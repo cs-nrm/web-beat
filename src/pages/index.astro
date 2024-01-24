@@ -2,6 +2,7 @@
 import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+
 import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 const res = await fetch("https://beatdigital.mx/wp-json/wp/v2/posts");
 const posts = await res.json();
@@ -11,9 +12,11 @@ const posts = await res.json();
 <html lang="en">
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		
 	</head>
 	<body>
 		<Header title={SITE_TITLE} />
+		
 		<main>
 			
 				{

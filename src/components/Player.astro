@@ -1,0 +1,71 @@
+<div id="player">
+<div id="td_container"></div>
+<button id="play" > PLAY </button>
+</div>
+
+<style>
+
+</style>
+
+
+
+<script>
+var player;
+    function initPlayerSDK()
+    {
+        console.log( 'TD Player SDK is ready' );
+        //Player SDK is ready to be used, this is where you can instantiate a new TDSdk instance.
+        //Player configuration: list of modules        
+        var tdPlayerConfig = {
+        coreModules: [{
+                id: 'MediaPlayer',
+                playerId: 'td_container',
+                audioAdaptive: true,
+                plugins: [ {id:"vastAd"}]
+            }],
+            playerReady: onPlayerReady,
+            configurationError: onConfigurationError,
+            moduleError: onModuleError,
+            adBlockerDetected: onAdBlockerDetected            
+        };
+        //Player instance
+        player = new TDSdk( tdPlayerConfig );
+        player.addEventListener('onPlay', onPlay);
+    }
+    function onPlay(){
+        player.play( {station:'XHSONFM'} );
+    }
+    /* Callback function called to notify that the SDK is ready to be used */
+    function onPlayerReady(){        
+        //Play the stream: station is TRITONRADIOMUSIC
+        console.log('streaming ready');
+    }
+    /* Callback function called to notify that the player configuration has an error. */
+    function onConfigurationError( e ) {
+        console.log(e);
+        console.log(e.data.errors);
+        //Error code : object.data.errors[0].code
+        //Error message : object.data.errors[0].message
+    }
+    /* Callback function called to notify that a module has not been loaded properly */
+    function onModuleError( object ){
+        console.log(object);
+        console.log(object.data.errors);
+        //Error code : object.data.errors[0].code
+        //Error message : object.data.errors[0].message
+    }
+    
+    /* Callback function called to notify that an Ad-Blocker was detected */
+    function onAdBlockerDetected(){
+        console.log( 'AdBlockerDetected' );
+    }
+
+    initPlayerSDK();
+    document.getElementById('play')?.addEventListener('click', function(){
+        console.log(player);
+        player.play( {station:'XHSONFM'} );
+    });
+
+
+</script>
+<script is:inline src="//sdk.listenlive.co/web/2.9/td-sdk.min.js"></script>

@@ -1,6 +1,8 @@
 ---
 import HeaderLink from './HeaderLink.astro';
 import { SITE_TITLE } from '../consts';
+import Player from '../components/Player.astro';
+import { ViewTransitions } from 'astro:transitions';
 ---
 
 <header>
@@ -11,6 +13,8 @@ import { SITE_TITLE } from '../consts';
 			<HeaderLink href="/blog">Blog</HeaderLink>
 			<HeaderLink href="/about">About</HeaderLink>
 		</div>
+		<ViewTransitions />
+		<Player client:visible transition:persist></Player>
 		<div class="social-links">
 			<a href="https://m.webtoo.ls/@astro" target="_blank">
 				<span class="sr-only">Follow Astro on Mastodon</span>

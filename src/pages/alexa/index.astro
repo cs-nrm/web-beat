@@ -1,0 +1,61 @@
+---
+import BaseHead from '../../components/BaseHead.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
+---
+
+<!doctype html>
+<html lang="es">
+	<head>
+		<BaseHead title={SITE_TITLE} seccion="Alexa" description={SITE_DESCRIPTION} />
+		 <meta charset="utf-8"/>
+	</head>
+	<body>
+		<Header title={SITE_TITLE} />
+		
+		<main>
+            <div class="container my-12 mx-auto">
+                <div><img src="https://storage.googleapis.com/nrm-web/nrm/images/titulo-alexa-generico.jpg"/></div>
+                <div class="block lg:flex mt-10">
+                    <div class="w-full lg:w-3/4 flex items-center bg-[#549bd7] text-white my-10 mr-10 p-10 rounded-2xl text-2xl">
+                        <div class="w-1/4 pr-5"><img src="https://storage.googleapis.com/nrm-web/nrm/images/1.png"></div>
+                        <div class="w-3/4">Desde la app de Alexa, en la parte de abajo, dale click en el menú  “Más” y selecciona la opción “Skills y juegos”</div>
+                    </div>
+                    <div class="w-full lg:w-1/4 text-center mx-auto">
+                        <img class="max-w-60 mx-auto w-full" src="https://storage.googleapis.com/nrm-web/nrm/images/IMG_5422-640x945.png" /> 
+                    </div>
+                </div>
+                <div class="block lg:flex mt-10 lg:hidden mobile">
+                    <div class="w-full lg:w-3/4 flex items-center bg-[#6bcccb] text-white my-5 mr-10 p-10 rounded-2xl text-2xl">
+                        <div class="w-1/4 pr-5"><img src="https://storage.googleapis.com/nrm-web/nrm/images/2.png"></div>
+                        <div class="w-3/4">Busca la skill “Oye 89.7” en el icono de la lupa de la parte superior</div>
+                    </div>
+                    <div class="w-full lg:w-1/4 text-center mx-auto">
+                        <img class="max-w-60 mx-auto w-full" src="https://storage.googleapis.com/nrm-web/nrm/images/IMG_5425-1-320x277.png" /> 
+                    </div>
+                </div>
+                <div class="hidden lg:flex mt-10 lg:block">
+                    <div class="w-full lg:w-1/4 text-center mx-auto">
+                        <img class="max-w-60 mx-auto w-full" src="https://storage.googleapis.com/nrm-web/nrm/images/IMG_5425-1-320x277.png" /> 
+                    </div>
+                    <div class="w-full lg:w-3/4 flex items-center bg-[#6bcccb] text-white my-1 ml-10 p-10 rounded-2xl text-2xl">
+                        <div class="w-1/4 pr-5"><img src="https://storage.googleapis.com/nrm-web/nrm/images/2.png"></div>
+                        <div class="w-3/4">Busca la skill “Oye 89.7” en el icono de la lupa de la parte superior</div>
+                    </div>
+
+                </div>
+                <div class="block lg:flex mt-10">
+                    <div class="w-full lg:w-3/4 flex items-center bg-[#ee7096] text-white my-10 mr-10 p-10 rounded-2xl text-2xl">
+                        <div class="w-1/4 pr-5"><img src="https://storage.googleapis.com/nrm-web/nrm/images/3.png"></div>
+                        <div class="w-3/4">Activa la skill. Y ahora para escuchar sólo tienes que decir: <b>"Alexa, reproduce Oye 89.7"</b></div>
+                    </div>
+                    <div class="w-full lg:w-1/4 text-center mx-auto">
+                        <img class="max-w-60 mx-auto w-full" src="https://storage.googleapis.com/nrm-web/nrm/images/IMG_5426-1-320x419.jpg" /> 
+                    </div>
+                </div>
+            </div>
+		</main>
+		<Footer />
+	</body>
+</html>

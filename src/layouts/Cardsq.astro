@@ -1,0 +1,100 @@
+---
+export interface Props {
+    post: {
+      imagePath: string;
+      title: {
+         rendered: string;
+      }
+      content: string;
+      slug: string;
+      categories : {};
+      yoast_head_json: {
+         og_image: [
+            {
+               url: string;
+            }
+         ]
+         article_published_time: string;
+         author:string;         
+      }
+    };
+    
+}
+
+const { post } = Astro.props;
+
+var url_seccion;
+//console.log(post.categories[0]);
+switch (post.categories[0]){
+    case 149:        
+        url_seccion = 'popnews';
+    break;
+    case 1606:        
+        url_seccion = 'promociones';
+    break;
+    case 1207:
+        url_seccion = 'eventos';
+    break;
+    case 156:
+        url_seccion = 'entrevistas';
+    break;
+    case 6616:
+        url_seccion = 'cine';
+    break;
+    case 172:
+        url_seccion = 'kpop';
+    break;
+    default:
+        url_seccion = 'popnews';    
+    break;      
+}
+
+
+/*const section = post.yoast_head_json.schema['@graph'][0].articleSection; 
+console.log(section);*/
+
+---
+
+<div class="card w-full md:w-1/2 lg:w-1/3 xl:w-1/3 md:p-4 pb-4 ">
+    <div class="overflow-hidden rounded-lg bg-white shadow-[0_2px_12px_6px_rgba(0,0,0,0.25)] hover:shadow-[0_2px_12px_6px_rgba(78,28,150,0.5)] border-2 border-pink-600">
+        <a href={`/${url_seccion}/${post.slug}/`}>
+            <img class="block h-auto w-full aspect-video object-cover" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} />
+        </a>
+        <div class="flex items-center justify-between leading-tight p-2 md:p-4 min-h-40">
+            <a class="no-underline" href={`/${url_seccion}/${post.slug}/`}>
+                <h2 class="text-base text-purple-900 font-bold hover:text-gray-800" set:html={post.title.rendered}></h2>
+            </a>
+        </div>
+        <div class="flex items-center justify-between p-2 md:px-4 text-xs font-bold uppercase text-gray-500">
+            <p>{post.yoast_head_json.author}</p>
+            <p>{post.yoast_head_json.article_published_time.substring(0, 10)}</p>
+        </div>
+    </div>
+</div>
+<!--div class="card w-full ">
+    <a href={`/quickys/${post.slug}/`}>
+        <figure class="bg-white">
+            <img
+                src={post.yoast_head_json.og_image[0].url}
+                alt={post.title.rendered}
+            />
+        </figure>
+    </a> 
+    <div class="card-body p-4 rounded-b-md">
+        <a href={`/quickys/${post.slug}/`}>
+            <h5
+                class="card-title uppercase min-h-32 transition duration-300 -inset-full h-full block transform -skew-x-12 bg-gradient-to-r from-gray-300 to-white group-hover:animate-shine"
+                set:html={post.title.rendered}
+            />
+        </a>
+        <div class="card-actions justify-end relative">
+            <span class="text-left">{post.yoast_head_json.article_published_time.substring(0, 10)}</span>
+            <span class="absolute right-0">{post.yoast_head_json.author}</span>
+        </div>
+        <div class="relative">
+            <a href={`/promociones/${post.slug}/`}>
+                <p class="text-gray-700 italic text-sm text-right"> Ver Más</p>
+            </a>
+        </div>
+    </div>
+</div-->

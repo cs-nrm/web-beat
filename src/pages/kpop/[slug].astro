@@ -1,0 +1,61 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import DoubleBox from '../../components/DoubleBox.astro';
+import BoxBanner from '../../components/BoxBanner.astro';
+import LeaderBoard from '../../components/LeaderBoard.astro';
+import SuperLeader from '../../components/SuperLeader.astro';
+import MoreNews from '../../components/MoreNews.astro';
+
+const { slug } = Astro.params;
+
+let res = await fetch(`https://contenido.oyedigital.mx/wp-json/wp/v2/posts?slug=${slug}`);
+let [post] = await res.json();
+
+export async function getStaticPaths() {
+  let data = await fetch("https://contenido.oyedigital.mx/wp-json/wp/v2/posts?_embed&per_page=100&_fields=title,slug,content&categories=172");
+  let posts = await data.json();
+
+  return posts.map((post:any) => ({
+    params: { slug: post.slug },
+    props: { post: post },
+  }));
+}
+
+
+
+---
+
+<Layout title={post.title.rendered} img={post.yoast_head_json.og_image[0].url}>
+  <section class="w-full py-4" id="content-w-video">
+    <div class="h-full">
+      <figure id="imagen-nota" class="imagen-nota flex justify-center rounded-sm w-auto bg-purple-700 bg-contain backdrop-opacity-80 backdrop-blur-2xl">
+        <img class="w-auto max-h-96 h-full shadow-[0_5px_12px_10px_rgba(0,0,0,0.4)] rounded scale-[1.01]" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} />
+      </figure>
+    </div>
+    <LeaderBoard />
+    <div class="container my-12 mx-auto px-4 md:px-12">
+      <div class="my-4 font-bold">
+        <h1 set:html={post.title.rendered}></h1>
+      </div>
+      <div class="flex flex-col lg:flex-row">
+        <article class="sm:min-w-[calc(100%-400px)] text-elipsis overflow-hidden lg:mr-10 text-lg">
+          <Fragment set:html={post.content.rendered} />
+        </article>
+        <div class="bg-gray-300 p-5 rounded-md my-2 sm:min-w-[350px] relative text-center md:text-left">
+          <div class="sticky top-0 left-0 right-0">
+            <h3 class="text-xl text-black font-extrabold">PUBLICIDAD</h3>
+            <BoxBanner />
+            </br>
+            <MoreNews />
+            </br>
+            <DoubleBox />
+          </div>
+        </div>
+      </div>
+    </div>
+    <SuperLeader />
+  </section>
+</Layout>
+
+<link rel="stylesheet" type="text/css" href="https://storage.googleapis.com/nrm-web/nrm/lib/plyr.css" />
+<script is:inline src="https://storage.googleapis.com/nrm-web/nrm/lib/plyr.js"></script>

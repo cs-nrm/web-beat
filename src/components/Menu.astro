@@ -1,0 +1,373 @@
+---
+---
+               
+<div class="nav__toggle" id="nav-toggle">
+  <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-menu-2 nav__burger" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#ffffff" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 6l16 0" /><path d="M4 12l16 0" /><path d="M4 18l16 0" />
+  </svg>
+  <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x nav__close" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#ffffff" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" />
+  </svg>
+</div>
+
+<!--=============== NAV MENU ===============-->
+  <div class="nav__menu" id="nav-menu">
+    <ul class="nav__list">
+      <li><a href="/" class="nav__link">INICIO</a></li>
+      <li><a href="/promociones" class="nav__link">PROMOCIONES</a></li>
+      <!--=============== DROPDOWN 1 ===============-->
+      <li class="dropdown__item">
+        <div class="nav__link">
+          POP NEWS <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-down dropdown__arrow" width="25" height="25" viewBox="0 0 24 24" stroke-width="1.5" stroke="#ffffff" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 9l6 6l6 -6" /></svg>
+        </div>
+        <ul class="dropdown__menu podcast rounded z-50" >
+          <li><a href="/popnews" class="dropdown__link">Noticias</a></li>
+          <li><a href="/cine" class="dropdown__link">Cine</a></li>
+          <li><a href="/kpop" class="dropdown__link">K-Pop</a></li>
+        </ul>
+      </li>
+      <!--=============== DROPDOWN 2 ===============-->
+      <li class="dropdown__item">
+        <div class="nav__link">
+          PODCAST <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-down dropdown__arrow" width="25" height="25" viewBox="0 0 24 24" stroke-width="1.5" stroke="#ffffff" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 9l6 6l6 -6" /></svg>
+        </div>
+        <ul class="dropdown__menu podcast rounded z-50" >
+          <li><a href="/podcast/zona-coder" class="dropdown__link">Oye la Zona Coder</a></li>
+          <li><a href="/podcast/la-alternativa" class="dropdown__link">Oye la alternativa</a></li>
+          <li><a href="/podcast/al-otro-lado-de-la-radio" class="dropdown__link">Al otro lado de la radio</a></li>
+          <li><a href="/podcast/pop-trends" class="dropdown__link">Pop trends</a></li>
+          <li><a href="/podcast/respira" class="dropdown__link">Respira</a></li>
+          <li><a href="/podcast/top-gaming" class="dropdown__link">Top gaming</a></li>
+          <li><a href="/podcast/top-tech" class="dropdown__link">Top tech</a></li>
+          <li><a href="/podcast/tu-fandom" class="dropdown__link">Tu fandom</a></li>
+          <li><a href="/podcast/el-debraye" class="dropdown__link">El debraye</a></li>
+        </ul>
+      </li>
+      <li><a href="/peticiones" class="nav__link">PETICIONES</a></li>
+      <!--=============== DROPDOWN 3 ===============-->
+      <li class="dropdown__item">
+        <div class="nav__link">
+          MÁS SECCIONES <svg class="dropdown__arrow" xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-down" width="25" height="25" viewBox="0 0 24 24" stroke-width="1.5" stroke="#ffffff" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 9l6 6l6 -6" /></svg>
+        </div>
+        <ul class="dropdown__menu">
+          <li><a href="/programacion" class="dropdown__link">Programación</a></li>
+          <li><a href="/poptrends" class="dropdown__link">Pop Trends</a></li>
+          <li><a href="/eventos" class="dropdown__link">Eventos</a></li>
+          <li><a href="/talento" class="dropdown__link">Talento</a></li>
+          <li><a href="/entrevistas" class="dropdown__link">Entrevistas</a></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+
+<style>
+
+/*=============== VARIABLES CSS ===============*/
+:root {
+  --header-height: 3.5rem;
+
+  /*========== Colors ==========*/
+  /*Color mode HSL(hue, saturation, lightness)*/
+  --black-color: #c026d3;
+  --black-color-light: #4c1d95;
+  --black-color-lighten: #c026d3;
+  --white-color: #fff;
+  --body-color: hsl(220, 100%, 97%);
+
+  /*========== Font and typography ==========*/
+  /*.5rem = 8px | 1rem = 16px ...*/
+  --body-font: "Montserrat", sans-serif;
+  --normal-font-size: .938rem;
+
+  /*========== Font weight ==========*/
+  --font-regular: 400;
+  --font-semi-bold: 600;
+
+  /*========== z index ==========*/
+  --z-tooltip: 10;
+  --z-fixed: 100;
+}
+
+/*========== Responsive typography ==========*/
+@media screen and (min-width: 1024px) {
+  :root {
+    --normal-font-size: 1rem;
+  }
+}
+ul {
+  list-style: none;
+  /* Color highlighting when pressed on mobile devices */
+  /*-webkit-tap-highlight-color: transparent;*/
+}
+a {
+  text-decoration: none;
+}
+.nav__logo, 
+.nav__burger, 
+.nav__close {
+  color: var(--white-color);
+}
+.nav__toggle {
+  position: relative;
+  width: 40px;
+  height: 40px;
+}
+
+.nav__burger, 
+.nav__close {
+  position: absolute;
+  width: max-content;
+  height: max-content;
+  inset: 0;
+  margin: auto;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: opacity .1s, transform .4s;
+}
+
+.nav__close {
+  opacity: 0;
+}
+
+/* Navigation for mobile devices */
+@media screen and (max-width: 1118px) {
+  .nav__menu {
+    position: absolute;
+    left: 0;
+    top: 2.5rem;
+    width: 100%;
+    height: calc(200vh - 3.5rem);
+    overflow: auto;
+    pointer-events: none;
+    opacity: 0;
+    transition: top .4s, opacity .3s;
+  }
+  .nav__menu::-webkit-scrollbar {
+    width: 0;
+  }
+  .nav__list {
+    background-color: var(--black-color);
+    padding-top: 1rem;
+  }
+}
+
+.nav__link {
+  color: var(--white-color);
+  font-weight: var(--font-semi-bold);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color .3s;
+}
+
+.nav__link:hover {
+  background-color: var(--black-color-light);
+  border-radius: 4px;
+}
+
+/* Show menu */
+.show-menu {
+  opacity: 1;
+  top: 5.5rem;
+  pointer-events: initial;
+  z-index: 100;
+}
+
+/* Show icon */
+.show-icon .nav__burger {
+  opacity: 0;
+  transform: rotate(90deg);
+}
+.show-icon .nav__close {
+  opacity: 1;
+  transform: rotate(90deg);
+}
+
+/*=============== DROPDOWN ===============*/
+.dropdown__item {
+  cursor: pointer;
+}
+ 
+.dropdown__arrow {
+  font-size: 1.25rem;
+  font-weight: initial;
+  transition: transform .4s;
+}
+
+.dropdown__link, 
+.dropdown__sublink {
+  padding: 0.75rem 0.25rem;
+  color: var(--white-color);
+  background-color: var(--black-color-light);
+  display: flex;
+  align-items: center;
+  column-gap: .5rem;
+  font-weight: var(--font-semi-bold);
+  transition: background-color .3s;
+  padding-inline: 1rem;
+}
+
+.dropdown__link i, 
+.dropdown__sublink i {
+  font-size: 1.25rem;
+  font-weight: initial;
+}
+
+.dropdown__link:hover, 
+.dropdown__sublink:hover {
+  background-color: var(--black-color);
+}
+
+.dropdown__menu, 
+.dropdown__submenu {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .4s ease-out;
+  border-radius: 4px;
+  z-index: 4;
+}
+
+/* Show dropdown menu & submenu */
+.dropdown__item:hover .dropdown__menu, 
+.dropdown__subitem:hover > .dropdown__submenu {
+  max-height: 1000px;
+  transition: max-height .4s ease-in;
+}
+
+/* Rotate dropdown icon */
+.dropdown__item:hover .dropdown__arrow {
+  transform: rotate(180deg);
+}
+
+/*=============== DROPDOWN SUBMENU ===============*/
+.dropdown__add {
+  margin-left: auto;
+}
+
+.dropdown__sublink {
+  background-color: var(--black-color-lighten);
+}
+
+/*=============== BREAKPOINTS ===============*/
+/* For small devices */
+@media screen and (max-width: 340px) {
+  .container {
+    margin-inline: 1rem;
+  }
+
+  .nav__link {
+    padding-inline: 1rem;
+  }
+}
+
+/* For large devices */
+@media screen and (min-width: 1118px) {
+  .container {
+    margin-inline: auto;
+  }
+
+  .nav {
+    height: calc(var(--header-height) + 2rem);
+    display: flex;
+    justify-content: space-between;
+  }
+  .nav__toggle {
+    display: none;
+  }
+  .nav__list {
+    height: 100%;
+    display: flex;
+    column-gap: 1.4rem;
+  }
+  .nav__link {
+    height: 100%;
+    padding: 0 5px;
+    justify-content: initial;
+    column-gap: .25rem;
+  }
+  .nav__link:hover {
+    background-color: var(--black-color-lighten);
+    border-radius: 4px;
+  }
+
+  .dropdown__item, 
+  .dropdown__subitem {
+    position: relative;
+  }
+
+  .dropdown__menu, 
+  .dropdown__submenu {
+    max-height: initial;
+    overflow: initial;
+    position: absolute;
+    left: 0;
+    /*top: 6rem;*/
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s, top .3s;
+  }
+
+  .dropdown__link, 
+  .dropdown__sublink {
+    padding-inline: 1rem;
+  }
+
+  .dropdown__subitem .dropdown__link {
+    padding-inline: 1rem;
+  }
+
+  .dropdown__submenu {
+    position: absolute;
+    left: 100%;
+    top: .5rem;
+  }
+
+  /* Show dropdown menu */
+  .dropdown__item:hover .dropdown__menu {
+    opacity: 1;
+    top: 1.8rem;
+    pointer-events: initial;
+    transition: top .3s;
+    width: 100%;
+    border-radius: 4px;
+  }
+
+  .dropdown__item:hover .dropdown__menu.podcast {
+    width: 150%;
+  }
+
+
+  /* Show dropdown submenu */
+  .dropdown__subitem:hover > .dropdown__submenu {
+    opacity: 1;
+    top: 0;
+    pointer-events: initial;
+    transition: top .3s;
+  }
+}
+</style>
+
+
+<script>
+/*=============== SHOW MENU ===============*/
+/*const showMenu = (toggleId:any, navId:any) =>{
+   const toggle:any = document.getElementById(toggleId),
+         nav:any = document.getElementById(navId)
+
+   toggle.addEventListener('click', () =>{
+       // Add show-menu class to nav menu
+       nav.classList.toggle('show-menu')
+
+       // Add show-icon to show and hide the menu icon
+       toggle.classList.toggle('show-icon')
+   })
+}
+
+showMenu('nav-toggle','nav-menu')
+*/
+</script>

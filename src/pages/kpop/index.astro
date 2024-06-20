@@ -1,0 +1,45 @@
+---
+import BaseHead from '../../components/BaseHead.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
+import Card from '../../layouts/Cardsq.astro';
+
+const res = await fetch("https://contenido.oyedigital.mx/wp-json/wp/v2/posts?_embed&per_page=9&_fields=title,slug,yoast_head_json,categories&categories=172");
+const posts = await res.json();
+---
+
+<!doctype html>
+<html lang="es">
+	<head>
+		<BaseHead title={SITE_TITLE} seccion="K-Pop" description={SITE_DESCRIPTION} />
+		<meta charset="utf-8"/>
+	</head>
+	<body>
+		<Header title={SITE_TITLE} />
+		
+		<main>
+            <div class="container my-12 mx-auto px-4 md:px-12">
+				<h1 class="py-4 font-bold [text-shadow:2px_4px_2px_rgb(88_29_135_/_64%)]">K-Pop</h1>
+                <section class="flex flex-wrap -mx-1 lg:-mx-4">
+                    {
+                        posts.map((post:any) => ( 
+                        <>
+                        <Card {post} />
+                        </>
+                        ))
+                    }
+                </section>
+                <div class="text-center mt-20">
+                    <a href="/kpop/2">
+                        <button class="group relative h-8 w-36 overflow-hidden rounded-lg bg-gray-100 text-base shadow">
+                            <div class="absolute inset-0 w-3 bg-pink-600 transition-all duration-[250ms] ease-out group-hover:w-full"></div>
+                            <span class="relative text-black group-hover:text-white">Siguiente</span>
+                        </button>
+                    </a>
+                </div>
+            </div>
+		</main>
+		<Footer />
+	</body>
+</html>

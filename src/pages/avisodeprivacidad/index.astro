@@ -1,0 +1,44 @@
+---
+import BaseHead from '../../components/BaseHead.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
+import DoubleBox from '../../components/DoubleBox.astro';
+import BoxBanner from '../../components/BoxBanner.astro';
+---
+
+<!doctype html>
+<html lang="es">
+	<head>
+		<BaseHead title={SITE_TITLE} seccion="Aviso de Privacidad" description={SITE_DESCRIPTION} />
+		 <meta charset="utf-8"/>
+	</head>
+	<body>
+		<Header title={SITE_TITLE} />
+		
+		<main>
+            <div class="container my-12 mx-auto">
+				<h1 class="py-4 font-bold [text-shadow:2px_4px_2px_rgb(88_29_135_/_64%)]">Aviso de Privacidad</h1>
+                <div class="flex flex-col lg:flex-row">
+                    <div class="sm:min-w-[calc(100%-400px)] lg:mr-10">
+                        <p>En cumplimiento a lo dispuesto por la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (en adelante, la Ley) RADIOPROYECCIÓN, S.A. DE C.V., (en lo sucesivo “OYE 89.7”) te informamos nuestra política de privacidad:</p>
+                        <p>La persona moral responsable en el tratamiento de tus datos personales es RADIOPROYECCIÓN, S.A. DE C.V. conocida comercialmente como “OYE 89.7”, integrante de la Holding de NRM COMUNICACIONES, con domicilio en Prolongación Paseo de la Reforma No 115, Col. Paseo de las Lomas C.P. 01330, Álvaro Obregón, México Distrito Federal.</p>
+                        <p>La obtención, uso, divulgación o almacenamiento de tus datos personales, por cualquier medio se utilizaran con FINES COMERCIALES, esto con el objeto de darte a conocer la información de la estación radiodifusora, como son difusión de promociones, concursos, presentación de nuevos productos, solicitudes de evaluación de calidad en el servicio, elaboración de estadísticas, y en general, toda actividad relacionada con la investigación, análisis, verificación y medición de la audiencia, para mantenernos CONTACTO CONTIGO en caso de que te hagas acreedor a algún premio que se deriven de promociones, trivias o concursos que realice la radiodifusora o bien PARA CONFIRMAR los detalles de registro y contraseña, o para enviarte nuevas contraseñas si olvidaste la actual.</p>
+                        <p>En los términos previstos por la Ley cualquier titular, o en su caso su representante legal, podrá ejercer el derecho de, ACCEDER a los datos personales a RECTIFICARLOS en caso de ser inexactos o a CANCELARLOS a fin de que dejemos de hacer uso de los mismos para lo cual hemos designado un departamento de datos personales con el fin de dar trámite a tus solicitudes para el ejercicio de los derechos antes mencionados, por lo anterior ponemos a tu disposición la siguiente dirección de correo electrónico privacidad@nrm.com.mx para ponerte en contacto con nosotros.</p>
+                        <p>La cancelación de datos personales dará lugar a un periodo de bloqueo tras el cual se procederá a la supresión del dato, podremos conservarlos exclusivamente para efectos de las responsabilidades nacidas del tratamiento “OYE 89.7” no transferirá a terceros tus datos personales, a menos que dicha transferencia sea necesaria para las finalidades propias de la estación, establecidas en el presente aviso, en este contexto si no manifiestas oposición para que tus datos sean transferidos, se entenderá que otorgaste tu consentimiento para ello.</p>
+                        <p>Nos reservamos el derecho de efectuar en cualquier momento modificaciones o actualizaciones al presente aviso de privacidad, para la atención de novedades legislativas o jurisprudenciales o políticas internas. Estas modificaciones estarán disponibles a través de esta página de Internet.</p>
+                    </div>
+                    <div class="bg-gray-300 p-5 rounded-md sm:min-w-[350px] relative text-center md:text-left">
+                        <div class="sticky top-0 left-0 right-0">
+                            <h3 class="text-xl text-black font-extrabold">PUBLICIDAD</h3>
+                            <BoxBanner />
+                            </br>
+                            <DoubleBox />
+                        </div>
+                    </div>
+                </div>
+            </div>
+		</main>
+		<Footer />
+	</body>
+</html>

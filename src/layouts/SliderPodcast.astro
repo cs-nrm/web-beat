@@ -1,0 +1,39 @@
+---
+import { Image } from 'astro:assets';
+---
+<link rel="stylesheet" type="text/css" href="https://storage.googleapis.com/nrm-web/nrm/lib/flickity.css">			
+
+
+<div class="main-carousel" data-flickity='{ "lazyLoad": 1, "wrapAround": true, "cellAlign": "center", "pageDots": false, "autoPlay": true}'>
+	<div class="carousel-cell"><a href="/podcast/la-alternativa"><Image class="block h-auto w-full object-fill" src="https://contenido.oyedigital.mx/wp-content/uploads/2024/05/OYE_alternativa-PODCAST-min-min.jpg" width="200" height="200" alt="La alternativa"/></a></div>
+	<div class="carousel-cell"><a href="/podcast/al-otro-lado-de-la-radio"><Image class="block h-auto w-full object-fill" src="https://contenido.oyedigital.mx/wp-content/uploads/2024/05/DETRASdelaRADIO11-min-min.jpg" width="200" height="200" alt="Detrás de la radio"/></a></div>
+	<div class="carousel-cell"><a href="/podcast/respira"><Image class="block h-auto w-full object-fill" src="https://contenido.oyedigital.mx/wp-content/uploads/2024/05/poscast-repira2-min.jpg" width="200" height="200" alt="Respira"/></a></div>
+	<div class="carousel-cell"><a href="/podcast/pop-trends"><Image class="block h-auto w-full object-fill" src="https://contenido.oyedigital.mx/wp-content/uploads/2024/05/POP-TRENDS-portada-min.jpg" width="200" height="200" alt="Pop trends"/></a></div>
+	<div class="carousel-cell"><a href="/podcast/top-tech"><Image class="block h-auto w-full object-fill" src="https://contenido.oyedigital.mx/wp-content/uploads/2024/05/TOP-TECH-min.jpg" width="200" height="200" alt="Top tech"/></a></div>
+	<div class="carousel-cell"><a href="/podcast/top-gaming"><Image class="block h-auto w-full object-fill" src="https://contenido.oyedigital.mx/wp-content/uploads/2024/05/TOP-GAMING-min.jpg" width="200" height="200" alt="Top gaming"/></a></div>
+	<div class="carousel-cell"><a href="/podcast/tu-fandom"><Image class="block h-auto w-full object-fill" src="https://contenido.oyedigital.mx/wp-content/uploads/2024/05/podcast-FANDOM-PORTADA-PAG-min.jpg" width="200" height="200" alt="Tu fandom"/></a></div>
+	<div class="carousel-cell"><a href="/podcast/el-debraye"><Image class="block h-auto w-full object-fill" src="https://contenido.oyedigital.mx/wp-content/uploads/2024/05/podcast-debraye-min.jpg" width="200" height="200" alt="El debraye"/></a></div>
+	<!--div class="carousel-cell"><a href="/podcast/zona-coder"><Image class="block h-auto w-full object-fill" src="https://contenido.oyedigital.mx/wp-content/uploads/2024/06/zona-coder-min.jpg" width="200" height="200" alt="Zona coder"/></a></div-->	
+</div>
+
+<script is:inline src="https://storage.googleapis.com/nrm-web/nrm/lib/flickity.pkgd.min.js"></script>
+
+<style>
+
+.carousel-cell {
+  width: 286px;
+  height: 330px;
+  margin-right: 40px;
+  border-radius: 20px;
+}
+
+.carousel-cell img{
+	border-radius: 1rem;
+	box-shadow: 0 2px 12px 7px rgba(0,0,0,0.4);
+	margin-top: 20px;
+}
+
+.carousel-cell.is-selected {
+  /*background: #ED2;*/
+}
+</style>

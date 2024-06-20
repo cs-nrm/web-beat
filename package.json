@@ -1,19 +1,30 @@
 {
-  "name": "web-beat",
+  "name": "web-oye",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro build",
+    "build": "astro check && astro build",
     "preview": "astro preview",
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/mdx": "^2.0.3",
-    "@astrojs/preact": "^3.1.0",
-    "@astrojs/rss": "^4.0.1",
-    "@astrojs/sitemap": "^3.0.4",
-    "astro": "^4.1.1"
+    "@astrojs/check": "^0.4.1",
+    "@astrojs/mdx": "^2.1.0",
+    "@astrojs/rss": "^4.0.3",
+    "@astrojs/sitemap": "^3.0.5",
+    "@astrojs/tailwind": "^5.1.0",
+    "astro": "^4.2.4",
+    "astro-tabs": "^0.1.8",
+    "dayjs": "^1.11.11",
+    "flickity": "^3.0.0",
+    "tailwindcss": "^3.4.1",
+    "tailwindcss-dropdown": "^1.0.0",
+    "typescript": "^5.3.3"
+  },
+  "devDependencies": {
+    "@types/jquery": "^3.5.29",
+    "sass": "^1.76.0"
   }
 }

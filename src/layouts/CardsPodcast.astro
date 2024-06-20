@@ -1,0 +1,44 @@
+---
+export interface Props {
+    post: {
+      imagePath: string;
+      title: {
+         rendered: string;
+      }
+      acf:{
+        ds: string;
+      }
+      content: string;
+      slug: string;
+      categories : {};
+      yoast_head_json: {
+         og_image: [
+            {
+               url: string;
+            }
+         ]
+         article_published_time: string;
+         author:string;         
+      }
+    };
+    
+}
+
+const { post } = Astro.props;
+
+---
+
+<div class="card w-full lg:w-1/2 md:p-4 p-2 pb-4 audiopod cursor-pointer">
+    <div class="overflow-hidden bg-white rounded-lg shadow-lg hover:shadow-xl border-2 border-pink-600">
+        <div class="flex items-center justify-between leading-tight p-2 md:p-4 min-h-28">
+            <h2 class="text-base text-purple-900 font-bold" >   
+                    {post.title.rendered}                
+            </h2>
+            <div class="play-pause-podcast" data-podcast-status="ready"> 
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-play-filled" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" stroke-width="0" fill="currentColor" /></svg>  
+            </div>           
+        </div>
+        <div class="data-iframe" data-iframe={post.acf.ds}></div>
+    </div>
+</div>
+

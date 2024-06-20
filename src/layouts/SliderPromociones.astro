@@ -1,0 +1,111 @@
+---
+import DoubleBox from '../components/DoubleBox.astro';
+import BoxBanner from '../components/BoxBanner.astro';
+import LeaderBoard from'../components/LeaderBoard.astro';
+import SuperLeader from '../components/SuperLeader.astro';
+import { Image } from 'astro:assets';
+
+
+const res = await fetch("https://contenido.oyedigital.mx/wp-json/wp/v2/posts?_fields=title,slug,yoast_head_json,_links,_embedded&_embed&per_page=30&categories=1606,1616");
+const posts = await res.json();
+
+---
+<link rel="stylesheet" type="text/css" href="https://storage.googleapis.com/nrm-web/nrm/lib/flickity.css">			
+
+<div class="slider-promociones">
+	<div class="carousel carousel-main" data-flickity='{ "sync": ".carousel-nav", "prevNextButtons": false, "autoPlay": true, "pageDots": false}'>
+
+	{
+	posts.map((post:any)=> (
+		<div class="carousel-cell">
+			<a href={`/promociones/${post.slug}/`}>
+				<Image class="block h-auto w-full object-fill" src={post._embedded['wp:featuredmedia'][0].media_details.sizes['medium_large'].source_url} width="300" height="150" alt={post.title.rendered}/>
+			</a>
+		</div>
+	))    
+	}
+	</div>
+
+
+	<div class="carousel carousel-nav" data-flickity='{ "asNavFor": ".carousel-main", "contain" : true, "pageDots": false }'>
+	{
+	posts.map((post:any)=> (
+		<div class="carousel-cell">
+			<Image class="block h-auto w-full object-fill" src={post._embedded['wp:featuredmedia'][0].media_details.sizes['thumbnail'].source_url} width="150" height="150" alt={post.title.rendered}/>
+		</div>
+	))    
+	}  
+	</div>
+</div>
+
+<script is:inline src="https://storage.googleapis.com/nrm-web/nrm/lib/flickity.pkgd.min.js"></script>
+
+<style>
+
+.carousel{
+  /*background-color: #7cdada;*/
+  padding: 1%;
+  border-radius: 0.25rem;
+  /*background-image: url("data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23cecece' fill-opacity='0.4'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E");*/
+}
+.carousel-main .carousel-cell img{
+	box-shadow: 0 2px 10px 7px rgba(0,0,0,0.4);
+}
+
+.carousel-cell {
+  width: 100%;
+  height: 540px;
+  padding: 13px;
+}
+
+.carousel-cell img{
+	width: 500px;
+	text-align: center;
+	margin: 0 auto;
+	border-radius: 0.25rem !important;
+	margin-top: 0px;
+	box-shadow: 0 0 6px 4px rgba(0,0,0,0.4);
+}
+
+.carousel.carousel-nav{
+	/*background-color: #7a68bb;*/
+	width: 90%;
+	margin: 0 auto;
+}
+.carousel-nav .carousel-cell {
+  height: 130px;
+  width: 120px;
+  padding: 10px 5px;
+}
+
+.carousel-nav .carousel-cell.is-nav-selected {
+  background: 	#c9018a;
+  border-radius: 0.25rem;
+}
+
+.slider-promociones .flickity-button {
+  background: transparent;
+}
+.slider-promociones .flickity-prev-next-button {
+  width: 100px;
+  height: 100px;
+}
+.slider-promociones .flickity-button-icon {
+  fill: #511d98;
+}
+.slider-promociones .flickity-button:disabled {
+  display: none;
+}
+.slider-promociones .flickity-prev-next-button.previous {
+  left: -40px;
+}
+.slider-promociones .flickity-prev-next-button.next {
+  right: -40px;
+}
+
+@media only screen and (max-width: 640px){
+	.carousel-cell {height: auto;}
+}
+
+
+</style>

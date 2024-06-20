@@ -1,0 +1,30 @@
+---
+import { getRelatedPosts } from '../js/related.js'; 
+
+export async function getStaticPaths() {
+  // Get all the posts
+  const allPosts = await Astro.glob("../posts/*.md")
+  // Get the number of the posts
+  const numberOfPosts = allPosts.length
+
+  return allPosts.map((post) => ({
+    params: {
+      slug: post.frontmatter.slug,
+    },
+    props: {
+      post,
+      // Pass the related posts props
+      relatedPosts: getRelatedPosts(
+        allPosts,
+        post.frontmatter.slug,
+        post.frontmatter.categories
+      ),
+    },
+  }))
+}
+
+// Get the related posts props
+const { relatedPosts } = Astro.props
+
+---
+

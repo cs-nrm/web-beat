@@ -1,0 +1,100 @@
+---
+import BaseHead from '../../../components/BaseHead.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../../../consts.js';
+import {getArticles} from '../../../lib/api.js';
+import Card from '../../../layouts/CardsPodcast.astro';
+
+
+export async function getStaticPaths( { paginate } ) {
+    
+  const arrpodcast = [
+        {nodo: 6806,title: 'Al otro lado de la Radio', link: 'al-otro-lado-de-la-radio', imagen: 'https://contenido.oyedigital.mx/wp-content/uploads/2024/05/DETRASdelaRADIO11-min-min.jpg', descripcion: 'Un podcast donde podrás escuchar a tus artistas favoritos y conocer más sobre ellos.'},
+        {nodo: 6581,title: 'Pop Trends', link: 'pop-trends', imagen: 'https://contenido.oyedigital.mx/wp-content/uploads/2024/05/POP-TRENDS-portada-min.jpg', descripcion: 'La música más top, nueva y relevante que escuchas, tu votas por tener tu canción en los 10 primero lugares.'},
+        {nodo: 6734,title: 'Respira', link: 'respira', imagen: 'https://contenido.oyedigital.mx/wp-content/uploads/2024/05/poscast-repira2-min.jpg', descripcion: 'Descubrir que tienes un problema de salud mental es una noticia impactante que puede transformar tu vida por completo.'},
+        {nodo: 3801,title: 'Top Gaming', link: 'top-gaming', imagen: 'https://contenido.oyedigital.mx/wp-content/uploads/2024/05/TOP-GAMING-min.jpg', descripcion: 'Un clavado al mundo de los gamers en el cual conocerás todo sobre los lanzamientos, mejores juegos del momento y los que vienen.'},
+        {nodo: 3813,title: 'Top Tech', link: 'top-tech', imagen: 'https://contenido.oyedigital.mx/wp-content/uploads/2024/05/TOP-TECH-min.jpg', descripcion: 'Top Tech con Diego Gil y Geekzilla. un podcast en el que conoceremos todo sobre la tecnología que nos está rodeando.'},
+        {nodo: 3788,title: 'Tu Fandom', link: 'tu-fandom', imagen: 'https://contenido.oyedigital.mx/wp-content/uploads/2024/05/podcast-FANDOM-PORTADA-PAG-min.jpg', descripcion: 'Pone el reflector sobre los fandoms más activos de las redes sociales, bajo la premisa de “USTEDES HACEN LA PLAYLIST”, a través del #OyeTuFandom seleccionamos los Idols más votados.'},
+        {nodo: 3449,title: 'El Debraye', link: 'el-debraye', imagen:'https://contenido.oyedigital.mx/wp-content/uploads/2024/05/podcast-debraye-min.jpg', descripcion:''},
+        {nodo: 7404,title: 'Oye la Alternativa', link: 'la-alternativa', imagen:'https://contenido.oyedigital.mx/wp-content/uploads/2024/05/OYE_alternativa-PODCAST-min-min.jpg', descripcion:'El espacio donde toda la música se escucha, sin distinción, entrevistas de todos los géneros en un solo lugar. '},
+        //{nodo: 7812,title: 'Oye la Zona Coder', link: 'zona-coder', imagen:'https://contenido.oyedigital.mx/wp-content/uploads/2024/06/zona-coder-min.jpg', descripcion:'Es el espacio de las Coders en Oye897fm donde podrán escuchar sus canciones favoritas de CD9 junto a Sergio Mejia. Somos la estación oficial de CD9.'},
+  ];
+
+  
+  const res = await fetch("https://contenido.oyedigital.mx/wp-json/wp/v2/posts?_embed&per_page=200&_fields=title,slug,yoast_head_json,categories,acf&categories=3449,3788,3813,3801,6734,6581,6806,7404,7812" ); 
+  const posts = await res.json();
+  //console.log(posts);
+  
+  return arrpodcast.flatMap( function(pod) {      
+      const podcast = pod.link; 
+      //console.log(pod.nodo);           
+      const filteredPosts = posts.filter((post) => post.categories[0] == pod.nodo);                      
+      //console.log(filteredPosts);
+      return paginate(filteredPosts,{
+        params:{ podcast },
+        props: { pod},
+        pageSize: 10
+      });
+  });  
+}
+
+interface Props{
+  page: any; 
+  podcast: any;
+  pod:any; 
+}
+
+const { page = [] } = Astro.props;
+const { podcast, pod } = Astro.props;
+
+---
+<!doctype html>
+<html lang="es">
+  <head>
+    <BaseHead title={SITE_TITLE} seccion="Podcast" description={SITE_DESCRIPTION} />
+    
+  </head>
+  <body>
+    <Header title={SITE_TITLE} />
+    
+    <main>
+            
+      <div class="container my-12 mx-auto px-4 md:px-12">
+        <div class="flex flex-wrap justify-center ">
+          <div class="w-full md:w-1/3 lg:w-1/4"><img class="content-center aspect-square shadow-xl rounded" src={pod.imagen}/></div>
+          <div class="w-full md:w-2/3 lg:w:3/4 p-4 flex items-center">
+            <div>
+            <h1 class="font-bold [text-shadow:2px_4px_2px_rgb(88_29_135_/_64%)] align-middle">{pod.title} </h1>
+            <p class="align-middle">{pod.descripcion}</p>
+            </div> 
+          </div>
+        </div>
+        <section class="flex flex-wrap -mx-4">
+          { 
+            page.data.map((post:any) => ( 
+            <>
+              <Card post={post} />
+            </>
+            ))
+          }
+        </section>
+        <div class="text-center mt-20">
+          {page.url.prev && <a href={page.url.prev}>
+            <button class="group relative h-8 w-36 overflow-hidden rounded-lg bg-gray-100 text-base shadow">
+              <div class="absolute inset-y-0 right-0 w-3 bg-pink-600 transition-all duration-[250ms] ease-out group-hover:w-full"></div>
+              <span class="relative text-black group-hover:text-white">Anterior</span>
+            </button>
+          </a>}
+          {page.url.next && <a href={page.url.next}>
+            <button class="group relative h-8 w-36 overflow-hidden rounded-lg bg-gray-100 text-base shadow">
+              <div class="absolute inset-0 w-3 bg-pink-600 transition-all duration-[250ms] ease-out group-hover:w-full"></div>
+              <span class="relative text-black group-hover:text-white">Siguiente</span>
+            </button>
+          </a>}
+        </div>
+      </div>  
+    </main>
+    <Footer />
+  </body>
+</html>

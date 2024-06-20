@@ -1,0 +1,52 @@
+---
+export interface Props {
+    post: {
+      id: number;
+      imagePath: string;
+      title: {
+         rendered: string;
+      }
+      content: {
+        rendered: string;
+      }
+      slug: string;
+      categories : {};
+      yoast_head_json: {
+         og_image: [
+            {
+               url: string;
+            }
+         ]
+         article_published_time: string;
+         author:string;         
+      }
+    };
+    
+}
+
+const { post } = Astro.props;
+
+var url_seccion;
+
+---
+
+<div class="card w-full p-2 md:p-4 pb-4 poptrend-video">
+    <div class="overflow-hidden bg-white rounded-lg shadow-lg hover:shadow-xl ">
+        <div set:html={post.content.rendered} class="block h-auto w-full aspect-video"></div>        
+        <div class="flex items-center justify-between leading-tight p-2 md:p-4 min-h-40">
+            <h2 class="text-base text-purple-900 font-bold hover:text-gray-800" set:html={post.title.rendered}></h2>
+            <div class="voto-pop" data-voto-id={post.id}>
+                <button class="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-purple-500 to-pink-500 group-hover:from-purple-500 group-hover:to-pink-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800">
+                    <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
+                    ¡Vota! 
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-thumb-up" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                            <path d="M7 11v8a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1v-7a1 1 0 0 1 1 -1h3a4 4 0 0 0 4 -4v-1a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1 -2 2h-7a3 3 0 0 1 -3 -3" />
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+

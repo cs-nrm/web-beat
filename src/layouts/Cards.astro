@@ -1,0 +1,50 @@
+---
+export interface Props {
+    post: {
+      imagePath: string;
+      title: {
+         rendered: string;
+      }
+      content: string;
+      slug: string;
+      categories : {};
+      yoast_head_json: {
+         og_image: [
+            {
+               url: string;
+            }
+         ]
+         article_published_time: string;
+         author:string;         
+      }
+    };
+    
+}
+
+const { post } = Astro.props;
+
+var url_seccion;
+
+//console.log(post.categories);
+
+
+switch (post.categories[0]){
+    case 149:        
+        url_seccion = 'pop-news';
+    break;
+    case 1606:        
+        url_seccion = 'promociones';
+    break;
+    case 1616:        
+        url_seccion = 'promociones';
+    break;    
+}
+---
+
+<div class="card w-full md:w-1/2 lg:w-1/2 md:p-4 pb-4 ">
+    <div class="overflow-hidden rounded-lg shadow-lg hover:shadow-xl border-2 border-pink-600">
+        <a href={`/${url_seccion}/${post.slug}/`}>
+            <img class="block h-auto w-full" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} />
+        </a>
+    </div>
+</div>

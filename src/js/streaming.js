@@ -17,29 +17,34 @@ const secchome = document.getElementById('home');
 
 //function initPlayer(){
     function initPlayerSDK(){
-        console.log( 'TD Player SDK is ready' );
-        //Player SDK is ready to be used, this is where you can instantiate a new TDSdk instance.
-        //Player configuration: list of modules        
         var tdPlayerConfig = {
-        coreModules: [{
-                id: 'MediaPlayer',
-                playerId: 'td_container',
-                audioAdaptive: true,
-                plugins: [ {id:"vastAd"}]
-            }],
-            playerReady: onPlayerReady,
-            configurationError: onConfigurationError,
-            moduleError: onModuleError,
-            adBlockerDetected: onAdBlockerDetected            
-        };
-        //Player instance
-        streaming = new TDSdk( tdPlayerConfig );        
+             coreModules: [{
+               id: 'MediaPlayer',
+               playerId: 'td_container' ,
+               audioAdaptive: true,
+               plugins: [ {id:"vastAd"}]
+             }],
+             // The callbacks are defined in your source code.
+             playerReady: onPlayerReady,
+             moduleError: onModuleError,
+             audioAdaptive: true,
+             analytics: {
+                active: true,
+                debug: false,
+                appInstallerId: 'beatpag',            
+                trackingId: 'UA-63005013-1',
+                trackingEvents: [ 'play', 'stop', 'pause', 'resume', 'all' ],
+                sampleRate: 100,     
+                category: 'Reproduccion Radio Pag' 
+             }
+            };
+        // The call to loadModules() as been removed.
+        streaming = new TDSdk( tdPlayerConfig );
         streaming.addEventListener( 'stream-status', getStatus );
         streaming.addEventListener( 'ad-playback-complete', completeAd );
         streaming.addEventListener( 'ad-playback-start', startAd );
         streaming.addEventListener( 'ad-playback-error', errorAd );
-       
-    }
+      }
     
      function getStatus(s){
         local_status = s.data.code;
@@ -77,16 +82,16 @@ const secchome = document.getElementById('home');
 
     function completeAd(e){        
         streaming.play({
-            station:'XEOYEFM',
+            station:'XHSONFM',
             trackingParameters:{
-            Dist: 'WebOye'
+            Dist: 'WebBeat'
             }
         });        
       }
 
       function startAd(e){
         console.log(local_status);                
-        streaming.playAd( 'vastAd', { url:'https://pubads.g.doubleclick.net/gampad/ads?sz=600x360&iu=/21799830913/Oye/VASTPrueba&ciu_szs=600x360&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&url=[referrer_url]&description_url=[description_url]&correlator=[timestamp]' } );
+        streaming.playAd( 'vastAd', { url:'https://pubads.g.doubleclick.net/gampad/ads?sz=600x360&iu=/21799830913/Beat/VideoVast&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&url=[referrer_url]&description_url=[description_url]&correlator=[timestamp]' } );
       }
       
       function pause(){
@@ -95,9 +100,9 @@ const secchome = document.getElementById('home');
 
       function play(){
         streaming.play({
-            station:'XEOYEFM',
+            station:'XHSONFM',
             trackingParameters:{
-            Dist: 'WebOye'
+            Dist: 'WebBeat'
             }
         });        
       }
@@ -110,9 +115,9 @@ const secchome = document.getElementById('home');
    
       function errorAd(e){        
         streaming.play({
-            station:'XEOYEFM',
+            station:'XHSONFM',
             trackingParameters:{
-            Dist: 'WebOye'
+            Dist: 'WebBeat'
             }
         });
         
@@ -159,7 +164,7 @@ const secchome = document.getElementById('home');
         });
 
         function getInfoMusic(){
-            fetch("https://cdn.nrm.com.mx/cdn/oye/playlist/cancion.json")
+            fetch("https://cdn.nrm.com.mx/cdn/beat/playlist/cancion.json")
             .then((res) => {
                 if (!res.ok) {
                     throw new Error
@@ -173,30 +178,59 @@ const secchome = document.getElementById('home');
                         artist = 'CORTE';
                         cancion = '';
                     break;
-                    case 'OYE-DEBRAYE':
-                        artist = 'EL DEBRAYE';
-                        cancion = '';
-                    break;
-                    case 'OYE-TURNOS':
-                        artist = 'EL DEBRAYE';
-                        cancion = '';
-                    break;                    
-                    case 'OYE-CAP':
-                        artist = 'CORTE';
-                        cancion = '';
-                    break;
-                    case 'OYE-PRO':
-                        artist = data.artista;
+                    
+                    case 'RANDOM':
+                        artist = data.dj;
                         cancion = data.title;
                         hora = data.hora_real;
                     break;
-                    case 'OYE-MUS':
-                        artist = data.artista;
+                    case 'MUSICA-DANCE':
+                        artist = data.dj;
+                        cancion = data.title;
+                        hora = data.hora_real; 
+                    break;
+                    case 'MUSICA-HOUSE':
+                        artist = data.dj;
+                        cancion = data.title;
+                        hora = data.hora_real;
+                    break;
+                    case 'MUSICA-DANCE':
+                        artist = data.dj;
+                        cancion = data.title;
+                        hora = data.hora_real;
+                    break;
+                    case 'MÚSICA-DREAM':
+                        artist = data.dj;
+                        cancion = data.title;
+                        hora = data.hora_real;
+                    break;
+                    case 'MUSICA-ELECTRONICA':
+                        artist = data.dj;
+                        cancion = data.title;
+                        hora = data.hora_real;
+                    break;
+                    case 'MUSICA-PROGRESIVO':
+                        artist = data.dj;
+                        cancion = data.title;
+                        hora = data.hora_real;
+                    break;
+                    case 'MUSICA-RETRO':
+                        artist = data.dj;
+                        cancion = data.title;
+                        hora = data.hora_real;
+                    break;
+                    case 'MUSICA-RANDOM ANDRE':
+                        artist = data.dj;
+                        cancion = data.title;
+                        hora = data.hora_real;
+                    break;
+                    case 'LADO F':
+                        artist = data.dj;
                         cancion = data.title;
                         hora = data.hora_real;
                     break;
                     default:
-                        artist = data.artista;
+                        artist = data.dj;
                         cancion = data.title;
                         hora = data.hora_real;
                     break;
@@ -217,7 +251,8 @@ const secchome = document.getElementById('home');
 
         
         function getInfoProg(){
-            fetch("https://contenido.oyedigital.mx/wp-json/wp/v2/posts?_embed&per_page=30&categories=3312&_fields[]=acf")
+            //fetch("https://contenido.oyedigital.mx/wp-json/wp/v2/posts?_embed&per_page=30&categories=3312&_fields[]=acf")
+            fetch("https://beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=40&categories=515&_fields[]=acf")            
             .then((res) => {
                 if (!res.ok) {
                     throw new Error
@@ -244,8 +279,8 @@ const secchome = document.getElementById('home');
                             if( document.getElementById('nombreprog') ){
                                 document.getElementById('nombreprog').innerHTML = prog.acf.programa;
                             }
-                             
-                            fetch("https://contenido.oyedigital.mx/wp-json/wp/v2/media/"+prog.acf.imagen_ahora_escuchas+"?_fields[]=link")
+                            /* 
+                            fetch("https://beatdigital.mx/wp-json/wp/v2/media/"+prog.acf.imagen_ahora_escuchas+"?_fields[]=link")
                             .then((rs) => {
                                 if (!rs.ok) {
                                     throw new Error
@@ -261,7 +296,7 @@ const secchome = document.getElementById('home');
                                     },2000);
                                 }
                                 
-                            });                                                        
+                            });   */                                                     
                         }
                     }
 
@@ -345,9 +380,9 @@ const playstopRadio = function(){
             if( local_status == null || local_status == 'undefined' || local_status == '' || local_status == 'LIVE_STOP' ){                
                 //streaming.playAd( 'vastAd', { url:'https://pubads.g.doubleclick.net/gampad/ads?sz=600x360&iu=/21799830913/Oye/VASTPrueba&ciu_szs=600x360&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&url=[referrer_url]&description_url=[description_url]&correlator=[timestamp]' } );
                 streaming.play({
-                    station:'XEOYEFM',
+                    station:'XHSONFM',
                     trackingParameters:{
-                    Dist: 'WebOye'
+                    Dist: 'WebBeat'
                     }
                 });     
 

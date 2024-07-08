@@ -2,16 +2,20 @@
 import { ViewTransitions } from 'astro:transitions';
 import Menu from './Menu.astro';
 import MenuLineal from './MenuLineal.astro';
+import MenuLogo from './MenuLogo.astro';
 ---
 
 <header>
 	<ViewTransitions />	
-	<nav class="border-gray-200 bg-gradient-to-r from-fuchsia-600 to-violet-900">
-	  <div class="max-w-screen-xl flex flex-nowrap items-center justify-between mx-auto p-2">
+	<nav class="border-gray-200 bg-zinc-800">
+	  <!--div class="max-w-screen-xl flex flex-nowrap items-center justify-between mx-auto p-2">
 		<a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
-			<img src="https://contenido.oyedigital.mx/wp-content/uploads/2021/07/logo-oye-2023.png" class="max-w-28" alt="Oye 89.7FM" width="112" height="75" />
+			<img src="https://storage.googleapis.com/nrm-web/beat/resources/img/beat-digital-logo-2024-min.png" class="max-w-28" alt="Oye 89.7FM" width="112" height="75" />
 		</a>
-		<MenuLineal />
+		<MenuLogo />
+	  </div-->
+	  <div class="flex flex-nowrap items-center justify-between mx-auto p-2">
+		<MenuLogo />
 	  </div>	
 	</nav>
 </header>

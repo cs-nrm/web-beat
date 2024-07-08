@@ -13,9 +13,7 @@
 <!--=============== NAV MENU ===============-->
   <div class="nav__menu" id="nav-menu">
     <ul class="nav__list">
-      <li><a href="/news" class="nav__link">News</a></li>
-      <li><a href="/playlist" class="nav__link">Playlist</a></li>
-      <!--=============== DROPDOWN 2 ===============-->
+      <!--=============== DROPDOWN ===============-->
       <li class="dropdown__item">
         <div class="nav__link">
           Podcast <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-down dropdown__arrow" width="25" height="25" viewBox="0 0 24 24" stroke-width="1.5" stroke="#ffd128" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -30,16 +28,20 @@
           <li><a href="/podcast/beat-trends" class="dropdown__link">Beat Trends</a></li>
         </ul>
       </li>
+      <li><a href="/news" class="nav__link">News</a></li>
       <li><a href="/purplenoise" class="nav__link">Purple Noise</a></li>
       <li><a href="/programacion" class="nav__link">Programación</a></li>
-      <li><a href="/beattrends" class="nav__link">Beat Trends</a></li>
-    </ul>
-    <ul class="nav__list mt-2">
-      <li><a href="/beatten" class="nav__link">Beat Ten</a></li>
-      <li><a href="/eventos" class="nav__link">Eventos</a></li>
+      <!--li><a href="/beattrends" class="nav__link">Beat Trends</a></li-->
+
+      <li><a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
+        <img src="https://storage.googleapis.com/nrm-web/beat/resources/img/beat-digital-logo-2024-min.png" class="max-w-36 logo" alt="Beat 100.9" width="140" height="75" />
+      </a></li>
+      <li><a href="/playlist" class="nav__link">Playlist</a></li>
+      <!--li><a href="/eventos" class="nav__link">Eventos</a></li-->
       <li><a href="/beatrecordings" class="nav__link">Beat Recordings</a></li>
+      <li><a href="/beatten" class="nav__link">Beat Ten</a></li>
       <li><a href="/lanzamientos" class="nav__link">Lanzamientos</a></li>
-      <li><a href="/nerdosis" class="nav__link">Nerdosis</a></li>
+      <!--li><a href="/nerdosis" class="nav__link">Nerdosis</a></li-->
     </ul>
   </div>
 
@@ -87,6 +89,7 @@ ul {
 a {
   text-decoration: none;
 }
+
 .nav__logo, 
 .nav__burger, 
 .nav__close {
@@ -112,6 +115,10 @@ a {
 
 .nav__close {
   opacity: 0;
+}
+
+.logo{
+  filter: drop-shadow(1px 0px 0 white) drop-shadow(0px 1px 1px white);
 }
 
 /* Navigation for mobile devices */
@@ -144,9 +151,9 @@ a {
   text-decoration: none;
   letter-spacing: 0.15em;
   padding: 15px 20px;
-  font-size: 16px;
+  font-size: 14px;
   line-height: 2;
-  font-weight: bold;
+  /*font-weight: bold;*/
   position: relative;
 }
 
@@ -203,14 +210,34 @@ a {
   padding: 0.75rem 0.25rem;
   color: var(--yellow-color);
   background-color: #27272b;
-  font: bold 15px/1.4 'Open Sans', arial, sans-serif;
+  font-size: 14px;
+  font: 14px/1.4;
   text-transform: uppercase;
   display: flex;
   align-items: center;
   column-gap: .5rem;
-  font-weight: var(--font-semi-bold);
   transition: background-color .3s;
   padding-inline: 1rem;
+  position: relative;
+}
+
+.dropdown__link:after {
+  background: none repeat scroll 0 0 transparent;
+  bottom: 0;
+  content: "";
+  display: block;
+  height: 2px;
+  left: 50%;
+  position: absolute;
+  background: var(--yellow-color);
+  transition: width 0.3s ease 0s, left 0.3s ease 0s;
+  width: 0;
+}
+
+.dropdown__link:hover:after { 
+  width: 100%; 
+  left: 0;
+  bottom: 0;
 }
 
 .dropdown__link i, 
@@ -219,10 +246,10 @@ a {
   font-weight: initial;
 }
 
-.dropdown__link:hover, 
+/*.dropdown__link:hover, 
 .dropdown__sublink:hover {
   background-color: var(--black-color);
-}
+}*/
 
 .dropdown__menu, 
 .dropdown__submenu {
@@ -280,11 +307,15 @@ a {
   .nav__toggle {
     display: none;
   }
+  .nav__menu{
+    width: 100%;
+  }
   .nav__list {
     height: 100%;
     display: flex;
-    column-gap: 3.4rem;
-    justify-content: center;
+    justify-content: space-evenly;
+    align-items: center;
+
   }
   .nav__list li{
     padding: 0 5px;
@@ -336,7 +367,7 @@ a {
   /* Show dropdown menu */
   .dropdown__item:hover .dropdown__menu {
     opacity: 1;
-    top: 1.8rem;
+    top: 1.3rem;
     pointer-events: initial;
     transition: top .3s;
     width: 100%;

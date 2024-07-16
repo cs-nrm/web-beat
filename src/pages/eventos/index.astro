@@ -6,7 +6,7 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
 import Card from '../../layouts/Cardsq.astro';
 
 
-const res = await fetch("http://contenido.oyedigital.mx/wp-json/wp/v2/posts?_embed&per_page=9&_fields=title,slug,yoast_head_json,categories&categories=1207");
+const res = await fetch("https://beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=9&_fields=title,slug,yoast_head_json,categories&categories=1207");
 const posts = await res.json();
 
 ---

@@ -6,7 +6,7 @@ import SuperLeader from '../components/SuperLeader.astro';
 import { Image } from 'astro:assets';
 
 
-const res = await fetch("https://contenido.oyedigital.mx/wp-json/wp/v2/posts?_fields=title,slug,yoast_head_json,_links,_embedded&_embed&per_page=3&categories=149");
+const res = await fetch("https://beatdigital.mx/wp-json/wp/v2/posts?_fields=title,slug,yoast_head_json,_links,_embedded&_embed&per_page=3&categories=143");
 
 const posts = await res.json();
 
@@ -14,11 +14,11 @@ const posts = await res.json();
 
 {
 posts.map((post:any)=> (
-    <a class="flex flex-wrap items-center my-12 text-black hover:text-[#7b439b]" href={`/popnews/${post.slug}/`}>
+    <a class="flex flex-wrap items-center my-12 gray-beat hover:text-[#ffeb3b]" href={`/news/${post.slug}/`}>
         <div class="w-full sm:w-1/3">
             <!--img class="block h-auto w-full shadow-[0_2px_12px_7px_rgba(0,0,0,0.4)] rounded object-fill" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} /-->
              
-            <!--Image class="block h-auto w-full shadow-[0_2px_12px_7px_rgba(0,0,0,0.4)] rounded object-fill" src={post._embedded['wp:featuredmedia'][0].media_details.sizes['werkstatt-blog'].source_url} width="300" height="150" alt={post.title.rendered}  /-->
+            <Image class="block h-auto w-full shadow-[0_2px_12px_7px_rgba(0,0,0,0.4)] rounded object-fill" src={post._embedded['wp:featuredmedia'][0].media_details.sizes['werkstatt-blog'].source_url} width="300" height="150" alt={post.title.rendered}  />
         </div>
         <div class="w-full sm:w-2/3 px-4">
             <p class="font-bold leading-snug mt-4 lg:m-0 text-xl lg:text-2xl text-center sm:text-left" set:html={post.title.rendered}></p>
@@ -30,7 +30,7 @@ posts.map((post:any)=> (
 <div class="m-auto mb-8 text-center">
     <a href="/popnews">
         <button class="group relative h-8 w-36 overflow-hidden rounded-lg bg-gray-100 text-base shadow">
-            <div class="absolute inset-0 w-3 bg-pink-600 transition-all duration-[250ms] ease-out group-hover:w-full"></div>
+            <div class="absolute inset-0 w-3 bg-[#ffeb3b] transition-all duration-[250ms] ease-out group-hover:w-full"></div>
             <span class="relative text-black group-hover:text-white">Ver más</span>
         </button>
     </a>

@@ -8,7 +8,7 @@ import {getArticles} from '../../lib/api.js';
 import Card from '../../layouts/Cards.astro';
 
 export async function getStaticPaths( { paginate } ) {
-  const data = await getArticles(1606);
+  const data = await getArticles(537);
   return paginate(data, { pageSize: 10 });
 }
 

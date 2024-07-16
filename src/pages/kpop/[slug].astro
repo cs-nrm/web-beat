@@ -8,11 +8,11 @@ import MoreNews from '../../components/MoreNews.astro';
 
 const { slug } = Astro.params;
 
-let res = await fetch(`https://contenido.oyedigital.mx/wp-json/wp/v2/posts?slug=${slug}`);
+let res = await fetch(`https://beatdigital.mx/wp-json/wp/v2/posts?slug=${slug}`);
 let [post] = await res.json();
 
 export async function getStaticPaths() {
-  let data = await fetch("https://contenido.oyedigital.mx/wp-json/wp/v2/posts?_embed&per_page=100&_fields=title,slug,content&categories=172");
+  let data = await fetch("https://beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=100&_fields=title,slug,content&categories=172");
   let posts = await data.json();
 
   return posts.map((post:any) => ({

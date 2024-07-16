@@ -3,7 +3,8 @@ import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import CardNews from '../layouts/CardsHomeNews.astro';
-import CardEntrevistas from '../layouts/CardsHomeEntrevistas.astro';
+import CardNerdosis from '../layouts/CardsHomeNerdosis.astro';
+import CardTrends from '../layouts/CardsHomeTrends.astro';
 import SliderPodcast from '../layouts/SliderPodcast.astro';
 import Separator from '../components/Separator.astro';
 import HomeHeader from '../layouts/HomeHeader.astro';
@@ -29,14 +30,16 @@ import SliderPromociones from '../layouts/SliderPromociones.astro';
 		<main id="home">
 				<header>
 					<HomeHeader />
+					<div style="border-top: 5px solid #3bff9d;"></div>
 				</header>
-				<LeaderBoard />
-				<section>
+				<SuperLeader />
+				
+				<section style="background: black;">
 					<div class="container-home lg:my-12 mx-auto">
-						<h1 class="py-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl [text-shadow:2px_4px_2px_rgb(88_29_135_/_64%)]">Promociones</h1>
+						<h1 class="py-4 font-bold yellow-beat text-4xl md:text-5xl lg:text-4xl xl:text-5xl [text-shadow:2px_4px_2px_rgb(86_85_83_/_64%)]">News</h1>
 						<div class="flex flex-wrap">
 							<div class="w-full lg:w-2/3">
-								<SliderPromociones />
+								<CardNews />
 							</div>
 							<div class="w-full mt-8 lg:w-1/3 lg:m-0 content-center">
 							<DoubleBox />
@@ -45,26 +48,30 @@ import SliderPromociones from '../layouts/SliderPromociones.astro';
 
 					</div>
 				</section>
-				<Separator />
-				<secttion>
+				<section>
 					<div class="container-home px-4 my-12 mx-auto">
 						<div class="flex flex-wrap">
 							<div class="w-full lg:w-2/3">
-								<h1 class="py-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl [text-shadow:2px_4px_2px_rgb(88_29_135_/_64%)]">Pop News</h1>
-								<CardNews />
+								<h1 class="py-4 font-bold yellow-beat text-4xl md:text-5xl lg:text-4xl xl:text-5xl [text-shadow:2px_4px_2px_rgb(86_85_83_/_64%)]">Promociones</h1>
+								<SliderPromociones />
 							</div>
-							<div class="w-full lg:w-1/3 bg-purple-300 rounded">
-								<h1 class="py-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl text-center [text-shadow:2px_4px_2px_rgb(88_29_135_/_64%)]">Entrevistas</h1>
-								<CardEntrevistas />
+							<div class="w-full lg:w-1/3 bg-zinc-700 rounded">
+								<h1 class="py-4 text-center font-bold yellow-beat text-4xl md:text-5xl lg:text-4xl xl:text-5xl [text-shadow:2px_4px_2px_rgb(86_85_83_/_64%)]">Beat Trends</h1>
+								<CardTrends />
+								<h1 class="py-4 text-center font-bold yellow-beat text-4xl md:text-5xl lg:text-4xl xl:text-5xl [text-shadow:2px_4px_2px_rgb(86_85_83_/_64%)]">Nerdosis</h1>
+								<CardNerdosis />
 							</div>
 						</div>
-						<SuperLeader />
+
+						<LeaderBoard />
+
+
+						
 					</div>
-				</secttion>
-					<Separator />
+				</section>
 				<section>
 					<div class="container-home w-full mx-auto">
-						<h1 class="py-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl [text-shadow:2px_4px_2px_rgb(88_29_135_/_64%)]">Podcast</h1>
+						<h1 class="py-4 font-bold yellow-beat text-4xl md:text-5xl lg:text-4xl xl:text-5xl [text-shadow:2px_4px_2px_rgb(86_85_83_/_64%)]">Podcast</h1>
 						<SliderPodcast />
 					</div>
 				</section>

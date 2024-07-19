@@ -26,20 +26,23 @@ const { post } = Astro.props;
 var url_seccion;
 //console.log(post.categories[0]);
 switch (post.categories[0]){
-    case 149:        
-        url_seccion = 'popnews';
+    case 143:        
+        url_seccion = 'news';
     break;
-    case 1606:        
+    case 537:        
         url_seccion = 'promociones';
     break;
-    case 1207:
-        url_seccion = 'eventos';
+    case 578:
+        url_seccion = 'purplenoise';
     break;
-    case 156:
-        url_seccion = 'entrevistas';
+    case 505:
+        url_seccion = 'beattrends';
+    break;
+    case 531:
+        url_seccion = 'nerdosis';
     break;
     default:
-        url_seccion = 'popnews';    
+        url_seccion = 'news';    
     break;      
 }
 

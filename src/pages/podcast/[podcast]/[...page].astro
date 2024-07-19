@@ -9,20 +9,17 @@ import Card from '../../../layouts/CardsPodcast.astro';
 
 export async function getStaticPaths( { paginate } ) {
     
-  const arrpodcast = [
-        {nodo: 6806,title: 'Al otro lado de la Radio', link: 'al-otro-lado-de-la-radio', imagen: 'https://contenido.oyedigital.mx/wp-content/uploads/2024/05/DETRASdelaRADIO11-min-min.jpg', descripcion: 'Un podcast donde podrás escuchar a tus artistas favoritos y conocer más sobre ellos.'},
-        {nodo: 6581,title: 'Pop Trends', link: 'pop-trends', imagen: 'https://contenido.oyedigital.mx/wp-content/uploads/2024/05/POP-TRENDS-portada-min.jpg', descripcion: 'La música más top, nueva y relevante que escuchas, tu votas por tener tu canción en los 10 primero lugares.'},
-        {nodo: 6734,title: 'Respira', link: 'respira', imagen: 'https://contenido.oyedigital.mx/wp-content/uploads/2024/05/poscast-repira2-min.jpg', descripcion: 'Descubrir que tienes un problema de salud mental es una noticia impactante que puede transformar tu vida por completo.'},
-        {nodo: 3801,title: 'Top Gaming', link: 'top-gaming', imagen: 'https://contenido.oyedigital.mx/wp-content/uploads/2024/05/TOP-GAMING-min.jpg', descripcion: 'Un clavado al mundo de los gamers en el cual conocerás todo sobre los lanzamientos, mejores juegos del momento y los que vienen.'},
-        {nodo: 3813,title: 'Top Tech', link: 'top-tech', imagen: 'https://contenido.oyedigital.mx/wp-content/uploads/2024/05/TOP-TECH-min.jpg', descripcion: 'Top Tech con Diego Gil y Geekzilla. un podcast en el que conoceremos todo sobre la tecnología que nos está rodeando.'},
-        {nodo: 3788,title: 'Tu Fandom', link: 'tu-fandom', imagen: 'https://contenido.oyedigital.mx/wp-content/uploads/2024/05/podcast-FANDOM-PORTADA-PAG-min.jpg', descripcion: 'Pone el reflector sobre los fandoms más activos de las redes sociales, bajo la premisa de “USTEDES HACEN LA PLAYLIST”, a través del #OyeTuFandom seleccionamos los Idols más votados.'},
-        {nodo: 3449,title: 'El Debraye', link: 'el-debraye', imagen:'https://contenido.oyedigital.mx/wp-content/uploads/2024/05/podcast-debraye-min.jpg', descripcion:''},
-        {nodo: 7404,title: 'Oye la Alternativa', link: 'la-alternativa', imagen:'https://contenido.oyedigital.mx/wp-content/uploads/2024/05/OYE_alternativa-PODCAST-min-min.jpg', descripcion:'El espacio donde toda la música se escucha, sin distinción, entrevistas de todos los géneros en un solo lugar. '},
-        //{nodo: 7812,title: 'Oye la Zona Coder', link: 'zona-coder', imagen:'https://contenido.oyedigital.mx/wp-content/uploads/2024/06/zona-coder-min.jpg', descripcion:'Es el espacio de las Coders en Oye897fm donde podrán escuchar sus canciones favoritas de CD9 junto a Sergio Mejia. Somos la estación oficial de CD9.'},
-  ];
+    const arrpodcast = [
+        {nodo: 607,title: 'Groove Dealers', link: 'groove-dealers', imagen: 'https://beatdigital.mx/wp-content/uploads/2024/06/GROOVE-DEALERS-PODCAST-min.png', descripcion: 'Conoce datos relevantes y curiosos sobre la escena de la música electrónica a través de la voz de Maria Purisima, DJ’s y productores nacionales e internacionales.'},
+        {nodo: 557,title: 'Respira', link: 'respira', imagen: 'https://beatdigital.mx/wp-content/uploads/2023/12/poscast-repira2.jpg', descripcion: 'Descubrir que tienes un problema de salud mental es una noticia impactante que puede transformar tu vida por completo.'},
+        {nodo: 539,title: 'Expedientes Secretos', link: 'expedientes-secretos', imagen: 'https://beatdigital.mx/wp-content/uploads/2023/10/EX_secretos5.jpg', descripcion: '¡Expedientes Secretos Beat! Un podcast que explora teorías de conspiración y desentraña los misterios ocultos del mundo. ¡Prepárate para una dosis semanal de intrigante información y descubrimientos fascinantes!'},
+        {nodo: 535,title: 'Nerdosis', link: 'nerdosis', imagen: 'https://beatdigital.mx/wp-content/uploads/2023/06/NERD_podcast3psd.jpg', descripcion: 'Un podcast sobre cómics, tecnología, gaming, torneos, streaming, memes y mucho más.'},
+        {nodo: 495,title: 'Dos Equis Mixx', link: 'dos-equis-mixx', imagen: 'https://beatdigital.mx/wp-content/uploads/2022/09/portada-xx.jpg', descripcion: '¿Y tú confías en tu MIXX? Un programa que trae lo mejor de la cultura pop, tendencias y lo más relevante de la música electrónica.'},
+        {nodo: 468,title: 'Beat Trends', link: 'beat-trends', imagen:'https://beatdigital.mx/wp-content/uploads/2022/08/podcast.jpg', descripcion:'Entérate de las últimas noticias sobre cine, anime, móviles, videojuegos y más con Frank, Wallace y el Negro Salcedo. '},
+    ]; 
 
   
-  const res = await fetch("https://contenido.oyedigital.mx/wp-json/wp/v2/posts?_embed&per_page=200&_fields=title,slug,yoast_head_json,categories,acf&categories=3449,3788,3813,3801,6734,6581,6806,7404,7812" ); 
+  const res = await fetch("https://beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=100&_fields=title,slug,yoast_head_json,categories,acf&categories=607,557,539,535,495,468" ); 
   const posts = await res.json();
   //console.log(posts);
   

@@ -16,7 +16,7 @@
       <!--=============== DROPDOWN ===============-->
       <li class="dropdown__item">
         <div class="nav__link">
-          Podcast <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-down dropdown__arrow" width="25" height="25" viewBox="0 0 24 24" stroke-width="1.5" stroke="#ffd128" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          Podcast <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-down dropdown__arrow" width="25" height="25" viewBox="0 0 24 24" stroke-width="1.5" stroke="#868583" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 9l6 6l6 -6" /></svg>
         </div>
         <ul class="dropdown__menu podcast rounded z-50" >
@@ -52,19 +52,10 @@
 :root {
   --header-height: 3.5rem;
 
-  /*========== Colors ==========*/
-  /*Color mode HSL(hue, saturation, lightness)*/
-  --black-color: #c026d3;
-  --black-color-light: #4c1d95;
-  --black-color-lighten: #c026d3;
-  --white-color: #fff;
-  --yellow-color: #ffd128;
-  --body-color: hsl(220, 100%, 97%);
-
   /*========== Font and typography ==========*/
   /*.5rem = 8px | 1rem = 16px ...*/
-  --body-font: "Montserrat", sans-serif;
-  --normal-font-size: .938rem;
+  /*--body-font: "Montserrat", sans-serif;
+  --normal-font-size: .938rem;*/
 
   /*========== Font weight ==========*/
   --font-regular: 400;
@@ -146,7 +137,7 @@ a {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: var(--yellow-color);
+  color: var(--gray-light);
   text-transform: uppercase;
   text-decoration: none;
   letter-spacing: 0.15em;
@@ -155,6 +146,14 @@ a {
   line-height: 2;
   /*font-weight: bold;*/
   position: relative;
+  /*text-shadow:     0 0 10px #fff,
+    0 0 20px #fff,
+    0 0 40px #44c2d5,
+    0 0 80px #44c2d5,
+    0 0 90px #44c2d5,
+    0 0 100px #44c2d5,
+    0 0 150px #44c2d5;*/
+
 }
 
 .nav__link:after {
@@ -208,10 +207,9 @@ a {
 .dropdown__link, 
 .dropdown__sublink {
   padding: 0.75rem 0.25rem;
-  color: var(--yellow-color);
-  background-color: #27272b;
+  color: var(--gray-light);
+  background-color: #000;
   font-size: 14px;
-  font: 14px/1.4;
   text-transform: uppercase;
   display: flex;
   align-items: center;

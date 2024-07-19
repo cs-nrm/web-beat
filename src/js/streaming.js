@@ -251,7 +251,7 @@ const secchome = document.getElementById('home');
 
         
         function getInfoProg(){
-            //fetch("https://contenido.oyedigital.mx/wp-json/wp/v2/posts?_embed&per_page=30&categories=3312&_fields[]=acf")
+            //fetch("https://beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=30&categories=3312&_fields[]=acf")
             fetch("https://beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=40&categories=515&_fields[]=acf")            
             .then((res) => {
                 if (!res.ok) {
@@ -649,7 +649,7 @@ const showMenu = (toggleId, navId) =>{
                     body: JSON.stringify( params )
                 };
                     
-                fetch('https://contenido.oyedigital.mx/wp-json/wp-ulike-pro/v1/vote/', Rparamas)
+                fetch('https://beatdigital.mx/wp-json/wp-ulike-pro/v1/vote/', Rparamas)
                 .then((res) => {
                     if (!res.ok) {
                         throw new Error

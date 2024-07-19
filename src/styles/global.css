@@ -3,16 +3,25 @@
   https://github.com/HermanMartinus/bearblog/blob/297026a877bc2ab2b3bdfbd6b9f7961c350917dd/templates/styles/blog/default.css
   License MIT: https://github.com/HermanMartinus/bearblog/blob/master/LICENSE.md
  */
+
  :root {
 	--accent: #2337ff;
 	--accent-dark: #000d8a;
 	--black: 15, 18, 25;
 	--gray: 96, 115, 159;
-	--gray-light: 229, 233, 240;
 	--gray-dark: 34, 41, 57;
 	--gray-gradient: rgba(var(--gray-light), 50%), #fff;
 	--box-shadow: 0 2px 6px rgba(var(--gray), 25%), 0 8px 24px rgba(var(--gray), 33%),0 16px 32px rgba(var(--gray), 33%);
 	--plyr-color-main: #e83229;
+	--yellow-color: #ffeb3b;
+  	--gray-color: #191818;
+	--gray-light: #868583;
+}
+.yellow-beat{
+	color: #ffeb3b;
+}
+.gray-beat{
+	color: #868583;
 }
 @font-face {
 	font-family: 'Atkinson';
@@ -37,14 +46,29 @@ body {
 	/*background-size: 100% 600px;*/
 	word-wrap: break-word;
 	overflow-wrap: break-word;
-	color: rgb(var(--gray-dark));
+	color: var(--gray-light);
 	font-size: 20px;
 	line-height: 1.7;
-	background-color: #fff;
-	background-color: #e5e5f7;
-	background-image:  radial-gradient(#d7d7d7 1px, transparent 1px), radial-gradient(#e0afff 1px, #e5e5f7 1px);
-	background-size: 40px 40px;
-	background-position: 0 0,20px 20px;
+	background-color: var(--gray-color);
+/*
+	background: radial-gradient(circle, transparent 25%, #191818  26%),linear-gradient(45deg, transparent 46%, #242424 47%, #242424 52%, transparent 53%), linear-gradient(135deg, transparent 46%, #242424 47%, #242424 52%, transparent 53%);
+	background: radial-gradient(circle at top left,transparent 9%, #242424 10% ,#242424 15% , transparent 16%) , radial-gradient(circle at bottom left,transparent 9%, #242424 10% ,#242424 15% , transparent 16%), radial-gradient(circle at top right ,transparent 9%, #242424 10% ,#242424 15% , transparent 16%) , radial-gradient(circle at bottom right,transparent 9%, #242424 10% ,#242424 15% , transparent 16%),radial-gradient(circle, transparent 25%, #191818  26%),linear-gradient(45deg, transparent 46%, #242424 47%, #242424 52%, transparent 53%), linear-gradient(135deg, transparent 46%, #242424 47%, #242424 52%, transparent 53%);
+	background: radial-gradient(circle at top left,transparent 9%, #242424 10% ,#242424 15% , transparent 16%) , radial-gradient(circle at bottom left,transparent 9%, #242424 10% ,#242424 15% , transparent 16%), radial-gradient(circle at top right ,transparent 9%, #242424 10% ,#242424 15% , transparent 16%) , radial-gradient(circle at bottom right,transparent 9%, #242424 10% ,#242424 15% , transparent 16%),radial-gradient(circle, transparent 25%, #191818  26%),linear-gradient(45deg, transparent 46%, #242424 47%, #242424 52%, transparent 53%), linear-gradient(135deg, transparent 46%, #242424 47%, #242424 52%, transparent 53%);
+	background: linear-gradient(45deg, #242424 0%, #242424 5%,transparent 5%, transparent 10%, #242424 10%, #242424 15%,transparent 15%,transparent 20%, #242424 20%, #242424 25%,transparent 25%,transparent 30%, #242424 30%, #242424 35%,transparent 35%,transparent 40%, #242424 40%, #242424 45%,transparent 45%,transparent 50%, #242424 50%, #242424 55%,transparent 55%,transparent 60%, #242424 60%, #242424 65%,transparent 65%,transparent 70%, #242424 70%, #242424 75%,transparent 70%,transparent 80%, #242424 80%, #242424 85%,transparent 85%,transparent 90%, #242424 90%, #242424 95%,transparent 95%);
+	background: repeating-linear-gradient(0deg, #191818 0, #191818 20%, transparent 0, transparent 50%),repeating-linear-gradient(45deg, #242424 0, #242424 10%, transparent 0, transparent 50%);
+	background: repeating-linear-gradient(0deg, #191818 0, #191818 20%, transparent 0, transparent 50%),repeating-linear-gradient(45deg, #1e1e1e 0, #1e1e1e 10%, transparent 0, transparent 50%);
+        background-size: 3em 3em;
+        background-size: 2em 2em;
+        background-color: #191818;
+        opacity: 1;*/
+
+	
+
+
+
+
+
+	
 }
 main {
 	width: 100%;
@@ -179,8 +203,6 @@ hr {
 		max-width: 1280px !important;
 	}
 }
-
-
 
 
 

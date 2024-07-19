@@ -5,12 +5,11 @@ import Footer from '../../components/Footer.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts.js';
 
 import {getArticles} from '../../lib/api.js';
-import Card from '../../layouts/Cardsq.astro';
-
+import Card from '../../layouts/Cards.astro';
 
 export async function getStaticPaths( { paginate } ) {
-  const data = await getArticles(149);  
-  return paginate(data, { pageSize: 9 });
+  const data = await getArticles(537);
+  return paginate(data, { pageSize: 10 });
 }
 
 interface Props{
@@ -18,12 +17,11 @@ interface Props{
 }
 
 const {page=[]} = Astro.props;
-//console.log(page.data);
 ---
 <!doctype html>
 <html lang="es">
 	<head>
-		<BaseHead title={SITE_TITLE} seccion="Pop News" description={SITE_DESCRIPTION} />
+		<BaseHead title={SITE_TITLE} seccion="Promociones" description={SITE_DESCRIPTION} />
 		
 	</head>
 	<body>
@@ -31,14 +29,14 @@ const {page=[]} = Astro.props;
 		
 		<main>
       <div class="container my-12 mx-auto px-4 md:px-12">
-				<h1 class="py-4 font-bold [text-shadow:2px_2px_3px_rgb(88_29_135_/_64%)]">Pop News</h1>
-        <section class="flex flex-wrap -mx-4">
+				<h1 class="py-4 font-bold [text-shadow:2px_4px_2px_rgb(88_29_135_/_64%)]">Promociones</h1>
+        <section class="flex flex-wrap -mx-1 lg:-mx-4">
           {
-          page.data.map((post:any) => ( 
+            page.data.map((post:any) => ( 
             <>
             <Card post={post} />
             </>
-          ))
+            ))
           }
         </section>
         <div class="text-center mt-20">

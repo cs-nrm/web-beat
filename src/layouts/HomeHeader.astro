@@ -83,7 +83,16 @@ var HEX_CRAD = 32,
 		HEX_HL = '#2a2a2a', 
 		HEX_HLW = 2, 
 		HEX_GAP = 4, 
-		NEON_PALETE = [
+        NEON_PALETE = [
+			'#bde57c', '#f0ff2e', 
+			'#40f489', '#27ea06', 
+			'#ffff67', '#ccff66', 
+			'#99fe00', '#fe99ff', 
+			'#ac06f9', '#0b4ef7', 
+			'#ebf706', '#6599ff', 
+			'#00ccff', '#ffffff'
+		],
+		/*NEON_PALETE = [
 			'#cb3301', '#ff0066', 
 			'#ff6666', '#feff99', 
 			'#ffff67', '#ccff66', 
@@ -91,7 +100,7 @@ var HEX_CRAD = 32,
 			'#ff99cb', '#fe349a', 
 			'#cc99fe', '#6599ff', 
 			'#00ccff', '#ffffff'
-		], 
+		],*/ 
 		T_SWITCH = 64, 
 		
 		unit_x = 3*HEX_CRAD + HEX_GAP*sqrt(3), 
@@ -223,7 +232,7 @@ var init = function() {
 	
 	w = ~~s.width.split('px')[0];
 	h = ~~s.height.split('px')[0];
-	_min = .75*min(w, h);
+	_min = .99*min(w, h);
 	
 	rows = ~~(h/unit_y) + 2;
 	cols = ~~(w/unit_x) + 2;

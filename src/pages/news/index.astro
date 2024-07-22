@@ -57,7 +57,7 @@ const posts = await res.json();
 
 
 <script type="module">
-    import {GUI} from 'https://cdn.skypack.dev/dat.gui'
+    /*import {GUI} from 'https://cdn.skypack.dev/dat.gui'*/
     const CONTAINER = document.querySelector('.container')
     const CARDS = document.querySelectorAll('article')
     const CONFIG = {
@@ -101,15 +101,17 @@ const posts = await res.json();
       CONTAINER.style.setProperty('--spread', CONFIG.spread)
       CONTAINER.style.setProperty('--direction', CONFIG.vertical ? 'column' : 'row')
     }
-    const CTRL = new GUI({
-      width: 340,
+    /*const CTRL = new GUI({
+      width: 0,
+      height:1
+      
     })
     CTRL.add(CONFIG, 'spread', 10, 180, 1).name('Spread (deg)').onChange(RESTYLE)
     CTRL.add(CONFIG, 'proximity', 10, 180, 1).name('Active Proximity (px)').onChange(RESTYLE)
     CTRL.add(CONFIG, 'gap', 10, 100, 1).name('Gap (px)').onChange(RESTYLE)
     CTRL.add(CONFIG, 'blur', 0, 50, 1).name('Blur (px)').onChange(RESTYLE)
     CTRL.add(CONFIG, 'opacity', 0, 1, 0.01).name('Inactive Opacity').onChange(RESTYLE)
-    CTRL.add(CONFIG, 'vertical').name('Vertical Layout').onChange(RESTYLE)
+    CTRL.add(CONFIG, 'vertical').name('Vertical Layout').onChange(RESTYLE)*/
     RESTYLE()
     UPDATE()
 </script>  

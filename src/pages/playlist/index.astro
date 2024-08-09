@@ -1,0 +1,86 @@
+---
+import BaseHead from '../../components/BaseHead.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
+
+const jueves_nojson = 'https://cdn.nrm.com.mx/cdn/beat/playlist/jueves.json';
+ 
+const jueves_arr = await fetch(jueves_nojson).then (r => r.text() )
+.then(data => {
+    //console.log(data.split('\n'));
+    const jueves_json = data.split('\n'); 
+    //console.log(jueves_json);
+    return jueves_json;
+});
+
+const jueves : string[] = [];
+
+jueves_arr.map(el =>{    
+    if(el != ''){
+        let ele = JSON.parse(el);
+        if(ele.categoria === 'RANDOM' || ele.categoria === 'MUSICA-DANCE' || ele.categoria === 'MUSICA-HOUSE' || ele.categoria === 'MÚSICA-DREAM' || ele.categoria === 'MUSICA-ELECTRONICA' || ele.categoria === 'MUSICA-PROGRESIVO' || ele.categoria === 'MUSICA-RETRO' || ele.categoria === 'MUSICA-RANDOM ANDRE' || ele.categoria === 'LADO F'){
+            jueves.push(ele);                     
+        }
+    }
+});
+
+
+---
+
+<!doctype html>
+<html lang="es">
+	<head>
+		<BaseHead title={SITE_TITLE} seccion="Playlist" description={SITE_DESCRIPTION} />
+		 <meta charset="utf-8"/>
+	</head>
+	<body>
+		<Header title={SITE_TITLE} />
+		
+		<main>
+            <div class="container my-12 mx-auto">
+                <h1>PLAYLIST</h1>
+
+
+                <table class="table-auto text-white  border-collapse: collapse; cursor:auto;  rounded-lg text-base" >
+                    <thead class="bg-gray-800/[0.5] rounded-lg">
+                      <tr>
+                        <th class="">Hora</th>
+                        <th>Canción</th>
+                        <th>DJ</th>
+                      </tr>
+                    </thead>
+                    {
+                        jueves.map( (el:any) => (
+                        
+                            <>  
+                                <tr class="hover:bg-gray-700/[0.6] hover:rounded-lg drop-shadow-[0_15px_15px_rgba(255,255,255,0.15)]">                  
+                                    <td class="cursor:auto; whitespace-nowrap;">{el.hora_real.split('T')[1].split(':')[0]}:{el.hora_real.split('T')[1].split(':')[1]}</td>
+                                    <td class="cursor:auto; whitespace-nowrap;">{el.title}</td>
+                                    <td class="cursor:auto; whitespace-nowrap;">{el.dj}</td>                        
+                                </tr>
+                            </>
+                        
+                        ))
+                    }
+               </table> 
+            </div>
+		</main>
+		<Footer />
+	</body>
+</html>
+<style>
+    table{ cursor:default; }
+    th { padding: 20px; 
+        text-shadow:
+        0 0 0.15em #1da9cc;
+    }
+
+    td {  padding: 0 5px;  }
+    tr:hover{    
+        text-shadow:
+        0.25em 0.25em 0.5em #0b8ce8;
+        font-size: 120%;
+        transition: all 0.3s;
+    }   
+</style>

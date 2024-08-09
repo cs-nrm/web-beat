@@ -13,14 +13,17 @@ const posts = await res.json();
 <link rel="stylesheet" type="text/css" href="https://storage.googleapis.com/nrm-web/nrm/lib/flickity.css">			
 
 <div class="slider-promociones">
-	<div class="carousel carousel-main" data-flickity='{ "sync": ".carousel-nav", "prevNextButtons": false, "autoPlay": true, "pageDots": false}'>
+	<div class="carousel carousel-main container cards promos" data-flickity='{ "sync": ".carousel-nav", "prevNextButtons": false, "autoPlay": true, "pageDots": false}'>
 
 	{
 	posts.map((post:any)=> (
-		<div class="carousel-cell">
-			<a href={`/promociones/${post.slug}/`}>
-				<Image class="block h-auto w-full object-fill" src={post._embedded['wp:featuredmedia'][0].media_details.sizes['medium_large'].source_url} width="300" height="150" alt={post.title.rendered}/>
-			</a>
+		<div class="carousel-cell card">
+			<article>
+				<div class="glows"></div>
+				<a href={`/promociones/${post.slug}/`}>
+					<Image class="block h-auto w-full object-fill" src={post._embedded['wp:featuredmedia'][0].media_details.sizes['medium_large'].source_url} width="300" height="150" alt={post.title.rendered}/>
+				</a>
+			</article>
 		</div>
 	))    
 	}

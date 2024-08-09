@@ -36,30 +36,25 @@ import SliderPromociones from '../layouts/SliderPromociones.astro';
 				
 				<section style="background: black;">
 					<div class="container-home lg:my-12 mx-auto">
-						<h1 class="py-4 font-bold yellow-beat text-4xl md:text-5xl lg:text-4xl xl:text-5xl [text-shadow:2px_4px_2px_rgb(86_85_83_/_64%)]">News</h1>
-						<div class="flex flex-wrap">
-							<div class="w-full lg:w-2/3">
-								<CardNews />
-							</div>
-							<div class="w-full mt-8 lg:w-1/3 lg:m-0 content-center">
-							<DoubleBox />
-							</div>
+						<h1 class="audiowide py-4 font-bold yellow-beat text-4xl md:text-5xl lg:text-4xl xl:text-5xl [text-shadow:2px_4px_2px_rgb(86_85_83_/_64%)]">News</h1>
+						<div class="">
+							<CardNews />
 						</div>
-
 					</div>
 				</section>
 				<section>
 					<div class="container-home px-4 my-12 mx-auto">
 						<div class="flex flex-wrap">
 							<div class="w-full lg:w-2/3">
-								<h1 class="py-4 font-bold yellow-beat text-4xl md:text-5xl lg:text-4xl xl:text-5xl [text-shadow:2px_4px_2px_rgb(86_85_83_/_64%)]">Promociones</h1>
+								<h1 class="audiowide py-4 font-bold yellow-beat text-4xl md:text-5xl lg:text-4xl xl:text-5xl [text-shadow:2px_4px_2px_rgb(86_85_83_/_64%)]">Promociones</h1>
 								<SliderPromociones />
 							</div>
-							<div class="w-full lg:w-1/3 bg-zinc-700 rounded">
-								<h1 class="py-4 text-center font-bold yellow-beat text-4xl md:text-5xl lg:text-4xl xl:text-5xl [text-shadow:2px_4px_2px_rgb(86_85_83_/_64%)]">Beat Trends</h1>
+							<div class="w-full mt-8 lg:w-1/3 lg:m-0 content-center bg-zinc-700 rounded">
+								<DoubleBox />
+								<!--h1 class="py-4 text-center font-bold yellow-beat text-4xl md:text-5xl lg:text-4xl xl:text-5xl [text-shadow:2px_4px_2px_rgb(86_85_83_/_64%)]">Beat Trends</h1>
 								<CardTrends />
 								<h1 class="py-4 text-center font-bold yellow-beat text-4xl md:text-5xl lg:text-4xl xl:text-5xl [text-shadow:2px_4px_2px_rgb(86_85_83_/_64%)]">Nerdosis</h1>
-								<CardNerdosis />
+								<CardNerdosis /-->
 							</div>
 						</div>
 
@@ -69,9 +64,11 @@ import SliderPromociones from '../layouts/SliderPromociones.astro';
 						
 					</div>
 				</section>
-				<section>
+				<section class="bg-zinc-700">
 					<div class="container-home w-full mx-auto">
-						<h1 class="py-4 font-bold yellow-beat text-4xl md:text-5xl lg:text-4xl xl:text-5xl [text-shadow:2px_4px_2px_rgb(86_85_83_/_64%)]">Podcast</h1>
+						<h1 class="audiowide py-4 font-bold yellow-beat text-4xl md:text-5xl lg:text-4xl xl:text-5xl [text-shadow:2px_4px_2px_rgb(86_85_83_/_64%)]">Podcast</h1>
+					</div>
+					<div class="w-full mx-auto">
 						<SliderPodcast />
 					</div>
 				</section>
@@ -84,6 +81,6 @@ import SliderPromociones from '../layouts/SliderPromociones.astro';
 		
 		<Footer />
 	</body>
-		
+	
 
 </html>

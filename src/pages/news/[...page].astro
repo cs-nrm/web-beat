@@ -23,7 +23,7 @@ const {page=[]} = Astro.props;
 <!doctype html>
 <html lang="es">
 	<head>
-		<BaseHead title={SITE_TITLE} seccion="Pop News" description={SITE_DESCRIPTION} />
+		<BaseHead title={SITE_TITLE} seccion="News" description={SITE_DESCRIPTION} />
 		
 	</head>
 	<body>
@@ -31,7 +31,7 @@ const {page=[]} = Astro.props;
 		
 		<main>
       <div class="container my-12 mx-auto px-4 md:px-12">
-				<h1 class="py-4 font-bold [text-shadow:2px_2px_3px_rgb(88_29_135_/_64%)]">Pop News</h1>
+				<h1 class="py-4 font-bold yellow-beat text-4xl md:text-5xl lg:text-4xl xl:text-5xl [text-shadow:2px_4px_2px_rgb(86_85_83_/_64%)]">News</h1>
         <section class="flex flex-wrap -mx-4">
           {
           page.data.map((post:any) => ( 

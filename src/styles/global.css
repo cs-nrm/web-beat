@@ -24,7 +24,7 @@
     --card: hsl(0 0% 0%);
     --color: hsl(240 18% 80%);
     --border-width: 2px;
-    --border-radius: 12px;
+    --border-radius: 1rem;
     --gradient: conic-gradient(from 180deg at 50% 70%, hsla(0, 0%, 98%, 1) 0deg, #df19f5 72.0000010728836deg, #f70bd0 144.0000021457672deg, #09e6f1 216.00000858306885deg, #08f62c 288.0000042915344deg, hsla(0, 0%, 98%, 1) 1turn);
 }
 .yellow-beat{
@@ -447,7 +447,7 @@ article .wp-block-embed-youtube .wp-block-embed__wrapper iframe {
 .card article {
     --active: 0.15;
     --start: 0;
-    height: 100%;
+    /*height: 100%;*/
     background: var(--card);
     /*aspect-ratio: 330 / 400;*/
     border-radius: var(--border-radius);
@@ -463,6 +463,7 @@ article .wp-block-embed-youtube .wp-block-embed__wrapper iframe {
     position: absolute;
     inset: 0;
     filter: blur(calc(var(--blur) * 1px));
+    filter: blur(10px);
 }
 .card .glows::after,
 .card .glows::before {

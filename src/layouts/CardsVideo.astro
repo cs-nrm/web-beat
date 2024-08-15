@@ -21,22 +21,27 @@ export interface Props {
          author:string;         
       }
     };
+    index: number;
+    
     
 }
 
 const { post } = Astro.props;
+const { index }= Astro.props;
+const ind = index +1;
 
 var url_seccion;
 
 ---
 
-<div class="card w-full p-2 md:p-4 pb-4 poptrend-video">
-    <div class="overflow-hidden bg-white rounded-lg shadow-lg hover:shadow-xl ">
+<div class="card w-full p-2 md:p-4 pb-4 content-video">
+    <div class="overflow-hidden bg-black text-white rounded-lg shadow-[0_35px_60px_-15px_rgba(255,255,255,0.3)]">
         <div set:html={post.content.rendered} class="block h-auto w-full aspect-video"></div>        
-        <div class="flex items-center justify-between leading-tight p-2 md:p-4 min-h-40">
-            <h2 class="text-base text-purple-900 font-bold hover:text-gray-800" set:html={post.title.rendered}></h2>
+        <div class="flex items-center justify-between leading-tight p-2 md:p-4 min-h-40">            
+            <span set:html={ind}></span>
+            <h2 class="text-base text-white font-bold" set:html={post.title.rendered}></h2>
             <div class="voto-pop" data-voto-id={post.id}>
-                <button class="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-purple-500 to-pink-500 group-hover:from-purple-500 group-hover:to-pink-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800">
+                <button class="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-white rounded-lg group bg-gradient-to-br from-purple-500 to-pink-500 group-hover:from-purple-500 group-hover:to-pink-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800">
                     <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
                     ¡Vota! 
                         <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-thumb-up" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">

@@ -632,8 +632,8 @@ const showMenu = (toggleId, navId) =>{
 
         }else{                      
         $('.wp-block-embed-youtube .wp-block-embed__wrapper').each(function(){
-            //console.log(e);            
-            const plyr = new Plyr($(this),{
+            console.log($(this).find('iframe'));            
+            const plyr = new Plyr($(this).find('iframe').parent(),{
                 debug:true,
                 controls:[
                     'play-large', // The large play button in the center
@@ -656,7 +656,7 @@ const showMenu = (toggleId, navId) =>{
                 playsinline: true
 
             });
-            console.log(plyr);
+            //console.log(plyr);
             plyr.on('playing',function(){
                 const getstatus = playerstatus();
                 if( getstatus == 'radio-playing'){
@@ -668,7 +668,7 @@ const showMenu = (toggleId, navId) =>{
             
             $('#radiobutton').on('click', function(){
                 plyr.pause();
-            });             
+            });     
         }); 
         }
         

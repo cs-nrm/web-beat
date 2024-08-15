@@ -138,8 +138,8 @@ function getMes(mes){
                 <h1 class="audiowide yellow-beat" >PLAYLIST</h1>
 
                 <form id="select-day" class="max-w-sm my-2">
-                    <label for="countries" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Selecciona un día</label>
-                    <select  id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                    <label for="dias" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Selecciona un día</label>
+                    <select  id="dias" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                       <option value="lunes">Lunes</option>
                       <option value="martes">Martes</option>
                       <option value="miercoles">Miércoles</option>
@@ -352,7 +352,7 @@ function getMes(mes){
     tr:hover{    
         text-shadow:
         0.25em 0.25em 0.5em #0b8ce8;
-        font-size: 120%;
+        font-size: 110%;
         transition: all 0.3s;
     }   
     #lunes, #martes, #miercoles, #jueves, #viernes, #sabado, #domingo{ display: none;}
@@ -411,15 +411,15 @@ selectElement.addEventListener("change", (event) => {
     }
 });
 
-const fecha = new Date();
+fecha = new Date();
 switch(fecha.getDay()){
-    case 1:        document.getElementById('lunes').style.display = 'block';    break;
-    case 2:        document.getElementById('martes').style.display = 'block';    break;
-    case 3:        document.getElementById('miercoles').style.display = 'block';    break;
-    case 4:        document.getElementById('jueves').style.display = 'block';    break;
-    case 5:        document.getElementById('viernes').style.display = 'block';    break;
-    case 6:        document.getElementById('sabado').style.display = 'block';    break;
-    case 7:        document.getElementById('domingo').style.display = 'block';    break;
+    case 1:        document.getElementById('lunes').style.display = 'block';   $('#dias option:eq(0)').prop('selected',true); break;
+    case 2:        document.getElementById('martes').style.display = 'block';   $('#dias option:eq(1)').prop('selected',true); break;
+    case 3:        document.getElementById('miercoles').style.display = 'block'; $('#dias option:eq(2)').prop('selected',true);   break;
+    case 4:        document.getElementById('jueves').style.display = 'block';  $('#dias option:eq(3)').prop('selected',true);  break;
+    case 5:        document.getElementById('viernes').style.display = 'block';  $('#dias option:eq(4)').prop('selected',true);  break;
+    case 6:        document.getElementById('sabado').style.display = 'block';  $('#dias option:eq(5)').prop('selected',true);  break;
+    case 7:        document.getElementById('domingo').style.display = 'block';  $('#dias option:eq(6)').prop('selected',true);  break;
 }
 
 </script>

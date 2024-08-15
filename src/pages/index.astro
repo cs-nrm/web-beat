@@ -31,23 +31,22 @@ import CardsHomeNerdosis from '../layouts/CardsHomeNerdosis.astro';
 		<main id="home">
 				<header>
 					<HomeHeader />
-					<div style="border-top: 5px solid #3bff9d;"></div>
 				</header>
-				<SuperLeader />
-				
-				<section style="background: black;">
-					<div class="container-home lg:my-12 mx-auto">
-						<h1 class="audiowide py-4 font-bold yellow-beat text-4xl md:text-5xl lg:text-4xl xl:text-5xl [text-shadow:2px_4px_2px_rgb(86_85_83_/_64%)]">News</h1>
+						
+				<section class="bg-[#010c27]">
+					<SuperLeader />	
+					<div class="container-home p-4 mx-auto">
+						<h1 class="audiowide neon-morado text-center md:text-left py-4 font-bold yellow-beat text-4xl md:text-5xl lg:text-4xl xl:text-5xl">News</h1>
 						<div class="">
 							<CardNews />
 						</div>
 					</div>
 				</section>
-				<section>
-					<div class="container-home px-4 my-12 mx-auto">
+				<section class="bg-black">
+					<div class="container-home p-4 mx-auto">
 						<div class="flex flex-wrap">
 							<div class="w-full lg:w-2/3">
-								<h1 class="audiowide py-4 font-bold yellow-beat text-4xl md:text-5xl lg:text-4xl xl:text-5xl [text-shadow:2px_4px_2px_rgb(86_85_83_/_64%)]">Promociones</h1>
+								<h1 class="audiowide neon-verde text-center md:text-left py-4 font-bold yellow-beat text-3xl md:text-5xl lg:text-4xl xl:text-5xl">Promociones</h1>
 								<SliderPromociones />
 							</div>
 							<div class="w-full mt-8 lg:w-1/3 lg:m-0 content-center bg-zinc-700 rounded">
@@ -58,38 +57,27 @@ import CardsHomeNerdosis from '../layouts/CardsHomeNerdosis.astro';
 								<CardNerdosis /-->
 							</div>
 						</div>
-
-						<LeaderBoard />
-
-
-						
+  						<LeaderBoard />						
 					</div>
 				</section>
 				<section>
-					<div class="container-home mx-auto">
-						<h1 class="audiowide py-4 font-bold yellow-beat text-4xl md:text-5xl lg:text-4xl xl:text-5xl [text-shadow:2px_4px_2px_rgb(86_85_83_/_64%)]">Nerdosis</h1>
+					<div class="container-home p-4 mx-auto">
+						<h1 class="audiowide neon-rosa text-center md:text-left py-4 font-bold yellow-beat text-4xl md:text-5xl lg:text-4xl xl:text-5xl">Nerdosis</h1>
 						<div class="flex flex-wrap -mx-1 lg:-mx-4 container cards">
 							<CardsHomeNerdosis />
 						</div>
 					</div>
 				</section>
 				<section class="bg-zinc-700">
-					<div class="container-home w-full mx-auto">
-						<h1 class="audiowide py-4 font-bold yellow-beat text-4xl md:text-5xl lg:text-4xl xl:text-5xl [text-shadow:2px_4px_2px_rgb(86_85_83_/_64%)]">Podcast</h1>
+					<div class="container-home p-4 mx-auto">
+						<h1 class="audiowide neon-azul text-center md:text-left pt-4 font-bold yellow-beat text-4xl md:text-5xl lg:text-4xl xl:text-5xl">Podcast</h1>
 					</div>
 					<div class="w-full mx-auto">
 						<SliderPodcast />
 					</div>
 				</section>
 				<BillBoard />
-					
-
-     			</div>
-
-		</main>
-		
+		</main>	
 		<Footer />
 	</body>
-	
-
 </html>

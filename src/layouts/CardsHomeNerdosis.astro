@@ -22,17 +22,18 @@ posts.map((post:any)=> (
 </div-->
 {
 posts.map((post:any)=> (
-<div class="card w-full md:w-1/2 md:p-4 pb-4 ">
+<div class="card w-full md:w-[48%] md:mr-[2%] mb-8">
     <article>
     <div class="glows"></div>
     <div class="overflow-hidden rounded-lg">
         <a href={`/nerdosis/${post.slug}/`} >
             <div class="flex items-center justify-between leading-tight">
               <img class="block w-2/4 aspect-video" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} />
-              <h2 class="text-base text-zinc-300 font-bold" set:html={post.title.rendered}></h2>
+              <h2 class="text-nerd text-base text-zinc-300 font-bold p-2" set:html={post.title.rendered}></h2>
             </div>
         </a>
     </div>
     </article>
 </div>
 ))  
+

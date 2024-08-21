@@ -5,7 +5,7 @@ import Footer from '../../components/Footer.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
 import { Tabs } from 'astro-tabs';
 
-const res = await fetch("https://beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=30&_fields=title,content,acf,yoast_head_json&categories=3312&filter[orderby]=acf[inicio]&order=asc");
+const res = await fetch("https://beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=80&_fields=title,content,acf,yoast_head_json&categories=515&filter[orderby]=acf[inicio]&order=asc");
 const posts = await res.json();
 
 posts.sort(function(a, b){
@@ -25,7 +25,7 @@ posts.sort(function(a, b){
 		
 		<main>
             <div class="container my-12 mx-auto px-4 md:px-12">
-				<h1 class="py-4 font-bold [text-shadow:2px_4px_2px_rgb(88_29_135_/_64%)]">Programación</h1>
+				<h1 class="audiowide neon-rosa text-center md:text-left py-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl">Programación</h1>
                 <div class="flex flex-col lg:flex-row">
                     <div class="sm:min-w-[calc(100%-400px)] lg:mr-10">
                         <Tabs class="programacion" class:list={['programacion']}>

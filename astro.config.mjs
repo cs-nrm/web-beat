@@ -9,6 +9,6 @@ export default defineConfig({
   site: 'https://beatdigital.mx',
   integrations: [mdx(), sitemap(), tailwind()],
   devToolbar: {
-    enabled: false
+    enabled: true
   }
 });

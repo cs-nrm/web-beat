@@ -94,7 +94,7 @@ body {
 	/*background-size: 100% 600px;*/
 	word-wrap: break-word;
 	overflow-wrap: break-word;
-	color: var(--gray-light);
+	color: var(--gray-beat);
 	font-size: 20px;
 	line-height: 1.7;
 	background-color: var(--gray-color);
@@ -333,12 +333,13 @@ hr {
     font-size: calc(1em + 1vw);
     font-weight: bold;
     text-transform: uppercase;
-    background: radial-gradient(circle at top left, #8114b8, rgb(217,64,172,0.75), #f4a3cc);
+    /*background: radial-gradient(circle at top left, #8114b8, rgb(217,64,172,0.75), #f4a3cc);*/
+    background: linear-gradient(90deg, rgba(223,25,245,1) 0%, rgba(247,11,208,1) 31%, rgba(9,230,241,1) 71%, rgba(8,246,44,1) 98%);
     width: 100%;
     justify-content: space-between;
-    color: rgb(68 68 68);
+    color: rgb(0, 0, 0);
     letter-spacing: 3px;
-    text-shadow: 1px 2px rgb(255 242 249 / 61%);
+    text-shadow: 1px 2px rgb(255 255 255 / 61%);
 	border-radius: 4px;
 }
 
@@ -348,6 +349,7 @@ hr {
 .tabs.programacion .tab-wrapper input:checked + label, .tabs.programacion .tab-wrapper label:hover{
     color: rgb(238, 238, 238);
     text-shadow: 1px 2px rgb(14 14 14 / 61%);
+    text-shadow: 0 0 5px #000, 0 0 10px #000, 0 0 20px #fff, 0 0 40px #ffffff, 0 0 80px #ffffff, 0 0 90px #ffffff, 0 0 100px #ffffff, 0 0 150px #ffffff;
 }
 
 /* CONTENIDO NOTAS */
@@ -475,11 +477,15 @@ article .wp-block-embed-youtube .wp-block-embed__wrapper iframe {
     flex-direction: var(--direction);
     gap: calc(var(--gap) * 1px);
     margin: 0 auto;
-    justify-content: center;
+    /*justify-content: center;*/
     place-items: center;
     position: relative;
     touch-action: none;
 }
+@media (width < 768px){
+  .container.cards{justify-content: center;}
+}
+
 .container.cards.promos{
     display: block !important;
 }

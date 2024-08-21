@@ -29,16 +29,17 @@ const { post } = Astro.props;
 ---
 
 <div class="card w-full lg:w-1/2 md:p-4 p-2 pb-4 audiopod cursor-pointer">
-    <div class="overflow-hidden bg-white rounded-lg shadow-lg hover:shadow-xl border-2 border-pink-600">
+    <article>
+    <div class="glows"></div>
         <div class="flex items-center justify-between leading-tight p-2 md:p-4 min-h-28">
-            <h2 class="text-base text-purple-900 font-bold" >   
-                    {post.title.rendered}                
-            </h2>
+            <h2 class="text-base text-purple-900 font-bold" set:html={post.title.rendered}></h2>
             <div class="play-pause-podcast" data-podcast-status="ready"> 
-              <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-play-filled" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" stroke-width="0" fill="currentColor" /></svg>  
+
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-play" width="80" height="80" viewBox="0 0 24 24" stroke-width="2" stroke="#df19f5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 4v16l13 -8z" /></svg>
             </div>           
         </div>
         <div class="data-iframe" data-iframe={post.acf.ds}></div>
     </div>
+    </article>
 </div>
 

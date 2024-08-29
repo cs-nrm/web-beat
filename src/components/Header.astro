@@ -8,14 +8,22 @@ import MenuLogo from './MenuLogo.astro';
 <header>
 	<ViewTransitions />	
 	<nav class="border-gray-200 bg-black">
-	  <!--div class="max-w-screen-xl flex flex-nowrap items-center justify-between mx-auto p-2">
-		<a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
-			<img src="https://storage.googleapis.com/nrm-web/beat/resources/img/beat-digital-logo-2024-min.png" class="max-w-28" alt="Oye 89.7FM" width="112" height="75" />
+	  <div class="flex flex-nowrap items-center max-w-screen-xl justify-between mx-auto p-2">
+		<a href="/" class="logo-beat-mobile flex items-center space-x-3 rtl:space-x-reverse">
+			<img src="https://storage.googleapis.com/nrm-web/beat/resources/img/beat-digital-logo-2024-min.png" class="max-w-28 logo" alt="Oye 89.7FM" width="112" height="75" />
 		</a>
 		<MenuLogo />
-	  </div-->
-	  <div class="flex flex-nowrap items-center justify-between mx-auto p-2">
-		<MenuLogo />
-	  </div>	
+	  </div>
 	</nav>
 </header>
+
+<style>
+.logo-beat-mobile img{
+	filter: drop-shadow(1px 0px 0 white) drop-shadow(0px 1px 1px white);
+}
+@media screen and (min-width: 1199px) {
+  .logo-beat-mobile {
+    display: none;
+  }
+}
+</style>

@@ -42,7 +42,7 @@
       <li><a href="/programacion" class="nav__link">Programación</a></li>
       <!--li><a href="/beattrends" class="nav__link">Beat Trends</a></li-->
 
-      <li><a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
+      <li class="logo-beat"><a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
         <img src="https://storage.googleapis.com/nrm-web/beat/resources/img/beat-digital-logo-2024-min.png" class="max-w-36 logo" alt="Beat 100.9" width="140" height="75" />
       </a></li>
       <li><a href="/playlist" class="nav__link">Playlist</a></li>
@@ -122,7 +122,10 @@ a {
 }
 
 /* Navigation for mobile devices */
-@media screen and (max-width: 1118px) {
+@media screen and (max-width: 1198px) {
+  .logo-beat{
+    display: none;
+  }
   .nav__menu {
     position: absolute;
     left: 0;
@@ -139,7 +142,7 @@ a {
   }
   .nav__list {
     background-color: var(--black-color);
-    padding-top: 1rem;
+    /*padding-top: 1rem;*/
   }
 }
 .nav__link {
@@ -189,7 +192,7 @@ a {
 /* Show menu */
 .show-menu {
   opacity: 1;
-  top: 5.5rem;
+  /*top: 5.5rem;*/
   pointer-events: initial;
   z-index: 100;
 }
@@ -300,7 +303,7 @@ a {
 }
 
 /* For large devices */
-@media screen and (min-width: 1118px) {
+@media screen and (min-width: 1199px) {
   .container {
     margin-inline: auto;
   }
@@ -310,7 +313,7 @@ a {
     display: flex;
     justify-content: space-between;
   }
-  .nav__toggle {
+  .nav__toggle, .logo-beat-mobile {
     display: none;
   }
   .nav__menu{

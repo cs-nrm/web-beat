@@ -136,6 +136,7 @@ a {
     pointer-events: none;
     opacity: 0;
     transition: top .4s, opacity .3s;
+    background: #000;
   }
   .nav__menu::-webkit-scrollbar {
     width: 0;
@@ -143,6 +144,9 @@ a {
   .nav__list {
     background-color: var(--black-color);
     /*padding-top: 1rem;*/
+  }
+  .dropdown__submenu li a{
+    margin-left: 20px;
   }
 }
 .nav__link {
@@ -192,7 +196,7 @@ a {
 /* Show menu */
 .show-menu {
   opacity: 1;
-  /*top: 5.5rem;*/
+  top: 5.2rem;
   pointer-events: initial;
   z-index: 100;
 }

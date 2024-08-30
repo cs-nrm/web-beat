@@ -20,7 +20,7 @@ const posts = await res.json();
             <article>
               <div class="glows"></div>
               <a href={`/news/${posts[0].slug}/`} class="group relative flex h-60 sm:h-48 items-end overflow-hidden rounded-lg bg-gray-100 shadow-lg md:h-80">
-                  <img src={posts[0]._embedded['wp:featuredmedia'][0].media_details.sizes['beat-news-size'].source_url} loading="lazy" alt="{posts[0].title.rendered}" class="absolute inset-0 w-full h-full object-cover object-center transition duration-200 group-hover:scale-110" />
+                  <img src={posts[0]._embedded['wp:featuredmedia'][0].media_details.sizes['beat-news-size'].source_url} alt="{posts[0].title.rendered}" class="absolute inset-0 w-full h-full object-cover object-center transition duration-200 group-hover:scale-110" />
                   <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-gray-800 via-transparent to-transparent opacity-50"></div>
                   <div class="text relative inline-block p-3 text-lg sm:text-sm text-white md:text-xl leading-tight md:leading-none"><p set:html={posts[0].title.rendered}></p></div>
               </a>
@@ -30,7 +30,7 @@ const posts = await res.json();
             <article>
               <div class="glows"></div>
               <a href={`/news/${posts[1].slug}/`} class="group relative flex h-60 sm:h-48 items-end overflow-hidden rounded-lg bg-gray-100 shadow-lg md:h-80">
-                  <img src={posts[1]._embedded['wp:featuredmedia'][0].media_details.sizes['beat-news-size'].source_url} loading="lazy" alt="Photo by Minh Pham" class="absolute inset-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110" />
+                  <img src={posts[1]._embedded['wp:featuredmedia'][0].media_details.sizes['beat-news-size'].source_url} alt="Photo by Minh Pham" class="absolute inset-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110" />
                   <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-gray-800 via-transparent to-transparent opacity-50"></div>
                   <div class="text relative inline-block p-3 text-lg sm:text-sm text-white md:text-xl leading-tight md:leading-none"><p set:html={posts[1].title.rendered}></p></div>
               </a>
@@ -40,7 +40,7 @@ const posts = await res.json();
             <article>
               <div class="glows"></div>
               <a href={`/news/${posts[2].slug}/`} class="group relative flex h-60 sm:h-48 items-end overflow-hidden rounded-lg bg-gray-100 shadow-lg md:h-80">
-                  <img src={posts[2]._embedded['wp:featuredmedia'][0].media_details.sizes['beat-news-size'].source_url} loading="lazy" alt="Photo by Minh Pham" class="absolute inset-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110" />
+                  <img src={posts[2]._embedded['wp:featuredmedia'][0].media_details.sizes['beat-news-size'].source_url} alt="Photo by Minh Pham" class="absolute inset-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110" />
                   <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-gray-800 via-transparent to-transparent opacity-50"></div>
                   <div class="text relative inline-block p-3 text-lg sm:text-sm text-white md:text-xl leading-tight md:leading-none"><p set:html={posts[2].title.rendered}></p></div>
               </a>
@@ -50,7 +50,7 @@ const posts = await res.json();
             <article>
               <div class="glows"></div>
               <a href={`/news/${posts[3].slug}/`} class="group relative flex h-60 sm:h-48 items-end overflow-hidden rounded-lg bg-gray-100 shadow-lg md:h-80">
-                  <img src={posts[3]._embedded['wp:featuredmedia'][0].media_details.sizes['beat-news-size'].source_url} loading="lazy" alt="Photo by Minh Pham" class="absolute inset-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110" />
+                  <img src={posts[3]._embedded['wp:featuredmedia'][0].media_details.sizes['beat-news-size'].source_url} alt="Photo by Minh Pham" class="absolute inset-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110" />
                   <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-gray-800 via-transparent to-transparent opacity-50"></div>
                   <div class="text relative inline-block p-3 text-lg sm:text-sm text-white md:text-xl leading-tight md:leading-none"><p set:html={posts[3].title.rendered}></p></div>
               </a>
@@ -60,7 +60,7 @@ const posts = await res.json();
             <article>
               <div class="glows"></div>
               <a href={`/news/${posts[4].slug}/`} class="group relative flex h-60 sm:h-48 items-end overflow-hidden rounded-lg bg-gray-100 shadow-lg md:h-80">
-                  <img src={posts[4]._embedded['wp:featuredmedia'][0].media_details.sizes['beat-news-size'].source_url} loading="lazy" alt="Photo by Minh Pham" class="absolute inset-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110" />
+                  <img src={posts[4]._embedded['wp:featuredmedia'][0].media_details.sizes['beat-news-size'].source_url} alt="Photo by Minh Pham" class="absolute inset-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110" />
                   <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-gray-800 via-transparent to-transparent opacity-50"></div>
                   <div class="text relative inline-block p-3 text-lg sm:text-sm text-white md:text-xl leading-tight md:leading-none"><p set:html={posts[4].title.rendered}></p></div>
               </a>
@@ -70,7 +70,7 @@ const posts = await res.json();
             <article>
               <div class="glows"></div>
               <a href={`/news/${posts[5].slug}/`} class="group relative flex h-60 sm:h-48 items-end overflow-hidden rounded-lg bg-gray-100 shadow-lg md:h-80">
-                  <img src={posts[5]._embedded['wp:featuredmedia'][0].media_details.sizes['beat-news-size'].source_url} loading="lazy" alt="Photo by Minh Pham" class="absolute inset-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110" />
+                  <img src={posts[5]._embedded['wp:featuredmedia'][0].media_details.sizes['beat-news-size'].source_url} alt="Photo by Minh Pham" class="absolute inset-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110" />
                   <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-gray-800 via-transparent to-transparent opacity-50"></div>
                   <div class="text relative inline-block p-3 text-lg sm:text-sm text-white md:text-xl leading-tight md:leading-none"><p set:html={posts[5].title.rendered}></p></div>
               </a>

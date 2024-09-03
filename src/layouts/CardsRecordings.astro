@@ -1,4 +1,6 @@
 ---
+import { Image } from 'astro:assets';
+
 export interface Props {
     post: {
       id: number;
@@ -8,6 +10,15 @@ export interface Props {
       }
       content: {
         rendered: string;
+      }
+      acf: {
+        itunes: string;
+        apple_music: string;
+        spotify: string;
+        deezer: string;
+        amazon_music: string;
+        tidal: string;
+        youtube_music: string;
       }
       slug: string;
       categories : {};
@@ -36,11 +47,17 @@ var url_seccion;
 
 <div class="card w-full p-2 md:p-4 pb-4 content-video">
     <div class="overflow-hidden bg-black text-white rounded-lg shadow-[0_35px_60px_-15px_rgba(255,255,255,0.3)]">
-        <div set:html={post.content.rendered} class="block h-auto w-full aspect-video"></div>        
+        <div class="flex flex-wrap justify-center justify-items-center items-center">
+            <Image class="block h-auto w-1/2 shadow-[0_2px_12px_7px_rgba(0,0,0,0.4)] rounded object-fill" src={post.yoast_head_json.og_image[0].url} width="250" height="250" alt={post.title.rendered}  />
+            <div class="w-1/2 align-middle">
+                post.acf.itunes && <a href={`${post.acf.itunes}`}><Image src="https://beatdigital.mx/wp-content/uploads/2022/11/itunes.png" width="162" height="43" alt="Apple Music"></a>
+                <a href={`${post.acf.apple_music}`}><Image src="https://beatdigital.mx/wp-content/uploads/2022/11/applemusic.png" width="164" height="51" alt="iTunes"></a>
+            </div>
+        </div>        
         <div class="flex items-center justify-between leading-tight p-2 md:p-4 min-h-40">            
-            <span class="audiowide neon-rosa px-4 text-4xl" set:html={ind}></span>
+            <!--span class="audiowide neon-rosa px-4 text-4xl" set:html={ind}></span-->
             <h2 class="text-base text-white font-bold" set:html={post.title.rendered}></h2>
-            <div class="voto-pop" data-voto-id={post.id}>
+            <!--div class="voto-pop" data-voto-id={post.id}>
                 <button class="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-white rounded-lg group bg-gradient-to-br from-purple-500 to-pink-500 group-hover:from-purple-500 group-hover:to-pink-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800">
                     <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
                     ¡Vota! 
@@ -50,7 +67,7 @@ var url_seccion;
                         </svg>
                     </span>
                 </button>
-            </div>
+            </div-->
         </div>
     </div>
 </div>

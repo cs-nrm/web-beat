@@ -1,0 +1,47 @@
+---
+import BaseHead from '../../components/BaseHead.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
+import Card from '../../layouts/Cardsq.astro';
+
+const res = await fetch("https://beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=9&_fields=title,slug,yoast_head_json,categories&categories=505");
+const posts = await res.json();
+
+
+
+---
+<!doctype html>
+<html lang="es">
+	<head>
+		<BaseHead title={SITE_TITLE} seccion="News" description={SITE_DESCRIPTION} />
+		<meta charset="utf-8"/>
+	</head>
+	<body>
+		<Header title={SITE_TITLE} />
+		
+		<main>
+            <div class="container cards my-12 mx-auto px-4">
+				<h1 class="audiowide neon-rosa text-center md:text-left pt-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl">Beat Trends</h1>
+                <section class="flex flex-wrap -mx-1 lg:-mx-4">
+                    {
+                        posts.map((post:any) => ( 
+                        <>
+                        <Card {post} />
+                        </>
+                        ))
+                    }
+                </section>
+                <div class="text-center m-auto my-8">
+                    <a href="/beat-trends/2">
+                        <button class="group relative h-8 w-36 overflow-hidden rounded-lg bg-zinc-700 text-base shadow">
+                            <div class="absolute inset-0 w-3 bg-[#df19f5] transition-all duration-[250ms] ease-out group-hover:w-full"></div>
+                            <span class="relative text-zinc-200 group-hover:text-zinc-900">Siguiente</span>
+                        </button>
+                    </a>
+                </div>
+            </div>
+		</main>
+		<Footer />
+	</body>
+</html>

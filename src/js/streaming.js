@@ -252,7 +252,7 @@ const secchome = document.getElementById('home');
         
         function getInfoProg(){
             //fetch("https://beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=30&categories=3312&_fields[]=acf")
-            fetch("https://beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=40&categories=515&_fields[]=acf")            
+            fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=40&categories=515&_fields[]=acf")            
             .then((res) => {
                 if (!res.ok) {
                     throw new Error
@@ -693,13 +693,13 @@ const showMenu = (toggleId, navId) =>{
                 const Rparamas = {
                     method: 'POST',
                     headers: {
-                        'Authorization': 'Bearer 31ifYsZyDJTM2ZZ9PxjDvTbUjRB7DgSNvG9eiJZZNT33Z3LEMo3RK7jlNc9XzXOvg3gwB2JuoDbT1L3KW6xoQBfqbsBoyBDYhQ597HPpFd8tremnnBpArzDW',
+                        'Authorization': 'Bearer GoW1bJVNjV3SCoUfVblUJs6ddelYSrGmmadoZglqcWrFELxbvrksHfsIOKeYZcgFN0jKNFtpiJEB7YN8rwUsLONosH06pWU1UZ2zIL10n0kUM26ufABMlqyh',
                         'Content-Type': 'application/json'
                     },                    
                     body: JSON.stringify( params )
                 };
                     
-                fetch('https://beatdigital.mx/wp-json/wp-ulike-pro/v1/vote/', Rparamas)
+                fetch('https://contenido.beatdigital.mx/wp-json/wp-ulike-pro/v1/vote/', Rparamas)
                 .then((res) => {
                     if (!res.ok) {
                         throw new Error

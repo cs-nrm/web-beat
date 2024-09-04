@@ -49,25 +49,19 @@ var url_seccion;
     <div class="overflow-hidden bg-black text-white rounded-lg shadow-[0_35px_60px_-15px_rgba(255,255,255,0.3)]">
         <div class="flex flex-wrap justify-center justify-items-center items-center">
             <Image class="block h-auto w-1/2 shadow-[0_2px_12px_7px_rgba(0,0,0,0.4)] rounded object-fill" src={post.yoast_head_json.og_image[0].url} width="250" height="250" alt={post.title.rendered}  />
-            <div class="w-1/2 align-middle">
-                post.acf.itunes && <a href={`${post.acf.itunes}`}><Image src="https://beatdigital.mx/wp-content/uploads/2022/11/itunes.png" width="162" height="43" alt="Apple Music"></a>
-                <a href={`${post.acf.apple_music}`}><Image src="https://beatdigital.mx/wp-content/uploads/2022/11/applemusic.png" width="164" height="51" alt="iTunes"></a>
+            <div class="w-1/2 grid text-center align-middle">
+                {post.acf.itunes &&<a href={`${post.acf.itunes}`}><Image class="block m-auto max-w-40" src="https://beatdigital.mx/wp-content/uploads/2022/11/itunes.png" width="162" height="43" alt="iTunes"></a>}
+                {post.acf.apple_music &&<a href={`${post.acf.apple_music}`}><Image class="block m-auto max-w-40" src="https://beatdigital.mx/wp-content/uploads/2022/11/applemusic.png" width="164" height="51" alt="Apple Music"></a>}
+                {post.acf.spotify &&<a href={`${post.acf.spotify}`}><Image class="block m-auto max-w-40" src="https://beatdigital.mx/wp-content/uploads/2022/11/spotify.png" width="164" height="52" alt="Spotify"></a>}
+                {post.acf.deezer &&<a href={`${post.acf.deezer}`}><Image class="block m-auto max-w-40" src="https://beatdigital.mx/wp-content/uploads/2022/11/deezer.png" width="164" height="64" alt="Deezer"></a>}
+                {post.acf.amazon_music &&<a href={`${post.acf.amazon_music}`}><Image class="block m-auto max-w-40" src="https://beatdigital.mx/wp-content/uploads/2024/04/amazonMlogo.png" width="410" height="82" alt="Amazon Music"></a>}
+                {post.acf.tidal &&<a href={`${post.acf.tidal}`}><Image class="block m-auto max-w-40 mt-4" src="https://beatdigital.mx/wp-content/uploads/2024/04/tidallogo.png" width="160" height="22" alt="Tidal"></a>}
+                {post.acf.youtube_music &&<a href={`${post.acf.youtube_music}`}><Image class="block m-auto max-w-40 mt-4" src="https://beatdigital.mx/wp-content/uploads/2024/04/yt-blanco.png" width="90" height="20" alt="YouTube Music"></a>}
             </div>
         </div>        
-        <div class="flex items-center justify-between leading-tight p-2 md:p-4 min-h-40">            
+        <div class="flex items-center justify-center p-2 md:p-4 min-h-40">            
             <!--span class="audiowide neon-rosa px-4 text-4xl" set:html={ind}></span-->
-            <h2 class="text-base text-white font-bold" set:html={post.title.rendered}></h2>
-            <!--div class="voto-pop" data-voto-id={post.id}>
-                <button class="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-white rounded-lg group bg-gradient-to-br from-purple-500 to-pink-500 group-hover:from-purple-500 group-hover:to-pink-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800">
-                    <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
-                    ¡Vota! 
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-thumb-up" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                            <path d="M7 11v8a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1v-7a1 1 0 0 1 1 -1h3a4 4 0 0 0 4 -4v-1a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1 -2 2h-7a3 3 0 0 1 -3 -3" />
-                        </svg>
-                    </span>
-                </button>
-            </div-->
+            <h2 class="text-2xl text-white font-bold" set:html={post.title.rendered}></h2>
         </div>
     </div>
 </div>

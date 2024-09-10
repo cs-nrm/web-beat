@@ -29,9 +29,9 @@ const posts = await res.json();
                     <div class="sm:min-w-[calc(100%-400px)] lg:mr-10">
                         <section class="flex flex-wrap -mx-4">
                             {
-                                posts.map((post:any,index) => (                                     
-                                <>                       
-                                <Card {post} {index} />
+                                posts.map((post:any) => ( 
+                                <>
+                                <Card {post} />
                                 </>
                                 ))
                             }

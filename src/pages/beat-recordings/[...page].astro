@@ -1,0 +1,76 @@
+---
+import BaseHead from '../../components/BaseHead.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts.js';
+
+import {getArticles} from '../../lib/api.js';
+import Card from '../../layouts/CardsRecordings.astro';
+import DoubleBox from '../../components/DoubleBox.astro';
+import BoxBanner from '../../components/BoxBanner.astro';
+
+
+export async function getStaticPaths( { paginate } ) {
+  const data = await getArticles(506);  
+  return paginate(data, { pageSize: 10 });
+}
+
+interface Props{
+  page: any;  
+}
+
+const {page=[]} = Astro.props;
+//console.log(page.url);
+---
+<!doctype html>
+<html lang="es">
+	<head>
+		<BaseHead title={SITE_TITLE} seccion="Beat Recordings" description={SITE_DESCRIPTION} />
+		
+	</head>
+	<body>
+		<Header title={SITE_TITLE} />
+		
+		<main>
+      <div class="container my-12 mx-auto px-4 md:px-12">
+				<h1 class="audiowide neon-rosa text-center md:text-left pt-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl">Beat Recordings</h1>
+        <div class="flex flex-col lg:flex-row">
+          <div class="sm:min-w-[calc(100%-400px)] lg:mr-10">
+            <section class="flex flex-wrap -mx-4">
+              {
+              page.data.map((post:any) => ( 
+                <>
+                <Card post={post} />
+                </>
+              ))
+              }
+            </section>
+            <div class="text-center mt-20">
+              {page.url.prev && <a href={page.url.prev}>
+                <button class="group relative h-8 w-36 overflow-hidden rounded-lg bg-zinc-700 text-base shadow">
+                  <div class="absolute inset-y-0 right-0 w-3 bg-[#df19f5] transition-all duration-[250ms] ease-out group-hover:w-full"></div>
+                  <span class="relative text-zinc-200 group-hover:text-zinc-900">Anterior</span>
+                </button>
+              </a>}
+              {page.url.next && <a href={page.url.next}>
+                <button class="group relative h-8 w-36 overflow-hidden rounded-lg bg-zinc-700 text-base shadow">
+                  <div class="absolute inset-0 w-3 bg-[#df19f5] transition-all duration-[250ms] ease-out group-hover:w-full"></div>
+                  <span class="relative text-zinc-200 group-hover:text-zinc-900">Siguiente</span>
+                </button>
+              </a>}
+            </div>
+          </div>
+          <div class="mt-4 bg-gray-300 p-5 rounded-md sm:min-w-[350px] relative text-center md:text-left">
+            <div class="sticky top-0 left-0 right-0">
+              <h3 class="text-xl text-black font-extrabold">PUBLICIDAD</h3>
+              <BoxBanner />
+              </br>
+              <DoubleBox />
+            </div>
+          </div>
+        </div>
+      </div>  
+		</main>
+		<Footer />
+	</body>
+</html>

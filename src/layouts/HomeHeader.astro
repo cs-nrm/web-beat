@@ -75,6 +75,37 @@ label{
 	 aspect-ratio: 183/250;
 }
 
+#infoprog:after {
+    content: '';
+    width: 100%;
+    height: 3px;
+    background-color: white;
+    margin-left: 20px;
+    border-radius: 4px;
+    box-shadow: 0 0 0px #fff, 0 0 10px #ffffff, 0 0 20px #ffffff, 0 0 30px #ffffff;
+    position: absolute;
+    bottom: 0px;
+    margin: auto;
+    text-align: center;
+    left: 0;
+    right: 0;
+}
+
+#infoprog:before {
+    content: '';
+    width: 100%;
+    height: 2px;
+    background-color: white;
+    margin-left: 20px;
+    border-radius: 4px;
+    box-shadow: 0 0 0px #fff, 0 0 10px #ffffff, 0 0 20px #ffffff, 0 0 30px #ffffff;
+    position: absolute;
+    top: 0px;
+    margin: auto;
+    text-align: center;
+    left: 0;
+    right: 0;
+}
 
 </style>
 
@@ -85,7 +116,8 @@ Object.getOwnPropertyNames(Math).map(function(p) {
 });
 
 var HEX_CRAD = 32, 
-		HEX_BG = '#171717', 
+		/*HEX_BG = '#171717', */
+		HEX_BG = '#171717',
 		HEX_HL = '#2a2a2a', 
 		HEX_HLW = 2, 
 		HEX_GAP = 4, 

@@ -185,7 +185,12 @@ body {
     0 0 80px var(--yellow-beat), 
     0 0 100px var(--yellow-beat);*/
 }
-  
+
+.ver-mas{
+  box-shadow: 0 0 0px #fff, 0 0 10px #06dbe5, 0 0 20px #eb2fc7, 0 0 50px #d52ab3;
+  background-color: #343434;
+  color: white;
+}
 
 
 main {
@@ -364,23 +369,26 @@ hr {
     font-size: calc(1em + 1vw);
     font-weight: bold;
     text-transform: uppercase;
-    /*background: radial-gradient(circle at top left, #8114b8, rgb(217,64,172,0.75), #f4a3cc);*/
-    background: linear-gradient(90deg, rgba(223,25,245,1) 0%, rgba(247,11,208,1) 31%, rgba(9,230,241,1) 71%, rgba(8,246,44,1) 98%);
+    /*background: radial-gradient(circle at top left, #8114b8, rgb(217,64,172,0.75), #f4a3cc);
+    background: linear-gradient(90deg, rgba(223,25,245,1) 0%, rgba(247,11,208,1) 31%, rgba(9,230,241,1) 71%, rgba(8,246,44,1) 98%);*/
     width: 100%;
     justify-content: space-between;
-    color: rgb(0, 0, 0);
+    /*color: rgb(0, 0, 0);*/
     letter-spacing: 3px;
-    text-shadow: 1px 2px rgb(255 255 255 / 61%);
-	border-radius: 4px;
+    /*text-shadow: 1px 2px rgb(255 255 255 / 61%);*/
+	  border-radius: 4px;
+    /*box-shadow: 0 0 0px #fff, 0 0 10px #06dbe5, 0 0 20px #eb2fc7, 0 0 50px #d52ab3;*/
+    background-color: rgb(0, 0, 0);
+    color: white;
 }
 
 .tabs.programacion .tab-wrapper{
   padding: 10px 10px 0px 10px;
 }
 .tabs.programacion .tab-wrapper input:checked + label, .tabs.programacion .tab-wrapper label:hover{
-    color: rgb(238, 238, 238);
-    text-shadow: 1px 2px rgb(14 14 14 / 61%);
-    text-shadow: 0 0 5px #000, 0 0 10px #000, 0 0 20px #fff, 0 0 40px #ffffff, 0 0 80px #ffffff, 0 0 90px #ffffff, 0 0 100px #ffffff, 0 0 150px #ffffff;
+    color: #06dbe5;
+    /*text-shadow: 1px 2px rgb(14 14 14 / 61%);
+    text-shadow: 0 0 5px #000, 0 0 10px #000, 0 0 20px #fff, 0 0 40px #ffffff, 0 0 80px #ffffff, 0 0 90px #ffffff, 0 0 100px #ffffff, 0 0 150px #ffffff;*/
 }
 
 /* CONTENIDO NOTAS */

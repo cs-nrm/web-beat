@@ -7,8 +7,9 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts.js';
 import {getArticles} from '../../lib/api.js';
 import Card from '../../layouts/Cards.astro';
 
+
 export async function getStaticPaths( { paginate } ) {
-  const data = await getArticles(537);
+  const data = await getArticles(537);  
   return paginate(data, { pageSize: 10 });
 }
 
@@ -17,6 +18,7 @@ interface Props{
 }
 
 const {page=[]} = Astro.props;
+console.log(page.data);
 ---
 <!doctype html>
 <html lang="es">
@@ -29,27 +31,27 @@ const {page=[]} = Astro.props;
 		
 		<main>
       <div class="container my-12 mx-auto px-4 md:px-12">
-				<h1 class="py-4 font-bold [text-shadow:2px_4px_2px_rgb(88_29_135_/_64%)]">Promociones</h1>
-        <section class="flex flex-wrap -mx-1 lg:-mx-4">
+				<h1 class="audiowide neon-azul text-center md:text-left pt-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl">Promociones</h1>
+        <section class="flex flex-wrap -mx-4">
           {
-            page.data.map((post:any) => ( 
+          page.data.map((post:any) => ( 
             <>
             <Card post={post} />
             </>
-            ))
+          ))
           }
         </section>
         <div class="text-center mt-20">
           {page.url.prev && <a href={page.url.prev}>
             <button class="group relative h-8 w-36 overflow-hidden rounded-lg bg-gray-100 text-base shadow">
-              <div class="absolute inset-y-0 right-0 w-3 bg-pink-600 transition-all duration-[250ms] ease-out group-hover:w-full"></div>
-              <span class="relative text-black group-hover:text-white">Anterior</span>
+              <div class="absolute inset-y-0 right-0 w-3 bg-[#09e6f1] transition-all duration-[250ms] ease-out group-hover:w-full"></div>
+              <span class="relative text-zinc-900 group-hover:text-zinc-900">Anterior</span>
             </button>
           </a>}
           {page.url.next && <a href={page.url.next}>
             <button class="group relative h-8 w-36 overflow-hidden rounded-lg bg-gray-100 text-base shadow">
-              <div class="absolute inset-0 w-3 bg-pink-600 transition-all duration-[250ms] ease-out group-hover:w-full"></div>
-              <span class="relative text-black group-hover:text-white">Siguiente</span>
+              <div class="absolute inset-0 w-3 bg-[#09e6f1] transition-all duration-[250ms] ease-out group-hover:w-full"></div>
+              <span class="relative text-zinc-900 group-hover:text-zinc-900">Siguiente</span>
             </button>
           </a>}
         </div>

@@ -42,9 +42,12 @@ switch (post.categories[0]){
 ---
 
 <div class="card w-full md:w-1/2 lg:w-1/2 md:p-4 pb-4 ">
-    <div class="overflow-hidden rounded-lg shadow-lg hover:shadow-xl border-2 border-pink-600">
-        <a href={`/${url_seccion}/${post.slug}/`}>
-            <img class="block h-auto w-full" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} />
-        </a>
-    </div>
+    <article>
+        <div class="glows"></div>
+        <div class="overflow-hidden rounded-lg">
+            <a href={`/${url_seccion}/${post.slug}/`}>
+                <img class="block h-auto w-full" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} />
+            </a>
+        </div>
+    </article>
 </div>

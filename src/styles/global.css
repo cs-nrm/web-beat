@@ -379,7 +379,8 @@ hr {
 	  border-radius: 4px;
     /*box-shadow: 0 0 0px #fff, 0 0 10px #06dbe5, 0 0 20px #eb2fc7, 0 0 50px #d52ab3;*/
     background-color: rgb(0, 0, 0);
-    color: white;
+    color: rgb(var(--gray-beat));
+    border: 1px solid var(--gray-beat);
 }
 
 .tabs.programacion .tab-wrapper{

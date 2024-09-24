@@ -103,12 +103,12 @@ import { Image } from 'astro:assets';
 
 	.preloader {z-index:9999; }
 	.loader {  position: fixed;  top: 50%;  left: 50%;  width: 160px;  height: 160px;  margin: -80px 0px 0px -80px;  background-color: transparent;  border-radius: 50%;  /*border: 2px solid #e3e4dc;	*/}
-	.loader:before {  content: "";  width: 164px;  height: 164px;  display: block;  position: absolute;    border-radius: 50%;  top: -2px;  left: -2px;  box-sizing: border-box;  clip: rect(0px, 35px, 35px, 0px);  z-index: 10;  animation: rotate infinite;  animation-duration: 3s;  animation-timing-function: linear; border: 4px solid #92e807;	}
-	.loader:after {  content: "";  width: 164px;  height: 164px;  display: block;  position: absolute;    border-radius: 50%;  top: -2px;  left: -2px;  box-sizing: border-box;  clip: rect(0px, 164px, 150px, 0px);  z-index: 9;  animation: rotate2 3s linear infinite;	    border: 2px solid #92e807ae;}
+	.loader:before {  content: "";  width: 164px;  height: 164px;  display: block;  position: absolute;    border-radius: 50%;  top: -2px;  left: -2px;  box-sizing: border-box;  clip: rect(0px, 35px, 35px, 0px);  z-index: 10;  animation: rotate infinite;  animation-duration: 3s;  animation-timing-function: linear; border: 4px solid #f70bd0;	}
+	.loader:after {  content: "";  width: 164px;  height: 164px;  display: block;  position: absolute;    border-radius: 50%;  top: -2px;  left: -2px;  box-sizing: border-box;  clip: rect(0px, 164px, 150px, 0px);  z-index: 9;  animation: rotate2 3s linear infinite;	    border: 2px solid #f70bd0; }
 	.hexagon-container {  position: relative;  top: 33px;  left: 41px;  border-radius: 50%;	}	
-	.hexagon {  position: absolute;  width: 40px;  height: 23px;  background-color: #dff978;	    box-shadow: #dff978 0px 4px 8px, rgb(223, 249, 120) 0px 1px 5px;}
-	.hexagon:before {  content: "";  position: absolute;  top: -11px;  left: 0;  width: 0;  height: 0;  border-left: 20px solid transparent;  border-right: 20px solid transparent;  border-bottom: 11.5px solid #dff978;	}
-	.hexagon:after {	content: "";  position: absolute;  top: 23px;  left: 0;  width: 0;  height: 0;  border-left: 20px solid transparent;  border-right: 20px solid transparent;  border-top: 11.5px solid #dff978;	}
+	.hexagon {  position: absolute;  width: 40px;  height: 23px;  background-color: #f70bd0;	    box-shadow: #f70bd0 0px 4px 8px, rgb(247, 11, 208) 0px 1px 5px;}
+	.hexagon:before {  content: "";  position: absolute;  top: -11px;  left: 0;  width: 0;  height: 0;  border-left: 20px solid transparent;  border-right: 20px solid transparent;  border-bottom: 11.5px solid #f70bd0;	}
+	.hexagon:after {	content: "";  position: absolute;  top: 23px;  left: 0;  width: 0;  height: 0;  border-left: 20px solid transparent;  border-right: 20px solid transparent;  border-top: 11.5px solid #f70bd0;	}
 	.hexagon.hex_1 {  top: 0px;  left: 0px;  animation: Animasearch 3s ease-in-out infinite;  animation-delay: 0.2142857143s;	}
 	.hexagon.hex_2 {  top: 0px;  left: 42px;  animation: Animasearch 3s ease-in-out infinite;  animation-delay: 0.4285714286s;	}
 	.hexagon.hex_3 {  top: 36px;  left: 63px;  animation: Animasearch 3s ease-in-out infinite;  animation-delay: 0.6428571429s;	}

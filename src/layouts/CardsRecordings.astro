@@ -50,13 +50,13 @@ var url_seccion;
         <div class="flex flex-wrap justify-center justify-items-center items-center">
             <Image class="block h-auto w-1/2 shadow-[0_2px_12px_7px_rgba(0,0,0,0.4)] rounded object-fill" src={post.yoast_head_json.og_image[0].url} width="250" height="250" alt={post.title.rendered}  />
             <div class="w-1/2 grid text-center align-middle">
-                {post.acf.itunes &&<a href={`${post.acf.itunes}`}><Image class="block m-auto max-w-40" src="https://contenido.beatdigital.mx/wp-content/uploads/2022/11/itunes.png" width="162" height="43" alt="iTunes"></a>}
-                {post.acf.apple_music &&<a href={`${post.acf.apple_music}`}><Image class="block m-auto max-w-40" src="https://contenido.beatdigital.mx/wp-content/uploads/2022/11/applemusic.png" width="164" height="51" alt="Apple Music"></a>}
-                {post.acf.spotify &&<a href={`${post.acf.spotify}`}><Image class="block m-auto max-w-40" src="https://contenido.beatdigital.mx/wp-content/uploads/2022/11/spotify.png" width="164" height="52" alt="Spotify"></a>}
-                {post.acf.deezer &&<a href={`${post.acf.deezer}`}><Image class="block m-auto max-w-40" src="https://contenido.beatdigital.mx/wp-content/uploads/2022/11/deezer.png" width="164" height="64" alt="Deezer"></a>}
-                {post.acf.amazon_music &&<a href={`${post.acf.amazon_music}`}><Image class="block m-auto max-w-40" src="https://contenido.beatdigital.mx/wp-content/uploads/2024/04/amazonMlogo.png" width="410" height="82" alt="Amazon Music"></a>}
-                {post.acf.tidal &&<a href={`${post.acf.tidal}`}><Image class="block m-auto max-w-40 mt-4" src="https://contenido.beatdigital.mx/wp-content/uploads/2024/04/tidallogo.png" width="160" height="22" alt="Tidal"></a>}
-                {post.acf.youtube_music &&<a href={`${post.acf.youtube_music}`}><Image class="block m-auto max-w-40 mt-4" src="https://contenido.beatdigital.mx/wp-content/uploads/2024/04/yt-blanco.png" width="90" height="20" alt="YouTube Music"></a>}
+                {post.acf.itunes &&<a target="_blank" href={`${post.acf.itunes}`}><Image class="block m-auto max-w-40" src="https://contenido.beatdigital.mx/wp-content/uploads/2022/11/itunes.png" width="162" height="43" alt="iTunes"></a>}
+                {post.acf.apple_music &&<a target="_blank" href={`${post.acf.apple_music}`}><Image class="block m-auto max-w-40" src="https://contenido.beatdigital.mx/wp-content/uploads/2022/11/applemusic.png" width="164" height="51" alt="Apple Music"></a>}
+                {post.acf.spotify &&<a target="_blank" href={`${post.acf.spotify}`}><Image class="block m-auto max-w-40" src="https://contenido.beatdigital.mx/wp-content/uploads/2022/11/spotify.png" width="164" height="52" alt="Spotify"></a>}
+                {post.acf.deezer &&<a target="_blank" href={`${post.acf.deezer}`}><Image class="block m-auto max-w-40" src="https://contenido.beatdigital.mx/wp-content/uploads/2022/11/deezer.png" width="164" height="64" alt="Deezer"></a>}
+                {post.acf.amazon_music &&<a target="_blank" href={`${post.acf.amazon_music}`}><Image class="block m-auto max-w-40" src="https://contenido.beatdigital.mx/wp-content/uploads/2024/04/amazonMlogo.png" width="410" height="82" alt="Amazon Music"></a>}
+                {post.acf.tidal &&<a target="_blank" href={`${post.acf.tidal}`}><Image class="block m-auto max-w-40 mt-4" src="https://contenido.beatdigital.mx/wp-content/uploads/2024/04/tidallogo.png" width="160" height="22" alt="Tidal"></a>}
+                {post.acf.youtube_music &&<a target="_blank" href={`${post.acf.youtube_music}`}><Image class="block m-auto max-w-40 mt-4" src="https://contenido.beatdigital.mx/wp-content/uploads/2024/04/yt-blanco.png" width="90" height="20" alt="YouTube Music"></a>}
             </div>
         </div>        
         <div class="flex items-center justify-center p-2 md:p-4 min-h-40">            

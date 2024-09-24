@@ -10,10 +10,8 @@ const res = await fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_f
 const posts = await res.json();
 
 ---
-<link rel="stylesheet" type="text/css" href="https://storage.googleapis.com/nrm-web/nrm/lib/flickity.css">			
-
 <div class="slider-promociones">
-	<div class="carousel carousel-main container cards promos" data-flickity='{ "sync": ".carousel-nav", "prevNextButtons": false, "autoPlay": true, "pageDots": false}'>
+	<div class="carousel carousel-main container cards promos">
 
 	{
 	posts.map((post:any)=> (
@@ -30,7 +28,7 @@ const posts = await res.json();
 	</div>
 
 
-	<div class="carousel carousel-nav" data-flickity='{ "asNavFor": ".carousel-main", "contain" : true, "pageDots": false }'>
+	<div class="carousel carousel-nav">
 	{
 	posts.map((post:any)=> (
 		<div class="carousel-cell">
@@ -40,8 +38,6 @@ const posts = await res.json();
 	}  
 	</div>
 </div>
-
-<script is:inline src="https://storage.googleapis.com/nrm-web/nrm/lib/flickity.pkgd.min.js"></script>
 
 <style>
 
@@ -72,7 +68,7 @@ const posts = await res.json();
 
 .carousel.carousel-nav{
 	/*background-color: #7a68bb;*/
-	width: 90%;
+	width: 100%;
 	margin: 0 auto;
 }
 .carousel-nav .carousel-cell {

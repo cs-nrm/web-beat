@@ -389,12 +389,13 @@ hr {
 }
 
 .tabs.programacion .tab-wrapper{
-  padding: 10px 10px 0px 10px;
+  padding: 0 10px;
+  text-shadow: 2px 2px 5px #09e6f1;
+  color: white;
 }
 .tabs.programacion .tab-wrapper input:checked + label, .tabs.programacion .tab-wrapper label:hover{
-    color: #06dbe5;
-    /*text-shadow: 1px 2px rgb(14 14 14 / 61%);
-    text-shadow: 0 0 5px #000, 0 0 10px #000, 0 0 20px #fff, 0 0 40px #ffffff, 0 0 80px #ffffff, 0 0 90px #ffffff, 0 0 100px #ffffff, 0 0 150px #ffffff;*/
+    text-shadow: 1px 2px rgb(14 14 14 / 61%);
+    text-shadow: 0 0 0px #fff, 0 0 10px #09e6f1, 0 0 20px #09e6f1, 0 0 30px #09e6f1;
 }
 
 /* CONTENIDO NOTAS */

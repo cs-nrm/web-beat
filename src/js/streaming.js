@@ -556,11 +556,12 @@ const showMenu = (toggleId, navId) =>{
                             
                 containerpodcast.innerHTML ='';
                 const playerpodcast = document.createElement('iframe');
-                playerpodcast.setAttribute('src',src[0]+"?image=0&share=0&download=1&description=0&follow=0");
+                playerpodcast.setAttribute('src',src[0]+"?image=0&share=0&download=1&description=0&follow=0&background=000000&foreground=00f4ff&highlight=ffffff");
                 playerpodcast.setAttribute('width','250');
                 playerpodcast.setAttribute('height','300');
                 playerpodcast.setAttribute('frameborder','0');
-                playerpodcast.setAttribute('allow','autoplay');                
+                playerpodcast.setAttribute('allow','autoplay');
+                playerpodcast.setAttribute('transition:persist','');
                 //console.log(playerpodcast);
                 containerpodcast.appendChild(playerpodcast);            
                 const ply =  new playerjs.Player(playerpodcast);

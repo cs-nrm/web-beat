@@ -1,7 +1,7 @@
 ---
 import Card from '../layouts/CardMoreNews.astro';
 
-const res = await fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=5&_fields=title,slug,yoast_head_json,categories&categories=149");
+const res = await fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=5&_fields=title,slug,yoast_head_json,categories&categories=143");
 const posts = await res.json();
 ---
 <div class="my-12 mx-auto">
@@ -15,7 +15,7 @@ const posts = await res.json();
                         ))
                     }
         </section>
-    <div class="text-center mt-20">
+    <div class="text-center">
         <a href="/news/">
             <button class="ver-mas group relative h-8 w-36 m-4 overflow-hidden rounded-lg bg-zinc-700 text-base shadow">
                 <div class="absolute inset-0 w-3 bg-[#09e6f1] transition-all duration-[250ms] ease-out group-hover:w-full"></div>

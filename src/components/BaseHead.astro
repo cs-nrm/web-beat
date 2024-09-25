@@ -12,7 +12,7 @@ interface Props {
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
-const { title, description, image = '/oye-share.jpg', seccion } = Astro.props;
+const { title, description, image = '/beat-share.jpg', seccion } = Astro.props;
 
 ---
 
@@ -25,11 +25,11 @@ const { title, description, image = '/oye-share.jpg', seccion } = Astro.props;
 <link rel="manifest" href="/favicon/site.webmanifest">
 <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#5bbad5">
 <meta name="msapplication-TileColor" content="#2b5797">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#000">
 
 <!-- Font preloads -->
-<link rel="preload" href="/fonts/atkinson-regular.woff" as="font" type="font/woff" crossorigin />
-<link rel="preload" href="/fonts/atkinson-bold.woff" as="font" type="font/woff" crossorigin />
+<!--link rel="preload" href="/fonts/atkinson-regular.woff" as="font" type="font/woff" crossorigin />
+<link rel="preload" href="/fonts/atkinson-bold.woff" as="font" type="font/woff" crossorigin /-->
 
 <!-- Canonical URL -->
 <link rel="canonical" href={canonicalURL} />
@@ -55,16 +55,16 @@ const { title, description, image = '/oye-share.jpg', seccion } = Astro.props;
 
 
 <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-M9RYDQ6Z9L"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-8DSGT28PYF"></script>
 <script is:inline>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
-  gtag('config', 'G-M9RYDQ6Z9L');
+  gtag('config', 'G-8DSGT28PYF');
 </script>
 
-<script defer>
+<!--script defer>
     // Cargue GPT de forma síncrona (Expandibles y Creatividad Adaptable)
     (function() {
         var useSSL = 'https:' == document.location.protocol;
@@ -73,4 +73,4 @@ const { title, description, image = '/oye-share.jpg', seccion } = Astro.props;
         document.write('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>');
     })();
 </script>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7423640555477330" crossorigin="anonymous"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7423640555477330" crossorigin="anonymous"></script-->

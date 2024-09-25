@@ -471,7 +471,7 @@ article .wp-block-embed-youtube .wp-block-embed__wrapper iframe {
 }
 
 /* player */
-.iframestyle {box-shadow: rgba(0, 0, 0, 0.56) 0px 22px 70px 4px; background-image: url('https://storage.googleapis.com/nrm-web/oye/recursos/8p7m.gif'); background-size:contain; background-color:#15181f; border: 1px solid  black; border-radius: 6px;}
+.iframestyle {box-shadow: rgba(0, 0, 0, 0.56) 0px 22px 70px 4px; background-image: url('https://storage.googleapis.com/nrm-web/oye/recursos/8p7m.gif'); background-size:contain; background-color:#15181f; border: 1px solid  white; border-radius: 6px; box-shadow: rgba(0, 0, 0, 0.56) 0px 22px 70px 4px;}
 .loading-gif {	width: 20px; height: auto;}
 
 	#player { transition: all 0.5s; /*background: linear-gradient(202.03deg, #df19f5 14.4%, #09e6f1 78.24%);*/ /*box-shadow: rgba(0, 0, 0, 0.56) 0px 22px 70px 4px;*/ animation: gradient 15s ease infinite; background-size:400%; background: white; box-shadow: rgba(255, 255, 255, 1) 0px 22px 70px 4px;  z-index:1000;}    

@@ -256,7 +256,6 @@ table {
 	width: 100%;
 }
 img {
-  width: 100%;
 	max-width: 100%;
 	height: auto;
 }
@@ -321,8 +320,8 @@ hr {
 	width: 100%;
   }
   .container{
-	padding-right: 5%;
-	padding-left: 5%;
+	/*padding-right: 5%;
+	padding-left: 5%;*/
 	max-width: 100% !important;
   }
 }

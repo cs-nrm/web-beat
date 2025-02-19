@@ -2,19 +2,12 @@
 import { ViewTransitions } from 'astro:transitions';
 /*import Menu from './Menu.astro';
 import MenuLineal from './MenuLineal.astro';*/
-import MenuLogo from './MenuLogo.astro';
+import Menu from './Menu.astro';
 ---
 
 <header>
-	<ViewTransitions />	
-	<nav class="border-gray-200 bg-black">
-	  <div class="flex flex-nowrap items-center justify-between mx-auto p-2">
-		<a href="/" class="logo-beat-mobile flex items-center space-x-3 rtl:space-x-reverse">
-			<img src="https://storage.googleapis.com/nrm-web/beat/resources/img/beat-digital-logo-2024-min.png" class="max-w-28 logo" alt="Beat 100.9" width="112" height="75" />
-		</a>
-		<MenuLogo />
-	  </div>
-	</nav>
+	<ViewTransitions />		
+		<Menu />
 </header>
 
 <style>

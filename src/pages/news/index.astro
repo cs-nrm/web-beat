@@ -21,8 +21,7 @@ const posts = await res.json();
 		<Header title={SITE_TITLE} />
 		
 		<main>
-            <div class="container my-12 mx-auto px-4 md:px-12">
-				<h1 class="audiowide neon-rosa text-center md:text-left pt-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl">News</h1>
+            <div class="container my-12 mx-auto px-4 md:px-12">				
                 <section class="flex flex-wrap -mx-1 lg:-mx-4">
                     {
                         posts.map((post:any) => ( 

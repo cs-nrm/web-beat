@@ -467,13 +467,59 @@ document.addEventListener('astro:page-load', ev => {
       CONTAINER.style.setProperty('--spread', CONFIG.spread)
       CONTAINER.style.setProperty('--direction', CONFIG.vertical ? 'column' : 'row')
     }
-    RESTYLE()
-    UPDATE()
+    RESTYLE();
+    UPDATE();
 
+
+    /* efectos */ 
+    (function($){
+        $(document).ready(function(){
+        
+            const fullheight = document.body.scrollHeight - window.innerHeight;
+            const range = fullheight/5;
+            const range2 = range * 2;
+            const range3 = range * 3;
+            const range4 = range * 4;
+            const range5 = range * 5;
+    
+            
+            window.addEventListener('scroll', function(e){
+                console.log(window.scrollY );
+                if( window.scrollY > 0 && window.scrollY <= range ){                    
+                    document.styleSheets[1].addRule('body::before','filter: hue-rotate(45deg) blur(5px)');
+                    document.styleSheets[1].addRule('body::before','transition: filter 0.5s ease-in-out;');
+                }
+                
+                if( window.scrollY > range && window.scrollY <= range2 ){                    
+                    document.styleSheets[1].addRule('body::before','filter: hue-rotate(90deg) blur(5px)');
+                    document.styleSheets[1].addRule('body::before','transition: filter 0.5s ease-in-out;');
+                }
+
+                if( window.scrollY > range2 && window.scrollY <= range3 ){                    
+                    document.styleSheets[1].addRule('body::before','filter: hue-rotate(135deg) blur(5px)');
+                    document.styleSheets[1].addRule('body::before','transition: filter 0.5s ease-in-out;');
+                }
+
+                if( window.scrollY > range3 && window.scrollY <= range4 ){
+                    document.styleSheets[1].addRule('body::before','filter: hue-rotate(190deg) blur(5px)');
+                    document.styleSheets[1].addRule('body::before','transition: filter 0.5s ease-in-out;');
+                }
+
+                if( window.scrollY > range4 ){                    
+                    document.styleSheets[1].addRule('body::before','filter: hue-rotate(250deg) blur(5px)');
+                    document.styleSheets[1].addRule('body::before','transition: filter 0.5s ease-in-out;');
+                }
+
+            });
+        });
+    })(jQuery);
+
+    
+    
 
 
    /*=============== SHOW MENU ===============*/
-const showMenu = (toggleId, navId) =>{
+/*const showMenu = (toggleId, navId) =>{
     const toggle = document.getElementById(toggleId),
           nav = document.getElementById(navId);
     toggle.addEventListener('click', () =>{
@@ -484,7 +530,7 @@ const showMenu = (toggleId, navId) =>{
     });
  }
  
- showMenu('nav-toggle','nav-menu');
+ showMenu('nav-toggle','nav-menu');*/
 
    const getplayingstatus = playerstatus();
     document.querySelector('main').classList.remove('loading');    
@@ -493,6 +539,7 @@ const showMenu = (toggleId, navId) =>{
     const secchome = document.getElementById('home');
     if ( secchome ){
         getInfoProg();
+        
         if( getplayingstatus == 'radio-playing'){
              document.getElementById('big-play').innerHTML = bigButtonPause; 
         }

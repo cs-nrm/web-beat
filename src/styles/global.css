@@ -36,58 +36,33 @@
 	color: #868583;
 }
 
+
 @font-face {
-	font-family: 'Atkinson';
-	src: url('/fonts/atkinson-regular.woff') format('woff');
-	font-weight: 400;
+	font-family: 'gendy';
+	src: url('/fonts/gendy.otf');	
 	font-style: normal;
 	font-display: swap;
 }
 @font-face {
-	font-family: 'Atkinson';
-	src: url('/fonts/atkinson-bold.woff') format('woff');
-	font-weight: 700;
+	font-family: 'poppins';
+	src: url('/fonts/Poppins-Regular.ttf');	
 	font-style: normal;
 	font-display: swap;
 }
-/*@font-face {
-	font-family: 'Antonsc';
-	src: url('/fonts/AntonSC-Regular.ttf');
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
-}*/
 @font-face {
-	font-family: 'Audiowide';
-	src: url('/fonts/Audiowide-Regular.ttf');
-	font-weight: 400;
+	font-family: 'Roboto';
+	src: url('/fonts/Roboto.ttf');	
 	font-style: normal;
 	font-display: swap;
 }
-/*@font-face {
-	font-family: 'Bebasneue';
-	src: url('/fonts/BebasNeue-Regular.ttf');
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
-}*/
-@font-face {
-	font-family: 'Firasans';
-	src: url('/fonts/FiraSans-Regular.ttf');
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
-}
+
 
 .audiowide{
   font-family: 'Audiowide';
 }
 
-body {
-	font-family: 'Atkinson', sans-serif;
-  /*font-family: 'Antonsc';*/
-  font-family: 'Bebasneue';
-  font-family: 'FiraSans';
+body {	
+  font-family: 'gendy';
   letter-spacing: 0.05em;
 	margin: 0;
 	padding: 0;
@@ -113,84 +88,8 @@ body {
         opacity: 1;*/
 }
 
-.neon-rosa{
-  /*background: -webkit-linear-gradient(-86deg, #f70bd0 20%, #f4c7dc 53%, #09E5C3 91%);
-  -webkit-background-clip: text;
-  -webkit-text-stroke: 4px transparent;
-  color: #000; */
-  text-shadow: 0 0 0px #fff, 0 0 10px #f70bd0, 0 0 20px #f70bd0, 0 0 30px #f70bd0;
-  color: white;
-  display: flex;
-  align-items: baseline;
-  white-space: nowrap;
-}
-.neon-rosa:after{
-  content: '';
-  width: 100%;
-  height: 5px;
-  background-color: white;
-  margin-left: 20px;
-  border-radius: 4px;
-  box-shadow: 0 0 0px #fff, 0 0 10px #f70bd0, 0 0 20px #f70bd0, 0 0 30px #f70bd0;
-}
-.neon-morado{
-  /*background: -webkit-linear-gradient(-86deg, #df19f5 20%, #09e6f1 53%, rgba(9,106,229,1) 91%);
-  -webkit-background-clip: text;
-  -webkit-text-stroke: 4px transparent;
-  color: #000;*/
-  text-shadow: 0 0 0px #fff, 0 0 10px #df19f5, 0 0 20px #df19f5, 0 0 30px #df19f5;
-  color: white;
-  display: flex;
-  align-items: baseline;
-  white-space: nowrap;
-}
-.neon-morado:after{
-  content: '';
-  width: 100%;
-  height: 5px;
-  background-color: white;
-  margin-left: 20px;
-  border-radius: 4px;
-  box-shadow: 0 0 0px #fff, 0 0 10px #df19f5, 0 0 20px #df19f5, 0 0 30px #df19f5;
-}
-.neon-azul{
-  /*background: -webkit-linear-gradient(-86deg, #09e6f1 26%, #1c726c 53%, #09E5C3 91%);
-  -webkit-background-clip: text;
-  -webkit-text-stroke: 4px transparent;
-  color: #000;*/
-  text-shadow: 0 0 0px #fff, 0 0 10px #09e6f1, 0 0 20px #09e6f1, 0 0 30px #09e6f1;
-  color: #ffffff;
-  display: flex;
-  align-items: baseline;
-  white-space: nowrap;
-}
-.neon-azul:after{
-  content: '';
-  width: 100%;
-  height: 5px;
-  background-color: white;
-  margin-left: 20px;
-  border-radius: 4px;
-  box-shadow: 0 0 0px #fff, 0 0 10px #09e6f1, 0 0 20px #09e6f1, 0 0 30px #09e6f1;
-}
 
-.neon-amarillo{
-  color: #000000;
-  text-shadow:
-  0 0 0 #fff, 
-  0 0 1px #c5f9cd,
-  0 0 4px #08f62c,
-  0 0 10px #08f62c; 
-  /*text-shadow: 
-    0 0 10px rgba(255,255,255,1) , 
-    0 0 20px rgba(255,255,255,1) , 
-    0 0 30px rgba(255,255,255,1) , 
-    0 0 40px var(--yellow-beat), 
-    0 0 70px var(--yellow-beat), 
-    0 0 80px var(--yellow-beat), 
-    0 0 100px var(--yellow-beat);*/
-}
-
+header {  overflow: hidden; position: sticky; top: 0;  z-index: 9999; }
 .ver-mas{
   box-shadow: 0 0 0px #fff, 0 0 10px #06dbe5, 0 0 20px #eb2fc7, 0 0 50px #d52ab3;
   background-color: #343434;
@@ -203,6 +102,19 @@ main {
 	/*max-width: calc(100% - 1em);*/
 	margin: auto;
 	overflow: hidden;
+  position: relative;
+}
+body::before{
+  content:'';
+  background: url(/img/back.jpg);
+  background-size: cover;
+  width: 100%;
+  height: 100%;
+  background-position: top;
+  position: fixed;
+  z-index: -1;
+  filter: blur(5px);
+  transition: all 05.s;  
 }
 h1,
 h2,
@@ -523,12 +435,12 @@ article iframe.iframe-class{
 
   .container.cards{
       --spread: 60;
-      display: flex;
+      /*display: flex;
       flex-wrap: wrap;
-      flex-direction: var(--direction);
+      flex-direction: var(--direction);*/
       gap: calc(var(--gap) * 1px);
       margin: 0 auto;
-      place-items: center;
+      /*place-items: center;*/
       position: relative;
       touch-action: none;
   }

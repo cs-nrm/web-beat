@@ -547,15 +547,15 @@ document.addEventListener('astro:page-load', ev => {
                 var elem = document.querySelector('.carousel-main');
         var flkty = new Flickity( elem, {
             // options
-            cellAlign: 'left',
-            contain: true,
-            sync: '.carousel-nav',
+            cellAlign: 'center',
             prevNextButtons: true,
-            autoPlay: 2000,
+        //    autoPlay: 5000,
             pageDots: false,
             pauseAutoPlayOnHover: true,
+            freeScroll: true,
             wrapAround: true
         });
+        flkty.select(2);
         flkty.reloadCells();   
 
         var elemnav = document.querySelector('.carousel-nav');

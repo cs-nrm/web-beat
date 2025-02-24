@@ -3,58 +3,96 @@ import { Image } from 'astro:assets';
 ---
 <div class="main-carousel container cards promos ">
 	<div class="carousel-cell card">
-	<article>
+	<article class="p-2">
 		<div class="glows"></div>
 		<a href="/podcast/groove-dealers" class="text-white">
-			<Image class="block h-auto w-full object-fill" src="https://contenido.beatdigital.mx/wp-content/uploads/2024/06/GROOVE-DEALERS-PODCAST-min.png" width="200" height="200" alt="La alternativa"/>
-			<p>Groove Dealers</p>
-			<p class="text-[13px] leading-none poppins">Conoce datos relevantes y curiosos sobre la escena de la música electrónica a través de la voz de Maria Purisima, DJ’s y productores nacionales e internacionales.</p>
+			<div class="img-podcast">
+				<Image class="block h-auto w-full object-fill" src="https://contenido.beatdigital.mx/wp-content/uploads/2024/06/GROOVE-DEALERS-PODCAST-min.png" width="200" height="200" alt="La alternativa"/>
+				<svg class="svg-icon" style="width: 80px; height: 80px;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M703.25 492.627l0.203-0.247-3.555-2.025c-0.54-0.248-0.968-0.653-1.53-0.878l-278.865-159.367-0.202 0.225c-3.465-2.767-7.695-4.68-12.465-4.68-11.182 0-20.272 9.067-20.272 20.272v324.518c0 11.205 9.090 20.295 20.272 20.295 4.77 0 9-1.912 12.465-4.68l0.202 0.248 278.865-159.368c0.563-0.225 0.968-0.54 1.507-0.855l3.578-2.070-0.203-0.157c4.635-3.758 7.83-9.225 7.83-15.637s-3.195-11.858-7.83-15.593M427.107 635.84v-255.218l223.29 127.598-223.29 127.62zM508.243 62c-246.465 0-446.243 199.778-446.243 446.243 0 246.443 199.778 446.243 446.243 446.243 246.443 0 446.243-199.8 446.243-446.243-0.022-246.465-199.822-446.243-446.243-446.243M508.243 913.895c-224.032 0-405.675-181.62-405.675-405.675s181.643-405.675 405.675-405.675c224.055 0 405.675 181.62 405.675 405.675s-181.62 405.675-405.675 405.675z"  /></svg>
+			</div>
+			<p class="m-0">Groove Dealers</p>
+			<p class="text-podcast text-[13px] leading-[1.2] poppins font-light hover:text-white">Conoce datos relevantes y curiosos sobre la escena de la música electrónica a través de la voz de Maria Purisima, DJ’s y productores nacionales e internacionales.</p>
 		</a>
 	</article>
 	</div>
 	<div class="carousel-cell card">
-	<article>
+	<article class="p-2">
 		<div class="glows"></div>
-		<a href="/podcast/respira">
-			<Image class="block h-auto w-full object-fill" src="https://contenido.beatdigital.mx/wp-content/uploads/2023/12/poscast-repira2.jpg" width="200" height="200" alt="Detrás de la radio"/>
+		<a href="/podcast/respira" class="text-white">
+			<div class="img-podcast">
+				<Image class="block h-auto w-full object-fill" src="https://contenido.beatdigital.mx/wp-content/uploads/2023/12/poscast-repira2.jpg" width="200" height="200" alt="La alternativa"/>
+				<svg class="svg-icon" style="width: 80px; height: 80px;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M703.25 492.627l0.203-0.247-3.555-2.025c-0.54-0.248-0.968-0.653-1.53-0.878l-278.865-159.367-0.202 0.225c-3.465-2.767-7.695-4.68-12.465-4.68-11.182 0-20.272 9.067-20.272 20.272v324.518c0 11.205 9.090 20.295 20.272 20.295 4.77 0 9-1.912 12.465-4.68l0.202 0.248 278.865-159.368c0.563-0.225 0.968-0.54 1.507-0.855l3.578-2.070-0.203-0.157c4.635-3.758 7.83-9.225 7.83-15.637s-3.195-11.858-7.83-15.593M427.107 635.84v-255.218l223.29 127.598-223.29 127.62zM508.243 62c-246.465 0-446.243 199.778-446.243 446.243 0 246.443 199.778 446.243 446.243 446.243 246.443 0 446.243-199.8 446.243-446.243-0.022-246.465-199.822-446.243-446.243-446.243M508.243 913.895c-224.032 0-405.675-181.62-405.675-405.675s181.643-405.675 405.675-405.675c224.055 0 405.675 181.62 405.675 405.675s-181.62 405.675-405.675 405.675z"  /></svg>
+			</div>
+			<p class="m-0">Respira</p>
+			<p class="text-podcast text-[13px] leading-[1.2] poppins font-light hover:text-white">Descubrir que tienes un problema de salud mental es una noticia impactante que puede transformar tu vida por completo.</p>
 		</a>
 	</article>
 	</div>
 	<div class="carousel-cell card">
-	<article>
+	<article class="p-2">
 		<div class="glows"></div>
-		<a href="/podcast/expedientes-secretos">
-			<Image class="block h-auto w-full object-fill" src="https://contenido.beatdigital.mx/wp-content/uploads/2023/10/EX_secretos5.jpg" width="200" height="200" alt="Pop trends"/>
+		<a href="/podcast/expedientes-secretos" class="text-white">
+			<div class="img-podcast">
+				<Image class="block h-auto w-full object-fill" src="https://contenido.beatdigital.mx/wp-content/uploads/2023/10/EX_secretos5.jpg" width="200" height="200" alt="La alternativa"/>
+				<svg class="svg-icon" style="width: 80px; height: 80px;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M703.25 492.627l0.203-0.247-3.555-2.025c-0.54-0.248-0.968-0.653-1.53-0.878l-278.865-159.367-0.202 0.225c-3.465-2.767-7.695-4.68-12.465-4.68-11.182 0-20.272 9.067-20.272 20.272v324.518c0 11.205 9.090 20.295 20.272 20.295 4.77 0 9-1.912 12.465-4.68l0.202 0.248 278.865-159.368c0.563-0.225 0.968-0.54 1.507-0.855l3.578-2.070-0.203-0.157c4.635-3.758 7.83-9.225 7.83-15.637s-3.195-11.858-7.83-15.593M427.107 635.84v-255.218l223.29 127.598-223.29 127.62zM508.243 62c-246.465 0-446.243 199.778-446.243 446.243 0 246.443 199.778 446.243 446.243 446.243 246.443 0 446.243-199.8 446.243-446.243-0.022-246.465-199.822-446.243-446.243-446.243M508.243 913.895c-224.032 0-405.675-181.62-405.675-405.675s181.643-405.675 405.675-405.675c224.055 0 405.675 181.62 405.675 405.675s-181.62 405.675-405.675 405.675z"  /></svg>
+			</div>
+			<p class="m-0">Expedientes Secretos</p>
+			<p class="text-podcast text-[13px] leading-[1.2] poppins font-light hover:text-white">¡Expedientes Secretos Beat! Un podcast que explora teorías de conspiración y desentraña los misterios ocultos del mundo. ¡Prepárate para una dosis semanal de intrigante información y descubrimientos fascinantes!</p>
 		</a>
 	</article>
 	</div>
 	<div class="carousel-cell card">
-	<article>
+	<article class="p-2">
 		<div class="glows"></div>
-		<a href="/podcast/nerdosis">
-			<Image class="block h-auto w-full object-fill" src="https://contenido.beatdigital.mx/wp-content/uploads/2023/06/NERD_podcast3psd.jpg" width="200" height="200" alt="Top tech"/>
+		<a href="/podcast/nerdosis" class="text-white">
+			<div class="img-podcast">
+				<Image class="block h-auto w-full object-fill" src="https://contenido.beatdigital.mx/wp-content/uploads/2023/06/NERD_podcast3psd.jpg" width="200" height="200" alt="La alternativa"/>
+				<svg class="svg-icon" style="width: 80px; height: 80px;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M703.25 492.627l0.203-0.247-3.555-2.025c-0.54-0.248-0.968-0.653-1.53-0.878l-278.865-159.367-0.202 0.225c-3.465-2.767-7.695-4.68-12.465-4.68-11.182 0-20.272 9.067-20.272 20.272v324.518c0 11.205 9.090 20.295 20.272 20.295 4.77 0 9-1.912 12.465-4.68l0.202 0.248 278.865-159.368c0.563-0.225 0.968-0.54 1.507-0.855l3.578-2.070-0.203-0.157c4.635-3.758 7.83-9.225 7.83-15.637s-3.195-11.858-7.83-15.593M427.107 635.84v-255.218l223.29 127.598-223.29 127.62zM508.243 62c-246.465 0-446.243 199.778-446.243 446.243 0 246.443 199.778 446.243 446.243 446.243 246.443 0 446.243-199.8 446.243-446.243-0.022-246.465-199.822-446.243-446.243-446.243M508.243 913.895c-224.032 0-405.675-181.62-405.675-405.675s181.643-405.675 405.675-405.675c224.055 0 405.675 181.62 405.675 405.675s-181.62 405.675-405.675 405.675z"  /></svg>
+			</div>
+			<p class="m-0">Nerdosis</p>
+			<p class="text-podcast text-[13px] leading-[1.2] poppins font-light hover:text-white">Un podcast sobre cómics, tecnología, gaming, torneos, streaming, memes y mucho más.</p>
 		</a>
 	</article>
 	</div>
 	<div class="carousel-cell card">
-	<article>
+	<article class="p-2">
 		<div class="glows"></div>
-		<a href="/podcast/dos-equis-mixx">
-			<Image class="block h-auto w-full object-fill" src="https://contenido.beatdigital.mx/wp-content/uploads/2022/09/portada-xx.jpg" width="200" height="200" alt="Top gaming"/>
+		<a href="/podcast/dos-equis-mixx" class="text-white">
+			<div class="img-podcast">
+				<Image class="block h-auto w-full object-fill" src="https://contenido.beatdigital.mx/wp-content/uploads/2022/09/portada-xx.jpg" width="200" height="200" alt="La alternativa"/>
+				<svg class="svg-icon" style="width: 80px; height: 80px;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M703.25 492.627l0.203-0.247-3.555-2.025c-0.54-0.248-0.968-0.653-1.53-0.878l-278.865-159.367-0.202 0.225c-3.465-2.767-7.695-4.68-12.465-4.68-11.182 0-20.272 9.067-20.272 20.272v324.518c0 11.205 9.090 20.295 20.272 20.295 4.77 0 9-1.912 12.465-4.68l0.202 0.248 278.865-159.368c0.563-0.225 0.968-0.54 1.507-0.855l3.578-2.070-0.203-0.157c4.635-3.758 7.83-9.225 7.83-15.637s-3.195-11.858-7.83-15.593M427.107 635.84v-255.218l223.29 127.598-223.29 127.62zM508.243 62c-246.465 0-446.243 199.778-446.243 446.243 0 246.443 199.778 446.243 446.243 446.243 246.443 0 446.243-199.8 446.243-446.243-0.022-246.465-199.822-446.243-446.243-446.243M508.243 913.895c-224.032 0-405.675-181.62-405.675-405.675s181.643-405.675 405.675-405.675c224.055 0 405.675 181.62 405.675 405.675s-181.62 405.675-405.675 405.675z"  /></svg>
+			</div>
+			<p class="m-0">Dos Equis Mixx</p>
+			<p class="text-podcast text-[13px] leading-[1.2] poppins font-light hover:text-white">¿Y tú confías en tu MIXX? Un programa que trae lo mejor de la cultura pop, tendencias y lo más relevante de la música electrónica.</p>
 		</a>
 	</article>
 	</div>
 	<div class="carousel-cell card">
-	<article>
+	<article class="p-2">
 		<div class="glows"></div>
-		<a href="/podcast/beat-trends">
-			<Image class="block h-auto w-full object-fill" src="https://contenido.beatdigital.mx/wp-content/uploads/2022/08/podcast.jpg" width="200" height="200" alt="Tu fandom"/>
+		<a href="/podcast/beat-trends" class="text-white">
+			<div class="img-podcast">
+				<Image class="block h-auto w-full object-fill" src="https://contenido.beatdigital.mx/wp-content/uploads/2022/08/podcast.jpg" width="200" height="200" alt="La alternativa"/>
+				<svg class="svg-icon" style="width: 80px; height: 80px;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M703.25 492.627l0.203-0.247-3.555-2.025c-0.54-0.248-0.968-0.653-1.53-0.878l-278.865-159.367-0.202 0.225c-3.465-2.767-7.695-4.68-12.465-4.68-11.182 0-20.272 9.067-20.272 20.272v324.518c0 11.205 9.090 20.295 20.272 20.295 4.77 0 9-1.912 12.465-4.68l0.202 0.248 278.865-159.368c0.563-0.225 0.968-0.54 1.507-0.855l3.578-2.070-0.203-0.157c4.635-3.758 7.83-9.225 7.83-15.637s-3.195-11.858-7.83-15.593M427.107 635.84v-255.218l223.29 127.598-223.29 127.62zM508.243 62c-246.465 0-446.243 199.778-446.243 446.243 0 246.443 199.778 446.243 446.243 446.243 246.443 0 446.243-199.8 446.243-446.243-0.022-246.465-199.822-446.243-446.243-446.243M508.243 913.895c-224.032 0-405.675-181.62-405.675-405.675s181.643-405.675 405.675-405.675c224.055 0 405.675 181.62 405.675 405.675s-181.62 405.675-405.675 405.675z"  /></svg>
+			</div>
+			<p class="m-0">Beat Trends</p>
+			<p class="text-podcast text-[13px] leading-[1.2] poppins font-light hover:text-white">Entérate de las últimas noticias sobre cine, anime, móviles, videojuegos y más con Frank, Wallace y el Negro Salcedo. </p>
 		</a>
 	</article>
 	</div>
 </div>
 
 <style>
+.card article{
+	background: hsla(var(--color-black), .3);
+    background-blend-mode: soft-light;
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, .5);
+}
+.carousel-cell img{
+    box-shadow: none;
+    -webkit-mask-image: linear-gradient(to bottom, hsla(var(--color-black), 1) 0, hsla(var(--color-black), 1) 70%, hsla(var(--color-black), 0) 100%);
+    mask-image: linear-gradient(to bottom, hsla(var(--color-black), 1) 0, hsla(var(--color-black), 1) 70%, hsla(var(--color-black), 0) 100%);
+    }
 .container.cards{
 	max-width: 100% !important;
 }
@@ -66,12 +104,41 @@ import { Image } from 'astro:assets';
   padding: 10px;
   margin-top: 20px;
 }
+.carousel-cell .img-podcast {
+    width: 100%;
+    height: 180px;
+	position: relative;
+}
+
+.carousel-cell .img-podcast svg{
+    position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	margin: auto;
+}
+
 
 .carousel-cell img{
 	border-radius: var(--border-radius);
 	box-shadow: 0 2px 12px 7px rgba(0,0,0,0.4);
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: top center;
 }
-
+p.text-podcast{
+	display: -webkit-box;
+	-webkit-margin-before: 0;
+    margin-block-start: 0;
+    -webkit-margin-after: 12px;
+    margin-block-end: 12px;
+    line-height: 1.2;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
 .carousel-cell.is-selected {
   /*background: #ED2;*/
 }

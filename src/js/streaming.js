@@ -575,8 +575,8 @@ document.addEventListener('astro:page-load', ev => {
             lazyLoad: 1, 
             wrapAround: true, 
             cellAlign: 'center',
-            pageDots: false, 
-            autoPlay: true
+            pageDots: false
+            //autoPlay: true
         });
 
 

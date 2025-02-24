@@ -561,9 +561,9 @@ article iframe.iframe-class{
     width: 70px !important;
     height: 70px !important;
 }
-.flickity-prev-next-button.previous {
+.slider-promociones .flickity-prev-next-button.previous {
     left: 8% !important;
 }
-.flickity-prev-next-button.next {
+.slider-promociones .flickity-prev-next-button.next {
     right: 8% !important;
 }

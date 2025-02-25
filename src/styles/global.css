@@ -5,6 +5,7 @@
  */
 
  @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+ @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
  :root {
 	--accent: #2337ff;
@@ -28,7 +29,7 @@
     --card: hsl(0 0% 0%);
     --color: hsl(240 18% 80%);
     --border-width: 2px;
-    --border-radius: 0.5rem;
+    --border-radius: 0.75rem;
     --gradient: conic-gradient(from 180deg at 50% 70%, hsla(0, 0%, 98%, 1) 0deg, #df19f5 72.0000010728836deg, #f70bd0 144.0000021457672deg, #09e6f1 216.00000858306885deg, #08f62c 288.0000042915344deg, hsla(0, 0%, 98%, 1) 1turn);
 }
 .yellow-beat{
@@ -461,7 +462,6 @@ article iframe.iframe-class{
       border-radius: var(--border-radius);
       gap: 0.25rem;
       position: relative;
-      border: 1px solid #3d3d3d;
   }
   .card article:is(:hover, :focus-visible) {
       z-index: 2;
@@ -540,9 +540,9 @@ article iframe.iframe-class{
 .card article a:hover h2{
   color: var(--azul-neon);
 }
-.card .text{
+/*.card .text{
   background-image: linear-gradient(transparent 0%, rgba(0, 0, 0, 0.5) 25%, rgba(0, 0, 0, 0.75) 60%, rgb(0, 0, 0) 90%);
-}
+}*/
 .text-nerd{
     display: -webkit-box;
     overflow: hidden;

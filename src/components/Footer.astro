@@ -81,10 +81,33 @@ import { Image } from 'astro:assets';
 
     <!-- Copyright -->
     <div class="copyright poppins">
-      <p>© 2025 Stereo. Todos los derechos reservados. El material de este sitio no puede reproducirse, distribuirse, transmitirse, almacenarse en caché ni utilizarse de otro modo, excepto con el permiso previo por escrito de NRM Comunicaciones.</p>
+      <p>© 2025 Beat. Todos los derechos reservados. El material de este sitio no puede reproducirse, distribuirse, transmitirse, almacenarse en caché ni utilizarse de otro modo, excepto con el permiso previo por escrito de NRM Comunicaciones.</p>
       <p>Beat y Beat 100.9 son marcas registradas con derechos de autor de NRM Comunicaciones.</p>
     </div>
   </footer>
+
+	<div class="footer-2025">        
+		<div class="container">
+			<div class="logo-section">
+				<a target="_blank" href="https://nrm.com.mx/"><img src="https://storage.googleapis.com/nrm-web/nrm/images/footer/NRM-2.png" alt="NRM"></a>
+				<a target="_blank" href="https://oyedigital.mx/"><img src="https://storage.googleapis.com/nrm-web/nrm/images/footer/OYE2.png" alt="Oye"></a>
+				<a target="_blank" href="https://stereociendigital.mx/"><img src="https://storage.googleapis.com/nrm-web/nrm/images/footer/stereo.png" alt="Stereo Cien"></a>
+				<a target="_blank" href="https://sabrositadigital.mx/"><img src="https://storage.googleapis.com/nrm-web/nrm/images/footer/sabrosita.png" alt="Sabrosita"></a>
+				<a target="_blank" href="https://enfoquenoticias.com.mx/"><img style="width: 80px;" src="https://storage.googleapis.com/nrm-web/nrm/images/footer/enfoque.png" alt="Enfoque Noticias"></a>
+			</div>
+			<div class="second-section">
+				<div class="links-section">
+					<a target="_blank" href="https://nrm.com.mx/contacto/" class="link-ventas">Ventas</a>
+					<span class="separator">|</span>
+					<a href="/aviso-de-privacidad/" class="link-privacy">Aviso de privacidad</a>
+					<span class="separator">|</span>
+					<a href="/terminos-y-condiciones/" class="link-terms">Términos y condiciones</a>
+				</div>
+				<div class="copyrightf">NRM Comunicaciones (C) 2025 Todos los Derechos Reservados</div>
+			</div>
+		</div>
+	</div>
+
 <!--footer>
 	<div class="block lg:flex text-white container m-auto">
 		<div class="w-full lg:w-1/3">
@@ -325,4 +348,95 @@ margin-top: 40px;
 						  100% {    transform: rotate(360deg);  }
 	}
 
+.footer-2025 {
+	font-family: "Montserrat";
+  font-size: 16px;
+    background-color: black;
+    color: white;
+    padding: 2rem 0;
+	padding-bottom: 150px;
+}
+.footer-2025 .container {
+    margin: 0 auto;
+    padding: 0 1rem;
+	max-width: 1320px;
+}
+
+/* Logo section */
+.footer-2025 .logo-section, .footer-2025 .second-section {
+    display: flex;
+    /*flex-wrap: wrap;*/
+    justify-content: space-between;
+	align-items: center;
+    gap: 2rem;
+    /*margin-bottom: 1.5rem;
+	display: grid;
+	grid-template-columns: repeat(6, 1fr);
+	gap: 10px;
+	grid-auto-rows: minmax(100px, auto);*/
+}
+.footer-2025 .second-section{
+	align-items: normal;
+	margin-top: 1rem;
+}
+.footer-2025 .logo-section img {
+    object-fit: contain;
+}
+
+.footer-2025 .links-section {
+    display: flex;
+    flex-wrap: wrap;
+	align-items: center;
+    justify-content: center;
+    gap: 10px;
+	line-height: 1;
+    margin-bottom: 1rem;
+}
+.footer-2025 .link-ventas {
+    color: #FCD34D;
+    text-decoration: none;
+}
+.footer-2025 .link-privacy,
+.footer-2025 .link-terms {
+    color: #60A5FA;
+    text-decoration: none;
+}
+.footer-2025 .link-ventas:hover,
+.footer-2025 .link-privacy:hover,
+.footer-2025 .link-terms:hover {
+  text-decoration: underline;
+	color: white;
+}
+.footer-2025 .separator {
+    color: #6B7280;
+}
+
+/* Copyright */
+.footer-2025 .copyrightf {
+    text-align: center;
+    color: #9CA3AF;
+}
+
+/* Responsive design */
+@media (min-width: 1000px) {
+	.footer-2025 .logo-section img {
+   		max-width: 110px;
+	}
+}
+@media (max-width: 768px) {
+  .footer-2025 .logo-section {
+    gap: 1.5rem;
+  }
+  .footer-2025 .second-section {
+    flex-direction: column;
+		gap:0;
+    align-items: center;
+    text-align: center;
+  }
+}
+@media (max-width: 600px) {
+  .footer-2025 .separator {
+   	display: none;
+  }
+}
 </style>	

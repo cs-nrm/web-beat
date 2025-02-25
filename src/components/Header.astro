@@ -6,19 +6,118 @@ import Menu from './Menu.astro';
 ---
 
 <header>
-	<ViewTransitions />		
-		<Menu />
+	<ViewTransitions />
+
+  <div class="pre-site-header">
+		<div class="pre-site-logo">
+			<div class="logo-nrm"><a href="https://nrm.com.mx" target="_blank"><img alt="nrm comunicaciones" src="https://storage.googleapis.com/nrm-web/nrm/images/footer/nrm.png" /></a>
+			</div>
+			<div class="expand-radio">
+				<div class="radio station">RADIO EN VIVO</div>
+				<div class="pre-site-station">			
+					<div class="station"><a target="_blank" href="https://oyedigital.mx">OYE 89.7</a></div><span class="separator">|</span>
+					<div class="station"><a target="_blank" href="https://stereociendigital.mx">STEREO CIEN 100.1</a></div><span class="separator">|</span>
+					<div class="station"><a target="_blank" href="https://beatdigital.mx">BEAT 100.9</a></div><span class="separator">|</span>
+					<div class="station"><a target="_blank" href="https://sabrositadigital.mx">SABROSITA 590-1410 AM</a></div><span class="separator">|</span>
+					<div class="station"><a target="_blank" href="https://enfoquenoticias.com.mx">ENFOQUE NOTICIAS</a></div>
+				</div>
+			</div>
+			<div class="expand-radio-mobile">
+				<div class="radio station">RADIO EN VIVO</div>
+				<div class="pre-site-station">			
+					<a href="https://oyedigital.mx" target="_blank" class="station-oye" ><div class="station">OYE 89.7</div></a>
+					<a href="https://stereociendigital.mx" target="_blank" class="station-st"><div class="station">STEREO CIEN 100.1</div></a>
+					<a href="https://beatdigital.mx" target="_blank" class="station-beat"><div class="station">BEAT 100.9</div></a>
+					<a href="https://sabrositadigital.mx" target="_blank" class="station-sab"><div class="station">SABROSITA 590-1410 AM</div></a>
+					<div class="station"><a href="#">ENFOQUE NOTICIAS</a></div>
+				</div>
+			</div>
+		</div>
+		<div class="ventas-fecha">
+			<div class="sales"><a href="https://nrm.com.mx/contacto/" target="_blank">VENTAS</a></div>
+			<div class="date"></div>	
+		</div>
+		
+	</div>
+
+	<Menu />
 </header>
 
+
 <style>
-.logo-beat-mobile img{
-	filter: drop-shadow(1px 0px 0 white) drop-shadow(0px 1px 1px white);
-}
-@media screen and (min-width: 1199px) {
-  .logo-beat-mobile {
-    display: none;
+  .logo-beat-mobile img{
+    filter: drop-shadow(1px 0px 0 white) drop-shadow(0px 1px 1px white);
   }
-}
+  @media screen and (min-width: 1199px) {
+    .logo-beat-mobile {
+      display: none;
+    }
+  }
+	.pre-site-header{ display:flex; background:black; width: 100%;    padding: 0;    margin: 0;    height: 60px;    color: white;  align-items:center; justify-content: space-between; font-family:'Montserrat'; font-size: 13px!important;}
+	.pre-site-logo{ display:flex; gap:40px;}
+	.pre-site-logo img{ height:70px; width:auto;}
+	.logo-nrm {padding-left: 25px;}
+	.pre-site-station {display:flex; align-items:center; justify-content: space-around; gap:8px; text-align:center;}
+	.sales a{ color: #FCD34D; padding:0 10px;}
+	.station a {color: #60A5FA;}
+	.radio {display:flex; align-items:center;}
+	.ventas-fecha{ display:flex; }
+	.date{ padding: 0 25px;}
+	.expand-radio{	display:flex; align-content:center; gap:10px;}
+	.expand-radio-mobile{display:none;}
+	
+	.header{
+		top: 60px !important;	
+	}
+	@media screen and (min-width: 601px){
+		.admin-bar .admin-style, .admin-bar .thb-borders, .admin-bar .header, .admin-bar #searchpopup, .admin-bar #mobile-menu, .admin-bar .thb-show-all, .admin-bar .portfolio-floating-button, .admin-bar .vertical-deck .vertical-page, .vertical-deck .admin-bar .vertical-page{
+			top: 106px;
+		}
+		.pre-site-header{ font-size: 2vw;}
+	}
+	@media screen and (min-width: 783px){
+		.admin-bar .admin-style, .admin-bar .thb-borders, .admin-bar .header, .admin-bar #searchpopup, .admin-bar #mobile-menu, .admin-bar .thb-show-all, .admin-bar .portfolio-floating-button, .admin-bar .vertical-deck .vertical-page, .vertical-deck .admin-bar .vertical-page{
+			top: 92px !important;
+		}
+		.pre-site-header{ font-size: 1vw;}
+	}
 
-
+	@media screen and (max-width: 768px) {
+		.date{ display: none; }
+		.expand-radio{position:relative; display:none;}
+		.expand-radio-mobile{ position:relative; display:flex; align-content:center; gap:10px;}
+		.separator { display:none;}	
+		.pre-site-logo{  white-space:nowrap; gap:20px;}
+		.pre-site-header{ gap:0px;}
+		.logo-nrm{width:70%; padding-left:5px;}
+		.logo-nrm img{width:60px; height:auto;}
+		.radio {  position:relative;}
+		.station{ padding: 7px 0;}
+		.radio::after{ font-size: 15px;    position: absolute;    right: -18px;    top: 50%;   margin-top: -12px; font-weight: bold;    width: auto;    text-align: center;    content: ">";    font-family: jegicon;    -webkit-font-smoothing: antialiased;    -moz-osx-font-smoothing: grayscale;    transition: .3s;}
+		::-webkit-scrollbar {   display: none; }
+		.pre-site-station a {z-index:99999999; color: #60A5FA;}
+		.pre-site-station { display: none;        width: 172px;        height: 185px;        background: black;        position: absolute;        top: 48px;        z-index: 99999999999999999;        border-bottom-right-radius: 10px;        border-bottom-left-radius: 10px;        padding: 10px; text-align:left;}
+	}
 </style>
+<script >
+	$(document).ready(function(){
+
+	
+		$('.expand-radio-mobile .radio').click(function(){
+			if($('.expand-radio-mobile .pre-site-station').css('display') == 'block'){
+				$('.expand-radio-mobile .pre-site-station').css('display','none');	
+			}else{
+				$('.expand-radio-mobile .pre-site-station').css('display','block');	
+			}						
+		});
+		
+		/*
+		$('.expand-radio-mobile .radio').hover(function(){
+			$('.expand-radio-mobile .pre-site-station').css('display','block');
+		},function(){
+			$('.expand-radio-mobile .pre-site-station').css('display','none');
+		});
+		*/
+	});
+</script>
+

@@ -17,6 +17,7 @@ import BillBoard from '../components/BillBoard.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 import SliderPromociones from '../layouts/SliderPromociones.astro';
 import CardsHomeNerdosis from '../layouts/CardsHomeNerdosis.astro';
+import PreSiteHeader from '../components/PreSiteHeader.astro';
 
 ---
 
@@ -26,6 +27,7 @@ import CardsHomeNerdosis from '../layouts/CardsHomeNerdosis.astro';
         <BaseHead title={SITE_TITLE} seccion="Home" description={SITE_DESCRIPTION} />       
     </head>
     <body>
+        <PreSiteHeader />
         <div class="w-full bg-neutral-800"> <SuperLeader />     </div>
         <Header title={SITE_TITLE} />
         

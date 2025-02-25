@@ -1,4 +1,4 @@
-<div id="radiobutton" class="text-white border-1 p-1 rounded-md top-[25px]  right-[70px] md:right-[40px] md:top-20 cursor-pointer absolute w-[170px] z-[10000] md:fixed flex items-center" transition:persist> 
+<div id="radiobutton" class="text-black border-1 p-4  top-[25px]  right-[0px] md:right-[0px] md:top-[50%] cursor-pointer absolute w-[250px] z-[10000] md:fixed flex items-center" transition:persist> 
         <!--div>
         <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-broadcast" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#343443" fill="none" stroke-linecap="round" stroke-linejoin="round">
             <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
@@ -8,7 +8,18 @@
           </svg>
         </div>
         <div class="text-center leading-normal">Streaming en vivo</div-->
-        <img src="https://storage.googleapis.com/nrm-web/beat/resources/img/live-on-air.png" width="300" height="120" alt="En vivo" />
+        <!--img src="https://storage.googleapis.com/nrm-web/beat/resources/img/live-on-air.png" width="300" height="120" alt="En vivo" /-->
+        <div class="player-float flex items-center">
+            <div id="big-play" class="z-10  border-4 rounded-full border-black cursor-pointer w-[20%]" >
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-play" width="35" height="35" viewBox="0 0 24 24" stroke-width="1.5" stroke="#000" fill="#000" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M7 4v16l13 -8z" />
+                </svg>
+            </div>
+            <div class="logo-player w-[40%]"><img src="/img/beat-digital-logo.png" /> </div>
+            <div class="text-player text-center text-[10px] w-[40%]"> ESCUCHA LA RADIO EN VIVO AHORA</div>
+        </div>
+
         
         
 </div>
@@ -51,6 +62,9 @@
 
     </div>
 </div>
+<style>
+#radiobutton { background: rgb(255,221,89);    background: linear-gradient(90deg, rgba(255,221,89,1) 0%, rgba(255,154,78,1) 85%); border-top-left-radius: 35px;    border-bottom-left-radius: 35px;}
+</style>
 
 <script is:inline src="https://storage.googleapis.com/nrm-web/nrm/lib/jquery.js"></script>
 <script is:inline src="//sdk.listenlive.co/web/2.9/td-sdk.min.js"></script>

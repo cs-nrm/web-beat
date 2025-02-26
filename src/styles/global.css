@@ -30,7 +30,7 @@
     --color: hsl(240 18% 80%);
     --border-width: 2px;
     --border-radius: 0.75rem;
-    --gradient: conic-gradient(from 180deg at 50% 70%, hsla(0, 0%, 98%, 1) 0deg, #df19f5 72.0000010728836deg, #f70bd0 144.0000021457672deg, #09e6f1 216.00000858306885deg, #08f62c 288.0000042915344deg, hsla(0, 0%, 98%, 1) 1turn);
+    --gradient: conic-gradient(from 180deg at 50% 70%, hsla(0, 0%, 98%, 1) 0deg, #ffb822 72.0000010728836deg, #00df68 144.0000021457672deg, #1e9aff 216.00000858306885deg, #f132e8 288.0000042915344deg, hsla(0, 0%, 98%, 1) 1turn);
 }
 .yellow-beat{
 	color: #ffeb3b;
@@ -96,12 +96,6 @@ body {
 
 
 header {  overflow: hidden; position: sticky; top: 0;  z-index: 9999; }
-.ver-mas{
-  box-shadow: 0 0 0px #fff, 0 0 10px #06dbe5, 0 0 20px #eb2fc7, 0 0 50px #d52ab3;
-  background-color: #343434;
-  color: white;
-}
-
 
 main {
 	width: 100%;

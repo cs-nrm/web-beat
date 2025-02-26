@@ -486,7 +486,7 @@ document.addEventListener('astro:page-load', ev => {
             window.addEventListener('scroll', function(e){
                // console.log(window.scrollY );
                 if( window.scrollY > 0 && window.scrollY <= range ){                    
-                    document.styleSheets[1].addRule('body::before','filter: hue-rotate(45deg) blur(5px)');
+                    document.styleSheets[1].addRule('body::before','filter: hue-rotate(0deg) blur(5px)');
                     document.styleSheets[1].addRule('body::before','transition: filter 0.5s ease-in-out;');
                 }
                 
@@ -496,17 +496,17 @@ document.addEventListener('astro:page-load', ev => {
                 }
 
                 if( window.scrollY > range2 && window.scrollY <= range3 ){                    
-                    document.styleSheets[1].addRule('body::before','filter: hue-rotate(135deg) blur(5px)');
+                    document.styleSheets[1].addRule('body::before','filter: hue-rotate(180deg) blur(5px)');
                     document.styleSheets[1].addRule('body::before','transition: filter 0.5s ease-in-out;');
                 }
 
                 if( window.scrollY > range3 && window.scrollY <= range4 ){
-                    document.styleSheets[1].addRule('body::before','filter: hue-rotate(190deg) blur(5px)');
+                    document.styleSheets[1].addRule('body::before','filter: hue-rotate(270deg) blur(5px)');
                     document.styleSheets[1].addRule('body::before','transition: filter 0.5s ease-in-out;');
                 }
 
                 if( window.scrollY > range4 ){                    
-                    document.styleSheets[1].addRule('body::before','filter: hue-rotate(250deg) blur(5px)');
+                    document.styleSheets[1].addRule('body::before','filter: hue-rotate(0deg) blur(5px)');
                     document.styleSheets[1].addRule('body::before','transition: filter 0.5s ease-in-out;');
                 }
 

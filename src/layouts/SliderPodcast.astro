@@ -1,7 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 ---
-<div class="main-carousel container cards promos ">
+<div class="main-carousel container cards slider-podcast ">
 	<div class="carousel-cell card">
 	<article class="p-2">
 		<div class="glows"></div>
@@ -83,6 +83,9 @@ import { Image } from 'astro:assets';
 </div>
 
 <style>
+.slider-podcast{
+	mask-image: radial-gradient(ellipse 77% 290% at 50% 60%, black 56%, transparent 65%);
+}
 .card article{
 	background: hsla(var(--color-black), .3);
     background-blend-mode: soft-light;

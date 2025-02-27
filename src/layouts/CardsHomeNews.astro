@@ -28,8 +28,9 @@ const posts = await res.json();
             </div>
           </article>
         </div>
-        <h1 class="text-left md:text-left py-4 font-bold text-white text-4xl md:text-5xl lg:text-4xl xl:text-5xl">#BeatNews</h1>
-        <div class="grid gap-4 grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 md:gap-12 xl:gap-12">
+        
+        <h1 class="text-left md:text-left py-4 mt-16 mb-8 font-bold text-white text-4xl md:text-5xl lg:text-4xl xl:text-5xl">#BeatNews</h1>
+        <div class="grid gap-4 grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 md:gap-16 xl:gap-16">
           
           <div class="card">
             <article>
@@ -126,16 +127,16 @@ posts.map((post:any)=> (
 }
 </div-->
 <div class="m-auto text-center">
-    <a href="/news" class="hover:text-black">
-        <button class="ver-mas group relative h-8 w-36 m-4 overflow-hidden rounded-xl bg-[rgba(52,52,52,0.2)] hover:bg-white transition-all duration-[150ms] border-2 border-white uppercase text-xs poppins font-bold tracking-[3px]">
-            <span class="relative text-zinc-200 group-hover:text-zinc-900">Ver más</span>
+    <a href="/news" class="text-white hover:text-black">
+        <button class="ver-mas group relative h-8 w-36 m-4 overflow-hidden rounded-xl bg-[rgba(52,52,52,0.2)] hover:bg-white border-2 border-white uppercase text-xs poppins font-bold tracking-[3px]">
+            <span>Ver más</span>
         </button>
     </a>
 </div>
 
 <style>
 .cards img{
-  mask-image: linear-gradient(180deg, hsla(var(--color-black), 1) 0, hsla(var(--color-black), .9) 30%, hsla(var(--color-black), 0) 100%);
+  mask-image: linear-gradient(225deg, hsla(var(--color-black), 1) 0, hsla(var(--color-black), 0.9) 40%, hsla(var(--color-black), 0) 80%);
 }
 
 

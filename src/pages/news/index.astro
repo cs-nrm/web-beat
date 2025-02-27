@@ -5,7 +5,7 @@ import Footer from '../../components/Footer.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
 import Card from '../../layouts/Cardsq.astro';
 
-const res = await fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=9&_fields=title,slug,yoast_head_json,categories&categories=143");
+const res = await fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=9&_fields=title,slug,yoast_head_json,categories,_links,_embedded&categories=143");
 const posts = await res.json();
 
 
@@ -22,7 +22,8 @@ const posts = await res.json();
 		
 		<main>
             <div class="container my-12 mx-auto px-4 md:px-12">				
-                <section class="flex flex-wrap -mx-1 lg:-mx-4">
+                <!--section class="flex flex-wrap -mx-1 lg:-mx-4"-->
+                <section class="grid gap-4 grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 md:gap-16 xl:gap-16">
                     {
                         posts.map((post:any) => ( 
                         <>
@@ -43,3 +44,5 @@ const posts = await res.json();
 		<Footer />
 	</body>
 </html>
+
+

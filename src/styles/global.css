@@ -22,7 +22,7 @@
 
 	--yellow-beat: #ffeb3b;
 	--gray-beat: #d4d4d8;
-  --azul-neon: #09e6f1;
+  --azul-neon: #FFAA1F;
   
 
 	--border: hsl(280 10% 50% / 1);
@@ -31,6 +31,9 @@
     --border-width: 2px;
     --border-radius: 0.75rem;
     --gradient: conic-gradient(from 180deg at 50% 70%, hsla(0, 0%, 98%, 1) 0deg, #ffb822 72.0000010728836deg, #00df68 144.0000021457672deg, #1e9aff 216.00000858306885deg, #f132e8 288.0000042915344deg, hsla(0, 0%, 98%, 1) 1turn);
+
+    --page-padding-inline: 60px;
+    --color-black: 0, 0%, 0%;
 }
 .yellow-beat{
 	color: #ffeb3b;
@@ -535,6 +538,7 @@ article iframe.iframe-class{
 .card article a:hover h2{
   color: var(--azul-neon);
 }
+
 /*.card .text{
   background-image: linear-gradient(transparent 0%, rgba(0, 0, 0, 0.5) 25%, rgba(0, 0, 0, 0.75) 60%, rgb(0, 0, 0) 90%);
 }*/

@@ -5,7 +5,7 @@ import Footer from '../../components/Footer.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
 import Card from '../../layouts/Cardsq.astro';
 
-const res = await fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=9&_fields=title,slug,yoast_head_json,categories&categories=578");
+const res = await fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=9&_fields=title,slug,yoast_head_json,categories,_links,_embedded&categories=578");
 const posts = await res.json();
 ---
 
@@ -21,7 +21,7 @@ const posts = await res.json();
 		<main>
             <div class="container my-12 mx-auto px-4 md:px-12">
 				<h1 class="audiowide neon-azul text-center md:text-left pt-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl">Purple Noise</h1>
-                <section class="flex flex-wrap -mx-1 lg:-mx-4">
+                <section class="grid gap-4 grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 md:gap-16 xl:gap-16">
                     {
                         posts.map((post:any) => ( 
                         <>

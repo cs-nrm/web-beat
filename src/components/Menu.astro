@@ -1,28 +1,132 @@
 ---
 ---
-
-<nav class="flex w-full h16 b-transparent items-center justify-between p-2 relative ">
+<div class="flex w-full h16 b-transparent items-center justify-between p-2 relative poppins">
     <div class="main-logo h16 pl-[25px]"> <a href="/"><img src="/img/LOGO_BEAT.svg" /></a></div>
-    <div class="links-menu flex gap-4 text-white "> 
+    <!--div class="links-menu flex items-center gap-4 text-white "> 
         <div class="link-menu"> <a href="/news">BeatNews</a></div>
         <div class="link-menu"> <a href="/playlist">Playlist</a></div>
         <div class="link-menu"> <a href="/podcast/groove-dealers">Podcast</a></div>
         <div class="link-menu"> <a href="/promociones">Promociones</a></div>
         <div class="link-menu"> <a href="/nerdosis">Nerdosis</a></div>
         <div class="link-menu"> <a href="#">Más Secciones</a></div>
+    </div-->
+    <div id="container" class="links-menu flex items-center gap-4 text-white ">
+      <nav>
+        <ul>
+            <li><a href="/news">Beat News</a></li>
+            <li><a href="/playlist">Playlist</a></li>
+            <li class="dd-menu">Podcast
+            <!-- First Tier Drop Down -->
+            <ul>
+                <li><a href="/podcast/groove-dealers">Groove Dealers</a></li>
+                <li><a href="/podcast/respira">Respira</a></li>
+                <li><a href="/podcast/expedientes-secretos">Expedientes Secretos</a></li>
+                <li><a href="/podcast/nerdosis">Nerdosis</a></li>
+                <li><a href="/podcast/dos-equis-mixx">Dos Equis Mixx</a></li>
+            </ul>        
+            </li>
+            <li><a href="/promociones">Promociones</a></li>
+            <li><a href="/nerdosis">Nerdosis</a></li>
+            <li class="dd-menu">Más Secciones
+              <!-- First Tier Drop Down -->
+              <ul>
+                  <li><a href="/purple-noise">Purple Noise</a></li>
+                  <li><a href="/programacion">Programación</a></li>
+                  <li><a href="/beat-trends">Beat Trends</a></li>
+                  <li><a href="/beat-ten">Beat Ten</a></li>
+                  <li><a href="/beat-recordings">Beat Recordings</a></li>
+                  <li><a href="/lanzamientos">Lanzamientos</a></li>
+                  <!--li><a href="#">Tutorials</a> SECOND AND THIRD DROP DOWN
+                  <ul>
+                      <li><a href="#">HTML/CSS</a></li>
+                      <li><a href="#">jQuery</a></li>
+                      <li><a href="#">Other</a>
+                          <ul>
+                              <li><a href="#">Stuff</a></li>
+                              <li><a href="#">Things</a></li>
+                              <li><a href="#">Other Stuff</a></li>
+                          </ul>
+                      </li>
+                  </ul>
+                  </li-->
+              </ul>
+            </li>
+        </ul>
+      </nav>
     </div>
     <button class="radio-button">
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.4 2.3 6.2 0 8.5"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/></svg>
       Radio en Vivo 100.1 FM
     </button>
-</nav>
+</div>
 <div class="opacity-back"></div>
 <style>
-nav {font-family: 'Roboto';}
+
 /*nav::before {content:''; width: 100%; height: 100%; position: absolute; background:black; top:0; z-index: -1;}*/
+.link-menu{height: 39px;}
 .link-menu a {color:white;  font-size: 14px;}
 .main-logo {  width: 100px; height: 100%;}
 .main-logo img{ width: 100%; height: auto;}
 button.radio-button {    display: flex;    align-items: center;    gap: 7px;      font-size: 15px;  color: #ffaa1f;}
 .opacity-back {position: absolute;    top: 0;    left: 0;    backdrop-filter: brightness(60%) blur(16px);    width: 100%;    height: 100%;    z-index: -1;  }
+
+nav ul {
+	padding: 0;
+  margin: 0;
+	list-style: none;
+	position: relative;
+}
+	
+nav ul li {
+	display:inline-block;
+}
+
+nav a, .dd-menu {
+	display:block;
+	padding:0 10px;	
+	color:#FFF;
+	font-size:14px;
+	text-decoration:none;
+  position: relative;
+}
+
+nav a:hover, dd-menu:hover { 
+	background-color: #000000; 
+}
+
+/* Hide Dropdowns by Default */
+nav ul ul {
+	display: none;
+	position: absolute; 
+  backdrop-filter: brightness(60%) blur(16px);
+  top: 25px;
+  left: 0;
+}
+	
+/* Display Dropdowns on Hover */
+nav ul li:hover > ul {
+	display:inherit;
+}
+	
+/* Fisrt Tier Dropdown */
+nav ul ul li {
+	width:150px;
+	float:none;
+	display:list-item;
+	position: relative;
+}
+
+/* Second, Third and more Tiers	*/
+nav ul ul ul li {
+	position: relative;
+	top:-60px; 
+	left:170px;
+}
+
+	
+/* Change this in order to change the Dropdown symbol */
+li > a:after, .dd-menu:after { content:  ' ▼'; font-size: 10px;}
+li > a:only-child:after, li > .dd-menu:only-child:after { content: ''; }
+
+
 </style>

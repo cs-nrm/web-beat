@@ -22,7 +22,7 @@
 
 	--yellow-beat: #ffeb3b;
 	--gray-beat: #d4d4d8;
-  --azul-neon: #FFAA1F;
+  --amarillo-beat: #FFAA1F;
   
 
 	--border: hsl(280 10% 50% / 1);
@@ -98,7 +98,7 @@ body {
 }
 
 
-header {  overflow: hidden; position: sticky; top: 0;  z-index: 9999; }
+header {position: sticky; top: 0;  z-index: 9999; }
 
 main {
 	width: 100%;
@@ -149,10 +149,10 @@ b {
 	font-weight: 700;
 }
 a {
-	color: var(--azul-neon);
+	color: var(--amarillo-beat);
 }
 a:hover {
-	color: var(--azul-neon);
+	color: var(--amarillo-beat);
 }
 p {
 	margin-bottom: 1em;
@@ -187,7 +187,7 @@ pre > code {
 	all: unset;
 }
 blockquote {
-	border-left: 4px solid var(--azul-neon);
+	border-left: 4px solid var(--amarillo-beat);
 	padding: 0 0 0 20px;
 	margin: 0px;
 	font-size: 1.333em;
@@ -536,7 +536,7 @@ article iframe.iframe-class{
   color: var(--gray-beat);
 }
 .card article a:hover h2{
-  color: var(--azul-neon);
+  color: var(--amarillo-beat);
 }
 
 /*.card .text{

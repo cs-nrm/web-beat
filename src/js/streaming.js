@@ -481,7 +481,8 @@ document.addEventListener('astro:page-load', ev => {
             const range3 = range * 3;
             const range4 = range * 4;
             const range5 = range * 5;
-    
+
+            const header = $('header');
             
             window.addEventListener('scroll', function(e){
                // console.log(window.scrollY );
@@ -510,6 +511,17 @@ document.addEventListener('astro:page-load', ev => {
                     document.styleSheets[1].addRule('body::before','transition: filter 0.5s ease-in-out;');
                 }
 
+
+
+                if (header.hasClass('is-pinned') ){
+                    header.addClass('compress');
+                    $('header .logo').addClass('compress-logo');
+                }
+                if($(document).scrollTop() <= 1){
+                    header.css('position','sticky');
+                    header.removeClass('compress');
+                    $('header .logo').removeClass('compress-logo');
+                }
             });
         });
     })(jQuery);

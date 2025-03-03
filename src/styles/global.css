@@ -97,8 +97,17 @@ body {
         opacity: 1;*/
 }
 
-
+.compress{  height: 50px; transition: height 0.5s; position: fixed; width: 100%;}
 header {position: sticky; top: 0;  z-index: 9999; }
+header .logo img{
+  height: 70px;
+  transition: all 0.5s;
+}
+
+header .compress-logo img{
+  height: 35px;
+  transition: all 0.5s;
+}
 
 main {
 	width: 100%;

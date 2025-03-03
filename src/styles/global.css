@@ -35,8 +35,8 @@
     --page-padding-inline: 60px;
     --color-black: 0, 0%, 0%;
 }
-.yellow-beat{
-	color: #ffeb3b;
+.amarillo-beat{
+	color: var(--amarillo-beat);
 }
 .gray-beat{
 	color: #868583;
@@ -305,12 +305,12 @@ hr {
 
 .tabs.programacion .tab-wrapper{
   padding: 0 10px;
-  text-shadow: 2px 2px 5px #09e6f1;
+  text-shadow: 2px 2px 5px var(--amarrillo-beat);
   color: white;
 }
 .tabs.programacion .tab-wrapper input:checked + label, .tabs.programacion .tab-wrapper label:hover{
     text-shadow: 1px 2px rgb(14 14 14 / 61%);
-    text-shadow: 0 0 0px #fff, 0 0 10px #09e6f1, 0 0 20px #09e6f1, 0 0 30px #09e6f1;
+    text-shadow: 0 0 0px #fff, 0 0 10px var(--amarillo-beat), 0 0 20px var(--amarillo-beat), 0 0 30px var(--amarillo-beat);
 }
 
 /* CONTENIDO NOTAS */

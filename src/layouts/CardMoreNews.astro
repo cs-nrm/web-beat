@@ -50,13 +50,13 @@ switch (post.categories[0]){
 ---
 
 <div class="card w-full p-4">
-    <div class="overflow-hidden bg-zinc-800 rounded-lg hover:shadow-[0_2px_12px_6px_rgba(9,230,241,0.5)] group">
+    <div class="overflow-hidden bg-zinc-800 rounded-lg hover:shadow-[0_2px_12px_6px_rgba(255,170,32,0.5)] group">
         <a href={`/${url_seccion}/${post.slug}/`}>
-            <img class="block h-auto w-full aspect-video object-cover group-hover:text-[#09e6f1]" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} />
+            <img class="block h-auto w-full aspect-video object-cover group-hover:text-[var(--amarillo-beat)]" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} />
         </a>
         <div class="flex items-center justify-between leading-tight px-2">
             <a class="no-underline" href={`/${url_seccion}/${post.slug}/`}>
-                <h2 class="text-base text-gray-200 group-hover:text-[#09e6f1] font-bold leading-normal" set:html={post.title.rendered}></h2>
+                <h2 class="text-base text-gray-200 group-hover:text-[var(--amarillo-beat)] font-bold leading-normal" set:html={post.title.rendered}></h2>
             </a>
         </div>
         <div class="flex items-center justify-between text-xs font-bold uppercase text-gray-500 px-2">            

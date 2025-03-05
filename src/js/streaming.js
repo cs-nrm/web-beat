@@ -121,7 +121,6 @@ const secchome = document.getElementById('home');
         streaming.stop();
       }
 
-   
       function errorAd(e){        
         /*streaming.play({
             station:'XHSONFM',

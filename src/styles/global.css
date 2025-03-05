@@ -575,3 +575,10 @@ article iframe.iframe-class{
 .slider-promociones .flickity-prev-next-button.next {
     right: 8% !important;
 }
+
+@media (max-width: 768px) {
+  .flickity-prev-next-button {
+    width: 50px !important;
+    height: 50px !important;
+  }
+}

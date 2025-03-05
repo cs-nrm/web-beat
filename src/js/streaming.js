@@ -410,6 +410,9 @@ $('#radiobutton').on('click',function(){
 $('#return-live').on('click',function(){    
        playstopRadio();    
 });
+$('.radio-link').on('click',function(){    
+       playstopRadio();    
+});
 
 
 /*$('#play-pause').on('click', function(){

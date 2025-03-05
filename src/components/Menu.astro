@@ -86,8 +86,10 @@
 }
 
 .links-menu nav{
-  overflow: auto;
   white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: visible;
+
 }
 
 
@@ -105,6 +107,7 @@ nav ul {
   margin: 0;
 	list-style: none;
 	position: relative;
+  overflow: visible;
 }
 	
 nav ul li {
@@ -119,6 +122,7 @@ nav a, .dd-menu {
 	text-decoration:none;
   position: relative;
   line-height: 2.2;
+  overflow: visible;
 }
 
 nav a:hover, dd-menu:hover { 
@@ -132,6 +136,7 @@ nav ul ul {
   backdrop-filter: brightness(60%) blur(16px);
   top: 25px;
   left: 0;
+  overflow: visible;
 }
 	
 /* Display Dropdowns on Hover */

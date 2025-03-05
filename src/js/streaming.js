@@ -49,7 +49,7 @@ const secchome = document.getElementById('home');
      function getStatus(s){
         local_status = s.data.code;
         const secchome = document.getElementById('home');        
-         console.log(local_status);
+         //console.log(local_status);
          if( local_status == 'GETTING_STATION_INFORMATION' || local_status == 'LIVE_CONNECTING' || local_status == 'LIVE_BUFFERING' ){
             document.getElementById('loading').classList.add('show');
             document.getElementById('loading').classList.remove('hide');
@@ -81,23 +81,30 @@ const secchome = document.getElementById('home');
      
 
     function completeAd(e){        
+        console.log('finaniizo pub');
         streaming.play({
             station:'XHSONFM',
             trackingParameters:{
             Dist: 'WebBeat'
             }
-        });        
+        }); 
+        $('#td_container').width('1px');
+        $('#td_container').height('1px');       
       }
 
       function startAd(e){
-        console.log(local_status);                
+
+        console.log('entro a pub');                
         streaming.playAd( 'vastAd', { url:'https://pubads.g.doubleclick.net/gampad/ads?sz=600x360&iu=/21799830913/Beat/VideoVast&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&url=[referrer_url]&description_url=[description_url]&correlator=[timestamp]' } );
+        $('#td_container').width('600px');
+        $('#td_container').height('360px');
       }
       
       function pause(){
         streaming.pause();
       }
 
+      /*
       function play(){
         streaming.play({
             station:'XHSONFM',
@@ -106,6 +113,8 @@ const secchome = document.getElementById('home');
             }
         });        
       }
+      */
+   
 
       function stop(){
         console.log('stopped');
@@ -114,12 +123,13 @@ const secchome = document.getElementById('home');
 
    
       function errorAd(e){        
-        streaming.play({
+        /*streaming.play({
             station:'XHSONFM',
             trackingParameters:{
             Dist: 'WebBeat'
             }
-        });
+        });*/
+        console.log('error ad');
         
       }
     /* Callback function called to notify that the SDK is ready to be used */
@@ -174,7 +184,7 @@ const secchome = document.getElementById('home');
             })
             .then((data) => {                
                 switch( data.categoria ){
-                    case 'PCRADIOS' :
+                    case 'COMERCIALES' :
                         artist = 'CORTE';
                         cancion = '';
                     break;
@@ -347,7 +357,7 @@ const videoActive = function(){
 }
 
 const radioStop = function(){
-        streaming.pause();
+        streaming.stop();
         $('#player').attr('data-status','init');                
         hidebarra();
         $('#player-inner').removeClass('active');
@@ -360,12 +370,13 @@ const playerstatus = function(){
 };
 
 const playstopRadio = function(){
-            console.log(local_status);
+            console.log('un click');
+            //console.log(local_status);
             const getplayingstatus = playerstatus();
-            console.log(getplayingstatus);
-            if (getplayingstatus == 'init'){
+            //console.log(getplayingstatus);
+           /* if (getplayingstatus == 'init'){
                 openbarra();
-            }
+            }*/
             
             if(getplayingstatus == 'podcast-playing'){
                 transitionBarra();
@@ -378,17 +389,12 @@ const playstopRadio = function(){
             }
 
             if( local_status == null || local_status == 'undefined' || local_status == '' || local_status == 'LIVE_STOP' ){                
-                //streaming.playAd( 'vastAd', { url:'https://pubads.g.doubleclick.net/gampad/ads?sz=600x360&iu=/21799830913/Oye/VASTPrueba&ciu_szs=600x360&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&url=[referrer_url]&description_url=[description_url]&correlator=[timestamp]' } );
-                streaming.play({
-                    station:'XHSONFM',
-                    trackingParameters:{
-                    Dist: 'WebBeat'
-                    }
-                });     
+                console.log('aqui mando a pub desde el boton start');
+                startAd();     
 
-             $('#player').attr('data-status','radio-playing');
-             transitionBarra(); 
-             radioActive();   
+                $('#player').attr('data-status','radio-playing');
+                //transitionBarra(); 
+                radioActive();   
             }else if( local_status == 'LIVE_PLAYING' || local_status == 'GETTING_STATION_INFORMATION' || local_status == 'LIVE_CONNECTING' || local_status == 'LIVE_BUFFERING'){                
                 radioStop();
             }
@@ -404,9 +410,9 @@ $('#return-live').on('click',function(){
 });
 
 
-$('#play-pause').on('click', function(){
+/*$('#play-pause').on('click', function(){
     playstopRadio();
-});
+});*/
 
 
 
@@ -610,9 +616,9 @@ document.addEventListener('astro:page-load', ev => {
         hidebarra();
     }
 
-    $('#big-play').on('click', function(){
+   /* $('#big-play').on('click', function(){
         playstopRadio();
-    });
+    });*/
     
     $('.audiopod').each(function(){   
         $(this).on('click',function(){

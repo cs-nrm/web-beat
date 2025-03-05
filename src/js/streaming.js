@@ -55,7 +55,7 @@ const secchome = document.getElementById('home');
             document.getElementById('loading').classList.remove('hide');
             document.getElementById('play-pause').classList.remove('show');
             document.getElementById('play-pause').classList.add('hide'); 
-            if(secchome){  document.getElementById('big-play').innerHTML = buttongLoading;    }
+            document.getElementById('big-play').innerHTML = buttongLoading;    
             
          }
          if (local_status == 'LIVE_PLAYING'){                        
@@ -64,7 +64,7 @@ const secchome = document.getElementById('home');
             document.getElementById('loading').classList.add('hide');
             document.getElementById('play-pause').classList.add('show');
             document.getElementById('play-pause').classList.remove('hide'); 
-            if(secchome){   document.getElementById('big-play').innerHTML = bigButtonPause; }
+            document.getElementById('big-play').innerHTML = bigButtonPause; 
             
          }
          if(local_status == 'LIVE_STOP' || local_status == 'LIVE_PAUSE') {
@@ -72,16 +72,14 @@ const secchome = document.getElementById('home');
             document.getElementById('loading').classList.add('hide');
             document.getElementById('play-pause').classList.add('show');
             document.getElementById('play-pause').classList.remove('hide'); 
-            document.getElementById('play-pause').innerHTML = buttonPlay;
-            
-            if(secchome){ document.getElementById('big-play').innerHTML = bigButtonPlay;  }
+            document.getElementById('play-pause').innerHTML = buttonPlay;            
+            document.getElementById('big-play').innerHTML = bigButtonPlay;  
          }
 
      }
      
 
-    function completeAd(e){        
-        console.log('finaniizo pub');
+    function completeAd(e){                
         streaming.play({
             station:'XHSONFM',
             trackingParameters:{
@@ -93,18 +91,22 @@ const secchome = document.getElementById('home');
       }
 
       function startAd(e){
-
-        console.log('entro a pub');                
-        streaming.playAd( 'vastAd', { url:'https://pubads.g.doubleclick.net/gampad/ads?sz=600x360&iu=/21799830913/Beat/VideoVast&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&url=[referrer_url]&description_url=[description_url]&correlator=[timestamp]' } );
         $('#td_container').width('600px');
         $('#td_container').height('360px');
+        document.getElementById('big-play').innerHTML = buttongLoading;    
       }
       
+      var start = function(){
+        console.log('trata la pub primero');    
+        streaming.playAd( 'vastAd', { url:'https://pubads.g.doubleclick.net/gampad/ads?sz=600x360&iu=/21799830913/Beat/VideoVast&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&url=[referrer_url]&description_url=[description_url]&correlator=[timestamp]' } );	        
+      };
+
+
       function pause(){
         streaming.pause();
       }
 
-      /*
+      
       function play(){
         streaming.play({
             station:'XHSONFM',
@@ -113,7 +115,7 @@ const secchome = document.getElementById('home');
             }
         });        
       }
-      */
+      
    
 
       function stop(){
@@ -122,12 +124,13 @@ const secchome = document.getElementById('home');
       }
 
       function errorAd(e){        
-        /*streaming.play({
+        streaming.play({
             station:'XHSONFM',
             trackingParameters:{
             Dist: 'WebBeat'
             }
-        });*/
+        });
+        console.log(e);
         console.log('error ad');
         
       }
@@ -369,10 +372,10 @@ const playerstatus = function(){
 };
 
 const playstopRadio = function(){
-            console.log('un click');
-            //console.log(local_status);
+            
+            console.log(local_status);
             const getplayingstatus = playerstatus();
-            //console.log(getplayingstatus);
+            console.log(getplayingstatus);
            /* if (getplayingstatus == 'init'){
                 openbarra();
             }*/
@@ -387,10 +390,9 @@ const playstopRadio = function(){
                 
             }
 
-            if( local_status == null || local_status == 'undefined' || local_status == '' || local_status == 'LIVE_STOP' ){                
-                console.log('aqui mando a pub desde el boton start');
-                startAd();     
-
+            if( local_status == null || local_status == 'undefined' || local_status == '' || local_status == 'LIVE_STOP' ){                                
+                console.log('aqui debe iniciar');
+                start();     
                 $('#player').attr('data-status','radio-playing');
                 //transitionBarra(); 
                 radioActive();   
@@ -401,6 +403,7 @@ const playstopRadio = function(){
 
 
 $('#radiobutton').on('click',function(){    
+        console.log('click en radiobutton');
         playstopRadio();      
 });
 
@@ -556,10 +559,10 @@ document.addEventListener('astro:page-load', ev => {
     const secchome = document.getElementById('home');
     if ( secchome ){
         getInfoProg();
-        
-        if( getplayingstatus == 'radio-playing'){
+        console.log(getplayingstatus);
+        /*if( getplayingstatus == 'radio-playing'){
              document.getElementById('big-play').innerHTML = bigButtonPause; 
-        }
+        }*/
 
                 var elem = document.querySelector('.carousel-main');
         var flkty = new Flickity( elem, {
@@ -595,8 +598,6 @@ document.addEventListener('astro:page-load', ev => {
             pageDots: false
             //autoPlay: true
         });
-
-
 
 
     }

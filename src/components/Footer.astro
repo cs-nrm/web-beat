@@ -284,6 +284,7 @@ import { Image } from 'astro:assets';
 .app-buttons {
   display: flex;
   gap: 0.5rem;
+  justify-content: center;
 }
 
 .app-buttons a {
@@ -440,10 +441,11 @@ margin-top: 40px;
     text-align: center;
   }
   .footer-container{
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(1, 1fr);
   }
   .footer-container .redes{
     grid-column: span 2/2;
+    text-align: center;
   }
 }
 @media (max-width: 600px) {

@@ -21,7 +21,7 @@ const posts = await res.json();
                 <!--div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-gray-800 via-transparent to-transparent opacity-50"></div-->
                 <div class="text relative inline-block p-3 text-xl sm:text-sm text-white md:text-3xl leading-tight md:leading-none w-full text-center"><p set:html={posts[0].title.rendered}></p></div>
             </a>
-            <div class="texto-nota poppins px-3 pb-6 ">
+            <div class="texto-nota poppins hidden md:block px-3 pb-6 ">
               <div class="text-uno">
                 <p set:html={posts[0].excerpt.rendered} /></p>
               </div>
@@ -29,7 +29,7 @@ const posts = await res.json();
           </article>
         </div>
         
-        <h1 class="text-left md:text-left py-4 mt-16 mb-8 font-bold text-white text-4xl md:text-5xl lg:text-4xl xl:text-5xl">#BeatNews</h1>
+        <h1 class="text-left md:text-left py-4 mt-8 mb-8 font-bold text-white text-4xl md:text-5xl lg:text-4xl xl:text-5xl">#BeatNews</h1>
         <div class="grid gap-4 grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 md:gap-16 xl:gap-16">
           
           <div class="card">

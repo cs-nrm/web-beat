@@ -67,6 +67,7 @@ const secchome = document.getElementById('home');
             document.getElementById('big-play').innerHTML = bigButtonPause; 
            // $('.text-player').html('');
             $('.text-player').attr('id','infoMusic');
+            getInfoMusic();
             
          }
          if(local_status == 'LIVE_STOP' || local_status == 'LIVE_PAUSE') {

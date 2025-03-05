@@ -11,11 +11,11 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.4.1",
-    "@astrojs/mdx": "^2.1.0",
+    "@astrojs/mdx": "^4.1.0",
     "@astrojs/rss": "^4.0.3",
     "@astrojs/sitemap": "^3.0.5",
     "@astrojs/tailwind": "^5.1.0",
-    "astro": "^4.2.4",
+    "astro": "^5.4.2",
     "astro-tabs": "^0.1.8",
     "dayjs": "^1.11.11",
     "flickity": "^3.0.0",

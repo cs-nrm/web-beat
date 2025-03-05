@@ -9,8 +9,8 @@
         </div>
         <div class="text-center leading-normal">Streaming en vivo</div-->
         <!--img src="https://storage.googleapis.com/nrm-web/beat/resources/img/live-on-air.png" width="300" height="120" alt="En vivo" /-->
-        <div class="player-float flex items-center">
-            <div id="big-play" class="z-10  border-4 rounded-full border-black cursor-pointer w-[20%]" >
+        <div class="player-float flex items-center" transition:persist>
+            <div id="big-play" class="z-10  border-4 rounded-full border-black cursor-pointer w-[20%]" transition:persist>
                 <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-play" width="35" height="35" viewBox="0 0 24 24" stroke-width="1.5" stroke="#000" fill="#000" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                     <path d="M7 4v16l13 -8z" />
@@ -18,13 +18,11 @@
             </div>
             <div class="logo-player w-[40%]"><img src="/img/beat-digital-logo.png" /> </div>
             <div class="text-player text-center text-[10px] w-[40%]"> ESCUCHA LA RADIO EN VIVO AHORA</div>
-        </div>
-
-        
-        
+        </div>            
 </div>
+<div id="td_container" class="w-1 h-1 absolute bottom-16 right-0"></div>
 <div id="player" class="w-[100%] lg:w-10/12 m-auto fixed bottom-0 left-0 right-0 border-black  rounded-t-lg bg-white z-100 border-b-0 h-0" transition:persist data-status="init">
-    <div id="td_container" class="w-1 h-1 absolute bottom-16 right-0"></div>
+    
     <div id="player-inner" class="flex h-16 items-center hide transition:persist">        
         <div class="w-3/4 lg:w-2/4 flex">
             <div class="label-ahora">Ahora escuchas: </div>

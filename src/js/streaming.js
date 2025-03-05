@@ -65,6 +65,8 @@ const secchome = document.getElementById('home');
             document.getElementById('play-pause').classList.add('show');
             document.getElementById('play-pause').classList.remove('hide'); 
             document.getElementById('big-play').innerHTML = bigButtonPause; 
+           // $('.text-player').html('');
+            $('.text-player').attr('id','infoMusic');
             
          }
          if(local_status == 'LIVE_STOP' || local_status == 'LIVE_PAUSE') {
@@ -73,7 +75,9 @@ const secchome = document.getElementById('home');
             document.getElementById('play-pause').classList.add('show');
             document.getElementById('play-pause').classList.remove('hide'); 
             document.getElementById('play-pause').innerHTML = buttonPlay;            
-            document.getElementById('big-play').innerHTML = bigButtonPlay;  
+            document.getElementById('big-play').innerHTML = bigButtonPlay; 
+            $('.text-player').html('ESCUCHA LA RADIO EN VIVO AHORA'); 
+            $('.text-player').attr('id','');
          }
 
      }
@@ -187,6 +191,10 @@ const secchome = document.getElementById('home');
             .then((data) => {                
                 switch( data.categoria ){
                     case 'COMERCIALES' :
+                        artist = 'CORTE';
+                        cancion = '';
+                    break;
+                    case 'DROP' :
                         artist = 'CORTE';
                         cancion = '';
                     break;
@@ -373,9 +381,9 @@ const playerstatus = function(){
 
 const playstopRadio = function(){
             
-            console.log(local_status);
+            //console.log(local_status);
             const getplayingstatus = playerstatus();
-            console.log(getplayingstatus);
+            //console.log(getplayingstatus);
            /* if (getplayingstatus == 'init'){
                 openbarra();
             }*/
@@ -391,7 +399,7 @@ const playstopRadio = function(){
             }
 
             if( local_status == null || local_status == 'undefined' || local_status == '' || local_status == 'LIVE_STOP' ){                                
-                console.log('aqui debe iniciar');
+                //console.log('aqui debe iniciar');
                 start();     
                 $('#player').attr('data-status','radio-playing');
                 //transitionBarra(); 

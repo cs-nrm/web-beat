@@ -113,7 +113,7 @@ main {
 	width: 100%;
 	/*max-width: calc(100% - 1em);*/
 	margin: auto;
-	overflow: hidden;
+	/*overflow: hidden;*/
   position: relative;
 }
 body::before{

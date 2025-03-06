@@ -67,7 +67,7 @@ const secchome = document.getElementById('home');
             document.getElementById('big-play').innerHTML = bigButtonPause; 
            // $('.text-player').html('');
             //$('.text-player').attr('id','infoMusic');
-            $('.text-player').html('<div>Estas escuchando...</div><div id="infoMusic" style="line-height:10px;"></div>');
+            $('.text-player').html('<div style="font-weight:bold;">Estas escuchando...</div><div id="infoMusic" style="line-height:10px; font-size:12px;"></div>');
             $('.text-player').addClass('playing');
             $('#radiobutton').addClass('playerplaying');
             getInfoMusic();
@@ -80,11 +80,14 @@ const secchome = document.getElementById('home');
             document.getElementById('play-pause').classList.remove('hide'); 
             document.getElementById('play-pause').innerHTML = buttonPlay;            
             document.getElementById('big-play').innerHTML = bigButtonPlay; 
-            $('.text-player').html('ESCUCHA LA RADIO EN VIVO AHORA'); 
-            
-            //$('.text-player').attr('id','');
             $('.text-player').removeClass('playing');
             $('#radiobutton').removeClass('playerplaying');
+            $('.text-player').html('');
+            setTimeout( function(){
+                $('.text-player').html('ESCUCHA LA RADIO EN VIVO AHORA');             
+            },1000);
+                
+            //$('.text-player').attr('id','');            
          }
 
      }

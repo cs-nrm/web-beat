@@ -108,7 +108,7 @@ const secchome = document.getElementById('home');
         $('#td_container').width('600px');
         $('#td_container').height('360px');
         document.getElementById('big-play').innerHTML = buttongLoading;    
-        $('.text-player').html('<div style="font-style: italic;">Escucharás el radio en vivo al finalizar la publicidad</div>'); 
+        $('.text-player').html('<div style="font-style: italic;">Iniciará la reproducción luego del anuncio...</div>'); 
       }
       
       var start = function(){

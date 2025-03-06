@@ -67,7 +67,7 @@ const secchome = document.getElementById('home');
             document.getElementById('big-play').innerHTML = bigButtonPause; 
            // $('.text-player').html('');
             //$('.text-player').attr('id','infoMusic');
-            $('.text-player').html('<div style="font-weight:bold;">Estas escuchando...</div><div id="infoMusic" style="line-height:10px; font-size:12px;"></div>');
+            $('.text-player').html('<div style="font-weight:bold;">Estas escuchando...</div><div id="infoMusic" style="line-height:11px; font-size:12px;"></div>');
             $('.text-player').addClass('playing');
             $('#radiobutton').addClass('playerplaying');
             getInfoMusic();
@@ -84,7 +84,7 @@ const secchome = document.getElementById('home');
             $('#radiobutton').removeClass('playerplaying');
             $('.text-player').html('');
             setTimeout( function(){
-                $('.text-player').html('ESCUCHA LA RADIO EN VIVO AHORA');             
+                $('.text-player').html('ESCUCHA LA RADIO EN VIVO <span style="color: #df104a;    font-weight: bold;    font-size: 12px;">GRATIS</span> AHORA');             
             },1000);
                 
             //$('.text-player').attr('id','');            
@@ -100,18 +100,21 @@ const secchome = document.getElementById('home');
             Dist: 'WebBeat'
             }
         }); 
-        $('#td_container').width('1px');
-        $('#td_container').height('1px');       
+        //$('#td_container').width('1px');
+        //$('#td_container').height('1px');       
+        $('#td_container').removeClass('pub_active');
       }
 
       function startAd(e){
-        $('#td_container').width('600px');
-        $('#td_container').height('360px');
+        //$('#td_container').width('600px');
+        //$('#td_container').height('360px');
+        $('#td_container').addClass('pub_active');
         document.getElementById('big-play').innerHTML = buttongLoading;    
+        $('.text-player').html('<div style="font-style: italic; line-height:11px; font-weight:bold; font-size:11px;">Iniciamos después del anuncio...</div>'); 
       }
       
       var start = function(){
-        console.log('trata la pub primero');    
+        //console.log('trata la pub primero');    
         streaming.playAd( 'vastAd', { url:'https://pubads.g.doubleclick.net/gampad/ads?sz=600x360&iu=/21799830913/Beat/VideoVast&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&url=[referrer_url]&description_url=[description_url]&correlator=[timestamp]' } );	        
       };
 
@@ -128,8 +131,7 @@ const secchome = document.getElementById('home');
             Dist: 'WebBeat'
             }
         });        
-      }
-      
+      }      
    
 
       function stop(){
@@ -201,19 +203,19 @@ const secchome = document.getElementById('home');
             .then((data) => {                
                 switch( data.categoria ){
                     case 'COMERCIALES' :
-                        artist = 'CORTE';
+                        artist = 'PAUSA COMERCIAL';
                         cancion = '';
                     break;
                     case 'DROP' :
-                        artist = 'CORTE';
+                        artist = 'PAUSA COMERCIAL';
                         cancion = '';
                     break;
                     case 'NUEVA PRODUCCION' :
-                        artist = 'CORTE';
+                        artist = 'PAUSA COMERCIAL';
                         cancion = '';
                     break;
                     case 'ELEMENTOS' :
-                        artist = 'CORTE';
+                        artist = 'PAUSA COMERCIAL';
                         cancion = '';
                     break;
                     

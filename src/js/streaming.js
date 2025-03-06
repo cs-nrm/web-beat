@@ -67,7 +67,7 @@ const secchome = document.getElementById('home');
             document.getElementById('big-play').innerHTML = bigButtonPause; 
            // $('.text-player').html('');
             //$('.text-player').attr('id','infoMusic');
-            $('.text-player').html('<div style="font-weight:bold;">Estas escuchando...</div><div id="infoMusic" style="line-height:10px; font-size:12px;"></div>');
+            $('.text-player').html('<div style="font-weight:bold;">Estas escuchando...</div><div id="infoMusic" style="line-height:11px; font-size:12px;"></div>');
             $('.text-player').addClass('playing');
             $('#radiobutton').addClass('playerplaying');
             getInfoMusic();

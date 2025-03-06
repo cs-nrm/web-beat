@@ -84,7 +84,7 @@ const secchome = document.getElementById('home');
             $('#radiobutton').removeClass('playerplaying');
             $('.text-player').html('');
             setTimeout( function(){
-                $('.text-player').html('ESCUCHA LA RADIO EN VIVO AHORA');             
+                $('.text-player').html('ESCUCHA LA RADIO EN VIVO GRATIS AHORA');             
             },1000);
                 
             //$('.text-player').attr('id','');            
@@ -108,10 +108,11 @@ const secchome = document.getElementById('home');
         $('#td_container').width('600px');
         $('#td_container').height('360px');
         document.getElementById('big-play').innerHTML = buttongLoading;    
+        $('.text-player').html('Escucharás el radio en vivo al finalizar la publicidad'); 
       }
       
       var start = function(){
-        console.log('trata la pub primero');    
+        //console.log('trata la pub primero');    
         streaming.playAd( 'vastAd', { url:'https://pubads.g.doubleclick.net/gampad/ads?sz=600x360&iu=/21799830913/Beat/VideoVast&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&url=[referrer_url]&description_url=[description_url]&correlator=[timestamp]' } );	        
       };
 
@@ -128,8 +129,7 @@ const secchome = document.getElementById('home');
             Dist: 'WebBeat'
             }
         });        
-      }
-      
+      }      
    
 
       function stop(){

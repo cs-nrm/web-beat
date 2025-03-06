@@ -69,6 +69,7 @@ const secchome = document.getElementById('home');
             //$('.text-player').attr('id','infoMusic');
             $('.text-player').html('<div>Estas escuchando...</div><div id="infoMusic" style="line-height:10px;"></div>');
             $('.text-player').addClass('playing');
+            $('#radiobutton').addClass('playerplaying');
             getInfoMusic();
             
          }
@@ -83,6 +84,7 @@ const secchome = document.getElementById('home');
             
             //$('.text-player').attr('id','');
             $('.text-player').removeClass('playing');
+            $('#radiobutton').removeClass('playerplaying');
          }
 
      }

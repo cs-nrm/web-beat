@@ -1,4 +1,4 @@
-<div id="radiobutton" class="text-black border-1 p-4  bottom-[5px]  right-[0px] md:right-[0px] md:bottom-[50%] cursor-pointer w-[250px] z-[10000] fixed flex items-center" transition:persist> 
+<div id="radiobutton" class="text-black border-1 p-4  bottom-[5px]  right-[0px] md:right-[0px] md:bottom-[50%] cursor-pointer  z-[10000] fixed flex items-center" transition:persist> 
         <!--div>
         <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-broadcast" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#343443" fill="none" stroke-linecap="round" stroke-linejoin="round">
             <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
@@ -10,14 +10,14 @@
         <div class="text-center leading-normal">Streaming en vivo</div-->
         <!--img src="https://storage.googleapis.com/nrm-web/beat/resources/img/live-on-air.png" width="300" height="120" alt="En vivo" /-->
         <div class="player-float flex items-center" transition:persist>
-            <div id="big-play" class="z-10  border-4 rounded-full border-black cursor-pointer w-[20%]" transition:persist>
+            <div id="big-play" class="z-10  border-4 rounded-full border-black cursor-pointer w-[45px]" transition:persist>
                 <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-play" width="35" height="35" viewBox="0 0 24 24" stroke-width="1.5" stroke="#000" fill="#000" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                     <path d="M7 4v16l13 -8z" />
                 </svg>
             </div>
-            <div class="logo-player w-[40%]"><img src="/img/beat-digital-logo.png" /> </div>
-            <div class="text-player text-center text-[10px] w-[40%]"> ESCUCHA LA RADIO EN VIVO AHORA</div>
+            <div class="logo-player w-[85px]"><img src="/img/beat-digital-logo.png" /> </div>
+            <div class="text-player text-center text-[10px] "> ESCUCHA LA RADIO EN VIVO AHORA</div>
         </div>            
 </div>
 <div id="td_container" class="w-1 h-1 absolute bottom-16 right-0"></div>
@@ -61,11 +61,18 @@
     </div>
 </div>
 <style>
-#radiobutton { background: rgb(255,221,89);    background: linear-gradient(90deg, rgba(255,221,89,1) 0%, rgba(255,154,78,1) 85%); border-top-left-radius: 35px;    border-bottom-left-radius: 35px;}
+#radiobutton { width: 250px; transition: all 0.5s; background: rgb(255,221,89);    background: linear-gradient(90deg, rgba(255,221,89,1) 0%, rgba(255,154,78,1) 85%); border-top-left-radius: 35px;    border-bottom-left-radius: 35px; font-family: Roboto;}
+.playerplaying{width: 350px!important; transition: all 0.5s; }
 #td_container { z-index: 99999; position: fixed; bottom: 16px; right: 0; }
-.playing { width: 85%; transition: all 1s;}
-.text-player { transition: all 1s; }
+.playing { width: 200px!important; transition: all 1s;}
+.text-player { transition: all 1s; width: 100px;}
 .infoMusic { line-height: 10px;}
+
+
+@media (max-width: 768px) {
+    #td_container{  width: 100%; bottom: 50px;}
+    
+}
 </style>
 
 <script is:inline src="https://storage.googleapis.com/nrm-web/nrm/lib/jquery.js"></script>

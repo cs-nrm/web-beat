@@ -1,16 +1,8 @@
 ---
 ---
-<div class="flex w-full h16 b-transparent items-center justify-between p-2 relative poppins">
+<div class="menutres flex w-full h16 b-transparent items-center justify-between p-2 relative poppins">
     <div class="logo main-logo h16 pl-[25px]"> <a href="/"><img src="/img/LOGO_BEAT.svg" /></a></div>
-    <!--div class="links-menu flex items-center gap-4 text-white "> 
-        <div class="link-menu"> <a href="/news">BeatNews</a></div>
-        <div class="link-menu"> <a href="/playlist">Playlist</a></div>
-        <div class="link-menu"> <a href="/podcast/groove-dealers">Podcast</a></div>
-        <div class="link-menu"> <a href="/promociones">Promociones</a></div>
-        <div class="link-menu"> <a href="/nerdosis">Nerdosis</a></div>
-        <div class="link-menu"> <a href="#">Más Secciones</a></div>
-    </div-->
-    <div id="container" class="links-menu flex items-center gap-4 text-white order-3 lg:order-2 justify-center">
+    <div id="container" class="links-menu hidden md:flex items-center m-auto gap-4 text-white order-3 lg:order-2 justify-center">
       <nav>
         <ul>
             <li><a href="/news">Beat News</a></li>
@@ -58,25 +50,34 @@
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.4 2.3 6.2 0 8.5"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/></svg>
       Radio en Vivo 100.1 FM
     </button>
+    <div class="menu-mobile flex md:hidden items-center gap-4 text-white order-3 lg:order-2"> 
+       <div class="link-menu"> <a href="/news">BeatNews</a></div>
+       <div class="link-menu"> <a href="/playlist">Playlist</a></div>
+       <div class="link-menu"> <a href="/podcast/groove-dealers">Podcast</a></div>
+       <div class="link-menu"> <a href="/promociones">Promociones</a></div>
+       <div class="link-menu"> <a href="/nerdosis">Nerdosis</a></div>
+       <div class="link-menu"> <a href="/purple-noise">Purple Noise</a></div>
+       <div class="link-menu"> <a href="/programacion">Programación</a></div>
+       <div class="link-menu"> <a href="/beat-trends">Beat Trends</a></div>
+       <div class="link-menu"> <a href="/beat-ten">Beat Ten</a></div>
+       <div class="link-menu"> <a href="/beat-recordings">Beat Recordings</a></div>
+       <div class="link-menu"> <a href="/lanzamientos">Lanzamientos</a></div>
+    </div>
 </div>
 <div class="opacity-back"></div>
 <style>
 @media (max-width: 1023px) {
-  .flex {
- /*   display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: space-around;*/
-    display: grid;
-    grid-column: 1 / 3;
-    background: rgba(0,0,0,0.5);
-  }
-  .flex >{
-    flex: 1 0 50%;
-  }
-  .flex&:first-child{
-    flex: 0 1 50%;
-  }
+.menutres {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.menutres >{
+  flex: 1 0 50%;
+}
+.menutres:first-child{
+  flex: 0 1 50%;
+}
   .logo{
     justify-content: left;
   }
@@ -85,11 +86,9 @@
   }
 }
 
-.links-menu nav{
+.menu-mobile{
   white-space: nowrap;
-  overflow-x: auto;
-  overflow-y: visible;
-
+  overflow-x: scroll;
 }
 
 

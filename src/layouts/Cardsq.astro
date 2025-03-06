@@ -62,25 +62,6 @@ console.log(section);*/
         </a>
     </article>
 </div>
-<div class="card carddos">
-    <article>
-    <div class="glows"></div>
-    <div class="overflow-hidden rounded-lg">
-        <a href={`/${url_seccion}/${post.slug}/`} >
-            <img class="block h-auto w-full aspect-video object-cover" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} />
-            <div class="flex items-center justify-between leading-tight p-2 md:p-4 min-h-28">
-              <h2 class="text-base text-zinc-300 font-bold" set:html={post.title.rendered}></h2>
-            </div>
-        </a>
-
-        <div class="flex items-center justify-between p-2 md:px-4 text-[13px] font-bold uppercase text-zinc-400">
-            <p>{post.yoast_head_json.author}</p>
-            <p>{post.yoast_head_json.article_published_time.substring(0, 10)}</p>
-        </div>
-    </div>
-    </article>
-</div>
-
 
 <style>
     .card.carddos article {

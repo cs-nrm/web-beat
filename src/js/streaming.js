@@ -66,7 +66,9 @@ const secchome = document.getElementById('home');
             document.getElementById('play-pause').classList.remove('hide'); 
             document.getElementById('big-play').innerHTML = bigButtonPause; 
            // $('.text-player').html('');
-            $('.text-player').attr('id','infoMusic');
+            //$('.text-player').attr('id','infoMusic');
+            $('.text-player').html('<div>Estas escuchando...</div><div id="infoMusic"></div>');
+            $('.text-player').addClass('playing');
             getInfoMusic();
             
          }
@@ -78,7 +80,9 @@ const secchome = document.getElementById('home');
             document.getElementById('play-pause').innerHTML = buttonPlay;            
             document.getElementById('big-play').innerHTML = bigButtonPlay; 
             $('.text-player').html('ESCUCHA LA RADIO EN VIVO AHORA'); 
-            $('.text-player').attr('id','');
+            
+            //$('.text-player').attr('id','');
+            $('.text-player').removeClass('playing');
          }
 
      }
@@ -199,6 +203,15 @@ const secchome = document.getElementById('home');
                         artist = 'CORTE';
                         cancion = '';
                     break;
+                    case 'NUEVA PRODUCCION' :
+                        artist = 'CORTE';
+                        cancion = '';
+                    break;
+                    case 'ELEMENTOS' :
+                        artist = 'CORTE';
+                        cancion = '';
+                    break;
+                    
                     
                     case 'RANDOM':
                         artist = data.dj;

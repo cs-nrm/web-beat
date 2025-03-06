@@ -67,7 +67,7 @@ const secchome = document.getElementById('home');
             document.getElementById('big-play').innerHTML = bigButtonPause; 
            // $('.text-player').html('');
             //$('.text-player').attr('id','infoMusic');
-            $('.text-player').html('<div>Estas escuchando...</div><div id="infoMusic"></div>');
+            $('.text-player').html('<div>Estas escuchando...</div><div id="infoMusic" style="line-height:10px;"></div>');
             $('.text-player').addClass('playing');
             getInfoMusic();
             

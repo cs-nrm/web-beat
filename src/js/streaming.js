@@ -110,7 +110,7 @@ const secchome = document.getElementById('home');
         //$('#td_container').height('360px');
         $('#td_container').addClass('pub_active');
         document.getElementById('big-play').innerHTML = buttongLoading;    
-        $('.text-player').html('<div style="font-style: italic;">Iniciará la reproducción luego del anuncio...</div>'); 
+        $('.text-player').html('<div style="font-style: italic; line-height:11px; font-weight:bold; font-size:11px;">Iniciamos después del anuncio...</div>'); 
       }
       
       var start = function(){
@@ -203,19 +203,19 @@ const secchome = document.getElementById('home');
             .then((data) => {                
                 switch( data.categoria ){
                     case 'COMERCIALES' :
-                        artist = 'CORTE';
+                        artist = 'PAUSA COMERCIAL';
                         cancion = '';
                     break;
                     case 'DROP' :
-                        artist = 'CORTE';
+                        artist = 'PAUSA COMERCIAL';
                         cancion = '';
                     break;
                     case 'NUEVA PRODUCCION' :
-                        artist = 'CORTE';
+                        artist = 'PAUSA COMERCIAL';
                         cancion = '';
                     break;
                     case 'ELEMENTOS' :
-                        artist = 'CORTE';
+                        artist = 'PAUSA COMERCIAL';
                         cancion = '';
                     break;
                     

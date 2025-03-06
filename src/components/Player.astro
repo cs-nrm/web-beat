@@ -63,15 +63,16 @@
 <style>
 #radiobutton { width: 250px; transition: all 0.5s; background: rgb(255,221,89);    background: linear-gradient(90deg, rgba(255,221,89,1) 0%, rgba(255,154,78,1) 85%); border-top-left-radius: 35px;    border-bottom-left-radius: 35px; font-family: Roboto;}
 .playerplaying{width: 350px!important; transition: all 0.5s; }
-#td_container { z-index: 99999; position: fixed; bottom: 16px; right: 0; }
+#td_container { z-index: 99999; position: fixed; bottom: 16px; right: 0; width: 1px; height: 1px; transition: all 0.3s;}
+.pub_active {   width: 600px!important; height: 360px!important; transition: all 0.3s; }
 .playing { width: 200px!important; transition: all 1s;}
 .text-player { transition: all 1s; width: 100px;}
 .infoMusic { line-height: 10px;}
 
 
 @media (max-width: 768px) {
-    #td_container{  width: 100%; bottom: 50px;}
     
+    .pub_active{ width: 90%!important; height: 260px!important; bottom: 120px!important;}
 }
 </style>
 

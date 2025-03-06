@@ -100,13 +100,15 @@ const secchome = document.getElementById('home');
             Dist: 'WebBeat'
             }
         }); 
-        $('#td_container').width('1px');
-        $('#td_container').height('1px');       
+        //$('#td_container').width('1px');
+        //$('#td_container').height('1px');       
+        $('#td_container').removeClass('pub_active');
       }
 
       function startAd(e){
-        $('#td_container').width('600px');
-        $('#td_container').height('360px');
+        //$('#td_container').width('600px');
+        //$('#td_container').height('360px');
+        $('#td_container').addClass('pub_active');
         document.getElementById('big-play').innerHTML = buttongLoading;    
         $('.text-player').html('<div style="font-style: italic;">Iniciará la reproducción luego del anuncio...</div>'); 
       }

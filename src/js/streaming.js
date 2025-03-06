@@ -84,7 +84,7 @@ const secchome = document.getElementById('home');
             $('#radiobutton').removeClass('playerplaying');
             $('.text-player').html('');
             setTimeout( function(){
-                $('.text-player').html('ESCUCHA LA RADIO EN VIVO <span>GRATIS</span> AHORA');             
+                $('.text-player').html('ESCUCHA LA RADIO EN VIVO <span style="color: #df104a;    font-weight: bold;    font-size: 12px;">GRATIS</span> AHORA');             
             },1000);
                 
             //$('.text-player').attr('id','');            

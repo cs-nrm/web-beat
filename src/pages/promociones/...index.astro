@@ -4,6 +4,8 @@ import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
 import Card from '../../layouts/Cards.astro';
+import DoubleBox from '../../components/DoubleBox.astro';
+import BoxBanner from '../../components/BoxBanner.astro';
 
 
 const res = await fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=10&_fields=title,slug,yoast_head_json,categories&categories=537");
@@ -21,24 +23,34 @@ const posts = await res.json();
 		
 		<main>
             <div class="container my-12 mx-auto px-4 md:px-12">
-				<h1 class="neon-azul text-center md:text-left pt-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl">Promociones</h1>
-                <section class="flex flex-wrap -mx-1 lg:-mx-4">
-                    {
-                        posts.map((post:any) => ( 
-                        <>
-                        <Card {post} />
-                        </>
-                        ))
-                    }
-                </section>
-                <div class="m-auto text-center">
-                    <a href="/promociones/2" class="text-white hover:text-black">
-                        <button class="ver-mas group relative h-8 w-36 m-4 overflow-hidden rounded-xl bg-[rgba(52,52,52,0.2)] hover:bg-white border-2 border-white uppercase text-xs poppins font-bold tracking-[3px]">
-                            <span>Siguiente</span>
-                        </button>
-                    </a>
-                </div>
-
+				<h1 class="text-center md:text-left pt-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl">Promociones</h1>
+                <div class="flex flex-col lg:flex-row">
+                    <div class="sm:min-w-[calc(100%-400px)] lg:mr-10">               
+                        <section class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 md:gap-16 xl:gap-16">
+                            {
+                                posts.map((post:any) => ( 
+                                <>
+                                <Card {post} />
+                                </>
+                                ))
+                            }
+                        </section>
+                        <div class="m-auto text-center">
+                            <a href="/promociones/2" class="text-white hover:text-black">
+                                <button class="ver-mas group relative h-8 w-36 m-4 overflow-hidden rounded-xl bg-[rgba(52,52,52,0.2)] hover:bg-white border-2 border-white uppercase text-xs poppins font-bold tracking-[3px]">
+                                    <span>Siguiente</span>
+                                </button>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="bg-black/50 p-5 rounded-xl sm:min-w-[350px] relative text-center md:text-left">
+                        <div class="sticky top-[50px] left-0 right-0">
+                            <BoxBanner />
+                            </br>
+                            <DoubleBox />
+                        </div>
+                    </div>
+                </div>    
             </div>
 		</main>
 		<Footer />

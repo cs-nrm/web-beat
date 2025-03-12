@@ -51,7 +51,7 @@ export async function getStaticPaths() {
           <div class="share-bar">
             <div class="sticky-bar sticky top-[90px] left-0 right-0">
                 <div class="share-buttons">
-                    <a href={`https://www.facebook.com/sharer/sharer.php?u=http://34.169.1.149/${post.slug}`}
+                    <a href={`https://www.facebook.com/sharer/sharer.php?u=https://beatdigital.mx/news/${post.slug}`}
                         target="_blank" 
                         class="share-button facebook"
                         title="Compartir en Facebook">
@@ -59,7 +59,7 @@ export async function getStaticPaths() {
                         <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
                         </svg>
                     </a>
-                    <a href={`https://twitter.com/intent/tweet?url=http://34.169.1.149/${post.slug}&text=${post.title.rendered}`} 
+                    <a href={`https://twitter.com/intent/tweet?url=https://beatdigital.mx/news/${post.slug}&text=${post.title.rendered}`} 
                         target="_blank" 
                         class="share-button twitter"
                         title="Compartir en X">
@@ -68,7 +68,7 @@ export async function getStaticPaths() {
                             <path d="M4 20l6.768-6.768m2.46-2.46L20 4"></path>
                         </svg>
                     </a>
-                    <a href={`https://wa.me/?text=${post.title.rendered} http://34.169.1.149/${post.slug}`} 
+                    <a href={`https://wa.me/?text=${post.title.rendered} https://beatdigital.mx/news/${post.slug}`} 
                         target="_blank" 
                         class="share-button whatsapp"
                         title="Compartir en WhatsApp">
@@ -80,7 +80,7 @@ export async function getStaticPaths() {
                 </div>
             </div>
         </div>
-          <div><Fragment set:html={post.content.rendered} /></div>
+          <div class="w-full"><Fragment set:html={post.content.rendered} /></div>
         </article>
         <div class="bg-black/50 p-5 rounded-xl my-2 sm:min-w-[350px] relative text-center md:text-left">
           <div class="sticky top-0 left-0 right-0">
@@ -99,91 +99,3 @@ export async function getStaticPaths() {
 
 <link rel="stylesheet" type="text/css" href="https://storage.googleapis.com/nrm-web/nrm/lib/plyr.css" />
 <script is:inline src="https://storage.googleapis.com/nrm-web/nrm/lib/plyr.js"></script>
-
-
-<style>
-.share-bar {
-  max-height: 70%;
-}
-
-.sticky-bar{
-      border: 1px solid #514e4e;
-    margin-right: 20px;
-    border-radius: 0.75rem;
-    background: #000000;
-}
-.share-buttons {
-    /*display: flex;
-    gap: 1.5rem;
-    flex-wrap: wrap;*/
-}
-
-.share-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    text-decoration: none;
-    color: var(--amarillo-beat);
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.share-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.share-button .icon {
-    width: 24px;
-    height: 24px;
-}
-
-.facebook, .twitter{
-  border-bottom: 1px solid #514e4e;
-}
-
-/* Social Media Colors */
-/*.facebook {
-    background-color: #1877f2;
-}
-
-.facebook:hover {
-    background-color: #0d6efd;
-}
-
-.twitter {
-    background-color: #000000;
-}
-
-.twitter:hover {
-    background-color: #333333;
-}
-
-.whatsapp {
-    background-color: #25D366;
-}
-
-.whatsapp:hover {
-    background-color: #1ea952;
-}*/
-
-/* Responsive Design */
-@media (max-width: 480px) {
-    .share-buttons {
-        justify-content: center;
-    }
-    
-    .share-button {
-        width: 56px;
-        height: 56px;
-    }
-    
-    .share-button .icon {
-        width: 28px;
-        height: 28px;
-    }
-}
-
-</style>

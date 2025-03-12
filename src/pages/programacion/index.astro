@@ -4,6 +4,7 @@ import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
 import { Tabs } from 'astro-tabs';
+import BarNrm from '../../components/BarNrm.astro';
 
 const res = await fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=80&_fields=title,content,acf,yoast_head_json&categories=515&filter[orderby]=acf[inicio]&order=asc");
 const posts = await res.json();
@@ -21,6 +22,7 @@ posts.sort(function(a, b){
 		<meta charset="utf-8"/>
 	</head>
 	<body>
+        <BarNrm />
 		<Header title={SITE_TITLE} />
 		
 		<main>

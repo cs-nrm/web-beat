@@ -9,6 +9,7 @@ import Card from '../../layouts/Cardsq.astro';
 
 import DoubleBox from '../../components/DoubleBox.astro';
 import BoxBanner from '../../components/BoxBanner.astro';
+import BarNrm from '../../components/BarNrm.astro';
 
 export async function getStaticPaths( { paginate } ) {
   const data = await getArticles(143);  
@@ -29,6 +30,7 @@ const {page=[]} = Astro.props;
 		
 	</head>
 	<body>
+    <BarNrm />
 		<Header title={SITE_TITLE} />
 		
 		<main>

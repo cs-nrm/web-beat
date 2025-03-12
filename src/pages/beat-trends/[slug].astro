@@ -46,12 +46,48 @@ export async function getStaticPaths() {
 
 
       <div class="flex flex-col lg:flex-row">
-        <article class="sm:min-w-[calc(100%-400px)] text-elipsis overflow-hidden lg:mr-10">
-          <Fragment set:html={post.content.rendered} />
+        <article class="sm:min-w-[calc(100%-400px)] text-elipsis lg:mr-10 flex flex-row">
+          <div class="share-bar">
+            <div class="sticky-bar sticky top-[90px] left-0 right-0">
+                <div class="share-buttons">
+                    <a href={`https://www.facebook.com/sharer/sharer.php?u=https://beatdigital.mx/beat-trends/${post.slug}`}
+                        target="_blank" 
+                        class="share-button facebook"
+                        title="Compartir en Facebook">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                        </svg>
+                    </a>
+                    <a href={`https://twitter.com/intent/tweet?url=https://beatdigital.mx/beat-trends/${post.slug}&text=${post.title.rendered}`} 
+                        target="_blank" 
+                        class="share-button twitter"
+                        title="Compartir en X">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                            <path d="M4 4l11.733 16h4.267l-11.733-16z"></path>
+                            <path d="M4 20l6.768-6.768m2.46-2.46L20 4"></path>
+                        </svg>
+                    </a>
+                    <a href={`https://wa.me/?text=${post.title.rendered} https://beatdigital.mx/beat-trends/${post.slug}`} 
+                        target="_blank" 
+                        class="share-button whatsapp"
+                        title="Compartir en WhatsApp">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="33" height="33" stroke-width="1">
+                          <path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9"></path>
+                          <path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+          <div class="w-full"><Fragment set:html={post.content.rendered} /></div>
         </article>
         <div class="bg-black/50 p-5 rounded-xl my-2 sm:min-w-[350px] relative text-center md:text-left">
           <div class="sticky top-0 left-0 right-0">
             <BoxBanner />
+            </br>
+            <MoreNews />
+            </br>
+            <DoubleBox />
           </div>
         </div>
       </div>

@@ -5,6 +5,7 @@ import Footer from '../../../components/Footer.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../../../consts.js';
 /*import {getArticles} from '../../../lib/api.js';*/
 import Card from '../../../layouts/CardsPodcast.astro';
+import BarNrm from '../../../components/BarNrm.astro';
 
 
 export async function getStaticPaths( { paginate } ) {
@@ -54,6 +55,7 @@ const { podcast, pod } = Astro.props;
     
   </head>
   <body>
+    <BarNrm />
     <Header title={SITE_TITLE} />
     
     <main>

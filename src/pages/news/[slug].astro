@@ -6,6 +6,8 @@ import LeaderBoard from '../../components/LeaderBoard.astro';
 import SuperLeader from '../../components/SuperLeader.astro';
 import MoreNews from '../../components/MoreNews.astro';
 import { any } from 'astro/zod';
+import Share from '../../components/Share.astro';
+import { SITE_TITLE } from '../../consts';
 
 const { slug } = Astro.params;
 
@@ -46,8 +48,39 @@ export async function getStaticPaths() {
 
 
       <div class="flex flex-col lg:flex-row">
-        <article class="sm:min-w-[calc(100%-400px)] text-elipsis overflow-hidden lg:mr-10">
-          <Fragment set:html={post.content.rendered} />
+        <article class="sm:min-w-[calc(100%-400px)] text-elipsis lg:mr-10 flex flex-row">
+          <div class="share-bar">
+    <div class="sticky top-[90px] left-0 right-0">
+        <div class="share-buttons pl-2 pr-4">
+            <a href={`https://www.facebook.com/sharer/sharer.php?u=http://34.169.1.149/${post.slug}`}
+                target="_blank" 
+                class="share-button facebook"
+                title="Compartir en Facebook">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                </svg>
+            </a>
+            <a href={`https://twitter.com/intent/tweet?url=http://34.169.1.149/${post.slug}&text=${post.title.rendered}`} 
+                target="_blank" 
+                class="share-button twitter"
+                title="Compartir en X">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                    <path d="M4 4l11.733 16h4.267l-11.733-16z"></path>
+                    <path d="M4 20l6.768-6.768m2.46-2.46L20 4"></path>
+                </svg>
+            </a>
+            <a href={`https://wa.me/?text=${post.title.rendered} http://http://34.169.1.149/${post.slug}`}" 
+                target="_blank" 
+                class="share-button whatsapp"
+                title="Compartir en WhatsApp">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                </svg>
+            </a>
+        </div>
+    </div>
+</div>
+          <div><Fragment set:html={post.content.rendered} /></div>
         </article>
         <div class="bg-black/50 p-5 rounded-xl my-2 sm:min-w-[350px] relative text-center md:text-left">
           <div class="sticky top-0 left-0 right-0">
@@ -66,3 +99,83 @@ export async function getStaticPaths() {
 
 <link rel="stylesheet" type="text/css" href="https://storage.googleapis.com/nrm-web/nrm/lib/plyr.css" />
 <script is:inline src="https://storage.googleapis.com/nrm-web/nrm/lib/plyr.js"></script>
+
+
+<style>
+.share-bar {
+
+}
+
+.share-buttons {
+    /*display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;*/
+}
+
+.share-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    text-decoration: none;
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.share-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.share-button .icon {
+    width: 24px;
+    height: 24px;
+}
+
+/* Social Media Colors */
+.facebook {
+    background-color: #1877f2;
+}
+
+.facebook:hover {
+    background-color: #0d6efd;
+}
+
+.twitter {
+    background-color: #000000;
+}
+
+.twitter:hover {
+    background-color: #333333;
+}
+
+.whatsapp {
+    background-color: #25D366;
+}
+
+.whatsapp:hover {
+    background-color: #1ea952;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .share-buttons {
+        justify-content: center;
+    }
+    
+    .share-button {
+        width: 56px;
+        height: 56px;
+    }
+    
+    .share-button .icon {
+        width: 28px;
+        height: 28px;
+    }
+}
+
+</style>

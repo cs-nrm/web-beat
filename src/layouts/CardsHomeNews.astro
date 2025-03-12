@@ -6,9 +6,13 @@ import SuperLeader from '../components/SuperLeader.astro';
 import { Image } from 'astro:assets';
 
 
-const res = await fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_fields=title,slug,content,excerpt,_links,_embedded&_embed&per_page=6&categories=143");
+const res = await fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_fields=date,title,slug,sticky,content,excerpt,_links,_embedded&_embed&per_page=6&categories=143&order_by=date&order=desc&sticky=false");
+
+const ressti = await fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_fields=date,title,slug,sticky,content,excerpt,_links,_embedded&_embed&per_page=6&categories=143&sticky=true");
 
 const posts = await res.json();
+
+const poststi = await ressti.json();
 
 ---
 
@@ -16,14 +20,15 @@ const posts = await res.json();
         <div class="card w-full md:px-[10%] h-[550px]">
           <article>
             <div class="glows"></div>
-            <a href={`/news/${posts[0].slug}/`} class="group relative flex  items-end overflow-hidden rounded-xl h-[500px] w-full">
-                <img src={posts[0]._embedded['wp:featuredmedia'][0].media_details.sizes['beat-news-size'].source_url} alt={posts[0].title.rendered} class="absolute inset-0 w-full h-full object-cover object-center transition duration-200 group-hover:scale-110" />
+            <a href={`/news/${poststi[0].slug}/`} class="group relative flex  items-end overflow-hidden rounded-xl h-[500px] w-full">
+                <img src={poststi[0]._embedded['wp:featuredmedia'][0].media_details.sizes['beat-news-size'].source_url} class="absolute inset-0 w-full h-full object-cover object-center transition duration-200 group-hover:scale-110" />
+                <!--img src={posts[0]._embedded['wp:featuredmedia'][0].media_details.sizes['beat-news-size'].source_url} alt={posts[0].title.rendered} class="absolute inset-0 w-full h-full object-cover object-center transition duration-200 group-hover:scale-110" /-->
                 <!--div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-gray-800 via-transparent to-transparent opacity-50"></div-->
-                <div class="text relative inline-block p-3 text-xl sm:text-sm text-white md:text-3xl leading-tight md:leading-none w-full text-center"><p set:html={posts[0].title.rendered}></p></div>
+                <div class="text relative inline-block p-3 text-xl sm:text-sm text-white md:text-3xl leading-tight md:leading-none w-full text-center"><p set:html={poststi[0].title.rendered}></p></div>
             </a>
             <div class="texto-nota poppins hidden md:block px-3 pb-6 ">
               <div class="text-uno">
-                <p set:html={posts[0].excerpt.rendered} /></p>
+                <p set:html={poststi[0].excerpt.rendered} /></p>
               </div>
             </div>
           </article>
@@ -32,6 +37,16 @@ const posts = await res.json();
         <h1 class="text-left md:text-left py-4 mt-8 mb-8 font-bold text-white text-4xl md:text-5xl lg:text-4xl xl:text-5xl">#BeatNews</h1>
         <div class="grid gap-4 grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 md:gap-16 xl:gap-16">
           
+          <div class="card">
+            <article>
+              <div class="glows"></div>
+              <a href={`/news/${posts[0].slug}/`} class="group relative flex h-60 sm:h-48 items-end overflow-hidden rounded-xl shadow-lg md:h-96">
+                  <img src={posts[0]._embedded['wp:featuredmedia'][0].media_details.sizes['beat-news-size'].source_url} alt={posts[0].title.rendered} class="absolute inset-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110" />
+                  <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-gray-800 via-transparent to-transparent opacity-50"></div>
+                  <div class="text relative inline-block p-3 text-lg sm:text-sm text-white md:text-xl leading-tight md:leading-none"><p set:html={posts[0].title.rendered}></p></div>
+              </a>
+            </article>
+          </div>
           <div class="card">
             <article>
               <div class="glows"></div>
@@ -49,16 +64,6 @@ const posts = await res.json();
                   <img src={posts[2]._embedded['wp:featuredmedia'][0].media_details.sizes['beat-news-size'].source_url} alt={posts[0].title.rendered} class="absolute inset-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110" />
                   <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-gray-800 via-transparent to-transparent opacity-50"></div>
                   <div class="text relative inline-block p-3 text-lg sm:text-sm text-white md:text-xl leading-tight md:leading-none"><p set:html={posts[2].title.rendered}></p></div>
-              </a>
-            </article>
-          </div>
-          <div class="card">
-            <article>
-              <div class="glows"></div>
-              <a href={`/news/${posts[3].slug}/`} class="group relative flex h-60 sm:h-48 items-end overflow-hidden rounded-xl shadow-lg md:h-96">
-                  <img src={posts[3]._embedded['wp:featuredmedia'][0].media_details.sizes['beat-news-size'].source_url} alt={posts[0].title.rendered} class="absolute inset-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110" />
-                  <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-gray-800 via-transparent to-transparent opacity-50"></div>
-                  <div class="text relative inline-block p-3 text-lg sm:text-sm text-white md:text-xl leading-tight md:leading-none"><p set:html={posts[3].title.rendered}></p></div>
               </a>
             </article>
           </div>

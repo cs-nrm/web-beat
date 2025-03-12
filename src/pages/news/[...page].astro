@@ -12,7 +12,7 @@ import BoxBanner from '../../components/BoxBanner.astro';
 
 export async function getStaticPaths( { paginate } ) {
   const data = await getArticles(143);  
-  return paginate(data, { pageSize: 10 });
+  return paginate(data, { pageSize: 20 });
 }
 
 interface Props{
@@ -60,7 +60,7 @@ const {page=[]} = Astro.props;
             </div>
           </div>
           <div class="bg-black/50 p-5 rounded-xl sm:min-w-[350px] relative text-center md:text-left">
-            <div class="sticky top-0 left-0 right-0">
+            <div class="sticky top-[50px] left-0 right-0">
               <BoxBanner />
               </br>
               <DoubleBox />

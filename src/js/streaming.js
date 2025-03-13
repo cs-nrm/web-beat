@@ -21,7 +21,7 @@ const secchome = document.getElementById('home');
              coreModules: [{
                id: 'MediaPlayer',
                playerId: 'td_container' ,
-               audioAdaptive: true,
+               audioAdaptive: false,
                plugins: [ {id:"vastAd"}]
              }],
              // The callbacks are defined in your source code.
@@ -120,7 +120,7 @@ const secchome = document.getElementById('home');
 
 
       function pause(){
-        streaming.pause();
+        streaming.stop();
       }
 
       
@@ -347,38 +347,43 @@ const secchome = document.getElementById('home');
         }
         
         //setTimeout(getInfoProg, 20000);
-        setInterval( getInfoProg, 300000);       
+        //setInterval( getInfoProg, 300000);       
         
 /* abrir barra*/
-const openbarra = function(){
+/*const openbarra = function(){
     player.classList.remove('h-0');
     player.classList.add('h-16');
     player.classList.add('border-4');    
-}
+}*/
 /* cerrar barra*/
-const hidebarra = function(){
+/*const hidebarra = function(){
     player.classList.remove('h-16');
     player.classList.add('h-0');
     player.classList.remove('border-4');                
-}
+}*/
 /* cerrar y abrir barra*/
-const transitionBarra = function(){    
+/*const transitionBarra = function(){    
     hidebarra();
     setTimeout( function(){        
         openbarra();
     }, 500);
-}
+}*/
+
 
 const radioActive = function(){
     $('#player-inner').addClass('active');
     $('#player-v-podcast').removeClass('active');
     $('#player-v-video').removeClass('active');
+    $('.player-float').removeClass('hide');
 }
 
 const podcastActive = function(){
+    //transitionPlayer();
     $('#player-inner').removeClass('active');
     $('#player-v-podcast').addClass('active');
     $('#player-v-video').removeClass('active');
+    $('.player-float').addClass('hide');
+    $('#radiobutton').addClass('playerplaying'); 
 }
 
 const videoActive = function(){
@@ -388,10 +393,28 @@ const videoActive = function(){
 }
 
 const radioStop = function(){
+        transitionPlayer();
         streaming.stop();
         $('#player').attr('data-status','init');                
-        hidebarra();
+        //hidebarra();
         $('#player-inner').removeClass('active');
+}
+
+const initPlayer = function(){
+    transitionPlayer();
+    $('#player-v-podcast').removeClass('active');
+    $('#player-v-video').removeClass('active');
+    $('.player-float').removeClass('hide');
+    $('#radiobutton').removeClass('playerplaying'); 
+    $('.player-float').removeClass('hide');
+    $('.player-float').addClass('active');    
+}
+
+const transitionPlayer = function(){
+    $('#radiobutton').width('0px');
+    setTimeout( function(){
+        $('#radiobutton').width('250px');
+    }, 500);
 }
 
 
@@ -401,7 +424,7 @@ const playerstatus = function(){
 };
 
 const playstopRadio = function(){
-            
+            transitionPlayer();
             //console.log(local_status);
             const getplayingstatus = playerstatus();
             //console.log(getplayingstatus);
@@ -410,7 +433,7 @@ const playstopRadio = function(){
             }*/
             
             if(getplayingstatus == 'podcast-playing'){
-                transitionBarra();
+                //transitionBarra();
                 const containerpodcast  = document.getElementById('iframepodcast');
                 containerpodcast.innerHTML ='';                
             }                
@@ -566,23 +589,6 @@ document.addEventListener('astro:page-load', ev => {
         });
     })(jQuery);
 
-    
-    
-
-
-   /*=============== SHOW MENU ===============*/
-/*const showMenu = (toggleId, navId) =>{
-    const toggle = document.getElementById(toggleId),
-          nav = document.getElementById(navId);
-    toggle.addEventListener('click', () =>{
-        // Add show-menu class to nav menu
-        nav.classList.toggle('show-menu');
-        // Add show-icon to show and hide the menu icon
-        toggle.classList.toggle('show-icon');
-    });
- }
- 
- showMenu('nav-toggle','nav-menu');*/
 
    const getplayingstatus = playerstatus();
     document.querySelector('main').classList.remove('loading');    
@@ -610,7 +616,7 @@ document.addEventListener('astro:page-load', ev => {
         flkty.select(2);
         flkty.reloadCells();   
 
-        var elemnav = document.querySelector('.carousel-nav');
+       /* var elemnav = document.querySelector('.carousel-nav');
         var flktynav = new Flickity( elemnav, {
             // options
             cellAlign: 'center',
@@ -620,6 +626,7 @@ document.addEventListener('astro:page-load', ev => {
             pageDots: false, 
             pauseAutoPlayOnHover: true
         }); 
+        */
 
         var elempod = document.querySelector('.main-carousel');
         var flktypod = new Flickity( elempod, {
@@ -645,7 +652,8 @@ document.addEventListener('astro:page-load', ev => {
     if( getplayingstatus == 'podcast-playing'){
         const containerpodcast  = document.getElementById('iframepodcast');
         containerpodcast.innerHTML ='';
-        hidebarra();
+
+        //hidebarra();
     }
 
    /* $('#big-play').on('click', function(){
@@ -659,8 +667,9 @@ document.addEventListener('astro:page-load', ev => {
             const podcaststatus = podactive.attr('data-podcast-status');
             const containerpodcast  = document.getElementById('iframepodcast');
             
-            
+            transitionPlayer();
             podcastActive();
+            $('#radiobutton').addClass('playerplaying'); 
             
             if (getstatus == 'radio-playing'){
                 radioStop();                
@@ -684,17 +693,17 @@ document.addEventListener('astro:page-load', ev => {
             }
             //console.log(podcaststatus);            
             if(podcaststatus == 'ready'){
-                transitionBarra();
+                //transitionBarra();
                 const ifr = $(this).find('.data-iframe').attr('data-iframe');
                 const ifrsrc = ifr.split('src="');
                 const src = ifrsrc[1].split('"');
                 //const playerpodcast = document.getElementById('playerpodcast');
-                            
+                //<iframe src="https://omny.fm/shows/beat-trends/amor-de-lejos-amor-de-ya-no-aplica/embed?size=square&style=cover&image=0&description=1&download=1&playlistImages=1&playlistShare=1&share=1&subscribe=0&background=efefef&foreground=2b2b2c&highlight=e1b01c" allow="autoplay; clipboard-write" width="300" height="300" frameborder="0" title="Amor de lejos, amor de… Ya no aplica"></iframe>           
                 containerpodcast.innerHTML ='';
                 const playerpodcast = document.createElement('iframe');
-                playerpodcast.setAttribute('src',src[0]+"?image=0&share=0&download=1&description=0&follow=0&background=000000&foreground=00f4ff&highlight=ffffff");
-                playerpodcast.setAttribute('width','250');
-                playerpodcast.setAttribute('height','300');
+                playerpodcast.setAttribute('src',src[0]+"?image=0&share=0&download=1&description=0&background=efefef&foreground=2b2b2c&highlight=e1b01c");
+                playerpodcast.setAttribute('width','300');
+                playerpodcast.setAttribute('height','190');
                 playerpodcast.setAttribute('frameborder','0');
                 playerpodcast.setAttribute('allow','autoplay');
                 playerpodcast.setAttribute('transition:persist','');
@@ -760,7 +769,7 @@ document.addEventListener('astro:page-load', ev => {
                 const getstatus = playerstatus();
                 if( getstatus == 'radio-playing'){
                     radioStop();   
-                    hidebarra();
+                    //hidebarra();
                     $('#player').attr('data-status','video-playing');
                 }
             });            
@@ -798,7 +807,7 @@ document.addEventListener('astro:page-load', ev => {
                 const getstatus = playerstatus();
                 if( getstatus == 'radio-playing'){
                     radioStop();   
-                    hidebarra();
+                    //hidebarra();
                     $('#player').attr('data-status','video-playing');
                 }
             });

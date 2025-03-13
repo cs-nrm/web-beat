@@ -396,13 +396,13 @@ article iframe.iframe-class{
 }
 
 /* player */
-.iframestyle {box-shadow: rgba(0, 0, 0, 0.56) 0px 22px 70px 4px; background-image: url('https://storage.googleapis.com/nrm-web/oye/recursos/8p7m.gif'); background-size:contain; background-color:#15181f; border: 1px solid  white; border-radius: 6px; box-shadow: rgba(0, 0, 0, 0.56) 0px 22px 70px 4px;}
+.iframestyle {/*box-shadow: rgba(0, 0, 0, 0.56) 0px 22px 70px 4px;*/ /*background-image: url('https://storage.googleapis.com/nrm-web/oye/recursos/8p7m.gif'); background-size:contain;*/ background-color:#15181f;  border-radius: 6px; box-shadow: rgba(0, 0, 0, 0.56) 0px 22px 70px 4px;}
 .loading-gif {	width: 20px; height: auto;}
 .infoMusic { line-height: 10px;}
-	#player { transition: all 0.5s; /*background: linear-gradient(202.03deg, #df19f5 14.4%, #09e6f1 78.24%);*/ /*box-shadow: rgba(0, 0, 0, 0.56) 0px 22px 70px 4px;*/ animation: gradient 15s ease infinite; background-size:400%; background: white; box-shadow: rgba(255, 255, 255, 1) 0px 22px 70px 4px;  z-index:1000;}    
-  #player .show { display:block }
-  #player .hide{ display: none; }
-  #player .active{ display: flex!important;  transition: all 1s;}
+	#radiobutton { transition: all 0.5s; /*background: linear-gradient(202.03deg, #df19f5 14.4%, #09e6f1 78.24%);*/ /*box-shadow: rgba(0, 0, 0, 0.56) 0px 22px 70px 4px;*/ animation: gradient 15s ease infinite; background-size:400%; background: white; /*box-shadow: rgba(255, 255, 255, 1) 0px 22px 70px 4px;*/  z-index:1000;}    
+  #radiobutton .show { display:block }
+  #radiobutton .hide{ display: none; transition: all 0.5s;}
+  #radiobutton .active{ display: flex!important;  transition: all 1s;}
     
   .marquee { white-space: nowrap; overflow: hidden; width: 100%; color:black;}
   .marquee div{  display: inline-block; animation: animate 10s linear infinite; padding-left: 100%;}

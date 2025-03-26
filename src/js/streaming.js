@@ -5,6 +5,8 @@ const buttonPlay = '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tab
 const bigButtonPause = '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-pause" width="35" height="35" viewBox="0 0 24 24" stroke-width="1.5" stroke="#000" fill="#000" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 5m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z" /><path d="M14 5m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z" /></svg>';
 const bigButtonPlay = '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-play" width="35" height="35" viewBox="0 0 24 24" stroke-width="1.5" stroke="#000" fill="#000" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 4v16l13 -8z" /></svg>';
 const buttongLoading = '<img width="40" height="40" src="https://storage.googleapis.com/nrm-web/oye/recursos/loading-normal.gif" style="padding:5px;"/>';
+const buttonPodcastPlay = '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-play" width="80" height="80" viewBox="0 0 24 24" stroke-width="2" stroke="#FFAA1F" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 4v16l13 -8z" /></svg>';
+const buttonPodcastPause = '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-pause" width="80" height="80" viewBox="0 0 24 24" stroke-width="1.5" stroke="#FFAA1F" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 5m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z" /><path d="M14 5m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z" /></svg>';
 var volume;
 var artist;
 var cancion;
@@ -687,7 +689,7 @@ document.addEventListener('astro:page-load', ev => {
                     podactive.attr('data-podcast-status','ready');
                 });
                 $('.audiopod').each(function(){
-                    $('.audiopod').find('.play-pause-podcast').html(buttonPlay);
+                    $('.audiopod').find('.play-pause-podcast').html(buttonPodcastPlay);
                     $('.audiopod').find('.play-pause-podcast').attr('data-podcast-status','ready');
                 });
             }
@@ -717,11 +719,11 @@ document.addEventListener('astro:page-load', ev => {
                     ply.play(); 
                     
                     ply.on('play', ()=>{
-                        podactive.html(buttonPause); 
+                        podactive.html(buttonPodcastPause); 
                     });
     
                     ply.on('pause', ()=>{
-                        podactive.html(buttonPlay); 
+                        podactive.html(buttonPodcastPlay); 
                     });
                     
                 });   

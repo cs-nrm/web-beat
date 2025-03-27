@@ -385,7 +385,8 @@ const podcastActive = function(){
     $('#player-v-podcast').addClass('active');
     $('#player-v-video').removeClass('active');
     $('.player-float').addClass('hide');
-    $('#radiobutton').addClass('playerplaying'); 
+    $('.player-float').removeClass('active');
+    //$('#radiobutton').addClass('playerplaying'); 
 }
 
 const videoActive = function(){
@@ -456,17 +457,20 @@ const playstopRadio = function(){
 };
 
 
-$('#radiobutton').on('click',function(){    
+$('#big-play').on('click',function(){    
         console.log('click en radiobutton');
         playstopRadio();      
 });
 
+
 $('#return-live').on('click',function(){    
        playstopRadio();    
 });
+
 $('.radio-link').on('click',function(){    
        playstopRadio();    
 });
+
 
 
 /*$('#play-pause').on('click', function(){
@@ -653,8 +657,8 @@ document.addEventListener('astro:page-load', ev => {
     
     if( getplayingstatus == 'podcast-playing'){
         const containerpodcast  = document.getElementById('iframepodcast');
-        containerpodcast.innerHTML ='';
-
+        //containerpodcast.innerHTML ='';
+        initPlayer();
         //hidebarra();
     }
 
@@ -671,7 +675,10 @@ document.addEventListener('astro:page-load', ev => {
             
             transitionPlayer();
             podcastActive();
-            $('#radiobutton').addClass('playerplaying'); 
+            setTimeout( function(){
+                $('#radiobutton').addClass('playerplaying'); 
+            },600);
+            
             
             if (getstatus == 'radio-playing'){
                 radioStop();                
@@ -679,10 +686,24 @@ document.addEventListener('astro:page-load', ev => {
                                                 
             podactive.html('<img class="loading-gif" src="https://storage.googleapis.com/nrm-web/oye/recursos/loading-normal.gif" />');
             
+            $('.close-podcast').on('click',function(){
+                initPlayer();
+                const playerpodcast = document.getElementById('iframepodcast').getElementsByTagName('iframe')[0];                
+                const ply =  new playerjs.Player(playerpodcast);
+                ply.on('ready', ()=> {
+                    ply.pause();
+                    podactive.attr('data-podcast-status','ready');
+                });
+                $('.audiopod').each(function(){
+                    $('.audiopod').find('.play-pause-podcast').html(buttonPodcastPlay);
+                    $('.audiopod').find('.play-pause-podcast').attr('data-podcast-status','ready');
+                });
+                
+            });
+            
             if (getstatus == 'podcast-playing'){
                 
-                const playerpodcast = document.getElementById('iframepodcast').getElementsByTagName('iframe')[0];
-                //console.log(playerpodcast);
+                const playerpodcast = document.getElementById('iframepodcast').getElementsByTagName('iframe')[0];                
                 const ply =  new playerjs.Player(playerpodcast);
                 ply.on('ready', ()=> {
                     ply.pause();
@@ -712,6 +733,7 @@ document.addEventListener('astro:page-load', ev => {
                 //console.log(playerpodcast);
                 containerpodcast.appendChild(playerpodcast);            
                 const ply =  new playerjs.Player(playerpodcast);
+                 
                 ply.on('ready', ()=> {
                     podactive.attr('data-podcast-status','active');
                     $('#player').attr('data-status','podcast-playing');

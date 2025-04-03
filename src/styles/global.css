@@ -295,21 +295,23 @@ hr {
 .tabs.programacion nav{
     display: flex;
     flex-wrap: nowrap;
-    font-size: calc(1em + 1vw);
-    font-weight: bold;
-    text-transform: uppercase;
+    /*font-size: calc(1em + 1vw);*/
+    /*font-weight: bold;*/
+    /*text-transform: uppercase;*/
     /*background: radial-gradient(circle at top left, #8114b8, rgb(217,64,172,0.75), #f4a3cc);
     background: linear-gradient(90deg, rgba(223,25,245,1) 0%, rgba(247,11,208,1) 31%, rgba(9,230,241,1) 71%, rgba(8,246,44,1) 98%);*/
     width: 100%;
-    justify-content: space-between;
+    justify-content: end;
     /*color: rgb(0, 0, 0);*/
     letter-spacing: 3px;
     /*text-shadow: 1px 2px rgb(255 255 255 / 61%);*/
 	  border-radius: 4px;
     /*box-shadow: 0 0 0px #fff, 0 0 10px #06dbe5, 0 0 20px #eb2fc7, 0 0 50px #d52ab3;*/
-    background-color: rgb(0, 0, 0);
+    /*background-color: rgb(0, 0, 0);
     color: rgb(var(--gray-beat));
-    border: 1px solid var(--gray-beat);
+    border: 1px solid var(--gray-beat);*/
+    /*float: right;*/
+    border-bottom: 1px solid #faa700;
 }
 
 .tabs.programacion .tab-wrapper{
@@ -318,9 +320,11 @@ hr {
   color: white;
 }
 .tabs.programacion .tab-wrapper input:checked + label, .tabs.programacion .tab-wrapper label:hover{
-    text-shadow: 1px 2px rgb(14 14 14 / 61%);
-    text-shadow: 0 0 0px #fff, 0 0 10px var(--amarillo-beat), 0 0 20px var(--amarillo-beat), 0 0 30px var(--amarillo-beat);
+    /*text-shadow: 1px 2px rgb(14 14 14 / 61%);
+    text-shadow: 0 0 0px #fff, 0 0 10px var(--amarillo-beat), 0 0 20px var(--amarillo-beat), 0 0 30px var(--amarillo-beat);*/
+    color: #faa700;
 }
+
 
 /* CONTENIDO NOTAS */
 #imagen-nota{
@@ -396,13 +400,12 @@ article iframe.iframe-class{
 }
 
 /* player */
+
 .iframestyle {/*box-shadow: rgba(0, 0, 0, 0.56) 0px 22px 70px 4px;*/ /*background-image: url('https://storage.googleapis.com/nrm-web/oye/recursos/8p7m.gif'); background-size:contain;*/ background-color:#15181f;  border-radius: 6px; box-shadow: rgba(0, 0, 0, 0.56) 0px 22px 70px 4px;}
 .loading-gif {	width: 20px; height: auto;}
 .infoMusic { line-height: 10px;}
-	#radiobutton { transition: all 0.5s; /*background: linear-gradient(202.03deg, #df19f5 14.4%, #09e6f1 78.24%);*/ /*box-shadow: rgba(0, 0, 0, 0.56) 0px 22px 70px 4px;*/ animation: gradient 15s ease infinite; background-size:400%; background: white; /*box-shadow: rgba(255, 255, 255, 1) 0px 22px 70px 4px;*/  z-index:1000;}    
-  #radiobutton .show { display:block }
-  #radiobutton .hide{ display: none; transition: all 0.5s;}
-  #radiobutton .active{ display: flex!important;  transition: all 1s;}
+	
+  
     
   .marquee { white-space: nowrap; overflow: hidden; width: 100%; color:black;}
   .marquee div{  display: inline-block; animation: animate 10s linear infinite; padding-left: 100%;}

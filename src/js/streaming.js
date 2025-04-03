@@ -295,7 +295,7 @@ const secchome = document.getElementById('home');
         
         function getInfoProg(){
             //fetch("https://beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=30&categories=3312&_fields[]=acf")
-            fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=40&categories=515&_fields[]=acf")            
+            fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=100&categories=515&_fields[]=jetpack_featured_media_url&_fields[]=acf")            
             .then((res) => {
                 if (!res.ok) {
                     throw new Error
@@ -311,45 +311,44 @@ const secchome = document.getElementById('home');
                 const dia = dias[fecha.getDay()];                
                 const hora = dayjs(fecha).format('HH:mm:ss');
                 //console.log(hora);
-                data.map(function(prog){                    
+                let siguientePrograma = null;
+                data.map(function(prog,i,el){                    
                     if(prog.acf[dia] === true){
+                        var h_i;
                         if( prog.acf.hora_fin >= hora &&  prog.acf.hora_inicio <= hora){
                            // console.log(prog.acf.hora_inicio);
-                            console.log(prog.acf.hora_inicio);
+                            /*console.log(prog.acf.hora_inicio);
                             console.log(prog.acf.hora_fin);
-                            console.log(prog.acf.programa);
-                            console.log(prog.acf);
-                            if( document.getElementById('nombreprog') ){
-                                document.getElementById('nombreprog').innerHTML = prog.acf.programa;
-                            }
-                            /* 
-                            fetch("https://beatdigital.mx/wp-json/wp/v2/media/"+prog.acf.imagen_ahora_escuchas+"?_fields[]=link")
-                            .then((rs) => {
-                                if (!rs.ok) {
-                                    throw new Error
-                                        ('HTTP error! Status: ${res.status}');
-                                }
-                                return rs.json();
-                            })
-                            .then(function(d){
-                                //console.log(d.link);
-                                if(document.getElementById('imgprog')){                                    
-                                    setTimeout(function(){
-                                        document.getElementById('imgprog').getElementsByClassName('imgprog')[0].src = d.link;
-                                    },2000);
-                                }
-                                
-                            });   */                                                     
+                            console.log(prog.acf.programa);*/
+                            
+                            $('.banner-prog img').attr('src', prog.jetpack_featured_media_url);
+                            $('.envivo-prog').html(prog.acf.programa);
+                            $('.envivo-now').html( prog.acf.hora_inicio + ' - ' + prog.acf.hora_fin);
+                            $('.envivo-prog-tab').html(prog.acf.programa);                            
+
                         }
+
+                        if (prog.acf.hora_inicio > hora) {
+                            if (!siguientePrograma || prog.acf.hora_inicio < siguientePrograma.acf.hora_inicio) {
+                                siguientePrograma = prog;
+                            }
+                        }
+                        
+
                     }
 
-                });                                                
+                });   
+                if (siguientePrograma) {
+                    console.log("Siguiente programa:", siguientePrograma.acf.programa);
+                    $('.envivo-next').html(siguientePrograma.acf.hora_inicio + ' - ' + siguientePrograma.acf.hora_fin);
+                    $('.envivo-prog-next-tab').html(siguientePrograma.acf.programa);
+                }                                             
             });
            // console.log('repetido');   
         }
         
-        //setTimeout(getInfoProg, 20000);
-        //setInterval( getInfoProg, 300000);       
+        setTimeout(getInfoProg, 20000);
+        setInterval( getInfoProg, 300000);       
         
 /* abrir barra*/
 /*const openbarra = function(){
@@ -467,9 +466,9 @@ $('#return-live').on('click',function(){
        playstopRadio();    
 });
 
-$('.radio-link').on('click',function(){    
+/*$('.radio-link').on('click',function(){    
        playstopRadio();    
-});
+});*/
 
 
 
@@ -601,8 +600,18 @@ document.addEventListener('astro:page-load', ev => {
     document.querySelector('.preloader').classList.remove('showpreloader');
     
     const secchome = document.getElementById('home');
-    if ( secchome ){
+    const secenvivo = document.getElementById('envivo');
+    if ( secenvivo ){   
+        //console.log('envivo');
         getInfoProg();
+        $('#radiobutton').addClass('en-vivo');
+
+    }else{
+        $('#radiobutton').removeClass('en-vivo');
+    }
+
+    
+    if ( secchome ){        
         console.log(getplayingstatus);
         /*if( getplayingstatus == 'radio-playing'){
              document.getElementById('big-play').innerHTML = bigButtonPause; 

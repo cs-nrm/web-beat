@@ -429,11 +429,6 @@ const playstopRadio = function(){
             transitionPlayer();
             //console.log(local_status);
             const getplayingstatus = playerstatus();
-            //console.log(getplayingstatus);
-           /* if (getplayingstatus == 'init'){
-                openbarra();
-            }*/
-            
             if(getplayingstatus == 'podcast-playing'){
                 //transitionBarra();
                 const containerpodcast  = document.getElementById('iframepodcast');
@@ -601,11 +596,17 @@ document.addEventListener('astro:page-load', ev => {
     
     const secchome = document.getElementById('home');
     const secenvivo = document.getElementById('envivo');
+
     if ( secenvivo ){   
         //console.log('envivo');
         getInfoProg();
         $('#radiobutton').addClass('en-vivo');
+        //console.log(local_status);
 
+        if( local_status == null || local_status == 'undefined' || local_status == '' || local_status == 'LIVE_STOP' ){  
+            playstopRadio();
+        }
+        
     }else{
         $('#radiobutton').removeClass('en-vivo');
     }

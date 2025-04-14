@@ -18,6 +18,9 @@
             </div>
             <div class="logo-player w-[85px]"><img src="/img/beat-digital-logo.png" /> </div>
             <div class="text-player text-center text-[10px] "> ESCUCHA LA RADIO EN VIVO <span>GRATIS</span> AHORA</div>
+            <div class="hidden md:block w-1/4 vol flex justify-center volume" transition:persist>
+                <input type="range" min="0.1" max="1" step="0.1" value="1" id="vol"> 
+            </div>
         </div> 
         <div id="player-v-podcast" class="hide" transition:persist>
                 <div class="close-podcast">X</div>
@@ -77,8 +80,16 @@
 .infoMusic { line-height: 10px;}
 .text-player span {   color: #df104a;    font-weight: bold;    font-size: 12px;   }
 .close-podcast {   position: absolute;    right: 15px;    top: 0;    background: black;    border-radius: 50%;    width: 35px;    height: 35px;    color: white;    text-align: center;    cursor: pointer;    z-index: 999999999;  }
-.en-vivo{ width: 100%!important; transition: all 1s; display: block; position: relative; background: #201e1e!important; border-radius: 0!important;}
-  
+.volume {display: none;}
+.en-vivo{ width: 100%!important; transition: all 1s; display: block; position: relative; background: #201e1e!important; border-radius: 0!important; height: 140px;}
+
+.en-vivo .logo-player  {order:1; }
+.en-vivo .text-player {order:2; }
+.en-vivo .volume {display: block; order: 4;}
+.en-vivo .player-float{ justify-content: space-around;}
+.en-vivo .text-player { color:#ffaa1f; }
+
+
 
 @media (max-width: 768px) {
     

@@ -404,8 +404,12 @@ article iframe.iframe-class{
 .iframestyle {/*box-shadow: rgba(0, 0, 0, 0.56) 0px 22px 70px 4px;*/ /*background-image: url('https://storage.googleapis.com/nrm-web/oye/recursos/8p7m.gif'); background-size:contain;*/ background-color:#15181f;  border-radius: 6px; box-shadow: rgba(0, 0, 0, 0.56) 0px 22px 70px 4px;}
 .loading-gif {	width: 20px; height: auto;}
 .infoMusic { line-height: 10px;}
-	
-  
+
+.en-vivo #infoMusic { color: white!important;     font-size: 18px !important;  line-height: 26px !important; }
+.en-vivo #big-play{ order:3; margin: auto; width: 75px; height: 75px;}
+.en-vivo #big-play svg {width: 65px; height: 65px; background:white; border-radius: 100%;}
+.en-vivo .text-player{ width: 280px!important; font-size: 16px;}
+.en-vivo #big-play img {  width: 65px;  height: 65px; }
     
   .marquee { white-space: nowrap; overflow: hidden; width: 100%; color:black;}
   .marquee div{  display: inline-block; animation: animate 10s linear infinite; padding-left: 100%;}

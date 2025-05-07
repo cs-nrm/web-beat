@@ -46,6 +46,8 @@ const secchome = document.getElementById('home');
         streaming.addEventListener( 'ad-playback-complete', completeAd );
         streaming.addEventListener( 'ad-playback-start', startAd );
         streaming.addEventListener( 'ad-playback-error', errorAd );
+        streaming.addEventListener( 'track-cue-point', onTrackCuePoint );
+        streaming.addEventListener( 'list-loaded', onListLoaded );
       }
     
      function getStatus(s){
@@ -72,7 +74,7 @@ const secchome = document.getElementById('home');
             $('.text-player').html('<div style="font-weight:bold;">Estas escuchando...</div><div id="infoMusic" style="line-height:11px; font-size:12px;"></div>');
             $('.text-player').addClass('playing');
             $('#radiobutton').addClass('playerplaying');
-            getInfoMusic();
+            //getInfoMusic();
             
          }
          if(local_status == 'LIVE_STOP' || local_status == 'LIVE_PAUSE') {
@@ -105,6 +107,24 @@ const secchome = document.getElementById('home');
         //$('#td_container').width('1px');
         //$('#td_container').height('1px');       
         $('#td_container').removeClass('pub_active');
+      }
+      
+      function onTrackCuePoint( event ){
+         var cueTitle = event.data.cuePoint.cueTitle;
+         var artistName = event.data.cuePoint.artistName;
+         //console.log(event.data.cuePoint);
+         //console.log('cueTitle: ' + cueTitle);
+         document.getElementById('infoMusic').innerHTML = artistName + ' / ' + cueTitle;
+      }
+
+      function onListLoaded( e ){
+        console.log( 'tdplayer::onListLoaded' );
+        console.log( e.data );
+            $.each( e.data.list, function(index, item){
+            console.log('Artist : ' + item.artistName );
+            console.log('Title : ' + item.cueTitle );
+            console.log('Time : ' + item.cueTimeStart );
+            } );
       }
 
       function startAd(e){
@@ -193,7 +213,7 @@ const secchome = document.getElementById('home');
 
         });
 
-        function getInfoMusic(){
+        /*function getInfoMusic(){
             fetch("https://cdn.nrm.com.mx/cdn/beat/playlist/cancion.json")
             .then((res) => {
                 if (!res.ok) {
@@ -289,7 +309,7 @@ const secchome = document.getElementById('home');
            // console.log('repetido');   
         }
         getInfoMusic();
-        setInterval( getInfoMusic, 30000);
+        setInterval( getInfoMusic, 30000);*/
         
 
         

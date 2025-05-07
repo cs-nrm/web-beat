@@ -105,7 +105,8 @@ header .logo img{
 }
 
 header .compress-logo img{
-  height: 35px;
+  width: 80px;
+  height: 40px;
   transition: all 0.5s;
 }
 

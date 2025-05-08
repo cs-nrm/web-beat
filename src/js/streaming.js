@@ -107,6 +107,7 @@ const secchome = document.getElementById('home');
         //$('#td_container').width('1px');
         //$('#td_container').height('1px');       
         $('#td_container').removeClass('pub_active');
+        $('#full-cover').css('display','none');
       }
       
       function onTrackCuePoint( event ){
@@ -132,6 +133,7 @@ const secchome = document.getElementById('home');
         //$('#td_container').width('600px');
         //$('#td_container').height('360px');
         $('#td_container').addClass('pub_active');
+        $('#full-cover').css('display','block');
         document.getElementById('big-play').innerHTML = buttongLoading;    
         $('.text-player').html('<div style="font-style: italic; line-height:11px; font-weight:bold; font-size:11px;">Iniciamos después del anuncio...</div>'); 
       }

@@ -126,6 +126,7 @@ const secchome = document.getElementById('home');
             console.log('Time : ' + item.cueTimeStart );
             } );
       }
+      onListLoaded;
 
       function startAd(e){
         //$('#td_container').width('600px');

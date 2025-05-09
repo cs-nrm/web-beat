@@ -113,7 +113,7 @@ const secchome = document.getElementById('home');
       function onTrackCuePoint( event ){
          var cueTitle = event.data.cuePoint.cueTitle;
          var artistName = event.data.cuePoint.artistName;
-         //console.log(event.data.cuePoint);
+         console.log(event.data.cuePoint);
          //console.log('cueTitle: ' + cueTitle);
          document.getElementById('infoMusic').innerHTML = artistName + ' / ' + cueTitle;
       }
@@ -127,7 +127,7 @@ const secchome = document.getElementById('home');
             console.log('Time : ' + item.cueTimeStart );
             } );
       }
-      onListLoaded;
+      
 
       function startAd(e){
         //$('#td_container').width('600px');
@@ -628,8 +628,10 @@ document.addEventListener('astro:page-load', ev => {
 
         if( local_status == null || local_status == 'undefined' || local_status == '' || local_status == 'LIVE_STOP' ){  
             playstopRadio();
-        }
-        
+        }        
+        console.log( $('.logo-player img'));
+        $('.logo-player img').attr('src','/img/logo-beat.png');
+
     }else{
         $('#radiobutton').removeClass('en-vivo');
     }

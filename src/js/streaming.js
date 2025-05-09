@@ -631,9 +631,12 @@ document.addEventListener('astro:page-load', ev => {
         }        
         console.log( $('.logo-player img'));
         $('.logo-player img').attr('src','/img/logo-beat.png');
+        $('#big-play').removeClass('border-4');
 
     }else{
         $('#radiobutton').removeClass('en-vivo');
+        $('#big-play').addClass('border-4');
+        $('.logo-player img').attr('src','/img/beat-digital-logo.png');
     }
 
     

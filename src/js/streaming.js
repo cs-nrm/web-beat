@@ -14,7 +14,7 @@ var hora;
 const radioButton = document.getElementById('radiobutton');
 const player = document.getElementById('player');
 const secchome = document.getElementById('home');
-
+var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=0aa2713d85e04243944924876ba71f05&format=json";
 
 
 //function initPlayer(){
@@ -48,6 +48,10 @@ const secchome = document.getElementById('home');
         streaming.addEventListener( 'ad-playback-error', errorAd );
         streaming.addEventListener( 'track-cue-point', onTrackCuePoint );
         streaming.addEventListener( 'list-loaded', onListLoaded );
+        streaming.addEventListener( 'list-empty', onListEmpty);
+        streaming.addEventListener( 'nowplaying-api-error', onNowPlayingApiError);
+        streaming.addEventListener( 'ad-break-cue-point', adBreakCuePoint);
+        
       }
     
      function getStatus(s){
@@ -112,22 +116,35 @@ const secchome = document.getElementById('home');
       
       function onTrackCuePoint( event ){
          var cueTitle = event.data.cuePoint.cueTitle;
-         var artistName = event.data.cuePoint.artistName;
-         console.log(event.data.cuePoint);
+         var artistName = event.data.cuePoint.artistName;         
          //console.log('cueTitle: ' + cueTitle);
+         console.log('cambio de cancion');
+         console.log(event.data.cuePoint);
          document.getElementById('infoMusic').innerHTML = artistName + ' / ' + cueTitle;
       }
+
+      function adBreakCuePoint( e ){
+        console.log('PAUSA COMERCIAL');
+        document.getElementById('infoMusic').innerHTML = 'PAUSA COMERCIAL';
+     }
 
       function onListLoaded( e ){
         console.log( 'tdplayer::onListLoaded' );
         console.log( e.data );
             $.each( e.data.list, function(index, item){
-            console.log('Artist : ' + item.artistName );
-            console.log('Title : ' + item.cueTitle );
-            console.log('Time : ' + item.cueTimeStart );
+            console.log(index + ' Artist : ' + item.artistName );
+            console.log(' Title : ' + item.cueTitle );
+            console.log(' Time : ' + item.cueTimeStart );
             } );
       }
+
+      function onListEmpty( e ){
+            console.log( 'tdplayer::onListEmpty' );
+      }
       
+      function onNowPlayingApiError( e ){
+        console.log( 'tdplayer::onNowPlayingApiError' + e );
+     }
 
       function startAd(e){
         //$('#td_container').width('600px');

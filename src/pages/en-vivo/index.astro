@@ -52,8 +52,15 @@ posts.sort(function(a, b){
                     </div>
                     
                         <div class="prog-all">                            
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="28" height="28" stroke-width="1"> <path d="M10.5 21h-4.5a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v3"></path> <path d="M16 3v4"></path> <path d="M8 3v4"></path> <path d="M4 11h10"></path> <path d="M18 18m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path> <path d="M18 16.5v1.5l.5 .5"></path> </svg> 
-                                    <a href="/programacion"><span>Ver toda la programación</span></a>                               
+                                    <div class="link-playlist">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="28" height="28" stroke-width="1"> <path d="M14 17m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"></path> <path d="M17 17v-13h4"></path> <path d="M13 5h-10"></path> <path d="M3 9l10 0"></path> <path d="M9 13h-6"></path> </svg> 
+                                        <a href="/playlist"><span>Playlist</span></a>                               
+                                    </div>
+                                    <div class="link-programacion">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="28" height="28" stroke-width="1"> <path d="M10.5 21h-4.5a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v3"></path> <path d="M16 3v4"></path> <path d="M8 3v4"></path> <path d="M4 11h10"></path> <path d="M18 18m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path> <path d="M18 16.5v1.5l.5 .5"></path> </svg> 
+                                        <a href="/programacion"><span>Programación</span></a>                               
+                                    </div>
+                                    
                         </div>
                     
                 </div>
@@ -67,8 +74,9 @@ posts.sort(function(a, b){
     .programas{display:flex; width: 100%;}
     .prog-now{width: 33%; padding: 20px; background: #201e1e;     border-top-right-radius: 20px;}
     .prog-next{width: 33%;  padding: 20px; border-right: 1px solid white}
-    .prog-all{width: 34%;  padding: 20px; ; display: flex; gap: 10px; color:#ffaa1f;}
-    
+    .prog-all{width: 34%;  padding: 20px; ; display: flex; gap: 25px; color:#adabab;}
+    .prog-all div { display: flex; gap:10px;}
+    .prog-all a {color:#e94543 }
     .banner-prog {width: 35%; padding:20px;}
     .banner-prog img {     width: 400px;    height: 400px;    object-fit: cover;    border-radius: 163%;}
     .envivo-prog {   font-size: 2.5rem; color:#d6d8d7;}

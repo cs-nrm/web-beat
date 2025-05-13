@@ -595,6 +595,13 @@ article iframe.iframe-class{
     width: 50px !important;
     height: 50px !important;
   }
+
+  .en-vivo #infoMusic {
+    color: white !important;
+    font-size: 10px !important;
+    line-height: 15px !important;
+    width: 175px !important;}
+
 }
 
 /* SHARE BAR */

@@ -27,7 +27,7 @@ posts.sort(function(a, b){
 		
 		<main id="envivo">
             <div class=" mx-auto ">				
-                <div class="flex flex-col lg:flex-row">
+                <div class="md:flex md:flex-col lg:flex-row">
                     <div class="banner-prog">
                         <img src="" />
                     </div>
@@ -85,4 +85,16 @@ posts.sort(function(a, b){
     .info-envivo {   padding: 40px; }
     .envivo-title, .siguiente-title {   color:#e94543; font-weight: bold; font-size: 85%;}
     .envivo-title span, .siguiente-title span {color:#adabab; font-weight: normal; }
+
+    @media (max-width: 768px) {
+        .programas {display: block;}
+        .banner-prog {width: 100%;}
+        .info-envivo {display: none;}
+        .prog-now {width: 100%;} 
+        .prog-next {width: 100%;}
+        .prog-all {width: 100%; padding: 20px; gap: 10px;}
+        .prog-all div { width: 100%; padding: 10px; background: #201e1e; border-radius: 20px; }
+        .volume {display: none!important;}
+
+    }
 </style>

@@ -45,7 +45,7 @@ posts.sort(function(a, b){
                                     posts.map((post:any) => (
                                         post.acf.lunes && <div class="flex items-center min-h-24 p-4">
                                             <div class="w-1/4 md:w-1/6 text-xl sm:text-2xl md:text-2xl text-center">{post.acf.hora_inicio.substring(0, 5)} - {post.acf.hora_fin.substring(0, 5)}</div>
-                                            <div class="w-1/6 max-[640px]:hidden"><img class="block h-auto w-full rounded object-fill" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} /></div>
+                                            <div class="w-1/6 max-[640px]:hidden"><img class="block w-[90px] h-[90px] m-auto rounded-[50%] object-cover" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} /></div>
                                             <div class="w-3/4 md:w-4/6 p-4">
                                                 <p class="font-bold leading-none m-0 text-xl">{post.acf.programa}</p>
                                                 <div class="leading-none m-0 max-[640px]:hidden" set:html={post.content.rendered}></div>

@@ -118,13 +118,16 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
          var cueTitle = event.data.cuePoint.cueTitle;
          var artistName = event.data.cuePoint.artistName;         
          //console.log('cueTitle: ' + cueTitle);
-         console.log('cambio de cancion');
-         console.log(event.data.cuePoint);
-         document.getElementById('infoMusic').innerHTML = artistName + ' / ' + cueTitle;
+         //console.log('cambio de cancion');
+         //console.log(event.data.cuePoint);
+
+         const codtit = cueTitle.replace('&', '%26');
+         const codart = artistName.replace('&', '%26');
+         document.getElementById('infoMusic').innerHTML = '<div class="current-song">' + artistName + ' / ' + cueTitle + '</div><div class="share-current"><div class="like"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="28" height="28" stroke-width="1"> <path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572"></path> </svg> </div> <div class="share-wp"><a href="https://api.whatsapp.com/send/?text=Estoy%20escuchando%20' + codtit +'%20de%20'+ codart +'%20en%20https://beta.beatdigital.mx/" target="_blank"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="28" height="28" stroke-width="1"> <path d="M13 4v4c-6.575 1.028 -9.02 6.788 -10 12c-.037 .206 5.384 -5.962 10 -6v4l8 -7l-8 -7z"></path> </svg> </div></div>';
       }
 
       function adBreakCuePoint( e ){
-        console.log('PAUSA COMERCIAL');
+        //console.log('PAUSA COMERCIAL');
         document.getElementById('infoMusic').innerHTML = 'PAUSA COMERCIAL';
      }
 
@@ -177,7 +180,7 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
    
 
       function stop(){
-        console.log('stopped');
+        //console.log('stopped');
         streaming.stop();
       }
 
@@ -188,8 +191,8 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
             Dist: 'WebBeat'
             }
         });
-        console.log(e);
-        console.log('error ad');
+        //console.log(e);
+        //console.log('error ad');
         
       }
     /* Callback function called to notify that the SDK is ready to be used */
@@ -200,15 +203,15 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
         document.getElementById('play-pause').classList.add('show');
         document.getElementById('play-pause').classList.remove('hide'); 
         vol = streaming.getVolume();
-        console.log(vol);
+        //console.log(vol);
 
     }
 
   
     /* Callback function called to notify that the player configuration has an error. */
     function onConfigurationError( e ) {
-        console.log(e);
-        console.log(e.data.errors);
+        //console.log(e);
+        //console.log(e.data.errors);
         //Error code : object.data.errors[0].code
         //Error message : object.data.errors[0].message
     }
@@ -379,7 +382,7 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
 
                 });   
                 if (siguientePrograma) {
-                    console.log("Siguiente programa:", siguientePrograma.acf.programa);
+                    //console.log("Siguiente programa:", siguientePrograma.acf.programa);
                     $('.envivo-next').html(siguientePrograma.acf.hora_inicio + ' - ' + siguientePrograma.acf.hora_fin);
                     $('.envivo-prog-next-tab').html(siguientePrograma.acf.programa);
                 }                                             
@@ -492,7 +495,7 @@ const playstopRadio = function(){
 
 
 $('#big-play').on('click',function(){    
-        console.log('click en radiobutton');
+        //console.log('click en radiobutton');
         playstopRadio();      
 });
 
@@ -646,7 +649,7 @@ document.addEventListener('astro:page-load', ev => {
         if( local_status == null || local_status == 'undefined' || local_status == '' || local_status == 'LIVE_STOP' ){  
             playstopRadio();
         }        
-        console.log( $('.logo-player img'));
+        //console.log( $('.logo-player img'));
         $('.logo-player img').attr('src','/img/logo-beat.png');
         $('#big-play').removeClass('border-4');
 
@@ -658,7 +661,7 @@ document.addEventListener('astro:page-load', ev => {
 
     
     if ( secchome ){        
-        console.log(getplayingstatus);
+        //console.log(getplayingstatus);
         /*if( getplayingstatus == 'radio-playing'){
              document.getElementById('big-play').innerHTML = bigButtonPause; 
         }*/
@@ -842,7 +845,7 @@ document.addEventListener('astro:page-load', ev => {
         if(navigator.userAgent.indexOf("iPhone") != -1){
             
         $('.wp-block-embed-youtube .wp-block-embed__wrapper iframe').each(function(t,el){
-            console.log($(this));   
+            //console.log($(this));   
             //const ele = $(this).attr('id','el-'+t);     
             $(this).on('click',function(){
                 const getstatus = playerstatus();

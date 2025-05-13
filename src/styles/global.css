@@ -413,7 +413,9 @@ article iframe.iframe-class{
 .en-vivo .text-player{ width: 400px!important; font-size: 14px; text-align: left!important; color:#d6d8d7; order:2;}
 .en-vivo #big-play img {  width: 65px;  height: 65px; }
 .en-vivo .playing { width: 400px!important;}
-
+.share-current {display: none;}
+.en-vivo .share-current { display: flex;  gap: 15px; margin-top: 10px;   }
+.en-vivo #infoMusic a {color: white;}
 
     
   .marquee { white-space: nowrap; overflow: hidden; width: 100%; color:black;}
@@ -423,7 +425,7 @@ article iframe.iframe-class{
   input[type=range]:focus {    outline: none;    }
   input[type=range]::-webkit-slider-runnable-track {    width: 100%;    height: 8.8px;    cursor: pointer;    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;    background: #d6d8d7;    border-radius: 25px;    border: 0px solid #000101;}
   input[type=range]::-webkit-slider-thumb {    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;    border: 0px solid #000000;    height:22px;    width: 39px;    border-radius: 12px;    background: #fff;    cursor: pointer;    -webkit-appearance: none;    margin-top: -6.6px;   }
-  input[type=range]:focus::-webkit-slider-runnable-track {    background: #000000;    }
+  input[type=range]:focus::-webkit-slider-runnable-track {    background: #d6d8d7;    }
   input[type=range]::-moz-range-track {    width: 100%;    height: 8.8px;    cursor: pointer;    animate: 0.2s;    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;    background: #d6d8d7;    border-radius: 30px;    border: 0px solid #000101;   }
   input[type=range]::-moz-range-thumb {    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;    border: 0px solid #000000;    height: 14px;    width: 39px;    border-radius: 7px;    background: #fff;    cursor: pointer;    }
   input[type=range]::-ms-track {    width: 100%;    height: 8.8px;    cursor: pointer;    animate: 0.2s;    background: transparent;    border-color: transparent;    border-width: 39px 0;    color: transparent;    }

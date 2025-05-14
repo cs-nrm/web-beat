@@ -57,7 +57,7 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
      function getStatus(s){
         local_status = s.data.code;
         const secchome = document.getElementById('home');        
-         //console.log(local_status);
+         console.log(local_status);
          if( local_status == 'GETTING_STATION_INFORMATION' || local_status == 'LIVE_CONNECTING' || local_status == 'LIVE_BUFFERING' ){
             document.getElementById('loading').classList.add('show');
             document.getElementById('loading').classList.remove('hide');
@@ -89,8 +89,8 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
             $('#radiobutton').removeClass('playerplaying');
             $('.text-player').html('');
             setTimeout( function(){
-                $('.text-player').html('ESCUCHA LA RADIO EN VIVO <span style="color: #df104a;    font-weight: bold;    font-size: 12px;">GRATIS</span> AHORA');             
-            },1000);
+                $('.text-player').html('ESCUCHA LA RADIO EN VIVO <span style="color: #e94543;    font-weight: bold;    font-size: 12px;">GRATIS</span> AHORA');             
+            },500);
                 
          }
 
@@ -113,7 +113,7 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
          var artistName = event.data.cuePoint.artistName;         
          //console.log('cueTitle: ' + cueTitle);
          //console.log('cambio de cancion');
-         //console.log(event.data.cuePoint);
+         console.log(event.data.cuePoint);
 
          const codtit = cueTitle.replace('&', '%26');
          const codart = artistName.replace('&', '%26');
@@ -121,7 +121,7 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
       }
 
       function adBreakCuePoint( e ){
-        //console.log('PAUSA COMERCIAL');
+        console.log('PAUSA COMERCIAL');
         document.getElementById('infoMusic').innerHTML = 'PAUSA COMERCIAL';
      }
 
@@ -221,12 +221,13 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
     }
 
     initPlayerSDK();        
-        volume = document.getElementById('vol');
-        volume.addEventListener('input', function(){
+    
+    volume = document.getElementById('vol');
+    volume.addEventListener('input', function(){
             //console.log(volume.value);
             streaming.setVolume(volume.value);
 
-        });
+    });
 
         /*function getInfoMusic(){
             fetch("https://cdn.nrm.com.mx/cdn/beat/playlist/cancion.json")
@@ -434,7 +435,8 @@ const playstopRadio = function(){
             if(getplayingstatus == 'video-playing'){
                 
             }
-
+            console.log(getplayingstatus);
+            
             if( local_status == null || local_status == 'undefined' || local_status == '' || local_status == 'LIVE_STOP' ){                                
                 start();     
                 $('#player').attr('data-status','radio-playing');                

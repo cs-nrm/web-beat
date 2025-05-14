@@ -4,18 +4,18 @@ import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
 import FormattedDate from '../../components/FormattedDate.astro';
-import BarNrm from '../../components/BarNrm.astro';
+/*import BarNrm from '../../components/BarNrm.astro';*/
 
 
 
 
-const lunes_nojson = 'https://cdn.nrm.com.mx/cdn/beat/playlist/lunes.json';
-const martes_nojson = 'https://cdn.nrm.com.mx/cdn/beat/playlist/martes.json';
-const miercoles_nojson = 'https://cdn.nrm.com.mx/cdn/beat/playlist/miércoles.json';
-const jueves_nojson = 'https://cdn.nrm.com.mx/cdn/beat/playlist/jueves.json';
-const viernes_nojson = 'https://cdn.nrm.com.mx/cdn/beat/playlist/viernes.json';
-const sabado_nojson = 'https://cdn.nrm.com.mx/cdn/beat/playlist/sábado.json';
-const domingo_nojson = 'https://cdn.nrm.com.mx/cdn/beat/playlist/domingo.json';
+const lunes_nojson = 'https://contenido.beatdigital.mx/cdn/playlist/lunes.json';
+const martes_nojson = 'https://contenido.beatdigital.mx/cdn/playlist/martes.json';
+const miercoles_nojson = 'https://contenido.beatdigital.mx/cdn/playlist/miércoles.json';
+const jueves_nojson = 'https://contenido.beatdigital.mx/cdn/playlist/jueves.json';
+const viernes_nojson = 'https://contenido.beatdigital.mx/cdn/playlist/viernes.json';
+const sabado_nojson = 'https://contenido.beatdigital.mx/cdn/playlist/sa%CC%81bado.json';
+const domingo_nojson = 'https://contenido.beatdigital.mx/cdn/playlist/domingo.json';
  
 const lunes_arr = await fetch(lunes_nojson).then(r => r.text() ).then(data => {    
     const lunes_json = data.split('\n');     

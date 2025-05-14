@@ -29,6 +29,7 @@ posts.sort(function(a, b){
 		
 		<main>
             <div class="container my-12 mx-auto px-4 md:px-12">
+            <div class="audiowide neon-rosa text-center md:text-left py-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl">Talento</div>
                 <div class="flex flex-wrap">
                     <div class="w-full lg:w-2/3">
                         <SliderLocutores />
@@ -37,7 +38,7 @@ posts.sort(function(a, b){
                         <BoxBanner />
                     </div>
                 </div>
-				<div class="audiowide neon-rosa text-center md:text-left py-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl">Programación</div>
+				<div class="audiowide neon-rosa text-center md:text-left py-4 mt-16 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl">Programación</div>
                 <div class="flex flex-col lg:flex-row">
                     <div class="sm:min-w-[calc(100%-400px)]">
                         <Tabs class="programacion" class:list={['programacion']}>
@@ -54,9 +55,9 @@ posts.sort(function(a, b){
                                 {
                                     posts.map((post:any) => (
                                         post.acf.lunes && <div class="flex items-center min-h-24 p-4">
-                                            <div class="w-1/4 md:w-1/6 text-xl sm:text-2xl md:text-2xl text-center">{post.acf.hora_inicio.substring(0, 5)} - {post.acf.hora_fin.substring(0, 5)}</div>
-                                            <div class="w-1/6 max-[640px]:hidden"><img class="block w-[90px] h-[90px] m-auto rounded-[50%] object-cover" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} /></div>
-                                            <div class="w-3/4 md:w-4/6 p-4">
+                                            <div class="w-5/12 md:w-3/12 text-xl sm:text-2xl md:text-2xl text-center">{post.acf.hora_inicio.substring(0, 5)} - {post.acf.hora_fin.substring(0, 5)}</div>
+                                            <div class="w-2/12 max-[640px]:hidden"><img class="block m-auto rounded-[50%] object-cover" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} /></div>
+                                            <div class="w-7/12 p-4">
                                                 <p class="font-bold leading-none m-0 text-xl">{post.acf.programa}</p>
                                                 <div class="leading-none m-0 max-[640px]:hidden" set:html={post.content.rendered}></div>
                                             </div>
@@ -71,9 +72,9 @@ posts.sort(function(a, b){
                                 {
                                     posts.map((post:any) => (
                                         post.acf.martes && <div class="flex items-center min-h-24 p-4">
-                                            <div class="w-1/4 md:w-1/6 text-xl sm:text-2xl md:text-2xl text-center">{post.acf.hora_inicio.substring(0, 5)} - {post.acf.hora_fin.substring(0, 5)}</div>
-                                            <div class="w-1/6 max-[600px]:hidden"><img class="block h-auto w-full rounded object-fill" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} /></div>
-                                            <div class="w-3/4 md:w-4/6 p-4">
+                                            <div class="w-5/12 md:w-3/12 text-xl sm:text-2xl md:text-2xl text-center">{post.acf.hora_inicio.substring(0, 5)} - {post.acf.hora_fin.substring(0, 5)}</div>
+                                            <div class="w-2/12 max-[640px]:hidden"><img class="block m-auto rounded-[50%] object-cover" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} /></div>
+                                            <div class="w-7/12 p-4">
                                                 <p class="font-bold  leading-none m-0 text-xl">{post.acf.programa}</p>
                                                 <div class="leading-none m-0 max-[640px]:hidden" set:html={post.content.rendered}></div>
                                             </div>
@@ -88,9 +89,9 @@ posts.sort(function(a, b){
                                 {
                                     posts.map((post:any) => (
                                         post.acf.miercoles && <div class="flex items-center min-h-24 p-4">
-                                            <div class="w-1/4 md:w-1/6 text-xl sm:text-2xl md:text-2xl text-center">{post.acf.hora_inicio.substring(0, 5)} - {post.acf.hora_fin.substring(0, 5)}</div>
-                                            <div class="w-1/6 max-[600px]:hidden"><img class="block h-auto w-full rounded object-fill" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} /></div>
-                                            <div class="w-3/4 md:w-4/6 p-4">
+                                            <div class="w-5/12 md:w-3/12 text-xl sm:text-2xl md:text-2xl text-center">{post.acf.hora_inicio.substring(0, 5)} - {post.acf.hora_fin.substring(0, 5)}</div>
+                                            <div class="w-2/12 max-[640px]:hidden"><img class="block m-auto rounded-[50%] object-cover" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} /></div>
+                                            <div class="w-7/12 p-4">
                                                 <p class="font-bold  leading-none m-0 text-xl">{post.acf.programa}</p>
                                                 <div class="leading-none m-0 max-[640px]:hidden" set:html={post.content.rendered}></div>
                                             </div>
@@ -105,9 +106,9 @@ posts.sort(function(a, b){
                                 {
                                     posts.map((post:any) => (
                                         post.acf.jueves && <div class="flex items-center min-h-24 p-4">
-                                            <div class="w-1/4 md:w-1/6 text-xl sm:text-2xl md:text-2xl text-center">{post.acf.hora_inicio.substring(0, 5)} - {post.acf.hora_fin.substring(0, 5)}</div>
-                                            <div class="w-1/6 max-[600px]:hidden"><img class="block h-auto w-full rounded object-fill" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} /></div>
-                                            <div class="w-3/4 md:w-4/6 p-4">
+                                            <div class="w-5/12 md:w-3/12 text-xl sm:text-2xl md:text-2xl text-center">{post.acf.hora_inicio.substring(0, 5)} - {post.acf.hora_fin.substring(0, 5)}</div>
+                                            <div class="w-2/12 max-[640px]:hidden"><img class="block m-auto rounded-[50%] object-cover" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} /></div>
+                                            <div class="w-7/12 p-4">
                                                 <p class="font-bold  leading-none m-0 text-xl">{post.acf.programa}</p>
                                                 <div class="leading-none m-0 max-[640px]:hidden" set:html={post.content.rendered}></div>
                                             </div>
@@ -122,9 +123,9 @@ posts.sort(function(a, b){
                                 {
                                     posts.map((post:any) => (
                                         post.acf.viernes && <div class="flex items-center min-h-24 p-4">
-                                            <div class="w-1/4 md:w-1/6 text-xl sm:text-2xl md:text-2xl text-center">{post.acf.hora_inicio.substring(0, 5)} - {post.acf.hora_fin.substring(0, 5)}</div>
-                                            <div class="w-1/6 max-[600px]:hidden"><img class="block h-auto w-full rounded object-fill" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} /></div>
-                                            <div class="w-3/4 md:w-4/6 p-4">
+                                            <div class="w-5/12 md:w-3/12 text-xl sm:text-2xl md:text-2xl text-center">{post.acf.hora_inicio.substring(0, 5)} - {post.acf.hora_fin.substring(0, 5)}</div>
+                                            <div class="w-2/12 max-[640px]:hidden"><img class="block m-auto rounded-[50%] object-cover" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} /></div>
+                                            <div class="w-7/12 p-4">
                                                 <p class="font-bold  leading-none m-0 text-xl">{post.acf.programa}</p>
                                                 <div class="leading-none m-0 max-[640px]:hidden" set:html={post.content.rendered}></div>
                                             </div>
@@ -139,9 +140,9 @@ posts.sort(function(a, b){
                                 {
                                     posts.map((post:any) => (
                                         post.acf.sabado && <div class="flex items-center min-h-24 p-4">
-                                            <div class="w-1/4 md:w-1/6 text-xl sm:text-2xl md:text-2xl text-center">{post.acf.hora_inicio.substring(0, 5)} - {post.acf.hora_fin.substring(0, 5)}</div>
-                                            <div class="w-1/6 max-[600px]:hidden"><img class="block h-auto w-full rounded object-fill" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} /></div>
-                                            <div class="w-3/4 md:w-4/6 p-4">
+                                            <div class="w-5/12 md:w-3/12 text-xl sm:text-2xl md:text-2xl text-center">{post.acf.hora_inicio.substring(0, 5)} - {post.acf.hora_fin.substring(0, 5)}</div>
+                                            <div class="w-2/12 max-[640px]:hidden"><img class="block m-auto rounded-[50%] object-cover" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} /></div>
+                                            <div class="w-7/12 p-4">
                                                 <p class="font-bold  leading-none m-0 text-xl">{post.acf.programa}</p>
                                                 <div class="leading-none m-0 max-[640px]:hidden" set:html={post.content.rendered}></div>
                                             </div>
@@ -156,9 +157,9 @@ posts.sort(function(a, b){
                                 {
                                     posts.map((post:any) => (
                                         post.acf.domingo && <div class="flex items-center min-h-24 p-4">
-                                            <div class="w-1/4 md:w-1/6 text-xl sm:text-2xl md:text-2xl text-center">{post.acf.hora_inicio.substring(0, 5)} - {post.acf.hora_fin.substring(0, 5)}</div>
-                                            <div class="w-1/6 max-[600px]:hidden"><img class="block h-auto w-full rounded object-fill" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} /></div>
-                                            <div class="w-3/4 md:w-4/6 p-4">
+                                            <div class="w-5/12 md:w-3/12 text-xl sm:text-2xl md:text-2xl text-center">{post.acf.hora_inicio.substring(0, 5)} - {post.acf.hora_fin.substring(0, 5)}</div>
+                                            <div class="w-2/12 max-[640px]:hidden"><img class="block m-auto rounded-[50%] object-cover" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} /></div>
+                                            <div class="w-7/12 p-4">
                                                 <p class="font-bold  leading-none m-0 text-xl">{post.acf.programa}</p>
                                                 <div class="leading-none m-0 max-[640px]:hidden" set:html={post.content.rendered}></div>
                                             </div>

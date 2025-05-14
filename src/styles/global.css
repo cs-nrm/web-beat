@@ -406,7 +406,7 @@ article iframe.iframe-class{
 .loading-gif {	width: 20px; height: auto;}
 .infoMusic { line-height: 10px;}
 
-.en-vivo #infoMusic { color: white!important;     font-size: 18px !important;  line-height: 26px !important; width: 400px!important; }
+.en-vivo #infoMusic { color: white!important;     font-size: 16px !important;  line-height: 26px !important; width: 400px!important; }
 .en-vivo #big-play{ order:3; margin: auto; width: 75px; height: 75px;}
 .en-vivo #big-play svg {width: 65px; height: 65px; background:#504e4e; border-radius: 100%;     fill: #fff;
   stroke: none; }

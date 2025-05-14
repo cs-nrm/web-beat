@@ -17,7 +17,7 @@ const secchome = document.getElementById('home');
 var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=0aa2713d85e04243944924876ba71f05&format=json";
 
 
-//function initPlayer(){
+
     function initPlayerSDK(){
         var tdPlayerConfig = {
              coreModules: [{
@@ -73,12 +73,9 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
             document.getElementById('play-pause').classList.add('show');
             document.getElementById('play-pause').classList.remove('hide'); 
             document.getElementById('big-play').innerHTML = bigButtonPause; 
-           // $('.text-player').html('');
-            //$('.text-player').attr('id','infoMusic');
             $('.text-player').html('<div style="font-weight:bold;">Estas escuchando...</div><div id="infoMusic" style="line-height:11px; font-size:12px;"></div>');
             $('.text-player').addClass('playing');
             $('#radiobutton').addClass('playerplaying');
-            //getInfoMusic();
             
          }
          if(local_status == 'LIVE_STOP' || local_status == 'LIVE_PAUSE') {
@@ -95,7 +92,6 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
                 $('.text-player').html('ESCUCHA LA RADIO EN VIVO <span style="color: #df104a;    font-weight: bold;    font-size: 12px;">GRATIS</span> AHORA');             
             },1000);
                 
-            //$('.text-player').attr('id','');            
          }
 
      }
@@ -108,8 +104,6 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
             Dist: 'WebBeat'
             }
         }); 
-        //$('#td_container').width('1px');
-        //$('#td_container').height('1px');       
         $('#td_container').removeClass('pub_active');
         $('#full-cover').css('display','none');
       }
@@ -150,8 +144,6 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
      }
 
       function startAd(e){
-        //$('#td_container').width('600px');
-        //$('#td_container').height('360px');
         $('#td_container').addClass('pub_active');
         $('#full-cover').css('display','block');
         document.getElementById('big-play').innerHTML = buttongLoading;    
@@ -336,8 +328,7 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
         
 
         
-        function getInfoProg(){
-            //fetch("https://beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=30&categories=3312&_fields[]=acf")
+        function getInfoProg(){            
             fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=100&categories=515&_fields[]=jetpack_featured_media_url&_fields[]=acf")            
             .then((res) => {
                 if (!res.ok) {
@@ -346,10 +337,8 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
                 }
                 return res.json();
             })
-            .then((data) => {                
-                //console.log(data);
+            .then((data) => {                                
                 const fecha = new Date();                
-                //const hora = fecha.getHours() + ':' + fecha.getUTCMinutes() + ':' + fecha.getSeconds();
                 const dias = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
                 const dia = dias[fecha.getDay()];                
                 const hora = dayjs(fecha).format('HH:mm:ss');
@@ -359,60 +348,28 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
                     if(prog.acf[dia] === true){
                         var h_i;
                         if( prog.acf.hora_fin >= hora &&  prog.acf.hora_inicio <= hora){
-                           // console.log(prog.acf.hora_inicio);
-                            /*console.log(prog.acf.hora_inicio);
-                            console.log(prog.acf.hora_fin);
-                            console.log(prog.acf.programa);*/
-                            
                             $('.banner-prog img').attr('src', prog.jetpack_featured_media_url);
                             $('.envivo-prog').html(prog.acf.programa);
                             $('.envivo-now').html( prog.acf.hora_inicio + ' - ' + prog.acf.hora_fin);
                             $('.envivo-prog-tab').html(prog.acf.programa);                            
-
                         }
-
                         if (prog.acf.hora_inicio > hora) {
                             if (!siguientePrograma || prog.acf.hora_inicio < siguientePrograma.acf.hora_inicio) {
                                 siguientePrograma = prog;
                             }
                         }
-                        
-
                     }
-
                 });   
                 if (siguientePrograma) {
-                    //console.log("Siguiente programa:", siguientePrograma.acf.programa);
                     $('.envivo-next').html(siguientePrograma.acf.hora_inicio + ' - ' + siguientePrograma.acf.hora_fin);
                     $('.envivo-prog-next-tab').html(siguientePrograma.acf.programa);
                 }                                             
-            });
-           // console.log('repetido');   
+            });         
         }
         
         setTimeout(getInfoProg, 20000);
         setInterval( getInfoProg, 300000);       
         
-/* abrir barra*/
-/*const openbarra = function(){
-    player.classList.remove('h-0');
-    player.classList.add('h-16');
-    player.classList.add('border-4');    
-}*/
-/* cerrar barra*/
-/*const hidebarra = function(){
-    player.classList.remove('h-16');
-    player.classList.add('h-0');
-    player.classList.remove('border-4');                
-}*/
-/* cerrar y abrir barra*/
-/*const transitionBarra = function(){    
-    hidebarra();
-    setTimeout( function(){        
-        openbarra();
-    }, 500);
-}*/
-
 
 const radioActive = function(){
     $('#player-inner').addClass('active');
@@ -427,8 +384,7 @@ const podcastActive = function(){
     $('#player-v-podcast').addClass('active');
     $('#player-v-video').removeClass('active');
     $('.player-float').addClass('hide');
-    $('.player-float').removeClass('active');
-    //$('#radiobutton').addClass('playerplaying'); 
+    $('.player-float').removeClass('active');    
 }
 
 const videoActive = function(){
@@ -440,8 +396,7 @@ const videoActive = function(){
 const radioStop = function(){
         transitionPlayer();
         streaming.stop();
-        $('#player').attr('data-status','init');                
-        //hidebarra();
+        $('#player').attr('data-status','init');                        
         $('#player-inner').removeClass('active');
 }
 
@@ -469,11 +424,9 @@ const playerstatus = function(){
 };
 
 const playstopRadio = function(){
-            transitionPlayer();
-            //console.log(local_status);
+            transitionPlayer();            
             const getplayingstatus = playerstatus();
-            if(getplayingstatus == 'podcast-playing'){
-                //transitionBarra();
+            if(getplayingstatus == 'podcast-playing'){                
                 const containerpodcast  = document.getElementById('iframepodcast');
                 containerpodcast.innerHTML ='';                
             }                
@@ -483,10 +436,8 @@ const playstopRadio = function(){
             }
 
             if( local_status == null || local_status == 'undefined' || local_status == '' || local_status == 'LIVE_STOP' ){                                
-                //console.log('aqui debe iniciar');
                 start();     
-                $('#player').attr('data-status','radio-playing');
-                //transitionBarra(); 
+                $('#player').attr('data-status','radio-playing');                
                 radioActive();   
             }else if( local_status == 'LIVE_PLAYING' || local_status == 'GETTING_STATION_INFORMATION' || local_status == 'LIVE_CONNECTING' || local_status == 'LIVE_BUFFERING'){                
                 radioStop();
@@ -494,8 +445,7 @@ const playstopRadio = function(){
 };
 
 
-$('#big-play').on('click',function(){    
-        //console.log('click en radiobutton');
+$('#big-play').on('click',function(){            
         playstopRadio();      
 });
 
@@ -504,19 +454,6 @@ $('#return-live').on('click',function(){
        playstopRadio();    
 });
 
-/*$('.radio-link').on('click',function(){    
-       playstopRadio();    
-});*/
-
-
-
-/*$('#play-pause').on('click', function(){
-    playstopRadio();
-});*/
-
-
-
-  
 
 /* NAVIGATION */ 
 document.addEventListener('astro:before-preparation', ev => {
@@ -644,7 +581,6 @@ document.addEventListener('astro:page-load', ev => {
         //console.log('envivo');
         getInfoProg();
         $('#radiobutton').addClass('en-vivo');
-        //console.log(local_status);
 
         if( local_status == null || local_status == 'undefined' || local_status == '' || local_status == 'LIVE_STOP' ){  
             playstopRadio();
@@ -661,11 +597,7 @@ document.addEventListener('astro:page-load', ev => {
 
     
     if ( secchome ){        
-        //console.log(getplayingstatus);
-        /*if( getplayingstatus == 'radio-playing'){
-             document.getElementById('big-play').innerHTML = bigButtonPause; 
-        }*/
-
+        
                 var elem = document.querySelector('.carousel-main');
         var flkty = new Flickity( elem, {
             // options
@@ -679,18 +611,7 @@ document.addEventListener('astro:page-load', ev => {
         });
         flkty.select(2);
         flkty.reloadCells();   
-
-       /* var elemnav = document.querySelector('.carousel-nav');
-        var flktynav = new Flickity( elemnav, {
-            // options
-            cellAlign: 'center',
-            contain: true,
-            asNavFor: '.carousel-main',
-            prevNextButtons: false,
-            pageDots: false, 
-            pauseAutoPlayOnHover: true
-        }); 
-        */
+       
 
         var elempod = document.querySelector('.main-carousel');
         var flktypod = new Flickity( elempod, {
@@ -699,7 +620,6 @@ document.addEventListener('astro:page-load', ev => {
             wrapAround: true, 
             cellAlign: 'center',
             pageDots: false
-            //autoPlay: true
         });
 
 
@@ -714,15 +634,10 @@ document.addEventListener('astro:page-load', ev => {
     
     
     if( getplayingstatus == 'podcast-playing'){
-        const containerpodcast  = document.getElementById('iframepodcast');
-        //containerpodcast.innerHTML ='';
-        initPlayer();
-        //hidebarra();
+        const containerpodcast  = document.getElementById('iframepodcast');        
+        initPlayer();        
     }
-
-   /* $('#big-play').on('click', function(){
-        playstopRadio();
-    });*/
+   
     
     $('.audiopod').each(function(){   
         $(this).on('click',function(){
@@ -774,12 +689,9 @@ document.addEventListener('astro:page-load', ev => {
             }
             //console.log(podcaststatus);            
             if(podcaststatus == 'ready'){
-                //transitionBarra();
                 const ifr = $(this).find('.data-iframe').attr('data-iframe');
                 const ifrsrc = ifr.split('src="');
                 const src = ifrsrc[1].split('"');
-                //const playerpodcast = document.getElementById('playerpodcast');
-                //<iframe src="https://omny.fm/shows/beat-trends/amor-de-lejos-amor-de-ya-no-aplica/embed?size=square&style=cover&image=0&description=1&download=1&playlistImages=1&playlistShare=1&share=1&subscribe=0&background=efefef&foreground=2b2b2c&highlight=e1b01c" allow="autoplay; clipboard-write" width="300" height="300" frameborder="0" title="Amor de lejos, amor de… Ya no aplica"></iframe>           
                 containerpodcast.innerHTML ='';
                 const playerpodcast = document.createElement('iframe');
                 playerpodcast.setAttribute('src',src[0]+"?image=0&share=0&download=1&description=0&background=efefef&foreground=2b2b2c&highlight=e1b01c");
@@ -788,7 +700,6 @@ document.addEventListener('astro:page-load', ev => {
                 playerpodcast.setAttribute('frameborder','0');
                 playerpodcast.setAttribute('allow','autoplay');
                 playerpodcast.setAttribute('transition:persist','');
-                //console.log(playerpodcast);
                 containerpodcast.appendChild(playerpodcast);            
                 const ply =  new playerjs.Player(playerpodcast);
                  
@@ -809,15 +720,7 @@ document.addEventListener('astro:page-load', ev => {
                 });   
             }
             else if(podcaststatus == 'active'){
-                /*if( getplayingstatus == 'podcast-playing'){
-                    const containerpodcast  = document.getElementById('iframepodcast');
-                    containerpodcast.innerHTML ='';
-                    hidebarra();
-                }*/
-                //containerpodcast.innerHTML = '';
-                //hidebarra();                
                 const playerpodcast = document.getElementById('iframepodcast').getElementsByTagName('iframe')[0];
-                //console.log(playerpodcast);
                 const ply =  new playerjs.Player(playerpodcast);
                 ply.on('ready', ()=> {
                     ply.pause();
@@ -840,13 +743,10 @@ document.addEventListener('astro:page-load', ev => {
 
     const containvideo = document.getElementById('content-w-video');
     if (containvideo){
-        //console.log('sccion pop');  
         console.log(navigator.userAgent);
         if(navigator.userAgent.indexOf("iPhone") != -1){
             
         $('.wp-block-embed-youtube .wp-block-embed__wrapper iframe').each(function(t,el){
-            //console.log($(this));   
-            //const ele = $(this).attr('id','el-'+t);     
             $(this).on('click',function(){
                 const getstatus = playerstatus();
                 if( getstatus == 'radio-playing'){
@@ -906,10 +806,6 @@ document.addEventListener('astro:page-load', ev => {
             $(this).on('click', function(){
                 console.log($(this).attr('data-voto-id'));
                 const id = $(this).attr('data-voto-id');                                
-                /*const params = {
-                    "search": id, 
-                    "per_page": 1000                    
-                };*/
                 const params = {
                     "item_id":id,
                     "user_id":15,
@@ -957,8 +853,7 @@ document.addEventListener('astro:page-load', ev => {
             });            
         });
         
-        /*------------------- */
-        
+       
     } 
 
         

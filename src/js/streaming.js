@@ -613,19 +613,17 @@ document.addEventListener('astro:page-load', ev => {
         });
         flkty.select(2);
         flkty.reloadCells();   
-       
-
-        var elempod = document.querySelector('.main-carousel');
-        var flktypod = new Flickity( elempod, {
-            contain: true,
-            lazyLoad: 1, 
-            wrapAround: true, 
-            cellAlign: 'center',
-            pageDots: false
-        });
-
-
     }
+
+
+    var elempod = document.querySelector('.main-carousel');
+    var flktypod = new Flickity( elempod, {
+        contain: true,
+        lazyLoad: 1, 
+        wrapAround: true, 
+        cellAlign: 'center',
+        pageDots: false
+    });
     
     const imagenNota = document.getElementById("imagen-nota");
     if( imagenNota ){

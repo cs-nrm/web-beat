@@ -589,6 +589,9 @@ article iframe.iframe-class{
 .slider-promociones .flickity-prev-next-button.next {
     right: 8% !important;
 }
+.slider-promociones .flickity-viewport {
+    min-height: 385px;
+}
 
 @media (max-width: 768px) {
   .flickity-prev-next-button {
@@ -603,6 +606,10 @@ article iframe.iframe-class{
     width: 175px !important;}
 
 }
+@media (max-width: 500px) {
+  .slider-promociones .flickity-viewport{min-height: 280px;}
+}
+
 
 /* SHARE BAR */
 

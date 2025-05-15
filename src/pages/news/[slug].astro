@@ -51,7 +51,7 @@ export async function getStaticPaths() {
           <div class="share-bar">
             <div class="sticky-bar sticky top-[90px] left-0 right-0">
                 <div class="share-buttons">
-                    <a href={`https://www.facebook.com/sharer/sharer.php?u=https://beatdigital.mx/news/${post.slug}`}
+                    <a href={`https://www.facebook.com/sharer/sharer.php?u=https://beta.beatdigital.mx/news/${post.slug}`}
                         target="_blank" 
                         class="share-button facebook"
                         title="Compartir en Facebook">
@@ -59,7 +59,7 @@ export async function getStaticPaths() {
                         <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
                         </svg>
                     </a>
-                    <a href={`https://twitter.com/intent/tweet?url=https://beatdigital.mx/news/${post.slug}&text=${post.title.rendered}`} 
+                    <a href={`https://twitter.com/intent/tweet?url=https://beta.beatdigital.mx/news/${post.slug}&text=${post.title.rendered}`} 
                         target="_blank" 
                         class="share-button twitter"
                         title="Compartir en X">
@@ -68,7 +68,7 @@ export async function getStaticPaths() {
                             <path d="M4 20l6.768-6.768m2.46-2.46L20 4"></path>
                         </svg>
                     </a>
-                    <a href={`https://wa.me/?text=${post.title.rendered} https://beatdigital.mx/news/${post.slug}`} 
+                    <a href={`https://wa.me/?text=${post.title.rendered} https://beta.beatdigital.mx/news/${post.slug}`} 
                         target="_blank" 
                         class="share-button whatsapp"
                         title="Compartir en WhatsApp">

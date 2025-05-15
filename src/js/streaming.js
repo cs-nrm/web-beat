@@ -51,6 +51,7 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
         streaming.addEventListener( 'list-empty', onListEmpty);
         streaming.addEventListener( 'nowplaying-api-error', onNowPlayingApiError);
         streaming.addEventListener( 'ad-break-cue-point', adBreakCuePoint);
+        streaming.addEventListener( 'autoplay', autoplay);
         
       }
     
@@ -219,6 +220,17 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
     function onAdBlockerDetected(){
         console.log( 'AdBlockerDetected' );
     }
+
+    const autoplay = function(){        
+        streaming.play({
+            station:'XHSONFM',
+            trackingParameters:{
+                Dist: 'WebBeat',
+                autoplay: 1
+            }
+        });
+    }
+
 
     initPlayerSDK();        
     
@@ -436,15 +448,23 @@ const playstopRadio = function(){
                 
             }
             console.log(getplayingstatus);
-            
-            if( local_status == null || local_status == 'undefined' || local_status == '' || local_status == 'LIVE_STOP' ){                                
+            console.log(local_status);
+
+            if( local_status == null || local_status == 'undefined' || local_status == ''  ){ 
+                //console.log('start');                               
                 start();     
                 $('#player').attr('data-status','radio-playing');                
                 radioActive();   
-            }else if( local_status == 'LIVE_PLAYING' || local_status == 'GETTING_STATION_INFORMATION' || local_status == 'LIVE_CONNECTING' || local_status == 'LIVE_BUFFERING'){                
+            }else if(local_status == 'LIVE_STOP'){
+                //console.log('else play');
+                play();
+            }
+            else if( local_status == 'LIVE_PLAYING' || local_status == 'GETTING_STATION_INFORMATION' || local_status == 'LIVE_CONNECTING' || local_status == 'LIVE_BUFFERING'){                
                 radioStop();
             }
 };
+
+
 
 
 $('#big-play').on('click',function(){            
@@ -585,6 +605,7 @@ document.addEventListener('astro:page-load', ev => {
 
         if( local_status == null || local_status == 'undefined' || local_status == '' || local_status == 'LIVE_STOP' ){  
             playstopRadio();
+            //autoplay();            
         }        
         //console.log( $('.logo-player img'));
         $('.logo-player img').attr('src','/img/logo-beat.png');

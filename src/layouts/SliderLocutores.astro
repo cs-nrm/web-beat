@@ -1,7 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 
-const res = await fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=8&_fields=title,excerpt,content,acf,yoast_head_json&categories=744");
+const res = await fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=8&_fields=title,slug,excerpt,content,acf,yoast_head_json&categories=744");
 const posts = await res.json();
 
 ---
@@ -13,9 +13,8 @@ const posts = await res.json();
 			<div class="glows"></div>
 			<a href={`/locutores/${post.slug}/`} class="text-white">
 				<div class="img-podcast">
-					<Image class="block h-auto w-full object-fill" src="https://contenido.beatdigital.mx/wp-content/uploads/2024/06/GROOVE-DEALERS-PODCAST-min.png" width="200" height="200" alt="La alternativa"/>
+					<Image class="block h-auto w-full object-fill" src="https://contenido.beatdigital.mx/wp-content/uploads/2025/05/BEAT-NEGRO.jpg" width="200" height="200" alt="La alternativa"/>
 					<!--Image class="block h-auto w-full object-fill" src={posts['_embedded']['wp:featuredmedia'][0].media_details.sizes['beat-news-size'].source_url} width="200" height="200" alt="La alternativa"/-->
-					<svg class="svg-icon" style="width: 80px; height: 80px;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M703.25 492.627l0.203-0.247-3.555-2.025c-0.54-0.248-0.968-0.653-1.53-0.878l-278.865-159.367-0.202 0.225c-3.465-2.767-7.695-4.68-12.465-4.68-11.182 0-20.272 9.067-20.272 20.272v324.518c0 11.205 9.090 20.295 20.272 20.295 4.77 0 9-1.912 12.465-4.68l0.202 0.248 278.865-159.368c0.563-0.225 0.968-0.54 1.507-0.855l3.578-2.070-0.203-0.157c4.635-3.758 7.83-9.225 7.83-15.637s-3.195-11.858-7.83-15.593M427.107 635.84v-255.218l223.29 127.598-223.29 127.62zM508.243 62c-246.465 0-446.243 199.778-446.243 446.243 0 246.443 199.778 446.243 446.243 446.243 246.443 0 446.243-199.8 446.243-446.243-0.022-246.465-199.822-446.243-446.243-446.243M508.243 913.895c-224.032 0-405.675-181.62-405.675-405.675s181.643-405.675 405.675-405.675c224.055 0 405.675 181.62 405.675 405.675s-181.62 405.675-405.675 405.675z"  /></svg>
 				</div>
 				<p class="m-0" set:html={post.title.rendered}></p>
 				<div class="text-podcast text-[13px] leading-[1.2] poppins font-light hover:text-white" set:html={post.excerpt.rendered}></div>

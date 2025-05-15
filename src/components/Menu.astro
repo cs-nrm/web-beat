@@ -5,7 +5,7 @@
     <div id="container" class="links-menu flex items-center m-auto text-white order-3 lg:order-2 justify-center">
       <nav>
         <ul>
-            <li><a href="/news">Beat News</a></li>
+            <li class="menu-section"><a href="/news">Beat News</a></li>
             <li><a href="/purple-noise">Purple Noise</a></li>
             <li class="dd-menu">Podcast
             <!-- First Tier Drop Down -->
@@ -86,7 +86,7 @@
        <div class="link-menu"> <a href="/lanzamientos">Lanzamientos</a></div>
        <!--div class="link-menu"> <a href="/nerdosis">Nerdosis</a></div>
        <div class="link-menu"> <a href="/beat-trends">Beat Trends</a></div-->
-       <div class="link-menu"> <a href="/geekzilla">Geekzilla</a></div>
+       <div class="link-menu"> <a href="/beatzilla">Beatzilla</a></div>
     </div>
 </div>
 <div class="opacity-back"></div>
@@ -189,7 +189,10 @@ nav a, .dd-menu, .dd-menu-2 {
 }
 
 nav a:hover, dd-menu:hover { 
-	background-color: #000000; 
+	background-color: #262626; 
+}
+nav a:checked, dd-menu:checked { 
+	color: var(--amarillo-beat); 
 }
 
 /* Hide Dropdowns by Default */

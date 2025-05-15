@@ -515,7 +515,6 @@ document.addEventListener('astro:page-load', ev => {
     RESTYLE();
     UPDATE();
 
-
     /* efectos */ 
     (function($){
         $(document).ready(function(){
@@ -737,8 +736,7 @@ document.addEventListener('astro:page-load', ev => {
         $(this).find('img').attr('src',datasrc);
     });
 
-    
-        
+  
   
 
     const containvideo = document.getElementById('content-w-video');

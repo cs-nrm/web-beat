@@ -535,7 +535,8 @@ document.addEventListener('astro:page-load', ev => {
     RESTYLE();
     UPDATE();
 
-    /* efectos */ 
+    /* efectos */
+    /* 
     (function($){
         $(document).ready(function(){
         
@@ -588,7 +589,7 @@ document.addEventListener('astro:page-load', ev => {
                 }
             });
         });
-    })(jQuery);
+    })(jQuery);*/
 
 
    const getplayingstatus = playerstatus();

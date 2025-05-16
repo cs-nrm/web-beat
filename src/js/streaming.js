@@ -611,6 +611,7 @@ document.addEventListener('astro:page-load', ev => {
         });
 
         if( local_status == null || local_status == 'undefined' || local_status == '' || local_status == 'LIVE_STOP' ){  
+            console.log('stat ' + local_status);
             playstopRadio();
             //autoplay();            
         }        
@@ -642,15 +643,19 @@ document.addEventListener('astro:page-load', ev => {
         flkty.reloadCells();   
     }
 
+    const secprogram = document.getElementById('programacion');
+    if ( secprogram ){      
+        var elempod = document.querySelector('.main-carousel');
+        var flktypod = new Flickity( elempod, {
+            contain: true,
+            lazyLoad: 1, 
+            wrapAround: true, 
+            cellAlign: 'center',
+            pageDots: false
+        });
+    } 
 
-    var elempod = document.querySelector('.main-carousel');
-    var flktypod = new Flickity( elempod, {
-        contain: true,
-        lazyLoad: 1, 
-        wrapAround: true, 
-        cellAlign: 'center',
-        pageDots: false
-    });
+   
     
     const imagenNota = document.getElementById("imagen-nota");
     if( imagenNota ){

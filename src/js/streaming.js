@@ -600,9 +600,15 @@ document.addEventListener('astro:page-load', ev => {
     const secenvivo = document.getElementById('envivo');
 
     if ( secenvivo ){   
-        //console.log('envivo');
+        console.log('envivo');
         getInfoProg();
         $('#radiobutton').addClass('en-vivo');
+        console.log(local_status);
+
+        $('.like').on('click',function(){
+            $(this).find('svg').css('fill','#d6d8d7');
+
+        });
 
         if( local_status == null || local_status == 'undefined' || local_status == '' || local_status == 'LIVE_STOP' ){  
             playstopRadio();
@@ -621,7 +627,7 @@ document.addEventListener('astro:page-load', ev => {
     
     if ( secchome ){        
         
-                var elem = document.querySelector('.carousel-main');
+        var elem = document.querySelector('.carousel-main');
         var flkty = new Flickity( elem, {
             // options
             cellAlign: 'center',

@@ -535,7 +535,8 @@ document.addEventListener('astro:page-load', ev => {
     RESTYLE();
     UPDATE();
 
-    /* efectos */ 
+    /* efectos */
+    /* 
     (function($){
         $(document).ready(function(){
         
@@ -588,7 +589,7 @@ document.addEventListener('astro:page-load', ev => {
                 }
             });
         });
-    })(jQuery);
+    })(jQuery);*/
 
 
    const getplayingstatus = playerstatus();
@@ -599,11 +600,18 @@ document.addEventListener('astro:page-load', ev => {
     const secenvivo = document.getElementById('envivo');
 
     if ( secenvivo ){   
-        //console.log('envivo');
+        console.log('envivo');
         getInfoProg();
         $('#radiobutton').addClass('en-vivo');
+        console.log(local_status);
+
+        $('.like').on('click',function(){
+            $(this).find('svg').css('fill','#d6d8d7');
+
+        });
 
         if( local_status == null || local_status == 'undefined' || local_status == '' || local_status == 'LIVE_STOP' ){  
+            console.log('stat ' + local_status);
             playstopRadio();
             //autoplay();            
         }        
@@ -617,10 +625,10 @@ document.addEventListener('astro:page-load', ev => {
         $('.logo-player img').attr('src','/img/beat-digital-logo.png');
     }
 
+    const secprogram = document.getElementById('programacion');
     
-    if ( secchome ){        
-        
-                var elem = document.querySelector('.carousel-main');
+    if ( secchome ){                
+        var elem = document.querySelector('.carousel-main');
         var flkty = new Flickity( elem, {
             // options
             cellAlign: 'center',
@@ -635,15 +643,19 @@ document.addEventListener('astro:page-load', ev => {
         flkty.reloadCells();   
     }
 
+    
+    if ( secprogram || secchome ){      
+        var elempod = document.querySelector('.main-carousel');
+        var flktypod = new Flickity( elempod, {
+            contain: true,
+            lazyLoad: 1, 
+            wrapAround: true, 
+            cellAlign: 'center',
+            pageDots: false
+        });
+    } 
 
-    var elempod = document.querySelector('.main-carousel');
-    var flktypod = new Flickity( elempod, {
-        contain: true,
-        lazyLoad: 1, 
-        wrapAround: true, 
-        cellAlign: 'center',
-        pageDots: false
-    });
+   
     
     const imagenNota = document.getElementById("imagen-nota");
     if( imagenNota ){

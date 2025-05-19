@@ -78,7 +78,7 @@ posts.sort(function(a, b){
     .prog-all div { display: flex; gap:10px;}
     .prog-all a {color:#e94543 }
     .banner-prog {width: 35%; padding:20px;}
-    .banner-prog img {     width: 400px;    height: 400px;    object-fit: cover;    border-radius: 163%;}
+    .banner-prog img {    object-fit: cover;    border-radius: 163%;}
     .envivo-prog {   font-size: 2.5rem; color:#d6d8d7;}
     .envivo-prog-tab{ color:#d6d8d7; }
     .envivo-prog-next-tab { color:#d6d8d7; }
@@ -88,18 +88,24 @@ posts.sort(function(a, b){
 
     @media (max-width: 768px) {
         .programas {display: block;}
-        .banner-prog {width: 100%;}
+        .banner-prog {width: 100%; justify-content: center;            display: flex;}
+        .banner-prog img {}
         .info-envivo {display: none;}
         .prog-now {width: 100%;} 
         .prog-next {width: 100%;}
         .prog-all {width: 100%; padding: 20px; gap: 10px;}
         .prog-all div { width: 100%; padding: 10px; background: #201e1e; border-radius: 20px; }
         .volume {display: none!important;}
+        
 
     }
 </style>
 <script>
 $('.logo-player img').attr('src','/img/logo-beat.png');
 $('#big-play').removeClass('border-4');
+
+$('.like').on('click',function(){
+     $(this).find('svg').css('fill','#d6d8d7');
+    });
 
 </script>

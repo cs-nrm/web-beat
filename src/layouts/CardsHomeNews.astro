@@ -8,7 +8,7 @@ import { Image } from 'astro:assets';
 
 const res = await fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_fields=date,title,slug,sticky,acf,content,excerpt,_links,_embedded&_embed&per_page=6&categories=143&order_by=date&order=desc&acf.fijo=false");
 
-const ressti = await fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_fields=date,title,slug,sticky,acf,content,excerpt,_links,_embedded&_embed&per_page=4&categories=143");
+const ressti = await fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_fields=date,title,slug,sticky,acf,content,excerpt,_links,_embedded&_embed&per_page=20&categories=143");
 
 const posts = await res.json();
 
@@ -21,8 +21,10 @@ const poststi = await ressti.json();
           <article>
             <div class="glows"></div>
             {
-            poststi.map((poststi:any) => (
-              poststi.acf.fijo && 
+            poststi
+            .filter((poststi:any) => poststi.acf.fijo)
+            .slice(0,1)
+            .map((poststi:any) => (
               <a href={`/news/${poststi.slug}/`} class="group relative flex  items-end overflow-hidden rounded-xl h-[500px] w-full">
                   <img src={poststi._embedded['wp:featuredmedia'][0].media_details.sizes['full'].source_url} class="absolute inset-0 w-full h-full object-cover object-center transition duration-200 group-hover:scale-110" />
                   <div class="text relative inline-block p-3 text-xl sm:text-sm text-white md:text-3xl leading-tight md:leading-none w-full text-center"><p set:html={poststi.title.rendered}></p></div>
@@ -41,8 +43,11 @@ const poststi = await ressti.json();
         <h1 class="text-left md:text-left py-4 mt-8 mb-8 font-bold text-white text-4xl md:text-5xl lg:text-4xl xl:text-5xl">#BeatNews</h1>
         <div class="grid gap-4 grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 md:gap-16 xl:gap-16">
           {
-            poststi.map((poststi:any) => (
-              !poststi.acf.fijo && 
+            poststi
+            .filter((poststi:any) => !poststi.acf.fijo)
+            .slice(0,3)
+            .map((poststi:any) => (
+              
 
             <div class="card">
               <article>

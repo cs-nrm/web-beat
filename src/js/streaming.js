@@ -625,9 +625,9 @@ document.addEventListener('astro:page-load', ev => {
         $('.logo-player img').attr('src','/img/beat-digital-logo.png');
     }
 
+    const secprogram = document.getElementById('programacion');
     
-    if ( secchome ){        
-        
+    if ( secchome ){                
         var elem = document.querySelector('.carousel-main');
         var flkty = new Flickity( elem, {
             // options
@@ -643,8 +643,8 @@ document.addEventListener('astro:page-load', ev => {
         flkty.reloadCells();   
     }
 
-    const secprogram = document.getElementById('programacion');
-    if ( secprogram ){      
+    
+    if ( secprogram || secchome ){      
         var elempod = document.querySelector('.main-carousel');
         var flktypod = new Flickity( elempod, {
             contain: true,

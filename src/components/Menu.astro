@@ -1,36 +1,37 @@
 ---
+const currentPath = Astro.url.pathname;
 ---
 <div class="menutres flex w-full h16 b-transparent items-center justify-between p-2 relative poppins">
     <div class="logo main-logo pl-[25px]"> <a href="/"><img src="/img/LOGO_BEAT.svg" /></a></div>
     <div id="container" class="links-menu flex items-center m-auto text-white order-3 lg:order-2 justify-center">
       <nav>
         <ul>
-            <li class="menu-section"><a href="/news">Beat News</a></li>
-            <li><a href="/beatzilla">Beatzilla</a></li>  
-            <li><a href="/purple-noise">Purple Noise</a></li>
-            <li class="dd-menu">Podcast
+            <li class={`menu-section${currentPath.startsWith('/news') ? ' active' : ''}`}><a href="/news">Beat News</a></li>
+            <li class={currentPath.startsWith('/beatzilla') ? 'active' : ''}><a href="/beatzilla">Beatzilla</a></li>  
+            <li class={currentPath.startsWith('/purple-noise') ? 'active' : ''}><a href="/purple-noise">Purple Noise</a></li>
+            <li class={`dd-menu${currentPath.startsWith('/podcast') ? ' active' : ''}`}>Podcast
             <!-- First Tier Drop Down -->
             <ul>
-                <li><a href="/podcast/groove-dealers">Groove Dealers</a></li>
+                <li class={currentPath.startsWith('/podcast/groove-dealers') ? 'active' : ''}><a href="/podcast/groove-dealers">Groove Dealers</a></li>
                 <!--li><a href="/podcast/respira">Respira</a></li-->
-                <li><a href="/podcast/expedientes-secretos">Expedientes Secretos</a></li>
+                <li class={currentPath.startsWith('/podcast/expedientes-secretos') ? 'active' : ''}><a href="/podcast/expedientes-secretos">Expedientes Secretos</a></li>
                 <!--li><a href="/podcast/nerdosis">Nerdosis</a></li>
                 <li><a href="/podcast/dos-equis-mixx">Dos Equis Mixx</a></li-->
             </ul>        
             </li>
-            <li><a href="/promociones">Promociones</a></li>
-            <li class="dd-menu">Video
+            <li class={currentPath.startsWith('/promociones') ? 'active' : ''}><a href="/promociones">Promociones</a></li>
+            <li class={`dd-menu${currentPath.startsWith('/beat-ten') || currentPath.startsWith('/lanzamientos') ? ' active' : ''}`}>Video
               <!-- First Tier Drop Down -->
               <ul>
-                  <li><a href="/beat-ten">Beat Ten</a></li>
-                  <li><a href="/lanzamientos">Lanzamientos</a></li>
+                  <li class={currentPath.startsWith('/beat-ten') ? 'active' : ''}><a href="/beat-ten">Beat Ten</a></li>
+                  <li class={currentPath.startsWith('/lanzamientos') ? 'active' : ''}><a href="/lanzamientos">Lanzamientos</a></li>
               </ul>
             </li>          
             <!--li class="dd-menu">Videocast
               <ul>
                   <li><a href="/nerdosis">Nerdosis</a></li>
                   <li><a href="/beat-trends">Beat Trends</a></li>
-                  <!--li><a href="#">Tutorials</a> SECOND AND THIRD DROP DOWN
+                  <li><a href="#">Tutorials</a> SECOND AND THIRD DROP DOWN
                   <ul>
                       <li><a href="#">HTML/CSS</a></li>
                       <li><a href="#">jQuery</a></li>
@@ -45,8 +46,8 @@
                   </li-->
               <!--/ul>
             </li-->
-            <li class="radio-link">
-              <a href="/en-vivo" >
+            <li class={`radio-link${currentPath.startsWith('/en-vivo') ? ' active' : ''}`}>
+              <a  href="/en-vivo" >
                 <div class="flex flex-wrap items-center relative top-[3px] gap-2 font-bold text-[17px] uppercase text-[#FFAA1F]">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.4 2.3 6.2 0 8.5"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/></svg>
                   <span>Radio</span>
@@ -283,6 +284,18 @@ li > a:only-child:after, li > .dd-menu:only-child:after { content: ''; }
     transform: scale(3.5, 3.5);
     background-color: rgba(255, 170, 31, 0);
   }
+}
+
+.active > a,
+li.active > div,
+li.active > span {
+  background: #ffaa1d;
+    color: black;
+    transition: all 0.5s;
+}
+.active {
+  font-weight: bold;
+  transition: all 0.5s;
 }
 
 </style>

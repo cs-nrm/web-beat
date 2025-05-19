@@ -54,7 +54,7 @@ const { title, description, image = '/beat-share.jpg', seccion } = Astro.props;
 <!--meta property="twitter:image" content={new URL(image, Astro.url)} /-->
 
 
-<!-- Google tag (gtag.js) -->
+<!-- Google tag (gtag.js) Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-8DSGT28PYF"></script>
 <script is:inline>
   window.dataLayer = window.dataLayer || [];
@@ -63,6 +63,10 @@ const { title, description, image = '/beat-share.jpg', seccion } = Astro.props;
 
   gtag('config', 'G-8DSGT28PYF');
 </script>
+
+<!-- AD SENSE -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7423640555477330"
+     crossorigin="anonymous"></script>
 
 <!--script defer>
     // Cargue GPT de forma síncrona (Expandibles y Creatividad Adaptable)

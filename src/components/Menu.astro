@@ -20,13 +20,14 @@ const currentPath = Astro.url.pathname;
             </ul>        
             </li>
             <li class={currentPath.startsWith('/promociones') ? 'active' : ''}><a href="/promociones">Promociones</a></li>
-            <li class={`dd-menu${currentPath.startsWith('/beat-ten') || currentPath.startsWith('/lanzamientos') ? ' active' : ''}`}>Video
-              <!-- First Tier Drop Down -->
+            <!--li class={`dd-menu${currentPath.startsWith('/beat-ten') || currentPath.startsWith('/lanzamientos') ? ' active' : ''}`}>Video
               <ul>
                   <li class={currentPath.startsWith('/beat-ten') ? 'active' : ''}><a href="/beat-ten">Beat Ten</a></li>
                   <li class={currentPath.startsWith('/lanzamientos') ? 'active' : ''}><a href="/lanzamientos">Lanzamientos</a></li>
               </ul>
-            </li>          
+            </li-->
+            <li class={currentPath.startsWith('/beat-ten') ? 'active' : ''}><a href="/beat-ten">Beat Ten</a></li>
+            <li class={currentPath.startsWith('/lanzamientos') ? 'active' : ''}><a href="/lanzamientos">Lanzamientos</a></li>        
             <!--li class="dd-menu">Videocast
               <ul>
                   <li><a href="/nerdosis">Nerdosis</a></li>
@@ -107,7 +108,7 @@ const currentPath = Astro.url.pathname;
   background-color: #1d1d1d;
 }
 
-@media (max-width: 935px) {
+@media (max-width: 1072px) {
   .main-logo{
     width: 70%;
     transition: all 0.5s;

@@ -351,11 +351,12 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
                 return res.json();
             })
             .then((data) => {                                
+                console.log(data);
                 const fecha = new Date();                
                 const dias = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
                 const dia = dias[fecha.getDay()];                
                 const hora = dayjs(fecha).format('HH:mm:ss');
-                //console.log(hora);
+                console.log(hora);
                 let siguientePrograma = null;
                 data.map(function(prog,i,el){                    
                     if(prog.acf[dia] === true){

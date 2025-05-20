@@ -342,7 +342,7 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
 
         
         function getInfoProg(){            
-            fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=100&categories=515&_fields[]=jetpack_featured_media_url&_fields[]=acf")            
+            fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=100&categories=515&_fields[]=jetpack_featured_media_url&_fields[]=acf&_fields[]=content")            
             .then((res) => {
                 if (!res.ok) {
                     throw new Error
@@ -366,6 +366,7 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
                             $('.envivo-prog').html(prog.acf.programa);
                             $('.envivo-now').html( prog.acf.hora_inicio + ' - ' + prog.acf.hora_fin);
                             $('.envivo-prog-tab').html(prog.acf.programa);                            
+                            $('.envivo-desc').html(prog.content.rendered);                            
                         }
                         if (prog.acf.hora_inicio > hora) {
                             if (!siguientePrograma || prog.acf.hora_inicio < siguientePrograma.acf.hora_inicio) {

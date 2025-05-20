@@ -95,4 +95,13 @@ const posts = await res.json();
 	$('.meta-nav').parent().on('click',function(e){
     	e.preventDefault();
 	});
+
+	$('.meta-nav').each(function(){
+		$(this).on('click',function(e){
+			e.preventDefault();
+			var index = $(this).index();
+			
+		});
+		$(this).parent().html('->');
+	});
 </script>

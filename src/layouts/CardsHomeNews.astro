@@ -26,7 +26,7 @@ const poststi = await ressti.json();
             .slice(0,1)
             .map((poststi:any) => (
               <a href={`/news/${poststi.slug}/`} class="group relative flex  items-end overflow-hidden rounded-xl h-[500px] w-full">
-                  <img src={poststi._embedded['wp:featuredmedia'][0].media_details.sizes['full'].source_url} class="absolute inset-0 w-full h-full object-cover object-center transition duration-200 group-hover:scale-110" />
+                  <img src={poststi._embedded['wp:featuredmedia'][0].media_details.sizes['full'].source_url} alt="Imagen Ilustrativa Principal" class="absolute inset-0 w-full h-full object-cover object-center transition duration-200 group-hover:scale-110" />
                   <div class="text relative inline-block p-3 text-xl sm:text-sm text-white md:text-3xl leading-tight md:leading-none w-full text-center"><p set:html={poststi.title.rendered}></p></div>
               </a>
               <div class="texto-nota poppins hidden md:block px-3 pb-6 ">
@@ -53,7 +53,7 @@ const poststi = await ressti.json();
               <article>
                 <div class="glows"></div>
                 <a href={`/news/${poststi.slug}/`} class="group relative flex h-60 sm:h-48 items-end overflow-hidden rounded-xl shadow-lg md:h-96">
-                    <img src={poststi._embedded['wp:featuredmedia'][0].media_details.sizes['beat-news-size'].source_url} alt={poststi.title.rendered} class="absolute inset-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110" />
+                    <img src={poststi._embedded['wp:featuredmedia'][0].media_details.sizes['beat-news-size'].source_url} alt="Imagen Ilustrativa News" class="absolute inset-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110" />
                     <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-gray-800 via-transparent to-transparent opacity-50"></div>
                     <div class="text relative inline-block p-3 text-lg sm:text-sm text-white md:text-xl leading-tight md:leading-none"><p set:html={poststi.title.rendered}></p></div>
                 </a>

@@ -315,6 +315,12 @@ hr {
     /*float: right;*/
     border-bottom: 1px solid #faa700;
 }
+@media (max-width: 720px) {
+  .tabs.programacion nav{
+      overflow-x: scroll;
+      justify-content: normal !important;
+  }
+}
 
 .tabs.programacion .tab-wrapper{
   padding: 0 10px;

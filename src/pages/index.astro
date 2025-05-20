@@ -14,6 +14,7 @@ import BoxBanner from '../components/BoxBanner.astro';
 import LeaderBoard from'../components/LeaderBoard.astro';
 import SuperLeader from '../components/SuperLeader.astro';
 import BillBoard from '../components/BillBoard.astro';
+import SuperBillboard from '../components/SuperBillboard.astro';
 
 import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 import SliderPromociones from '../layouts/SliderPromociones.astro';
@@ -29,6 +30,7 @@ import CardsHomeNerdosis from '../layouts/CardsHomeNerdosis.astro';
     </head>
     <body>
         <!--BarNrm /-->
+        <SuperBillboard />
         <Header title={SITE_TITLE} />
         
         <main id="home">

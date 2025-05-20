@@ -11,7 +11,7 @@ import FormattedDate from '../../components/FormattedDate.astro';
 
 const lunes_nojson = 'https://contenido.beatdigital.mx/cdn/playlist/lunes.json';
 const martes_nojson = 'https://contenido.beatdigital.mx/cdn/playlist/martes.json';
-const miercoles_nojson = 'https://contenido.beatdigital.mx/cdn/playlist/miércoles.json';
+const miercoles_nojson = 'https://contenido.beatdigital.mx/cdn/playlist/mi%C3%A9rcoles.json';
 const jueves_nojson = 'https://contenido.beatdigital.mx/cdn/playlist/jueves.json';
 const viernes_nojson = 'https://contenido.beatdigital.mx/cdn/playlist/viernes.json';
 const sabado_nojson = 'https://contenido.beatdigital.mx/cdn/playlist/sa%CC%81bado.json';
@@ -22,9 +22,11 @@ const lunes_arr = await fetch(lunes_nojson).then(r => r.text() ).then(data => {
     return lunes_json;
 });
 const martes_arr = await fetch(martes_nojson).then(r => r.text() ).then(data => {    
-    const martes_json = data.split('\n');     
+    const martes_json = data.split('\n');         
     return martes_json;
 });
+//console.log(martes_arr);
+//console.log(lunes_arr);
 const miercoles_arr = await fetch(miercoles_nojson).then(r => r.text() ).then(data => {    
     const miercoles_json = data.split('\n');     
     return miercoles_json;
@@ -184,7 +186,14 @@ function getMes(mes){
                 </div>
                 
                 <div id="martes">
-                    <div>Martes { martes[0]['hora_real'].split('T')[0].split('-')[2] } de {  getMes(martes[0]['hora_real'].split('T')[0].split('-')[1]) }</div>
+                    <!--div>Martes { martes[0]['hora_real'].split('T')[0].split('-')[2] } de {  getMes(martes[0]['hora_real'].split('T')[0].split('-')[1]) }</div-->
+                    {martes.length > 0 && martes[0]?.hora_real ? (
+                        <div>
+                          Martes {martes[0].hora_real.split('T')[0].split('-')[2]} de {getMes(martes[0].hora_real.split('T')[0].split('-')[1])}
+                        </div>
+                      ) : (
+                        <div class="text-red-400 py-4">No hay datos disponibles para Martes.</div>
+                      )}
                     <table class="table-auto text-white  border-collapse: collapse; cursor:auto;  rounded-lg text-base" >
                         <thead class="bg-gray-800/[0.5] rounded-lg">
                         <tr>

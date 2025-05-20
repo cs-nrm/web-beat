@@ -187,9 +187,9 @@ function getMes(mes){
                 
                 <div id="martes">
                     <!--div>Martes { martes[0]['hora_real'].split('T')[0].split('-')[2] } de {  getMes(martes[0]['hora_real'].split('T')[0].split('-')[1]) }</div-->
-                    {martes.length > 0 && martes[0]?.hora_real ? (
+                    {martes.length > 0 && martes[0]['hora_real'] ? (
                         <div>
-                          Martes {martes[0].hora_real.split('T')[0].split('-')[2]} de {getMes(martes[0].hora_real.split('T')[0].split('-')[1])}
+                          Martes {martes[0]['hora_rela'].split('T')[0].split('-')[2]} de {getMes(martes[0]['hora_real'].split('T')[0].split('-')[1])}
                         </div>
                       ) : (
                         <div class="text-red-400 py-4">No hay datos disponibles para Martes.</div>

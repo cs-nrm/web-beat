@@ -661,7 +661,7 @@ document.addEventListener('astro:page-load', ev => {
         var elem = document.querySelector('.carousel-main');
         var flkty = new Flickity( elem, {
             // options
-            cellAlign: 'center',
+            cellAlign: 'right',
             prevNextButtons: true,
         //    autoPlay: 5000,
             pageDots: false,

@@ -545,6 +545,8 @@ document.addEventListener('astro:page-load', ev => {
             
     } else if(navigator.userAgent.indexOf("Safari") != -1) {
               console.log('Safari');
+            $('.card .glows').css('display','none');
+            $('.card').find('.glows').removeClass('glows');
 
 
     } else {

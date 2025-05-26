@@ -69,6 +69,31 @@ const { title, description, image = '/beat-share.jpg', seccion } = Astro.props;
      crossorigin="anonymous"></script>
 
 <!-- AD MANAGER -->
+
+<!-- Begin comScore Tag -->
+<script is:inline>
+  var _comscore = _comscore || [];
+  _comscore.push({
+  c1: "2", c2: "6906652",
+  options: {
+  enableFirstPartyCookie: true,
+  bypassUserConsentRequirementFor1PCookie: true
+  }
+  });
+  (function() {
+  var s = document.createElement("script"), el =
+  document.getElementsByTagName("script")[0]; s.async = true;
+  s.src = "https://sb.scorecardresearch.com/cs/6906652/beacon.js";
+  el.parentNode.insertBefore(s, el);
+  })();
+  </script>
+  <noscript>
+  <img
+  src="https://sb.scorecardresearch.com/p?c1=2&amp;c2=6906652&amp;cv=cv=4.4.0&amp;c
+  j=1">
+  </noscript>
+  <!-- End comScore Tag -->
+
 <script defer>
     // Cargue GPT de forma síncrona (Expandibles y Creatividad Adaptable)
     (function() {

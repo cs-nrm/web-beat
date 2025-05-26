@@ -495,7 +495,8 @@ document.addEventListener('astro:before-preparation', ev => {
 document.addEventListener('astro:page-load', ev => {
    // console.log('pageload');
 
-   /* ==========CURSOR HOVER ===========*/
+   if(navigator.userAgent.indexOf("Chrome") != -1 || navigator.userAgent.indexOf("Firefox") != -1 || navigator.userAgent.indexOf("MSIE") != -1 || !!document.documentMode == true ) {
+        /* ==========CURSOR HOVER ===========*/
     const CONTAINER = document.querySelector('.container')
     const CARDS = document.querySelectorAll('article')
     const CONFIG = {
@@ -541,6 +542,19 @@ document.addEventListener('astro:page-load', ev => {
     }
     RESTYLE();
     UPDATE();
+            
+    } else if(navigator.userAgent.indexOf("Safari") != -1) {
+              console.log('Safari');
+            $('.card .glows').css('display','none');
+            $('.card').find('.glows').removeClass('glows');
+
+
+    } else {
+              console.log('Unknown');
+    }
+
+
+   
 
     /* efectos */
     /* 

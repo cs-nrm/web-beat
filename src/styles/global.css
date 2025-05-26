@@ -303,7 +303,7 @@ hr {
     /*background: radial-gradient(circle at top left, #8114b8, rgb(217,64,172,0.75), #f4a3cc);
     background: linear-gradient(90deg, rgba(223,25,245,1) 0%, rgba(247,11,208,1) 31%, rgba(9,230,241,1) 71%, rgba(8,246,44,1) 98%);*/
     width: 100%;
-    justify-content: end;
+    justify-content:right;
     /*color: rgb(0, 0, 0);*/
     letter-spacing: 3px;
     /*text-shadow: 1px 2px rgb(255 255 255 / 61%);*/
@@ -534,6 +534,10 @@ article iframe.iframe-class{
       mask-clip: padding-box, border-box;
       opacity: var(--active);
       transition: opacity 1s;
+  }
+
+  _::-webkit-full-page-media, _:future, :root .safari_only {
+      .card .glows{display: none;}
   }
 
   .card article::before {

@@ -1,0 +1,165 @@
+<div id="modal">
+	<input type="checkbox" id="cerrar">
+	<label for="cerrar" id="btn-cerrar">X</label>
+	<div class="modals">
+		<div class="contenido" style="text-align: center;">
+			<!--div class="container-iframe">
+				<iframe width="560" height="315" src="https://www.youtube.com/embed/V6uz0dS4mMA" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>	
+			</div-->
+			<!--a href="/promociones/tesla/"><img class="responsive-img" src="https://contenido.oyedigital.mx/wp-content/uploads/2024/12/TAKEOVER_TESLA-min.jpg" alt="Imagen streaming"/></a-->
+			<!-- publicidad por adManager -->			
+			<div class="modal-video">
+				<div id="ad-slot14">
+				<script is:inline>
+                var gptAdSlots14 = [];
+                googletag.cmd.push(function() {
+                  var mapping14 = googletag.sizeMapping().
+                  addSize([600, 800]).
+                  build();
+                  var slot14 = googletag.defineSlot("/21799830913/Beat", [600, 800], 'ad-slot14').
+                  defineSizeMapping(mapping14).
+                  addService(googletag.pubads());
+                  googletag.pubads().setTargeting("test", "responsive");
+                  googletag.enableServices();
+                  googletag.display('ad-slot14');
+        				  googletag.pubads().refresh([slot14]);
+                  //setInterval(function(){googletag.pubads().refresh([slot14]);}, 120000);
+                });
+				</script>
+				</div>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+
+<style>
+@media (max-width: 620px) {
+    #modal{display: none;}
+}
+
+#modal .modals {
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7);
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  animation-name: modal;
+  animation-duration: 10s;
+  animation-delay: 0s;
+  visibility: hidden;
+  opacity: 0;
+  max-height: 100% !important;
+  z-index: 10000;
+  overflow: scroll;
+}
+#modal .contenido {
+  margin: auto;
+  /*width: 75%;*/
+  padding: 2% 0;
+}
+#modal .contenido .unilogo img{
+  width: 100%;
+  height: auto;
+}
+#modal .contenido video{
+  width: 100%;
+  height: auto;
+  max-width: 900px;
+}
+#modal .contenido #videopromo{
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+#modal .contenido .info {
+  font-size: 23px;
+  position: relative;
+  top: 15px;
+  color: #52fdfd;
+  font-weight: bold;
+  text-shadow: 5px 5px 5px #8286ab;
+}
+#modal .contenido .info b{color: white;}
+	
+#modal .contenido a.info:hover{
+  color: white;
+  cursor: pointer;
+}
+#modal .contenido img {
+  /*width: auto;
+  height: auto;
+  max-width: 600px;
+  max-height: 800px;*/
+}
+#modal #cerrar {
+  display: none;
+}
+#modal #cerrar + label {
+  position: fixed;
+  color: #fff;
+  font-size: 27px;
+  z-index: 10010;
+  background: darkred;
+  height: 40px;
+  width: 40px;
+  line-height: 40px;
+  border-radius: 50%;
+  right: 5%;
+  top: 5%;
+  cursor: pointer;
+  animation-name: modal;
+  animation-duration: 10s;
+  animation-delay: 0s;
+  visibility: hidden;
+  opacity: 0;
+}
+#modal #cerrar:checked + label, #modal #cerrar:checked ~ .modals {
+  display: none;
+}
+#modal [type=checkbox] + label {
+  padding-left: 11px !important;
+}
+#modal [type=checkbox] + label:before, #modal [type=checkbox]:not(.filled-in) + label:after {
+  border: none;
+}
+@keyframes modal {
+  0% {
+    visibility: visible;
+    opacity: 1;
+  }
+  25% {
+    visibility: visible;
+    opacity: 1;
+  }
+  50% {
+    visibility: visible;
+    opacity: 1;
+  }
+  90% {
+    visibility: visible;
+    opacity: 1;
+  }
+  100% {
+    visibility: hidden;
+    opacity: 0;
+  }
+}
+	
+#modal .contenido .container-iframe {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+}
+#modal .contenido .container-iframe iframe {
+    position: absolute;
+    top:0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+</style>

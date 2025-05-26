@@ -1,6 +1,8 @@
 ---
 import Player from './Player.astro';
 import { Image } from 'astro:assets';
+import Notificacion  from './Notificacion.astro';
+import Modal  from './Modal.astro';
 ---
 
 <div><Player transition:persist /></div>
@@ -112,6 +114,7 @@ import { Image } from 'astro:assets';
 		</div>
 	</div>
 
+<Modal/>
 <!--footer>
 	<div class="block lg:flex text-white container m-auto">
 		<div class="w-full lg:w-1/3">

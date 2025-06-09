@@ -74,7 +74,7 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
             document.getElementById('play-pause').classList.add('show');
             document.getElementById('play-pause').classList.remove('hide'); 
             document.getElementById('big-play').innerHTML = bigButtonPause; 
-            $('.text-player').html('<div style="font-weight:bold;">Estas escuchando...</div><div id="infoMusic" style="line-height:11px; font-size:12px;"></div>');
+            $('.text-player').html('<div style="font-weight:bold;">Estás escuchando...</div><div id="infoMusic" style="line-height:11px; font-size:12px;"></div>');
             $('.text-player').addClass('playing');
             $('#radiobutton').addClass('playerplaying');
             

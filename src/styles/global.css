@@ -365,6 +365,19 @@ article .wp-block-embed-twitter{
 article .wp-block-embed-instagram iframe {
     margin: 3rem auto !important;
 }
+.wp-block-embed-twitter .wp-block-embed__wrapper{
+  overflow: visible !important;
+}
+
+.wp-block-embed-twitter .wp-block-embed__wrapper, .twitter-tweet.twitter-tweet-rendered {
+    width: 100%;
+}
+.wp-block-embed-twitter  iframe {
+  width: 100% !important;
+}
+.wp-block-embed-instagram iframe {
+    min-width: 200px !important;
+}
 
 article figure img {
     text-align: center;

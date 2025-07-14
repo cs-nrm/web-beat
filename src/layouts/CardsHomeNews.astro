@@ -8,7 +8,7 @@ import { Image } from 'astro:assets';
 
 const res = await fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_fields=date,title,slug,sticky,acf,content,excerpt,_links,_embedded&_embed&per_page=6&categories=143&order_by=date&order=desc&acf.fijo=false");
 
-const ressti = await fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_fields=date,title,slug,sticky,acf,content,excerpt,_links,_embedded&_embed&per_page=20&categories=143");
+const ressti = await fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_fields=date,title,slug,sticky,acf,content,excerpt,_links,_embedded&_embed&per_page=4&categories=143");
 
 const posts = await res.json();
 
@@ -22,7 +22,7 @@ const poststi = await ressti.json();
             <div class="glows"></div>
             {
             poststi
-            .filter((poststi:any) => poststi.acf.fijo)
+            /*.filter((poststi:any) => poststi.acf.fijo)*/
             .slice(0,1)
             .map((poststi:any) => (
               <a href={`/news/${poststi.slug}/`} class="group relative flex  items-end overflow-hidden rounded-xl h-[500px] w-full">
@@ -44,8 +44,8 @@ const poststi = await ressti.json();
         <div class="grid gap-4 grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 md:gap-16 xl:gap-16">
           {
             poststi
-            .filter((poststi:any) => !poststi.acf.fijo)
-            .slice(0,3)
+            /*.filter((poststi:any) => !poststi.acf.fijo)*/
+            .slice(1,4)
             .map((poststi:any) => (
               
 

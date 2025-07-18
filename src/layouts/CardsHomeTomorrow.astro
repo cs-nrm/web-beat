@@ -1,0 +1,78 @@
+---
+import DoubleBox from '../components/DoubleBox.astro';
+import BoxBanner from '../components/BoxBanner.astro';
+import LeaderBoard from'../components/LeaderBoard.astro';
+import SuperLeader from '../components/SuperLeader.astro';
+import { Image } from 'astro:assets';
+
+
+const res = await fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_fields=date,title,slug,sticky,acf,content,excerpt,_links,_embedded&_embed&per_page=3&categories=774&order_by=date&order=desc&acf.fijo=false");
+
+const posts = await res.json();
+---
+
+      <div class="container cards">
+
+        <!--h1 class="text-left md:text-left py-4 mt-8 mb-8 font-bold text-white text-4xl md:text-5xl lg:text-4xl xl:text-5xl">Tomorrowland</h1-->
+        <div class="grid gap-4 grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 md:gap-16 xl:gap-16">
+          {
+            posts.map((poststi:any) => (
+              /*!poststi.acf.fijo && */
+
+            <div class="card">
+              <article>
+                <div class="glows"></div>
+                <a href={`/tomorrowland/${poststi.slug}/`} class="group relative flex h-60 sm:h-48 items-end overflow-hidden rounded-xl shadow-lg md:h-96">
+                    <img src={poststi._embedded['wp:featuredmedia'][0].media_details.sizes['beat-news-size'].source_url} alt={poststi.title.rendered} class="absolute inset-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110" />
+                    <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-gray-800 via-transparent to-transparent opacity-50"></div>
+                    <div class="text relative inline-block p-3 text-lg sm:text-sm text-white md:text-xl leading-tight md:leading-none"><p set:html={poststi.title.rendered}></p></div>
+                </a>
+              </article>
+            </div>
+          ))
+          }
+        </div>
+      </div>
+
+<div class="m-auto text-center">
+    <a href="/tomorrowland" class="text-white hover:text-black">
+        <button class="ver-mas group relative h-8 w-36 m-4 overflow-hidden rounded-xl bg-[rgba(52,52,52,0.2)] hover:bg-white border-2 border-white uppercase text-xs poppins font-bold tracking-[3px]">
+            <span>Ver más</span>
+        </button>
+    </a>
+</div>
+
+<style>
+.cards img{
+  mask-image: linear-gradient(225deg, hsla(var(--color-black), 1) 0, hsla(var(--color-black), 0.9) 40%, hsla(var(--color-black), 0) 80%);
+}
+
+
+p{
+  font-size: 90%;
+  letter-spacing: 2px;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  margin-bottom: 0;
+}
+
+.texto-nota{
+  box-shadow: none;
+  mask-image: linear-gradient(to bottom, hsla(var(--color-black), 1) 0, hsla(var(--color-black), 1) 10%, hsla(var(--color-black), 0) 100%);
+}
+
+.text-uno{
+	display: -webkit-box;
+	-webkit-margin-before: 0;
+  margin-block-start: 0;
+  -webkit-margin-after: 12px;
+  margin-block-end: 12px;
+  line-height: 1.2;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+</style>
+

@@ -724,3 +724,11 @@ article iframe.iframe-class{
     margin-right: 10px;
   }
 }
+
+/* MARIPOSAS TOMORROW*/
+
+@media (min-width: 1801px){
+  .backtomorrow{
+    background-size: cover !important;
+  }
+}

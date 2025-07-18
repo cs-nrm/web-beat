@@ -719,3 +719,8 @@ article iframe.iframe-class{
         height: 28px;
     }
 }
+@media (max-width: 768px){
+  .share-bar .sticky-bar {
+    margin-right: 10px;
+  }
+}

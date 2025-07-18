@@ -28,8 +28,8 @@ export async function getStaticPaths() {
 
 <Layout title={post.title.rendered} img={post.yoast_head_json.og_image[0].url}>
   <section class="w-full py-4 poppins" id="content-w-video">
-    <div class="container my-12 mx-auto px-4 md:px-12">
-      <div class="my-4">
+    <div class="container my-12 mx-auto md:px-4">
+      <div class="my-4 px-4 md:px-0">
         <h1 class="font-bold" set:html={post.title.rendered}></h1>
         <div class="flex items-center justify-between text-sm uppercase text-zinc-400">
           <p>{post.yoast_head_json.author}</p>
@@ -83,11 +83,11 @@ export async function getStaticPaths() {
         </div>
         <div>
           <p class="text-xs roboto">Por <a target="_blank" href="https://geekzilla.tech/">Geekzilla.tech</a></p>
-          <div class="w-full"><Fragment set:html={post.content.rendered} /></div>
+          <div class="w-full pr-4 md:pr-0"><Fragment set:html={post.content.rendered} /></div>
         </div>
         </article>
         <div class="bg-black/50 p-5 rounded-xl my-2 sm:min-w-[350px] relative text-center md:text-left">
-          <div class="sticky top-0 left-0 right-0">
+          <div class="sticky top-[140px] left-0 right-0">
             <BoxBanner />
             </br>
             <MoreGeekzilla />

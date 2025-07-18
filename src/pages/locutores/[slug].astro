@@ -47,7 +47,7 @@ export async function getStaticPaths() {
       <div class="flex flex-col lg:flex-row">
         <article class="sm:min-w-[calc(100%-400px)] text-elipsis lg:mr-10 flex flex-row">
           <div class="share-bar">
-            <div class="sticky-bar sticky top-[145px] left-0 right-0">
+            <div class="sticky-bar sticky top-[140px] left-0 right-0">
                 <div class="share-buttons">
                     <a href={`https://www.facebook.com/sharer/sharer.php?u=https://beatdigital.mx/locutores/${post.slug}`}
                         target="_blank" 
@@ -81,7 +81,7 @@ export async function getStaticPaths() {
           <div class="w-full"><Fragment set:html={post.content.rendered} /></div>
         </article>
         <div class="bg-black/50 p-5 rounded-xl my-2 sm:min-w-[350px] relative text-center md:text-left">
-          <div class="sticky top-0 left-0 right-0">
+          <div class="sticky top-[140px] left-0 right-0">
             <BoxBanner />
             </br>
             <MoreNews />

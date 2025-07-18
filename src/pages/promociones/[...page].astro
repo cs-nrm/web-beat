@@ -36,7 +36,7 @@ const {page=[]} = Astro.props;
 				<h1 class="audiowide neon-azul text-center md:text-left pt-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl">Promociones</h1>
         <div class="flex flex-col lg:flex-row">
           <div class="sm:min-w-[calc(100%-400px)] lg:mr-10">
-            <section class="flex flex-wrap -mx-4">
+            <section class="flex flex-wrap mx-4">
               {
               page.data.map((post:any) => ( 
                 <>
@@ -59,7 +59,7 @@ const {page=[]} = Astro.props;
             </div>
           </div>
           <div class="bg-black/50 mt-4 p-5 rounded-xl sm:min-w-[350px] relative text-center md:text-left">
-            <div class="sticky top-[50px] left-0 right-0">
+            <div class="sticky top-[140px] left-0 right-0">
               <BoxBanner />
               </br>
               <DoubleBox />

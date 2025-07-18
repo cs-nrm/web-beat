@@ -90,7 +90,7 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
             $('#radiobutton').removeClass('playerplaying');
             $('.text-player').html('');
             setTimeout( function(){
-                $('.text-player').html('ESCUCHA LA RADIO EN VIVO <span style="color: #e94543;    font-weight: bold;    font-size: 12px;">GRATIS</span> AHORA');             
+                $('.text-player').html('ESCUCHA LA RADIO <span style="color: #e94543;    font-weight: bold;    font-size: 12px;">EN VIVO</span> AHORA');             
             },500);
                 
          }

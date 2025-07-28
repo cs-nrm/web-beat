@@ -3,7 +3,7 @@
 <div class="billboard my-9 table mx-auto text-center w-full lg:w-[970px] h-[250px]">
 	<span class="text-xs text-zinc-500">PUBLICIDAD</span>
    <!--img src="https://contenido.beatdigital.mx/wp-content/uploads/2024/07/bilboard.jpg" alt="billboard" width="970" height="250"-->
-   <div id="ad-slot3">
+   <div id="ad-slot3" class="hidden md:block">
 	<script defer is:inline>
 	  var gptAdSlots3 = [];
 	  googletag.cmd.push(function() {
@@ -21,10 +21,27 @@
 	  });
 	</script>
    </div>
+   <div id="ad-slot31" class="md:hidden block">
+	<script defer is:inline>
+	  var gptAdSlots31 = [];
+	  googletag.cmd.push(function() {
+ 	    var mapping31 = googletag.sizeMapping().
+	    addSize([320, 50]).
+	    build(); 
+	    var slot31 = googletag.defineSlot("/21799830913/Beat", [320, 50],'ad-slot31').
+	    defineSizeMapping(mapping31).
+	    addService(googletag.pubads());
+	    googletag.pubads().setTargeting("test","responsive");
+	    googletag.enableServices();
+	    googletag.display('ad-slot31');
+	    googletag.pubads().refresh([slot31]);
+	    //setInterval(function(){googletag.pubads().refresh([slot3]);}, 180000);
+	  });
+	</script>
+   </div>
 
-	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7423640555477330"
+	<!--script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7423640555477330"
 		crossorigin="anonymous"></script> 
-	<!-- beat-adaptable -->
 	<ins class="adsbygoogle"
 		style="display:block; height:250px;"
 		data-ad-client="ca-pub-7423640555477330"
@@ -33,6 +50,6 @@
 		data-full-width-responsive="true"></ins>
 	<script is:inline>
 		(adsbygoogle = window.adsbygoogle || []).push({});
-	</script>
+	</script-->
 
 </div>

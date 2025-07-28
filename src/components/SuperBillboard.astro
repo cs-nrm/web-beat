@@ -3,20 +3,38 @@
 <div class="billboard my-9 hidden md:table mx-auto text-center w-[320px] md:w-[728px] lg:[970px] !h-[50px] lg:h-[90px]">
 	<span class="text-xs text-zinc-500">PUBLICIDAD</span>
    <!--img src="https://contenido.beatdigital.mx/wp-content/uploads/2024/07/bilboard.jpg" alt="billboard" width="970" height="250"-->
-   <div id="ad-slot3">
+   <div id="ad-slot32">
 	<script defer is:inline>
-	  var gptAdSlots3 = [];
+	  var gptAdSlots32 = [];
 	  googletag.cmd.push(function() {
- 	    var mapping3 = googletag.sizeMapping().
+ 	    var mapping32 = googletag.sizeMapping().
 	    addSize([728, 90]).
 	    build(); //970x250
-	    var slot3 = googletag.defineSlot("/21799830913/Beat", [728, 90],'ad-slot3').
-	    defineSizeMapping(mapping3).
+	    var slot32 = googletag.defineSlot("/21799830913/Beat", [728, 90],'ad-slot32').
+	    defineSizeMapping(mapping32).
 	    addService(googletag.pubads());
 	    googletag.pubads().setTargeting("test","responsive");
 	    googletag.enableServices();
-	    googletag.display('ad-slot3');
-	    googletag.pubads().refresh([slot3]);
+	    googletag.display('ad-slot32');
+	    googletag.pubads().refresh([slot32]);
+	    //setInterval(function(){googletag.pubads().refresh([slot3]);}, 180000);
+	  });
+	</script>
+   </div>
+    <div id="ad-slot321">
+	<script defer is:inline>
+	  var gptAdSlots321 = [];
+	  googletag.cmd.push(function() {
+ 	    var mapping321 = googletag.sizeMapping().
+	    addSize([320, 50]).
+	    build(); //970x250
+	    var slot321 = googletag.defineSlot("/21799830913/Beat", [320, 50],'ad-slot321').
+	    defineSizeMapping(mapping321).
+	    addService(googletag.pubads());
+	    googletag.pubads().setTargeting("test","responsive");
+	    googletag.enableServices();
+	    googletag.display('ad-slot321');
+	    googletag.pubads().refresh([slot321]);
 	    //setInterval(function(){googletag.pubads().refresh([slot3]);}, 180000);
 	  });
 	</script>

@@ -46,11 +46,11 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
         streaming.addEventListener( 'ad-playback-complete', completeAd );
         streaming.addEventListener( 'ad-playback-start', startAd );
         streaming.addEventListener( 'ad-playback-error', errorAd );
-        streaming.addEventListener( 'track-cue-point', onTrackCuePoint );
+        /*streaming.addEventListener( 'track-cue-point', onTrackCuePoint );
         streaming.addEventListener( 'list-loaded', onListLoaded );
         streaming.addEventListener( 'list-empty', onListEmpty);
         streaming.addEventListener( 'nowplaying-api-error', onNowPlayingApiError);
-        streaming.addEventListener( 'ad-break-cue-point', adBreakCuePoint);
+        streaming.addEventListener( 'ad-break-cue-point', adBreakCuePoint);*/
         streaming.addEventListener( 'autoplay', autoplay);
         
       }
@@ -109,7 +109,7 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
         $('#full-cover').css('display','none');
       }
       
-      function onTrackCuePoint( event ){
+      /*function onTrackCuePoint( event ){
          var cueTitle = event.data.cuePoint.cueTitle;
          var artistName = event.data.cuePoint.artistName;         
          //console.log('cueTitle: ' + cueTitle);
@@ -123,9 +123,9 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
             console.log('click');
              $(this).find('svg').css('fill','#d6d8d7');
         });
-      }
+      }*/
 
-      function adBreakCuePoint( e ){
+      /*function adBreakCuePoint( e ){
         console.log('PAUSA COMERCIAL');
         document.getElementById('infoMusic').innerHTML = 'PAUSA COMERCIAL';
      }
@@ -146,7 +146,7 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
       
       function onNowPlayingApiError( e ){
         console.log( 'tdplayer::onNowPlayingApiError' + e );
-     }
+     }*/
 
       function startAd(e){
         $('#td_container').addClass('pub_active');
@@ -245,7 +245,7 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
 
     });
 
-        /*function getInfoMusic(){
+        function getInfoMusic(){
             fetch("https://cdn.nrm.com.mx/cdn/beat/playlist/cancion.json")
             .then((res) => {
                 if (!res.ok) {
@@ -335,13 +335,20 @@ var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key
                 if (cancion == ''){
                     document.getElementById('infoMusic').innerHTML = artist;
                 }else{
-                    document.getElementById('infoMusic').innerHTML = artist + ' / ' + cancion;
+        //            document.getElementById('infoMusic').innerHTML = artist + ' / ' + cancion;
+                    const codtit = cancion.replace('&', '%26');
+                    const codart = artist.replace('&', '%26');
+                    document.getElementById('infoMusic').innerHTML = '<div class="current-song">' + cancion + ' / ' + artist + '</div><div class="share-current"><div class="like"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="28" height="28" stroke-width="1"> <path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572"></path> </svg> </div> <div class="share-wp"><a href="https://api.whatsapp.com/send/?text=Estoy%20escuchando%20' + codtit +'%20de%20'+ codart +'%20en%20https://beatdigital.mx/" target="_blank"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="28" height="28" stroke-width="1"> <path d="M13 4v4c-6.575 1.028 -9.02 6.788 -10 12c-.037 .206 5.384 -5.962 10 -6v4l8 -7l-8 -7z"></path> </svg> </div></div>';
+                    $('.like').on('click',function(){
+                        console.log('click');
+                        $(this).find('svg').css('fill','#d6d8d7');
+                    });
                 }
             })
            // console.log('repetido');   
         }
         getInfoMusic();
-        setInterval( getInfoMusic, 30000);*/
+        setInterval( getInfoMusic, 30000);
         
 
         

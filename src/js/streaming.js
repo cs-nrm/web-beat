@@ -16,20 +16,78 @@ const player = document.getElementById('player');
 const secchome = document.getElementById('home');
 var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=0aa2713d85e04243944924876ba71f05&format=json";
 
+// ===== Optimized polling for current song (conditional requests + adaptive cadence)
+let songETag = null;
+let songLastModified = null;
+let songPrevTitle = null;
+let songPrevArtist = null;
+let songTimer = null;
+let songController = null;
+let songFirstLoad = true;
+const songURL = "https://cdn.nrm.com.mx/cdn/beat/playlist/cancion.json";
+
+const BASE_INTERVAL_MS = 30000; // default 30s
+
+function renderNowPlaying(titleText, artistText){
+  const host = document.querySelector('.text-player');
+  if (!host) {
+    // Removed debug console.warn
+    return false;
+  }
+  const isCommercial = !titleText || titleText === '';
+  const label = isCommercial ? (artistText || 'PAUSA COMERCIAL') : (titleText + ' / ' + artistText);
+
+  const codtit = encodeURIComponent(titleText || '');
+  const codart = encodeURIComponent(artistText || '');
+  const share = isCommercial ? '' : (
+    '<div class="share-current">' +
+      '<div class="like">\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="28" height="28" stroke-width="1">\n  <path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572"></path>\n</svg>\n</div>' +
+      '<div class="share-wp">\n<a href="https://api.whatsapp.com/send/?text=Estoy%20escuchando%20' + codtit +'%20de%20'+ codart +'%20en%20https://beatdigital.mx/" target="_blank">\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="28" height="28" stroke-width="1">\n  <path d="M13 4v4c-6.575 1.028 -9.02 6.788 -10 12c-.037 .206 5.384 -5.962 10 -6v4l8 -7l-8 -7z"></path>\n</svg>\n</a>\n</div></div>'
+  );
+
+  host.innerHTML = '<div style="font-weight:bold;">Estás escuchando...</div>' +
+                   '<div class="now-playing" style="line-height:11px; font-size:12px;">' + label + '</div>' +
+                   share;
+  // Removed debug console.log
+  try {
+    $('.like').off('click').on('click', function(){
+      $(this).find('svg').css('fill','#d6d8d7');
+    });
+  } catch(_) {}
+  return true;
+}
+
+function scheduleNextSongFetch(delayMs) {
+  clearTimeout(songTimer);
+  songTimer = setTimeout(getInfoMusic, delayMs);
+}
+
+function currentPollInterval() {
+  // Faster while playing and tab visible; slower when paused or tab hidden
+  const visible = !document.hidden;
+  const isPlaying = local_status === 'LIVE_PLAYING';
+  if (isPlaying && visible) return 15000;
+  if (visible) return BASE_INTERVAL_MS;
+  return 60000; // throttle in background
+}
+
+function startSongPolling() {
+  clearTimeout(songTimer);
+  getInfoMusic();
+}
+
+document.addEventListener('visibilitychange', () => {
+  // When tab visibility changes, reschedule with the new cadence
+  scheduleNextSongFetch(currentPollInterval());
+});
+
+// Abort in-flight fetches during Astro navigations to avoid race conditions
+document.addEventListener('astro:before-preparation', () => {
+  if (songController) try { songController.abort(); } catch(e) {}
+});
+
 function initGPT() {
-    googletag.destroySlots();
-  var gptAdSlots2 = [];       //boxbanner
-  var gptAdSlots3 = [];       //billboard 970x250
-  var gptAdSlots31 = [];      //billboard móvil
-  var gptAdSlots32 = [];      //billboard2 móvil
-  var gptAdSlots321 = [];     //billboard2 móvil
-  var gptAdSlots4 = [];       //leaderboard 728x90
-  var gptAdSlots41 = [];      //leaderboard móvil
-  var gptAdSlots42 = [];      //leaderboard2
-  var gptAdSlots421 = [];     //leaderboard2 móvil
-  var gptAdSlots5 = [];       //doublebox
-  var gptAdSlots6 = [];       //superleader 970x90
-  var gptAdSlots61 = [];      //superleader móvil
+    googletag.destroySlots(); 
   
   googletag.cmd.push(function() {
     var mapping2 = googletag.sizeMapping().addSize([300, 250]).build();
@@ -118,7 +176,7 @@ function safeRefreshSlots() {
                 active: true,
                 debug: false,
                 appInstallerId: 'beatpag',            
-                trackingId: 'UA-63005013-1',
+                trackingId: 'G-8DSGT28PYF',
                 trackingEvents: [ 'play', 'stop', 'pause', 'resume', 'all' ],
                 sampleRate: 100,     
                 category: 'Reproduccion Radio Pag' 
@@ -141,54 +199,58 @@ function safeRefreshSlots() {
     
      function getStatus(s){
         local_status = s.data.code;
-        const secchome = document.getElementById('home');        
-         console.log(local_status);
+        const secchome = document.getElementById('home');
+         // Removed debug console.log(local_status);
          if( local_status == 'GETTING_STATION_INFORMATION' || local_status == 'LIVE_CONNECTING' || local_status == 'LIVE_BUFFERING' ){
             document.getElementById('loading').classList.add('show');
             document.getElementById('loading').classList.remove('hide');
             document.getElementById('play-pause').classList.remove('show');
-            document.getElementById('play-pause').classList.add('hide'); 
-            document.getElementById('big-play').innerHTML = buttongLoading;    
-            
+            document.getElementById('play-pause').classList.add('hide');
+            document.getElementById('big-play').innerHTML = buttongLoading;
+
          }
-         if (local_status == 'LIVE_PLAYING'){                        
+         if (local_status == 'LIVE_PLAYING'){
             document.getElementById('play-pause').innerHTML = buttonPause;
             document.getElementById('loading').classList.remove('show');
             document.getElementById('loading').classList.add('hide');
             document.getElementById('play-pause').classList.add('show');
-            document.getElementById('play-pause').classList.remove('hide'); 
-            document.getElementById('big-play').innerHTML = bigButtonPause; 
-            $('.text-player').html('<div style="font-weight:bold;">Estás escuchando...</div><div id="infoMusic" style="line-height:11px; font-size:12px;"></div>');
-            $('.text-player').addClass('playing');
+            document.getElementById('play-pause').classList.remove('hide');
+            document.getElementById('big-play').innerHTML = bigButtonPause;
+            $('.text-player').addClass('playing').html('<div style="font-weight:bold;">Estás escuchando...</div>');
             $('#radiobutton').addClass('playerplaying');
-            
+            // Fetch current song immediately when playback starts (avoid invoking inside setTimeout)
+            getInfoMusic(true);
+            setTimeout(startSongPolling(), 500); // Start polling after a short delay to allow song info to be fetched
+
          }
          if(local_status == 'LIVE_STOP' || local_status == 'LIVE_PAUSE') {
             document.getElementById('loading').classList.remove('show');
             document.getElementById('loading').classList.add('hide');
             document.getElementById('play-pause').classList.add('show');
-            document.getElementById('play-pause').classList.remove('hide'); 
-            document.getElementById('play-pause').innerHTML = buttonPlay;            
-            document.getElementById('big-play').innerHTML = bigButtonPlay; 
+            document.getElementById('play-pause').classList.remove('hide');
+            document.getElementById('play-pause').innerHTML = buttonPlay;
+            document.getElementById('big-play').innerHTML = bigButtonPlay;
             $('.text-player').removeClass('playing');
             $('#radiobutton').removeClass('playerplaying');
             $('.text-player').html('');
             setTimeout( function(){
-                $('.text-player').html('ESCUCHA LA RADIO <span style="color: #e94543;    font-weight: bold;    font-size: 12px;">EN VIVO</span> AHORA');             
+                $('.text-player').html('ESCUCHA LA RADIO <span style="color: #e94543;    font-weight: bold;    font-size: 12px;">EN VIVO</span> AHORA');
             },500);
-                
+
          }
 
      }
      
 
-    function completeAd(e){                
+      function completeAd(e){                
         streaming.play({
             station:'XHSONFM',
             trackingParameters:{
             Dist: 'WebBeat'
             }
         }); 
+        // Ensure current song is shown as soon as we resume after ad
+        getInfoMusic(true);
         $('#td_container').removeClass('pub_active');
         $('#full-cover').css('display','none');
       }
@@ -256,7 +318,9 @@ function safeRefreshSlots() {
             trackingParameters:{
             Dist: 'WebBeat'
             }
-        });        
+        });
+        // Also fetch song right after requesting playback, in case status event is delayed
+        getInfoMusic(true);
       }      
    
 
@@ -272,6 +336,8 @@ function safeRefreshSlots() {
             Dist: 'WebBeat'
             }
         });
+        // Ensure current song is shown even if ad failed and we jump to live
+        getInfoMusic(true);
         //console.log(e);
         //console.log('error ad');
         
@@ -317,6 +383,8 @@ function safeRefreshSlots() {
                 autoplay: 1
             }
         });
+        // Autoplay path should also fetch current song promptly
+        getInfoMusic(true);
     }
 
 
@@ -329,110 +397,102 @@ function safeRefreshSlots() {
 
     });
 
-        function getInfoMusic(){
-            fetch("https://cdn.nrm.com.mx/cdn/beat/playlist/cancion.json")
-            .then((res) => {
-                if (!res.ok) {
-                    throw new Error
-                        ('HTTP error! Status: ${res.status}');
-                }
-                return res.json();
-            })
-            .then((data) => {                
-                switch( data.categoria ){
-                    case 'COMERCIALES' :
-                        artist = 'PAUSA COMERCIAL';
-                        cancion = '';
-                    break;
-                    case 'DROP' :
-                        artist = 'PAUSA COMERCIAL';
-                        cancion = '';
-                    break;
-                    case 'NUEVA PRODUCCION' :
-                        artist = 'PAUSA COMERCIAL';
-                        cancion = '';
-                    break;
-                    case 'ELEMENTOS' :
-                        artist = 'PAUSA COMERCIAL';
-                        cancion = '';
-                    break;
-                    
-                    
-                    case 'RANDOM':
-                        artist = data.dj;
-                        cancion = data.title;
-                        hora = data.hora_real;
-                    break;
-                    case 'MUSICA-DANCE':
-                        artist = data.dj;
-                        cancion = data.title;
-                        hora = data.hora_real; 
-                    break;
-                    case 'MUSICA-HOUSE':
-                        artist = data.dj;
-                        cancion = data.title;
-                        hora = data.hora_real;
-                    break;
-                    case 'MUSICA-DANCE':
-                        artist = data.dj;
-                        cancion = data.title;
-                        hora = data.hora_real;
-                    break;
-                    case 'MÚSICA-DREAM':
-                        artist = data.dj;
-                        cancion = data.title;
-                        hora = data.hora_real;
-                    break;
-                    case 'MUSICA-ELECTRONICA':
-                        artist = data.dj;
-                        cancion = data.title;
-                        hora = data.hora_real;
-                    break;
-                    case 'MUSICA-PROGRESIVO':
-                        artist = data.dj;
-                        cancion = data.title;
-                        hora = data.hora_real;
-                    break;
-                    case 'MUSICA-RETRO':
-                        artist = data.dj;
-                        cancion = data.title;
-                        hora = data.hora_real;
-                    break;
-                    case 'MUSICA-RANDOM ANDRE':
-                        artist = data.dj;
-                        cancion = data.title;
-                        hora = data.hora_real;
-                    break;
-                    case 'LADO F':
-                        artist = data.dj;
-                        cancion = data.title;
-                        hora = data.hora_real;
-                    break;
-                    default:
-                        artist = data.dj;
-                        cancion = data.title;
-                        hora = data.hora_real;
-                    break;
-                    
+function getInfoMusic(forceFresh = false){
+  // Abort any previous request to avoid overlap
+  if (songController) {
+    try { songController.abort(); } catch(e) {}
+  }
+  songController = new AbortController();
 
-                }                 
-                if (cancion == ''){
-                    document.getElementById('infoMusic').innerHTML = artist;
-                }else{
-        //            document.getElementById('infoMusic').innerHTML = artist + ' / ' + cancion;
-                    const codtit = cancion.replace('&', '%26');
-                    const codart = artist.replace('&', '%26');
-                    document.getElementById('infoMusic').innerHTML = '<div class="current-song">' + cancion + ' / ' + artist + '</div><div class="share-current"><div class="like"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="28" height="28" stroke-width="1"> <path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572"></path> </svg> </div> <div class="share-wp"><a href="https://api.whatsapp.com/send/?text=Estoy%20escuchando%20' + codtit +'%20de%20'+ codart +'%20en%20https://beatdigital.mx/" target="_blank"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="28" height="28" stroke-width="1"> <path d="M13 4v4c-6.575 1.028 -9.02 6.788 -10 12c-.037 .206 5.384 -5.962 10 -6v4l8 -7l-8 -7z"></path> </svg> </div></div>';
-                    $('.like').on('click',function(){
-                        console.log('click');
-                        $(this).find('svg').css('fill','#d6d8d7');
-                    });
-                }
-            })
-           // console.log('repetido');   
+  // Optionally bypass caches on first load or when explicitly requested
+  const baseURL = songURL + ((forceFresh || songFirstLoad) ? (songURL.includes('?') ? '&' : '?') + '_ts=' + Date.now() : '');
+  const reqURL = new URL(baseURL, location.href);
+  const crossOrigin = reqURL.origin !== location.origin;
+
+  const fetchOpts = { method: 'GET', cache: (forceFresh || songFirstLoad) ? 'no-store' : 'no-cache', signal: songController.signal, mode: 'cors' };
+  if (!crossOrigin) {
+    const headers = {};
+    if (songETag) headers['If-None-Match'] = songETag;
+    if (songLastModified) headers['If-Modified-Since'] = songLastModified;
+    if (Object.keys(headers).length) fetchOpts.headers = headers;
+  }
+
+  fetch(reqURL, fetchOpts)
+    .then((res) => {
+      // Removed debug console.log for HTTP status
+      // Handle 304 Not Modified to skip parsing & DOM work
+      if (res.status === 304) {
+        if (songFirstLoad || forceFresh) {
+          // Removed debug console.log for first-load 304
+          songFirstLoad = false;
+          getInfoMusic(true);
+          return Promise.reject({ _skip: true });
         }
-        getInfoMusic();
-        setInterval( getInfoMusic, 30000);
+        // Removed debug console.log for 304 skip
+        scheduleNextSongFetch(currentPollInterval());
+        return Promise.reject({ _skip: true });
+      }
+      if (!res.ok) {
+        throw new Error(`HTTP error! Status: ${res.status}`);
+      }
+      songETag = res.headers.get('ETag') || songETag;
+      songLastModified = res.headers.get('Last-Modified') || songLastModified;
+      return res.json();
+    })
+    .then((data) => {
+      songFirstLoad = false;
+      let categoria = data.categoria;
+      // Removed debug console.log for payload
+      switch (categoria) {
+        case 'COMERCIALES':
+        case 'DROP':
+        case 'NUEVA PRODUCCION':
+        case 'ELEMENTOS':
+          artist = 'PAUSA COMERCIAL';
+          cancion = '';
+          break;
+        default:
+          artist = data.dj;
+          cancion = data.title;
+          hora = data.hora_real;
+          // Removed debug console.log for parsed song
+      }
+
+      // Avoid unnecessary DOM churn when nothing changed
+      const sameSong = (songPrevTitle === cancion) && (songPrevArtist === artist);
+      // Removed debug console.log for compare
+
+      let painted = false;
+      if (cancion === '') {
+        // Removed debug console.log for commercial/element
+        painted = renderNowPlaying('', artist);
+      } else {
+        // Removed debug console.log for updating DOM
+        painted = renderNowPlaying(cancion, artist);
+      }
+
+      if (painted) {
+        songPrevTitle = cancion;
+        songPrevArtist = artist;
+      } else if (sameSong) {
+        // If we couldn't paint and it's the same song, just schedule next poll
+        // Removed debug console.warn for could not paint
+        scheduleNextSongFetch(currentPollInterval());
+        return;
+      }
+      scheduleNextSongFetch(currentPollInterval());
+    })
+    .catch((err) => {
+      // Ignore controlled early-exit when 304 was handled
+      if (err && err._skip) return;
+      // On network/API errors, back off a bit
+      const backoff = Math.min(currentPollInterval() * 2, 300000); // cap at 5 min
+      scheduleNextSongFetch(backoff);
+      // Removed debug console.warn for error/backoff
+    });
+}
+
+
         
 
         
@@ -446,12 +506,12 @@ function safeRefreshSlots() {
                 return res.json();
             })
             .then((data) => {                                
-                console.log(data);
+                //console.log(data);
                 const fecha = new Date();                
                 const dias = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
                 const dia = dias[fecha.getDay()];                
                 const hora = dayjs(fecha).format('HH:mm:ss');
-                console.log(hora);
+                //console.log(hora);
                 let siguientePrograma = null;
                 data.map(function(prog,i,el){                    
                     if(prog.acf[dia] === true){
@@ -477,8 +537,7 @@ function safeRefreshSlots() {
             });         
         }
         
-        setTimeout(getInfoProg, 20000);
-        setInterval( getInfoProg, 300000);       
+        
         
 
 const radioActive = function(){
@@ -739,7 +798,8 @@ document.addEventListener('astro:page-load', ev => {
 
     if ( secenvivo ){   
         console.log('envivo');
-        getInfoProg();
+        getInfoProg();        
+        setInterval( getInfoProg, 300000);       
         $('#radiobutton').addClass('en-vivo');
         console.log(local_status);
 

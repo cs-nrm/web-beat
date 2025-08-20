@@ -6,20 +6,52 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 export interface Props {
     title: string;
     img: string;
+    //categoria: string;
+    //postslug: string;
+    description: string
+    tags: {
+        title: string;
+        description: string;
+        og_image: { url: string };
+        og_description: string;
+        og_locale: string;
+        og_type: string;
+        article_published_time: string;
+        article_modified_time: string;
+    }
+    
 }
 
 const { title } = Astro.props;
 const { img } = Astro.props;
+const { tags } = Astro.props;
+const { description } = Astro.props;
+//const { categoria } = Astro.props;
+//const { postslug } = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
 ---
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 	<head>
-		<BaseHead title={SITE_TITLE} seccion={title} description={SITE_DESCRIPTION} />
-		<meta property="og:image" content={new URL(img, Astro.url)}>
-        <meta property="og:title" content={title} />
-        <meta property="twitter:image" content={new URL(img, Astro.url)}>
+		<BaseHead title={SITE_TITLE} seccion={title} description={description} />		
+        <meta name="description" content={tags.description} />                
+        <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+        <link rel="canonical" href={canonicalURL} class="yoast-seo-meta-tag" />
+        <meta property="og:locale" content={tags.og_locale} class="yoast-seo-meta-tag" />
+        <meta property="og:type" content={tags.og_type} class="yoast-seo-meta-tag" />
+        <meta property="og:title" content={tags.title} class="yoast-seo-meta-tag" />
+        <meta property="og:description" content={tags.og_description} class="yoast-seo-meta-tag" />
+        <meta property="og:url" content={canonicalURL} class="yoast-seo-meta-tag" />
+        <meta property="og:site_name" content="Stereo Cien" class="yoast-seo-meta-tag" />
+        <meta property="article:publisher" content="https://www.facebook.com/beat1009fm" class="yoast-seo-meta-tag" />
+        <meta property="article:published_time" content={tags.article_published_time} class="yoast-seo-meta-tag" />
+        <meta property="article:modified_time" content={tags.article_modified_time} class="yoast-seo-meta-tag" />
+        <meta property="og:image" content={tags.og_image[0].url} class="yoast-seo-meta-tag" />
+        <meta name="author" content="Beat 100.9" class="yoast-seo-meta-tag" />
+        <meta name="twitter:card" content="summary_large_image" class="yoast-seo-meta-tag" />
+        <meta name="twitter:creator" content="@BEATOFICIAL" class="yoast-seo-meta-tag" />                
         <title>{SITE_TITLE} | {title}</title>
 	</head>
 	<body>

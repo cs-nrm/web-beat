@@ -714,19 +714,19 @@ article iframe.iframe-class{
 }*/
 /* Responsive Design */
 @media (max-width: 480px) {
-    .share-bar .share-buttons {
-        justify-content: center;
-    }
-    
-    .share-bar .share-button {
-        width: 56px;
-        height: 56px;
-    }
-    
-    .share-bar .share-button .icon {
-        width: 28px;
-        height: 28px;
-    }
+  .share-bar .share-buttons {
+    justify-content: center;
+  }
+  .share-bar .share-button .icon {
+    width: 28px;
+    height: 28px;
+  }
+  .share-bar .sticky-bar{
+    margin-right: 10px;
+  }
+  .share-bar .share-button {
+    width: 38px;
+  }
 }
 @media (max-width: 768px){
   .share-bar .sticky-bar {

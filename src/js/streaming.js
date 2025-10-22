@@ -405,6 +405,74 @@ function safeRefreshSlots() {
 
     });
 
+// === [VOTOS] Helpers y función reutilizable ===
+const VOTE_COLOR = '#ef4444';
+
+function detectarDispositivo() {
+  return /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'mobile' : 'desktop';
+}
+
+/**
+ * Registra un voto en el backend.
+ * @param {string} seccion - Ej: 'Radio', 'Hot parade', 'Lanzamientos'
+ * @param {string} artista - Nombre del artista (sin codificar)
+ * @param {string} cancion - Título de la canción (sin codificar)
+ * @param {jQuery|null} $btn - Botón/elemento clicado (opcional) para manejar UI
+ * @returns {Promise}
+ */
+function registerVote(seccion, artista, cancion, $btn = null) {
+  return new Promise((resolve, reject) => {
+    const url = 'https://contenido.beatdigital.mx/6456heu2/8s4v3f1l3s.php';
+
+    // Protección de doble click o voto ya marcado
+    if ($btn) {
+      const $svg = $btn.find('svg');
+      const fillColor = ($svg.css('fill') || '').toLowerCase();
+      if (fillColor === VOTE_COLOR) {
+        console.log('Ya votaste por esta canción.');
+        return resolve({ status: 'already' });
+      }
+      if ($btn.prop('disabled')) {
+        return resolve({ status: 'disabled' });
+      }
+      $btn.prop('disabled', true);
+    }
+
+    const safe = (s) => (s || '').toString().replace('&', '%26');
+    const { navegador, sistema } = detectarNavegador();
+
+    $.post(
+      url,
+      {
+        artista: safe(artista),
+        cancion: safe(cancion),
+        seccion: seccion, // El backend actual puede ignorarlo; ya preparado para futuro
+        dispositivo: detectarDispositivo(),
+        navegador,
+        sistema_operativo: sistema,
+      },
+      function (resp) {
+        if ($btn) $btn.prop('disabled', false);
+        if (resp && resp.status === 'success') {
+          if ($btn) $btn.find('svg').css('fill', VOTE_COLOR);
+          console.log('Voto registrado con éxito.');
+          resolve(resp);
+        } else {
+          console.log((resp && resp.message) || 'Error al votar.');
+          reject(resp || new Error('vote-error'));
+        }
+      },
+      'json'
+    ).fail(function () {
+      if ($btn) $btn.prop('disabled', false);
+      console.log('No se pudo registrar el voto. Intenta de nuevo.');
+      reject(new Error('network-fail'));
+    });
+  });
+}
+
+
+
 function getInfoMusic(forceFresh = false){
   // Abort any previous request to avoid overlap
   if (songController) {
@@ -477,6 +545,17 @@ function getInfoMusic(forceFresh = false){
       } else {
         // Removed debug console.log for updating DOM
         painted = renderNowPlaying(cancion, artist);
+        $('.like').off('click.vote').on('click.vote', function (e) {
+                  e.preventDefault();
+                  const $btn = $(this);
+                  registerVote('Radio', artist, cancion, $btn)
+                    .then(() => {
+                      // Hook opcional: aquí podrías disparar un toast/analytics
+                    })
+                    .catch(() => {
+                      // Manejo ya se hizo con logs; deja el catch vacío para no romper UX
+                    });
+          });
       }
 
       if (painted) {
@@ -1091,6 +1170,36 @@ document.addEventListener('astro:page-load', ev => {
        
     } 
 
+
+    // === [/VOTOS] ===
+    $('.like-topten').off('click.vote').on('click.vote', function (e) {
+      console.log('like topten');
+                    e.preventDefault();
+                    const artist = $(this).data('artist') || '';
+                    const cancion = $(this).data('song') || '';
+                    const $btn = $(this);
+                    registerVote('TopTen', artist, cancion, $btn)
+                        .then(() => {
+                        // Hook opcional: aquí podrías disparar un toast/analytics
+                        })
+                        .catch(() => {
+                        // Manejo ya se hizo con logs; deja el catch vacío para no romper UX
+                        });
+    });
+
+    $('.like-lanzamientos').off('click.vote').on('click.vote', function (e) {
+                    e.preventDefault();
+                    const artist = $(this).data('artist') || '';
+                    const cancion = $(this).data('song') || '';
+                    const $btn = $(this);
+                    registerVote('Lanzamientos', artist, cancion, $btn)
+                        .then(() => {
+                        // Hook opcional: aquí podrías disparar un toast/analytics
+                        })
+                        .catch(() => {
+                        // Manejo ya se hizo con logs; deja el catch vacío para no romper UX
+                        });
+    });
         
        
 });

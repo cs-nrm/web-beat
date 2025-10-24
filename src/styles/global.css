@@ -808,3 +808,9 @@ article iframe.iframe-class{
     background-size: cover !important;
   }
 }
+
+/* REBELS */
+.repr-rebels iframe{
+    width: 100%;
+    border-radius: 0 0 0.75rem 0.75rem;
+}

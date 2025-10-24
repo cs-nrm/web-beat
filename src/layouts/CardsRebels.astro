@@ -67,7 +67,7 @@ switch (post.categories[0]){
 console.log(section);*/
 
 ---
-<div class="audiopod bg-black/50 text-[#F2400E] border border-[#f2400e4d] rounded-xl mb-8 hover:shadow-lg hover:shadow-red-500/50 transition-shadow duration-300 ease-in-out">
+<div class="audiopod-rebels bg-black/50 text-[#F2400E] border border-[#f2400e4d] rounded-xl mb-8 hover:shadow-lg hover:shadow-red-500/50 transition-shadow duration-300 ease-in-out">
     <article>
         <div class="p-2 border-b border-[#f2400e4d] leading-none"><span class="text-base">REBELS RADIO </span><span class="text-xs">PRESENTA</span></div>
         <div class="text-center p-2 border-b border-[#f2400e4d]"><span class=" text-4xl font-bold text-pretty md:text-balance leading-none" set:html={post.acf.dj}></span></div>        
@@ -75,8 +75,15 @@ console.log(section);*/
           <div class="border-r border-[#f2400e4d]"><span set:html={post.acf.fecha_transmision.substring(2, 4)}></span>.<span set:html={post.acf.fecha_transmision.substring(4, 6)}></span>.<span set:html={post.acf.fecha_transmision.substring(6, 8)}></span></div>
           <div><span>SESSION </span><span set:html={post.acf.session}></span></div>
         </div>
-        <div class="repr-rebels play-pause-podcast" data-podcast-status="ready" set:html={post.acf.ds}></div>
+        <!--div class="repr-rebels play-pause-podcast" data-podcast-status="ready" set:html={post.acf.ds}></div-->
+        <div class="flex items-center justify-between leading-tight p-2 md:p-4 min-h-28">
+            <h2 class="text-base text-[#F2400D] font-bold" set:html={post.title.rendered}></h2>
+            <div class="play-pause-podcast" data-podcast-status="ready"> 
 
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-play" width="80" height="80" viewBox="0 0 24 24" stroke-width="2" stroke="#F2400D" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 4v16l13 -8z" /></svg>
+            </div>           
+        </div>
+        <div class="data-iframe" data-iframe={post.acf.ds}></div>
     </article>
 </div>
 

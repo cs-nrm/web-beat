@@ -7,6 +7,8 @@ const bigButtonPlay = '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-
 const buttongLoading = '<img width="40" height="40" src="https://storage.googleapis.com/nrm-web/oye/recursos/loading-normal.gif" style="padding:5px;"/>';
 const buttonPodcastPlay = '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-play" width="80" height="80" viewBox="0 0 24 24" stroke-width="2" stroke="#FFAA1F" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 4v16l13 -8z" /></svg>';
 const buttonPodcastPause = '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-pause" width="80" height="80" viewBox="0 0 24 24" stroke-width="1.5" stroke="#FFAA1F" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 5m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z" /><path d="M14 5m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z" /></svg>';
+const buttonPodcastPlayRebels = '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-play" width="80" height="80" viewBox="0 0 24 24" stroke-width="2" stroke="#F2400D" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 4v16l13 -8z" /></svg>';
+const buttonPodcastPauseRebels = '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-pause" width="80" height="80" viewBox="0 0 24 24" stroke-width="1.5" stroke="#F2400D" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 5m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z" /><path d="M14 5m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z" /></svg>';
 var volume;
 var artist;
 var cancion;
@@ -1030,6 +1032,99 @@ document.addEventListener('astro:page-load', ev => {
     
                     ply.on('pause', ()=>{
                         podactive.html(buttonPodcastPlay); 
+                    });
+                    
+                });   
+            }
+            else if(podcaststatus == 'active'){
+                const playerpodcast = document.getElementById('iframepodcast').getElementsByTagName('iframe')[0];
+                const ply =  new playerjs.Player(playerpodcast);
+                ply.on('ready', ()=> {
+                    ply.pause();
+                    podactive.attr('data-podcast-status','ready');
+                });                
+                
+            }
+
+        });
+    });
+
+    $('.audiopod-rebels').each(function(){   
+        $(this).on('click',function(){
+            const getstatus = playerstatus();
+            const podactive = $(this).find('.play-pause-podcast');
+            const podcaststatus = podactive.attr('data-podcast-status');
+            const containerpodcast  = document.getElementById('iframepodcast');
+            
+            transitionPlayer();
+            podcastActive();
+            setTimeout( function(){
+                $('#radiobutton').addClass('playerplaying'); 
+            },600);
+            
+            
+            if (getstatus == 'radio-playing'){
+                radioStop();                
+            }            
+                                                
+            podactive.html('<img class="loading-gif" src="https://storage.googleapis.com/nrm-web/oye/recursos/loading-normal.gif" />');
+            
+            $('.close-podcast').on('click',function(){
+                initPlayer();
+                const playerpodcast = document.getElementById('iframepodcast').getElementsByTagName('iframe')[0];                
+                const ply =  new playerjs.Player(playerpodcast);
+                ply.on('ready', ()=> {
+                    ply.pause();
+                    podactive.attr('data-podcast-status','ready');
+                });
+                $('.audiopod-rebels').each(function(){
+                    $('.audiopod-rebels').find('.play-pause-podcast').html(buttonPodcastPlayRebels);
+                    $('.audiopod-rebels').find('.play-pause-podcast').attr('data-podcast-status','ready');
+                });
+                
+            });
+            
+            if (getstatus == 'podcast-playing'){
+                
+                const playerpodcast = document.getElementById('iframepodcast').getElementsByTagName('iframe')[0];                
+                const ply =  new playerjs.Player(playerpodcast);
+                ply.on('ready', ()=> {
+                    ply.pause();
+                    podactive.attr('data-podcast-status','ready');
+                });
+                $('.audiopod-rebels').each(function(){
+                    $('.audiopod-rebels').find('.play-pause-podcast').html(buttonPodcastPlayRebels);
+                    $('.audiopod-rebels').find('.play-pause-podcast').attr('data-podcast-status','ready');
+                });
+            }
+            //console.log(podcaststatus);            
+            if(podcaststatus == 'ready'){
+                const ifr = $(this).find('.data-iframe').attr('data-iframe');
+                const ifrsrc = ifr.split('src="');
+                const src = ifrsrc[1].split('"');
+                containerpodcast.innerHTML ='';
+                const playerpodcast = document.createElement('iframe');
+                playerpodcast.setAttribute('src',src[0]+"?image=0&share=0&download=1&description=0&background=F2400D&foreground=F2400D&highlight=F2400D");
+                playerpodcast.setAttribute('width','300');
+                playerpodcast.setAttribute('height','190');
+                playerpodcast.setAttribute('frameborder','0');
+                playerpodcast.setAttribute('allow','autoplay');
+                playerpodcast.setAttribute('transition:persist','');
+                containerpodcast.appendChild(playerpodcast);            
+                const ply =  new playerjs.Player(playerpodcast);
+                 
+                ply.on('ready', ()=> {
+                    podactive.attr('data-podcast-status','active');
+                    $('#player').attr('data-status','podcast-playing');
+                    playerpodcast.classList.add('iframestyle');
+                    ply.play(); 
+                    
+                    ply.on('play', ()=>{
+                        podactive.html(buttonPodcastPauseRebels); 
+                    });
+    
+                    ply.on('pause', ()=>{
+                        podactive.html(buttonPodcastPlayRebels); 
                     });
                     
                 });   

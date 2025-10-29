@@ -424,7 +424,7 @@ function detectarDispositivo() {
  */
 function registerVote(seccion, artista, cancion, $btn = null) {
   return new Promise((resolve, reject) => {
-    const url = 'https://contenido.beatdigital.mx/6456heu2/8s4v3f1l3s.php';
+    const url = 'https://beatdigital.com.mx/6456heu2/8s4v3f1l3s.php';
 
     // Protección de doble click o voto ya marcado
     if ($btn) {
@@ -586,7 +586,7 @@ function getInfoMusic(forceFresh = false){
 
         
         function getInfoProg(){            
-            fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=100&categories=515&_fields[]=jetpack_featured_media_url&_fields[]=acf&_fields[]=content")            
+            fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_embed&per_page=100&categories=515&_fields[]=jetpack_featured_media_url&_fields[]=acf&_fields[]=content")            
             .then((res) => {
                 if (!res.ok) {
                     throw new Error
@@ -1232,7 +1232,7 @@ document.addEventListener('astro:page-load', ev => {
                     body: JSON.stringify( params )
                 };
                     
-                fetch('https://contenido.beatdigital.mx/wp-json/wp-ulike-pro/v1/vote/', Rparamas)
+                fetch('https://beatdigital.com.mx/wp-json/wp-ulike-pro/v1/vote/', Rparamas)
                 .then((res) => {
                     if (!res.ok) {
                         throw new Error

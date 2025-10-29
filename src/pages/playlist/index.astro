@@ -9,13 +9,13 @@ import FormattedDate from '../../components/FormattedDate.astro';
 
 
 
-const lunes_nojson = 'https://contenido.beatdigital.mx/cdn/playlist/lunes.json';
-const martes_nojson = 'https://contenido.beatdigital.mx/cdn/playlist/martes.json';
-const miercoles_nojson = 'https://contenido.beatdigital.mx/cdn/playlist/mi%C3%A9rcoles.json';
-const jueves_nojson = 'https://contenido.beatdigital.mx/cdn/playlist/jueves.json';
-const viernes_nojson = 'https://contenido.beatdigital.mx/cdn/playlist/viernes.json';
-const sabado_nojson = 'https://contenido.beatdigital.mx/cdn/playlist/sa%CC%81bado.json';
-const domingo_nojson = 'https://contenido.beatdigital.mx/cdn/playlist/domingo.json';
+const lunes_nojson = 'https://beatdigital.com.mx/cdn/playlist/lunes.json';
+const martes_nojson = 'https://beatdigital.com.mx/cdn/playlist/martes.json';
+const miercoles_nojson = 'https://beatdigital.com.mx/cdn/playlist/mi%C3%A9rcoles.json';
+const jueves_nojson = 'https://beatdigital.com.mx/cdn/playlist/jueves.json';
+const viernes_nojson = 'https://beatdigital.com.mx/cdn/playlist/viernes.json';
+const sabado_nojson = 'https://beatdigital.com.mx/cdn/playlist/sa%CC%81bado.json';
+const domingo_nojson = 'https://beatdigital.com.mx/cdn/playlist/domingo.json';
  
 const lunes_arr = await fetch(lunes_nojson).then(r => r.text() ).then(data => {    
     const lunes_json = data.split('\n');     

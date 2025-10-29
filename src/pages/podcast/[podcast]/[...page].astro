@@ -11,16 +11,16 @@ import BarNrm from '../../../components/BarNrm.astro';
 export async function getStaticPaths( { paginate } ) {
     
     const arrpodcast = [
-        {nodo: 607,title: 'Groove Dealers', link: 'groove-dealers', imagen: 'https://contenido.beatdigital.mx/wp-content/uploads/2024/06/GROOVE-DEALERS-PODCAST-min.png', descripcion: 'Conoce datos relevantes y curiosos sobre la escena de la música electrónica a través de la voz de Maria Purisima, DJ’s y productores nacionales e internacionales.'},
-        {nodo: 557,title: 'Respira', link: 'respira', imagen: 'https://contenido.beatdigital.mx/wp-content/uploads/2023/12/poscast-repira2.jpg', descripcion: 'Descubrir que tienes un problema de salud mental es una noticia impactante que puede transformar tu vida por completo.'},
-        {nodo: 539,title: 'Expedientes Secretos', link: 'expedientes-secretos', imagen: 'https://contenido.beatdigital.mx/wp-content/uploads/2023/10/EX_secretos5.jpg', descripcion: '¡Expedientes Secretos Beat! Un podcast que explora teorías de conspiración y desentraña los misterios ocultos del mundo. ¡Prepárate para una dosis semanal de intrigante información y descubrimientos fascinantes!'},
-        {nodo: 535,title: 'Nerdosis', link: 'nerdosis', imagen: 'https://contenido.beatdigital.mx/wp-content/uploads/2023/06/NERD_podcast3psd.jpg', descripcion: 'Un podcast sobre cómics, tecnología, gaming, torneos, streaming, memes y mucho más.'},
-        {nodo: 495,title: 'Dos Equis Mixx', link: 'dos-equis-mixx', imagen: 'https://contenido.beatdigital.mx/wp-content/uploads/2022/09/portada-xx.jpg', descripcion: '¿Y tú confías en tu MIXX? Un programa que trae lo mejor de la cultura pop, tendencias y lo más relevante de la música electrónica.'},
-        {nodo: 468,title: 'Beat Trends', link: 'beat-trends', imagen:'https://contenido.beatdigital.mx/wp-content/uploads/2022/08/podcast.jpg', descripcion:'Entérate de las últimas noticias sobre cine, anime, móviles, videojuegos y más con Frank, Wallace y el Negro Salcedo. '},
+        {nodo: 607,title: 'Groove Dealers', link: 'groove-dealers', imagen: 'https://beatdigital.com.mx/wp-content/uploads/2024/06/GROOVE-DEALERS-PODCAST-min.png', descripcion: 'Conoce datos relevantes y curiosos sobre la escena de la música electrónica a través de la voz de Maria Purisima, DJ’s y productores nacionales e internacionales.'},
+        {nodo: 557,title: 'Respira', link: 'respira', imagen: 'https://beatdigital.com.mx/wp-content/uploads/2023/12/poscast-repira2.jpg', descripcion: 'Descubrir que tienes un problema de salud mental es una noticia impactante que puede transformar tu vida por completo.'},
+        {nodo: 539,title: 'Expedientes Secretos', link: 'expedientes-secretos', imagen: 'https://beatdigital.com.mx/wp-content/uploads/2023/10/EX_secretos5.jpg', descripcion: '¡Expedientes Secretos Beat! Un podcast que explora teorías de conspiración y desentraña los misterios ocultos del mundo. ¡Prepárate para una dosis semanal de intrigante información y descubrimientos fascinantes!'},
+        {nodo: 535,title: 'Nerdosis', link: 'nerdosis', imagen: 'https://beatdigital.com.mx/wp-content/uploads/2023/06/NERD_podcast3psd.jpg', descripcion: 'Un podcast sobre cómics, tecnología, gaming, torneos, streaming, memes y mucho más.'},
+        {nodo: 495,title: 'Dos Equis Mixx', link: 'dos-equis-mixx', imagen: 'https://beatdigital.com.mx/wp-content/uploads/2022/09/portada-xx.jpg', descripcion: '¿Y tú confías en tu MIXX? Un programa que trae lo mejor de la cultura pop, tendencias y lo más relevante de la música electrónica.'},
+        {nodo: 468,title: 'Beat Trends', link: 'beat-trends', imagen:'https://beatdigital.com.mx/wp-content/uploads/2022/08/podcast.jpg', descripcion:'Entérate de las últimas noticias sobre cine, anime, móviles, videojuegos y más con Frank, Wallace y el Negro Salcedo. '},
     ]; 
 
   
-  const res = await fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_embed&per_page=250&_fields=title,slug,yoast_head_json,categories,acf&categories=607,557,539,535,495,468" ); 
+  const res = await fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_embed&per_page=250&_fields=title,slug,yoast_head_json,categories,acf&categories=607,557,539,535,495,468" ); 
   const posts = await res.json();
   //console.log(posts);
   

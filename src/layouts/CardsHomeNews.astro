@@ -6,9 +6,9 @@ import SuperLeader from '../components/SuperLeader.astro';
 import { Image } from 'astro:assets';
 
 
-const res = await fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_fields=date,title,slug,sticky,acf,content,excerpt,_links,_embedded&_embed&per_page=6&categories=143&order_by=date&order=desc&acf.fijo=false");
+const res = await fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_fields=date,title,slug,sticky,acf,content,excerpt,_links,_embedded&_embed&per_page=6&categories=143&order_by=date&order=desc&acf.fijo=false");
 
-const ressti = await fetch("https://contenido.beatdigital.mx/wp-json/wp/v2/posts?_fields=date,title,slug,sticky,acf,content,excerpt,_links,_embedded&_embed&per_page=4&categories=143");
+const ressti = await fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_fields=date,title,slug,sticky,acf,content,excerpt,_links,_embedded&_embed&per_page=4&categories=143");
 
 const posts = await res.json();
 

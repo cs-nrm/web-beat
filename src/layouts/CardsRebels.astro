@@ -70,7 +70,7 @@ console.log(section);*/
 <div class="audiopod-rebels bg-black/50 text-[#F2400E] border border-[#f2400e4d] rounded-xl mb-8 hover:shadow-lg hover:shadow-red-500/50 transition-shadow duration-300 ease-in-out">
     <article>
         <div class="p-2 border-b border-[#f2400e4d] leading-none"><span class="text-base">REBELS RADIO </span><span class="text-xs">PRESENTA</span></div>
-        <div class="text-center p-2 border-b border-[#f2400e4d]"><span class=" text-4xl font-bold text-pretty md:text-balance leading-none" set:html={post.acf.dj}></span></div>        
+        <div class="text-center p-2 border-b border-[#f2400e4d] min-h-[85px] flex items-center justify-center"><span class=" text-4xl font-bold text-pretty md:text-balance leading-none" set:html={post.acf.dj}></span></div>        
         <div class="grid grid-cols-2 text-center text-sm p-2 border-b border-[#f2400e4d] leading-none">
           <div class="border-r border-[#f2400e4d]"><span set:html={post.acf.fecha_transmision.substring(2, 4)}></span>.<span set:html={post.acf.fecha_transmision.substring(4, 6)}></span>.<span set:html={post.acf.fecha_transmision.substring(6, 8)}></span></div>
           <div><span>SESSION </span><span set:html={post.acf.session}></span></div>

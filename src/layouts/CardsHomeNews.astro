@@ -17,7 +17,7 @@ const poststi = await ressti.json();
 ---
 
       <div class="container cards">
-        <div class="card w-full md:px-[10%] h-[620px]">
+        <div class="card principal w-full md:px-[10%] h-[620px]">
           <article>
             <div class="glows"></div>
             {
@@ -49,7 +49,7 @@ const poststi = await ressti.json();
             .map((poststi:any) => (
               
 
-            <div class="card">
+            <div class="card secundarias">
               <article>
                 <div class="glows"></div>
                 <a href={`/news/${poststi.slug}/`} class="group relative flex h-60 sm:h-48 items-end overflow-hidden rounded-xl shadow-lg md:h-96">
@@ -114,9 +114,9 @@ posts.map((post:any)=> (
 </div>
 
 <style>
-.cards img{
+/*.cards .secundarias img{
   mask-image: linear-gradient(225deg, hsla(var(--color-black), 1) 0, hsla(var(--color-black), 0.9) 40%, hsla(var(--color-black), 0) 80%);
-}
+}*/
 
 
 p{

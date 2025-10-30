@@ -525,6 +525,7 @@ function getInfoMusic(forceFresh = false){
         case 'COMERCIALES':
         case 'DROP':
         case 'NUEVA PRODUCCION':
+        case 'Elementos RANDOM':
         case 'ELEMENTOS':
           artist = 'PAUSA COMERCIAL';
           cancion = '';

@@ -926,6 +926,21 @@ document.addEventListener('astro:page-load', ev => {
         });
         flkty.select(2);
         flkty.reloadCells();   
+
+        /*var elempod = document.querySelector('.slider-podcast');
+        var flktypod = new Flickity( elempod, {
+            // options
+            cellAlign: 'right',
+            prevNextButtons: true,
+        //    autoPlay: 5000,
+            pageDots: false,
+            pauseAutoPlayOnHover: true,
+            freeScroll: true,
+            wrapAround: true
+        });
+        flktypod.select(2);
+        flktypod.reloadCells();*/
+        
     }
 
     

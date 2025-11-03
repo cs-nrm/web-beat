@@ -13,6 +13,7 @@ import BarNrm from '../../components/BarNrm.astro';
 
 export async function getStaticPaths( { paginate } ) {
   const data = await getArticles(781);  
+  data.sort((a, b) => Number(b.acf.session) - Number(a.acf.session));
   return paginate(data, { pageSize: 20 });
 }
 
@@ -26,7 +27,7 @@ const {page=[]} = Astro.props;
 <!doctype html>
 <html lang="es">
 	<head>
-		<BaseHead title={SITE_TITLE} seccion="News" description={SITE_DESCRIPTION} />
+		<BaseHead title={SITE_TITLE} seccion="Rebels" description={SITE_DESCRIPTION} />
 		
 	</head>
 	<body>

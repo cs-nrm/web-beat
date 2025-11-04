@@ -1,10 +1,27 @@
 ---
 import Card from '../layouts/CardMoreNews.astro';
 
-const res = await fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_embed&per_page=5&_fields=title,slug,yoast_head_json,categories,_links,_embedded&categories=143");
+const { tags = [], currentId } = Astro.props;
+
+let apiUrl = `https://beatdigital.com.mx/wp-json/wp/v2/posts?_embed&per_page=5&_fields=title,slug,yoast_head_json,categories,_links,_embedded`;
+if (tags && tags.length > 0) {
+  apiUrl += `&tags=${tags.join(',')}`;
+}
+if (currentId) {
+  apiUrl += `&exclude=${currentId}`;
+}
+const res = await fetch(apiUrl);
 const posts = await res.json();
 ---
 <div class="my-12 mx-auto">
+  {tags && tags.length > 0 && (
+    <div class="mb-4 text-sm text-white">
+      <strong>En esta nota:</strong>
+      {tags.map((tag, index) => (
+        <a href={`/tag/${tag}`} class="ml-2 mr-1 hover:underline">#{tag}</a>
+      ))}
+    </div>
+  )}
 	<h4 class="font-bold">Te podría interesar...</h4>
         <section class="flex flex-wrap -mx-1 lg:-mx-4">
                     {

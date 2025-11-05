@@ -1,0 +1,69 @@
+---
+import { Image } from 'astro:assets';
+
+const PLACEHOLDER_IMG = 'https://storage.googleapis.com/nrm-web/beat/resources/img/img_beat-min.jpg';
+const res = await fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_fields=date,title,slug,sticky,acf,yoast_head_json,content,excerpt,_links,_embedded&_embed&per_page=20&categories=788");
+const posts = await res.json();
+const filteredPosts = posts.filter((post:any) => !post.acf?.fijo);
+
+---
+
+      <div class="container cards">
+        <!--h1 class="text-center p-4 my-4 font-bold text-xl md:text-2xl lg:text-4xl">CORONA CAPITAL</h1-->
+        <div class="news-grid grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:gap-16 xl:gap-16">
+        {
+          filteredPosts.slice(0, 4).map((post:any, idx:number) => (
+            <div class={`cards-filtro-${idx}`}>
+              <article class="news-card transition duration-[0.2s] hover:translate-y-[-4px]">
+                <a class="text-black hover:text-[#515151]" href={`/corona-capital/${post.slug}/`}>
+                  <div class="bg-black"><img loading="lazy" class="aspect-not h-auto w-full" src={post.yoast_head_json.og_image[0].url|| PLACEHOLDER_IMG} alt={post?._embedded?.['wp:featuredmedia']?.[0]?.alt_text||"Imagen Front Row"}/></div>
+                  <div class="news-content p-6">
+                    <h5 set:html={post.title.rendered}></h5>
+                    <!--div class="text-sm resumen" set:html={post.excerpt.rendered}></div-->
+                    <span class="roboto font-bold text-xs mt-4">por {post.yoast_head_json.author}</span>
+                  </div>
+                </a>  
+              </article>
+            </div>
+          ))
+          }
+        </div>
+      </div>
+
+<div class="m-auto text-center">
+    <a href="/corona-capital" class="hover:text-white">
+        <button class="ver-mas lovelo group relative h-8 w-36 m-4 overflow-hidden bg-white hover:bg-[#ef4444] uppercase text-xs font-bold tracking-[3px]">
+            <span>Ver más</span>
+        </button>
+    </a>
+</div>
+
+<style>
+.cards-filtro-3{display: none;}
+.cards-filtro-0{background:#F5F42F; padding: 10px;}
+.cards-filtro-1{background:#FD77E1; padding: 10px;}
+.cards-filtro-2{background:#FA6421; padding: 10px;}
+.cards-filtro-3{background:#7BDAB2; padding: 10px;}
+
+@media (min-width: 769px) and (max-width: 1024px){
+  .cards-filtro-3{display: block;}
+}
+/*
+.texto-nota{
+  box-shadow: none;
+  mask-image: linear-gradient(to bottom, hsla(var(--color-black), 1) 0, hsla(var(--color-black), 1) 10%, hsla(var(--color-black), 0) 100%);
+}
+
+.text-uno{
+	display: -webkit-box;
+	-webkit-margin-before: 0;
+  margin-block-start: 0;
+  -webkit-margin-after: 12px;
+  margin-block-end: 12px;
+  line-height: 1.2;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}*/
+</style>
+

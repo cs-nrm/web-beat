@@ -12,7 +12,7 @@ import BoxBanner from '../../components/BoxBanner.astro';
 import BarNrm from '../../components/BarNrm.astro';
 
 export async function getStaticPaths( { paginate } ) {
-  const data = await getArticles(854);  
+  const data = await getArticles(788);  
   return paginate(data, { pageSize: 20 });
 }
 

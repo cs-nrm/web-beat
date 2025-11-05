@@ -5,6 +5,7 @@ import LeaderBoard from'../components/LeaderBoard.astro';
 import SuperLeader from '../components/SuperLeader.astro';
 import { Image } from 'astro:assets';
 
+const PLACEHOLDER_IMG = 'https://storage.googleapis.com/nrm-web/beat/resources/img/img_beat-min.jpg';
 
 const res = await fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_fields=date,title,slug,sticky,acf,content,excerpt,_links,_embedded&_embed&per_page=6&categories=143&order_by=date&order=desc&acf.fijo=false");
 
@@ -26,7 +27,7 @@ const poststi = await ressti.json();
             .slice(0,1)
             .map((poststi:any) => (
               <a href={`/news/${poststi.slug}/`} class="group relative flex  items-end overflow-hidden rounded-xl h-[500px] w-full">
-                  <img src={poststi._embedded['wp:featuredmedia'][0].media_details.sizes['full'].source_url} alt="Imagen Ilustrativa Principal" class="absolute inset-0 w-full h-full object-cover object-center transition duration-200 group-hover:scale-110" />
+                  <img src={poststi?._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.['full']?.source_url|| PLACEHOLDER_IMG} alt={poststi?._embedded?.['wp:featuredmedia']?.[0]?.alt_text||"Imagen Ilustrativa Principal"} class="absolute aspect-not inset-0 w-full h-auto object-cover object-center transition duration-200 group-hover:scale-110" />
                   <div class="text relative inline-block p-3 text-xl sm:text-sm text-white md:text-3xl leading-tight md:leading-none w-full text-center"><p set:html={poststi.title.rendered}></p></div>
               </a>
               <div class="texto-nota poppins hidden md:block px-3 pb-6 ">

@@ -61,8 +61,20 @@ switch (post.categories[0]){
 <div class="card w-full p-4">
     <div class="overflow-hidden bg-zinc-800 rounded-lg hover:shadow-[0_2px_12px_6px_rgba(255,170,32,0.5)] group">
         <a href={`/${url_seccion}/${post.slug}/`}>
-            <!--img class="block h-auto w-full aspect-video object-cover group-hover:text-[var(--amarillo-beat)]" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} /-->
-            <img class="block h-auto w-full aspect-video object-cover group-hover:text-[var(--amarillo-beat)]" src={post._embedded['wp:featuredmedia'][0].media_details.sizes['beat-news-size'].source_url} alt={post.title.rendered} />
+            {/* {post._embedded && post._embedded['wp:featuredmedia'] && post._embedded['wp:featuredmedia'][0]?.media_details?.sizes?.['beat-news-size']?.source_url && (
+              <img
+                class="block h-auto w-full aspect-video object-cover group-hover:text-[var(--amarillo-beat)]"
+                src={post._embedded['wp:featuredmedia'][0].media_details.sizes['beat-news-size'].source_url}
+                alt={post.title.rendered}
+              />
+            )} */}
+            {post._embedded && post._embedded['wp:featuredmedia'] && post._embedded['wp:featuredmedia'][0]?.media_details?.sizes?.['beat-news-size']?.source_url && (
+              <img
+                class="block h-auto w-full aspect-video object-cover group-hover:text-[var(--amarillo-beat)]"
+                src={post._embedded['wp:featuredmedia'][0].media_details.sizes['beat-news-size'].source_url}
+                alt={post.title.rendered}
+              />
+            )}
         </a>
         <div class="flex items-center justify-between leading-tight px-2">
             <a class="no-underline" href={`/${url_seccion}/${post.slug}/`}>

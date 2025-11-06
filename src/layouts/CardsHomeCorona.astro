@@ -16,7 +16,7 @@ const filteredPosts = posts.filter((post:any) => !post.acf?.fijo);
             <div class={`cards-filtro-${idx}`}>
               <article class="news-card transition duration-[0.2s] hover:translate-y-[-4px]">
                 <a class="text-black hover:text-[#515151]" href={`/corona-capital/${post.slug}/`}>
-                  <div class="bg-black"><img loading="lazy" class="aspect-not h-auto w-full" src={post.yoast_head_json.og_image[0].url|| PLACEHOLDER_IMG} alt={post?._embedded?.['wp:featuredmedia']?.[0]?.alt_text||"Imagen Front Row"}/></div>
+                  <div class="bg-black"><img loading="lazy" class="aspect-not h-auto w-full" src={post?._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.['beat-news-size']?.source_url || PLACEHOLDER_IMG} alt={post?._embedded?.['wp:featuredmedia']?.[0]?.alt_text||"Imagen Corona Capital"}/></div>
                   <div class="news-content p-6">
                     <h5 set:html={post.title.rendered}></h5>
                     <!--div class="text-sm resumen" set:html={post.excerpt.rendered}></div-->

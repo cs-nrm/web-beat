@@ -6,14 +6,15 @@
 <script is:inline>
   const anio = 2025;
   const mes = 10; // Agosto (0=enero, 7=agosto, 8=septiembre, 9=octubre, 10=Noviembre)
-  const dia = 5;
-  const horaInicio = { h: 19, m: 55 }; // 7:55pm
-  const horaFin = { h: 21, m: 5 };     // 9pm
+  const dia = 8;
+  const diafin = 9;
+  const horaInicio = { h: 15, m: 55 }; // 
+  const horaFin = { h: 4, m: 0 };     // 
 
   function estaEnRango() {
     const ahora = new Date();
     const inicio = new Date(anio, mes, dia, horaInicio.h, horaInicio.m, 0, 0);
-    const fin = new Date(anio, mes, dia, horaFin.h, horaFin.m, 0, 0);
+    const fin = new Date(anio, mes, diafin, horaFin.h, horaFin.m, 0, 0);
     return ahora >= inicio && ahora <= fin;
   }
 

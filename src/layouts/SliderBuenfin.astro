@@ -8,14 +8,74 @@ import { Image } from 'astro:assets';
 
 ---
 
-<div class="slider-buenfin">
+<!--div class="slider-buenfin">
 	<div class="carousel carousel-buenfin cards">
 			<div class="carousel-cell card" id="ad-slot201"></div>
 			<div class="carousel-cell card" id="ad-slot202"></div>
 			<div class="carousel-cell card" id="ad-slot203"></div>
 			<div class="carousel-cell card" id="ad-slot204"></div>
 	</div> 
+</div-->
+
+<div class="text-center pt-4 text-white">¡Cada día más cerca de El Buen Fin 2025!</div>
+<div class="contenedor-reloj"> 
+  <div class="contenido-reloj">
+    <div class="contador-reloj">
+      <div class="responsivo1-reloj">
+        <div class="cartel-reloj">
+        <div id="dias"></div>
+        <div class="h3"><h3>Días</h3></div>
+      </div>
+        <div class="cartel-reloj">
+        <div id="horas"></div>
+        <div class="h3"><h3>Horas</h3></div>
+      </div>
+      </div>
+      <div class="responsivo2-reloj">
+      <div class="cartel-reloj">
+        <div id="minutos"></div>
+        <div class="h3"><h3>Minutos</h3></div>
+      </div>
+      <div class="cartel-reloj">
+        <div id="segundos"></div>
+        <div class="h3"><h3>Segundos</h3></div>
+      </div>
+      </div>
+    </div>
+  </div>
 </div>
+
+<div class="grid gap-4 md:gap-16 grid-cols-1 sm:grid-cols-3 p-4 md:p-8">
+	<a class="text-center" target="_blank" href="https://www.liverpool.com.mx/" ><img class="max-w-[300px] m-auto" src="https://storage.googleapis.com/nrm-web/nrm/adManager/logo_liverpool.png"/></a>
+	<a class="text-center" target="_blank" href="https://www.openbank.mx/" ><img class="max-w-[300px] m-auto" src="https://storage.googleapis.com/nrm-web/nrm/adManager/logo_openbank.png"/></a>
+	<a class="text-center" target="_blank" href="https://www.sams.com.mx/" ><img class="max-w-[300px] m-auto" src="https://storage.googleapis.com/nrm-web/nrm/adManager/logo_sams.png"/></a>
+</div>
+
+<div class="grid gap-4 grid-cols-1 sm:grid-cols-3 md:gap-16 p-4 md:p-8">
+	<div class="text-center bg-black text-white rounded-lg py-8"><a target="_blank" href="https://www.elbuenfin.org/consumidores">Conoce más de El Buen Fin</a></div>
+	<div class="text-center bg-black text-white rounded-lg py-8"><a target="_blank" href="https://www.sat.gob.mx/minisitio/SorteoElBuenFin/tarjetahabientes.html">Sorteo El Buen Fin 2025</a></div>
+	<div class="text-center bg-black text-white rounded-lg py-8"><a target="_blank" href="https://www.elbuenfin.org/abm">Evita estafas en El Buen Fin</a></div>
+</div>
+
+<script is:inline>
+const second = 1000,
+      minute = second * 60,
+      hour = minute * 60,
+      day = hour * 24;
+
+let countDown = new Date('Nov 13, 2025 00:00:00').getTime(),
+    x = setInterval(function() {
+
+      let now = new Date().getTime(),
+          distance = countDown - now;
+
+      document.getElementById('dias').innerText = Math.floor(distance / (day)),
+      document.getElementById('horas').innerText = Math.floor((distance % (day)) / (hour)),
+      document.getElementById('minutos').innerText = Math.floor((distance % (hour)) / (minute)),
+      document.getElementById('segundos').innerText = Math.floor((distance % (minute)) / second);
+
+    }, second)
+</script>
 
 <style>
 .slider-buenfin{
@@ -120,6 +180,103 @@ import { Image } from 'astro:assets';
 
 
 
+
+
+
+
+.contenedor-reloj {
+  color: #000000;
+  text-align: center;
+}
+.cartel-reloj {
+  width: 109px;
+  height: 109px;
+  padding: 20px 0px 5px 0px;
+  text-align: center;
+  display: inline-block;
+  margin: 5px;
+  border: 3px solid #000000;
+  border-radius: 5px;
+  border-radius: 50%;
+  background: white;
+}
+.cartel-reloj>div{
+  font-size: 40px;
+  animation: fade 3s;
+  line-height: 20px;
+  margin-top: 5px;
+}
+.cartel-reloj>div>h3 {
+  margin-top: 15px;
+  font-size: 16px;
+  font-weight: bold;
+}
+.cartel-reloj .h3 {
+  bottom: 0;
+  margin: 0 auto ;
+}
+.contenedor-reloj {
+  padding-top: 1%;
+}
+.contenido-reloj {
+  width: 80%;
+  margin: 0 auto;
+  border: 0px solid black;
+  z-index: 10;
+}
+/*li {
+  display: inline-block;
+  font-size: 1.5em;
+  list-style-type: none;
+  padding: 1em;
+  text-transform: uppercase;
+}
+li span {
+  display: block;
+  font-size: 4.5rem;
+}
+.numeros {
+  font-size: 60px;
+  transition: .3s;
+  animation-name: fade;
+  animation-duration: 3s;
+}*/
+.responsivo1-reloj {
+  display: inline-block
+}
+.responsivo2-reloj {
+  display: inline-block
+}
+@media (max-width: 450px) {  
+  .contenedor-reloj {
+    margin-top: 15%;
+  }
+  /*.banner {
+   margin-bottom: 30px; 
+  }*/
+  .cartel-reloj {
+    height: 99px;
+    width: 99px;
+  }
+  .cartel-reloj>div{
+    font-size: 45px;
+  }
+  .cartel-reloj>div>h3 {
+    font-size: 15px;
+    margin-top: 0px;
+  }
+}
+@keyframes fade {
+    0%   {
+      opacity: 0;
+  }
+    30%   {
+      opacity: 0;
+  }  
+    100% {
+      opacity: 1;
+  }
+}
 
 
 </style>

@@ -8,7 +8,7 @@ import { Image } from 'astro:assets';*/
 
 const res = await fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_fields=title,slug,yoast_head_json,_links,_embedded&_embed&per_page=2&categories=531");
 const posts = await res.json();
-
+const PLACEHOLDER_IMG = 'https://storage.googleapis.com/nrm-web/beat/resources/img/img_beat-min.jpg';
 ---
 <!--div class="flex flex-wrap">
 {
@@ -28,7 +28,7 @@ posts.map((post:any)=> (
     <div class="overflow-hidden rounded-lg">
         <a href={`/nerdosis/${post.slug}/`} >
             <div class="flex items-center justify-between leading-tight">
-              <img class="block w-2/4 aspect-video" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} />
+              <img loading="lazy" class="block w-2/4 aspect-video" src={post?.yoast_head_json?.og_image?.[0]?.url || PLACEHOLDER_IMG} alt={post?._embedded?.['wp:featuredmedia']?.[0]?.alt_text || "Imagen Nerdosis"} />
               <h2 class="text-nerd text-base text-zinc-300 font-bold p-2" set:html={post.title.rendered}></h2>
             </div>
         </a>

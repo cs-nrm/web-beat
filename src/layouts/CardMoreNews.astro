@@ -58,6 +58,7 @@ switch (post.categories[0]){
     break;      
 }
 
+const PLACEHOLDER_IMG = 'https://storage.googleapis.com/nrm-web/beat/resources/img/img_beat-min.jpg';
 
 ---
 
@@ -74,8 +75,8 @@ switch (post.categories[0]){
             {post._embedded && post._embedded['wp:featuredmedia'] && post._embedded['wp:featuredmedia'][0]?.media_details?.sizes?.['beat-news-size']?.source_url && (
               <img
                 class="block h-auto w-full aspect-video object-cover group-hover:text-[var(--amarillo-beat)]"
-                src={post._embedded['wp:featuredmedia'][0].media_details.sizes['beat-news-size'].source_url}
-                alt={post.title.rendered}
+                src={post?._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.['beat-news-size']?.source_url || PLACEHOLDER_IMG}
+                alt={post?._embedded?.['wp:featuredmedia']?.[0]?.alt_text || "Imagen More News"}
               />
             )}
         </a>

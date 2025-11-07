@@ -27,7 +27,7 @@ const poststi = await ressti.json();
             .slice(0,1)
             .map((poststi:any) => (
               <a href={`/news/${poststi.slug}/`} class="group relative flex  items-end overflow-hidden rounded-xl h-[500px] w-full">
-                  <img src={poststi?._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.['full']?.source_url|| PLACEHOLDER_IMG} alt={poststi?._embedded?.['wp:featuredmedia']?.[0]?.alt_text||"Imagen Ilustrativa Principal"} class="absolute aspect-not inset-0 w-full h-auto object-cover object-center transition duration-200 group-hover:scale-110" loading="lazy" />
+                  <img src={poststi?._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.['full']?.source_url|| PLACEHOLDER_IMG} alt={poststi?._embedded?.['wp:featuredmedia']?.[0]?.alt_text||"Imagen Ilustrativa Principal"} class="absolute md:aspect-not inset-0 w-full h-full object-cover object-center transition duration-200 group-hover:scale-110" loading="lazy" />
                   <div class="text relative inline-block p-3 text-xl sm:text-sm text-white md:text-3xl leading-tight md:leading-none w-full text-center"><p set:html={poststi.title.rendered}></p></div>
               </a>
               <div class="texto-nota poppins hidden md:block px-3 pb-6 ">
@@ -50,7 +50,7 @@ const poststi = await ressti.json();
             .map((poststi:any) => (
               
 
-            <div class="card secundarias">
+            <div class="card secundarias"> 
               <article>
                 <div class="glows"></div>
                 <a href={`/news/${poststi.slug}/`} class="group relative flex h-60 sm:h-48 items-end overflow-hidden rounded-xl shadow-lg md:h-96">

@@ -56,7 +56,7 @@ switch (post.categories[0]){
     break;      
 }
 
-
+const PLACEHOLDER_IMG = 'https://storage.googleapis.com/nrm-web/beat/resources/img/img_beat-min.jpg';
 /*const section = post.yoast_head_json.schema['@graph'][0].articleSection; 
 console.log(section);*/
 
@@ -66,7 +66,7 @@ console.log(section);*/
         <div class="glows"></div>
         <a href={`/${url_seccion}/${post.slug}/`} class="group relative flex h-60 sm:h-48 items-end overflow-hidden rounded-xl shadow-lg md:h-96">
             <!--img src={post['_embedded']['wp:featuredmedia'][0].media_details.sizes['beat-news-size'].source_url} alt={post.title.rendered} class="absolute inset-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110" /-->
-            <img src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} class="absolute inset-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110" />
+            <img src={post?._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.['beat-news-size']?.source_url || PLACEHOLDER_IMG} alt={post?._embedded?.['wp:featuredmedia']?.[0]?.alt_text || "Imagen Cards"}  class="absolute inset-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110" />
             <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-gray-800 via-transparent to-transparent opacity-50"></div>
             <div class="text relative inline-block p-3 text-lg sm:text-sm text-white md:text-xl leading-tight md:leading-none"><p set:html={post.title.rendered}></p></div>
         </a>

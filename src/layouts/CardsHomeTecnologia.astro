@@ -25,7 +25,7 @@ const posts = await res.json();
                 <a href={`/beatzilla/${poststi.slug}/`} class="group relative flex h-60 sm:h-48 items-end overflow-hidden rounded-xl shadow-lg md:h-96">
                     <img loading="lazy" src={poststi?._embedded?.['wp:featuredmedia']?.[0]?.media_details.sizes?.['beat-news-size']?.source_url || PLACEHOLDER_IMG} alt={poststi?._embedded?.['wp:featuredmedia']?.[0]?.alt_text||"Imagen Beatzilla"} class="absolute inset-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110" />
                     <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-gray-800 via-transparent to-transparent opacity-50"></div>
-                    <div class="text relative inline-block p-3 text-lg sm:text-sm text-white md:text-xl leading-tight md:leading-none"><p set:html={poststi.title.rendered}></p></div>
+                    <div class="text relative inline-block p-3 text-lg sm:text-sm text-white md:text-xl leading-tight md:leading-none"><p set:html={poststi.title.rendered}></p></div> 
                 </a>
               </article>
             </div>

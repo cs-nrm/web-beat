@@ -24,6 +24,7 @@ export async function getStaticPaths() {
   }));
 }
 
+const PLACEHOLDER_IMG = 'https://storage.googleapis.com/nrm-web/stereocien/img_stereocien-min.jpg';
 ---
 <Layout title={post.title.rendered} img={post.yoast_head_json.og_image[0].url} tags={post.yoast_head_json} description={post.yoast_head_json.og_description} >
   <section class="w-full py-4 poppins" id="content-w-video">
@@ -39,7 +40,7 @@ export async function getStaticPaths() {
         <!--figure id="imagen-nota" class="imagen-nota flex justify-center rounded-sm w-auto bg-purple-700 bg-contain backdrop-opacity-80 backdrop-blur-2xl">
           <img class="w-auto max-h-96 h-full shadow-[0_5px_12px_10px_rgba(0,0,0,0.4)] rounded scale-[1.01]" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered} />
         </figure-->
-        <img class="text-center m-auto shadow-[0_5px_12px_10px_rgba(0,0,0,0.4)] rounded-xl" src={post.yoast_head_json.og_image[0].url} alt={post.title.rendered}/>
+        <img class="h-auto w-full aspect-video text-center m-auto shadow-[0_5px_12px_10px_rgba(0,0,0,0.4)] rounded-xl" src={post?.yoast_head_json?.og_image?.[0]?.url || PLACEHOLDER_IMG } alt={post?._embedded?.['wp:featuredmedia']?.[0]?.alt_text||"Imagen Ilustrativa News"}/>
       </div>
     <LeaderBoard />
 

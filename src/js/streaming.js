@@ -98,8 +98,8 @@ function initGPT() {
     var mapping32 = googletag.sizeMapping().addSize([728, 90]).build();
     var mapping32 = googletag.sizeMapping().addSize([600, 300]).build();
     var mapping321 = googletag.sizeMapping().addSize([320, 50]).build();
-    //var mapping4 = googletag.sizeMapping().addSize([728, 90]).build();
-    //var mapping41 = googletag.sizeMapping().addSize([320, 50]).build();
+    var mapping4 = googletag.sizeMapping().addSize([728, 90]).build();
+    var mapping41 = googletag.sizeMapping().addSize([320, 50]).build();
     //var mapping42 = googletag.sizeMapping().addSize([728, 90]).build();
     //var mapping421 = googletag.sizeMapping().addSize([320, 50]).build();   
     var mapping5 = googletag.sizeMapping().addSize([300, 600]).build();
@@ -124,9 +124,9 @@ function initGPT() {
     window.slot32 = googletag.defineSlot("/21799830913/Beat", [728, 90],'ad-slot32').defineSizeMapping(mapping32).addService(googletag.pubads());
     //window.slot32 = googletag.defineSlot("/21799830913/Beat", [600, 300],'ad-slot32').defineSizeMapping(mapping32).addService(googletag.pubads());
     window.slot321 = googletag.defineSlot("/21799830913/Beat", [320, 50],'ad-slot321').defineSizeMapping(mapping321).addService(googletag.pubads());
-    //window.slot4 = googletag.defineSlot("/21799830913/Beat", [728, 90],'ad-slot4').defineSizeMapping(mapping4).addService(googletag.pubads());
-    //window.slot41 = googletag.defineSlot("/21799830913/Beat", [320, 50],'ad-slot41').defineSizeMapping(mapping41).addService(googletag.pubads());
-    //window.slot42 = googletag.defineSlot("/21799830913/Beat", [728, 90],'ad-slot42').defineSizeMapping(mapping42).addService(googletag.pubads());
+    window.slot4 = googletag.defineSlot("/21799830913/Beat", [728, 90],'ad-slot4').defineSizeMapping(mapping4).addService(googletag.pubads());
+    window.slot41 = googletag.defineSlot("/21799830913/Beat", [320, 50],'ad-slot41').defineSizeMapping(mapping41).addService(googletag.pubads());
+   //window.slot42 = googletag.defineSlot("/21799830913/Beat", [728, 90],'ad-slot42').defineSizeMapping(mapping42).addService(googletag.pubads());
     //window.slot421 = googletag.defineSlot("/21799830913/Beat", [320, 50],'ad-slot421').defineSizeMapping(mapping421).addService(googletag.pubads());
     window.slot5 = googletag.defineSlot("/21799830913/Beat", [300, 600],'ad-slot5').defineSizeMapping(mapping5).addService(googletag.pubads());
     //window.slot6 = googletag.defineSlot("/21799830913/Beat", [728, 90],'ad-slot6').defineSizeMapping(mapping6).addService(googletag.pubads());

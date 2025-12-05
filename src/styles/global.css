@@ -649,7 +649,7 @@ article iframe.iframe-class{
 
 .ns-attached{max-width: 350px !important; left: auto !important;}
 .ns-effect-bouncyflip {
-	background: #921B8D!important;
+	background: #EB00D9!important;
 	text-align: center;
 	left: auto;
 	right: 30px;
@@ -667,17 +667,21 @@ article iframe.iframe-class{
 
 .ns-box-inner a, .ns-box-inner .fondo-live div:first-child{
 	position: relative;
-	top: 210px;
-	left: -15px;
+	top: 200px;
+	left: 70px;
 	text-decoration: none;
 	/*text-align: right;*/
 	line-height: 0px;
 	color: #dc0d0d!important;
 	font-size: 17px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
 }
  .ns-effect-bouncyflip .icon {
-	left: 70px !important;
-    top: -15px !important;
+  position: relative !important;
+	left: 0 !important;
+    top: 0 !important;
 }
 .ns-box-inner .fondo-live div:first-child, .ns-box-inner a{color: white !important;}
 .ns-box-inner h3{margin: 0; font-size: 1.5rem; color: #ffffff!important;}
@@ -698,7 +702,7 @@ article iframe.iframe-class{
 .fondo-live{
 	width: 300px;
 	height: 256px;
-	background: #fff url('https://storage.googleapis.com/nrm-web/beat/resources/img/notificacion-xibalba.jpg') no-repeat;
+	background: #fff url('https://storage.googleapis.com/nrm-web/mundial/notificacion_sorteo.jpg') no-repeat;
   /*background: #fff url('https://storage.googleapis.com/nrm-web/beat/resources/img/notificacion-lou.jpg') no-repeat;*/
 	background-position: top center;
 }

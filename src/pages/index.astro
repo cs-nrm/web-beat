@@ -1,62 +1,70 @@
 ---
-import BaseHead from '../components/BaseHead.astro';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
-import CardNews from '../layouts/CardsHomeNews.astro';
-import CardTecnologia from '../layouts/CardsHomeTecnologia.astro';
-import CardTomorrow from '../layouts/CardsHomeTomorrow.astro';
-import CardNerdosis from '../layouts/CardsHomeNerdosis.astro';
+import BaseHead from "../components/BaseHead.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import CardNews from "../layouts/CardsHomeNews.astro";
+import CardTecnologia from "../layouts/CardsHomeTecnologia.astro";
+import CardTomorrow from "../layouts/CardsHomeTomorrow.astro";
+import CardNerdosis from "../layouts/CardsHomeNerdosis.astro";
 /*import CardTrends from '../layouts/CardsHomeTrends.astro';*/
-import SliderPodcast from '../layouts/SliderPodcast.astro';
-import Separator from '../components/Separator.astro';
-import HomeHeader from '../layouts/HomeHeader.astro';
-import DoubleBox from '../components/DoubleBox.astro';
-import BoxBanner from '../components/BoxBanner.astro';
-import LeaderBoard from'../components/LeaderBoard.astro';
-import SuperLeader from '../components/SuperLeader.astro';
-import BillBoard from '../components/BillBoard.astro';
-import SuperBillboard from '../components/SuperBillboard.astro';
-import Modal  from '../components/Modal.astro';
+import SliderPodcast from "../layouts/SliderPodcast.astro";
+import Separator from "../components/Separator.astro";
+import HomeHeader from "../layouts/HomeHeader.astro";
+import DoubleBox from "../components/DoubleBox.astro";
+import BoxBanner from "../components/BoxBanner.astro";
+import LeaderBoard from "../components/LeaderBoard.astro";
+import SuperLeader from "../components/SuperLeader.astro";
+import BillBoard from "../components/BillBoard.astro";
+import SuperBillboard from "../components/SuperBillboard.astro";
+import Modal from "../components/Modal.astro";
 
-import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
-import SliderPromociones from '../layouts/SliderPromociones.astro';
-import CardsHomeNerdosis from '../layouts/CardsHomeNerdosis.astro';
-import Notificacion from '../components/Notificacion.astro';
+import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
+import SliderPromociones from "../layouts/SliderPromociones.astro";
+import CardsHomeNerdosis from "../layouts/CardsHomeNerdosis.astro";
+import Notificacion from "../components/Notificacion.astro";
 /*import SliderBuenfin from '../layouts/SliderBuenfin.astro';*/
-import CardsHomeCorona from '../layouts/CardsHomeCorona.astro';
-import Navidad from '../components/Navidad.astro';
+import CardsHomeCorona from "../layouts/CardsHomeCorona.astro";
+import Navidad from "../components/Navidad.astro";
 /*import BarNrm from '../components/BarNrm.astro';*/
-
 ---
 
 <!doctype html>
 <html lang="es">
     <head>
-        <BaseHead title={SITE_TITLE} seccion="Beat 100.9" description={SITE_DESCRIPTION} />       
+        <BaseHead
+            title={SITE_TITLE}
+            seccion="Beat 100.9"
+            description={SITE_DESCRIPTION}
+        />
     </head>
     <body>
         <!--BarNrm /-->
         <!--SuperBillboard/-->
         <div>
-            <a target="_blank" href="https://bit.ly/44CyzU3"><img class="img-prin w-full h-auto" src="https://storage.googleapis.com/nrm-web/beat/resources/img/portada_marinela_strangerthings2-min.jpg" alt="Imagen La Nota"></a>
+            <a target="_blank" href="https://bit.ly/44CyzU3"
+                ><img
+                    class="img-prin w-full h-auto"
+                    src="https://storage.googleapis.com/nrm-web/beat/resources/img/portada_marinela_strangerthings2-min.jpg"
+                    alt="Imagen La Nota"
+                /></a
+            >
         </div>
         <Header title={SITE_TITLE} />
-        
+
         <main id="home">
-                <!--header-->
-                    <!--HomeHeader /-->
-                <!--/header-->
-                        
-                <section>                   
-                    <div class="container-home p-4 mx-auto">
-                        
-                        <div class="">
-                            <CardNews />
-                        </div>
+            <!--header-->
+            <!--HomeHeader /-->
+            <!--/header-->
+
+            <section>
+                <div class="container-home p-4 mx-auto">
+                    <div class="">
+                        <CardNews />
                     </div>
-                </section>
-                <LeaderBoard /> 
-                <!--section>
+                </div>
+            </section>
+            <LeaderBoard />
+            <!--section>
                     <div>
                         <img class="w-full h-auto hidden md:block" src="https://storage.googleapis.com/nrm-web/nrm/adManager/buen-fin%202.png"/>
                         <img class="w-full h-auto block md:hidden" src="https://storage.googleapis.com/nrm-web/nrm/adManager/buen-fin-movil2.png"/>
@@ -66,7 +74,7 @@ import Navidad from '../components/Navidad.astro';
                         <div class="flex justify-end"><img class="w-full max-w-[100px]" src="https://storage.googleapis.com/nrm-web/nrm/adManager/buen-fin-qr.png"/></div>
                     </div>
                 </section-->
-                <!--section class="mt-16">
+            <!--section class="mt-16">
 
                     <div class="bg-[url('https://stereociendigital.com.mx/wp-content/uploads/2025/07/CORONA_CAPITAL-scaled.jpg')] bg-no-repeat bg-cover bg-bottom">
                         <div class="bg-[#411ED4] bg-[url('https://stereociendigital.com.mx/wp-content/uploads/2025/07/CORONA_CAPITAL_2025.png')] bg-no-repeat bg-contain 2xl:bg-cover bg-bottom">
@@ -80,7 +88,7 @@ import Navidad from '../components/Navidad.astro';
                         </div>
                     </div>
                 </section-->
-                <!--section>                   
+            <!--section>                   
                     <div class="bg-[url('https://beatdigital.com.mx/wp-content/uploads/2025/07/Tomorrowland-fondo3.png')] bg-no-repeat bg-cover bg-top">
                         <div class="backtomorrow bg-[#934D8A] bg-[url('https://beatdigital.com.mx/wp-content/uploads/2025/07/mariposas-arriba.png')] bg-no-repeat bg-contain bg-top">
                             <img class="max-w-[328px] m-auto" src="https://beatdigital.com.mx/wp-content/uploads/2025/07/logo-tomorrow.png" alt="Tomorrowland"/>
@@ -92,44 +100,48 @@ import Navidad from '../components/Navidad.astro';
                         </div>
                     </div>
                 </section-->
-                <section>                   
-                    <div class="container-home p-4 mx-auto">
-                        
-                        <div class="">
-                            <CardTecnologia/>
-                        </div>
+            <section>
+                <div class="container-home p-4 mx-auto">
+                    <div class="">
+                        <CardTecnologia />
                     </div>
-                    <!--BillBoard /-->   
-                </section>
-                <section class="">
-                        <div class="container-home p-4 mx-auto">
-                            <h1 class=" text-white text-center md:text-left py-4 font-bold  text-3xl md:text-5xl lg:text-4xl xl:text-5xl">Promociones</h1>
-                        </div>
-                        <div class="w-full mx-auto">
-                            <SliderPromociones/>
-                        </div>                     
-                </section>
+                </div>
+                <!--BillBoard /-->
+            </section>
+            <section class="">
+                <div class="container-home p-4 mx-auto">
+                    <h1
+                        class="text-white text-center md:text-left py-4 font-bold text-3xl md:text-5xl lg:text-4xl xl:text-5xl"
+                    >
+                        Promociones
+                    </h1>
+                </div>
+                <div class="w-full mx-auto">
+                    <SliderPromociones />
+                </div>
+            </section>
 
-                <section class="">
-                    <div class="container-home p-4 mx-auto">
-                         
-                        <h1 class=" text-white text-center md:text-left py-4 font-bold  text-3xl md:text-5xl lg:text-4xl xl:text-5xl">Podcast</h1>
-                        <div class="flex flex-wrap">
-                            <div class="w-full lg:w-2/3">
-                                <SliderPodcast />
-                            </div>
-                            <div class="w-full mt-8 lg:w-1/3 lg:m-0 content-center">
-                                <BoxBanner />
-                            </div>
+            <section class="">
+                <div class="container-home p-4 mx-auto">
+                    <h1
+                        class="text-white text-center md:text-left py-4 font-bold text-3xl md:text-5xl lg:text-4xl xl:text-5xl"
+                    >
+                        Podcast
+                    </h1>
+                    <div class="flex flex-wrap">
+                        <div class="w-full lg:w-2/3">
+                            <SliderPodcast />
                         </div>
-                                           
+                        <div class="w-full mt-8 lg:w-1/3 lg:m-0 content-center">
+                            <BoxBanner />
+                        </div>
                     </div>
-                </section>
-                
-        </main> 
+                </div>
+            </section>
+        </main>
         <Navidad />
         <Footer />
         <!--Modal /-->
-        <Notificacion />
+        <!--Notificacion /-->
     </body>
 </html>

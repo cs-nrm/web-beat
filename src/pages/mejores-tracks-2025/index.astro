@@ -1,0 +1,84 @@
+---
+import BaseHead from "../../components/BaseHead.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from "../../consts";
+import Card from "../../layouts/CardsTracks2025.astro";
+import DoubleBox from "../../components/DoubleBox.astro";
+import BoxBanner from "../../components/BoxBanner.astro";
+
+const res = await fetch(
+    "https://beatdigital.com.mx/wp-json/wp/v2/posts?_embed&per_page=100&categories=834&_fields=id,title,yoast_head_json,content,slug,categories,acf",
+);
+const posts = await res.json();
+---
+
+<!doctype html>
+<html lang="es">
+    <head>
+        <BaseHead
+            title={SITE_TITLE}
+            seccion="Mejores Tracks 2025"
+            description={SITE_DESCRIPTION}
+        />
+        <meta charset="utf-8" />
+    </head>
+    <body>
+        <!--BarNrm /-->
+        <Header title={SITE_TITLE} />
+
+        <main>
+            <div
+                class="container my-12 mx-auto px-4 md:px-12"
+                id="content-w-video"
+            >
+                <h1
+                    class="audiowide neon-morado text-center md:text-left pt-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl"
+                >
+                    Mejores Tracks 2025
+                </h1>
+                <div class="flex flex-col lg:flex-row">
+                    <div class="sm:min-w-[calc(100%-400px)] lg:mr-10">
+                        <section class="flex flex-wrap -mx-4">
+                            {
+                                posts.map((post: any, index) => (
+                                    <>
+                                        <Card {post} {index} />
+                                    </>
+                                ))
+                            }
+                        </section>
+                    </div>
+                    <div
+                        class="mt-4 bg-black/50 p-5 rounded-xl sm:min-w-[350px] relative text-center md:text-left"
+                    >
+                        <div class="sticky top-[140px] left-0 right-0">
+                            <BoxBanner />
+                        </div>
+                        <DoubleBox />
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <Footer />
+    </body><link
+        rel="stylesheet"
+        type="text/css"
+        href="https://storage.googleapis.com/nrm-web/nrm/lib/plyr.css"
+    />
+    <script
+        is:inline
+        src="https://storage.googleapis.com/nrm-web/nrm/lib/plyr.js"></script>
+    <!--script is:inline src="https://www.youtube.com/iframe_api"></script-->
+
+    <link
+        rel="stylesheet"
+        type="text/css"
+        href="https://storage.googleapis.com/nrm-web/nrm/lib/toastify.css"
+    />
+    <script
+        is:inline
+        src="https://storage.googleapis.com/nrm-web/nrm/lib/toastify.js"
+    ></script>
+</html>

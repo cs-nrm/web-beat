@@ -11,6 +11,29 @@ const res = await fetch(
     "https://beatdigital.com.mx/wp-json/wp/v2/posts?_embed&per_page=100&categories=834&_fields=id,title,yoast_head_json,content,slug,categories,acf",
 );
 const posts = await res.json();
+
+// Función para mezclar aleatoriamente el array (Fisher-Yates Shuffle)
+function shuffle(array: any[]) {
+    let currentIndex = array.length,
+        randomIndex;
+
+    // Mientras queden elementos a mezclar...
+    while (currentIndex != 0) {
+        // Elegir un elemento restante...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+
+        // Y cambiarlo con el elemento actual.
+        [array[currentIndex], array[randomIndex]] = [
+            array[randomIndex],
+            array[currentIndex],
+        ];
+    }
+
+    return array;
+}
+
+shuffle(posts);
 ---
 
 <!doctype html>

@@ -1366,6 +1366,7 @@ document.addEventListener('astro:page-load', ev => {
   });
 
   $(document).off('click.vote_tracks2025').on('click.vote_tracks2025', '.like-tracks2025', function (e) {
+    console.log('like tracks2025');
     e.preventDefault();
     const artist = $(this).data('artist') || '';
     const cancion = $(this).data('song') || '';
@@ -1378,6 +1379,127 @@ document.addEventListener('astro:page-load', ev => {
         // Manejo ya se hizo con logs; deja el catch vacío para no romper UX
       });
   });
+
+  // === [Floating Video Player] ===
+  $(document).off('click.play_video_float').on('click.play_video_float', '.play-video-float', function (e) {
+    e.preventDefault();
+    const content = $(this).attr('data-video');
+    if (content) {
+      createFloatingPlayer(content);
+    }
+  });
+
+  function createFloatingPlayer(content) {
+    // Destroy existing player if any
+    $('#floating-player-container').remove();
+
+    // Create container
+    const $container = $('<div>', {
+      id: 'floating-player-container',
+      css: {
+        position: 'fixed',
+        bottom: '20px',
+        right: '20px',
+        width: '320px',
+        height: '180px',
+        zIndex: 9999,
+        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+        background: '#000',
+        borderRadius: '8px',
+        overflow: 'hidden'
+      }
+    });
+
+    // Close button
+    const $closeBtn = $('<div>', {
+      html: '&times;',
+      css: {
+        position: 'absolute',
+        top: '0',
+        right: '0',
+        background: 'rgba(0,0,0,0.7)',
+        color: '#fff',
+        width: '24px',
+        height: '24px',
+        textAlign: 'center',
+        lineHeight: '24px',
+        cursor: 'pointer',
+        zIndex: 10000,
+        fontSize: '18px',
+        fontWeight: 'bold'
+      },
+      click: function () {
+        $container.remove();
+        $('#radiobutton').off('click.floating');
+      }
+    });
+
+    // Content wrapper (iframe)
+    const $content = $('<div>', {
+      class: 'plyr__video-embed',
+      css: {
+        width: '100%',
+        height: '100%'
+      }
+    });
+
+    // Extract iframe src to ensure clean HTML (remove wp paragraphs etc)
+    const $temp = $('<div>').html(content);
+    const $iframe = $temp.find('iframe');
+
+    if ($iframe.length > 0) {
+      $iframe.css({
+        width: '100%',
+        height: '100%',
+        border: 'none'
+      });
+      $content.append($iframe);
+    } else {
+      // Fallback if no iframe found (unlikely)
+      $content.html(content);
+    }
+
+    $container.append($closeBtn).append($content);
+    $('body').append($container);
+
+    // Initialize Plyr
+    const plyr = new Plyr($content[0], {
+      debug: false,
+      controls: [
+        'play-large', 'restart', 'rewind', 'play', 'fast-forward',
+        'progress', 'current-time', 'duration', 'mute', 'volume',
+        'captions', 'settings', 'pip', 'airplay', 'download', 'fullscreen'
+      ],
+      playsinline: true,
+      autoplay: true
+    });
+
+    // Force Plyr to fit container (CSS fix for blank screen)
+    // Plyr creates a .plyr container, we need to ensure it fills our fixed box
+    $container.find('.plyr').css({
+      width: '100%',
+      height: '100%',
+      position: 'absolute',
+      top: 0,
+      left: 0
+    });
+
+
+
+
+    // Event hooks
+    plyr.on('playing', function () {
+      const getstatus = playerstatus();
+      if (getstatus == 'radio-playing') {
+        radioStop();
+        $('#player').attr('data-status', 'video-playing');
+      }
+    });
+
+    $('#radiobutton').off('click.floating').on('click.floating', function () {
+      plyr.pause();
+    });
+  }
 
 
 

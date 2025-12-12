@@ -98,6 +98,32 @@ var url_seccion;
                         >
                     </div>
                 </div>
+
+                <div
+                    class="share-whatsapp cursor-pointer hover:scale-110 transition-transform"
+                >
+                    <a
+                        href={`https://wa.me/?text=Estoy votando por ${post.title.rendered.replace(/&/g, "and")} de ${post.acf.artista.replace(/&/g, "and")} en https://beatdigital.mx/mejores-tracks-2025/`}
+                        target="_blank"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="40"
+                            height="40"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="white"
+                            stroke-width="1"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="icon"
+                        >
+                            <path
+                                d="M13 4v4c-6.575 1.028 -9.02 6.788 -10 12c-.037 .206 5.384 -5.962 10 -6v4l8 -7l-8 -7z"
+                            ></path>
+                        </svg>
+                    </a>
+                </div>
             </div>
         </div>
     </div>

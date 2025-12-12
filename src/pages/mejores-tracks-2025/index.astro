@@ -10,30 +10,8 @@ import BoxBanner from "../../components/BoxBanner.astro";
 const res = await fetch(
     "https://beatdigital.com.mx/wp-json/wp/v2/posts?_embed&per_page=100&categories=834&_fields=id,title,yoast_head_json,content,slug,categories,acf",
 );
+// Server-side: render in default order (e.g. by date/id) to ensure consistency during build
 const posts = await res.json();
-
-// Función para mezclar aleatoriamente el array (Fisher-Yates Shuffle)
-function shuffle(array: any[]) {
-    let currentIndex = array.length,
-        randomIndex;
-
-    // Mientras queden elementos a mezclar...
-    while (currentIndex != 0) {
-        // Elegir un elemento restante...
-        randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex--;
-
-        // Y cambiarlo con el elemento actual.
-        [array[currentIndex], array[randomIndex]] = [
-            array[randomIndex],
-            array[currentIndex],
-        ];
-    }
-
-    return array;
-}
-
-shuffle(posts);
 ---
 
 <!doctype html>
@@ -62,7 +40,10 @@ shuffle(posts);
                 </h1>
                 <div class="flex flex-col lg:flex-row">
                     <div class="sm:min-w-[calc(100%-400px)] lg:mr-10">
-                        <section class="flex flex-wrap -mx-4">
+                        <section
+                            class="flex flex-wrap -mx-4"
+                            id="tracks-container"
+                        >
                             {
                                 posts.map((post: any, index) => (
                                     <>
@@ -104,4 +85,25 @@ shuffle(posts);
         is:inline
         src="https://storage.googleapis.com/nrm-web/nrm/lib/toastify.js"
     ></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const container = document.getElementById("tracks-container");
+            if (!container) return;
+
+            const cards = Array.from(container.children);
+            if (cards.length === 0) return;
+
+            // Fisher-Yates shuffle
+            for (let i = cards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cards[i], cards[j]] = [cards[j], cards[i]];
+            }
+
+            // Re-append in random order
+            // Note: This causes reflow but ensures order is random on every client load
+            const fragment = document.createDocumentFragment();
+            cards.forEach((card) => fragment.appendChild(card));
+            container.appendChild(fragment);
+        });
+    </script>
 </html>

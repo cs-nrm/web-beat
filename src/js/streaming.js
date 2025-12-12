@@ -1393,12 +1393,17 @@ document.addEventListener('astro:page-load', ev => {
     // Destroy existing player if any
     $('#floating-player-container').remove();
 
+    // Determine bottom position based on screen width
+    // Mobile devices usually have the bottom player bar, so we need to move it up
+    const isMobile = window.innerWidth < 768;
+    const bottomPos = isMobile ? '130px' : '20px';
+
     // Create container
     const $container = $('<div>', {
       id: 'floating-player-container',
       css: {
         position: 'fixed',
-        bottom: '20px',
+        bottom: bottomPos,
         right: '20px',
         width: '320px',
         height: '180px',

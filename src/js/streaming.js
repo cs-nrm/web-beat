@@ -435,6 +435,25 @@ volume.addEventListener('input', function () {
 // === [VOTOS] Helpers y función reutilizable ===
 const VOTE_COLOR = '#ef4444';
 
+function showVoteToast(message) {
+  try {
+    if (window.Toastify) {
+      Toastify({
+        text: message,
+        className: "info",
+        style: {
+          background: "linear-gradient(to right, #ec4899, #a855f7)",
+          'border-radius': '6px',
+          'box-shadow': 'var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)'
+        },
+        offset: { x: '10rem', y: '20rem' }
+      }).showToast();
+      return;
+    }
+  } catch (_) {}
+  console.log(message);
+}
+
 function detectarNavegador() {
   var ua = navigator.userAgent, tem,
     M = ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
@@ -499,26 +518,42 @@ function registerVote(seccion, artista, cancion, $btn = null) {
       {
         artista: safe(artista),
         cancion: safe(cancion),
-        seccion: seccion, // El backend actual puede ignorarlo; ya preparado para futuro
+        seccion: seccion,
         dispositivo: detectarDispositivo(),
         navegador,
         sistema_operativo: sistema,
       },
       function (resp) {
         if ($btn) $btn.prop('disabled', false);
+
+        // Contrato nuevo del backend:
+        // - success: inserted true
+        // - skipped (cooldown): inserted false
+        // - blocked (rate limits): inserted false
         if (resp && resp.status === 'success') {
           if ($btn) $btn.find('svg').css('fill', VOTE_COLOR);
-          console.log('Voto registrado con éxito.');
-          resolve(resp);
-        } else {
-          console.log((resp && resp.message) || 'Error al votar.');
-          reject(resp || new Error('vote-error'));
+          showVoteToast(resp.message || 'Gracias por tu voto');
+          return resolve(resp);
         }
+
+        if (resp && (resp.status === 'blocked' || resp.status === 'skipped')) {
+          // Mensajes amigables para UX (Astro/JS puede leer reason si lo necesita)
+          showVoteToast(resp.message || 'No se pudo registrar tu voto.');
+          return resolve(resp);
+        }
+
+        // Respuesta inesperada
+        showVoteToast((resp && resp.message) || 'Error al votar.');
+        return reject(resp || new Error('vote-error'));
       },
       'json'
-    ).fail(function () {
+    ).fail(function (xhr) {
       if ($btn) $btn.prop('disabled', false);
-      console.log('No se pudo registrar el voto. Intenta de nuevo.');
+      // Si el backend devolvió JSON (por ejemplo 429), lo mostramos
+      const msg = (xhr && xhr.responseJSON && xhr.responseJSON.message)
+        ? xhr.responseJSON.message
+        : 'No se pudo registrar el voto. Intenta de nuevo.';
+      showVoteToast(msg);
       reject(new Error('network-fail'));
     });
   });
@@ -1279,7 +1314,13 @@ document.addEventListener('astro:page-load', ev => {
     }
 
 
+    /*
+      [DEPRECADO] Voto por WP ULike (wp-ulike-pro)
+      Ya no se usa. Conservamos este bloque comentado como referencia histórica.
+      El voto vigente se hace vía registerVote() -> save.php.
+    */
     /*voto*/
+    /*
     $('.voto-pop').each(function () {
       $(this).on('click', function () {
         console.log($(this).attr('data-voto-id'));
@@ -1330,6 +1371,7 @@ document.addEventListener('astro:page-load', ev => {
 
       });
     });
+    */
 
 
   }

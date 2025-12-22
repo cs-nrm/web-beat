@@ -50,6 +50,9 @@
 .aspect-not {
   aspect-ratio: 3 / 2;
 }
+.aspect-plan {
+  aspect-ratio: 2 / 3;
+}
 
 @font-face {
   font-family: 'gendy';

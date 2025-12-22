@@ -1042,6 +1042,33 @@ document.addEventListener('astro:page-load', ev => {
       pageDots: false,
       autoPlay: 5000,
     });
+
+    var elemconciertos = document.querySelector('.main-conciertos');
+    var flktyconciertos = new Flickity(elemconciertos, {
+      contain: true,
+      lazyLoad: 1,
+      wrapAround: true,
+      cellAlign: 'center',
+      pageDots: false,
+    });
+
+    var elemteatro = document.querySelector('.main-teatro');
+    var flktyteatro = new Flickity(elemteatro, {
+      contain: true,
+      lazyLoad: 1,
+      wrapAround: true,
+      cellAlign: 'center',
+      pageDots: false,
+    });
+
+    var elemfamiliar = document.querySelector('.main-familiar');
+    var flktyfamiliar = new Flickity(elemfamiliar, {
+      contain: true,
+      lazyLoad: 1,
+      wrapAround: true,
+      cellAlign: 'center',
+      pageDots: false,
+    });
   }
 
 

@@ -24,14 +24,18 @@ import CardsHomeNerdosis from "../layouts/CardsHomeNerdosis.astro";
 import Notificacion from "../components/Notificacion.astro";
 /*import SliderBuenfin from '../layouts/SliderBuenfin.astro';*/
 import CardsHomeCorona from "../layouts/CardsHomeCorona.astro";
-import Navidad from "../components/Navidad.astro";
+/*import Navidad from "../components/Navidad.astro";*/
 /*import BarNrm from '../components/BarNrm.astro';*/
 ---
 
 <!doctype html>
 <html lang="es">
     <head>
-        <BaseHead title={SITE_TITLE} seccion="Beat 100.9" description={SITE_DESCRIPTION} />    
+        <BaseHead
+            title={SITE_TITLE}
+            seccion="Beat 100.9"
+            description={SITE_DESCRIPTION}
+        />
     </head>
     <body>
         <!--BarNrm /-->
@@ -136,7 +140,7 @@ import Navidad from "../components/Navidad.astro";
                 </div>
             </section>
         </main>
-        <Navidad />
+        <!--Navidad /-->
         <Footer />
         <!--Modal /-->
         <Notificacion />

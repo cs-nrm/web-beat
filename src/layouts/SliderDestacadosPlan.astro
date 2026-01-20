@@ -1,0 +1,71 @@
+---
+const PLACEHOLDER_IMG = 'https://storage.googleapis.com/nrm-web/beat/resources/img/img_beat-min.jpg';
+
+const { posts = [] } = Astro.props;
+
+function formatHora(h){
+	if(!h) return '';
+	try{
+		if(typeof h === 'string' && h.length >= 5) return h.substring(0,5);
+		const d = new Date('1970-01-01T' + h);
+		if(!isNaN(d.getTime())) return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+	}catch(e){}
+	return '';
+}
+---
+<div class="main-carousel container cards slider-locutores ">
+  	{
+  	posts.map((post:any) => (
+		<div class="carousel-cell card">
+		<article class="p-2">
+			<div class="glows"></div>
+			<a href={`/que-plan/${post.slug}/`} class="text-white relative">
+				<div class="bg-white text-black text-sm absolute top-0 right-0 px-2 rounded-tr-xl etiqueta" set:html={post.acf?.etiqueta}></div>
+				<div>
+					<img class="block h-auto w-full object-fill" src={post?._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.['full']?.source_url || PLACEHOLDER_IMG} width="200" height="200" alt="Imagen Locutores"/>
+				</div>
+				<div class="min-h-40">
+					<h3 class="mt-4 mb-2 text-lg font-bold text-white text-podcast" set:html={post.title.rendered}></h3>
+					<div class="flex items-center gap-4 text-sm mb-2">
+						<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z" /></svg></div>
+						<div class="leading-none"><span set:html={post.acf?.lugar}></span><span>, </span><span set:html={post.acf?.ciudad}></span></div>
+					</div>
+					<div class="flex items-center gap-4 text-sm mb-2">
+						<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" /><path d="M11 15h1" /><path d="M12 15v3" /></svg></div>
+						<span set:html={post.fecha_inicio_formateada}></span>
+						{post.acf.fecha_fin && <span> - <span set:html={post.fecha_fin_formateada}></span></span> }
+					</div>
+					<div class="flex items-center gap-4 text-sm mb-2">
+						<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg></div>
+						<span>{formatHora(post.acf?.hora)} hrs.</span>
+					</div>
+				</div>
+				
+			</a>
+		</article>
+		</div>
+  	))
+  	}
+</div>
+
+<style>	
+.carousel-cell {
+  width: 286px;
+  margin-right: 40px;
+  border-radius: 20px;
+  padding: 10px;
+  margin-top: 20px;
+}
+
+.text-podcast{
+	display: -webkit-box;
+	-webkit-margin-before: 0;
+    margin-block-start: 0;
+    -webkit-margin-after: 12px;
+    margin-block-end: 12px;
+    line-height: 1.2;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+</style>

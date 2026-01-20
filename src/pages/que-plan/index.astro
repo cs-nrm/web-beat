@@ -1,0 +1,204 @@
+---
+import BaseHead from '../../components/BaseHead.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
+import { Tabs } from 'astro-tabs';
+import BarNrm from '../../components/BarNrm.astro';
+import BoxBanner from '../../components/BoxBanner.astro';
+import SliderDestacadosPlan from '../../layouts/SliderDestacadosPlan.astro';
+
+const PLACEHOLDER_IMG = 'https://storage.googleapis.com/nrm-web/beat/resources/img/img_beat-min.jpg';
+
+const res = await fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_embed&per_page=80&_fields=title,slug,content,acf,yoast_head_json,_links,_embedded&categories=818&filter[orderby]=acf[inicio]&order=asc");
+const posts = await res.json();
+
+posts.sort(function(a, b){
+    //return a.acf.hora_inicio < b.acf.hora_inicio;    
+    return ((a.acf.hora_inicio > b.acf.hora_inicio) ? 1 : (a.acf.hora_inicio < b.acf.hora_inicio) ? -1 : 0);
+});
+
+
+function pad(n){
+	return String(n).padStart(2,'0');
+}
+
+function formatFecha(fecha){
+	if(!fecha) return '';
+	// Date object
+	if(fecha instanceof Date && !isNaN(fecha.getTime())){
+		return pad(fecha.getDate()) + '/' + pad(fecha.getMonth() + 1);
+	}
+	const s = String(fecha).trim();
+	if(!s) return '';
+	// ISO-like: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS
+	const isoMatch = s.match(/(\d{4})-(\d{2})-(\d{2})/);
+	if(isoMatch) return pad(Number(isoMatch[3])) + '/' + pad(Number(isoMatch[2]));
+
+	// Slash-separated e.g. DD/MM/YYYY or YYYY/MM/DD
+	if(s.includes('/')){
+		const parts = s.split('/').map(p => p.trim());
+		if(parts.length >= 3){
+			if(parts[0].length === 4){ // YYYY/MM/DD
+				return pad(Number(parts[2])) + '/' + pad(Number(parts[1]));
+			}
+			// assume DD/MM/YYYY
+			return pad(Number(parts[0])) + '/' + pad(Number(parts[1]));
+		}
+	}
+
+	// Pure digits cases: YYYYMMDD, DDMMYYYY, YYMMDD
+	const digits = s.replace(/[^0-9]/g,'');
+	if(/^\d{8}$/.test(digits)){
+		const first4 = Number(digits.substring(0,4));
+		if(first4 >= 1900) { // YYYYMMDD
+			return pad(Number(digits.substring(6,8))) + '/' + pad(Number(digits.substring(4,6)));
+		}
+		// assume DDMMYYYY
+		return pad(Number(digits.substring(0,2))) + '/' + pad(Number(digits.substring(2,4)));
+	}
+	if(/^\d{6}$/.test(digits)){
+		// YYMMDD -> take last two as day
+		return pad(Number(digits.substring(4,6))) + '/' + pad(Number(digits.substring(2,4)));
+	}
+
+	// If contains space and time, try take first token
+	const token = s.split(' ')[0];
+	const tokenIso = token.match(/(\d{4})-(\d{2})-(\d{2})/);
+	if(tokenIso) return pad(Number(tokenIso[3])) + '/' + pad(Number(tokenIso[2]));
+
+	// Fallback: try to parse as Date
+	const d = new Date(s);
+	if(!isNaN(d.getTime())) return pad(d.getDate()) + '/' + pad(d.getMonth() + 1);
+
+	return '';
+}
+
+posts.forEach(p => {
+	p.fecha_inicio_formateada = formatFecha(p.acf?.fecha_inicio || p.acf?.fecha_inicio_raw || p.fecha_inicio || '');
+	p.fecha_fin_formateada = formatFecha(p.acf?.fecha_fin || p.acf?.fecha_fin_raw || p.fecha_fin || '');
+});
+
+function formatHora(h){
+	if(!h) return '';
+	try{
+		if(typeof h === 'string' && h.length >= 5) return h.substring(0,5);
+		const d = new Date('1970-01-01T' + h);
+		if(!isNaN(d.getTime())) return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+	}catch(e){}
+	return '';
+}
+---
+
+<!doctype html>
+<html lang="es">
+	<head>
+		<BaseHead title={SITE_TITLE} seccion="Programación" description={SITE_DESCRIPTION} />
+		<meta charset="utf-8"/>
+	</head>
+	<body>
+        <!--BarNrm /-->
+		<Header title={SITE_TITLE} />
+		
+		<main id="programacion">
+            <div class="container my-12 mx-auto px-4 md:px-12">
+                <div class="audiowide neon-rosa text-center py-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl">QUE PLAN</div>
+                <div class="audiowide neon-rosa text-center md:text-left py-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl">Destacados</div>
+                <div>
+                    <SliderDestacadosPlan posts={posts} />
+                </div>
+                <div class="audiowide neon-rosa text-center md:text-left py-4 mt-16 font-bold text-3xl">Conciertos</div>
+                <div class="main-conciertos container cards">
+                    {
+                    posts.map((post:any) => (
+                        <div class="carousel-cell card">
+                        <article class="p-2">
+                            <div class="glows"></div>
+                            <a href={`/que-plan/${post.slug}/`} class="text-white relative">
+                                <div class="bg-white text-black text-sm absolute top-0 right-0 px-2 rounded-tr-xl etiqueta" set:html={post.acf?.etiqueta}></div>
+                                <div>
+                                    <img class="block h-auto w-full object-fill" src={post?._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.['full']?.source_url || PLACEHOLDER_IMG} width="200" height="200" alt="Imagen Locutores"/>
+                                </div>
+                                <div class="min-h-[180px]">
+                                    <h3 class="mt-4 mb-2 text-lg font-bold text-white text-podcast" set:html={post.title.rendered}></h3>
+                                    <div class="flex items-center gap-4 text-sm mb-2">
+                                        <div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z" /></svg></div>
+                                        <div class="leading-none"><span set:html={post.acf?.lugar}></span><span>, </span><span set:html={post.acf?.ciudad}></span></div>
+                                    </div>
+                                    <div class="flex items-center gap-4 text-sm mb-2">
+                                        <div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" /><path d="M11 15h1" /><path d="M12 15v3" /></svg></div>
+                                        <span set:html={post.fecha_inicio_formateada}></span>
+                                        {post.acf.fecha_fin && <span> - <span set:html={post.fecha_fin_formateada}></span></span> }
+                                    </div>
+                                    <div class="flex items-center gap-4 text-sm mb-2">
+                                        <div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg></div>
+                                        <span>{formatHora(post.acf?.hora)} hrs.</span>
+                                    </div>
+                                </div>
+                                
+                            </a>
+                        </article>
+                        </div>
+                    ))
+                    }
+                </div>
+                <div class="audiowide neon-rosa text-center md:text-left py-4 mt-16 font-bold text-3xl">Teatro</div>
+                <div class="audiowide neon-rosa text-center md:text-left py-4 mt-16 font-bold text-3xl">Familiar</div>
+
+            </div>
+		</main>
+		<Footer />
+	</body>
+</html>
+
+<style>
+.slider-podcast{
+	mask-image: radial-gradient(ellipse 77% 290% at 50% 60%, black 56%, transparent 65%);
+}
+.card article{
+	background: hsla(var(--color-black), .3);
+    background-blend-mode: soft-light;
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, .5);
+}
+.carousel-cell img{
+    box-shadow: none;
+    -webkit-mask-image: linear-gradient(to bottom, hsla(var(--color-black), 1) 0, hsla(var(--color-black), 1) 70%, hsla(var(--color-black), 0) 100%);
+    mask-image: linear-gradient(to bottom, hsla(var(--color-black), 1) 0, hsla(var(--color-black), 1) 70%, hsla(var(--color-black), 0) 100%);
+    }
+.container.cards{
+	max-width: 100% !important;
+}
+
+.carousel-cell {
+  width: 215px;
+  margin-right: 20px;
+  border-radius: 20px;
+  padding: 10px;
+  margin-top: 20px;
+}
+
+.carousel-cell img{
+	border-radius: var(--border-radius);
+	box-shadow: 0 2px 12px 7px rgba(0,0,0,0.4);
+	width: 100%;
+	height: auto;
+	object-fit: cover;
+	object-position: top center;
+}
+.text-podcast{
+	display: -webkit-box;
+	-webkit-margin-before: 0;
+    margin-block-start: 0;
+    -webkit-margin-after: 12px;
+    margin-block-end: 12px;
+    line-height: 1.2;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.etiqueta{
+	z-index: 1;
+	border-top-right-radius: 0.75rem;
+}
+</style>

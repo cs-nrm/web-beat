@@ -1,26 +1,53 @@
 ---
 const PLACEHOLDER_IMG = 'https://storage.googleapis.com/nrm-web/beat/resources/img/img_beat-min.jpg';
+import { formatFecha, parseToDate, formatHora } from '../lib/formatters.js';
 
-const { posts = [] } = Astro.props;
 
-function formatHora(h){
-	if(!h) return '';
-	try{
-		if(typeof h === 'string' && h.length >= 5) return h.substring(0,5);
-		const d = new Date('1970-01-01T' + h);
-		if(!isNaN(d.getTime())) return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
-	}catch(e){}
-	return '';
+export async function getQuePlanPosts({ per_page = 80, category = 818 } = {}){
+  const url = `https://beatdigital.com.mx/wp-json/wp/v2/posts?_embed&per_page=${per_page}&_fields=title,slug,content,acf,yoast_head_json,_links,_embedded&categories=${category}&filter[orderby]=acf[inicio]&order=asc`;
+  const res = await fetch(url);
+  if(!res.ok) return [];
+  let posts = await res.json();
+
+  // Sort by hora_inicio if present
+  posts.sort(function(a,b){
+    const ah = a?.acf?.hora_inicio || '';
+    const bh = b?.acf?.hora_inicio || '';
+    return ah > bh ? 1 : (ah < bh ? -1 : 0);
+  });
+
+  // add formatted dates
+  posts.forEach(p => {
+    p.fecha_inicio_formateada = formatFecha(p.acf?.fecha_inicio || p.acf?.fecha_inicio_raw || p.fecha_inicio || '');
+    p.fecha_fin_formateada = formatFecha(p.acf?.fecha_fin || p.acf?.fecha_fin_raw || p.fecha_fin || '');
+  });
+
+  // filter out expired
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  posts = posts.filter(p => {
+    const raw = p.acf?.fecha_fin || p.acf?.fecha_inicio || '';
+    if(!raw) return true;
+    const d = parseToDate(raw);
+    if(!d) return true;
+    d.setHours(0,0,0,0);
+    return d >= today;
+  });
+
+  return posts;
 }
+
+const posts = await getQuePlanPosts();
 ---
-<div class="main-carousel container cards slider-locutores ">
+<div class="main-carousel container cards slider-destacados-plan">
   	{
   	posts.map((post:any) => (
+		post.acf?.destacada === true &&
 		<div class="carousel-cell card">
 		<article class="p-2">
 			<div class="glows"></div>
 			<a href={`/que-plan/${post.slug}/`} class="text-white relative">
-				<div class="bg-white text-black text-sm absolute top-0 right-0 px-2 rounded-tr-xl etiqueta" set:html={post.acf?.etiqueta}></div>
+				<div class="bg-white text-black text-sm absolute top-0 right-0 px-2 etiqueta" set:html={post.acf?.etiqueta}></div>
 				<div>
 					<img class="block h-auto w-full object-fill" src={post?._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.['full']?.source_url || PLACEHOLDER_IMG} width="200" height="200" alt="Imagen Locutores"/>
 				</div>
@@ -49,6 +76,12 @@ function formatHora(h){
 </div>
 
 <style>	
+
+.carousel-cell img{
+    box-shadow: none;
+    -webkit-mask-image: linear-gradient(to bottom, hsla(var(--color-black), 1) 0, hsla(var(--color-black), 1) 70%, hsla(var(--color-black), 0) 100%);
+    mask-image: linear-gradient(to bottom, hsla(var(--color-black), 1) 0, hsla(var(--color-black), 1) 70%, hsla(var(--color-black), 0) 100%);
+}
 .carousel-cell {
   width: 286px;
   margin-right: 40px;

@@ -925,6 +925,10 @@ input[type=range]:focus::-ms-fill-upper {
   min-height: 385px;
 }
 
+.slider-destacados-plan .flickity-viewport{
+	min-height: 590px !important;
+}
+
 
 /* NOTIFICACIÓN */
 

@@ -1028,6 +1028,18 @@ document.addEventListener('astro:page-load', ev => {
 
     });
 
+    var elemportada = document.querySelector('.carousel-portada');
+    var flktyportada = new Flickity(elemportada, {
+      // options
+      cellAlign: 'center',
+      prevNextButtons: false,
+      pageDots: false,
+      pauseAutoPlayOnHover: true,
+      freeScroll: true,
+      wrapAround: true,
+      autoPlay: 5000,
+    });
+
   }
 
 

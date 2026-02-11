@@ -1,72 +1,77 @@
 ---
-import BaseHead from '../../components/BaseHead.astro';
-import Header from '../../components/Header.astro';
-import Footer from '../../components/Footer.astro';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
-import Card from '../../layouts/CardsRecordings.astro';
-import DoubleBox from '../../components/DoubleBox.astro';
-import BoxBanner from '../../components/BoxBanner.astro';
-import BarNrm from '../../components/BarNrm.astro';
+import Layout from "../../layouts/Layout.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from "../../consts";
+import Card from "../../layouts/CardsRecordings.astro";
+import DoubleBox from "../../components/DoubleBox.astro";
+import BoxBanner from "../../components/BoxBanner.astro";
+import BarNrm from "../../components/BarNrm.astro";
 
-
-const res = await fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_embed&per_page=10&categories=506&_fields=id,title,yoast_head_json,content,slug,categories,acf");
+const res = await fetch(
+    "https://beatdigital.com.mx/wp-json/wp/v2/posts?_embed&per_page=10&categories=506&_fields=id,title,yoast_head_json,content,slug,categories,acf",
+);
 const posts = await res.json();
-
 ---
 
-<!doctype html>
-<html lang="es">
-	<head>
-		<BaseHead title={SITE_TITLE} seccion="Beat Recordings" description={SITE_DESCRIPTION} />
-		 <meta charset="utf-8"/>
-	</head>
-	<body>
-        <!--BarNrm /-->
-		<Header title={SITE_TITLE} />
-		
-		<main>
-            <div class="container my-12 mx-auto px-4 md:px-12" id="content-w-video">
-				<h1 class="audiowide neon-morado text-center md:text-left pt-4 font-bold text-2xl sm:text-4xl md:text-5xl lg:text-4xl xl:text-5xl">Beat Recordings</h1>
-                <div class="flex flex-col lg:flex-row">
-                    <div class="sm:min-w-[calc(100%-400px)] lg:mr-10">
-                        <section class="flex flex-wrap -mx-4">
-                            {
-                                posts.map((post:any) => ( 
-                                <>
-                                <Card {post} />
-                                </>
-                                ))
-                            }
-                        </section>
-                        <div class="m-auto text-center">
-                            <a href="/beat-recordings/2" class="text-white hover:text-black">
-                                <button class="ver-mas group relative h-8 w-36 m-4 overflow-hidden rounded-xl bg-[rgba(52,52,52,0.2)] hover:bg-white border-2 border-white uppercase text-xs poppins font-bold tracking-[3px]">
-                                    <span>Siguiente</span>
-                                </button>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="mt-4 bg-black/50 p-5 rounded-xl sm:min-w-[350px] relative text-center md:text-left">
-                        <div class="sticky top-0 left-0 right-0">
-                            <BoxBanner />
-                            </br>
-                            <DoubleBox />
-                        </div>
+<Layout
+    title={SITE_TITLE}
+    seccion="Beat Recordings"
+    description={SITE_DESCRIPTION}
+>
+    <!--BarNrm /-->
+
+    <main>
+        <div class="container my-12 mx-auto px-4 md:px-12" id="content-w-video">
+            <h1
+                class="audiowide neon-morado text-center md:text-left pt-4 font-bold text-2xl sm:text-4xl md:text-5xl lg:text-4xl xl:text-5xl"
+            >
+                Beat Recordings
+            </h1>
+            <div class="flex flex-col lg:flex-row">
+                <div class="sm:min-w-[calc(100%-400px)] lg:mr-10">
+                    <section class="flex flex-wrap -mx-4">
+                        {posts.map((post: any) => <Card {post} />)}
+                    </section>
+                    <div class="m-auto text-center">
+                        <a
+                            href="/beat-recordings/2"
+                            class="text-white hover:text-black"
+                        >
+                            <button
+                                class="ver-mas group relative h-8 w-36 m-4 overflow-hidden rounded-xl bg-[rgba(52,52,52,0.2)] hover:bg-white border-2 border-white uppercase text-xs poppins font-bold tracking-[3px]"
+                            >
+                                <span>Siguiente</span>
+                            </button>
+                        </a>
                     </div>
                 </div>
+                <div
+                    class="mt-4 bg-black/50 p-5 rounded-xl sm:min-w-[350px] relative text-center md:text-left"
+                >
+                    <div class="sticky top-0 left-0 right-0">
+                        <BoxBanner />
+                    </div>
+                    <DoubleBox />
+                </div>
             </div>
-		</main>
-		<Footer />
-	</body>    
-    <link rel="stylesheet" type="text/css" href="https://storage.googleapis.com/nrm-web/nrm/lib/plyr.css" />
-    <script is:inline src="https://storage.googleapis.com/nrm-web/nrm/lib/plyr.js"></script>
+        </div>
+    </main>
+    <link
+        rel="stylesheet"
+        type="text/css"
+        href="https://storage.googleapis.com/nrm-web/nrm/lib/plyr.css"
+    />
+    <script
+        is:inline
+        src="https://storage.googleapis.com/nrm-web/nrm/lib/plyr.js"></script>
     <!--script is:inline src="https://www.youtube.com/iframe_api"></script-->
 
-
-    <link rel="stylesheet" type="text/css" href="https://storage.googleapis.com/nrm-web/nrm/lib/toastify.css" />
-    <script is:inline src="https://storage.googleapis.com/nrm-web/nrm/lib/toastify.js"></script>
-    
-    
-    
-</html>
-
+    <link
+        rel="stylesheet"
+        type="text/css"
+        href="https://storage.googleapis.com/nrm-web/nrm/lib/toastify.css"
+    />
+    <script
+        is:inline
+        src="https://storage.googleapis.com/nrm-web/nrm/lib/toastify.js"
+    ></script>
+</Layout>

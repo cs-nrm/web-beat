@@ -1,76 +1,80 @@
 ---
-import BaseHead from '../../components/BaseHead.astro';
-import Header from '../../components/Header.astro';
-import Footer from '../../components/Footer.astro';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts.js';
+import Layout from "../../layouts/Layout.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from "../../consts.js";
 
-import {getArticles} from '../../lib/api.js';
-import Card from '../../layouts/Cardsq.astro';
+import { getArticles } from "../../lib/api.js";
+import Card from "../../layouts/Cardsq.astro";
 
-import DoubleBox from '../../components/DoubleBox.astro';
-import BoxBanner from '../../components/BoxBanner.astro';
-import BarNrm from '../../components/BarNrm.astro';
+import DoubleBox from "../../components/DoubleBox.astro";
+import BoxBanner from "../../components/BoxBanner.astro";
+import BarNrm from "../../components/BarNrm.astro";
 
-export async function getStaticPaths( { paginate } ) {
-  const data = await getArticles(788);  
+export async function getStaticPaths({ paginate }) {
+  const data = await getArticles(788);
   return paginate(data, { pageSize: 20 });
 }
 
-interface Props{
-  page: any;  
+interface Props {
+  page: any;
 }
 
-const {page=[]} = Astro.props;
+const { page = [] } = Astro.props;
 //console.log(page.data);
 ---
-<!doctype html>
-<html lang="es">
-	<head>
-		<BaseHead title={SITE_TITLE} seccion="Corona Capital" description={SITE_DESCRIPTION} />
-		
-	</head>
-	<body>
-    <BarNrm />
-		<Header title={SITE_TITLE} />
-		
-		<main>
-      <div class="container my-12 mx-auto px-4 md:px-12">
-				<h1 class="text-center p-4 my-4 font-bold text-xl md:text-2xl lg:text-4xl">Corona Capital</h1>	
-        <div class="flex flex-col lg:flex-row">
-          <div class="sm:min-w-[calc(100%-400px)] lg:mr-10">
-            <!--section class="flex flex-wrap -mx-1 lg:-mx-4"-->
-            <section class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 md:gap-16 xl:gap-16">
-              {
-              page.data.map((post:any) => ( 
-                <>
+
+<Layout
+  title={SITE_TITLE}
+  seccion="Corona Capital"
+  description={SITE_DESCRIPTION}
+>
+  <BarNrm />
+  <div class="container my-12 mx-auto px-4 md:px-12">
+    <h1 class="text-center p-4 my-4 font-bold text-xl md:text-2xl lg:text-4xl">
+      Corona Capital
+    </h1>
+    <div class="flex flex-col lg:flex-row">
+      <div class="sm:min-w-[calc(100%-400px)] lg:mr-10">
+        <!--section class="flex flex-wrap -mx-1 lg:-mx-4"-->
+        <section
+          class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 md:gap-16 xl:gap-16"
+        >
+          {
+            page.data.map((post: any) => (
+              <>
                 <Card post={post} />
-                </>
-              ))
-              }
-            </section>
-            <div class="m-auto text-center">
-                {page.url.prev && <a href={page.url.prev} class="text-black hover:text-white">
-                    <button class="ver-mas lovelo group relative h-8 w-36 m-4 overflow-hidden bg-white hover:bg-[#ef4444] uppercase text-xs font-bold tracking-[3px]">
-                        <span>Anterior</span>
-                    </button>
-                </a>}
-                {page.url.next && <a href={page.url.next} class="text-black hover:text-white">
-                    <button class="ver-mas lovelo group relative h-8 w-36 m-4 overflow-hidden bg-white hover:bg-[#ef4444] uppercase text-xs font-bold tracking-[3px]">
-                        <span>Siguiente</span>
-                    </button>
-                </a>}
-            </div>
-          </div>
-          <div class="bg-black/20 p-5 sm:min-w-[350px] relative text-center md:text-left">
-            <div class="sticky top-[50px] left-0 right-0">
-              <BoxBanner />
-              </br>
-              <DoubleBox />
-            </div>
-          </div>
-        </div>  
-      </div>  
-		</main>
-		<Footer />
-	</body>
-</html>
+              </>
+            ))
+          }
+        </section>
+        <div class="m-auto text-center">
+          {
+            page.url.prev && (
+              <a href={page.url.prev} class="text-black hover:text-white">
+                <button class="ver-mas lovelo group relative h-8 w-36 m-4 overflow-hidden bg-white hover:bg-[#ef4444] uppercase text-xs font-bold tracking-[3px]">
+                  <span>Anterior</span>
+                </button>
+              </a>
+            )
+          }
+          {
+            page.url.next && (
+              <a href={page.url.next} class="text-black hover:text-white">
+                <button class="ver-mas lovelo group relative h-8 w-36 m-4 overflow-hidden bg-white hover:bg-[#ef4444] uppercase text-xs font-bold tracking-[3px]">
+                  <span>Siguiente</span>
+                </button>
+              </a>
+            )
+          }
+        </div>
+      </div>
+      <div
+        class="bg-black/20 p-5 sm:min-w-[350px] relative text-center md:text-left"
+      >
+        <div class="sticky top-[50px] left-0 right-0">
+          <BoxBanner />
+        </div>
+        <DoubleBox />
+      </div>
+    </div>
+  </div>
+</Layout>

@@ -1,178 +1,474 @@
 ---
-import BaseHead from '../../components/BaseHead.astro';
-import Header from '../../components/Header.astro';
-import Footer from '../../components/Footer.astro';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
-import { Tabs } from 'astro-tabs';
-import BarNrm from '../../components/BarNrm.astro';
-import SliderLocutores from '../../layouts/SliderLocutores.astro';
-import BoxBanner from '../../components/BoxBanner.astro';
+import Layout from "../../layouts/Layout.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from "../../consts";
+import { Tabs } from "astro-tabs";
+import BarNrm from "../../components/BarNrm.astro";
+import SliderLocutores from "../../layouts/SliderLocutores.astro";
+import BoxBanner from "../../components/BoxBanner.astro";
 
-const PLACEHOLDER_IMG = 'https://storage.googleapis.com/nrm-web/beat/resources/img/img_beat-min.jpg';
+const PLACEHOLDER_IMG =
+    "https://storage.googleapis.com/nrm-web/beat/resources/img/img_beat-min.jpg";
 
-const res = await fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_embed&per_page=80&_fields=title,content,acf,yoast_head_json,_links,_embedded&categories=515&filter[orderby]=acf[inicio]&order=asc");
+const res = await fetch(
+    "https://beatdigital.com.mx/wp-json/wp/v2/posts?_embed&per_page=80&_fields=title,content,acf,yoast_head_json,_links,_embedded&categories=515&filter[orderby]=acf[inicio]&order=asc",
+);
 const posts = await res.json();
 
-posts.sort(function(a, b){
-    //return a.acf.hora_inicio < b.acf.hora_inicio;    
-    return ((a.acf.hora_inicio > b.acf.hora_inicio) ? 1 : (a.acf.hora_inicio < b.acf.hora_inicio) ? -1 : 0);
+posts.sort(function (a, b) {
+    //return a.acf.hora_inicio < b.acf.hora_inicio;
+    return a.acf.hora_inicio > b.acf.hora_inicio
+        ? 1
+        : a.acf.hora_inicio < b.acf.hora_inicio
+          ? -1
+          : 0;
 });
 ---
 
-<!doctype html>
-<html lang="es">
-	<head>
-		<BaseHead title={SITE_TITLE} seccion="Programación" description={SITE_DESCRIPTION} />
-		<meta charset="utf-8"/>
-	</head>
-	<body>
-        <!--BarNrm /-->
-		<Header title={SITE_TITLE} />
-		
-		<main id="programacion">
-            <div class="container my-12 mx-auto px-4 md:px-12">
-            <div class="audiowide neon-rosa text-center md:text-left py-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl">Talento</div>
-                <div class="flex flex-wrap">
-                    <div class="w-full lg:w-2/3">
-                        <SliderLocutores />
-                    </div>
-                    <div class="w-full mt-8 lg:w-1/3 lg:m-0 content-center">
-                        <BoxBanner />
-                    </div>
-                </div>
-				<div class="audiowide neon-rosa text-center md:text-left py-4 mt-16 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl">Programación</div>
-                <div class="flex flex-col lg:flex-row">
-                    <div class="sm:min-w-[calc(100%-400px)]">
-                        <Tabs class="programacion" class:list={['programacion']}>
-                            <Fragment slot="tab-1">Lunes</Fragment>
-                            <Fragment slot="tab-2">Martes</Fragment>
-                            <Fragment slot="tab-3">Miércoles</Fragment>
-                            <Fragment slot="tab-4">Jueves</Fragment>
-                            <Fragment slot="tab-5">Viernes</Fragment>
-                            <Fragment slot="tab-6">Sábado</Fragment>
-                            <Fragment slot="tab-7">Domingo</Fragment>
-                                
-                            <Fragment slot="panel-1">
-                                <section>
-                                {
-                                    posts.map((post:any) => (
-                                        post.acf.lunes && <div class="flex items-center min-h-24 p-4">
-                                            <div class="w-5/12 md:w-3/12 text-xl sm:text-2xl md:text-2xl text-center">{post.acf.hora_inicio.substring(0, 5)} - {post.acf.hora_fin.substring(0, 5)}</div>
-                                            <div class="w-2/12 max-[640px]:hidden"><img class="block m-auto rounded-[50%] object-cover" src={post?._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.['beat-size']?.source_url || PLACEHOLDER_IMG} alt={post?._embedded?.['wp:featuredmedia']?.[0]?.alt_text || "Imagen Programación"} /></div>
-                                            <div class="w-7/12 p-4">
-                                                <p class="font-bold leading-none m-0 text-xl">{post.acf.programa}</p>
-                                                <div class="m-0 text-xs max-[640px]:hidden poppins" set:html={post.content.rendered}></div>
-                                            </div>
-                                        </div>
-                                    ))
-                                }
-                                </section>
-                            </Fragment>
+<Layout
+    title={SITE_TITLE}
+    description={SITE_DESCRIPTION}
+    seccion="Programación"
+    mainId="programacion"
+>
+    <!--BarNrm /-->
+    <div class="container my-12 mx-auto px-4 md:px-12">
+        <div
+            class="audiowide neon-rosa text-center md:text-left py-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl"
+        >
+            Talento
+        </div>
+        <div class="flex flex-wrap">
+            <div class="w-full lg:w-2/3">
+                <SliderLocutores />
+            </div>
+            <div class="w-full mt-8 lg:w-1/3 lg:m-0 content-center">
+                <BoxBanner />
+            </div>
+        </div>
+        <div
+            class="audiowide neon-rosa text-center md:text-left py-4 mt-16 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl"
+        >
+            Programación
+        </div>
+        <div class="flex flex-col lg:flex-row">
+            <div class="sm:min-w-[calc(100%-400px)]">
+                <Tabs class="programacion" class:list={["programacion"]}>
+                    <Fragment slot="tab-1">Lunes</Fragment>
+                    <Fragment slot="tab-2">Martes</Fragment>
+                    <Fragment slot="tab-3">Miércoles</Fragment>
+                    <Fragment slot="tab-4">Jueves</Fragment>
+                    <Fragment slot="tab-5">Viernes</Fragment>
+                    <Fragment slot="tab-6">Sábado</Fragment>
+                    <Fragment slot="tab-7">Domingo</Fragment>
 
-                            <Fragment slot="panel-2">
-                                <section>
-                                {
-                                    posts.map((post:any) => (
-                                        post.acf.martes && <div class="flex items-center min-h-24 p-4">
-                                            <div class="w-5/12 md:w-3/12 text-xl sm:text-2xl md:text-2xl text-center">{post.acf.hora_inicio.substring(0, 5)} - {post.acf.hora_fin.substring(0, 5)}</div>
-                                            <div class="w-2/12 max-[640px]:hidden"><img class="block m-auto rounded-[50%] object-cover" src={post?._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.['beat-size']?.source_url || PLACEHOLDER_IMG} alt={post?._embedded?.['wp:featuredmedia']?.[0]?.alt_text || "Imagen Programación"} /></div>
-                                            <div class="w-7/12 p-4">
-                                                <p class="font-bold  leading-none m-0 text-xl">{post.acf.programa}</p>
-                                                <div class="m-0 text-xs max-[640px]:hidden poppins" set:html={post.content.rendered}></div>
+                    <Fragment slot="panel-1">
+                        <section>
+                            {
+                                posts.map(
+                                    (post: any) =>
+                                        post.acf.lunes && (
+                                            <div class="flex items-center min-h-24 p-4">
+                                                <div class="w-5/12 md:w-3/12 text-xl sm:text-2xl md:text-2xl text-center">
+                                                    {post.acf.hora_inicio.substring(
+                                                        0,
+                                                        5,
+                                                    )}{" "}
+                                                    -{" "}
+                                                    {post.acf.hora_fin.substring(
+                                                        0,
+                                                        5,
+                                                    )}
+                                                </div>
+                                                <div class="w-2/12 max-[640px]:hidden">
+                                                    <img
+                                                        class="block m-auto rounded-[50%] object-cover"
+                                                        src={
+                                                            post?._embedded?.[
+                                                                "wp:featuredmedia"
+                                                            ]?.[0]
+                                                                ?.media_details
+                                                                ?.sizes?.[
+                                                                "beat-size"
+                                                            ]?.source_url ||
+                                                            PLACEHOLDER_IMG
+                                                        }
+                                                        alt={
+                                                            post?._embedded?.[
+                                                                "wp:featuredmedia"
+                                                            ]?.[0]?.alt_text ||
+                                                            "Imagen Programación"
+                                                        }
+                                                    />
+                                                </div>
+                                                <div class="w-7/12 p-4">
+                                                    <p class="font-bold leading-none m-0 text-xl">
+                                                        {post.acf.programa}
+                                                    </p>
+                                                    <div
+                                                        class="m-0 text-xs max-[640px]:hidden poppins"
+                                                        set:html={
+                                                            post.content
+                                                                .rendered
+                                                        }
+                                                    />
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))
-                                }
-                                </section>
-                            </Fragment>
+                                        ),
+                                )
+                            }
+                        </section>
+                    </Fragment>
 
-                            <Fragment slot="panel-3">
-                                <section>
-                                {
-                                    posts.map((post:any) => (
-                                        post.acf.miercoles && <div class="flex items-center min-h-24 p-4">
-                                            <div class="w-5/12 md:w-3/12 text-xl sm:text-2xl md:text-2xl text-center">{post.acf.hora_inicio.substring(0, 5)} - {post.acf.hora_fin.substring(0, 5)}</div>
-                                            <div class="w-2/12 max-[640px]:hidden"><img class="block m-auto rounded-[50%] object-cover" src={post?._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.['beat-size']?.source_url || PLACEHOLDER_IMG} alt={post?._embedded?.['wp:featuredmedia']?.[0]?.alt_text || "Imagen Programación"} /></div>
-                                            <div class="w-7/12 p-4">
-                                                <p class="font-bold  leading-none m-0 text-xl">{post.acf.programa}</p>
-                                                <div class="m-0 text-xs max-[640px]:hidden poppins" set:html={post.content.rendered}></div>
+                    <Fragment slot="panel-2">
+                        <section>
+                            {
+                                posts.map(
+                                    (post: any) =>
+                                        post.acf.martes && (
+                                            <div class="flex items-center min-h-24 p-4">
+                                                <div class="w-5/12 md:w-3/12 text-xl sm:text-2xl md:text-2xl text-center">
+                                                    {post.acf.hora_inicio.substring(
+                                                        0,
+                                                        5,
+                                                    )}{" "}
+                                                    -{" "}
+                                                    {post.acf.hora_fin.substring(
+                                                        0,
+                                                        5,
+                                                    )}
+                                                </div>
+                                                <div class="w-2/12 max-[640px]:hidden">
+                                                    <img
+                                                        class="block m-auto rounded-[50%] object-cover"
+                                                        src={
+                                                            post?._embedded?.[
+                                                                "wp:featuredmedia"
+                                                            ]?.[0]
+                                                                ?.media_details
+                                                                ?.sizes?.[
+                                                                "beat-size"
+                                                            ]?.source_url ||
+                                                            PLACEHOLDER_IMG
+                                                        }
+                                                        alt={
+                                                            post?._embedded?.[
+                                                                "wp:featuredmedia"
+                                                            ]?.[0]?.alt_text ||
+                                                            "Imagen Programación"
+                                                        }
+                                                    />
+                                                </div>
+                                                <div class="w-7/12 p-4">
+                                                    <p class="font-bold  leading-none m-0 text-xl">
+                                                        {post.acf.programa}
+                                                    </p>
+                                                    <div
+                                                        class="m-0 text-xs max-[640px]:hidden poppins"
+                                                        set:html={
+                                                            post.content
+                                                                .rendered
+                                                        }
+                                                    />
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))
-                                }
-                                </section>
-                            </Fragment>
-                            
-                            <Fragment slot="panel-4">
-                                <section>
-                                {
-                                    posts.map((post:any) => (
-                                        post.acf.jueves && <div class="flex items-center min-h-24 p-4">
-                                            <div class="w-5/12 md:w-3/12 text-xl sm:text-2xl md:text-2xl text-center">{post.acf.hora_inicio.substring(0, 5)} - {post.acf.hora_fin.substring(0, 5)}</div>
-                                            <div class="w-2/12 max-[640px]:hidden"><img class="block m-auto rounded-[50%] object-cover" src={post?._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.['beat-size']?.source_url || PLACEHOLDER_IMG} alt={post?._embedded?.['wp:featuredmedia']?.[0]?.alt_text || "Imagen Programación"} /></div>
-                                            <div class="w-7/12 p-4">
-                                                <p class="font-bold  leading-none m-0 text-xl">{post.acf.programa}</p>
-                                                <div class="m-0 text-xs max-[640px]:hidden poppins" set:html={post.content.rendered}></div>
+                                        ),
+                                )
+                            }
+                        </section>
+                    </Fragment>
+
+                    <Fragment slot="panel-3">
+                        <section>
+                            {
+                                posts.map(
+                                    (post: any) =>
+                                        post.acf.miercoles && (
+                                            <div class="flex items-center min-h-24 p-4">
+                                                <div class="w-5/12 md:w-3/12 text-xl sm:text-2xl md:text-2xl text-center">
+                                                    {post.acf.hora_inicio.substring(
+                                                        0,
+                                                        5,
+                                                    )}{" "}
+                                                    -{" "}
+                                                    {post.acf.hora_fin.substring(
+                                                        0,
+                                                        5,
+                                                    )}
+                                                </div>
+                                                <div class="w-2/12 max-[640px]:hidden">
+                                                    <img
+                                                        class="block m-auto rounded-[50%] object-cover"
+                                                        src={
+                                                            post?._embedded?.[
+                                                                "wp:featuredmedia"
+                                                            ]?.[0]
+                                                                ?.media_details
+                                                                ?.sizes?.[
+                                                                "beat-size"
+                                                            ]?.source_url ||
+                                                            PLACEHOLDER_IMG
+                                                        }
+                                                        alt={
+                                                            post?._embedded?.[
+                                                                "wp:featuredmedia"
+                                                            ]?.[0]?.alt_text ||
+                                                            "Imagen Programación"
+                                                        }
+                                                    />
+                                                </div>
+                                                <div class="w-7/12 p-4">
+                                                    <p class="font-bold  leading-none m-0 text-xl">
+                                                        {post.acf.programa}
+                                                    </p>
+                                                    <div
+                                                        class="m-0 text-xs max-[640px]:hidden poppins"
+                                                        set:html={
+                                                            post.content
+                                                                .rendered
+                                                        }
+                                                    />
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))
-                                }
-                                </section>
-                            </Fragment>
-                            
-                            <Fragment slot="panel-5">
-                                <section>
-                                {
-                                    posts.map((post:any) => (
-                                        post.acf.viernes && <div class="flex items-center min-h-24 p-4">
-                                            <div class="w-5/12 md:w-3/12 text-xl sm:text-2xl md:text-2xl text-center">{post.acf.hora_inicio.substring(0, 5)} - {post.acf.hora_fin.substring(0, 5)}</div>
-                                            <div class="w-2/12 max-[640px]:hidden"><img class="block m-auto rounded-[50%] object-cover" src={post?._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.['beat-size']?.source_url || PLACEHOLDER_IMG} alt={post?._embedded?.['wp:featuredmedia']?.[0]?.alt_text || "Imagen Programación"} /></div>
-                                            <div class="w-7/12 p-4">
-                                                <p class="font-bold  leading-none m-0 text-xl">{post.acf.programa}</p>
-                                                <div class="m-0 text-xs max-[640px]:hidden poppins" set:html={post.content.rendered}></div>
+                                        ),
+                                )
+                            }
+                        </section>
+                    </Fragment>
+
+                    <Fragment slot="panel-4">
+                        <section>
+                            {
+                                posts.map(
+                                    (post: any) =>
+                                        post.acf.jueves && (
+                                            <div class="flex items-center min-h-24 p-4">
+                                                <div class="w-5/12 md:w-3/12 text-xl sm:text-2xl md:text-2xl text-center">
+                                                    {post.acf.hora_inicio.substring(
+                                                        0,
+                                                        5,
+                                                    )}{" "}
+                                                    -{" "}
+                                                    {post.acf.hora_fin.substring(
+                                                        0,
+                                                        5,
+                                                    )}
+                                                </div>
+                                                <div class="w-2/12 max-[640px]:hidden">
+                                                    <img
+                                                        class="block m-auto rounded-[50%] object-cover"
+                                                        src={
+                                                            post?._embedded?.[
+                                                                "wp:featuredmedia"
+                                                            ]?.[0]
+                                                                ?.media_details
+                                                                ?.sizes?.[
+                                                                "beat-size"
+                                                            ]?.source_url ||
+                                                            PLACEHOLDER_IMG
+                                                        }
+                                                        alt={
+                                                            post?._embedded?.[
+                                                                "wp:featuredmedia"
+                                                            ]?.[0]?.alt_text ||
+                                                            "Imagen Programación"
+                                                        }
+                                                    />
+                                                </div>
+                                                <div class="w-7/12 p-4">
+                                                    <p class="font-bold  leading-none m-0 text-xl">
+                                                        {post.acf.programa}
+                                                    </p>
+                                                    <div
+                                                        class="m-0 text-xs max-[640px]:hidden poppins"
+                                                        set:html={
+                                                            post.content
+                                                                .rendered
+                                                        }
+                                                    />
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))
-                                }
-                                </section>
-                            </Fragment>
-                            
-                            <Fragment slot="panel-6">
-                                <section>
-                                {
-                                    posts.map((post:any) => (
-                                        post.acf.sabado && <div class="flex items-center min-h-24 p-4">
-                                            <div class="w-5/12 md:w-3/12 text-xl sm:text-2xl md:text-2xl text-center">{post.acf.hora_inicio.substring(0, 5)} - {post.acf.hora_fin.substring(0, 5)}</div>
-                                            <div class="w-2/12 max-[640px]:hidden"><img class="block m-auto rounded-[50%] object-cover" src={post?._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.['beat-size']?.source_url || PLACEHOLDER_IMG} alt={post?._embedded?.['wp:featuredmedia']?.[0]?.alt_text || "Imagen Programación"} /></div>
-                                            <div class="w-7/12 p-4">
-                                                <p class="font-bold  leading-none m-0 text-xl">{post.acf.programa}</p>
-                                                <div class="m-0 text-xs max-[640px]:hidden poppins" set:html={post.content.rendered}></div>
+                                        ),
+                                )
+                            }
+                        </section>
+                    </Fragment>
+
+                    <Fragment slot="panel-5">
+                        <section>
+                            {
+                                posts.map(
+                                    (post: any) =>
+                                        post.acf.viernes && (
+                                            <div class="flex items-center min-h-24 p-4">
+                                                <div class="w-5/12 md:w-3/12 text-xl sm:text-2xl md:text-2xl text-center">
+                                                    {post.acf.hora_inicio.substring(
+                                                        0,
+                                                        5,
+                                                    )}{" "}
+                                                    -{" "}
+                                                    {post.acf.hora_fin.substring(
+                                                        0,
+                                                        5,
+                                                    )}
+                                                </div>
+                                                <div class="w-2/12 max-[640px]:hidden">
+                                                    <img
+                                                        class="block m-auto rounded-[50%] object-cover"
+                                                        src={
+                                                            post?._embedded?.[
+                                                                "wp:featuredmedia"
+                                                            ]?.[0]
+                                                                ?.media_details
+                                                                ?.sizes?.[
+                                                                "beat-size"
+                                                            ]?.source_url ||
+                                                            PLACEHOLDER_IMG
+                                                        }
+                                                        alt={
+                                                            post?._embedded?.[
+                                                                "wp:featuredmedia"
+                                                            ]?.[0]?.alt_text ||
+                                                            "Imagen Programación"
+                                                        }
+                                                    />
+                                                </div>
+                                                <div class="w-7/12 p-4">
+                                                    <p class="font-bold  leading-none m-0 text-xl">
+                                                        {post.acf.programa}
+                                                    </p>
+                                                    <div
+                                                        class="m-0 text-xs max-[640px]:hidden poppins"
+                                                        set:html={
+                                                            post.content
+                                                                .rendered
+                                                        }
+                                                    />
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))
-                                }
-                                </section>
-                            </Fragment>
-                           
-                            <Fragment slot="panel-7">
-                                <section>
-                                {
-                                    posts.map((post:any) => (
-                                        post.acf.domingo && <div class="flex items-center min-h-24 p-4">
-                                            <div class="w-5/12 md:w-3/12 text-xl sm:text-2xl md:text-2xl text-center">{post.acf.hora_inicio.substring(0, 5)} - {post.acf.hora_fin.substring(0, 5)}</div>
-                                            <div class="w-2/12 max-[640px]:hidden"><img class="block m-auto rounded-[50%] object-cover" src={post?._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.['beat-size']?.source_url || PLACEHOLDER_IMG} alt={post?._embedded?.['wp:featuredmedia']?.[0]?.alt_text || "Imagen Programación"} /></div>
-                                            <div class="w-7/12 p-4">
-                                                <p class="font-bold  leading-none m-0 text-xl">{post.acf.programa}</p>
-                                                <div class="m-0 text-xs max-[640px]:hidden poppins" set:html={post.content.rendered}></div>
+                                        ),
+                                )
+                            }
+                        </section>
+                    </Fragment>
+
+                    <Fragment slot="panel-6">
+                        <section>
+                            {
+                                posts.map(
+                                    (post: any) =>
+                                        post.acf.sabado && (
+                                            <div class="flex items-center min-h-24 p-4">
+                                                <div class="w-5/12 md:w-3/12 text-xl sm:text-2xl md:text-2xl text-center">
+                                                    {post.acf.hora_inicio.substring(
+                                                        0,
+                                                        5,
+                                                    )}{" "}
+                                                    -{" "}
+                                                    {post.acf.hora_fin.substring(
+                                                        0,
+                                                        5,
+                                                    )}
+                                                </div>
+                                                <div class="w-2/12 max-[640px]:hidden">
+                                                    <img
+                                                        class="block m-auto rounded-[50%] object-cover"
+                                                        src={
+                                                            post?._embedded?.[
+                                                                "wp:featuredmedia"
+                                                            ]?.[0]
+                                                                ?.media_details
+                                                                ?.sizes?.[
+                                                                "beat-size"
+                                                            ]?.source_url ||
+                                                            PLACEHOLDER_IMG
+                                                        }
+                                                        alt={
+                                                            post?._embedded?.[
+                                                                "wp:featuredmedia"
+                                                            ]?.[0]?.alt_text ||
+                                                            "Imagen Programación"
+                                                        }
+                                                    />
+                                                </div>
+                                                <div class="w-7/12 p-4">
+                                                    <p class="font-bold  leading-none m-0 text-xl">
+                                                        {post.acf.programa}
+                                                    </p>
+                                                    <div
+                                                        class="m-0 text-xs max-[640px]:hidden poppins"
+                                                        set:html={
+                                                            post.content
+                                                                .rendered
+                                                        }
+                                                    />
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))
-                                }
-                                </section>
-                            </Fragment>
-                        </Tabs>
-                    </div>
-                    <!--div class="bg-gray-300 p-5 rounded-md sm:min-w-[350px] relative text-center md:text-left">
+                                        ),
+                                )
+                            }
+                        </section>
+                    </Fragment>
+
+                    <Fragment slot="panel-7">
+                        <section>
+                            {
+                                posts.map(
+                                    (post: any) =>
+                                        post.acf.domingo && (
+                                            <div class="flex items-center min-h-24 p-4">
+                                                <div class="w-5/12 md:w-3/12 text-xl sm:text-2xl md:text-2xl text-center">
+                                                    {post.acf.hora_inicio.substring(
+                                                        0,
+                                                        5,
+                                                    )}{" "}
+                                                    -{" "}
+                                                    {post.acf.hora_fin.substring(
+                                                        0,
+                                                        5,
+                                                    )}
+                                                </div>
+                                                <div class="w-2/12 max-[640px]:hidden">
+                                                    <img
+                                                        class="block m-auto rounded-[50%] object-cover"
+                                                        src={
+                                                            post?._embedded?.[
+                                                                "wp:featuredmedia"
+                                                            ]?.[0]
+                                                                ?.media_details
+                                                                ?.sizes?.[
+                                                                "beat-size"
+                                                            ]?.source_url ||
+                                                            PLACEHOLDER_IMG
+                                                        }
+                                                        alt={
+                                                            post?._embedded?.[
+                                                                "wp:featuredmedia"
+                                                            ]?.[0]?.alt_text ||
+                                                            "Imagen Programación"
+                                                        }
+                                                    />
+                                                </div>
+                                                <div class="w-7/12 p-4">
+                                                    <p class="font-bold  leading-none m-0 text-xl">
+                                                        {post.acf.programa}
+                                                    </p>
+                                                    <div
+                                                        class="m-0 text-xs max-[640px]:hidden poppins"
+                                                        set:html={
+                                                            post.content
+                                                                .rendered
+                                                        }
+                                                    />
+                                                </div>
+                                            </div>
+                                        ),
+                                )
+                            }
+                        </section>
+                    </Fragment>
+                </Tabs>
+            </div>
+            <!--div class="bg-gray-300 p-5 rounded-md sm:min-w-[350px] relative text-center md:text-left">
                         <div class="sticky top-0 left-0 right-0">
                             <h3 class="text-xl text-black font-extrabold">PUBLICIDAD</h3>
                             <BoxBanner />
@@ -180,18 +476,14 @@ posts.sort(function(a, b){
                             <DoubleBox />
                         </div>
                     </div-->
-                </div>
-            </div>
-		</main>
-		<Footer />
-	</body>
-</html>
-
-<style>
-@media (max-width: 720px) {
-    .tabs.programacion nav{
-        overflow-x: scroll;
-        justify-content: normal !important;
-    }
-}
-</style>
+        </div>
+    </div>
+    <style>
+        @media (max-width: 720px) {
+            .tabs.programacion nav {
+                overflow-x: scroll;
+                justify-content: normal !important;
+            }
+        }
+    </style>
+</Layout>

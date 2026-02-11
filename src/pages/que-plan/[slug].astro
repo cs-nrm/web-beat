@@ -1,41 +1,61 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import DoubleBox from '../../components/DoubleBox.astro';
-import BoxBanner from '../../components/BoxBanner.astro';
-import LeaderBoard from '../../components/LeaderBoard.astro';
-import SuperLeader from '../../components/SuperLeader.astro';
-import MoreNews from '../../components/MoreNews.astro';
-import { any } from 'astro/zod';
-import { SITE_TITLE } from '../../consts';
-import { formatHora, formatFecha } from '../../lib/formatters.js';
+import Layout from "../../layouts/Layout.astro";
+import DoubleBox from "../../components/DoubleBox.astro";
+import BoxBanner from "../../components/BoxBanner.astro";
+import LeaderBoard from "../../components/LeaderBoard.astro";
+import SuperLeader from "../../components/SuperLeader.astro";
+import MoreNews from "../../components/MoreNews.astro";
+import { any } from "astro/zod";
+import { SITE_TITLE } from "../../consts";
+import { formatHora, formatFecha } from "../../lib/formatters.js";
 
 const { slug } = Astro.params;
 
-let res = await fetch(`https://beatdigital.com.mx/wp-json/wp/v2/posts?slug=${slug}`);
+let res = await fetch(
+  `https://beatdigital.com.mx/wp-json/wp/v2/posts?slug=${slug}`,
+);
 let [post] = await res.json();
-post.fecha_inicio_formateada = formatFecha(post.acf?.fecha_inicio || post.acf?.fecha_inicio_raw || post.fecha_inicio || '');
-post.fecha_fin_formateada = formatFecha(post.acf?.fecha_fin || post.acf?.fecha_fin_raw || post.fecha_fin || '');
+post.fecha_inicio_formateada = formatFecha(
+  post.acf?.fecha_inicio ||
+    post.acf?.fecha_inicio_raw ||
+    post.fecha_inicio ||
+    "",
+);
+post.fecha_fin_formateada = formatFecha(
+  post.acf?.fecha_fin || post.acf?.fecha_fin_raw || post.fecha_fin || "",
+);
 const tagIds = post.tags || [];
 
 export async function getStaticPaths() {
-  let data = await fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_embed&per_page=100&_fields=title,slug,content,yoast_head_json,tags&categories=818");
+  let data = await fetch(
+    "https://beatdigital.com.mx/wp-json/wp/v2/posts?_embed&per_page=100&_fields=title,slug,content,yoast_head_json,tags&categories=818",
+  );
   let posts = await data.json();
 
-  return posts.map((post:any) => ({
+  return posts.map((post: any) => ({
     params: { slug: post.slug },
     props: { post: post },
   }));
 }
 
-const PLACEHOLDER_IMG = 'https://storage.googleapis.com/nrm-web/beat/resources/img/img_beat-min.jpg';
+const PLACEHOLDER_IMG =
+  "https://storage.googleapis.com/nrm-web/beat/resources/img/img_beat-min.jpg";
 ---
-<Layout title={post.title.rendered} img={post.yoast_head_json.og_image[0].url} tags={post.yoast_head_json} description={post.yoast_head_json.og_description} >
+
+<Layout
+  title={post.title.rendered}
+  image={post.yoast_head_json.og_image[0].url}
+  tags={post.yoast_head_json}
+  description={post.yoast_head_json.og_description}
+>
   <section class="w-full py-4 poppins" id="content-w-video">
     <div class="container my-12 mx-auto md:px-4">
       <LeaderBoard />
       <div class="my-4 px-4 md:px-0">
-        <h1 class="font-bold" set:html={post.title.rendered}></h1>
-        <div class="flex items-center justify-between text-sm uppercase text-zinc-400">
+        <h1 class="font-bold" set:html={post.title.rendered} />
+        <div
+          class="flex items-center justify-between text-sm uppercase text-zinc-400"
+        >
           <p>{post.yoast_head_json.author}</p>
           <p>{post.yoast_head_json.article_published_time.substring(0, 10)}</p>
         </div>
@@ -46,77 +66,191 @@ const PLACEHOLDER_IMG = 'https://storage.googleapis.com/nrm-web/beat/resources/i
         </figure-->
       </div>
 
-
-
       <div class="flex flex-col lg:flex-row">
-        <article class="sm:min-w-[calc(100%-400px)] text-elipsis lg:mr-10 flex flex-row">
+        <article
+          class="sm:min-w-[calc(100%-400px)] text-elipsis lg:mr-10 flex flex-row"
+        >
           <div class="share-bar">
             <div class="sticky-bar sticky top-[145px] left-0 right-0">
-                <div class="share-buttons">
-                    <a href={`https://www.facebook.com/sharer/sharer.php?u=https://beatdigital.mx/que-plan/${post.slug}`}
-                        target="_blank" 
-                        class="share-button facebook"
-                        title="Compartir en Facebook">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon">
-                        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-                        </svg>
-                    </a>
-                    <a href={`https://twitter.com/intent/tweet?url=https://beatdigital.mx/que-plan/${post.slug}&text=${post.title.rendered}`} 
-                        target="_blank" 
-                        class="share-button twitter"
-                        title="Compartir en X">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-                            <path d="M4 4l11.733 16h4.267l-11.733-16z"></path>
-                            <path d="M4 20l6.768-6.768m2.46-2.46L20 4"></path>
-                        </svg>
-                    </a>
-                    <a href={`https://wa.me/?text=${post.title.rendered} https://beatdigital.mx/que-plan/${post.slug}`} 
-                        target="_blank" 
-                        class="share-button whatsapp"
-                        title="Compartir en WhatsApp">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="33" height="33" stroke-width="1">
-                          <path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9"></path>
-                          <path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1"></path>
-                        </svg>
-                    </a>
-                </div>
+              <div class="share-buttons">
+                <a
+                  href={`https://www.facebook.com/sharer/sharer.php?u=https://beatdigital.mx/que-plan/${post.slug}`}
+                  target="_blank"
+                  class="share-button facebook"
+                  title="Compartir en Facebook"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    stroke="none"
+                    stroke-width="1"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="icon"
+                  >
+                    <path
+                      d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"
+                    ></path>
+                  </svg>
+                </a>
+                <a
+                  href={`https://twitter.com/intent/tweet?url=https://beatdigital.mx/que-plan/${post.slug}&text=${post.title.rendered}`}
+                  target="_blank"
+                  class="share-button twitter"
+                  title="Compartir en X"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="icon"
+                  >
+                    <path d="M4 4l11.733 16h4.267l-11.733-16z"></path>
+                    <path d="M4 20l6.768-6.768m2.46-2.46L20 4"></path>
+                  </svg>
+                </a>
+                <a
+                  href={`https://wa.me/?text=${post.title.rendered} https://beatdigital.mx/que-plan/${post.slug}`}
+                  target="_blank"
+                  class="share-button whatsapp"
+                  title="Compartir en WhatsApp"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    width="33"
+                    height="33"
+                    stroke-width="1"
+                  >
+                    <path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9"></path>
+                    <path
+                      d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1"
+                    ></path>
+                  </svg>
+                </a>
+              </div>
             </div>
           </div>
           <div class="flex flex-col md:flex-row w-full gap-4 pr-4 md:pr-0">
-            <div><img class="h-auto w-full max-w-[500px] min-w-[400px] text-center m-auto shadow-[0_5px_12px_10px_rgba(0,0,0,0.4)] rounded-xl" src={post?.yoast_head_json?.og_image?.[0]?.url || PLACEHOLDER_IMG } alt={post?._embedded?.['wp:featuredmedia']?.[0]?.alt_text||"Imagen Ilustrativa News"}/></div>
+            <div>
+              <img
+                class="h-auto w-full max-w-[500px] min-w-[400px] text-center m-auto shadow-[0_5px_12px_10px_rgba(0,0,0,0.4)] rounded-xl"
+                src={post?.yoast_head_json?.og_image?.[0]?.url ||
+                  PLACEHOLDER_IMG}
+                alt={post?._embedded?.["wp:featuredmedia"]?.[0]?.alt_text ||
+                  "Imagen Ilustrativa News"}
+              />
+            </div>
             <div class="pr-4 md:pr-0">
               <Fragment set:html={post.content.rendered} />
               <div class="flex items-center gap-4 text-sm mb-2">
-                <div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z" /></svg></div>
-                <div class="leading-none"><span set:html={post.acf?.lugar}></span><span>, </span><span set:html={post.acf?.ciudad}></span></div>
+                <div>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#fff"
+                    stroke-width="1"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    ><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"></path><path
+                      d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z"
+                    ></path></svg
+                  >
+                </div>
+                <div class="leading-none">
+                  <span set:html={post.acf?.lugar} /><span>, </span><span
+                    set:html={post.acf?.ciudad}
+                  />
+                </div>
               </div>
               <div class="flex items-center gap-4 text-sm mb-2">
-                <div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" /><path d="M11 15h1" /><path d="M12 15v3" /></svg></div>
-                <span set:html={post.fecha_inicio_formateada}></span>
-                {post.acf.fecha_fin && <span> - <span set:html={post.fecha_fin_formateada}></span></span> }
+                <div>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#fff"
+                    stroke-width="1"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    ><path
+                      d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z"
+                    ></path><path d="M16 3v4"></path><path d="M8 3v4"
+                    ></path><path d="M4 11h16"></path><path d="M11 15h1"
+                    ></path><path d="M12 15v3"></path></svg
+                  >
+                </div>
+                <span set:html={post.fecha_inicio_formateada} />
+                {
+                  post.acf.fecha_fin && (
+                    <span>
+                      {" "}
+                      - <span set:html={post.fecha_fin_formateada} />
+                    </span>
+                  )
+                }
               </div>
               <div class="flex items-center gap-4 text-sm mb-2">
-                <div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg></div>
+                <div>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#fff"
+                    stroke-width="1"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    ><circle cx="12" cy="12" r="10"></circle><polyline
+                      points="12 6 12 12 16 14"></polyline></svg
+                  >
+                </div>
                 <span>{formatHora(post.acf?.hora)} hrs.</span>
               </div>
-              <div class="table bg-[#FFAA1F] rounded-xl px-4 text-center m-auto"><a class="text-black" target="_blank" href={post.acf?.link_externo}>Más info aquí</a></div>
+              <div
+                class="table bg-[#FFAA1F] rounded-xl px-4 text-center m-auto"
+              >
+                <a
+                  class="text-black"
+                  target="_blank"
+                  href={post.acf?.link_externo}>Más info aquí</a
+                >
+              </div>
             </div>
           </div>
-          
         </article>
-        
-        <div class="bg-black/50 p-5 rounded-xl my-2 sm:min-w-[350px] relative text-center md:text-left">
+
+        <div
+          class="bg-black/50 p-5 rounded-xl my-2 sm:min-w-[350px] relative text-center md:text-left"
+        >
           <div class="sticky top-[140px] left-0 right-0">
             <BoxBanner />
-            </br>
-            
           </div>
         </div>
       </div>
     </div>
-    <SuperLeader />
   </section>
+  <SuperLeader />
+  <link
+    rel="stylesheet"
+    type="text/css"
+    href="https://storage.googleapis.com/nrm-web/nrm/lib/plyr.css"
+  />
+  <script is:inline src="https://storage.googleapis.com/nrm-web/nrm/lib/plyr.js"
+  ></script>
 </Layout>
-
-<link rel="stylesheet" type="text/css" href="https://storage.googleapis.com/nrm-web/nrm/lib/plyr.css" />
-<script is:inline src="https://storage.googleapis.com/nrm-web/nrm/lib/plyr.js"></script>

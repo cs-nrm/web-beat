@@ -1,7 +1,6 @@
 ---
-import BaseHead from "../components/BaseHead.astro";
+import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
-import Footer from "../components/Footer.astro";
 import CardNews from "../layouts/CardsHomeNews.astro";
 import CardTecnologia from "../layouts/CardsHomeTecnologia.astro";
 import CardEdc from "../layouts/CardsHomeEdc.astro";
@@ -30,16 +29,13 @@ import SliderPortada from "../layouts/SliderPortada.astro";
 /*import BarNrm from '../components/BarNrm.astro';*/
 ---
 
-<!doctype html>
-<html lang="es">
-    <head>
-        <BaseHead
-            title={SITE_TITLE}
-            seccion="Beat 100.9"
-            description={SITE_DESCRIPTION}
-        />
-    </head>
-    <body>
+<Layout
+    title={SITE_TITLE}
+    description={SITE_DESCRIPTION}
+    seccion="Beat 100.9"
+    mainId="home"
+>
+    <div slot="before-header">
         <!--BarNrm /-->
         <!--SuperBillboard/-->
         <!--div>
@@ -50,77 +46,126 @@ import SliderPortada from "../layouts/SliderPortada.astro";
                     alt=""
                 /></a
             >
+
         </div-->
         <SliderPortada />
         <Header title={SITE_TITLE} />
+    </div>
 
-        <main id="home">
-            <!--header-->
-            <!--HomeHeader /-->
-            <!--/header-->
+    <!--header-->
+    <!--HomeHeader /-->
+    <!--/header-->
 
-            <section>
-                <div class="container-home p-4 mx-auto">
-                    <div class="">
-                        <CardNews />
-                    </div>
+    <section>
+        <div class="container-home p-4 mx-auto">
+            <div class="">
+                <CardNews />
+            </div>
+        </div>
+    </section>
+    <LeaderBoard />
+    <!--BillBoard /-->
+    <!--section>
+            <div>
+                <img class="w-full h-auto hidden md:block" src="https://storage.googleapis.com/nrm-web/nrm/adManager/buen-fin%202.png"/>
+                <img class="w-full h-auto block md:hidden" src="https://storage.googleapis.com/nrm-web/nrm/adManager/buen-fin-movil2.png"/>
+            </div>
+            <div class="bg-[#e20612]">
+                <SliderBuenfin />
+                <div class="flex justify-end"><img class="w-full max-w-[100px]" src="https://storage.googleapis.com/nrm-web/nrm/adManager/buen-fin-qr.png"/></div>
+            </div>
+        </section-->
+    <!--section class="mt-16">
+
+            <div class="bg-[url('https://stereociendigital.com.mx/wp-content/uploads/2025/07/CORONA_CAPITAL-scaled.jpg')] bg-no-repeat bg-cover bg-bottom">
+                <div class="bg-[#411ED4] bg-[url('https://stereociendigital.com.mx/wp-content/uploads/2025/07/CORONA_CAPITAL_2025.png')] bg-no-repeat bg-contain 2xl:bg-cover bg-bottom">
+                    <img class="max-w-[328px] m-auto" src="https://stereociendigital.com.mx/wp-content/uploads/2025/07/corona-capital-logo.png" alt="Corona Capital"/>
                 </div>
-            </section>
-            <LeaderBoard />
-            <!--BillBoard /-->
-            <!--section>
-                    <div>
-                        <img class="w-full h-auto hidden md:block" src="https://storage.googleapis.com/nrm-web/nrm/adManager/buen-fin%202.png"/>
-                        <img class="w-full h-auto block md:hidden" src="https://storage.googleapis.com/nrm-web/nrm/adManager/buen-fin-movil2.png"/>
-                    </div>
-                    <div class="bg-[#e20612]">
-                        <SliderBuenfin />
-                        <div class="flex justify-end"><img class="w-full max-w-[100px]" src="https://storage.googleapis.com/nrm-web/nrm/adManager/buen-fin-qr.png"/></div>
-                    </div>
-                </section-->
-            <!--section class="mt-16">
+                <div class="w-full flex justify-center relative z-20 mt-8 mb-6">
 
-                    <div class="bg-[url('https://stereociendigital.com.mx/wp-content/uploads/2025/07/CORONA_CAPITAL-scaled.jpg')] bg-no-repeat bg-cover bg-bottom">
-                        <div class="bg-[#411ED4] bg-[url('https://stereociendigital.com.mx/wp-content/uploads/2025/07/CORONA_CAPITAL_2025.png')] bg-no-repeat bg-contain 2xl:bg-cover bg-bottom">
-                            <img class="max-w-[328px] m-auto" src="https://stereociendigital.com.mx/wp-content/uploads/2025/07/corona-capital-logo.png" alt="Corona Capital"/>
-                        </div>
-                        <div class="w-full flex justify-center relative z-20 mt-8 mb-6">
+                </div>
+                <div class="container-home relative z-10 p-4 mx-auto">                            
+                    <CardsHomeCorona />        
+                </div>
+            </div>
+        </section-->
+    <section>
+        <div
+            class="bg-[url('https://storage.googleapis.com/nrm-web/beat/resources/img/edc-fondo-min.jpg')] bg-no-repeat bg-cover bg-top"
+        >
+            <!--div class="backtomorrow bg-[#934D8A] bg-[url('https://beatdigital.com.mx/wp-content/uploads/2025/07/mariposas-arriba.png')] bg-no-repeat bg-contain bg-top">
+                    <img class="max-w-[328px] m-auto" src="https://beatdigital.com.mx/wp-content/uploads/2025/07/logo-tomorrow.png" alt="Tomorrowland"/>
+                </div-->
+            <div class="backtomorrow">
+                <img
+                    class="max-w-[328px] m-auto"
+                    src="https://storage.googleapis.com/nrm-web/beat/resources/img/logo_edc2026-min.png"
+                    alt="Tomorrowland"
+                />
+            </div>
 
-                        </div>
-                        <div class="container-home relative z-10 p-4 mx-auto">                            
-                            <CardsHomeCorona />        
-                        </div>
-                    </div>
-                </section-->
-            <section>
-                <div
-                    class="bg-[url('https://storage.googleapis.com/nrm-web/beat/resources/img/edc-fondo-min.jpg')] bg-no-repeat bg-cover bg-top"
+            <div class="container-home p-4 mx-auto">
+                <CardEdc />
+            </div>
+            <!--div class="backtomorrow bg-[#E7BB42] w-full min-h-[150px] bg-[url('https://beatdigital.com.mx/wp-content/uploads/2025/07/mariposas-abajo.png')] bg-no-repeat bg-contain bg-bottom">
+                </div-->
+        </div>
+    </section>
+    <section class="">
+        <div class="container-home p-4 mx-auto">
+            <h1
+                class="text-white text-center md:text-left py-4 font-bold text-3xl md:text-5xl lg:text-4xl xl:text-5xl"
+            >
+                ¿Qué Plan?
+            </h1>
+        </div>
+        <div class="w-full mx-auto">
+            <SliderDestacadosPlan />
+        </div>
+        <div class="m-auto text-center">
+            <a href="/que-plan" class="text-white hover:text-black">
+                <button
+                    class="ver-mas group relative h-8 w-36 m-4 overflow-hidden rounded-xl bg-[rgba(52,52,52,0.2)] hover:bg-white border-2 border-white uppercase text-xs poppins font-bold tracking-[3px]"
                 >
-                    <!--div class="backtomorrow bg-[#934D8A] bg-[url('https://beatdigital.com.mx/wp-content/uploads/2025/07/mariposas-arriba.png')] bg-no-repeat bg-contain bg-top">
-                            <img class="max-w-[328px] m-auto" src="https://beatdigital.com.mx/wp-content/uploads/2025/07/logo-tomorrow.png" alt="Tomorrowland"/>
-                        </div-->
-                    <div class="backtomorrow">
-                        <img
-                            class="max-w-[328px] m-auto"
-                            src="https://storage.googleapis.com/nrm-web/beat/resources/img/logo_edc2026-min.png"
-                            alt="Tomorrowland"
-                        />
-                    </div>
+                    <span>Ver más</span>
+                </button>
+            </a>
+        </div>
+    </section>
+    <section>
+        <div class="container-home p-4 mx-auto">
+            <div class="">
+                <CardTecnologia />
+            </div>
+        </div>
+        <!--BillBoard /-->
+    </section>
+    <section class="">
+        <div class="container-home p-4 mx-auto">
+            <h1
+                class="text-white text-center md:text-left py-4 font-bold text-3xl md:text-5xl lg:text-4xl xl:text-5xl"
+            >
+                Promociones
+            </h1>
+        </div>
+        <div class="w-full mx-auto">
+            <SliderPromociones />
+        </div>
+    </section>
 
-                    <div class="container-home p-4 mx-auto">
-                        <CardEdc />
-                    </div>
-                    <!--div class="backtomorrow bg-[#E7BB42] w-full min-h-[150px] bg-[url('https://beatdigital.com.mx/wp-content/uploads/2025/07/mariposas-abajo.png')] bg-no-repeat bg-contain bg-bottom">
-                        </div-->
+    <section class="">
+        <div class="container-home p-4 mx-auto">
+            <h1
+                class="text-white text-center md:text-left py-4 font-bold text-3xl md:text-5xl lg:text-4xl xl:text-5xl"
+            >
+                Podcast
+            </h1>
+            <div class="flex flex-wrap">
+                <div class="w-full lg:w-2/3">
+                    <SliderPodcast />
                 </div>
-            </section>
-            <section class="">
-                <div class="container-home p-4 mx-auto">
-                    <h1
-                        class="text-white text-center md:text-left py-4 font-bold text-3xl md:text-5xl lg:text-4xl xl:text-5xl"
-                    >
-                        ¿Qué Plan?
-                    </h1>
+                <div class="w-full mt-8 lg:w-1/3 lg:m-0 content-center">
+                    <BoxBanner />
                 </div>
                 <div class="w-full mx-auto">
                     <SliderDestacadosPlan />
@@ -134,7 +179,7 @@ import SliderPortada from "../layouts/SliderPortada.astro";
                         </button>
                     </a>
                 </div>
-            </section>
+            </div>
             <section class="">
                 <div class="container-home p-4 mx-auto">
                     <h1
@@ -155,29 +200,10 @@ import SliderPortada from "../layouts/SliderPortada.astro";
                 </div>
                 <!--BillBoard /-->
             </section>
+        </div>
+    </section>
+</Layout>
 
-
-            <section class="">
-                <div class="container-home p-4 mx-auto">
-                    <h1
-                        class="text-white text-center md:text-left py-4 font-bold text-3xl md:text-5xl lg:text-4xl xl:text-5xl"
-                    >
-                        Podcast
-                    </h1>
-                    <div class="flex flex-wrap">
-                        <div class="w-full lg:w-2/3">
-                            <SliderPodcast />
-                        </div>
-                        <div class="w-full mt-8 lg:w-1/3 lg:m-0 content-center">
-                            <BoxBanner />
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </main>
-        <!--Navidad /-->
-        <Footer />
-        <!--Modal /-->
-        <!--Notificacion /-->
-    </body>
-</html>
+<!--Navidad /-->
+<!--Modal /-->
+<!--Notificacion /-->

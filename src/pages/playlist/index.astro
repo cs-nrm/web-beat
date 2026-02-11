@@ -1,433 +1,702 @@
 ---
-import BaseHead from '../../components/BaseHead.astro';
-import Header from '../../components/Header.astro';
-import Footer from '../../components/Footer.astro';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
-import FormattedDate from '../../components/FormattedDate.astro';
+import Layout from "../../layouts/Layout.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from "../../consts";
+import FormattedDate from "../../components/FormattedDate.astro";
 /*import BarNrm from '../../components/BarNrm.astro';*/
 
+const lunes_nojson = "https://beatdigital.com.mx/cdn/playlist/lunes.json";
+const martes_nojson = "https://beatdigital.com.mx/cdn/playlist/martes.json";
+const miercoles_nojson =
+    "https://beatdigital.com.mx/cdn/playlist/mi%C3%A9rcoles.json";
+const jueves_nojson = "https://beatdigital.com.mx/cdn/playlist/jueves.json";
+const viernes_nojson = "https://beatdigital.com.mx/cdn/playlist/viernes.json";
+const sabado_nojson =
+    "https://beatdigital.com.mx/cdn/playlist/sa%CC%81bado.json";
+const domingo_nojson = "https://beatdigital.com.mx/cdn/playlist/domingo.json";
 
-
-
-const lunes_nojson = 'https://beatdigital.com.mx/cdn/playlist/lunes.json';
-const martes_nojson = 'https://beatdigital.com.mx/cdn/playlist/martes.json';
-const miercoles_nojson = 'https://beatdigital.com.mx/cdn/playlist/mi%C3%A9rcoles.json';
-const jueves_nojson = 'https://beatdigital.com.mx/cdn/playlist/jueves.json';
-const viernes_nojson = 'https://beatdigital.com.mx/cdn/playlist/viernes.json';
-const sabado_nojson = 'https://beatdigital.com.mx/cdn/playlist/sa%CC%81bado.json';
-const domingo_nojson = 'https://beatdigital.com.mx/cdn/playlist/domingo.json';
- 
-const lunes_arr = await fetch(lunes_nojson).then(r => r.text() ).then(data => {    
-    const lunes_json = data.split('\n');     
-    return lunes_json;
-});
-const martes_arr = await fetch(martes_nojson).then(r => r.text() ).then(data => {    
-    const martes_json = data.split('\n');         
-    return martes_json;
-});
+const lunes_arr = await fetch(lunes_nojson)
+    .then((r) => r.text())
+    .then((data) => {
+        const lunes_json = data.split("\n");
+        return lunes_json;
+    });
+const martes_arr = await fetch(martes_nojson)
+    .then((r) => r.text())
+    .then((data) => {
+        const martes_json = data.split("\n");
+        return martes_json;
+    });
 //console.log(martes_arr);
 //console.log(lunes_arr);
-const miercoles_arr = await fetch(miercoles_nojson).then(r => r.text() ).then(data => {    
-    const miercoles_json = data.split('\n');     
-    return miercoles_json;
-});
-const jueves_arr = await fetch(jueves_nojson).then(r => r.text() ).then(data => {    
-    const jueves_json = data.split('\n');     
-    return jueves_json;
-});
-const viernes_arr = await fetch(viernes_nojson).then(r => r.text() ).then(data => {    
-    const viernes_json = data.split('\n');     
-    return viernes_json;
-});
-const sabado_arr = await fetch(sabado_nojson).then(r => r.text() ).then(data => {    
-    const sabado_json = data.split('\n');     
-    return sabado_json;
-});
-const domingo_arr = await fetch(domingo_nojson).then(r => r.text() ).then(data => {    
-    const domingo_json = data.split('\n');     
-    return domingo_json;
-});
+const miercoles_arr = await fetch(miercoles_nojson)
+    .then((r) => r.text())
+    .then((data) => {
+        const miercoles_json = data.split("\n");
+        return miercoles_json;
+    });
+const jueves_arr = await fetch(jueves_nojson)
+    .then((r) => r.text())
+    .then((data) => {
+        const jueves_json = data.split("\n");
+        return jueves_json;
+    });
+const viernes_arr = await fetch(viernes_nojson)
+    .then((r) => r.text())
+    .then((data) => {
+        const viernes_json = data.split("\n");
+        return viernes_json;
+    });
+const sabado_arr = await fetch(sabado_nojson)
+    .then((r) => r.text())
+    .then((data) => {
+        const sabado_json = data.split("\n");
+        return sabado_json;
+    });
+const domingo_arr = await fetch(domingo_nojson)
+    .then((r) => r.text())
+    .then((data) => {
+        const domingo_json = data.split("\n");
+        return domingo_json;
+    });
 
-const lunes : string[] = [];
-const martes : string[] = [];
-const miercoles : string[] = [];
-const jueves : string[] = [];
-const viernes : string[] = [];
-const sabado : string[] = [];
-const domingo : string[] = [];
+const lunes: string[] = [];
+const martes: string[] = [];
+const miercoles: string[] = [];
+const jueves: string[] = [];
+const viernes: string[] = [];
+const sabado: string[] = [];
+const domingo: string[] = [];
 
-
-lunes_arr.map(ellunes =>{    
-    if(ellunes != ''){
+lunes_arr.map((ellunes) => {
+    if (ellunes != "") {
         let elelun = JSON.parse(ellunes);
-        if(elelun.categoria === 'RANDOM' || elelun.categoria === 'MUSICA-DANCE' || elelun.categoria === 'MUSICA-HOUSE' || elelun.categoria === 'MÚSICA-DREAM' || elelun.categoria === 'MUSICA-ELECTRONICA' || elelun.categoria === 'MUSICA-PROGRESIVO' || elelun.categoria === 'MUSICA-RETRO' || elelun.categoria === 'MUSICA-RANDOM ANDRE' || elelun.categoria === 'LADO F'){
-            lunes.push(elelun);                     
+        if (
+            elelun.categoria === "RANDOM" ||
+            elelun.categoria === "MUSICA-DANCE" ||
+            elelun.categoria === "MUSICA-HOUSE" ||
+            elelun.categoria === "MÚSICA-DREAM" ||
+            elelun.categoria === "MUSICA-ELECTRONICA" ||
+            elelun.categoria === "MUSICA-PROGRESIVO" ||
+            elelun.categoria === "MUSICA-RETRO" ||
+            elelun.categoria === "MUSICA-RANDOM ANDRE" ||
+            elelun.categoria === "LADO F"
+        ) {
+            lunes.push(elelun);
         }
     }
 });
 
-martes_arr.map(el =>{    
-    if(el != ''){
+martes_arr.map((el) => {
+    if (el != "") {
         let ele = JSON.parse(el);
-        if(ele.categoria === 'RANDOM' || ele.categoria === 'MUSICA-DANCE' || ele.categoria === 'MUSICA-HOUSE' || ele.categoria === 'MÚSICA-DREAM' || ele.categoria === 'MUSICA-ELECTRONICA' || ele.categoria === 'MUSICA-PROGRESIVO' || ele.categoria === 'MUSICA-RETRO' || ele.categoria === 'MUSICA-RANDOM ANDRE' || ele.categoria === 'LADO F'){
-            martes.push(ele);                     
+        if (
+            ele.categoria === "RANDOM" ||
+            ele.categoria === "MUSICA-DANCE" ||
+            ele.categoria === "MUSICA-HOUSE" ||
+            ele.categoria === "MÚSICA-DREAM" ||
+            ele.categoria === "MUSICA-ELECTRONICA" ||
+            ele.categoria === "MUSICA-PROGRESIVO" ||
+            ele.categoria === "MUSICA-RETRO" ||
+            ele.categoria === "MUSICA-RANDOM ANDRE" ||
+            ele.categoria === "LADO F"
+        ) {
+            martes.push(ele);
         }
     }
 });
 
-miercoles_arr.map(el =>{    
-    if(el != ''){
+miercoles_arr.map((el) => {
+    if (el != "") {
         let ele = JSON.parse(el);
-        if(ele.categoria === 'RANDOM' || ele.categoria === 'MUSICA-DANCE' || ele.categoria === 'MUSICA-HOUSE' || ele.categoria === 'MÚSICA-DREAM' || ele.categoria === 'MUSICA-ELECTRONICA' || ele.categoria === 'MUSICA-PROGRESIVO' || ele.categoria === 'MUSICA-RETRO' || ele.categoria === 'MUSICA-RANDOM ANDRE' || ele.categoria === 'LADO F'){
-            miercoles.push(ele);                     
+        if (
+            ele.categoria === "RANDOM" ||
+            ele.categoria === "MUSICA-DANCE" ||
+            ele.categoria === "MUSICA-HOUSE" ||
+            ele.categoria === "MÚSICA-DREAM" ||
+            ele.categoria === "MUSICA-ELECTRONICA" ||
+            ele.categoria === "MUSICA-PROGRESIVO" ||
+            ele.categoria === "MUSICA-RETRO" ||
+            ele.categoria === "MUSICA-RANDOM ANDRE" ||
+            ele.categoria === "LADO F"
+        ) {
+            miercoles.push(ele);
         }
     }
 });
 
-jueves_arr.map(el =>{    
-    if(el != ''){
+jueves_arr.map((el) => {
+    if (el != "") {
         let ele = JSON.parse(el);
-        if(ele.categoria === 'RANDOM' || ele.categoria === 'MUSICA-DANCE' || ele.categoria === 'MUSICA-HOUSE' || ele.categoria === 'MÚSICA-DREAM' || ele.categoria === 'MUSICA-ELECTRONICA' || ele.categoria === 'MUSICA-PROGRESIVO' || ele.categoria === 'MUSICA-RETRO' || ele.categoria === 'MUSICA-RANDOM ANDRE' || ele.categoria === 'LADO F'){
-            jueves.push(ele);                     
+        if (
+            ele.categoria === "RANDOM" ||
+            ele.categoria === "MUSICA-DANCE" ||
+            ele.categoria === "MUSICA-HOUSE" ||
+            ele.categoria === "MÚSICA-DREAM" ||
+            ele.categoria === "MUSICA-ELECTRONICA" ||
+            ele.categoria === "MUSICA-PROGRESIVO" ||
+            ele.categoria === "MUSICA-RETRO" ||
+            ele.categoria === "MUSICA-RANDOM ANDRE" ||
+            ele.categoria === "LADO F"
+        ) {
+            jueves.push(ele);
         }
     }
 });
 
-viernes_arr.map(el =>{    
-    if(el != ''){
+viernes_arr.map((el) => {
+    if (el != "") {
         let ele = JSON.parse(el);
-        if(ele.categoria === 'RANDOM' || ele.categoria === 'MUSICA-DANCE' || ele.categoria === 'MUSICA-HOUSE' || ele.categoria === 'MÚSICA-DREAM' || ele.categoria === 'MUSICA-ELECTRONICA' || ele.categoria === 'MUSICA-PROGRESIVO' || ele.categoria === 'MUSICA-RETRO' || ele.categoria === 'MUSICA-RANDOM ANDRE' || ele.categoria === 'LADO F'){
-            viernes.push(ele);                     
+        if (
+            ele.categoria === "RANDOM" ||
+            ele.categoria === "MUSICA-DANCE" ||
+            ele.categoria === "MUSICA-HOUSE" ||
+            ele.categoria === "MÚSICA-DREAM" ||
+            ele.categoria === "MUSICA-ELECTRONICA" ||
+            ele.categoria === "MUSICA-PROGRESIVO" ||
+            ele.categoria === "MUSICA-RETRO" ||
+            ele.categoria === "MUSICA-RANDOM ANDRE" ||
+            ele.categoria === "LADO F"
+        ) {
+            viernes.push(ele);
         }
     }
 });
 
-sabado_arr.map(el =>{    
-    if(el != ''){
+sabado_arr.map((el) => {
+    if (el != "") {
         let ele = JSON.parse(el);
-        if(ele.categoria === 'RANDOM' || ele.categoria === 'MUSICA-DANCE' || ele.categoria === 'MUSICA-HOUSE' || ele.categoria === 'MÚSICA-DREAM' || ele.categoria === 'MUSICA-ELECTRONICA' || ele.categoria === 'MUSICA-PROGRESIVO' || ele.categoria === 'MUSICA-RETRO' || ele.categoria === 'MUSICA-RANDOM ANDRE' || ele.categoria === 'LADO F'){
-            sabado.push(ele);                     
+        if (
+            ele.categoria === "RANDOM" ||
+            ele.categoria === "MUSICA-DANCE" ||
+            ele.categoria === "MUSICA-HOUSE" ||
+            ele.categoria === "MÚSICA-DREAM" ||
+            ele.categoria === "MUSICA-ELECTRONICA" ||
+            ele.categoria === "MUSICA-PROGRESIVO" ||
+            ele.categoria === "MUSICA-RETRO" ||
+            ele.categoria === "MUSICA-RANDOM ANDRE" ||
+            ele.categoria === "LADO F"
+        ) {
+            sabado.push(ele);
         }
     }
 });
 
-domingo_arr.map(el =>{    
-    if(el != ''){
+domingo_arr.map((el) => {
+    if (el != "") {
         let ele = JSON.parse(el);
-        if(ele.categoria === 'RANDOM' || ele.categoria === 'MUSICA-DANCE' || ele.categoria === 'MUSICA-HOUSE' || ele.categoria === 'MÚSICA-DREAM' || ele.categoria === 'MUSICA-ELECTRONICA' || ele.categoria === 'MUSICA-PROGRESIVO' || ele.categoria === 'MUSICA-RETRO' || ele.categoria === 'MUSICA-RANDOM ANDRE' || ele.categoria === 'LADO F'){
-            domingo.push(ele);                     
+        if (
+            ele.categoria === "RANDOM" ||
+            ele.categoria === "MUSICA-DANCE" ||
+            ele.categoria === "MUSICA-HOUSE" ||
+            ele.categoria === "MÚSICA-DREAM" ||
+            ele.categoria === "MUSICA-ELECTRONICA" ||
+            ele.categoria === "MUSICA-PROGRESIVO" ||
+            ele.categoria === "MUSICA-RETRO" ||
+            ele.categoria === "MUSICA-RANDOM ANDRE" ||
+            ele.categoria === "LADO F"
+        ) {
+            domingo.push(ele);
         }
     }
 });
 
-
-
-function getMes(mes){
-    const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];    
-    return meses[mes-1];
+function getMes(mes) {
+    const meses = [
+        "Enero",
+        "Febrero",
+        "Marzo",
+        "Abril",
+        "Mayo",
+        "Junio",
+        "Julio",
+        "Agosto",
+        "Septiembre",
+        "Octubre",
+        "Noviembre",
+        "Diciembre",
+    ];
+    return meses[mes - 1];
 }
-
-
 ---
 
-<!doctype html>
-<html lang="es">
-	<head>
-		<BaseHead title={SITE_TITLE} seccion="Playlist" description={SITE_DESCRIPTION} />
-		 <meta charset="utf-8"/>
-	</head>
-	<body>
-        <!--BarNrm /-->
-		<Header title={SITE_TITLE} />
-		
-		<main id="playlist">
-            <div class="container my-12 mx-auto">
-                <h1 class="audiowide neon-verde text-center md:text-left pt-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl" >PLAYLIST</h1>
+<Layout title={SITE_TITLE} seccion="Playlist" description={SITE_DESCRIPTION}>
+    <!--BarNrm /-->
 
-                <form id="select-day" class="max-w-sm my-2">
-                    <label for="dias" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Selecciona un día</label>
-                    <select  id="dias" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                      <option value="lunes">Lunes</option>
-                      <option value="martes">Martes</option>
-                      <option value="miercoles">Miércoles</option>
-                      <option value="jueves">Jueves</option>
-                      <option value="viernes">Viernes</option>
-                      <option value="sabado">Sábado</option>
-                      <option value="domingo">Domingo</option>
-                    </select>
-                  </form>
-                
-                
-                <div id="lunes">
-                    <div>Lunes {  lunes[0]['hora_real'].split('T')[0].split('-')[2] } de {  getMes(lunes[0]['hora_real'].split('T')[0].split('-')[1]) }</div>
+    <main id="playlist">
+        <div class="container my-12 mx-auto">
+            <h1
+                class="audiowide neon-verde text-center md:text-left pt-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl"
+            >
+                PLAYLIST
+            </h1>
 
-                    <table class="table-auto text-white  border-collapse: collapse; cursor:auto;  rounded-lg text-base" >
-                        <thead class="bg-gray-800/[0.5] rounded-lg">
-                        <tr>
-                            <th class="">Hora</th>
-                            <th>Canción</th>
-                            <th>DJ</th>
-                        </tr>
-                        </thead>
-                        { 
-                            lunes.map( (el:any) => (
-                            
-                                <>  
-                                    <tr class="hover:bg-gray-700/[0.6] hover:rounded-lg drop-shadow-[0_15px_15px_rgba(255,255,255,0.15)]">                  
-                                        <td class="cursor:auto; whitespace-nowrap;">{el.hora_real.split('T')[1].split(':')[0]}:{el.hora_real.split('T')[1].split(':')[1]}</td>
-                                        <td class="cursor:auto; whitespace-nowrap;">{el.title}</td>
-                                        <td class="cursor:auto; whitespace-nowrap;">{el.dj}</td>                        
-                                    </tr>
-                                </>
-                            
-                            ))
-                        }
-                 </table>
+            <form id="select-day" class="max-w-sm my-2">
+                <label
+                    for="dias"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Selecciona un día</label
+                >
+                <select
+                    id="dias"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                >
+                    <option value="lunes">Lunes</option>
+                    <option value="martes">Martes</option>
+                    <option value="miercoles">Miércoles</option>
+                    <option value="jueves">Jueves</option>
+                    <option value="viernes">Viernes</option>
+                    <option value="sabado">Sábado</option>
+                    <option value="domingo">Domingo</option>
+                </select>
+            </form>
+
+            <div id="lunes">
+                <div>
+                    Lunes {lunes[0]["hora_real"].split("T")[0].split("-")[2]} de {
+                        getMes(
+                            lunes[0]["hora_real"].split("T")[0].split("-")[1],
+                        )
+                    }
                 </div>
-                
-                <div id="martes">
-                    <div>Martes { martes[0]['hora_real'].split('T')[0].split('-')[2] } de {  getMes(martes[0]['hora_real'].split('T')[0].split('-')[1]) }</div>
-                    
-                    <table class="table-auto text-white  border-collapse: collapse; cursor:auto;  rounded-lg text-base" >
-                        <thead class="bg-gray-800/[0.5] rounded-lg">
+
+                <table
+                    class="table-auto text-white border-collapse: collapse; cursor:auto; rounded-lg text-base"
+                >
+                    <thead class="bg-gray-800/[0.5] rounded-lg">
                         <tr>
                             <th class="">Hora</th>
                             <th>Canción</th>
                             <th>DJ</th>
                         </tr>
-                        </thead>
-                        { 
-                            martes.map( (el:any) => (
-                            
-                                <>  
-                                    <tr class="hover:bg-gray-700/[0.6] hover:rounded-lg drop-shadow-[0_15px_15px_rgba(255,255,255,0.15)]">                  
-                                        <td class="cursor:auto; whitespace-nowrap;">{el.hora_real.split('T')[1].split(':')[0]}:{el.hora_real.split('T')[1].split(':')[1]}</td>
-                                        <td class="cursor:auto; whitespace-nowrap;">{el.title}</td>
-                                        <td class="cursor:auto; whitespace-nowrap;">{el.dj}</td>                        
-                                    </tr>
-                                </>
-                            
-                            ))
-                        }
-                 </table>
-                </div> 
-
-                <div id="miercoles">
-                    <div>Miércoles { miercoles[0]['hora_real'].split('T')[0].split('-')[2] } de {  getMes(miercoles[0]['hora_real'].split('T')[0].split('-')[1]) }</div>
-                    <table class="table-auto text-white  border-collapse: collapse; cursor:auto;  rounded-lg text-base" >
-                        <thead class="bg-gray-800/[0.5] rounded-lg">
-                        <tr>
-                            <th class="">Hora</th>
-                            <th>Canción</th>
-                            <th>DJ</th>
-                        </tr>
-                        </thead>
-                        { 
-                            miercoles.map( (el:any) => (
-                            
-                                <>  
-                                    <tr class="hover:bg-gray-700/[0.6] hover:rounded-lg drop-shadow-[0_15px_15px_rgba(255,255,255,0.15)]">                  
-                                        <td class="cursor:auto; whitespace-nowrap;">{el.hora_real.split('T')[1].split(':')[0]}:{el.hora_real.split('T')[1].split(':')[1]}</td>
-                                        <td class="cursor:auto; whitespace-nowrap;">{el.title}</td>
-                                        <td class="cursor:auto; whitespace-nowrap;">{el.dj}</td>                        
-                                    </tr>
-                                </>
-                            
-                            ))
-                        }
-                 </table>
-                </div> 
-
-                <div id="jueves">
-                    <div>Jueves { jueves[0]['hora_real'].split('T')[0].split('-')[2] } de {  getMes(jueves[0]['hora_real'].split('T')[0].split('-')[1]) }</div>
-                    <table class="table-auto text-white  border-collapse: collapse; cursor:auto;  rounded-lg text-base" >
-                        <thead class="bg-gray-800/[0.5] rounded-lg">
-                        <tr>
-                            <th class="">Hora</th>
-                            <th>Canción</th>
-                            <th>DJ</th>
-                        </tr>
-                        </thead>
-                        { 
-                            jueves.map( (el:any) => (
-                            
-                                <>  
-                                    <tr class="hover:bg-gray-700/[0.6] hover:rounded-lg drop-shadow-[0_15px_15px_rgba(255,255,255,0.15)]">                  
-                                        <td class="cursor:auto; whitespace-nowrap;">{el.hora_real.split('T')[1].split(':')[0]}:{el.hora_real.split('T')[1].split(':')[1]}</td>
-                                        <td class="cursor:auto; whitespace-nowrap;">{el.title}</td>
-                                        <td class="cursor:auto; whitespace-nowrap;">{el.dj}</td>                        
-                                    </tr>
-                                </>
-                            
-                            ))
-                        }
-                 </table>
-                </div> 
-
-                <div id="viernes">
-                    <div>Viernes { viernes[0]['hora_real'].split('T')[0].split('-')[2] } de {  getMes(viernes[0]['hora_real'].split('T')[0].split('-')[1]) }</div>
-                    <table class="table-auto text-white  border-collapse: collapse; cursor:auto;  rounded-lg text-base" >
-                        <thead class="bg-gray-800/[0.5] rounded-lg">
-                        <tr>
-                            <th class="">Hora</th>
-                            <th>Canción</th>
-                            <th>DJ</th>
-                        </tr>
-                        </thead>
-                        { 
-                            viernes.map( (el:any) => (
-                            
-                                <>  
-                                    <tr class="hover:bg-gray-700/[0.6] hover:rounded-lg drop-shadow-[0_15px_15px_rgba(255,255,255,0.15)]">                  
-                                        <td class="cursor:auto; whitespace-nowrap;">{el.hora_real.split('T')[1].split(':')[0]}:{el.hora_real.split('T')[1].split(':')[1]}</td>
-                                        <td class="cursor:auto; whitespace-nowrap;">{el.title}</td>
-                                        <td class="cursor:auto; whitespace-nowrap;">{el.dj}</td>                        
-                                    </tr>
-                                </>
-                            
-                            ))
-                        }
-                 </table>
-                </div> 
-
-                <div id="sabado">
-                    <div>Sábado { sabado[0]['hora_real'].split('T')[0].split('-')[2] } de {  getMes(sabado[0]['hora_real'].split('T')[0].split('-')[1]) }</div>
-                    <table class="table-auto text-white  border-collapse: collapse; cursor:auto;  rounded-lg text-base" >
-                        <thead class="bg-gray-800/[0.5] rounded-lg">
-                        <tr>
-                            <th class="">Hora</th>
-                            <th>Canción</th>
-                            <th>DJ</th>
-                        </tr>
-                        </thead>
-                        { 
-                            sabado.map( (el:any) => (
-                            
-                                <>  
-                                    <tr class="hover:bg-gray-700/[0.6] hover:rounded-lg drop-shadow-[0_15px_15px_rgba(255,255,255,0.15)]">                  
-                                        <td class="cursor:auto; whitespace-nowrap;">{el.hora_real.split('T')[1].split(':')[0]}:{el.hora_real.split('T')[1].split(':')[1]}</td>
-                                        <td class="cursor:auto; whitespace-nowrap;">{el.title}</td>
-                                        <td class="cursor:auto; whitespace-nowrap;">{el.dj}</td>                        
-                                    </tr>
-                                </>
-                            
-                            ))
-                        }
-                 </table>
-                </div> 
-
-                <div id="domingo">
-                    <div>Domingo { domingo[0]['hora_real'].split('T')[0].split('-')[2] } de {  getMes(domingo[0]['hora_real'].split('T')[0].split('-')[1]) }</div>
-                    <table class="table-auto text-white  border-collapse: collapse; cursor:auto;  rounded-lg text-base" >
-                        <thead class="bg-gray-800/[0.5] rounded-lg">
-                        <tr>
-                            <th class="">Hora</th>
-                            <th>Canción</th>
-                            <th>DJ</th>
-                        </tr>
-                        </thead>
-                        { 
-                            domingo.map( (el:any) => (
-                            
-                                <>  
-                                    <tr class="hover:bg-gray-700/[0.6] hover:rounded-lg drop-shadow-[0_15px_15px_rgba(255,255,255,0.15)]">                  
-                                        <td class="cursor:auto; whitespace-nowrap;">{el.hora_real.split('T')[1].split(':')[0]}:{el.hora_real.split('T')[1].split(':')[1]}</td>
-                                        <td class="cursor:auto; whitespace-nowrap;">{el.title}</td>
-                                        <td class="cursor:auto; whitespace-nowrap;">{el.dj}</td>                        
-                                    </tr>
-                                </>
-                            
-                            ))
-                        }
-                 </table>
-                </div> 
-
-
-
+                    </thead>
+                    {
+                        lunes.map((el: any) => (
+                            <>
+                                <tr class="hover:bg-gray-700/[0.6] hover:rounded-lg drop-shadow-[0_15px_15px_rgba(255,255,255,0.15)]">
+                                    <td class="cursor:auto; whitespace-nowrap;">
+                                        {
+                                            el.hora_real
+                                                .split("T")[1]
+                                                .split(":")[0]
+                                        }
+                                        :
+                                        {
+                                            el.hora_real
+                                                .split("T")[1]
+                                                .split(":")[1]
+                                        }
+                                    </td>
+                                    <td class="cursor:auto; whitespace-nowrap;">
+                                        {el.title}
+                                    </td>
+                                    <td class="cursor:auto; whitespace-nowrap;">
+                                        {el.dj}
+                                    </td>
+                                </tr>
+                            </>
+                        ))
+                    }
+                </table>
             </div>
-		</main>
-		<Footer />
-	</body>
-</html>
-<style>
-    table{ cursor:default; }
-    th { padding: 20px; 
-        text-shadow:
-        0 0 0.15em var(--amarillo-beat);
-    }
 
-    td {  padding: 0 5px;  }
-    tr:hover{    
-        text-shadow:
-        0.25em 0.25em 0.5em var(--amarillo-beat);
-        font-size: 110%;
-        transition: all 0.3s;
-    }   
-    #lunes, #martes, #miercoles, #jueves, #viernes, #sabado, #domingo{ display: none;}
-</style>
+            <div id="martes">
+                <div>
+                    Martes {martes[0]["hora_real"].split("T")[0].split("-")[2]} de
+                    {getMes(martes[0]["hora_real"].split("T")[0].split("-")[1])}
+                </div>
 
-<script is:inline>
+                <table
+                    class="table-auto text-white border-collapse: collapse; cursor:auto; rounded-lg text-base"
+                >
+                    <thead class="bg-gray-800/[0.5] rounded-lg">
+                        <tr>
+                            <th class="">Hora</th>
+                            <th>Canción</th>
+                            <th>DJ</th>
+                        </tr>
+                    </thead>
+                    {
+                        martes.map((el: any) => (
+                            <>
+                                <tr class="hover:bg-gray-700/[0.6] hover:rounded-lg drop-shadow-[0_15px_15px_rgba(255,255,255,0.15)]">
+                                    <td class="cursor:auto; whitespace-nowrap;">
+                                        {
+                                            el.hora_real
+                                                .split("T")[1]
+                                                .split(":")[0]
+                                        }
+                                        :
+                                        {
+                                            el.hora_real
+                                                .split("T")[1]
+                                                .split(":")[1]
+                                        }
+                                    </td>
+                                    <td class="cursor:auto; whitespace-nowrap;">
+                                        {el.title}
+                                    </td>
+                                    <td class="cursor:auto; whitespace-nowrap;">
+                                        {el.dj}
+                                    </td>
+                                </tr>
+                            </>
+                        ))
+                    }
+                </table>
+            </div>
 
-/*function selectday(e){
-    console.log(e)
-    //console.log(e.target.value);
-}*/
-selectElement = document.querySelector('#select-day');
-selectElement.addEventListener("change", (event) => {
-  console.log(event.target.value);
-  
-  function hide(){
-    $('#lunes').css('display','none');
-    $('#martes').css('display','none');
-    $('#miercoles').css('display','none');
-    $('#jueves').css('display','none');
-    $('#viernes').css('display','none');
-    $('#sabado').css('display','none');
-    $('#domingo').css('display','none');
-  }
+            <div id="miercoles">
+                <div>
+                    Miércoles {
+                        miercoles[0]["hora_real"].split("T")[0].split("-")[2]
+                    } de {
+                        getMes(
+                            miercoles[0]["hora_real"]
+                                .split("T")[0]
+                                .split("-")[1],
+                        )
+                    }
+                </div>
+                <table
+                    class="table-auto text-white border-collapse: collapse; cursor:auto; rounded-lg text-base"
+                >
+                    <thead class="bg-gray-800/[0.5] rounded-lg">
+                        <tr>
+                            <th class="">Hora</th>
+                            <th>Canción</th>
+                            <th>DJ</th>
+                        </tr>
+                    </thead>
+                    {
+                        miercoles.map((el: any) => (
+                            <>
+                                <tr class="hover:bg-gray-700/[0.6] hover:rounded-lg drop-shadow-[0_15px_15px_rgba(255,255,255,0.15)]">
+                                    <td class="cursor:auto; whitespace-nowrap;">
+                                        {
+                                            el.hora_real
+                                                .split("T")[1]
+                                                .split(":")[0]
+                                        }
+                                        :
+                                        {
+                                            el.hora_real
+                                                .split("T")[1]
+                                                .split(":")[1]
+                                        }
+                                    </td>
+                                    <td class="cursor:auto; whitespace-nowrap;">
+                                        {el.title}
+                                    </td>
+                                    <td class="cursor:auto; whitespace-nowrap;">
+                                        {el.dj}
+                                    </td>
+                                </tr>
+                            </>
+                        ))
+                    }
+                </table>
+            </div>
 
-    switch(event.target.value){
-        case 'lunes':
-            hide();
-            $('#lunes').css('display','block');
-        break;
-        case 'martes':
-            hide();
-            $('#martes').css('display','block');
-        break;
-        case 'miercoles':
-            hide();
-            $('#miercoles').css('display','block');
-        break;
-        case 'jueves':
-            hide();
-            $('#jueves').css('display','block');
-        break;
-        case 'viernes':
-            hide();
-            $('#viernes').css('display','block');
-        break;
-        case 'sabado':
-            hide();
-            $('#sabado').css('display','block');
-        break;
-        case 'domingo':
-            hide();
-            $('#domingo').css('display','block');            
-        break;
-        
-    }
-});
+            <div id="jueves">
+                <div>
+                    Jueves {jueves[0]["hora_real"].split("T")[0].split("-")[2]} de
+                    {getMes(jueves[0]["hora_real"].split("T")[0].split("-")[1])}
+                </div>
+                <table
+                    class="table-auto text-white border-collapse: collapse; cursor:auto; rounded-lg text-base"
+                >
+                    <thead class="bg-gray-800/[0.5] rounded-lg">
+                        <tr>
+                            <th class="">Hora</th>
+                            <th>Canción</th>
+                            <th>DJ</th>
+                        </tr>
+                    </thead>
+                    {
+                        jueves.map((el: any) => (
+                            <>
+                                <tr class="hover:bg-gray-700/[0.6] hover:rounded-lg drop-shadow-[0_15px_15px_rgba(255,255,255,0.15)]">
+                                    <td class="cursor:auto; whitespace-nowrap;">
+                                        {
+                                            el.hora_real
+                                                .split("T")[1]
+                                                .split(":")[0]
+                                        }
+                                        :
+                                        {
+                                            el.hora_real
+                                                .split("T")[1]
+                                                .split(":")[1]
+                                        }
+                                    </td>
+                                    <td class="cursor:auto; whitespace-nowrap;">
+                                        {el.title}
+                                    </td>
+                                    <td class="cursor:auto; whitespace-nowrap;">
+                                        {el.dj}
+                                    </td>
+                                </tr>
+                            </>
+                        ))
+                    }
+                </table>
+            </div>
 
-fecha = new Date();
-switch(fecha.getDay()){
-    case 1:        document.getElementById('lunes').style.display = 'block';   $('#dias option:eq(0)').prop('selected',true); break;
-    case 2:        document.getElementById('martes').style.display = 'block';   $('#dias option:eq(1)').prop('selected',true); break;
-    case 3:        document.getElementById('miercoles').style.display = 'block'; $('#dias option:eq(2)').prop('selected',true);   break;
-    case 4:        document.getElementById('jueves').style.display = 'block';  $('#dias option:eq(3)').prop('selected',true);  break;
-    case 5:        document.getElementById('viernes').style.display = 'block';  $('#dias option:eq(4)').prop('selected',true);  break;
-    case 6:        document.getElementById('sabado').style.display = 'block';  $('#dias option:eq(5)').prop('selected',true);  break;
-    case 7:        document.getElementById('domingo').style.display = 'block';  $('#dias option:eq(6)').prop('selected',true);  break;
-}
+            <div id="viernes">
+                <div>
+                    Viernes {
+                        viernes[0]["hora_real"].split("T")[0].split("-")[2]
+                    } de {
+                        getMes(
+                            viernes[0]["hora_real"].split("T")[0].split("-")[1],
+                        )
+                    }
+                </div>
+                <table
+                    class="table-auto text-white border-collapse: collapse; cursor:auto; rounded-lg text-base"
+                >
+                    <thead class="bg-gray-800/[0.5] rounded-lg">
+                        <tr>
+                            <th class="">Hora</th>
+                            <th>Canción</th>
+                            <th>DJ</th>
+                        </tr>
+                    </thead>
+                    {
+                        viernes.map((el: any) => (
+                            <>
+                                <tr class="hover:bg-gray-700/[0.6] hover:rounded-lg drop-shadow-[0_15px_15px_rgba(255,255,255,0.15)]">
+                                    <td class="cursor:auto; whitespace-nowrap;">
+                                        {
+                                            el.hora_real
+                                                .split("T")[1]
+                                                .split(":")[0]
+                                        }
+                                        :
+                                        {
+                                            el.hora_real
+                                                .split("T")[1]
+                                                .split(":")[1]
+                                        }
+                                    </td>
+                                    <td class="cursor:auto; whitespace-nowrap;">
+                                        {el.title}
+                                    </td>
+                                    <td class="cursor:auto; whitespace-nowrap;">
+                                        {el.dj}
+                                    </td>
+                                </tr>
+                            </>
+                        ))
+                    }
+                </table>
+            </div>
 
-</script>
+            <div id="sabado">
+                <div>
+                    Sábado {sabado[0]["hora_real"].split("T")[0].split("-")[2]} de
+                    {getMes(sabado[0]["hora_real"].split("T")[0].split("-")[1])}
+                </div>
+                <table
+                    class="table-auto text-white border-collapse: collapse; cursor:auto; rounded-lg text-base"
+                >
+                    <thead class="bg-gray-800/[0.5] rounded-lg">
+                        <tr>
+                            <th class="">Hora</th>
+                            <th>Canción</th>
+                            <th>DJ</th>
+                        </tr>
+                    </thead>
+                    {
+                        sabado.map((el: any) => (
+                            <>
+                                <tr class="hover:bg-gray-700/[0.6] hover:rounded-lg drop-shadow-[0_15px_15px_rgba(255,255,255,0.15)]">
+                                    <td class="cursor:auto; whitespace-nowrap;">
+                                        {
+                                            el.hora_real
+                                                .split("T")[1]
+                                                .split(":")[0]
+                                        }
+                                        :
+                                        {
+                                            el.hora_real
+                                                .split("T")[1]
+                                                .split(":")[1]
+                                        }
+                                    </td>
+                                    <td class="cursor:auto; whitespace-nowrap;">
+                                        {el.title}
+                                    </td>
+                                    <td class="cursor:auto; whitespace-nowrap;">
+                                        {el.dj}
+                                    </td>
+                                </tr>
+                            </>
+                        ))
+                    }
+                </table>
+            </div>
+
+            <div id="domingo">
+                <div>
+                    Domingo {
+                        domingo[0]["hora_real"].split("T")[0].split("-")[2]
+                    } de {
+                        getMes(
+                            domingo[0]["hora_real"].split("T")[0].split("-")[1],
+                        )
+                    }
+                </div>
+                <table
+                    class="table-auto text-white border-collapse: collapse; cursor:auto; rounded-lg text-base"
+                >
+                    <thead class="bg-gray-800/[0.5] rounded-lg">
+                        <tr>
+                            <th class="">Hora</th>
+                            <th>Canción</th>
+                            <th>DJ</th>
+                        </tr>
+                    </thead>
+                    {
+                        domingo.map((el: any) => (
+                            <>
+                                <tr class="hover:bg-gray-700/[0.6] hover:rounded-lg drop-shadow-[0_15px_15px_rgba(255,255,255,0.15)]">
+                                    <td class="cursor:auto; whitespace-nowrap;">
+                                        {
+                                            el.hora_real
+                                                .split("T")[1]
+                                                .split(":")[0]
+                                        }
+                                        :
+                                        {
+                                            el.hora_real
+                                                .split("T")[1]
+                                                .split(":")[1]
+                                        }
+                                    </td>
+                                    <td class="cursor:auto; whitespace-nowrap;">
+                                        {el.title}
+                                    </td>
+                                    <td class="cursor:auto; whitespace-nowrap;">
+                                        {el.dj}
+                                    </td>
+                                </tr>
+                            </>
+                        ))
+                    }
+                </table>
+            </div>
+        </div>
+    </main>
+    <style>
+        table {
+            cursor: default;
+        }
+        th {
+            padding: 20px;
+            text-shadow: 0 0 0.15em var(--amarillo-beat);
+        }
+
+        td {
+            padding: 0 5px;
+        }
+        tr:hover {
+            text-shadow: 0.25em 0.25em 0.5em var(--amarillo-beat);
+            font-size: 110%;
+            transition: all 0.3s;
+        }
+        #lunes,
+        #martes,
+        #miercoles,
+        #jueves,
+        #viernes,
+        #sabado,
+        #domingo {
+            display: none;
+        }
+    </style>
+
+    <script is:inline>
+        /*function selectday(e){
+        console.log(e)
+        //console.log(e.target.value);
+    }*/
+        selectElement = document.querySelector("#select-day");
+        selectElement.addEventListener("change", (event) => {
+            console.log(event.target.value);
+
+            function hide() {
+                $("#lunes").css("display", "none");
+                $("#martes").css("display", "none");
+                $("#miercoles").css("display", "none");
+                $("#jueves").css("display", "none");
+                $("#viernes").css("display", "none");
+                $("#sabado").css("display", "none");
+                $("#domingo").css("display", "none");
+            }
+
+            switch (event.target.value) {
+                case "lunes":
+                    hide();
+                    $("#lunes").css("display", "block");
+                    break;
+                case "martes":
+                    hide();
+                    $("#martes").css("display", "block");
+                    break;
+                case "miercoles":
+                    hide();
+                    $("#miercoles").css("display", "block");
+                    break;
+                case "jueves":
+                    hide();
+                    $("#jueves").css("display", "block");
+                    break;
+                case "viernes":
+                    hide();
+                    $("#viernes").css("display", "block");
+                    break;
+                case "sabado":
+                    hide();
+                    $("#sabado").css("display", "block");
+                    break;
+                case "domingo":
+                    hide();
+                    $("#domingo").css("display", "block");
+                    break;
+            }
+        });
+
+        fecha = new Date();
+        switch (fecha.getDay()) {
+            case 1:
+                document.getElementById("lunes").style.display = "block";
+                $("#dias option:eq(0)").prop("selected", true);
+                break;
+            case 2:
+                document.getElementById("martes").style.display = "block";
+                $("#dias option:eq(1)").prop("selected", true);
+                break;
+            case 3:
+                document.getElementById("miercoles").style.display = "block";
+                $("#dias option:eq(2)").prop("selected", true);
+                break;
+            case 4:
+                document.getElementById("jueves").style.display = "block";
+                $("#dias option:eq(3)").prop("selected", true);
+                break;
+            case 5:
+                document.getElementById("viernes").style.display = "block";
+                $("#dias option:eq(4)").prop("selected", true);
+                break;
+            case 6:
+                document.getElementById("sabado").style.display = "block";
+                $("#dias option:eq(5)").prop("selected", true);
+                break;
+            case 7:
+                document.getElementById("domingo").style.display = "block";
+                $("#dias option:eq(6)").prop("selected", true);
+                break;
+        }
+    </script>
+</Layout>

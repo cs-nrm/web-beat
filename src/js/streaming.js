@@ -119,8 +119,8 @@ function initGPT() {
 
 
     window.slot2 = googletag.defineSlot("/21799830913/Beat", [300, 250], 'ad-slot2').defineSizeMapping(mapping2).addService(googletag.pubads());
-    window.slot3 = googletag.defineSlot("/21799830913/Beat", [970, 90],'ad-slot3').defineSizeMapping(mapping3).addService(googletag.pubads());
-    window.slot31 = googletag.defineSlot("/21799830913/Beat", [320, 50],'ad-slot31').defineSizeMapping(mapping31).addService(googletag.pubads());
+    window.slot3 = googletag.defineSlot("/21799830913/Beat", [970, 90], 'ad-slot3').defineSizeMapping(mapping3).addService(googletag.pubads());
+    window.slot31 = googletag.defineSlot("/21799830913/Beat", [320, 50], 'ad-slot31').defineSizeMapping(mapping31).addService(googletag.pubads());
     window.slot32 = googletag.defineSlot("/21799830913/Beat", [728, 90], 'ad-slot32').defineSizeMapping(mapping32).addService(googletag.pubads());
     //window.slot32 = googletag.defineSlot("/21799830913/Beat", [600, 300],'ad-slot32').defineSizeMapping(mapping32).addService(googletag.pubads());
     window.slot321 = googletag.defineSlot("/21799830913/Beat", [320, 50], 'ad-slot321').defineSizeMapping(mapping321).addService(googletag.pubads());
@@ -450,7 +450,7 @@ function showVoteToast(message) {
       }).showToast();
       return;
     }
-  } catch (_) {}
+  } catch (_) { }
   console.log(message);
 }
 
@@ -996,7 +996,7 @@ document.addEventListener('astro:page-load', ev => {
     $('.logo-player img').attr('src', '/img/beat-digital-logo.png');
   }
 
-  const secprogram = document.getElementById('programacion' || 'que-plan');
+  const secprogram = document.getElementById('programacion') || document.getElementById('que-plan');
 
   if (secchome) {
     var elem = document.querySelector('.carousel-main');
@@ -1046,41 +1046,49 @@ document.addEventListener('astro:page-load', ev => {
 
   if (secprogram || secchome) {
     var elempod = document.querySelector('.main-carousel');
-    var flktypod = new Flickity(elempod, {
-      contain: true,
-      lazyLoad: 1,
-      wrapAround: true,
-      cellAlign: 'center',
-      pageDots: false,
-      autoPlay: 5000,
-    });
+    if (elempod) {
+      var flktypod = new Flickity(elempod, {
+        contain: true,
+        lazyLoad: 1,
+        wrapAround: true,
+        cellAlign: 'center',
+        pageDots: false,
+        autoPlay: 5000,
+      });
+    }
 
     var elemconciertos = document.querySelector('.main-conciertos');
-    var flktyconciertos = new Flickity(elemconciertos, {
-      contain: true,
-      lazyLoad: 1,
-      wrapAround: true,
-      cellAlign: 'left',
-      pageDots: false,
-    });
+    if (elemconciertos) {
+      var flktyconciertos = new Flickity(elemconciertos, {
+        contain: true,
+        lazyLoad: 1,
+        wrapAround: true,
+        cellAlign: 'left',
+        pageDots: false,
+      });
+    }
 
     var elemteatro = document.querySelector('.main-teatro');
-    var flktyteatro = new Flickity(elemteatro, {
-      contain: true,
-      lazyLoad: 1,
-      wrapAround: true,
-      cellAlign: 'left',
-      pageDots: false,
-    });
+    if (elemteatro) {
+      var flktyteatro = new Flickity(elemteatro, {
+        contain: true,
+        lazyLoad: 1,
+        wrapAround: true,
+        cellAlign: 'left',
+        pageDots: false,
+      });
+    }
 
     var elemfamiliar = document.querySelector('.main-familiar');
-    var flktyfamiliar = new Flickity(elemfamiliar, {
-      contain: true,
-      lazyLoad: 1,
-      wrapAround: true,
-      cellAlign: 'left',
-      pageDots: false,
-    });
+    if (elemfamiliar) {
+      var flktyfamiliar = new Flickity(elemfamiliar, {
+        contain: true,
+        lazyLoad: 1,
+        wrapAround: true,
+        cellAlign: 'left',
+        pageDots: false,
+      });
+    }
   }
 
 

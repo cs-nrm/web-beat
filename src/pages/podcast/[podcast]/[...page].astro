@@ -1,98 +1,149 @@
 ---
-import BaseHead from '../../../components/BaseHead.astro';
-import Header from '../../../components/Header.astro';
-import Footer from '../../../components/Footer.astro';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../../../consts.js';
+import Layout from "../../../layouts/Layout.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from "../../../consts.js";
 /*import {getArticles} from '../../../lib/api.js';*/
-import Card from '../../../layouts/CardsPodcast.astro';
-import BarNrm from '../../../components/BarNrm.astro';
+import Card from "../../../layouts/CardsPodcast.astro";
+import BarNrm from "../../../components/BarNrm.astro";
 
+export async function getStaticPaths({ paginate }) {
+  const arrpodcast = [
+    {
+      nodo: 607,
+      title: "Groove Dealers",
+      link: "groove-dealers",
+      imagen:
+        "https://beatdigital.com.mx/wp-content/uploads/2024/06/GROOVE-DEALERS-PODCAST-min.png",
+      descripcion:
+        "Conoce datos relevantes y curiosos sobre la escena de la música electrónica a través de la voz de Maria Purisima, DJ’s y productores nacionales e internacionales.",
+    },
+    {
+      nodo: 557,
+      title: "Respira",
+      link: "respira",
+      imagen:
+        "https://beatdigital.com.mx/wp-content/uploads/2023/12/poscast-repira2.jpg",
+      descripcion:
+        "Descubrir que tienes un problema de salud mental es una noticia impactante que puede transformar tu vida por completo.",
+    },
+    {
+      nodo: 539,
+      title: "Expedientes Secretos",
+      link: "expedientes-secretos",
+      imagen:
+        "https://beatdigital.com.mx/wp-content/uploads/2023/10/EX_secretos5.jpg",
+      descripcion:
+        "¡Expedientes Secretos Beat! Un podcast que explora teorías de conspiración y desentraña los misterios ocultos del mundo. ¡Prepárate para una dosis semanal de intrigante información y descubrimientos fascinantes!",
+    },
+    {
+      nodo: 535,
+      title: "Nerdosis",
+      link: "nerdosis",
+      imagen:
+        "https://beatdigital.com.mx/wp-content/uploads/2023/06/NERD_podcast3psd.jpg",
+      descripcion:
+        "Un podcast sobre cómics, tecnología, gaming, torneos, streaming, memes y mucho más.",
+    },
+    {
+      nodo: 495,
+      title: "Dos Equis Mixx",
+      link: "dos-equis-mixx",
+      imagen:
+        "https://beatdigital.com.mx/wp-content/uploads/2022/09/portada-xx.jpg",
+      descripcion:
+        "¿Y tú confías en tu MIXX? Un programa que trae lo mejor de la cultura pop, tendencias y lo más relevante de la música electrónica.",
+    },
+    {
+      nodo: 468,
+      title: "Beat Trends",
+      link: "beat-trends",
+      imagen:
+        "https://beatdigital.com.mx/wp-content/uploads/2022/08/podcast.jpg",
+      descripcion:
+        "Entérate de las últimas noticias sobre cine, anime, móviles, videojuegos y más con Frank, Wallace y el Negro Salcedo. ",
+    },
+  ];
 
-export async function getStaticPaths( { paginate } ) {
-    
-    const arrpodcast = [
-        {nodo: 607,title: 'Groove Dealers', link: 'groove-dealers', imagen: 'https://beatdigital.com.mx/wp-content/uploads/2024/06/GROOVE-DEALERS-PODCAST-min.png', descripcion: 'Conoce datos relevantes y curiosos sobre la escena de la música electrónica a través de la voz de Maria Purisima, DJ’s y productores nacionales e internacionales.'},
-        {nodo: 557,title: 'Respira', link: 'respira', imagen: 'https://beatdigital.com.mx/wp-content/uploads/2023/12/poscast-repira2.jpg', descripcion: 'Descubrir que tienes un problema de salud mental es una noticia impactante que puede transformar tu vida por completo.'},
-        {nodo: 539,title: 'Expedientes Secretos', link: 'expedientes-secretos', imagen: 'https://beatdigital.com.mx/wp-content/uploads/2023/10/EX_secretos5.jpg', descripcion: '¡Expedientes Secretos Beat! Un podcast que explora teorías de conspiración y desentraña los misterios ocultos del mundo. ¡Prepárate para una dosis semanal de intrigante información y descubrimientos fascinantes!'},
-        {nodo: 535,title: 'Nerdosis', link: 'nerdosis', imagen: 'https://beatdigital.com.mx/wp-content/uploads/2023/06/NERD_podcast3psd.jpg', descripcion: 'Un podcast sobre cómics, tecnología, gaming, torneos, streaming, memes y mucho más.'},
-        {nodo: 495,title: 'Dos Equis Mixx', link: 'dos-equis-mixx', imagen: 'https://beatdigital.com.mx/wp-content/uploads/2022/09/portada-xx.jpg', descripcion: '¿Y tú confías en tu MIXX? Un programa que trae lo mejor de la cultura pop, tendencias y lo más relevante de la música electrónica.'},
-        {nodo: 468,title: 'Beat Trends', link: 'beat-trends', imagen:'https://beatdigital.com.mx/wp-content/uploads/2022/08/podcast.jpg', descripcion:'Entérate de las últimas noticias sobre cine, anime, móviles, videojuegos y más con Frank, Wallace y el Negro Salcedo. '},
-    ]; 
-
-  
-  const res = await fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_embed&per_page=250&_fields=title,slug,yoast_head_json,categories,acf&categories=607,557,539,535,495,468" ); 
+  const res = await fetch(
+    "https://beatdigital.com.mx/wp-json/wp/v2/posts?_embed&per_page=250&_fields=title,slug,yoast_head_json,categories,acf&categories=607,557,539,535,495,468",
+  );
   const posts = await res.json();
   //console.log(posts);
-  
-  return arrpodcast.flatMap( function(pod) {      
-      const podcast = pod.link; 
-      //console.log(pod.nodo);           
-      const filteredPosts = posts.filter((post:any) => post.categories[0] == pod.nodo);                      
-      //console.log(filteredPosts);
-      return paginate(filteredPosts,{
-        params:{ podcast },
-        props: { pod},
-        pageSize: 10
-      });
-  });  
+
+  return arrpodcast.flatMap(function (pod) {
+    const podcast = pod.link;
+    //console.log(pod.nodo);
+    const filteredPosts = posts.filter(
+      (post: any) => post.categories[0] == pod.nodo,
+    );
+    //console.log(filteredPosts);
+    return paginate(filteredPosts, {
+      params: { podcast },
+      props: { pod },
+      pageSize: 10,
+    });
+  });
 }
 
-interface Props{
-  page: any; 
+interface Props {
+  page: any;
   podcast: any;
-  pod:any; 
+  pod: any;
 }
 
 const { page = [] } = Astro.props;
 const { podcast, pod } = Astro.props;
 /*const { pod } = Astro.props;*/
-
 ---
-<!doctype html>
-<html lang="es">
-  <head>
-    <BaseHead title={SITE_TITLE} seccion="Podcast" description={SITE_DESCRIPTION} />
-    
-  </head>
-  <body>
-    <!--BarNrm /-->
-    <Header title={SITE_TITLE} />
-    
-    <main>
-            
-      <div class="container my-12 mx-auto px-4 md:px-12">
-        <div class="flex flex-wrap justify-center items-center">
-          <div class="w-full md:w-1/3 lg:w-1/4 m-0"><img class="content-center aspect-square shadow-xl rounded text-center m-auto" src={pod.imagen}/></div>
-          <div class="w-full md:w-2/3 lg:w:3/4 p-4 flex items-center">
-            <div>
-              <h1 class="audiowide neon-morado text-center md:text-left font-bold text-3xl md:text-4xl lg:text-3xl xl:text-4xl align-middle">{pod.title} </h1>
-              <p class="align-middle">{pod.descripcion}</p>
-            </div> 
-          </div>
+
+<Layout title={SITE_TITLE} description={SITE_DESCRIPTION} seccion="Podcast">
+  <!--BarNrm /-->
+  <div class="container my-12 mx-auto px-4 md:px-12">
+    <div class="flex flex-wrap justify-center items-center">
+      <div class="w-full md:w-1/3 lg:w-1/4 m-0">
+        <img
+          class="content-center aspect-square shadow-xl rounded text-center m-auto"
+          src={pod.imagen}
+        />
+      </div>
+      <div class="w-full md:w-2/3 lg:w:3/4 p-4 flex items-center">
+        <div>
+          <h1
+            class="audiowide neon-morado text-center md:text-left font-bold text-3xl md:text-4xl lg:text-3xl xl:text-4xl align-middle"
+          >
+            {pod.title}
+          </h1>
+          <p class="align-middle">{pod.descripcion}</p>
         </div>
-        <section class="flex flex-wrap -mx-4">
-          { 
-            page.data.map((post:any) => ( 
-            <>
-              <Card post={post} />
-            </>
-            ))
-          }
-        </section>
-            <div class="m-auto text-center">
-                {page.url.prev && <a href={page.url.prev} class="text-white hover:text-black">
-                    <button class="ver-mas group relative h-8 w-36 m-4 overflow-hidden rounded-xl bg-[rgba(52,52,52,0.2)] hover:bg-white border-2 border-white uppercase text-xs poppins font-bold tracking-[3px]">
-                        <span>Anterior</span>
-                    </button>
-                </a>}
-                {page.url.next && <a href={page.url.next} class="text-white hover:text-black">
-                    <button class="ver-mas group relative h-8 w-36 m-4 overflow-hidden rounded-xl bg-[rgba(52,52,52,0.2)] hover:bg-white border-2 border-white uppercase text-xs poppins font-bold tracking-[3px]">
-                        <span>Siguiente</span>
-                    </button>
-                </a>}
-            </div>
-      </div>  
-    </main>
-    <Footer />
-  </body>
-</html>
+      </div>
+    </div>
+    <section class="flex flex-wrap -mx-4">
+      {
+        page.data.map((post: any) => (
+          <>
+            <Card post={post} />
+          </>
+        ))
+      }
+    </section>
+    <div class="m-auto text-center">
+      {
+        page.url.prev && (
+          <a href={page.url.prev} class="text-white hover:text-black">
+            <button class="ver-mas group relative h-8 w-36 m-4 overflow-hidden rounded-xl bg-[rgba(52,52,52,0.2)] hover:bg-white border-2 border-white uppercase text-xs poppins font-bold tracking-[3px]">
+              <span>Anterior</span>
+            </button>
+          </a>
+        )
+      }
+      {
+        page.url.next && (
+          <a href={page.url.next} class="text-white hover:text-black">
+            <button class="ver-mas group relative h-8 w-36 m-4 overflow-hidden rounded-xl bg-[rgba(52,52,52,0.2)] hover:bg-white border-2 border-white uppercase text-xs poppins font-bold tracking-[3px]">
+              <span>Siguiente</span>
+            </button>
+          </a>
+        )
+      }
+    </div>
+  </div>
+</Layout>

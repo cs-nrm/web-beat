@@ -1,7 +1,5 @@
 ---
-import BaseHead from '../../components/BaseHead.astro';
-import Header from '../../components/Header.astro';
-import Footer from '../../components/Footer.astro';
+import Layout from '../../layouts/Layout.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
 import { Tabs } from 'astro-tabs';
 import BarNrm from '../../components/BarNrm.astro';
@@ -16,17 +14,8 @@ const PLACEHOLDER_IMG = 'https://storage.googleapis.com/nrm-web/beat/resources/i
 const posts = await getQuePlanPosts();
 ---
 
-<!doctype html>
-<html lang="es">
-	<head>
-		<BaseHead title={SITE_TITLE} seccion="Programación" description={SITE_DESCRIPTION} />
-		<meta charset="utf-8"/>
-	</head>
-	<body>
+<Layout title={SITE_TITLE} description={SITE_DESCRIPTION} seccion="Programación" mainId="programacion">
         <!--BarNrm /-->
-		<Header title={SITE_TITLE} />
-		
-		<main id="programacion">
             <div class="container my-12 mx-auto px-4 md:px-12">
                 <div class="audiowide neon-rosa text-center py-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl">¿QUÉ PLAN?</div>
                 <div class="audiowide neon-rosa text-center md:text-left py-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl">Destacados</div>
@@ -144,11 +133,6 @@ const posts = await getQuePlanPosts();
                 </div>
 
             </div>
-		</main>
-		<Footer />
-	</body>
-</html>
-
 <style>
 .slider-podcast{
 	mask-image: radial-gradient(ellipse 77% 290% at 50% 60%, black 56%, transparent 65%);
@@ -199,3 +183,4 @@ const posts = await getQuePlanPosts();
 	z-index: 1;
 }
 </style>
+</Layout>

@@ -1,0 +1,40 @@
+<div id="dia-radio" class="bg-black">
+    <div class="container-home px-[5px] py-4 md:p-4 mx-auto">
+        <img src="https://storage.googleapis.com/nrm-web/nrm/images/back-radio3.jpg"/>
+        <div><div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://vimeo.com/event/5725293/embed" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe></div></div>
+        <img src="https://storage.googleapis.com/nrm-web/nrm/images/footer-radio2.jpg"/>
+    </div>
+</div>
+
+<script is:inline>
+  const anio = 2026;
+  const mes = 1; // Agosto (0=enero, 7=agosto, 8=septiembre, 9=octubre, 10=Noviembre, 11=Diciembre)
+  const dia = 13;
+  const diafin = 13;
+  const horaInicio = { h: 8, m: 24 }; // 
+  const horaFin = { h: 9, m: 3};     // 
+
+  function estaEnRango() {
+    const ahora = new Date();
+    const inicio = new Date(anio, mes, dia, horaInicio.h, horaInicio.m, 0, 0);
+    const fin = new Date(anio, mes, diafin, horaFin.h, horaFin.m, 0, 0);
+    return ahora >= inicio && ahora <= fin;
+  }
+
+  function mostrarDiaRadio() {
+    const elemento = document.getElementById('dia-radio');
+    if (elemento) {
+      if (estaEnRango()) {
+        elemento.style.display = 'block';
+      } else {
+        elemento.style.display = 'none';
+      }
+    }
+  }
+
+  // Ejecutar al cargar la página
+  mostrarDiaRadio();
+
+  // Verificar cada minuto si debe mostrarse u ocultarse
+  setInterval(mostrarDiaRadio, 60000);
+</script>

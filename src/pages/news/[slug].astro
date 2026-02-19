@@ -145,10 +145,12 @@ const PLACEHOLDER_IMG =
         >
           <div class="sticky top-[140px] left-0 right-0">
             <BoxBanner />
+            <MoreNews tags={post.tags} currentId={post.id} />
+            <DoubleBox />
           </div>
-          <MoreNews tags={post.tags} currentId={post.id} />
+          
         </div>
-        <DoubleBox />
+        
       </div>
     </div>
   </section>

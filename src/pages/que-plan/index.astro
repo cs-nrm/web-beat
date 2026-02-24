@@ -59,7 +59,7 @@ const posts = await getQuePlanPosts();
                     }
                 </div>
     
-                <div class="audiowide neon-rosa text-center md:text-left py-4 mt-16 font-bold text-3xl">Teatro</div>
+                <!--div class="audiowide neon-rosa text-center md:text-left py-4 mt-16 font-bold text-3xl">Teatro</div>
                 <div class="main-teatro container cards">
                     {
                     posts.map((post:any) => (
@@ -68,7 +68,6 @@ const posts = await getQuePlanPosts();
                         <article class="p-2">
                             <div class="glows"></div>
                             <a href={`/que-plan/${post.slug}/`} class="text-white relative">
-                                <!--div class="bg-white text-black text-sm absolute top-0 right-0 px-2 rounded-tr-xl etiqueta" set:html={post.acf?.etiqueta}></div-->
                                 <div>
                                     <img class="block h-auto w-full object-fill" src={post?._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.['full']?.source_url || PLACEHOLDER_IMG} width="200" height="200" alt="Imagen Locutores"/>
                                 </div>
@@ -104,7 +103,6 @@ const posts = await getQuePlanPosts();
                         <article class="p-2">
                             <div class="glows"></div>
                             <a href={`/que-plan/${post.slug}/`} class="text-white relative">
-                                <!--div class="bg-white text-black text-sm absolute top-0 right-0 px-2 rounded-tr-xl etiqueta" set:html={post.acf?.etiqueta}></div-->
                                 <div>
                                     <img class="block h-auto w-full object-fill" src={post?._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.['full']?.source_url || PLACEHOLDER_IMG} width="200" height="200" alt="Imagen Locutores"/>
                                 </div>
@@ -130,7 +128,7 @@ const posts = await getQuePlanPosts();
                         </div>
                     ))
                     }
-                </div>
+                </div-->
 
             </div>
 <style>

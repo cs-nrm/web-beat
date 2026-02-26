@@ -18,6 +18,34 @@ const player = document.getElementById('player');
 const secchome = document.getElementById('home');
 var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=0aa2713d85e04243944924876ba71f05&format=json";
 
+// ===== GA4 tracking helpers (manual, to get clean event names like play/pause/stop/resume)
+let lastStreamStatus = null;
+
+function ga4Track(eventName, params = {}) {
+  try {
+    // GA4 via gtag
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', eventName, params);
+      return;
+    }
+    // GA4 via dataLayer (GTM)
+    if (Array.isArray(window.dataLayer)) {
+      window.dataLayer.push({ event: eventName, ...params });
+      return;
+    }
+  } catch (_) { }
+}
+
+function trackTritonPlaybackEvent(eventName, extra = {}) {
+  // Mantén params simples (GA4 recomienda snake_case, pero GA acepta ambos; esto es pragmático)
+  ga4Track(eventName, {
+    category: 'Triton SDK',
+    station: 'XHSONFM',
+    dist: 'WebBeat',
+    ...extra,
+  });
+}
+
 // ===== Optimized polling for current song (conditional requests + adaptive cadence)
 let songETag = null;
 let songLastModified = null;
@@ -229,12 +257,30 @@ function initPlayerSDK() {
   streaming.addEventListener( 'nowplaying-api-error', onNowPlayingApiError);
   streaming.addEventListener( 'ad-break-cue-point', adBreakCuePoint);*/
   streaming.addEventListener('autoplay', autoplay);
-
 }
 
 function getStatus(s) {
+  const prevStatus = lastStreamStatus;
   local_status = s.data.code;
+  lastStreamStatus = local_status;
   const secchome = document.getElementById('home');
+
+  // ===== Manual GA4 events with clean names
+  // Evita spamear GA: solo dispara cuando hay cambio real.
+  if (prevStatus !== local_status) {
+    if (local_status === 'LIVE_PLAYING') {
+      // Si venimos de pausa, es resume; si no, es play.
+      const ev = (prevStatus === 'LIVE_PAUSE') ? 'resume' : 'play';
+      trackTritonPlaybackEvent(ev);
+    }
+    if (local_status === 'LIVE_PAUSE') {
+      trackTritonPlaybackEvent('pause');
+    }
+    if (local_status === 'LIVE_STOP') {
+      trackTritonPlaybackEvent('stop');
+    }
+  }
+
   // Removed debug console.log(local_status);
   if (local_status == 'GETTING_STATION_INFORMATION' || local_status == 'LIVE_CONNECTING' || local_status == 'LIVE_BUFFERING') {
     document.getElementById('loading').classList.add('show');
@@ -255,7 +301,7 @@ function getStatus(s) {
     $('#radiobutton').addClass('playerplaying');
     // Fetch current song immediately when playback starts (avoid invoking inside setTimeout)
     getInfoMusic(true);
-    setTimeout(startSongPolling(), 500); // Start polling after a short delay to allow song info to be fetched
+    setTimeout(startSongPolling, 500); // Start polling after a short delay to allow song info to be fetched
 
   }
   if (local_status == 'LIVE_STOP' || local_status == 'LIVE_PAUSE') {
@@ -273,7 +319,6 @@ function getStatus(s) {
     }, 500);
 
   }
-
 }
 
 

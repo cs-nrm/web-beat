@@ -17,7 +17,7 @@ const posts = await res.json();
 	posts.map((post:any)=> (
 		<div class="carousel-cell card">
 			<article>
-				<a target="_blank" href={`${post.acf.link}/`}>
+				<a target="_blank" href={`${post.acf.link}`}>
 					<Image loading="lazy" class="block h-auto w-full object-fill" src={post?.yoast_head_json?.['og_image']?.[0]?.url || PLACEHOLDER_IMG} width="300" height="150" alt="Imagen Promociones"/>
 				</a>
 			</article>

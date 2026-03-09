@@ -718,7 +718,7 @@ function getInfoMusic(forceFresh = false) {
 
 
 function getInfoProg() {
-  fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_embed&per_page=100&categories=515&_fields[]=jetpack_featured_media_url&_fields[]=acf&_fields[]=content")
+  fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_embed&per_page=100&categories=515&_fields[]=_links&_fields[]=_embedded&_fields[]=acf&_fields[]=content")
     .then((res) => {
       if (!res.ok) {
         throw new Error
@@ -738,7 +738,7 @@ function getInfoProg() {
         if (prog.acf[dia] === true) {
           var h_i;
           if (prog.acf.hora_fin >= hora && prog.acf.hora_inicio <= hora) {
-            $('.banner-prog img').attr('src', prog.jetpack_featured_media_url);
+            $('.banner-prog img').attr('src', prog._embedded['wp:featuredmedia'][0].media_details.sizes['full'].source_url);
             $('.envivo-prog').html(prog.acf.programa);
             $('.envivo-now').html(prog.acf.hora_inicio + ' - ' + prog.acf.hora_fin);
             $('.envivo-prog-tab').html(prog.acf.programa);

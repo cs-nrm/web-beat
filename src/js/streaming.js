@@ -146,6 +146,34 @@ function initGPT() {
 
 
 
+// helper to manage fallbacks between GPT slots and an AdSense element
+function adFallback(slots, fallbackId) {
+    const loaded = {};
+    let rendered = 0;
+
+    slots.forEach(id => { loaded[id] = false; });
+
+    googletag.pubads().addEventListener('slotRenderEnded', function(event) {
+        const id = event.slot.getSlotElementId();
+        if (slots.includes(id)) {
+            if (!event.isEmpty) {
+                loaded[id] = true;
+            }
+            rendered++;
+        }
+
+        if (rendered === slots.length) {
+            const showGPT = slots.every(s => loaded[s]);
+            slots.forEach(s => {
+                const el = document.getElementById(s);
+                if (el) el.style.display = showGPT ? '' : 'none';
+            });
+            const fb = document.getElementById(fallbackId);
+            if (fb) fb.style.display = showGPT ? 'none' : '';
+        }
+    });
+}
+
     window.slot2 = googletag.defineSlot("/21799830913/Beat", [300, 250], 'ad-slot2').defineSizeMapping(mapping2).addService(googletag.pubads());
     window.slot3 = googletag.defineSlot("/21799830913/Beat", [970, 90], 'ad-slot3').defineSizeMapping(mapping3).addService(googletag.pubads());
     window.slot31 = googletag.defineSlot("/21799830913/Beat", [320, 50], 'ad-slot31').defineSizeMapping(mapping31).addService(googletag.pubads());
@@ -188,6 +216,17 @@ function initGPT() {
     googletag.display('ad-slot203');
     googletag.display('ad-slot204');
     googletag.display('ad-slot205');
+
+    // once slots have been requested, set up fallbacks for billboards and leaders
+    function initBillboardFallbacks() {
+        adFallback(['ad-slot3','ad-slot31'],'ad-slot3-adsense');
+        adFallback(['ad-slot4','ad-slot41'],'ad-slot4-adsense');
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initBillboardFallbacks);
+    } else {
+        initBillboardFallbacks();
+    }
 
     //googletag.pubads().refresh([slot3]);
     //setInterval(function(){googletag.pubads().refresh([slot3]);}, 180000);

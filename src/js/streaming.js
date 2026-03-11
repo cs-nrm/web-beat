@@ -164,12 +164,37 @@ function adFallback(slots, fallbackId) {
 
         if (rendered === slots.length) {
             const showGPT = slots.every(s => loaded[s]);
+            console.log('adFallback', { slots, loaded, showGPT, fallbackId });
             slots.forEach(s => {
                 const el = document.getElementById(s);
-                if (el) el.style.display = showGPT ? '' : 'none';
+                if (el) {
+                    el.style.display = showGPT ? '' : 'none';
+                } else {
+                    console.warn('adFallback: slot element not found', s);
+                }
             });
             const fb = document.getElementById(fallbackId);
-            if (fb) fb.style.display = showGPT ? 'none' : '';
+            if (fb) {
+                fb.style.display = showGPT ? 'none' : 'block';
+                if (!showGPT) {
+                    // when showing the fallback, wait until it gets a real width
+                    const schedulePush = () => {
+                        if (fb.offsetWidth > 0) {
+                            try {
+                                (adsbygoogle = window.adsbygoogle || []).push({});
+                            } catch (e) {
+                                console.error('adFallback: adsbygoogle push failed', e);
+                            }
+                        } else {
+                            // try again a little later
+                            setTimeout(schedulePush, 50);
+                        }
+                    };
+                    requestAnimationFrame(schedulePush);
+                }
+            } else {
+                console.warn('adFallback: fallback element not found', fallbackId);
+            }
         }
     });
 }

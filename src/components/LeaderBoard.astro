@@ -18,4 +18,35 @@
 		(adsbygoogle = window.adsbygoogle || []).push({});
 	</script>
    </div>
+
+	<script is:inline>
+     let slot4Loaded = false;
+     let slot41Loaded = false;
+     let renderedCount = 0;
+
+     googletag.cmd.push(function() {
+       googletag.pubads().addEventListener('slotRenderEnded', function(event) {
+         if (event.slot.getSlotElementId() === 'ad-slot4') {
+           if (!event.isEmpty) slot4Loaded = true;
+         }
+         if (event.slot.getSlotElementId() === 'ad-slot41') {
+           if (!event.isEmpty) slot41Loaded = true;
+         }
+         renderedCount++;
+         if (renderedCount === 2) {
+           if (slot4Loaded && slot41Loaded) {
+             // Mostrar GPT slots
+             document.getElementById('ad-slot4').style.display = '';
+             document.getElementById('ad-slot41').style.display = '';
+             document.querySelector('.ad-slot4-adsense').style.display = 'none';
+           } else {
+             // Mostrar AdSense
+             document.getElementById('ad-slot4').style.display = 'none';
+             document.getElementById('ad-slot41').style.display = 'none';
+             document.querySelector('.ad-slot4-adsense').style.display = 'block';
+           }
+         }
+       });
+     });
+   </script>
 </div>

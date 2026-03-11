@@ -13,9 +13,40 @@
 		data-ad-slot="1885203366"
 		data-ad-format="horizontal"
 		data-full-width-responsive="true"></ins>
-	<script is:inline>
-		(adsbygoogle = window.adsbygoogle || []).push({});
-	</script>
 
    </div>
+
+	<script is:inline>
+     let slot3Loaded = false;
+     let slot31Loaded = false;
+     let renderedCount = 0;
+
+     googletag.cmd.push(function() {
+       googletag.pubads().addEventListener('slotRenderEnded', function(event) {
+         if (event.slot.getSlotElementId() === 'ad-slot3') {
+           if (!event.isEmpty) slot3Loaded = true;
+         }
+         if (event.slot.getSlotElementId() === 'ad-slot31') {
+           if (!event.isEmpty) slot31Loaded = true;
+         }
+         renderedCount++;
+         if (renderedCount === 2) {
+           if (slot3Loaded && slot31Loaded) {
+             // Mostrar GPT slots
+             document.getElementById('ad-slot3').style.display = '';
+             document.getElementById('ad-slot31').style.display = '';
+             document.querySelector('.ad-slot3-adsense').style.display = 'none';
+           } else {
+             // Mostrar AdSense
+			 (adsbygoogle = window.adsbygoogle || []).push({});
+             document.getElementById('ad-slot3').style.display = 'none';
+             document.getElementById('ad-slot31').style.display = 'none';
+             document.querySelector('.ad-slot3-adsense').style.display = 'block';
+           }
+         }
+       });
+     });
+   </script>
+
 </div>
+

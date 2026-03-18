@@ -1,10 +1,59 @@
 ---
 ---
-<div class="billboard my-9 hidden md:table mx-auto text-center w-[320px] md:w-[728px] lg:[970px] !h-[50px] lg:h-[90px]">
+<div class="leader my-9 table mx-auto text-center w-full lg:w-[728px] h-[90px]">
 	<span class="text-xs text-zinc-500">PUBLICIDAD</span>
    <!--img src="https://beatdigital.com.mx/wp-content/uploads/2024/07/bilboard.jpg" alt="billboard" width="970" height="250"-->
+   <div id="ad-slot32" class="hidden md:block" style="display:none;"></div>
+   <div id="ad-slot321" class="md:hidden block" style="display:none;"></div>
+   <div id="ad-slot32-adsense" style="display:none;">
+
+	<ins class="adsbygoogle"
+		style="display:block; height:90px; width:100%;"
+		data-ad-client="ca-pub-7423640555477330"
+		data-ad-slot="1885203366"
+		data-ad-format="horizontal"
+		data-full-width-responsive="true"></ins>
+
+   </div>
+
+	<script is:inline>
+     let slot32Loaded = false;
+     let slot321Loaded = false;
+     let renderedCount = 0;
+
+     googletag.cmd.push(function() {
+       googletag.pubads().addEventListener('slotRenderEnded', function(event) {
+         if (event.slot.getSlotElementId() === 'ad-slot32') {
+           if (!event.isEmpty) slot32Loaded = true;
+         }
+         if (event.slot.getSlotElementId() === 'ad-slot321') {
+           if (!event.isEmpty) slot321Loaded = true;
+         }
+         renderedCount++;
+         if (renderedCount === 2) {
+           if (slot32Loaded && slot321Loaded) {
+             // Mostrar GPT slots
+             document.getElementById('ad-slot32').style.display = '';
+             document.getElementById('ad-slot321').style.display = '';
+             document.querySelector('.ad-slot32-adsense').style.display = 'none';
+           } else {
+             // Mostrar AdSense
+			 (adsbygoogle = window.adsbygoogle || []).push({});
+             document.getElementById('ad-slot32').style.display = 'none';
+             document.getElementById('ad-slot321').style.display = 'none';
+             document.querySelector('.ad-slot32-adsense').style.display = 'block';
+           }
+         }
+       });
+     });
+   </script>
+
+</div>
+<!--div class="billboard my-9 hidden md:table mx-auto text-center w-[320px] md:w-[728px] lg:[970px] !h-[50px] lg:h-[90px]">
+	<span class="text-xs text-zinc-500">PUBLICIDAD</span>
+   <img src="https://beatdigital.com.mx/wp-content/uploads/2024/07/bilboard.jpg" alt="billboard" width="970" height="250">
    <div id="ad-slot32" class="hidden md:block" style="display:none;">
-	<!--script defer is:inline>
+	<script defer is:inline>
 	  var gptAdSlots32 = [];
 	  googletag.cmd.push(function() {
  	    var mapping32 = googletag.sizeMapping().
@@ -19,11 +68,11 @@
 	    googletag.pubads().refresh([slot32]);
 	    //setInterval(function(){googletag.pubads().refresh([slot3]);}, 180000);
 	  });
-	</script-->
+	</script>
    </div>
     <div id="ad-slot321" class="md:hidden block" style="display:none;">
 	
-	<!--script defer is:inline>
+	<script defer is:inline>
 	  var gptAdSlots321 = [];
 	  googletag.cmd.push(function() {
  	    var mapping321 = googletag.sizeMapping().
@@ -38,7 +87,7 @@
 	    googletag.pubads().refresh([slot321]);
 	    //setInterval(function(){googletag.pubads().refresh([slot3]);}, 180000);
 	  });
-	</script-->
+	</script>
    </div>
    <div id="ad-slot32-adsense" style="display:none;">
 	<ins class="adsbygoogle"
@@ -83,4 +132,4 @@
      });
    </script>
 
-</div>
+</div-->

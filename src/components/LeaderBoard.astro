@@ -1,22 +1,19 @@
 ---
 ---
-
-<div class="leader my-9 table mx-auto text-center w-[300px] md:w-[728px] h-[90px]">
+<div class="leader my-9 table mx-auto text-center w-full lg:w-[728px] h-[90px]">
 	<span class="text-xs text-zinc-500">PUBLICIDAD</span>
-	<!--img src="https://beatdigital.com.mx/wp-content/uploads/2024/07/leader.png" alt="leader" width="728" height="90"/-->
+   <!--img src="https://beatdigital.com.mx/wp-content/uploads/2024/07/bilboard.jpg" alt="billboard" width="970" height="250"-->
    <div id="ad-slot4" class="hidden md:block" style="display:none;"></div>
    <div id="ad-slot41" class="md:hidden block" style="display:none;"></div>
+   <div id="ad-slot4-adsense" style="display:none;">
 
-   <div class="ad-slot4-adsense" style="display:none;">
 	<ins class="adsbygoogle"
-		style="display:block; height:90px;"
+		style="display:block; height:90px; width:100%;"
 		data-ad-client="ca-pub-7423640555477330"
-		data-ad-slot="9572121691"
+		data-ad-slot="1885203366"
 		data-ad-format="horizontal"
 		data-full-width-responsive="true"></ins>
-	<script is:inline>
-		(adsbygoogle = window.adsbygoogle || []).push({});
-	</script>
+
    </div>
 
 	<script is:inline>
@@ -41,6 +38,7 @@
              document.querySelector('.ad-slot4-adsense').style.display = 'none';
            } else {
              // Mostrar AdSense
+			 (adsbygoogle = window.adsbygoogle || []).push({});
              document.getElementById('ad-slot4').style.display = 'none';
              document.getElementById('ad-slot41').style.display = 'none';
              document.querySelector('.ad-slot4-adsense').style.display = 'block';
@@ -49,4 +47,59 @@
        });
      });
    </script>
+
 </div>
+
+<!--div class="leader my-9 table mx-auto text-center w-[300px] md:w-[728px] h-[90px]">
+	<span class="text-xs text-zinc-500">PUBLICIDAD</span>
+	<img src="https://beatdigital.com.mx/wp-content/uploads/2024/07/leader.png" alt="leader" width="728" height="90"/>
+   <div id="ad-slot4" class="hidden md:block">
+	<script defer is:inline>
+	  var gptAdSlots4 = [];
+	  googletag.cmd.push(function() {
+ 	    var mapping4 = googletag.sizeMapping().
+	    addSize([728, 90]).
+	    build();
+	    var slot4 = googletag.defineSlot("/21799830913/Beat", [728, 90],'ad-slot4').
+	    defineSizeMapping(mapping4).
+	    addService(googletag.pubads());
+	    googletag.pubads().setTargeting("test","responsive");
+	    googletag.enableServices();
+	    googletag.display('ad-slot4');
+	    googletag.pubads().refresh([slot4]);
+	    //setInterval(function(){googletag.pubads().refresh([slot4]);}, 180000);
+	  });
+	</script>
+   </div>
+   <div id="ad-slot41" class="block md:hidden">
+	<script defer is:inline>
+	  var gptAdSlots41 = [];
+	  googletag.cmd.push(function() {
+ 	    var mapping41 = googletag.sizeMapping().
+	    addSize([320, 50]).
+	    build();
+	    var slot41 = googletag.defineSlot("/21799830913/Beat", [320, 50],'ad-slot41').
+	    defineSizeMapping(mapping41).
+	    addService(googletag.pubads());
+	    googletag.pubads().setTargeting("test","responsive");
+	    googletag.enableServices();
+	    googletag.display('ad-slot41');
+	    googletag.pubads().refresh([slot41]);
+	    //setInterval(function(){googletag.pubads().refresh([slot4]);}, 180000);
+	  });
+	</script>
+   </div>
+
+	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7423640555477330"
+		crossorigin="anonymous"></script>
+	<ins class="adsbygoogle"
+		style="display:block; height:90px;"
+		data-ad-client="ca-pub-7423640555477330"
+		data-ad-slot="9572121691"
+		data-ad-format="horizontal"
+		data-full-width-responsive="true"></ins>
+	<script is:inline>
+		(adsbygoogle = window.adsbygoogle || []).push({});
+	</script>
+
+</div-->

@@ -47,8 +47,9 @@ const posts = await getQuePlanPosts();
 		<article class="p-2">
 			<div class="glows"></div>
 			<a href={`/que-plan/${post.slug}/`} class="text-white relative">
-				<div class="bg-white text-black text-sm absolute top-0 right-0 px-2 etiqueta" set:html={post.acf?.etiqueta}></div>
-				<div>
+				
+				<div class="relative">
+          <div class="bg-white text-black text-sm absolute top-0 right-0 px-2 etiqueta" set:html={post.acf?.etiqueta}></div>
 					<img class="block h-auto w-full object-fill" src={post?._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.['full']?.source_url || PLACEHOLDER_IMG} width="200" height="200" alt="Imagen Locutores"/>
 				</div>
 				<div class="min-h-40">

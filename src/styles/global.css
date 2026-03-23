@@ -1170,3 +1170,6 @@ input[type=range]:focus::-ms-fill-upper {
   width: 100%;
   border-radius: 0 0 0.75rem 0.75rem;
 }
+
+/*PUBLICIDAD*/
+#ad-slot1 iframe, #ad-slot2 iframe, #ad-slot3 iframe, #ad-slot31 iframe, #ad-slot32 iframe, #ad-slot321 iframe, #ad-slot4 iframe, #ad-slot41 iframe, #ad-slot42 iframe, #ad-slot421 iframe, #ad-slot5 iframe, #ad-slot6 iframe, #ad-slot61 iframe{margin: 0 auto;}

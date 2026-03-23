@@ -2,6 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../../consts";
 import { Tabs } from "astro-tabs";
+import LeaderBoard from "../../components/LeaderBoard.astro";
 /*import BarNrm from '../../components/BarNrm.astro';*/
 
 const res = await fetch(
@@ -23,6 +24,7 @@ posts.sort(function (a, b) {
     <!--BarNrm /-->
 
     <main id="envivo">
+        <LeaderBoard />
         <div class="mx-auto">
             <div class="sm:flex sm:flex-col md:flex-row">
                 <div class="banner-prog">

@@ -2,6 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../../consts";
 import FormattedDate from "../../components/FormattedDate.astro";
+import LeaderBoard from "../../components/LeaderBoard.astro";
 /*import BarNrm from '../../components/BarNrm.astro';*/
 
 const lunes_nojson = "https://beatdigital.com.mx/cdn/playlist/lunes.json";
@@ -224,6 +225,7 @@ function getMes(mes) {
 
     <main id="playlist">
         <div class="container my-12 mx-auto">
+            <LeaderBoard />
             <h1
                 class="audiowide neon-verde text-center md:text-left pt-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl"
             >

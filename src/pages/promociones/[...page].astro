@@ -6,6 +6,8 @@ import BoxBanner from "../../components/BoxBanner.astro";
 
 import { getArticles } from "../../lib/api.js";
 import Card from "../../layouts/Cards.astro";
+import LeaderBoard from "../../components/LeaderBoard.astro";
+import LeaderBoard2 from "../../components/LeaderBoard2.astro";
 
 export async function getStaticPaths({ paginate }) {
   const data = await getArticles(537);
@@ -20,7 +22,8 @@ const { page = [] } = Astro.props;
 ---
 
 <Layout title={SITE_TITLE} seccion="Promociones" description={SITE_DESCRIPTION}>
-  <div class="container my-12 mx-auto px-4 md:px-12">
+  <div class="container my-4 mx-auto px-4 md:px-12">
+    <LeaderBoard2 />
     <h1
       class="audiowide neon-azul text-center md:text-left pt-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl"
     >

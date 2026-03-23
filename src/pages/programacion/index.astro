@@ -5,6 +5,8 @@ import { Tabs } from "astro-tabs";
 import BarNrm from "../../components/BarNrm.astro";
 import SliderLocutores from "../../layouts/SliderLocutores.astro";
 import BoxBanner from "../../components/BoxBanner.astro";
+import LeaderBoard from "../../components/LeaderBoard.astro";
+import LeaderBoard2 from "../../components/LeaderBoard2.astro";
 
 const PLACEHOLDER_IMG =
     "https://storage.googleapis.com/nrm-web/beat/resources/img/img_beat-min.jpg";
@@ -32,6 +34,7 @@ posts.sort(function (a, b) {
 >
     <!--BarNrm /-->
     <div class="container my-12 mx-auto px-4 md:px-12">
+        <LeaderBoard2/>
         <div
             class="audiowide neon-rosa text-center md:text-left py-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl"
         >

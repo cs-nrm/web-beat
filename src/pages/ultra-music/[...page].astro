@@ -8,6 +8,8 @@ import Card from "../../layouts/Cardsq.astro";
 import DoubleBox from "../../components/DoubleBox.astro";
 import BoxBanner from "../../components/BoxBanner.astro";
 import BarNrm from "../../components/BarNrm.astro";
+import LeaderBoard from "../../components/LeaderBoard.astro";
+import LeaderBoard2 from "../../components/LeaderBoard2.astro";
 
 export async function getStaticPaths({ paginate }) {
   const data = await getArticles(849);
@@ -24,7 +26,8 @@ const { page = [] } = Astro.props;
 
 <Layout title={SITE_TITLE} seccion="EDC" description={SITE_DESCRIPTION}>
   <!--BarNrm /-->
-  <div class="container my-12 mx-auto px-4 md:px-12">
+  <div class="container my-4 mx-auto px-4 md:px-12">
+    <LeaderBoard2 />
     <h1
       class="text-center md:text-left pt-4 font-bold text-4xl md:text-5xl lg:text-4xl xl:text-5xl"
     >

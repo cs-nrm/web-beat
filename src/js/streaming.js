@@ -163,9 +163,8 @@ function initAdFallbackListener() {
 }
 
 function initGPT() {
-  googletag.destroySlots();
-
   googletag.cmd.push(function () {
+    googletag.destroySlots(); // dentro de cmd.push: GPT siempre está listo aquí
     window._adFallbackStates = {}; // reset inside cmd to avoid race condition
 
     // Responsive mappings: addSize([viewport_w, viewport_h], [ad_w, ad_h])

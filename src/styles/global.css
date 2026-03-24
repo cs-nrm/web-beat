@@ -830,12 +830,8 @@ input[type=range]:focus::-ms-fill-upper {
     transition: opacity 1s;
   }
 
-  _::-webkit-full-page-media,
-  _:future,
-  :root .safari_only {
-    .card .glows {
-      display: none;
-    }
+  _::-webkit-full-page-media, _:future, :root .safari_only .card .glows {
+    display: none;
   }
 
   .card article::before {

@@ -16,37 +16,6 @@
 
    </div>
 
-   	<script is:inline>
-     let slot6Loaded = false;
-     let slot61Loaded = false;
-     let renderedCount = 0;
-
-     googletag.cmd.push(function() {
-       googletag.pubads().addEventListener('slotRenderEnded', function(event) {
-         if (event.slot.getSlotElementId() === 'ad-slot6') {
-           if (!event.isEmpty) slot6Loaded = true;
-         }
-         if (event.slot.getSlotElementId() === 'ad-slot61') {
-           if (!event.isEmpty) slot61Loaded = true;
-         }
-         renderedCount++;
-         if (renderedCount === 2) {
-           if (slot6Loaded && slot61Loaded) {
-             // Mostrar GPT slots
-             document.getElementById('ad-slot6').style.display = '';
-             document.getElementById('ad-slot61').style.display = '';
-             document.querySelector('.ad-slot6-adsense').style.display = 'none';
-           } else {
-             // Mostrar AdSense
-			 (adsbygoogle = window.adsbygoogle || []).push({});
-             document.getElementById('ad-slot6').style.display = 'none';
-             document.getElementById('ad-slot61').style.display = 'none';
-             document.querySelector('.ad-slot6-adsense').style.display = 'block';
-           }
-         }
-       });
-     });
-   </script>
 </div>
 <!--div class="super-leader py-9 table mx-auto text-center w-[300px] md:w-[728px] lg:w-[970px] h-[90px]">
   <span class="text-xs text-zinc-500">PUBLICIDAD</span-->

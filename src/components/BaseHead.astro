@@ -87,15 +87,8 @@ const { title, description, image = '/beat-share.jpg', seccion } = Astro.props;
   <!-- End comScore Tag -->
 
   <!-- AD MANAGER -->
-<script defer>
-    // Cargue GPT de forma síncrona (Expandibles y Creatividad Adaptable)
-    (function() {
-        var useSSL = 'https:' == document.location.protocol;
-        var src = (useSSL ? 'https:' : 'http:') +
-        '//www.googletagservices.com/tag/js/gpt.js';
-        document.write('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>');
-    })();
-</script>
+<script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
+<script is:inline>window.googletag = window.googletag || { cmd: [] };</script>
 
 <!-- Google Tag Manager -->
 <script is:inline>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -110,8 +103,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 
-
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7423640555477330" crossorigin="anonymous"></script>
 
 <!-- METRICOOL -->
 <script is:inline>function loadScript(a){var b=document.getElementsByTagName("head")[0],c=document.createElement("script");c.type="text/javascript",c.src="https://tracker.metricool.com/resources/be.js",c.onreadystatechange=a,c.onload=a,b.appendChild(c)}loadScript(function(){beTracker.t({hash:"4fd204bbc1425414335df4a54d190be0"})});</script>

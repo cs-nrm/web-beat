@@ -116,7 +116,54 @@ document.addEventListener('astro:before-preparation', () => {
   if (songController) try { songController.abort(); } catch (e) { }
 });
 
+// ===== Ad Fallback: GPT → AdSense =====
+// Estado global, se resetea en cada initGPT() para que la navegación funcione correctamente
+window._adFallbackStates = window._adFallbackStates || {};
+
+// Registra un grupo de slots con su fallback. Llamar dentro de initGPT() tras destroySlots()
+function adFallback(slots, fallbackId) {
+  const state = { slots, fallbackId, loaded: {}, rendered: 0 };
+  slots.forEach(id => { state.loaded[id] = false; });
+  window._adFallbackStates[fallbackId] = state;
+}
+
+// Listener único — se registra UNA sola vez después del primer initGPT()
+function initAdFallbackListener() {
+  googletag.pubads().addEventListener('slotRenderEnded', function(event) {
+    const id = event.slot.getSlotElementId();
+    for (const state of Object.values(window._adFallbackStates)) {
+      if (!state.slots.includes(id)) continue;
+      if (!event.isEmpty) state.loaded[id] = true;
+      state.rendered++;
+      if (state.rendered < state.slots.length) break;
+      // Todos los slots del grupo han respondido
+      const showGPT = state.slots.every(s => state.loaded[s]);
+      state.slots.forEach(s => {
+        const el = document.getElementById(s);
+        if (el) el.style.display = showGPT ? '' : 'none';
+      });
+      const fb = document.getElementById(state.fallbackId);
+      if (fb) {
+        fb.style.display = showGPT ? 'none' : 'block';
+        if (!showGPT) {
+          const schedulePush = () => {
+            if (fb.offsetWidth > 0) {
+              try { (adsbygoogle = window.adsbygoogle || []).push({}); }
+              catch (e) { console.error('adFallback: adsbygoogle push failed', e); }
+            } else {
+              setTimeout(schedulePush, 50);
+            }
+          };
+          requestAnimationFrame(schedulePush);
+        }
+      }
+      break;
+    }
+  });
+}
+
 function initGPT() {
+  window._adFallbackStates = {};
   googletag.destroySlots();
 
   googletag.cmd.push(function () {
@@ -144,59 +191,6 @@ function initGPT() {
 
 
 
-
-// helper to manage fallbacks between GPT slots and an AdSense element
-function adFallback(slots, fallbackId) {
-    const loaded = {};
-    let rendered = 0;
-
-    slots.forEach(id => { loaded[id] = false; });
-
-    googletag.pubads().addEventListener('slotRenderEnded', function(event) {
-        const id = event.slot.getSlotElementId();
-        if (slots.includes(id)) {
-            if (!event.isEmpty) {
-                loaded[id] = true;
-            }
-            rendered++;
-        }
-
-        if (rendered === slots.length) {
-            const showGPT = slots.every(s => loaded[s]);
-            console.log('adFallback', { slots, loaded, showGPT, fallbackId });
-            slots.forEach(s => {
-                const el = document.getElementById(s);
-                if (el) {
-                    el.style.display = showGPT ? '' : 'none';
-                } else {
-                    console.warn('adFallback: slot element not found', s);
-                }
-            });
-            const fb = document.getElementById(fallbackId);
-            if (fb) {
-                fb.style.display = showGPT ? 'none' : 'block';
-                if (!showGPT) {
-                    // when showing the fallback, wait until it gets a real width
-                    const schedulePush = () => {
-                        if (fb.offsetWidth > 0) {
-                            try {
-                                (adsbygoogle = window.adsbygoogle || []).push({});
-                            } catch (e) {
-                                console.error('adFallback: adsbygoogle push failed', e);
-                            }
-                        } else {
-                            // try again a little later
-                            setTimeout(schedulePush, 50);
-                        }
-                    };
-                    requestAnimationFrame(schedulePush);
-                }
-            } else {
-                console.warn('adFallback: fallback element not found', fallbackId);
-            }
-        }
-    });
-}
 
     window.slot2 = googletag.defineSlot("/21799830913/Beat", [300, 250], 'ad-slot2').defineSizeMapping(mapping2).addService(googletag.pubads());
     window.slot3 = googletag.defineSlot("/21799830913/Beat", [970, 250], 'ad-slot3').defineSizeMapping(mapping3).addService(googletag.pubads());
@@ -261,6 +255,9 @@ function adFallback(slots, fallbackId) {
   });
 }
 initGPT();
+// Registra el listener de fallback una sola vez, después de que GPT esté listo
+googletag.cmd.push(initAdFallbackListener);
+
 function safeRefreshSlots() {
   if (window.googletag && googletag.apiReady && googletag.pubads) {
     // Repite para cada slot, si tienes más
@@ -1050,8 +1047,13 @@ document.addEventListener('astro:page-load', ev => {
       });
   })(jQuery);*/
 
-  /* publicidad google refresh*/
-  googletag.pubads().refresh();
+  /* publicidad: reinicializa slots tras el DOM swap de Astro View Transitions */
+  if (window.googletag && googletag.apiReady) {
+    initGPT();
+  } else {
+    window.googletag = window.googletag || { cmd: [] };
+    googletag.cmd.push(function() { initGPT(); });
+  }
 
   /* =======COMSCORE*/
   var ts = Math.round((new Date()).getTime() / 1000 * Math.random() * 10);

@@ -230,8 +230,9 @@ function initGPT() {
     //setInterval(function(){googletag.pubads().refresh([slot3]);}, 180000);
   });
 }
-initGPT();
-// Registra el listener de fallback una sola vez, después de que GPT esté listo
+// initGPT() NO se llama aquí — astro:page-load dispara en carga inicial Y en navegaciones,
+// así que centralizar ahí evita la doble inicialización que destruía el anuncio del modal.
+// El listener de fallback se registra UNA sola vez aquí (no dentro de initGPT).
 googletag.cmd.push(initAdFallbackListener);
 
 function safeRefreshSlots() {

@@ -1,3 +1,4 @@
+// ===== [PLAYER - GLOBALS + SVG CONSTANTS] =====
 var streaming;
 var local_status;
 const buttonPause = '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-pause" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 5m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z" /><path d="M14 5m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z" /></svg>';
@@ -18,7 +19,7 @@ const player = document.getElementById('player');
 const secchome = document.getElementById('home');
 var coverbase = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=0aa2713d85e04243944924876ba71f05&format=json";
 
-// ===== GA4 tracking helpers (manual, to get clean event names like play/pause/stop/resume)
+// ===== [ANALYTICS] ga4Track, trackTritonPlaybackEvent =====
 let lastStreamStatus = null;
 
 function ga4Track(eventName, params = {}) {
@@ -46,7 +47,7 @@ function trackTritonPlaybackEvent(eventName, extra = {}) {
   });
 }
 
-// ===== Optimized polling for current song (conditional requests + adaptive cadence)
+// ===== [PLAYER - SONG POLLING] renderNowPlaying, scheduleNextSongFetch, startSongPolling =====
 let songETag = null;
 let songLastModified = null;
 let songPrevTitle = null;
@@ -116,7 +117,7 @@ document.addEventListener('astro:before-preparation', () => {
   if (songController) try { songController.abort(); } catch (e) { }
 });
 
-// ===== Ad Fallback: GPT → AdSense =====
+// ===== [ADS] adFallback, initAdFallbackListener, initGPT, safeRefreshSlots =====
 // Estado global, se resetea en cada initGPT() para que la navegación funcione correctamente
 window._adFallbackStates = window._adFallbackStates || {};
 
@@ -256,6 +257,7 @@ function safeRefreshSlots() {
 
 
 
+// ===== [PLAYER - TRITON SDK] initPlayerSDK, getStatus, startAd, completeAd, play, pause, stop =====
 function initPlayerSDK() {
   var tdPlayerConfig = {
     coreModules: [{
@@ -510,7 +512,7 @@ volume.addEventListener('input', function () {
 
 });
 
-// === [VOTOS] Helpers y función reutilizable ===
+// ===== [VOTES] showVoteToast, detectarNavegador, detectarDispositivo, registerVote =====
 const VOTE_COLOR = '#ef4444';
 
 function showVoteToast(message) {
@@ -638,7 +640,7 @@ function registerVote(seccion, artista, cancion, $btn = null) {
 }
 
 
-
+// ===== [PLAYER - MUSIC INFO + COVER ART] getInfoMusic, getInfoProg =====
 function getInfoMusic(forceFresh = false) {
   // Abort any previous request to avoid overlap
   if (songController) {
@@ -793,7 +795,7 @@ function getInfoProg() {
 
 
 
-
+// ===== [PLAYER - CONTROLS] radioActive, podcastActive, videoActive, initPlayer, transitionPlayer =====
 const radioActive = function () {
   $('#player-inner').addClass('active');
   $('#player-v-podcast').removeClass('active');

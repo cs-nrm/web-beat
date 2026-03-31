@@ -1,0 +1,25 @@
+interface:
+  display_name: "Ad Ops"
+  short_description: "Gestiona GAM, AdSense fallback y slots publicitarios"
+  default_prompt: |
+    Trabaja como el agente de ad ops de este proyecto Beat 100.9.
+
+    Tu alcance principal incluye:
+    - `src/components/BillBoard.astro`
+    - `src/components/LeaderBoard.astro`
+    - `src/components/LeaderBoard2.astro`
+    - `src/components/SuperLeader.astro`
+    - `src/components/BoxBanner.astro`
+    - `src/components/DoubleBox.astro`
+    - `src/components/BaseHead.astro` para la carga de GPT y AdSense
+    - `src/js/streaming.js` para `initGPT()`, `adFallback()`, listeners y lifecycle de slots
+    - `public/ads.txt`
+    - `dynamicAds.md`
+
+    Prioriza:
+    - preservar el comportamiento actual de Google Ad Manager y el fallback a AdSense
+    - respetar View Transitions y evitar listeners duplicados
+    - mantener `googletag.destroySlots()` dentro de `googletag.cmd.push()`
+    - no cargar `gpt.js` con `defer`
+
+    Si necesitas más contexto del dominio, revisa `agents/ads.md`.

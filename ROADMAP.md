@@ -112,12 +112,13 @@ Sacar las funciones de ads de `streaming.js` a su propio archivo.
 
 ---
 
-### Fase 3 — Extraer `src/js/analytics.js` (riesgo: bajo)
+### Fase 3 — Extraer `src/js/analytics.js` ✅ COMPLETADA
+
 Sacar helpers de GA4 de `streaming.js`.
 
-- [ ] Crear `src/js/analytics.js` con `ga4Track()` y `trackTritonPlaybackEvent()`
-- [ ] Cargar `analytics.js` antes que `player.js` (player depende de estas funciones)
-- [ ] Eliminar esas funciones de `streaming.js`
+- [x] Crear `src/js/analytics.js` con `ga4Track()` y `trackTritonPlaybackEvent()`
+- [x] Cargar `analytics.js` antes que `player.js` (player depende de estas funciones)
+- [x] Eliminar esas funciones de `streaming.js`
 - [ ] Verificar en GA4 DebugView que los eventos del player siguen llegando
 
 **Dependencias:** `player.js` llama a `trackTritonPlaybackEvent()` — el orden de carga importa.
@@ -126,13 +127,14 @@ Sacar helpers de GA4 de `streaming.js`.
 
 ---
 
-### Fase 4 — Extraer `src/js/votes.js` (riesgo: bajo-medio)
+### Fase 4 — Extraer `src/js/votes.js` ✅ COMPLETADA
+
 El sistema de votos es relativamente independiente pero interactúa con el DOM del player.
 
-- [ ] Crear `src/js/votes.js` con `showVoteToast()`, `detectarNavegador()`, `detectarDispositivo()`, `registerVote()`
-- [ ] Identificar qué funciones de `player.js` llaman a funciones de votes (si hay acoplamiento)
-- [ ] Cargar `votes.js` después de que el DOM esté listo
-- [ ] Eliminar esas funciones de `streaming.js`
+- [x] Crear `src/js/votes.js` con `showVoteToast()`, `detectarNavegador()`, `detectarDispositivo()`, `registerVote()`
+- [x] Identificar qué funciones de `player.js` llaman a funciones de votes (si hay acoplamiento)
+- [x] Cargar `votes.js` después de que el DOM esté listo
+- [x] Eliminar esas funciones de `streaming.js`
 - [ ] Verificar flujo completo de votación en dev
 
 **Criterio de éxito:** Flujo de voto (toast + registro) funciona igual.
@@ -198,6 +200,105 @@ Ningún archivo pertenece a más de un agente.
 
 ---
 
+## Riesgos identificados
+
+Antes de ejecutar cualquier fase, tener en cuenta estos puntos críticos:
+
+### R1 — Variables globales compartidas entre secciones (riesgo: ALTO)
+
+El archivo no usa módulos ES. Todo vive en `window`. Varias secciones se llaman entre sí directamente:
+
+| Función en... | Llama a... | Definida en... |
+| --- | --- | --- |
+| `[PLAYER - TRITON SDK]` | `trackTritonPlaybackEvent()` | `[ANALYTICS]` |
+| `[PLAYER - TRITON SDK]` | `getInfoMusic()` | `[PLAYER - MUSIC INFO]` |
+| `[PLAYER - TRITON SDK]` | `startSongPolling()` | `[PLAYER - SONG POLLING]` |
+| `[PLAYER - CONTROLS]` | `initGPT()` | `[ADS]` |
+
+Si los archivos se cargan en el orden equivocado habrá `ReferenceError` en runtime. **El orden de `<script>` en `Player.astro` es crítico y no hay ningún sistema de módulos que lo gestione automáticamente.**
+
+### R2 — `googletag.cmd.push(initAdFallbackListener)` se ejecuta al cargar el script (riesgo: ALTO)
+
+La línea 236 de `streaming.js` registra el listener de fallback fuera de cualquier función, en el top-level del archivo. Al moverlo a `ads.js`, si `googletag` no existe en ese momento, falla silenciosamente. Este listener **debe registrarse una sola vez** — ni antes de que GPT esté disponible, ni repetirse en navegaciones.
+
+### R3 — Variables `var` hoisted usadas cross-sección (riesgo: MEDIO)
+
+`var streaming`, `var local_status`, `var volume`, `var artist`, `var cancion` se declaran en línea 2 y las usan funciones en secciones distintas. Deben quedar en `player.js` (el primer archivo que carga) para que estén disponibles globalmente.
+
+### R4 — View Transitions y `astro:page-load` (riesgo: MEDIO)
+
+`initGPT()` se dispara desde un listener de `astro:page-load`. Si ese listener está en `player.js` pero `initGPT` ya vive en `ads.js`, hay que garantizar que `ads.js` esté cargado antes de que el evento dispare. Con View Transitions el orden de ejecución no siempre es el mismo entre carga inicial y navegaciones.
+
+### R5 — `Player.astro` tiene un único `<script src>` hoy (riesgo: MEDIO)
+
+Al separar, hay que agregar múltiples `<script>` en orden estricto, ninguno con `defer` ni `async`:
+
+```astro
+<script src="/src/js/analytics.js"></script>
+<script src="/src/js/ads.js"></script>
+<script src="/src/js/votes.js"></script>
+<script src="/src/js/player.js"></script>
+```
+
+Astro no bundlea ni procesa estos scripts externos — los pasa tal cual al HTML. Eso es intencional pero significa que el orden es responsabilidad nuestra.
+
+### R6 — Build vs dev (riesgo: BAJO)
+
+Astro puede comportarse diferente entre `dev` y `build` en el manejo de scripts externos. Validar siempre en `build` antes de cerrar cada fase.
+
+---
+
+## Plan de ejecución segura
+
+Guía paso a paso para cada fase, incorporando los riesgos identificados.
+
+### Antes de empezar cualquier fase
+
+- [ ] Hacer commit limpio del estado actual (punto de rollback)
+- [ ] Tener el sitio corriendo en dev con DevTools abierto (Network + Console)
+- [ ] Confirmar que ads, player y analytics funcionan antes de tocar nada
+
+### Orden de extracción recomendado
+
+El orden importa por las dependencias entre secciones:
+
+```
+1. analytics.js  ← no depende de nada del proyecto
+2. votes.js      ← no depende de ads ni player (solo DOM)
+3. ads.js        ← depende de googletag (externo), no del player
+4. player.js     ← depende de analytics.js (trackTritonPlaybackEvent)
+```
+
+### Protocolo por fase
+
+Para **cada** fase (2, 3, 4, 5):
+
+1. **Crear el archivo nuevo** con exactamente el código del bloque delimitado — sin cambiar ni una línea
+2. **Agregar el `<script src>` en `Player.astro`** en la posición correcta (antes del script que lo necesita)
+3. **Eliminar** ese bloque de `streaming.js`
+4. **Verificar en dev:** sin errores en Console, funcionalidad intacta
+5. **Verificar en build:** `npm run build && npm run preview` — comparar Network tab con estado anterior
+6. **Commit** — un commit por fase, mensaje claro
+
+### Verificaciones específicas por archivo extraído
+
+| Archivo | Qué verificar |
+| --- | --- |
+| `analytics.js` | Eventos `play`, `pause`, `stop`, `resume` llegan a GA4 DebugView |
+| `votes.js` | Flujo completo de votación: toast aparece, voto se registra |
+| `ads.js` | Slots renderizan, fallback GPT→AdSense funciona, no hay slots duplicados en navegación |
+| `player.js` | Player inicia, now playing actualiza, audio ads (VAST) no rompen |
+
+### Punto crítico: extracción de `ads.js`
+
+Al mover el bloque `[ADS]`, hay un detalle que **no está en el código pero sí en el comportamiento**:
+
+- La línea `googletag.cmd.push(initAdFallbackListener)` debe mantenerse en el **top-level** de `ads.js`
+- Debe ejecutarse **después** de que GPT (`gpt.js`) haya cargado — GPT se carga en `BaseHead.astro`, que carga antes que `Player.astro`, por lo que el orden natural lo garantiza
+- Si en algún momento se mueve GPT a `defer`, este punto se rompe
+
+---
+
 ## Principios de la refactorización
 
 1. **Una fase a la vez** — no combinar extracciones. Cada fase tiene su propio PR y validación.
@@ -205,3 +306,5 @@ Ningún archivo pertenece a más de un agente.
 3. **El orden de carga importa** — `analytics.js` antes que `player.js`, `ads.js` antes que ambos.
 4. **Validar en build, no solo en dev** — Astro SSG puede comportarse diferente en build por el manejo de scripts.
 5. **Fase 1 es gratis** — los comentarios de sección pueden hacerse hoy sin riesgo.
+6. **Nunca `defer` ni `async`** en estos scripts — el orden de ejecución sincrónico es parte del contrato.
+7. **Un commit por fase** — facilita rollback granular si algo falla en producción.

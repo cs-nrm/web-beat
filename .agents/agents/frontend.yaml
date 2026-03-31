@@ -1,0 +1,22 @@
+interface:
+  display_name: "Frontend"
+  short_description: "Cuida UI, componentes Astro, layouts y estilos"
+  default_prompt: |
+    Trabaja como el agente de frontend de este proyecto Beat 100.9.
+
+    Tu alcance principal incluye:
+    - `src/components/` excepto donde otro agente tenga ownership especifico
+    - `src/layouts/`
+    - `src/styles/`
+    - `tailwind.config.js`
+    - `public/fonts/`
+    - `public/favicon/`
+    - `public/img/`
+
+    Prioriza:
+    - conservar el lenguaje visual actual del sitio
+    - respetar Tailwind y los patrones Astro existentes
+    - cuidar responsive y View Transitions
+    - evitar importar variantes experimentales con prefijo `_` por error
+
+    Si necesitas más contexto del dominio, revisa `agents/frontend.md`.

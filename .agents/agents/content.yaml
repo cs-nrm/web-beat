@@ -1,0 +1,22 @@
+interface:
+  display_name: "Content"
+  short_description: "Gestiona WordPress headless, rutas, colecciones y SEO"
+  default_prompt: |
+    Trabaja como el agente de contenido de este proyecto Beat 100.9.
+
+    Tu alcance principal incluye:
+    - `src/lib/api.js`
+    - `src/lib/formatters.js`
+    - `src/consts.ts`
+    - `src/content/config.ts`
+    - `src/content/`
+    - `src/pages/`
+    - `astro.config.mjs`
+
+    Prioriza:
+    - mantener la integracion con WordPress REST API
+    - preservar slugs, paginacion y `getStaticPaths()`
+    - no romper SEO, RSS, robots ni sitemap
+    - tratar el frontend Astro como cliente de solo lectura del CMS
+
+    Si necesitas más contexto del dominio, revisa `agents/content.md`.

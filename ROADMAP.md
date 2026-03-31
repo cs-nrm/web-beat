@@ -98,12 +98,13 @@ Esto prepara la extracción en Fase 2 y permite que los agentes ya sepan qué se
 
 ---
 
-### Fase 2 — Extraer `src/js/ads.js` (riesgo: bajo)
+### Fase 2 — Extraer `src/js/ads.js` ✅ COMPLETADA
+
 Sacar las funciones de ads de `streaming.js` a su propio archivo.
 
-- [ ] Crear `src/js/ads.js` con `adFallback()`, `initAdFallbackListener()`, `initGPT()`, `safeRefreshSlots()`
-- [ ] Actualizar el `<script>` en `Layout.astro` (o donde se cargue) para incluir `ads.js` antes que `player.js`
-- [ ] Eliminar esas funciones de `streaming.js`
+- [x] Crear `src/js/ads.js` con `adFallback()`, `initAdFallbackListener()`, `initGPT()`, `safeRefreshSlots()`
+- [x] Actualizar el `<script>` en `Player.astro` para incluir `ads.js` antes que `streaming.js`
+- [x] Eliminar esas funciones de `streaming.js`
 - [ ] Verificar que los slots de ads sigan funcionando en dev y en build
 
 **Dependencias:** `ads.js` necesita que `googletag` esté disponible en el scope global (viene de GPT en BaseHead — no cambia).
@@ -141,12 +142,13 @@ El sistema de votos es relativamente independiente pero interactúa con el DOM d
 
 ---
 
-### Fase 5 — Renombrar `streaming.js` → `player.js` (riesgo: bajo)
+### Fase 5 — Renombrar `streaming.js` → `player.js` ✅ COMPLETADA
+
 Una vez extraídas las tres secciones, lo que queda es exclusivamente el player.
 
-- [ ] Renombrar `src/js/streaming.js` a `src/js/player.js`
-- [ ] Actualizar todos los `<script src="...streaming.js">` en los layouts/components que lo cargan
-- [ ] Verificar que no haya referencias hardcodeadas al nombre del archivo
+- [x] Renombrar `src/js/streaming.js` a `src/js/player.js`
+- [x] Actualizar todos los `<script src="...streaming.js">` en los layouts/components que lo cargan
+- [x] Verificar que no haya referencias hardcodeadas al nombre del archivo
 
 **Criterio de éxito:** Build limpio, player funciona, sin errores 404 en Network tab.
 

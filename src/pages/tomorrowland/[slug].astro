@@ -7,6 +7,7 @@ import SuperLeader from "../../components/SuperLeader.astro";
 import { any } from "astro/zod";
 import { SITE_TITLE } from "../../consts";
 import MoreTomorrowland from "../../components/MoreTomorrowland.astro";
+import LeaderBoard2 from "../../components/LeaderBoard2.astro";
 
 const { slug } = Astro.params;
 
@@ -37,7 +38,8 @@ const PLACEHOLDER_IMG =
   description={post.yoast_head_json.og_description}
 >
   <section class="w-full py-4 poppins" id="content-w-video">
-    <div class="container my-12 mx-auto md:px-4">
+    <div class="container my-4 mx-auto md:px-4">
+      <LeaderBoard2 />
       <div class="my-4 px-4 md:px-0">
         <h1 class="font-bold" set:html={post.title.rendered} />
         <div
@@ -58,9 +60,8 @@ const PLACEHOLDER_IMG =
             "Imagen Ilustrativa Tomorrowland"}
         />
       </div>
-      <LeaderBoard />
 
-      <div class="flex flex-col lg:flex-row">
+      <div class="flex flex-col lg:flex-row mt-8">
         <article
           class="sm:min-w-[calc(100%-400px)] text-elipsis lg:mr-10 flex flex-row"
         >

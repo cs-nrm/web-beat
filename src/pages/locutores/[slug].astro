@@ -5,6 +5,7 @@ import BoxBanner from "../../components/BoxBanner.astro";
 import LeaderBoard from "../../components/LeaderBoard.astro";
 import SuperLeader from "../../components/SuperLeader.astro";
 import MoreNews from "../../components/MoreNews.astro";
+import LeaderBoard2 from "../../components/LeaderBoard2.astro";
 
 const { slug } = Astro.params;
 
@@ -36,7 +37,8 @@ const PLACEHOLDER_IMG =
   description={post.yoast_head_json.og_description}
 >
   <section class="w-full py-4 poppins" id="content-w-video">
-    <div class="container my-12 mx-auto px-4 md:px-12">
+    <div class="container my-4 mx-auto px-4 md:px-12">
+      <LeaderBoard2 />
       <div class="my-4">
         <h1 class="font-bold" set:html={post.title.rendered} />
         <div
@@ -57,9 +59,8 @@ const PLACEHOLDER_IMG =
             "Imagen Ilustrativa Locutores"}
         />
       </div>
-      <LeaderBoard />
 
-      <div class="flex flex-col lg:flex-row">
+      <div class="flex flex-col lg:flex-row mt-8">
         <article
           class="sm:min-w-[calc(100%-400px)] text-elipsis lg:mr-10 flex flex-row"
         >
@@ -142,8 +143,6 @@ const PLACEHOLDER_IMG =
         >
           <div class="sticky top-[140px] left-0 right-0">
             <BoxBanner />
-            <MoreNews />
-            <DoubleBox />
           </div>
         </div>
       </div>

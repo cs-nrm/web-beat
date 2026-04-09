@@ -20,8 +20,8 @@ Gestión de inventario publicitario programático: Google Ad Manager (GAM), AdSe
 ### Lógica central de ads
 | Archivo | Sección relevante |
 |---|---|
-| `src/js/streaming.js` | Funciones: `initGPT()`, `adFallback()`, `initAdFallbackListener()`, `destroySlots()`, y definición de slots 2–6 y 14, 201–205 |
-| `src/components/BaseHead.astro` | Bloques de carga: GPT (`gpt.js` sin `defer`) y AdSense (`adsbygoogle.js`) |
+| `src/js/ads.js` | Funciones: `initGPT()`, `adFallback()`, `initAdFallbackListener()`, `destroySlots()`, `safeRefreshSlots()`, y definición de slots 2–6 y 14, 201–205 |
+| `src/components/BaseHead.astro` | Bloques de carga actuales: GPT (`gpt.js` sin `defer`) y AdSense (`adsbygoogle.js`) |
 
 ### Certificación y documentación
 | Archivo | Propósito |
@@ -78,6 +78,8 @@ adFallback(gptDivId, adsenseDivId)
 3. AdSense se carga **una sola vez** en `BaseHead.astro`, no por componente.
 4. Un solo slot por formato (sizeMapping maneja desktop/mobile internamente).
 5. En View Transitions: `initGPT()` se re-ejecuta en `astro:page-load`; el listener **no** se re-registra (tiene guard de estado).
+
+> Nota: el roadmap contempla mover los scripts a `src/components/head/AdScripts.astro`, pero hoy la carga real sigue viviendo en `BaseHead.astro`.
 
 ---
 

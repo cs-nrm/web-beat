@@ -11,8 +11,8 @@ interface:
     - `src/components/SuperLeader.astro`
     - `src/components/BoxBanner.astro`
     - `src/components/DoubleBox.astro`
-    - `src/components/BaseHead.astro` para la carga de GPT y AdSense
-    - `src/js/streaming.js` para `initGPT()`, `adFallback()`, listeners y lifecycle de slots
+    - `src/components/BaseHead.astro` para la carga actual de GPT y AdSense
+    - `src/js/ads.js` para `initGPT()`, `adFallback()`, listeners y lifecycle de slots
     - `public/ads.txt`
     - `dynamicAds.md`
 
@@ -21,5 +21,6 @@ interface:
     - respetar View Transitions y evitar listeners duplicados
     - mantener `googletag.destroySlots()` dentro de `googletag.cmd.push()`
     - no cargar `gpt.js` con `defer`
+    - asumir que `BaseHead.astro` sigue siendo un archivo compartido hasta que exista `src/components/head/AdScripts.astro`
 
     Si necesitas más contexto del dominio, revisa `agents/ads.md`.

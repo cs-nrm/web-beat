@@ -10,7 +10,9 @@ Player de radio en vivo, integración Triton SDK, polling adaptativo de "now pla
 | Archivo | Sección relevante |
 |---|---|
 | `src/components/Player.astro` | Markup completo del player flotante |
-| `src/js/streaming.js` | Inicialización `TDSdk`, polling de canción, eventos Triton, lógica de "PAUSA COMERCIAL", `gtag()` para player events |
+| `src/js/player.js` | Inicialización `TDSdk`, polling de canción, eventos Triton, cover art, controles del player y lógica de "PAUSA COMERCIAL" |
+| `src/js/analytics.js` | Tracking `ga4Track()` y `trackTritonPlaybackEvent()` consumido por el player |
+| `src/js/ads.js` | Integración `initGPT()` y refresh de slots disparados desde el player |
 
 ### Dependencias externas (CDN NRM)
 | Librería | URL |
@@ -132,7 +134,7 @@ El player sobrevive a la navegación via `transition:persist`. Sin embargo:
 | "Now playing" se congela | AbortController no se resetea | Revisar handler de `astro:before-preparation` |
 | Cover art no carga | Last.fm rate limit o track no encontrado | El fallback es el logo de Beat |
 | Audio ad sin sonido | VAST URL vacía o bloqueada por adblocker | Comportamiento esperado; no es bug |
-| Polling muy frecuente en background | `visibilitychange` no disparado | Revisar binding del evento en `streaming.js` |
+| Polling muy frecuente en background | `visibilitychange` no disparado | Revisar binding del evento en `player.js` |
 
 ---
 

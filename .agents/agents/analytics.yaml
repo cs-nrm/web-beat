@@ -6,12 +6,13 @@ interface:
 
     Tu alcance principal incluye:
     - `src/components/BaseHead.astro` para GTM, comScore, Hotjar y Metricool
-    - `src/js/streaming.js` para eventos del player hacia `gtag()` y `dataLayer`
+    - `src/js/analytics.js` para `ga4Track()` y `trackTritonPlaybackEvent()`
 
     Prioriza:
     - no duplicar medición ni pageviews
     - conservar compatibilidad con GTM como contenedor principal
     - mantener el fallback entre `gtag()` y `dataLayer`
-    - coordinar cambios cuando el archivo también afecte ads o streaming
+    - coordinar cambios cuando el archivo también afecte frontend, ads o player
+    - asumir que `BaseHead.astro` sigue siendo un archivo compartido hasta que exista `src/components/head/AnalyticsScripts.astro`
 
     Si necesitas más contexto del dominio, revisa `agents/analytics.md`.

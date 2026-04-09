@@ -10,9 +10,9 @@ Instrumentación de medición del sitio y el player: Google Tag Manager, GA4, co
 | Archivo | Sección relevante |
 |---|---|
 | `src/components/BaseHead.astro` | Scripts de GTM, comScore, Hotjar y Metricool |
-| `src/js/streaming.js` | Todas las llamadas a `gtag()` y `dataLayer` para eventos del player |
+| `src/js/analytics.js` | Helpers `ga4Track()` y `trackTritonPlaybackEvent()` para eventos del player |
 
-> Este agente **no es dueño exclusivo** de estos archivos — los comparte con `agents/ads.md` (BaseHead, bloque GPT/AdSense) y `agents/streaming.md` (streaming.js, lógica del player). Coordinar cambios en esos archivos con los agentes correspondientes.
+> Este agente **no es dueño exclusivo** de todos estos archivos — comparte `BaseHead.astro` con `agents/ads.md` y `agents/frontend.md`. El player consume `analytics.js`, así que cambios en eventos deben coordinarse con `agents/streaming.md`.
 
 ---
 
@@ -36,7 +36,7 @@ BaseHead.astro
       └─ dispara GA4 (G-8DSGT28PYF)
       └─ dispara otros tags configurados en GTM UI
 
-streaming.js (para eventos del player)
+analytics.js (para eventos del player)
   └─ gtag('event', ...) — método directo
   └─ dataLayer.push(...) — fallback si gtag no disponible
 ```
@@ -45,7 +45,7 @@ Los eventos del player tienen **doble método** de envío para garantizar que ll
 
 ---
 
-## Eventos GA4 del player (desde streaming.js)
+## Eventos GA4 del player (desde analytics.js)
 
 | Evento | Parámetros enviados |
 |---|---|
@@ -143,7 +143,7 @@ El orden importa para evitar race conditions:
 
 | Síntoma | Causa probable | Solución |
 |---|---|---|
-| Eventos de player no llegan a GA4 | `gtag` no definido al ejecutarse streaming.js | El fallback `dataLayer` debería capturarlos; verificar en GTM Preview |
+| Eventos de player no llegan a GA4 | `gtag` no definido al ejecutarse `analytics.js` o el player llama antes de tiempo | El fallback `dataLayer` debería capturarlos; verificar en GTM Preview |
 | Pageviews duplicados | GA4 tag en GTM + tag directo en BaseHead | Verificar que GA4 solo se dispare desde GTM, no duplicado |
 | Hotjar no graba | Adblocker o privacy browser | Comportamiento esperado |
 | comScore sin datos | Script bloqueado | Verificar en Network tab que el beacon llegue a `sb.scorecardresearch.com` |
@@ -154,3 +154,5 @@ El orden importa para evitar race conditions:
 ## Contexto de negocio
 
 Las métricas de comScore son las que NRM reporta a anunciantes para justificar CPMs. GA4 es el sistema interno de análisis de comportamiento. Hotjar lo usa el equipo de producto para UX. Cambios en cualquiera de estos scripts deben coordinarse con el equipo de marketing/adops de NRM — especialmente comScore, ya que afecta reportes de audiencia certificados.
+
+> Nota: el roadmap contempla mover estos scripts a `src/components/head/AnalyticsScripts.astro`, pero hoy la carga real sigue viviendo en `BaseHead.astro`.

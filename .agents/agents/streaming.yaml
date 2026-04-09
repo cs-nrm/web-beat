@@ -6,12 +6,12 @@ interface:
 
     Tu alcance principal incluye:
     - `src/components/Player.astro`
-    - `src/js/streaming.js`
+    - `src/js/player.js`
 
     Prioriza:
     - preservar la integracion con Triton SDK y el plugin `vastAd`
     - mantener el polling adaptativo de now playing
     - respetar `transition:persist` y el lifecycle de View Transitions
-    - no romper eventos del player, estados de audio ads ni fallback del display
+    - no romper eventos del player, estados de audio ads ni la integracion con `ads.js` y `analytics.js`
 
     Si necesitas más contexto del dominio, revisa `agents/streaming.md`.

@@ -3,6 +3,7 @@ latamconnect.com.mx, 0001, DIRECT
 google.com, pub-7423640555477330, DIRECT, f08c47fec0942fa0
 smartadserver.com, 5366, DIRECT, 060d053dcf45cbf3
 smartadserver.com, 5366-OB, RESELLER, 060d053dcf45cbf3
+google.com, pub-3354798231881818, DIRECT
 
 #EXTE
 richaudience.com, 037IAvqYOi, DIRECT

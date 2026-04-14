@@ -2,6 +2,42 @@
 // Estado global, se resetea en cada initGPT() para que la navegación funcione correctamente
 window._adFallbackStates = window._adFallbackStates || {};
 
+// Crea el <ins> dinámicamente para evitar que AdSense lo auto-inicialice en display:none
+function scheduleAdsensePush(fb) {
+  // Eliminar cualquier <ins> previo (por navegación SPA)
+  const old = fb.querySelector('ins.adsbygoogle');
+  if (old) old.remove();
+
+  // Crear <ins> fresco con las dimensiones del contenedor
+  const ins = document.createElement('ins');
+  ins.className = 'adsbygoogle';
+  ins.style.display = 'block';
+  ins.style.width = (fb.dataset.adWidth || '300') + 'px';
+  ins.style.maxWidth = '100%';
+  ins.style.height = (fb.dataset.adHeight || '250') + 'px';
+  ins.dataset.adClient = fb.dataset.adClient;
+  ins.dataset.adSlot = fb.dataset.adSlot;
+  ins.dataset.adFormat = fb.dataset.adFormat || 'auto';
+  fb.appendChild(ins);
+
+  let attempts = 0;
+  const maxAttempts = 10;
+  const delay = 80;
+
+  const checkAndPush = () => {
+    const insWidth = ins.offsetWidth;
+    if (insWidth > 0) {
+      try { (window.adsbygoogle = window.adsbygoogle || []).push({}); }
+      catch (e) { console.error('scheduleAdsensePush: push failed', e); }
+    } else {
+      attempts++;
+      if (attempts < maxAttempts) setTimeout(checkAndPush, delay);
+    }
+  };
+
+  setTimeout(checkAndPush, 50);
+}
+
 // Registra un grupo de slots con su fallback. Llamar dentro de initGPT() tras destroySlots()
 function adFallback(slots, fallbackId) {
   const state = { slots, fallbackId, loaded: {}, rendered: 0 };
@@ -28,15 +64,7 @@ function initAdFallbackListener() {
       if (fb) {
         fb.style.display = showGPT ? 'none' : 'block';
         if (!showGPT) {
-          const schedulePush = () => {
-            if (fb.offsetWidth > 0) {
-              try { (adsbygoogle = window.adsbygoogle || []).push({}); }
-              catch (e) { console.error('adFallback: adsbygoogle push failed', e); }
-            } else {
-              setTimeout(schedulePush, 50);
-            }
-          };
-          requestAnimationFrame(schedulePush);
+          scheduleAdsensePush(fb);
         }
       }
       break;

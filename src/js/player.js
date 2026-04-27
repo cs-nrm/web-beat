@@ -1231,6 +1231,16 @@ document.addEventListener('astro:page-load', ev => {
       });
   });
 
+  $(document).off('click.vote_propuestas').on('click.vote_propuestas', '.like-propuestas', function (e) {
+    e.preventDefault();
+    const artist = $(this).data('artist') || '';
+    const cancion = $(this).data('song') || '';
+    const $btn = $(this);
+    registerVote('Propuestas', artist, cancion, $btn)
+      .then(() => {})
+      .catch(() => {});
+  });
+
   $(document).off('click.vote_lanzamientos').on('click.vote_lanzamientos', '.like-lanzamientos', function (e) {
     e.preventDefault();
     const artist = $(this).data('artist') || '';

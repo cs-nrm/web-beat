@@ -1,0 +1,56 @@
+---
+const res = await fetch(
+    "https://beatdigital.com.mx/wp-json/wp/v2/posts?categories=866&per_page=5&_fields=id,title,acf,yoast_head_json"
+);
+const propuestas = await res.json();
+---
+
+<div class="mt-4 w-full">
+    <h2 class="audiowide neon-rosa text-center text-4xl font-bold mb-3">Propuestas</h2>
+    <ul class="flex flex-col gap-2">
+        {
+            propuestas.map((post: any) => {
+                const imgUrl = post.yoast_head_json?.og_image?.[0]?.url ?? '';
+                const artista = post.acf?.artista ?? '';
+                const titulo = post.title?.rendered ?? '';
+                return (
+                    <li class="flex items-center gap-2 bg-black/40 rounded-xl p-2">
+                        {imgUrl && (
+                            <img
+                                src={imgUrl}
+                                alt={artista}
+                                width="64"
+                                height="64"
+                                class="rounded-lg object-cover w-16 h-16 flex-shrink-0"
+                            />
+                        )}
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs text-[#FFAA1F] font-bold uppercase truncate">{artista}</p>
+                            <p class="text-xs text-white leading-tight mt-0.5" set:html={titulo} />
+                        </div>
+                        <div
+                            class="like-propuestas cursor-pointer flex-shrink-0"
+                            title="Votar"
+                            data-song={titulo}
+                            data-artist={artista}
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="white"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                width="28"
+                                height="28"
+                                stroke-width="1"
+                            >
+                                <path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572" />
+                            </svg>
+                        </div>
+                    </li>
+                );
+            })
+        }
+    </ul>
+</div>

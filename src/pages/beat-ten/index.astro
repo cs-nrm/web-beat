@@ -2,7 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../../consts";
 import Card from "../../layouts/CardsVideoTopTen.astro";
-import DoubleBox from "../../components/DoubleBox.astro";
+import SidebarPropuestas from "../../components/SidebarPropuestas.astro";
 import BoxBanner from "../../components/BoxBanner.astro";
 import BarNrm from "../../components/BarNrm.astro";
 import LeaderBoard from "../../components/LeaderBoard.astro";
@@ -27,7 +27,7 @@ const posts = await res.json();
             <div class="sm:min-w-[calc(100%-400px)] lg:mr-10">
                 <section class="flex flex-wrap -mx-4">
                     {
-                        posts.map((post: any, index) => (
+                        posts.map((post: any, index: number) => (
                             <>
                                 <Card {post} {index} />
                             </>
@@ -41,7 +41,7 @@ const posts = await res.json();
                 <div class="sticky top-[140px] left-0 right-0">
                     <BoxBanner />
                     </br>
-                    <DoubleBox />
+                    <SidebarPropuestas />
                 </div>
             </div>
         </div>

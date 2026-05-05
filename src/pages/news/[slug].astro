@@ -157,6 +157,18 @@ const PLACEHOLDER_IMG =
   </section>
   <SuperLeader />
 
+  <style is:global>
+    .plyr,
+    .plyr--video,
+    [id*="viralize"],
+    [class*="viralize"],
+    [id*="vtv"],
+    [class*="vtv"],
+    [id*="sunmedia"],
+    [class*="sunmedia"] {
+      z-index: 999999 !important;
+    }
+  </style>
   <link
     rel="stylesheet"
     type="text/css"
@@ -165,5 +177,5 @@ const PLACEHOLDER_IMG =
   <script is:inline src="https://storage.googleapis.com/nrm-web/nrm/lib/plyr.js"
   ></script>
   <script is:inline src="https://storage.googleapis.com/nrm-web/nrm/lib/SunMediaBeat.js"></script>
-  <script data-wid="auto" type="text/javascript" src="https://content.viralize.tv/display/?zid=AAGEvmBi3yVQL6nZ&u=%%REFERRER_URL_ESC%%"></script>
+  <script is:inline data-wid="auto" type="text/javascript" src="https://content.viralize.tv/display/?zid=AAGEvmBi3yVQL6nZ&u=%%REFERRER_URL_ESC%%"></script>
 </Layout>

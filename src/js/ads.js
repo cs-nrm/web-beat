@@ -90,6 +90,7 @@ function initGPT() {
     var mapping203 = googletag.sizeMapping().addSize([0, 0], [300, 250]).build();
     var mapping204 = googletag.sizeMapping().addSize([0, 0], [300, 250]).build();
     var mapping205 = googletag.sizeMapping().addSize([0, 0], [300, 250]).build();
+    var mappingVideoNota = googletag.sizeMapping().addSize([0, 0], [400, 311]).build();
 
 
     window.slot2  = googletag.defineSlot("/23349147378/Beat", [300, 250], 'ad-slot2').defineSizeMapping(mapping2).addService(googletag.pubads());
@@ -104,6 +105,7 @@ function initGPT() {
     window.slot203 = googletag.defineSlot("/23349147378/Beat/Box3", [300, 250], 'ad-slot203').defineSizeMapping(mapping203).addService(googletag.pubads());
     window.slot204 = googletag.defineSlot("/23349147378/Beat/Box4", [300, 250], 'ad-slot204').defineSizeMapping(mapping204).addService(googletag.pubads());
     window.slot205 = googletag.defineSlot("/23349147378/Beat/Box5", [300, 250], 'ad-slot205').defineSizeMapping(mapping205).addService(googletag.pubads());
+    window.slotVideoNota = googletag.defineSlot("/23349147378/StereoCien", [400, 311], 'ad-slot-videonota').defineSizeMapping(mappingVideoNota).addService(googletag.pubads());
 
     googletag.pubads().setTargeting("test", "responsive");
     googletag.enableServices();
@@ -119,6 +121,7 @@ function initGPT() {
     googletag.display('ad-slot203');
     googletag.display('ad-slot204');
     googletag.display('ad-slot205');
+    if (document.getElementById('ad-slot-videonota')) googletag.display('ad-slot-videonota');
 
     // once slots have been requested, set up fallbacks for billboards and leaders
     function initBillboardFallbacks() {

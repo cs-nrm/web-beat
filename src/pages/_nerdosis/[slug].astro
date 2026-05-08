@@ -132,6 +132,7 @@ export async function getStaticPaths() {
           </div>
           <div class="w-full">
             <Fragment set:html={post.content.rendered} />
+            <div id="ad-slot-videonota"></div>
           </div>
         </article>
         <div
@@ -152,5 +153,5 @@ export async function getStaticPaths() {
   />
   <script is:inline src="https://storage.googleapis.com/nrm-web/nrm/lib/plyr.js"
   ></script>
-  <script is:inline data-wid="auto" type="text/javascript" src="https://content.viralize.tv/display/?zid=AAGEvmBi3yVQL6nZ&u=%%REFERRER_URL_ESC%%"></script>
+
 </Layout>

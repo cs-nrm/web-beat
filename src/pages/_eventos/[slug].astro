@@ -55,6 +55,7 @@ export async function getStaticPaths() {
           class="sm:min-w-[calc(100%-400px)] text-elipsis overflow-hidden lg:mr-10 text-lg"
         >
           <Fragment set:html={post.content.rendered} />
+          <div id="ad-slot-videonota"></div>
         </article>
         <div
           class="bg-gray-300 p-5 rounded-md my-2 sm:min-w-[350px] relative text-center md:text-left"
@@ -69,7 +70,7 @@ export async function getStaticPaths() {
     </div>
   </section>
   <SuperLeader />
-  <script is:inline data-wid="auto" type="text/javascript" src="https://content.viralize.tv/display/?zid=AAGEvmBi3yVQL6nZ&u=%%REFERRER_URL_ESC%%"></script>
+
 </Layout>
 <link
   rel="stylesheet"

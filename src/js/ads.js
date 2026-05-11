@@ -105,22 +105,22 @@ function initGPT() {
     window.slot203 = googletag.defineSlot("/23349147378/Beat/Box3", [300, 250], 'ad-slot203').defineSizeMapping(mapping203).addService(googletag.pubads());
     window.slot204 = googletag.defineSlot("/23349147378/Beat/Box4", [300, 250], 'ad-slot204').defineSizeMapping(mapping204).addService(googletag.pubads());
     window.slot205 = googletag.defineSlot("/23349147378/Beat/Box5", [300, 250], 'ad-slot205').defineSizeMapping(mapping205).addService(googletag.pubads());
-    window.slotVideoNota = googletag.defineSlot("/23349147378/StereoCien", [400, 311], 'ad-slot-videonota').defineSizeMapping(mappingVideoNota).addService(googletag.pubads());
+    window.slotVideoNota = googletag.defineSlot("/23349147378/Beat", [400, 311], 'ad-slot-videonota').defineSizeMapping(mappingVideoNota).addService(googletag.pubads());
 
     googletag.pubads().setTargeting("test", "responsive");
     googletag.enableServices();
-    googletag.display('ad-slot2');
-    googletag.display('ad-slot3');
-    googletag.display('ad-slot32');
-    googletag.display('ad-slot4');
-    googletag.display('ad-slot5');
-    googletag.display('ad-slot6');
-    googletag.display('ad-slot14');
-    googletag.display('ad-slot201');
-    googletag.display('ad-slot202');
-    googletag.display('ad-slot203');
-    googletag.display('ad-slot204');
-    googletag.display('ad-slot205');
+    if (document.getElementById('ad-slot2'))   googletag.display('ad-slot2');
+    if (document.getElementById('ad-slot3'))   googletag.display('ad-slot3');
+    if (document.getElementById('ad-slot32'))  googletag.display('ad-slot32');
+    if (document.getElementById('ad-slot4'))   googletag.display('ad-slot4');
+    if (document.getElementById('ad-slot5'))   googletag.display('ad-slot5');
+    if (document.getElementById('ad-slot6'))   googletag.display('ad-slot6');
+    if (document.getElementById('ad-slot14'))  googletag.display('ad-slot14');
+    if (document.getElementById('ad-slot201')) googletag.display('ad-slot201');
+    if (document.getElementById('ad-slot202')) googletag.display('ad-slot202');
+    if (document.getElementById('ad-slot203')) googletag.display('ad-slot203');
+    if (document.getElementById('ad-slot204')) googletag.display('ad-slot204');
+    if (document.getElementById('ad-slot205')) googletag.display('ad-slot205');
     if (document.getElementById('ad-slot-videonota')) googletag.display('ad-slot-videonota');
 
     // once slots have been requested, set up fallbacks for billboards and leaders

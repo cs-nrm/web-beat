@@ -52,76 +52,78 @@ function detectarDispositivo() {
 
 /**
  * Registra un voto en el backend.
- * @param {string} seccion - Ej: 'Radio', 'Hot parade', 'Lanzamientos'
- * @param {string} artista - Nombre del artista (sin codificar)
- * @param {string} cancion - Título de la canción (sin codificar)
- * @param {jQuery|null} $btn - Botón/elemento clicado (opcional) para manejar UI
+ * @param {string} seccion
+ * @param {string} artista
+ * @param {string} cancion
+ * @param {HTMLElement|null} btn
  * @returns {Promise}
  */
-function registerVote(seccion, artista, cancion, $btn = null) {
+function registerVote(seccion, artista, cancion, btn = null) {
   return new Promise((resolve, reject) => {
     const url = 'https://beatdigital.com.mx/6456heu2/8s4v3f1l3s.php';
 
-    // Protección de doble click o voto ya marcado
-    if ($btn) {
-      const $svg = $btn.find('svg');
-      const fillColor = ($svg.css('fill') || '').toLowerCase();
+    if (btn) {
+      const svg = btn.querySelector('svg');
+      const fillColor = svg ? (svg.style.fill || '').toLowerCase() : '';
       if (fillColor === VOTE_COLOR) {
         console.log('Ya votaste por esta canción.');
         return resolve({ status: 'already' });
       }
-      if ($btn.prop('disabled')) {
+      if (btn.disabled) {
         return resolve({ status: 'disabled' });
       }
-      $btn.prop('disabled', true);
+      btn.disabled = true;
     }
 
     const safe = (s) => (s || '').toString().replace('&', '%26');
     const { navegador, sistema } = detectarNavegador();
 
-    $.post(
-      url,
-      {
-        artista: safe(artista),
-        cancion: safe(cancion),
-        seccion: seccion,
-        dispositivo: detectarDispositivo(),
-        navegador,
-        sistema_operativo: sistema,
-      },
-      function (resp) {
-        if ($btn) $btn.prop('disabled', false);
+    const data = {
+      artista: safe(artista),
+      cancion: safe(cancion),
+      seccion: seccion,
+      dispositivo: detectarDispositivo(),
+      navegador,
+      sistema_operativo: sistema,
+    };
 
-        // Contrato nuevo del backend:
-        // - success: inserted true
-        // - skipped (cooldown): inserted false
-        // - blocked (rate limits): inserted false
+    fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(data)
+    })
+      .then(function(res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function(resp) {
+        if (btn) btn.disabled = false;
+
         if (resp && resp.status === 'success') {
-          if ($btn) $btn.find('svg').css('fill', VOTE_COLOR);
+          if (btn) {
+            const svg = btn.querySelector('svg');
+            if (svg) svg.style.fill = VOTE_COLOR;
+          }
           showVoteToast(resp.message || 'Gracias por tu voto');
           return resolve(resp);
         }
 
         if (resp && (resp.status === 'blocked' || resp.status === 'skipped')) {
-          // Mensajes amigables para UX (Astro/JS puede leer reason si lo necesita)
           showVoteToast(resp.message || 'No se pudo registrar tu voto.');
           return resolve(resp);
         }
 
-        // Respuesta inesperada
         showVoteToast((resp && resp.message) || 'Error al votar.');
         return reject(resp || new Error('vote-error'));
-      },
-      'json'
-    ).fail(function (xhr) {
-      if ($btn) $btn.prop('disabled', false);
-      // Si el backend devolvió JSON (por ejemplo 429), lo mostramos
-      const msg = (xhr && xhr.responseJSON && xhr.responseJSON.message)
-        ? xhr.responseJSON.message
-        : 'No se pudo registrar el voto. Intenta de nuevo.';
-      showVoteToast(msg);
-      reject(new Error('network-fail'));
-    });
+      })
+      .catch(function(xhr) {
+        if (btn) btn.disabled = false;
+        const msg = (xhr && xhr.responseJSON && xhr.responseJSON.message)
+          ? xhr.responseJSON.message
+          : 'No se pudo registrar el voto. Intenta de nuevo.';
+        showVoteToast(msg);
+        reject(new Error('network-fail'));
+      });
   });
 }
 

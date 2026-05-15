@@ -47,7 +47,7 @@ function renderNowPlaying(titleText, artistText) {
     return false;
   }
   const isCommercial = !titleText || titleText === '';
-  const label = isCommercial ? (artistText || 'PAUSA COMERCIAL') : (titleText + ' / ' + artistText);
+  const label = isCommercial ? (artistText || 'Beat 100.9') : (titleText + ' / ' + artistText);
 
   const codtit = encodeURIComponent(titleText || '');
   const codart = encodeURIComponent(artistText || '');
@@ -339,7 +339,7 @@ function getInfoMusic(forceFresh = false) {
         case 'NUEVA PRODUCCION':
         case 'Elementos RANDOM':
         case 'ELEMENTOS':
-          artist = 'PAUSA COMERCIAL';
+          artist = 'Beat 100.9';
           cancion = '';
           break;
         default:

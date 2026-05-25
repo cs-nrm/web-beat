@@ -140,8 +140,17 @@ function initGPT() {
         initBillboardFallbacks();
     }
 
-    //googletag.pubads().refresh([slot3]);
-    //setInterval(function(){googletag.pubads().refresh([slot3]);}, 180000);
+    googletag.pubads().refresh([window.slot32]);
+    
+    // Limpiar intervalo anterior si existe (por navegación SPA)
+    if (window.slot32RefreshInterval) {
+      clearInterval(window.slot32RefreshInterval);
+    }
+    
+    // Crear intervalo para refresh cada 10 segundos
+    window.slot32RefreshInterval = setInterval(function(){
+      googletag.pubads().refresh([window.slot32]);
+    }, 180000);
   });
 }
 // initGPT() NO se llama aquí — astro:page-load dispara en carga inicial Y en navegaciones,

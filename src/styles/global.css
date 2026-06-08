@@ -934,7 +934,7 @@ input[type=range]:focus::-ms-fill-upper {
 }
 
 .ns-effect-bouncyflip {
-  background: #cfda2f !important;
+  background: #99ff1e !important;
   text-align: center;
   left: auto;
   right: 30px;
@@ -957,8 +957,8 @@ input[type=range]:focus::-ms-fill-upper {
 .ns-box-inner a,
 .ns-box-inner .fondo-live div:first-child {
   position: relative;
-  top: 200px;
-  left: 70px;
+  top: 190px;
+  left: 50px;
   text-decoration: none;
   /*text-align: right;*/
   line-height: 0px;
@@ -983,7 +983,7 @@ input[type=range]:focus::-ms-fill-upper {
 .ns-box-inner h3 {
   margin: 0;
   font-size: 1.5rem;
-  color: #ffffff !important;
+  color: #000 !important;
 }
 
 .ns-box-inner i {
@@ -1022,7 +1022,7 @@ input[type=range]:focus::-ms-fill-upper {
   width: 300px;
   height: 256px;
   /*background: #fff url('https://storage.googleapis.com/nrm-web/mundial/notificacion_sorteo.jpg') no-repeat;*/
-  background: #fff url('https://storage.googleapis.com/nrm-web/beat/resources/img/notificacion-1009-2025.jpg') no-repeat;
+  background: #fff url('https://storage.googleapis.com/nrm-web/mundial/notificacion-mundial.jpg') no-repeat;
 
   /*background: #fff url('https://storage.googleapis.com/nrm-web/beat/resources/img/notificacion-lou.jpg') no-repeat;*/
   background-position: top center;
@@ -1038,7 +1038,7 @@ input[type=range]:focus::-ms-fill-upper {
 
 .ns-effect-bouncyflip .ns-close::after,
 .ns-effect-bouncyflip .ns-close::before {
-  background: #fff !important;
+  background: #000 !important;
 }
 
 .ns-close {

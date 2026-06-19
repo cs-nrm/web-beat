@@ -140,17 +140,17 @@ function initGPT() {
         initBillboardFallbacks();
     }
 
-    /*googletag.pubads().refresh([window.slot32]);
+    googletag.pubads().refresh([window.slot5]);
     
     // Limpiar intervalo anterior si existe (por navegación SPA)
-    if (window.slot32RefreshInterval) {
-      clearInterval(window.slot32RefreshInterval);
+    if (window.slot5RefreshInterval) {
+      clearInterval(window.slot5RefreshInterval);
     }
     
     // Crear intervalo para refresh cada 10 segundos
-    window.slot32RefreshInterval = setInterval(function(){
-      googletag.pubads().refresh([window.slot32]);
-    }, 180000);*/
+    window.slot5RefreshInterval = setInterval(function(){
+      googletag.pubads().refresh([window.slot5]);
+    }, 180000);
   });
 }
 // initGPT() NO se llama aquí — astro:page-load dispara en carga inicial Y en navegaciones,

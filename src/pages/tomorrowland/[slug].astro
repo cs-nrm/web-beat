@@ -18,7 +18,7 @@ let [post] = await res.json();
 
 export async function getStaticPaths() {
   let data = await fetch(
-    "https://beatdigital.com.mx/wp-json/wp/v2/posts?_embed&per_page=100&_fields=title,slug,content,yoast_head_json&categories=774",
+    "https://beatdigital.com.mx/wp-json/wp/v2/posts?_embed&per_page=100&_fields=title,slug,content,yoast_head_json&categories=861",
   );
   let posts = await data.json();
 

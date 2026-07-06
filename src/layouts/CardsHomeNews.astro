@@ -1,6 +1,7 @@
 ---
 import DoubleBox from '../components/DoubleBox.astro';
 import BoxBanner from '../components/BoxBanner.astro';
+import BoxBanner2 from '../components/BoxBanner2.astro';
 import LeaderBoard from'../components/LeaderBoard.astro';
 import SuperLeader from '../components/SuperLeader.astro';
 import LeaderBoard2 from '../components/LeaderBoard2.astro';
@@ -42,7 +43,7 @@ const { poststi } = Astro.props;
           {
             poststi
             /*.filter((poststi:any) => !poststi.acf.fijo)*/
-            .slice(1,4)
+            .slice(1,3)
             .map((poststi:any) => (
               
 
@@ -58,6 +59,9 @@ const { poststi } = Astro.props;
             </div>
           ))
           }
+          <div class="card secundarias"> 
+            <BoxBanner2 />
+          </div>
         </div>
       </div>
 

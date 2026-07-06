@@ -7,12 +7,7 @@ import SuperLeader from "../../components/SuperLeader.astro";
 import MoreNews from "../../components/MoreNews.astro";
 import { any } from "astro/zod";
 
-const { slug } = Astro.params;
-
-let res = await fetch(
-  `https://beatdigital.com.mx/wp-json/wp/v2/posts?slug=${slug}`,
-);
-let [post] = await res.json();
+const { post } = Astro.props;
 
 export async function getStaticPaths() {
   let data = await fetch(

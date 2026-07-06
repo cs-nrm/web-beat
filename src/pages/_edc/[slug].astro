@@ -9,16 +9,11 @@ import { SITE_TITLE } from "../../consts";
 import MoreEdc from "../../components/MoreEdc.astro";
 import LeaderBoard2 from "../../components/LeaderBoard2.astro";
 
-const { slug } = Astro.params;
-
-let res = await fetch(
-  `https://beatdigital.com.mx/wp-json/wp/v2/posts?slug=${slug}`,
-);
-let [post] = await res.json();
+const { post } = Astro.props;
 
 export async function getStaticPaths() {
   let data = await fetch(
-    "https://beatdigital.com.mx/wp-json/wp/v2/posts?_embed&per_page=100&_fields=title,slug,content,yoast_head_json&categories=835",
+    "https://beatdigital.com.mx/wp-json/wp/v2/posts?_embed&per_page=100&_fields=title,slug,content,yoast_head_json,_links,_embedded&categories=835",
   );
   let posts = await data.json();
 

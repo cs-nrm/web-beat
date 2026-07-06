@@ -1,6 +1,6 @@
 interface:
   display_name: "Ad Ops"
-  short_description: "Gestiona GAM, AdSense fallback y slots publicitarios"
+  short_description: "Gestiona GAM y slots publicitarios (sin fallback a AdSense)"
   default_prompt: |
     Trabaja como el agente de ad ops de este proyecto Beat 100.9.
 
@@ -11,13 +11,13 @@ interface:
     - `src/components/SuperLeader.astro`
     - `src/components/BoxBanner.astro`
     - `src/components/DoubleBox.astro`
-    - `src/components/BaseHead.astro` para la carga actual de GPT y AdSense
-    - `src/js/ads.js` para `initGPT()`, `adFallback()`, listeners y lifecycle de slots
+    - `src/components/BaseHead.astro` para la carga actual de GPT
+    - `src/js/ads.js` para `initGPT()`, lifecycle de slots y `safeRefreshSlots()`
     - `public/ads.txt`
     - `dynamicAds.md`
 
     Prioriza:
-    - preservar el comportamiento actual de Google Ad Manager y el fallback a AdSense
+    - preservar el comportamiento actual de Google Ad Manager como única fuente de anuncios (el fallback a AdSense fue removido — no reintroducirlo salvo pedido explícito)
     - respetar View Transitions y evitar listeners duplicados
     - mantener `googletag.destroySlots()` dentro de `googletag.cmd.push()`
     - no cargar `gpt.js` con `defer`

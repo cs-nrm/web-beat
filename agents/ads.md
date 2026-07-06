@@ -1,27 +1,31 @@
 # Ad Ops Agent — Beat 100.9
 
 ## Rol
-Gestión de inventario publicitario programático: Google Ad Manager (GAM), AdSense fallback, sizeMapping responsivo y roadmap hacia Prebid.js / AdX.
+Gestión de inventario publicitario programático: Google Ad Manager (GAM), sizeMapping responsivo y roadmap hacia Prebid.js / AdX. El fallback a AdSense fue removido del proyecto — GAM es la única fuente de anuncios.
 
 ---
 
 ## Archivos bajo responsabilidad
 
 ### Componentes de ad units
-| Archivo | Formato | Tamaños |
-|---|---|---|
-| `src/components/BillBoard.astro` | Billboard | 970×250 desktop / 320×50 mobile |
-| `src/components/LeaderBoard.astro` | Leaderboard | 728×90 desktop / 320×50 mobile |
-| `src/components/LeaderBoard2.astro` | Leaderboard variante | igual que LeaderBoard |
-| `src/components/SuperLeader.astro` | Super Leaderboard | 970×90 desktop |
-| `src/components/BoxBanner.astro` | Medium Rectangle | 300×250 |
-| `src/components/DoubleBox.astro` | Half Page | 300×600 |
+Estandarizados a dos formatos: **leaderboard (728×90)** y **box (300×250)**. Solo DoubleBox (skyscraper vertical) y el slot de Modal quedan fuera del estándar — no se tocan.
+
+| Archivo | Div ID | Formato | Tamaños |
+|---|---|---|---|
+| `src/components/BillBoard.astro` | `ad-slot-leaderboard1` | Leaderboard | 728×90 desktop / 320×50 mobile |
+| `src/components/LeaderBoard.astro` | `ad-slot-leaderboard2` | Leaderboard | 728×90 desktop / 320×50 mobile |
+| `src/components/LeaderBoard2.astro` | `ad-slot-leaderboard3` | Leaderboard | 728×90 desktop / 320×50 mobile |
+| `src/components/SuperLeader.astro` | `ad-slot-leaderboard4` | Leaderboard | 728×90 desktop / 320×50 mobile (antes 970×90) |
+| `src/components/BoxBanner.astro` | `ad-slot-boxbanner1` | Box | 300×250 |
+| `src/layouts/SliderBuenfin.astro` | `ad-slot-boxbanner2`…`ad-slot-boxbanner6` | Box (carrusel, 5 slots) | 300×250 |
+| `src/components/DoubleBox.astro` | `ad-slot5` | Half Page (sin cambios, no estandarizado) | 300×600 |
+| `src/components/Modal.astro` | `ad-slot14` | Modal (sin cambios, no estandarizado; actualmente comentado/inactivo en el HTML) | 600×800 desktop / 320×480 mobile |
 
 ### Lógica central de ads
 | Archivo | Sección relevante |
 |---|---|
-| `src/js/ads.js` | Funciones: `initGPT()`, `adFallback()`, `initAdFallbackListener()`, `destroySlots()`, `safeRefreshSlots()`, y definición de slots 2–6 y 14, 201–205 |
-| `src/components/BaseHead.astro` | Bloques de carga actuales: GPT (`gpt.js` sin `defer`) y AdSense (`adsbygoogle.js`) |
+| `src/js/ads.js` | Funciones: `initGPT()`, `destroySlots()`, `safeRefreshSlots()`. Mapping único `mappingLeaderboard` reusado por los 4 slots leaderboard y `mappingBox` reusado por los 6 slots box. |
+| `src/components/BaseHead.astro` | Bloque de carga actual: GPT (`gpt.js` sin `defer`). Ya no se carga `adsbygoogle.js`. |
 
 ### Certificación y documentación
 | Archivo | Propósito |
@@ -33,40 +37,27 @@ Gestión de inventario publicitario programático: Google Ad Manager (GAM), AdSe
 
 ## Configuración de red
 
-- **GAM Network ID:** `21799830913`
+- **GAM Network ID:** `21799830913` (verificar contra el path activo en `ads.js`, ver Troubleshooting)
 - **Ad Unit base path:** `/21799830913/Beat`
-- **AdSense Publisher ID:** `ca-pub-7423640555477330`
-- **Slot IDs activos:** slot2–slot6, slot14, slot201–slot205 (11 slots)
+- **Slot IDs activos:** `ad-slot-leaderboard1`–`4`, `ad-slot-boxbanner1`–`6`, `ad-slot5` (DoubleBox), `ad-slot14` (Modal), `ad-slot-videonota` (11 slots + videonota)
 
 ---
 
-## Arquitectura de fallback (GPT → AdSense)
+## Arquitectura (solo GAM, sin fallback)
 
 ```
 initGPT()
+  └─ destroySlots() dentro de cmd.push
   └─ define slots + sizeMapping
   └─ googletag.display()
-
-initAdFallbackListener()  ← se registra UNA sola vez
-  └─ escucha slotRenderEnded
-  └─ si isEmpty → adFallback() muestra AdSense
-  └─ si fill    → oculta div AdSense
-
-adFallback(gptDivId, adsenseDivId)
-  └─ espera a que el elemento tenga width > 0
-  └─ usa AbortController para cancelar en navegación
-  └─ pushea adsbygoogle solo cuando el slot es visible
 ```
+
+Si un slot no tiene fill, el div queda vacío — no hay una segunda capa de anuncios.
 
 **Patrón HTML de cada componente:**
 ```html
-<!-- GPT slot -->
-<div id="ad-slotN"></div>
-
-<!-- AdSense fallback (display:none por defecto) -->
-<div id="ad-slotN-adsense" style="display:none">
-  <ins class="adsbygoogle" ...></ins>
-</div>
+<!-- GPT slot, único div. IDs: ad-slot-leaderboardN / ad-slot-boxbannerN -->
+<div id="ad-slot-leaderboard1"></div>
 ```
 
 ---
@@ -87,8 +78,8 @@ adFallback(gptDivId, adsenseDivId)
 
 | Breakpoint | Formatos activos |
 |---|---|
-| `≥ 768px` (desktop) | 970×250, 728×90, 970×90 |
-| `0px` (mobile) | 320×50, 300×250, 300×600 |
+| `≥ 768px` (desktop) | 728×90 (leaderboard ×4), 600×800 (modal, sin usar) |
+| `0px` (mobile) | 320×50 (leaderboard), 300×250 (box ×6), 300×600 (double box), 320×480 (modal, sin usar) |
 
 ---
 
@@ -101,6 +92,8 @@ google.com, pub-7423640555477330, DIRECT, f08c47fec0942fa0
 smartadserver.com, 5366, DIRECT
 ```
 
+> Nota: `public/ads.txt` sigue listando publisher IDs de AdSense (`pub-7423640555477330`, `pub-3354798231881818`) por compatibilidad/uso en otros contextos de la cuenta de Google. No se tocó al remover el fallback — confirmar con NRM si deben limpiarse.
+
 ---
 
 ## Roadmap activo
@@ -108,7 +101,7 @@ smartadserver.com, 5366, DIRECT
 | Etapa | Estado |
 |---|---|
 | Google Ad Manager (GAM) | ✅ en producción |
-| AdSense fallback | ✅ en producción |
+| AdSense fallback | ❌ removido — GAM es la única fuente de anuncios |
 | Prebid.js (header bidding) | 🔜 pendiente |
 | Google Ad Exchange (AdX) | 🔜 pendiente (requiere certificación NRM) |
 
@@ -119,10 +112,9 @@ smartadserver.com, 5366, DIRECT
 | Síntoma | Causa probable | Solución |
 |---|---|---|
 | `TypeError: googletag.destroySlots is not a function` | `destroySlots()` fuera de `cmd.push()` | Moverlo dentro del callback |
-| AdSense aparece aunque GPT tiene fill | Listener acumulado en navegación | Verificar guard de `initAdFallbackListener` |
 | Slot no renderiza en mobile | sizeMapping no cubre el breakpoint | Revisar mapeo `[0, 0]` en `addSize()` |
-| AdSense no pushea | Elemento sin ancho al momento del push | El `width > 0` check lo maneja; revisar CSS del contenedor |
 | Slots duplicados tras navegación | `initGPT()` sin `destroySlots()` previo | Siempre destruir antes de re-definir |
+| Slot vacío sin ningún anuncio | GAM sin fill para ese inventario/geo | Comportamiento esperado — ya no hay fallback a AdSense |
 
 ---
 

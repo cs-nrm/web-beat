@@ -8,13 +8,7 @@ import { Image } from 'astro:assets';
 
 const PLACEHOLDER_IMG = 'https://storage.googleapis.com/nrm-web/beat/resources/img/img_beat-min.jpg';
 
-const res = await fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_fields=date,title,slug,sticky,acf,content,excerpt,_links,_embedded&_embed&per_page=6&categories=143&order_by=date&order=desc&acf.fijo=false");
-
-const ressti = await fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_fields=date,title,slug,sticky,acf,content,excerpt,_links,_embedded&_embed&per_page=4&categories=143");
-
-const posts = await res.json();
-
-const poststi = await ressti.json();
+const { poststi } = Astro.props;
 
 ---
       <div class="container cards">

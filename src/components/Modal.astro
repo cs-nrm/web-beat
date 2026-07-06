@@ -25,13 +25,28 @@
 </div>
 
 <script is:inline>
+  (function () {
+    const SEEN_KEY = 'beat_modal_seen';
+    const modal = document.getElementById('modal');
+    if (!modal) return;
+    if (sessionStorage.getItem(SEEN_KEY)) {
+      modal.remove();
+      return;
+    }
+    sessionStorage.setItem(SEEN_KEY, '1');
+  })();
+</script>
+
+<script is:inline>
   const now = new Date();
   const targetDate = new Date('2026-07-03T17:00:00');
   if (now >= targetDate) {
     const videoElement = document.getElementById('videopromo');
-    const sourceElement = videoElement.querySelector('source');
-    sourceElement.src = 'https://storage.googleapis.com/nrm-web/beat/videos/Break_takeover_diecinueve_1.mp4'; 
-    videoElement.load();
+    if (videoElement) {
+      const sourceElement = videoElement.querySelector('source');
+      sourceElement.src = 'https://storage.googleapis.com/nrm-web/beat/videos/Break_takeover_diecinueve_1.mp4';
+      videoElement.load();
+    }
   }
 </script>
 

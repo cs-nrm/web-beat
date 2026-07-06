@@ -31,7 +31,26 @@ import SliderPortada from "../layouts/SliderPortada.astro";
 import DiaRadio from "../components/DiaRadio.astro";
 import CardsHomeEdcVegas from "../layouts/CardsHomeEdcVegas.astro";
 import CardsHomeTomorrow from "../layouts/CardsHomeTomorrow.astro";
+import { getQuePlanPosts } from "../lib/quePlan.js";
 
+// Las 6 secciones que sí se renderizan en el home piden sus datos en paralelo
+// (antes cada componente hacía su propio fetch secuencial, lo que hacía que
+// el home tardara minutos en generarse).
+const [
+  portadaPosts,
+  newsPosts,
+  tomorrowPosts,
+  quePlanPosts,
+  promocionesPosts,
+  tecnologiaPosts,
+] = await Promise.all([
+  fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_fields=title,slug,yoast_head_json,acf&_embed&per_page=30&categories=842").then((r) => r.json()),
+  fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_fields=date,title,slug,sticky,acf,content,excerpt,_links,_embedded&_embed&per_page=4&categories=143").then((r) => r.json()),
+  fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_fields=date,title,slug,sticky,acf,content,excerpt,_links,_embedded&_embed&per_page=3&categories=861&order_by=date&order=desc&acf.fijo=false").then((r) => r.json()),
+  getQuePlanPosts(),
+  fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_fields=title,slug,yoast_head_json,_links,_embedded&_embed&per_page=30&categories=537,458").then((r) => r.json()),
+  fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_fields=date,title,slug,sticky,acf,content,excerpt,_links,_embedded&_embed&per_page=3&categories=625&order_by=date&order=desc&acf.fijo=false").then((r) => r.json()),
+]);
 ---
  
 <Layout
@@ -53,7 +72,7 @@ import CardsHomeTomorrow from "../layouts/CardsHomeTomorrow.astro";
             >
 
         </div-->
-        <SliderPortada />
+        <SliderPortada posts={portadaPosts} />
     </div>
 
     <!--header-->
@@ -66,7 +85,7 @@ import CardsHomeTomorrow from "../layouts/CardsHomeTomorrow.astro";
     <section>
         <div class="container-home p-4 mx-auto">
             <div class="">
-                <CardNews />
+                <CardNews poststi={newsPosts} />
             </div>
         </div>
     </section>
@@ -109,7 +128,7 @@ import CardsHomeTomorrow from "../layouts/CardsHomeTomorrow.astro";
             </div>
 
             <div class="container-home p-4 mx-auto">
-                <CardsHomeTomorrow />
+                <CardsHomeTomorrow posts={tomorrowPosts} />
             </div>
         </div>
     </section>
@@ -122,7 +141,7 @@ import CardsHomeTomorrow from "../layouts/CardsHomeTomorrow.astro";
             </h1>
         </div>
         <div class="w-full mx-auto">
-            <SliderConciertosPlan />
+            <SliderConciertosPlan posts={quePlanPosts} />
         </div>
         <!--div class="m-auto text-center">
             <a href="/que-plan" class="text-white hover:text-black">
@@ -144,14 +163,14 @@ import CardsHomeTomorrow from "../layouts/CardsHomeTomorrow.astro";
             </h1>
         </div>
         <div class="w-full mx-auto">
-            <SliderPromociones />
+            <SliderPromociones posts={promocionesPosts} />
         </div>
     </section>
     <SuperLeader />
     <section>
         <div class="container-home p-4 mx-auto">
             <div class="">
-                <CardTecnologia />
+                <CardTecnologia posts={tecnologiaPosts} />
             </div>
         </div>
         <BillBoard />

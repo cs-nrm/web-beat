@@ -6,8 +6,7 @@ import SuperLeader from '../components/SuperLeader.astro';
 import { Image } from 'astro:assets';
 
 const PLACEHOLDER_IMG = 'https://storage.googleapis.com/nrm-web/beat/resources/img/img_beat-min.jpg';
-const res = await fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_fields=title,slug,yoast_head_json,acf&_embed&per_page=30&categories=842");
-const posts = await res.json();
+const { posts } = Astro.props;
 
 ---
 <div class="slider-portada">

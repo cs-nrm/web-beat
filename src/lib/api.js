@@ -22,6 +22,18 @@ export async function getArticles(cat) {
     return data;
 }
 
+// Cachea por URL dentro del mismo proceso de build — evita repetir la misma
+// consulta (ej. "últimos 5 posts de la categoría X") en cada página que
+// renderiza un componente "More*".
+const fetchCache = new Map();
+
+export async function fetchCached(url) {
+    if (!fetchCache.has(url)) {
+        fetchCache.set(url, fetch(url).then((res) => res.json()));
+    }
+    return fetchCache.get(url);
+}
+
 /*export async function conn() {
     const res = await fetch('',{
 

@@ -1198,3 +1198,4 @@ input[type=range]:focus::-ms-fill-upper {
 
 /*PUBLICIDAD*/
 #ad-slot1 iframe, #ad-slot2 iframe, #ad-slot3 iframe, #ad-slot31 iframe, #ad-slot32 iframe, #ad-slot321 iframe, #ad-slot4 iframe, #ad-slot41 iframe, #ad-slot42 iframe, #ad-slot421 iframe, #ad-slot5 iframe, #ad-slot6 iframe, #ad-slot61 iframe{margin: 0 auto;}
+#ad-slot-leaderboard4 iframe:hover, #ad-slot-leaderboard3 iframe:hover, #ad-slot-leaderboard2 iframe:hover, #ad-slot-leaderboard1 iframe:hover{height:400px;z-index:10000;position:relative; cursor: pointer;}

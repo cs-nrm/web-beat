@@ -971,7 +971,7 @@ input[type=range]:focus::-ms-fill-upper {
 
 .ns-effect-bouncyflip .icon {
   position: relative !important;
-  left: -7px !important;
+  left: -10px !important;
   top: 0 !important;
 }
 

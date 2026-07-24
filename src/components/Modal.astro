@@ -24,7 +24,7 @@
 	</div>
 </div>
 
-<script is:inline>
+<!--script is:inline>
   (function () {
     const SEEN_KEY = 'beat_modal_seen';
     const modal = document.getElementById('modal');
@@ -35,11 +35,11 @@
     }
     sessionStorage.setItem(SEEN_KEY, '1');
   })();
-</script>
+</script-->
 
 <script is:inline>
   const now = new Date();
-  const targetDate = new Date('2026-07-17T17:00:00');
+  const targetDate = new Date('2026-07-24T17:00:00');
   if (now >= targetDate) {
     const videoElement = document.getElementById('videopromo');
     if (videoElement) {

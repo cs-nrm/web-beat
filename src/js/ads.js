@@ -81,3 +81,5 @@ function safeRefreshSlots() {
 // Exponer globalmente para que player.js pueda llamar initGPT y safeRefreshSlots
 window.initGPT = initGPT;
 window.safeRefreshSlots = safeRefreshSlots;
+
+

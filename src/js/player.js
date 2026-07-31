@@ -607,6 +607,17 @@ document.addEventListener('astro:page-load', ev => {
     });
   /* =======COMSCORE*/
 
+  /* TONEFUSE APPLE MUSIC */
+  window.amplified = window.amplified || { init: [] };
+    amplified.init.push(function() {
+        amplified.setParams({
+            artist: "",
+            song: "",
+        });
+        amplified.pushAdUnit(100007142);
+        amplified.pushAdUnit(100007146); //Beatzilla
+        amplified.run();
+    });
 
   const getplayingstatus = playerstatus();
   document.querySelector('main').classList.remove('loading');

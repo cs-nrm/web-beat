@@ -516,6 +516,7 @@ if (returnLive) returnLive.addEventListener('click', function () {
   playstopRadio();
 });
 
+/* TONEFUSE APPLE MUSIC */
 function initAppleMusicAds() {
   const slot142 = document.getElementById('amplified_100007142');
   const slot146 = document.getElementById('amplified_100007146');

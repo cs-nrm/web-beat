@@ -1103,6 +1103,22 @@ input[type=range]:focus::-ms-fill-upper {
   max-height: 60%;
 }
 
+/* El <article> de las notas es flex-row con dos hijos: .share-bar (50px fijos) y el bloque
+   de contenido, que trae w-full (width: 100%). En una fila flex eso pide 50px + 100% del
+   contenedor, o sea 425px en un viewport de 375: el contenido se recorria a la derecha y
+   arrastraba la nota entera (y con ella el video de ShowHeroes, que se posiciona sobre
+   #ad-slot-videonota). Que el bloque de contenido flexione en vez de exigir el 100%.
+   Va por CSS y no por markup porque son 15 plantillas [slug].astro con estructura variada. */
+article > .share-bar {
+  flex: 0 0 auto;
+}
+
+article > .share-bar + * {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+}
+
 .share-bar .sticky-bar {
   border: 1px solid #514e4e;
   margin-right: 20px;
@@ -1205,6 +1221,14 @@ input[type=range]:focus::-ms-fill-upper {
 .leaderboard,
 .boxbanner,
 .double-box {
+	max-width: 100%;
+	overflow-x: clip;
+}
+
+/* Misma red para los contenedores de terceros que inyectan <table> (Amplified/ToneFuse):
+   una tabla crece hasta su contenido y se lleva unos px fuera del viewport. El id lo
+   genera el script en cada carga, por eso el selector va por prefijo. */
+[id^="amplified_"] {
 	max-width: 100%;
 	overflow-x: clip;
 }

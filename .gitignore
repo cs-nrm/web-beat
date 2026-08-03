@@ -18,3 +18,10 @@ pnpm-debug.log*
 
 # macOS-specific files
 .DS_Store
+
+# Runbooks locales: guias para replicar estos fixes en las otras estaciones
+# (Stereo Cien, La Z, web-oye...). Se quedan fuera del repo pero NO se borran:
+# todavia tienen pendientes anotados adentro.
+fix-mobile-ads-overflow.md
+fix-postcss-vulnerability.md
+optimizaciones-performance.md

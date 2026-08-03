@@ -1211,7 +1211,13 @@ input[type=range]:focus::-ms-fill-upper {
 
 #ad-slot1 iframe, #ad-slot2 iframe, #ad-slot3 iframe, #ad-slot31 iframe, #ad-slot32 iframe, #ad-slot321 iframe, #ad-slot4 iframe, #ad-slot41 iframe, #ad-slot42 iframe, #ad-slot421 iframe, #ad-slot5 iframe, #ad-slot6 iframe, #ad-slot61 iframe{margin: 0 auto;}
 #ad-slot-leaderboard4, #ad-slot-leaderboard3, #ad-slot-leaderboard2, #ad-slot-leaderboard1{position: relative;}
-#ad-slot-leaderboard4 iframe:hover, #ad-slot-leaderboard3 iframe:hover, #ad-slot-leaderboard2 iframe:hover, #ad-slot-leaderboard1 iframe:hover{height:400px;z-index:10000;position:absolute; cursor: pointer;}
+/* Anuncio expandible al pasar el mouse. Va dentro de (hover: hover) and (pointer: fine)
+   a proposito: en un dispositivo tactil el :hover se queda pegado despues del tap, y como
+   la regla saca al iframe del flujo (position:absolute) y lo estira a 400px, el anuncio
+   se encimaba sobre el contenido de abajo y no habia forma de "quitar el hover". */
+@media (hover: hover) and (pointer: fine) {
+	#ad-slot-leaderboard4 iframe:hover, #ad-slot-leaderboard3 iframe:hover, #ad-slot-leaderboard2 iframe:hover, #ad-slot-leaderboard1 iframe:hover{height:400px;z-index:10000;position:absolute; cursor: pointer;}
+}
 
 #radiobutton {
 position: fixed;

@@ -1197,6 +1197,18 @@ input[type=range]:focus::-ms-fill-upper {
 }
 
 /*PUBLICIDAD*/
+
+/* Red de seguridad: un contenedor de anuncio nunca debe desbordar el viewport.
+   Los contenedores ya no son display:table, pero si GAM sirve un creativo más ancho
+   que la pantalla el contenedor crecería igual, y mx-auto no puede centrar algo más
+   ancho que su padre: el banner se recorre a la izquierda y arrastra todo el layout. */
+.leaderboard,
+.boxbanner,
+.double-box {
+	max-width: 100%;
+	overflow-x: clip;
+}
+
 #ad-slot1 iframe, #ad-slot2 iframe, #ad-slot3 iframe, #ad-slot31 iframe, #ad-slot32 iframe, #ad-slot321 iframe, #ad-slot4 iframe, #ad-slot41 iframe, #ad-slot42 iframe, #ad-slot421 iframe, #ad-slot5 iframe, #ad-slot6 iframe, #ad-slot61 iframe{margin: 0 auto;}
 #ad-slot-leaderboard4, #ad-slot-leaderboard3, #ad-slot-leaderboard2, #ad-slot-leaderboard1{position: relative;}
 #ad-slot-leaderboard4 iframe:hover, #ad-slot-leaderboard3 iframe:hover, #ad-slot-leaderboard2 iframe:hover, #ad-slot-leaderboard1 iframe:hover{height:400px;z-index:10000;position:absolute; cursor: pointer;}

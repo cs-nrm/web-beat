@@ -444,12 +444,18 @@ margin-top: 40px;
     align-items: center;
     text-align: center;
   }
+  /* Una sola columna que nunca excede el contenedor. minmax(0, 1fr) en vez de 1fr
+     porque el minimo automatico de una pista es min-content, y basta un texto largo
+     para que la columna crezca mas que la pantalla. */
   .footer-container{
-    grid-template-columns: repeat(1, 45%);
+    grid-template-columns: minmax(0, 1fr);
     margin-top: 20px;
   }
+  /* Antes: grid-column: span 2/2. En una grid de UNA columna eso termina en la linea 2
+     y abarca 2, o sea arranca en la linea 0: crea una columna implicita que se dimensiona
+     a max-content e ignora el ancho disponible. Ese era el desborde horizontal en mobile. */
   .footer-container .redes{
-    grid-column: span 2/2;
+    grid-column: 1;
     text-align: center;
   }
 }

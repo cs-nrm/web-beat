@@ -1197,9 +1197,9 @@ input[type=range]:focus::-ms-fill-upper {
 }
 
 /*PUBLICIDAD*/
-#ad-slot-leaderboard4 iframe, #ad-slot-leaderboard3 iframe, #ad-slot-leaderboard3 iframe, #ad-slot-leaderboard1 iframe, #ad-slot5 iframe, #ad-slot14 iframe, #ad-slot-boxbanner1 iframe, #ad-slot-boxbanner2 iframe, #ad-slot-boxbanner3 iframe, #ad-slot-boxbanner4 iframe, #ad-slot-boxbanner5 iframe, #ad-slot-boxbanner6 iframe, #ad-slot-videonota iframe{margin: 0 auto;}
+#ad-slot-leaderboard4 iframe, #ad-slot-leaderboard3 iframe, #ad-slot-leaderboard2 iframe, #ad-slot-leaderboard1 iframe, #ad-slot-leaderboard iframe, #ad-slot5 iframe, #ad-slot14 iframe, #ad-slot-boxbanner1 iframe, #ad-slot-boxbanner2 iframe, #ad-slot-boxbanner3 iframe, #ad-slot-boxbanner4 iframe, #ad-slot-boxbanner5 iframe, #ad-slot-boxbanner6 iframe, #ad-slot-videonota iframe{margin: 0 auto;}
 #ad-slot-leaderboard4, #ad-slot-leaderboard3, #ad-slot-leaderboard2, #ad-slot-leaderboard1{position: relative;}
-#ad-slot-leaderboard4 iframe:hover, #ad-slot-leaderboard3 iframe:hover, #ad-slot-leaderboard2 iframe:hover, #ad-slot-leaderboard1 iframe:hover{height:400px;z-index:10000;position:absolute; cursor: pointer;}
+#ad-slot-leaderboard4 iframe:hover, #ad-slot-leaderboard3 iframe:hover, #ad-slot-leaderboard2 iframe:hover, #ad-slot-leaderboard1 iframe:hover, #ad-slot-leaderboard iframe:hover{height:400px;z-index:10000;position:absolute; cursor: pointer;}
 
 #radiobutton {
 position: fixed;

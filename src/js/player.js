@@ -516,6 +516,46 @@ if (returnLive) returnLive.addEventListener('click', function () {
   playstopRadio();
 });
 
+function initAppleMusicAds() {
+  const slot142 = document.getElementById('amplified_100007142');
+  const slot146 = document.getElementById('amplified_100007146');
+  if (!slot142 && !slot146) return;
+
+  const runAppleMusicAds = () => {
+    window.amplified = window.amplified || { init: [] };
+
+    if (typeof window.amplified.setParams === 'function' &&
+        typeof window.amplified.pushAdUnit === 'function' &&
+        typeof window.amplified.run === 'function') {
+      window.amplified.setParams({ artist: '', song: '' });
+      window.amplified.pushAdUnit(100007142);
+      window.amplified.pushAdUnit(100007146);
+      window.amplified.run();
+      return true;
+    }
+
+    if (Array.isArray(window.amplified.init)) {
+      window.amplified.init.push(function() {
+        window.amplified.setParams({ artist: '', song: '' });
+        window.amplified.pushAdUnit(100007142);
+        window.amplified.pushAdUnit(100007146);
+        window.amplified.run();
+      });
+      return true;
+    }
+
+    return false;
+  };
+
+  if (runAppleMusicAds()) return;
+
+  window.setTimeout(() => {
+    if (!document.getElementById('amplified_100007142')) return;
+    runAppleMusicAds();
+    if (!document.getElementById('amplified_100007146')) return;
+    runAppleMusicAds();
+  }, 500);
+}
 
 /* NAVIGATION */
 
@@ -607,17 +647,7 @@ document.addEventListener('astro:page-load', ev => {
     });
   /* =======COMSCORE*/
 
-  /* TONEFUSE APPLE MUSIC */
-  window.amplified = window.amplified || { init: [] };
-    amplified.init.push(function() {
-        amplified.setParams({
-            artist: "",
-            song: "",
-        });
-        amplified.pushAdUnit(100007142);
-        amplified.pushAdUnit(100007146); //Beatzilla
-        amplified.run();
-    });
+    initAppleMusicAds();
 
   const getplayingstatus = playerstatus();
   document.querySelector('main').classList.remove('loading');

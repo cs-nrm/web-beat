@@ -54,7 +54,7 @@ function initGPT() {
     window.slotBoxbanner2RefreshInterval = setInterval(function(){
       googletag.pubads().refresh([window.slotBoxbanner2]);
       googletag.pubads().refresh([window.slotLeaderboard3]);
-    }, 10000);
+    }, 120000);
   });
 }
 // initGPT() NO se llama aquí — astro:page-load dispara en carga inicial Y en navegaciones,

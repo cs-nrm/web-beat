@@ -1242,6 +1242,7 @@ article > .share-bar + * {
 @media (hover: hover) and (pointer: fine) {
 	#ad-slot-leaderboard4 iframe:hover, #ad-slot-leaderboard3 iframe:hover, #ad-slot-leaderboard2 iframe:hover, #ad-slot-leaderboard1 iframe:hover, #ad-slot-leaderboard iframe:hover{height:400px;z-index:10000;position:absolute; cursor: pointer;}
 }
+#ad-slot-videonota iframe{width: 100%;}
 
 #radiobutton {
 position: fixed;

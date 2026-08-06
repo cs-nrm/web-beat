@@ -31,7 +31,7 @@ import SliderPortada from "../layouts/SliderPortada.astro";
 import DiaRadio from "../components/DiaRadio.astro";
 import CardsHomeEdcVegas from "../layouts/CardsHomeEdcVegas.astro";
 import CardsHomeTomorrow from "../layouts/CardsHomeTomorrow.astro";
-import { getQuePlanPosts } from "../lib/quePlan.js";
+// import { getQuePlanPosts } from "../lib/quePlan.js";  <- seccion ¿Que Plan? oculta
 
 // Las 6 secciones que sí se renderizan en el home piden sus datos en paralelo
 // (antes cada componente hacía su propio fetch secuencial, lo que hacía que
@@ -40,14 +40,14 @@ const [
   portadaPosts,
   newsPosts,
   tomorrowPosts,
-  quePlanPosts,
+  // quePlanPosts,  <- la seccion ¿Que Plan? esta oculta; no se pide su data
   promocionesPosts,
   tecnologiaPosts,
 ] = await Promise.all([
   fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_fields=title,slug,yoast_head_json,acf&_embed&per_page=30&categories=842").then((r) => r.json()),
   fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_fields=date,title,slug,sticky,acf,content,excerpt,_links,_embedded&_embed&per_page=4&categories=143").then((r) => r.json()),
   fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_fields=date,title,slug,sticky,acf,content,excerpt,_links,_embedded&_embed&per_page=3&categories=861&order_by=date&order=desc&acf.fijo=false").then((r) => r.json()),
-  getQuePlanPosts(),
+  // getQuePlanPosts(),  <- idem: se omite para no pegarle a WordPress de mas
   fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_fields=title,slug,yoast_head_json,_links,_embedded&_embed&per_page=30&categories=537,458").then((r) => r.json()),
   fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_fields=date,title,slug,sticky,acf,content,excerpt,_links,_embedded&_embed&per_page=3&categories=625&order_by=date&order=desc&acf.fijo=false").then((r) => r.json()),
 ]);
@@ -133,6 +133,10 @@ const [
         </div>
     </section-->
     <LeaderBoard />
+    <!-- SECCION ¿QUE PLAN? OCULTA (ago 2026). Para restaurarla, quita este comentario y
+         vuelve a habilitar `quePlanPosts` / `getQuePlanPosts()` en el frontmatter.
+         Se elimino el bloque "Ver mas" que ya estaba comentado aqui dentro: los comentarios
+         HTML no se anidan y su cierre rompia este.
     <section id="que-plan" class="">
         <div class="container-home p-4 mx-auto">
             <h1
@@ -144,16 +148,8 @@ const [
         <div class="w-full mx-auto">
             <SliderConciertosPlan posts={quePlanPosts} />
         </div>
-        <!--div class="m-auto text-center">
-            <a href="/que-plan" class="text-white hover:text-black">
-                <button
-                    class="ver-mas group relative h-8 w-36 m-4 overflow-hidden rounded-xl bg-[rgba(52,52,52,0.2)] hover:bg-white border-2 border-white uppercase text-xs poppins font-bold tracking-[3px]"
-                >
-                    <span>Ver más</span>
-                </button>
-            </a>
-        </div-->
     </section>
+    -->
 
         <section>
         <div class="container-home p-4 mx-auto">
@@ -179,6 +175,8 @@ const [
     <SuperLeader />
 
 
+    <!-- SECCION PODCAST OCULTA (ago 2026). Incluye el <BoxBanner /> que vivia aqui:
+         ese slot de publicidad deja de existir en el home. Avisado a adops.
     <section class="">
         <div class="container-home p-4 mx-auto">
             <h1
@@ -196,6 +194,7 @@ const [
             </div>
         </div>
     </section>
+    -->
 </Layout>
 
 <!--Navidad /-->

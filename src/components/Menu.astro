@@ -8,7 +8,9 @@ const currentPath = Astro.url.pathname;
         <ul>
             <li class={`menu-section${currentPath.startsWith('/news') ? ' active' : ''}`}><a href="/news">Beat News</a></li>
             <li class={currentPath.startsWith('/beatzilla') ? 'active' : ''}><a href="/beatzilla">Beatzilla</a></li>  
+            <!-- PURPLE NOISE OCULTO (ago 2026)
             <li class={currentPath.startsWith('/purple-noise') ? 'active' : ''}><a href="/purple-noise">Purple Noise</a></li>
+            -->
             <!-- DESPLEGABLE PODCAST OCULTO (ago 2026). Incluye Rebels, que colgaba de aqui.
                  Se eliminaron los <li> ya comentados (Respira, Nerdosis, Dos Equis Mixx)
                  porque los comentarios HTML no se anidan y rompian este.
@@ -86,7 +88,9 @@ const currentPath = Astro.url.pathname;
     <div class="menu-mobile hidden items-center gap-4 text-white order-3 lg:order-2"> 
        <div class="link-menu"> <a href="/news">BeatNews</a></div>
        <div class="link-menu"> <a href="/beatzilla">Beatzilla</a></div>
+       <!-- PURPLE NOISE OCULTO (ago 2026)
        <div class="link-menu"> <a href="/purple-noise">Purple Noise</a></div>
+       -->
        <!-- PODCAST OCULTO (ago 2026)
        <div class="link-menu"> <a href="/podcast/groove-dealers">Groove Dealers</a></div>
        <div class="link-menu"> <a href="/podcast/expedientes-secretos">Expedientes Secretos</a></div>

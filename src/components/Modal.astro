@@ -5,7 +5,7 @@
 		<div class="contenido" style="text-align: center;">
 			<div class="container-iframe">
 				<video id="videopromo" loop autoplay muted playsinline>
-          <source src="https://storage.googleapis.com/nrm-web/beat/videos/Break_Takeover_Veintitres_1.mp4" type="video/mp4">
+          <source src="https://storage.googleapis.com/nrm-web/beat/videos/Takeover_break24.mp4" type="video/mp4">
           Your browser does not support the video tag.
         </video>
 			</div>
@@ -39,12 +39,12 @@
 
 <script is:inline>
   const now = new Date();
-  const targetDate = new Date('2026-07-24T17:00:00');
+  const targetDate = new Date('2026-08-7T17:00:00');
   if (now >= targetDate) {
     const videoElement = document.getElementById('videopromo');
     if (videoElement) {
       const sourceElement = videoElement.querySelector('source');
-      sourceElement.src = 'https://storage.googleapis.com/nrm-web/beat/videos/Break_Takeover_Veintitres_1.mp4';
+      sourceElement.src = 'https://storage.googleapis.com/nrm-web/beat/videos/Takeover_break24.mp4';
       videoElement.load();
     }
   }

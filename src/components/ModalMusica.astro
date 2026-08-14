@@ -1,0 +1,309 @@
+<div id="modal">
+	<input type="checkbox" id="cerrar">
+	<label for="cerrar" id="btn-cerrar">X</label>
+	<div class="modals">
+		<div class="contenido" style="text-align: center;">
+			<div class="container-iframe">
+				<div class="video-wrapper">
+					<video id="videopromo" loop autoplay muted playsinline>
+          <source src="https://storage.googleapis.com/nrm-web/beat/videos/Takeover_break25_sonido.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+					<button id="audio-toggle" class="audio-toggle" type="button" aria-label="Activar audio" aria-pressed="false">
+						<svg class="audio-icon" viewBox="0 0 24 24" aria-hidden="true">
+							<path class="speaker-body" d="M3 10v4h4l5 5V5L7 10H3z"/>
+							<path class="audio-wave wave-1" d="M14.5 8.5a4.5 4.5 0 0 1 0 7"/>
+							<path class="audio-wave wave-2" d="M17.5 5.5a8 8 0 0 1 0 13"/>
+							<path class="audio-wave wave-3" d="M20.5 2.5a11.5 11.5 0 0 1 0 19"/>
+							<path class="audio-slash" d="M16 8l7 8M23 8l-7 8"/>
+						</svg>
+					</button>
+				</div>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+
+
+<script is:inline>
+  const now = new Date();
+  const targetDate = new Date('2026-08-7T17:00:00');
+  const videoElement = document.getElementById('videopromo');
+  const audioToggle = document.getElementById('audio-toggle');
+
+  if (now >= targetDate && videoElement) {
+    const sourceElement = videoElement.querySelector('source');
+    if (sourceElement) {
+      sourceElement.src = 'https://storage.googleapis.com/nrm-web/beat/videos/Takeover_break24.mp4';
+    }
+    videoElement.load();
+  }
+
+  if (videoElement && audioToggle) {
+    const updateAudioButton = () => {
+      const isMuted = videoElement.muted;
+      audioToggle.setAttribute('aria-label', isMuted ? 'Activar audio' : 'Silenciar audio');
+      audioToggle.setAttribute('aria-pressed', String(!isMuted));
+      audioToggle.classList.toggle('is-muted', isMuted);
+      audioToggle.classList.toggle('is-active', !isMuted);
+    };
+
+    const disableAudio = () => {
+      videoElement.muted = true;
+      videoElement.volume = 0;
+      videoElement.pause();
+      updateAudioButton();
+    };
+
+    audioToggle.addEventListener('click', async () => {
+      videoElement.muted = !videoElement.muted;
+      videoElement.volume = 1;
+
+      if (!videoElement.muted) {
+        try {
+          await videoElement.play();
+        } catch (error) {
+          console.warn('No se pudo reproducir el video con audio:', error);
+        }
+      }
+
+      updateAudioButton();
+    });
+
+    const modalElement = document.getElementById('modal');
+    if (modalElement) {
+      modalElement.addEventListener('animationend', (event) => {
+        if (event.animationName === 'modal') {
+          disableAudio();
+        }
+      });
+    }
+
+    document.getElementById('cerrar')?.addEventListener('change', (event) => {
+      if (event.target.checked) {
+        disableAudio();
+      }
+    });
+
+    updateAudioButton();
+  }
+</script>
+
+<style>
+
+#modal .modals {
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7);
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  animation-name: modal;
+  animation-duration:17s;
+  animation-delay: 0s;
+  visibility: hidden;
+  opacity: 0;
+  max-height: 100% !important;
+  z-index: 10000;
+  overflow: scroll;
+}
+#modal .contenido {
+  margin: auto;
+  /*width: 75%;*/
+  padding: 2% 0;
+}
+#modal .contenido .unilogo img{
+  width: 100%;
+  height: auto;
+}
+#modal .contenido .video-wrapper {
+  position: relative;
+  display: inline-block;
+  max-width: 600px;
+}
+#modal .contenido video{
+  width: 100%;
+  height: 100%;
+  max-width: 900px;
+}
+#modal .contenido #videopromo{
+  width: 100%;
+  height: auto;  
+  margin: 0 auto;
+  max-width: 600px;
+  padding: 0 20px;
+  display: block;
+}
+#modal .contenido .audio-toggle {
+  position: absolute;
+  right: 30px;
+  top: 18px;
+  width: 46px;
+  height: 46px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+  color: #070707;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+  padding: 0;
+}
+#modal .contenido .audio-toggle:hover {
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.18);
+}
+#modal .contenido .audio-toggle:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+#modal .contenido .audio-icon {
+  width: 26px;
+  height: 22px;
+  display: block;
+}
+#modal .contenido .speaker-body,
+#modal .contenido .audio-wave {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#modal .contenido .speaker-body {
+  fill: currentColor;
+  stroke: none;
+}
+#modal .contenido .audio-wave {
+  opacity: 0;
+  stroke: currentColor;
+}
+#modal .contenido .audio-slash {
+  stroke: #ff3b30;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+#modal .contenido .audio-toggle.is-active {
+  color: #000000;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.2), 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+#modal .contenido .audio-toggle.is-active .audio-wave {
+  opacity: 1;
+}
+#modal .contenido .audio-toggle.is-active .speaker-body {
+  fill: currentColor;
+  filter: drop-shadow(0 0 5px rgba(5, 5, 5, 0.85));
+}
+#modal .contenido .audio-toggle.is-muted {
+  color: #ff3b30;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 4px rgba(255, 59, 48, 0.16), 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+#modal .contenido .audio-toggle.is-muted .audio-wave {
+  opacity: 0;
+}
+#modal .contenido .audio-toggle.is-muted .audio-slash {
+  opacity: 1;
+}
+#modal .contenido .audio-toggle.is-muted .speaker-body {
+  fill: #000;
+  opacity: 0.9;
+}
+#modal .contenido .info {
+  font-size: 23px;
+  position: relative;
+  top: 15px;
+  color: #52fdfd;
+  font-weight: bold;
+  text-shadow: 5px 5px 5px #8286ab;
+}
+#modal .contenido .info b{color: white;}
+	
+#modal .contenido a.info:hover{
+  color: white;
+  cursor: pointer;
+}
+#modal .contenido img {
+  /*width: auto;
+  height: auto;
+  max-width: 600px;
+  max-height: 800px;*/
+}
+#modal #cerrar {
+  display: none;
+}
+#modal #cerrar + label {
+  position: fixed;
+  color: #fff;
+  font-size: 27px;
+  z-index: 10010;
+  background: darkred;
+  height: 40px;
+  width: 40px;
+  line-height: 40px;
+  border-radius: 50%;
+  right: 5%;
+  top: 5%;
+  cursor: pointer;
+  animation-name: modal;
+  animation-duration:17s;
+  animation-delay: 0s;
+  visibility: hidden;
+  opacity: 0;
+}
+#modal #cerrar:checked + label, #modal #cerrar:checked ~ .modals {
+  display: none;
+}
+#modal [type=checkbox] + label {
+  padding-left: 11px !important;
+}
+#modal [type=checkbox] + label:before, #modal [type=checkbox]:not(.filled-in) + label:after {
+  border: none;
+}
+@keyframes modal {
+  0% {
+    visibility: visible;
+    opacity: 1;
+  }
+  25% {
+    visibility: visible;
+    opacity: 1;
+  }
+  50% {
+    visibility: visible;
+    opacity: 1;
+  }
+  90% {
+    visibility: visible;
+    opacity: 1;
+  }
+  100% {
+    visibility: hidden;
+    opacity: 0;
+  }
+}
+/*	
+#modal .contenido .container-iframe {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+}
+#modal .contenido .container-iframe iframe {
+    position: absolute;
+    top:0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+    */
+</style>

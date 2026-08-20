@@ -1,0 +1,22 @@
+# Lo que NO debe entrar al contexto de build (más rápido y evita filtrar cosas).
+node_modules
+dist
+.output
+.git
+.github
+.astro
+.env
+.env.*
+!.env.example
+*.log
+logs
+.DS_Store
+.claude
+.agents
+.vscode
+# El lienzo de Claude Design pesa y no participa del build: los tokens ya están
+# materializados en tailwind.config.js y en src/styles/.
+design
+# Documentación: no afecta al build de la app.
+*.md
+!README.md

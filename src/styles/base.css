@@ -1,0 +1,16 @@
+/**
+ * Hoja base del sitio.
+ *
+ * ⏳ Los tokens del design system NO están aquí todavía: llegan con el export del
+ * lienzo "Sitio Beat 2026 v13" a `design/<iteracion>/_ds/tokens/*.css` (B3 del
+ * plan). Cuando lleguen, se importan ANTES de las capas de Tailwind y
+ * `tailwind.config.js` los mapea a utilidades.
+ *
+ * 🔴 Y no se repite el error de los repos hermanos: nada de un `global.css` de
+ * 1170 líneas donde los tokens de marca conviven con sobras del starter de Astro,
+ * ni `@import` de Google Fonts dentro del CSS bundleado — eso es una cascada
+ * render-blocking. Las fuentes se auto-hospedan en `.woff2` (B3.2).
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

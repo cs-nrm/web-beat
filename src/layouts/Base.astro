@@ -1,0 +1,43 @@
+---
+/**
+ * Cascarón del sitio.
+ *
+ * ⏳ Provisional: es el mínimo para que el SSR y la capa de datos se puedan
+ * verificar de punta a punta. El layout de verdad llega con el design system
+ * (B3/B4 del plan), y con él el header que lleva el player persistente — que por
+ * el §4.1 del mapa de sitio es **requisito de producto**, no adorno:
+ * "el reproductor en vivo es persistente… es la afirmación de que Beat sigue
+ * siendo una estación de radio en vivo".
+ */
+import '@/styles/base.css';
+import { IDIOMA, NOINDEX_SITIO, SITE_URL, noIndexarHost } from '@/config/site';
+
+interface Props {
+  titulo: string;
+  descripcion?: string;
+}
+
+const { titulo, descripcion } = Astro.props;
+
+// Las dos reglas de indexación, igual que en el middleware. La cabecera la pone
+// el middleware (protege TODA respuesta); el `<meta>` es la segunda capa.
+const noIndexar = NOINDEX_SITIO || noIndexarHost(Astro.url.hostname);
+const canonical = new URL(Astro.url.pathname, SITE_URL).href;
+---
+
+<!doctype html>
+<html lang={IDIOMA}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{titulo}</title>
+    {descripcion && <meta name="description" content={descripcion} />}
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="/favicon/apple-touch-icon.png" />
+    <meta name="robots" content={noIndexar ? 'noindex, nofollow' : 'index, follow'} />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

@@ -1,7 +1,17 @@
 {
-  "extends": "astro/tsconfigs/base",
+  "extends": "astro/tsconfigs/strict",
+  "include": [".astro/types.d.ts", "**/*"],
+  // `src/js` es el runtime heredado del v1 (WordPress/SSG): JS plano, sin módulos,
+  // todo en `window`, y todavía NO cableado al sitio nuevo. Se excluye para que
+  // `astro check` —que es el gate real del build— hable solo del código vivo y sus
+  // avisos signifiquen algo. Ver src/js/README.md.
+  // ⚠️ Al portarlo (B6), lo que quede vivo sale de `src/js` y vuelve al check.
+  "exclude": ["dist", "design", "src/js"],
   "compilerOptions": {
     "strictNullChecks": true,
-    "allowJs": true
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   }
 }

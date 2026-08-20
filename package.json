@@ -1,30 +1,31 @@
 {
   "name": "web-beat",
   "type": "module",
-  "version": "0.0.1",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Front público de Beat 100.9 — Astro SSR sobre cms-estaciones (Payload multi-estación).",
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro build",
-    "check": "astro check",
+    "build": "astro check && astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "check": "astro check",
+    "astro": "astro",
+    "sync:types": "node scripts/sync-payload-types.mjs",
+    "sync:types:check": "node scripts/sync-payload-types.mjs --check"
   },
   "dependencies": {
-    "@astrojs/check": "^0.4.1",
-    "@astrojs/mdx": "^4.1.0",
-    "@astrojs/rss": "^4.0.3",
-    "@astrojs/sitemap": "^3.4.0",
+    "@astrojs/node": "^9.5.1",
     "@astrojs/tailwind": "^5.1.0",
     "astro": "^5.4.2",
-    "astro-tabs": "^0.1.8",
-    "dayjs": "^1.11.11",
-    "flickity": "^3.0.0",
-    "tailwindcss": "^3.4.1",
-    "tailwindcss-dropdown": "^1.0.0",
-    "typescript": "^5.3.3"
+    "tailwindcss": "^3.4.1"
   },
   "devDependencies": {
-    "sass": "^1.76.0"
+    "@astrojs/check": "^0.9.4",
+    "typescript": "^5.6.3"
   }
 }

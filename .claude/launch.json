@@ -2,9 +2,9 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "astro-dev",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "name": "web-beat",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev", "--port", "4321"],
       "port": 4321
     }
   ]

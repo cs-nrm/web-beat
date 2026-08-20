@@ -16,7 +16,8 @@
     "check": "astro check",
     "astro": "astro",
     "sync:types": "node scripts/sync-payload-types.mjs",
-    "sync:types:check": "node scripts/sync-payload-types.mjs --check"
+    "sync:types:check": "node scripts/sync-payload-types.mjs --check",
+    "fuentes": "node scripts/fuentes.mjs"
   },
   "dependencies": {
     "@astrojs/node": "^9.5.1",

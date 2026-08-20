@@ -43,81 +43,74 @@ const SECCIONES = [
 ---
 
 <Base titulo="web-beat v2 — scaffold" descripcion="Front Astro SSR de Beat 100.9 sobre cms-estaciones.">
-  <main class="mx-auto max-w-3xl px-6 py-12 font-sans text-neutral-100 antialiased">
-    <p class="mb-2 text-xs uppercase tracking-widest text-neutral-500">web-beat · rama beat</p>
-    <h1 class="mb-8 text-3xl font-bold">Scaffold del relanzamiento</h1>
+  <main class="mx-auto max-w-grid px-contenedor py-13">
+    <p class="t-label mb-4 text-text-faint">web-beat · rama beat</p>
+    <h1 class="t-display-3 mb-11 text-text-primary">Scaffold del relanzamiento</h1>
 
-    <section class="mb-10">
-      <h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-400">
+    <section class="mb-12">
+      <h2 class="t-label mb-6 text-text-accent">
         Conexión con el CMS
       </h2>
       {error ? (
-        <div class="rounded border border-amber-600/40 bg-amber-950/30 p-4 text-sm">
-          <p class="mb-2 font-semibold text-amber-300">Sin datos del CMS</p>
-          <p class="mb-2 text-neutral-300">{error}</p>
-          <p class="text-neutral-400">
+        <div class="rounded-card border-hairline border-borde-quiet bg-surface-card p-card text-body-sm">
+          <p class="mb-4 font-semibold text-state-warning">Sin datos del CMS</p>
+          <p class="mb-4 text-text-body">{error}</p>
+          <p class="text-text-muted">
             {CMS_URL
               ? 'El CMS no respondió. Comprueba que esté arriba y que la estación esté sembrada.'
               : 'Falta CMS_URL. Copia .env.example a .env — en desarrollo puedes apuntar al CMS de producción: su read es público.'}
           </p>
         </div>
       ) : (
-        <dl class="grid grid-cols-[10rem_1fr] gap-y-2 text-sm">
-          <dt class="text-neutral-500">codigo</dt>
-          <dd><code>{estacion!.codigo}</code> <span class="text-neutral-500">(pedido: {ESTACION_CODIGO})</span></dd>
-          <dt class="text-neutral-500">id resuelto</dt>
-          <dd><code>{estacion!.id}</code></dd>
-          <dt class="text-neutral-500">nombre</dt>
+        <dl class="grid grid-cols-[11rem_1fr] gap-y-4 text-body-sm">
+          <dt class="text-text-faint">codigo</dt>
+          <dd><code class="t-mono">{estacion!.codigo}</code> <span class="text-text-faint">(pedido: {ESTACION_CODIGO})</span></dd>
+          <dt class="text-text-faint">id resuelto</dt>
+          <dd><code class="t-mono">{estacion!.id}</code></dd>
+          <dt class="text-text-faint">nombre</dt>
           <dd>{estacion!.nombre}</dd>
-          <dt class="text-neutral-500">publicación</dt>
+          <dt class="text-text-faint">publicación</dt>
           <dd>{estacion!.nombrePublicacion}</dd>
-          <dt class="text-neutral-500">dominio</dt>
+          <dt class="text-text-faint">dominio</dt>
           <dd>{estacion!.dominio}</dd>
-          <dt class="text-neutral-500">mount de Triton</dt>
-          <dd><code>{estacion!.tritonMount ?? '—'}</code></dd>
+          <dt class="text-text-faint">mount de Triton</dt>
+          <dd><code class="t-mono">{estacion!.tritonMount ?? '—'}</code></dd>
         </dl>
       )}
     </section>
 
-    <section class="mb-10">
-      <h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-400">
+    <section class="mb-12">
+      <h2 class="t-label mb-6 text-text-accent">
         Al aire
       </h2>
       {alAire ? (
-        <p class="text-sm">
+        <p class="text-body">
           <strong>{alAire.titulo}</strong>
-          {alAire.artista && <span class="text-neutral-400"> — {alAire.artista}</span>}
+          {alAire.artista && <span class="text-text-muted"> — {alAire.artista}</span>}
         </p>
       ) : (
-        <p class="text-sm text-neutral-400">
+        <p class="max-w-[62ch] text-body-sm text-text-muted">
           La bitácora está vacía. Es lo esperado: ninguna estación tiene cargada la lista blanca
-          <code class="mx-1">categoriasMusicales</code>, y la ingesta <strong>falla cerrado</strong>,
+          <code class="t-mono mx-1">categoriasMusicales</code>, y la ingesta <strong>falla cerrado</strong>,
           así que descarta todo lo que manda el playout. Es la tarea A6 del plan.
         </p>
       )}
     </section>
 
     <section>
-      <h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-400">
+      <h2 class="t-label mb-6 text-text-accent">
         Mapa de sitio
       </h2>
-      <ul class="divide-y divide-neutral-800 text-sm">
+      <ul class="divide-y divide-borde-hairline text-body-sm">
         {SECCIONES.map((s) => (
-          <li class="flex items-baseline gap-3 py-2">
-            <span class="w-5 shrink-0 tabular-nums text-neutral-600">{s.n}</span>
-            <span class="w-52 shrink-0 font-medium">{s.nombre}</span>
-            <code class="w-40 shrink-0 text-neutral-500">{s.ruta}</code>
-            <span class="text-neutral-500">{s.coleccion}</span>
+          <li class="flex items-baseline gap-6 py-5">
+            <span class="t-mono w-6 shrink-0 text-text-faint">{s.n}</span>
+            <span class="w-52 shrink-0 font-medium text-text-primary">{s.nombre}</span>
+            <code class="t-mono w-44 shrink-0 text-text-accent">{s.ruta}</code>
+            <span class="text-text-faint">{s.coleccion}</span>
           </li>
         ))}
       </ul>
     </section>
   </main>
 </Base>
-
-<style is:global>
-  /* Provisional, solo para que el scaffold sea legible. Lo sustituye el DS. */
-  body {
-    background: #0b0b0c;
-  }
-</style>

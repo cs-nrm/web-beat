@@ -12,12 +12,9 @@ import { IDIOMA, NOINDEX_SITIO, SITE_URL, noIndexarHost } from '@/config/site';
 interface Props {
   titulo: string;
   descripcion?: string;
-  /** `neblina` es el único set claro del DS: para momentos de respiro (una nota
-   *  larga, una sección de deck). Nunca una interfaz completa. */
-  tema?: 'oscuro' | 'neblina';
 }
 
-const { titulo, descripcion, tema = 'oscuro' } = Astro.props;
+const { titulo, descripcion } = Astro.props;
 
 // Las dos reglas de indexación, igual que en el middleware. La cabecera la pone el
 // middleware (protege TODA respuesta); el `<meta>` es la segunda capa.
@@ -26,7 +23,14 @@ const canonical = new URL(Astro.url.pathname, SITE_URL).href;
 ---
 
 <!doctype html>
-<html lang={IDIOMA} data-theme={tema === 'neblina' ? 'neblina' : undefined}>
+{/*
+  Sin `data-theme`: el sitio es SOLO oscuro (decisión de Carlos, 2026-08-20). El DS
+  trae un set claro `[data-theme="neblina"]` para "momentos de respiro", pero queda
+  fuera del alcance, así que no se expone un conmutador que nadie va a usar.
+  `color-scheme: dark` le dice al navegador que pinte de oscuro sus propios
+  controles (scrollbars, campos de formulario, el fondo antes de que cargue el CSS).
+*/}
+<html lang={IDIOMA} style="color-scheme: dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -38,25 +42,16 @@ const canonical = new URL(Astro.url.pathname, SITE_URL).href;
     <meta name="robots" content={noIndexar ? 'noindex, nofollow' : 'index, follow'} />
 
     {/*
-      ⏳ INTERINO — las fuentes se auto-hospedarán en `.woff2` (B3.2 del plan), con
-      solo los subsets `latin`/`latin-ext` y solo los pesos que el sitio pinte de
-      verdad, medidos en el navegador.
+      Las fuentes son AUTO-HOSPEDADAS (`public/fuentes/`, generadas con
+      `pnpm fuentes`). Antes iban por `<link>` a Google, y antes de eso por un
+      `@import` dentro del CSS del DS. Ya no hay ninguna de las dos: los `.woff2`
+      salen de nuestro propio dominio, así que no hace falta `preconnect` a
+      terceros ni se le manda a Google la IP del lector en cada visita.
 
-      Por ahora van por `<link>` y no por el `@import` que traía el DS: un `@import`
-      dentro del CSS bundleado obliga al navegador a bajar y parsear la hoja ANTES
-      de enterarse de que necesita las fuentes — cascada render-blocking. Un `<link>`
-      en el `<head>` sale en paralelo, y con `preconnect` se adelanta el handshake.
-
-      🔴 Y son SUSTITUTOS, no las tipografías de marca: el propio DS lo dice ("no
-      licensed brand fonts were provided"). Archivo hace de voz display expandida
-      del wordmark, Schibsted Grotesk de texto, Martian Mono de metadata técnica.
+      🔴 Son SUSTITUTOS, no las tipografías de marca — el DS lo dice: "no licensed
+      brand fonts were provided". Al llegar las licenciadas se reemplazan los
+      archivos y las familias de `ds/tokens/typography.css`.
     */}
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Schibsted+Grotesk:ital,wght@0,400..900;1,400..900&family=Martian+Mono:wdth,wght@75..112.5,100..800&display=swap"
-    />
   </head>
   <body class="min-h-screen bg-surface-canvas font-text text-body text-text-body antialiased">
     <slot />

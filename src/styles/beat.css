@@ -2,43 +2,69 @@
  * Deltas del proyecto sobre el design system.
  *
  * 🔴 Se importa DESPUÉS del DS, a propósito. En `web-enfoque` el archivo
- * equivalente se importaba ANTES, así que cualquier regla que compitiera con el
- * DS perdía ahí y costaba tiempo entender por qué. Acá gana el proyecto.
+ * equivalente iba ANTES, así que cualquier regla que compitiera con el DS perdía
+ * ahí y costaba entender por qué. Acá gana el proyecto.
  *
  * Regla: aquí solo van correcciones justificadas y tokens que el DS no tiene.
  * Nada de redefinir la paleta — para eso está el DS.
  */
 
 :root {
-  /* Nada por ahora: el tema oscuro del DS pasa WCAG completo (lo más bajo,
-     --text-faint, da 6.23:1 sobre --surface-base). */
+  /* Nada por ahora: el tema oscuro pasa WCAG completo. Lo más bajo es
+     --text-faint con 6.23:1 sobre --surface-base, y --state-onair con 6.82:1. */
 }
 
 /**
- * 🔴 Corrección de contraste del tema claro `neblina`.
+ * Tema claro `neblina` — FUERA DEL ALCANCE (decisión de Carlos, 2026-08-20:
+ * "solo haremos versión negra").
  *
- * Medido contra `--surface-base` (#E7EBE9) del propio tema:
+ * Este bloque se queda igual, y a propósito: el DS ship´ea su propio
+ * `[data-theme="neblina"]` en `ds/tokens/colors.css`, que no editamos para poder
+ * re-sincronizarlo. Así que si alguien activa el tema alguna vez, ya está
+ * corregido en vez de fallar en silencio. Cuesta cuatro líneas y quita una mina.
+ *
+ * Qué corrige, medido contra el `--surface-base` (#E7EBE9) del propio tema:
  *   · --text-accent / --text-link = --luz-ink (#D9451C) → 3.62:1  ❌
  *   · --text-faint = --graphite-2 (#6B7471)             → 4.00:1  ⚠️
  *
- * WCAG 1.4.3 pide 4.5:1 para texto normal. El primero es el que muerde de
- * verdad, porque es el color de los ENLACES: un enlace a 16px en una nota larga
- * —que es justo el caso de uso que el DS declara para `neblina`— no cumple.
+ * WCAG 1.4.3 pide 4.5:1 para texto normal. El primero es el que muerde, porque es
+ * el color de los ENLACES. Es el mismo hallazgo que en Enfoque, donde el rojo de
+ * marca no llegaba y lo cazó Lighthouse con el sitio ya publicado.
  *
- * Es el mismo hallazgo que en Enfoque, donde el rojo de marca no daba 4.5:1 y
- * hubo que separar un token de texto aparte; allá lo cazó Lighthouse cuando ya
- * estaba en producción. Acá se corrige antes.
- *
- * `#BD3C18` conserva el tono (13°) y la saturación (87%) de `--luz-ink`, solo
- * baja la luminosidad hasta 4.57:1. El `--luz-ink` original NO se toca: sigue
- * sirviendo para superficies y bordes, donde el umbral es 3:1.
+ * `#BD3C18` conserva tono (13°) y saturación (87%) de `--luz-ink`, solo baja la
+ * luminosidad hasta 4.57:1. `--luz-ink` NO se toca: sigue sirviendo para
+ * superficies y bordes, donde el umbral es 3:1.
  */
 [data-theme='neblina'] {
-  --text-accent-ink: #bd3c18; /* 4.57:1 sobre --surface-base */
-  --text-accent: var(--text-accent-ink);
-  --text-link: var(--text-accent-ink);
-
-  /* --text-faint se queda como está (4.00:1): cumple 3:1, así que es válido
-     para texto grande (≥24px, o ≥18.66px en bold). NO usarlo por debajo de eso
-     en tema claro. En el tema oscuro da 6.23:1 y no tiene restricción. */
+  --text-accent: #bd3c18; /* 4.57:1 sobre --surface-base */
+  --text-link: #bd3c18;
+  /* --text-faint se queda (4.00:1): válido para texto grande (≥24px, o ≥18.66px
+     bold), no para cuerpo. En el tema oscuro da 6.23:1 y no tiene restricción. */
 }
+
+/**
+ * Roles tipográficos como clases.
+ *
+ * 🔴 Por qué existen: el DS define su tipografía en `font` SHORTHANDS compuestos
+ * (`--type-display-3: var(--w-bold) var(--size-display-3)/var(--lh-tight)
+ * var(--font-display)`), no como propiedades sueltas. Si se reensamblan con
+ * utilidades de Tailwind (`text-display-3 font-display`), se pierde el PESO en
+ * silencio — un titular display sale en 400 y nadie lo nota hasta que se compara
+ * con el lienzo.
+ *
+ * Así que los roles se usan como clase, no se reconstruyen. Las utilidades de
+ * Tailwind del `fontSize` quedan para casos sueltos donde solo hace falta el
+ * tamaño.
+ */
+.t-display-1 { font: var(--type-display-1); font-variation-settings: var(--font-display-settings); letter-spacing: var(--track-display); text-transform: uppercase; }
+.t-display-2 { font: var(--type-display-2); font-variation-settings: var(--font-display-settings); letter-spacing: var(--track-display); text-transform: uppercase; }
+.t-display-3 { font: var(--type-display-3); font-variation-settings: var(--font-display-settings); letter-spacing: var(--track-display); text-transform: uppercase; }
+.t-h1        { font: var(--type-h1); letter-spacing: var(--track-heading); }
+.t-h2        { font: var(--type-h2); letter-spacing: var(--track-heading); }
+.t-h3        { font: var(--type-h3); letter-spacing: var(--track-heading); }
+.t-h4        { font: var(--type-h4); letter-spacing: var(--track-heading); }
+.t-body-lg   { font: var(--type-body-lg); }
+.t-body      { font: var(--type-body); }
+.t-body-sm   { font: var(--type-body-sm); }
+.t-label     { font: var(--type-label); letter-spacing: var(--track-label); text-transform: uppercase; }
+.t-mono      { font: var(--type-mono); letter-spacing: var(--track-mono); }

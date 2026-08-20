@@ -18,6 +18,10 @@
  * (Vive en `src/` y no se lee de `design/` porque `design/` está en
  * `.dockerignore`: el build de producción no lo tiene.)
  */
+/* Las @font-face auto-hospedadas van PRIMERO: tienen que existir antes de que el
+   DS declare las familias en `tokens/typography.css`. Generado por `pnpm fuentes`. */
+@import './fuentes.css';
+
 @import './ds/styles.css';
 
 @import './beat.css';

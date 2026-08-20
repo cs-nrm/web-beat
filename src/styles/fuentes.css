@@ -1,0 +1,111 @@
+/* ============================================================
+   WEBFONTS AUTO-HOSPEDADAS
+   ------------------------------------------------------------
+   El DS las cargaba con `@import url(fonts.googleapis.com…)` DENTRO del CSS
+   (`ds/tokens/fonts.css`). Esa es la forma más lenta que existe: el navegador
+   descarga el CSS, lo parsea, DESCUBRE el @import, pide OTRO CSS a otro dominio y
+   solo entonces pide los woff2 — una cadena en serie de 3+ viajes, toda ella
+   bloqueando el pintado. En red móvil se nota. El propio readme del DS pide
+   exactamente este cambio.
+
+   Ahora los woff2 se sirven desde nuestro dominio: una sola conexión, sin DNS/TLS
+   a terceros, cacheables por el CDN como cualquier otro asset, y sin mandarle a
+   Google la IP del lector en cada visita.
+
+   Las tres familias son VARIABLES: un archivo por subset cubre todo el rango de
+   pesos pedido. Schibsted Grotesk lleva además su cara itálica real.
+
+   🔴 Y son SUSTITUTOS, no las tipografías de marca de Beat ("no licensed brand
+   fonts were provided", dice el DS). Al llegar las licenciadas se reemplazan estos
+   archivos y las familias de `ds/tokens/typography.css`; nada más cambia.
+
+   🤖 GENERADO por `scripts/fuentes.mjs` — no editar a mano. Volver a correr
+   `pnpm fuentes` si cambian las familias o los rangos.
+
+   Licencias: las tres son SIL Open Font License 1.1, que permite auto-hospedarlas
+   y redistribuirlas.
+   ============================================================ */
+
+/* Archivo · latin-ext · normal · peso 400 800 · ancho 100% 125% */
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 400 800;
+  font-stretch: 100% 125%;
+  font-display: swap;
+  src: url('/fuentes/archivo-var-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* Archivo · latin · normal · peso 400 800 · ancho 100% 125% */
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 400 800;
+  font-stretch: 100% 125%;
+  font-display: swap;
+  src: url('/fuentes/archivo-var-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Schibsted Grotesk · latin-ext · italic · peso 400 800 */
+@font-face {
+  font-family: 'Schibsted Grotesk';
+  font-style: italic;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fuentes/schibsted-grotesk-var-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* Schibsted Grotesk · latin · italic · peso 400 800 */
+@font-face {
+  font-family: 'Schibsted Grotesk';
+  font-style: italic;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fuentes/schibsted-grotesk-var-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Schibsted Grotesk · latin-ext · normal · peso 400 800 */
+@font-face {
+  font-family: 'Schibsted Grotesk';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fuentes/schibsted-grotesk-var-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* Schibsted Grotesk · latin · normal · peso 400 800 */
+@font-face {
+  font-family: 'Schibsted Grotesk';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fuentes/schibsted-grotesk-var-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Martian Mono · latin-ext · normal · peso 400 600 · ancho 100% */
+@font-face {
+  font-family: 'Martian Mono';
+  font-style: normal;
+  font-weight: 400 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url('/fuentes/martian-mono-var-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* Martian Mono · latin · normal · peso 400 600 · ancho 100% */
+@font-face {
+  font-family: 'Martian Mono';
+  font-style: normal;
+  font-weight: 400 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url('/fuentes/martian-mono-var-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}

@@ -1,0 +1,9 @@
+:root{
+--s-0:0; /* @kind spacing */
+--s-1:2px;--s-2:4px;--s-3:6px;--s-4:8px;--s-5:12px;--s-6:16px;--s-7:20px;--s-8:24px;--s-9:32px;--s-10:40px;--s-11:56px;--s-12:72px;--s-13:96px;--s-14:128px;--s-15:180px;
+/* Semantic spacing */
+--space-inline-tight:var(--s-3);--space-inline:var(--s-5);--space-stack-tight:var(--s-4);--space-stack:var(--s-6);--space-stack-loose:var(--s-9);
+--pad-control-y:10px;--pad-control-x:var(--s-6);--pad-control-y-sm:6px;--pad-control-x-sm:var(--s-5);--pad-control-y-lg:14px;--pad-control-x-lg:var(--s-8);
+--pad-card:var(--s-7);--pad-card-lg:var(--s-9);--pad-section:var(--s-13);--pad-section-sm:var(--s-11);
+--gap-grid:var(--s-8);--gap-tile:var(--s-5);
+}

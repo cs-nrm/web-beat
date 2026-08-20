@@ -1,16 +1,27 @@
 /**
- * Hoja base del sitio.
+ * Hoja base del sitio. El ORDEN importa:
  *
- * ⏳ Los tokens del design system NO están aquí todavía: llegan con el export del
- * lienzo "Sitio Beat 2026 v13" a `design/<iteracion>/_ds/tokens/*.css` (B3 del
- * plan). Cuando lleguen, se importan ANTES de las capas de Tailwind y
- * `tailwind.config.js` los mapea a utilidades.
+ *   1. `ds/styles.css` — el design system completo. Él mismo importa sus 9
+ *      archivos de tokens y sus componentes, así que NO se importan por separado
+ *      (hacerlo los duplicaba).
+ *   2. `beat.css` — los deltas del proyecto. Va DESPUÉS para que gane. En
+ *      `web-enfoque` el archivo equivalente iba ANTES, y cualquier regla que
+ *      compitiera con el DS perdía ahí; costaba entender por qué.
+ *   3. capas de Tailwind.
  *
- * 🔴 Y no se repite el error de los repos hermanos: nada de un `global.css` de
- * 1170 líneas donde los tokens de marca conviven con sobras del starter de Astro,
- * ni `@import` de Google Fonts dentro del CSS bundleado — eso es una cascada
- * render-blocking. Las fuentes se auto-hospedan en `.woff2` (B3.2).
+ * `src/styles/ds/` es una COPIA de `design/Nuevo sitio de beat/_ds/copy-of-beat-100-9-…/`.
+ * 🔴 No se edita: así se puede re-sincronizar cuando cambie el lienzo. La única
+ * intervención es haber neutralizado el `@import` de Google Fonts en
+ * `tokens/fonts.css` — las fuentes se cargan desde el `<head>` (ver Base.astro) y
+ * acabarán auto-hospedadas en `.woff2`.
+ *
+ * (Vive en `src/` y no se lee de `design/` porque `design/` está en
+ * `.dockerignore`: el build de producción no lo tiene.)
  */
+@import './ds/styles.css';
+
+@import './beat.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

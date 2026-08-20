@@ -1,0 +1,68 @@
+:root{
+/* ── Neblina: la base. El sistema vive en claro. ──────────────────── */
+--mist-0:#FAFBFA;--mist-1:#F1F3F2;--mist-2:#E7EBE9;--mist-3:#D9DEDC;--mist-4:#C7CFCC;--mist-5:#AEB8B5;
+/* ── Grafito: texto y acción. ─────────────────────────────────────── */
+--graphite-1:#8B9491;--graphite-2:#6B7471;--graphite-3:#4A5350;--graphite-4:#2E3634;--graphite-5:#171C1B;
+/* ── Luz: el acento no es un color, es una gama cálida. ───────────── */
+--luz-rosa:#FF6E93;--luz-coral:#FF6A3D;--luz-ambar:#FFA24B;--luz-rubor:#FFB3C6;--luz-pale:#FFD9C9;--luz-ink:#D9451C;
+/* ── Semánticos de estado (uso escaso). ──────────────────────────── */
+--green-600:#0F9D6B;--amber-600:#C77700;--red-600:#D93025;
+
+/* ── Aliases semánticos: construye con estos ─────────────────────── */
+--surface-canvas:var(--mist-3);
+--surface-base:var(--mist-2);
+--surface-raised:var(--mist-1);
+--surface-card:rgba(255,255,255,.58);
+--surface-card-hover:rgba(255,255,255,.8);
+--surface-sunken:var(--mist-4);
+--surface-inverse:var(--graphite-5);
+--surface-accent:var(--graphite-5);
+--surface-accent-hover:var(--graphite-4);
+--surface-accent-quiet:rgba(255,106,61,.14);
+--surface-live:var(--luz-coral);
+--surface-live-quiet:rgba(255,110,147,.18);
+
+--text-primary:var(--graphite-5);
+--text-body:var(--graphite-4);
+--text-muted:var(--graphite-3);
+--text-faint:var(--graphite-2);
+--text-accent:var(--luz-ink);
+--text-live:var(--luz-ink);
+--text-on-accent:#FFFFFF;
+--text-on-live:#FFFFFF;
+--text-on-inverse:#FFFFFF;
+--text-link:var(--luz-ink);
+--text-link-hover:var(--graphite-5);
+
+--border-hairline:rgba(23,28,27,.10);
+--border-quiet:rgba(23,28,27,.16);
+--border-strong:rgba(23,28,27,.30);
+--border-accent:var(--luz-coral);
+--border-live:rgba(255,106,61,.5);
+
+--state-success:var(--green-600);
+--state-warning:var(--amber-600);
+--state-danger:var(--red-600);
+--state-onair:var(--luz-coral);
+--state-disabled-text:var(--mist-5);
+--state-disabled-surface:rgba(23,28,27,.06);
+
+--focus-ring:var(--luz-coral);
+}
+/* Tinta: el único set oscuro. Momentos de contraste — portada de deck,
+   sección a sangre, reproductor nocturno. Nunca una interfaz completa. */
+[data-theme="tinta"]{
+color-scheme:dark;
+--surface-canvas:var(--graphite-5);--surface-base:#1E2423;--surface-raised:#262D2C;
+--surface-card:rgba(255,255,255,.06);--surface-card-hover:rgba(255,255,255,.1);--surface-sunken:#0E1211;--surface-inverse:var(--mist-0);
+--surface-accent:var(--luz-coral);--surface-accent-hover:var(--luz-ambar);--surface-accent-quiet:rgba(255,106,61,.18);
+--text-primary:#FFFFFF;--text-body:var(--mist-2);--text-muted:var(--mist-5);--text-faint:var(--graphite-1);
+--text-accent:var(--luz-ambar);--text-live:var(--luz-ambar);--text-on-accent:#171C1B;--text-on-inverse:var(--graphite-5);
+--text-link:var(--luz-ambar);--text-link-hover:#FFFFFF;
+--border-hairline:rgba(255,255,255,.10);--border-quiet:rgba(255,255,255,.16);--border-strong:rgba(255,255,255,.30);
+--glass-fill:rgba(255,255,255,.06);--glass-edge:rgba(255,255,255,.14);--glass-highlight:inset 0 1px 0 rgba(255,255,255,.08); /* @kind shadow */
+--shadow-1:0 1px 2px rgba(0,0,0,.4);--shadow-2:0 10px 30px -14px rgba(0,0,0,.7);--shadow-3:0 26px 60px -26px rgba(0,0,0,.8);
+--tex-grid:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px); /* @kind other */
+--grad-scrim-b:linear-gradient(to top,rgba(14,18,17,.95) 0%,rgba(14,18,17,.6) 44%,rgba(14,18,17,0) 100%); /* @kind other */
+--state-disabled-surface:rgba(255,255,255,.06);--state-disabled-text:var(--graphite-2);
+}

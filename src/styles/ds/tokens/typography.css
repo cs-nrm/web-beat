@@ -1,0 +1,54 @@
+:root{
+/* Families. Display is Archivo held at an expanded width so headlines echo the wordmark. */
+--font-display:"Archivo","Archivo Expanded",system-ui,sans-serif;
+--font-text:"Schibsted Grotesk",system-ui,sans-serif;
+--font-mono:"Martian Mono",ui-monospace,monospace;
+--wdth-display:125; /* @kind other */
+--wdth-display-tight:100; /* @kind other */
+--font-display-settings:"wdth" 125; /* @kind font */
+
+/* Weights */
+--w-regular:400; /* @kind other */
+--w-medium:500; /* @kind other */
+--w-semibold:600; /* @kind other */
+--w-bold:700; /* @kind other */
+--w-black:800; /* @kind other */
+
+/* Sizes — fixed px, matched to a 1240px web grid */
+--size-display-1:88px;--size-display-2:64px;--size-display-3:48px;
+--size-h1:40px;--size-h2:30px;--size-h3:23px;--size-h4:19px;
+--size-body-lg:18px;--size-body:16px;--size-body-sm:14px;--size-caption:13px;--size-micro:11px;
+--size-mono:12px;--size-mono-lg:14px;
+
+/* Line heights */
+--lh-display:0.92; /* @kind other */
+--lh-tight:1.06; /* @kind other */
+--lh-heading:1.16; /* @kind other */
+--lh-body:1.55; /* @kind other */
+--lh-relaxed:1.7; /* @kind other */
+--lh-flat:1; /* @kind other */
+
+/* Tracking — display goes tight, all-caps labels go wide */
+--track-display:-0.03em; /* @kind other */
+--track-heading:-0.015em; /* @kind other */
+--track-body:0; /* @kind other */
+--track-label:0.14em; /* @kind other */
+--track-mono:-0.02em; /* @kind other */
+
+/* Composed roles */
+--type-display-1:var(--w-black) var(--size-display-1)/var(--lh-display) var(--font-display); /* @kind font */
+--type-display-2:var(--w-black) var(--size-display-2)/var(--lh-display) var(--font-display); /* @kind font */
+--type-display-3:var(--w-bold) var(--size-display-3)/var(--lh-tight) var(--font-display); /* @kind font */
+--type-h1:var(--w-bold) var(--size-h1)/var(--lh-heading) var(--font-display); /* @kind font */
+--type-h2:var(--w-bold) var(--size-h2)/var(--lh-heading) var(--font-display); /* @kind font */
+--type-h3:var(--w-semibold) var(--size-h3)/var(--lh-heading) var(--font-text); /* @kind font */
+--type-h4:var(--w-semibold) var(--size-h4)/var(--lh-heading) var(--font-text); /* @kind font */
+--type-body-lg:var(--w-regular) var(--size-body-lg)/var(--lh-body) var(--font-text); /* @kind font */
+--type-body:var(--w-regular) var(--size-body)/var(--lh-body) var(--font-text); /* @kind font */
+--type-body-sm:var(--w-regular) var(--size-body-sm)/var(--lh-body) var(--font-text); /* @kind font */
+--type-label:var(--w-semibold) var(--size-micro)/var(--lh-flat) var(--font-mono); /* @kind font */
+--type-mono:var(--w-regular) var(--size-mono)/1.4 var(--font-mono); /* @kind font */
+}
+/* Display faces must carry the width axis; utility classes for card demos and kits. */
+.beat-display{font-family:var(--font-display);font-variation-settings:var(--font-display-settings);letter-spacing:var(--track-display);text-transform:uppercase}
+.beat-label{font:var(--type-label);letter-spacing:var(--track-label);text-transform:uppercase}

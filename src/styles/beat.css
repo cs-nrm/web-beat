@@ -1,0 +1,44 @@
+/**
+ * Deltas del proyecto sobre el design system.
+ *
+ * 🔴 Se importa DESPUÉS del DS, a propósito. En `web-enfoque` el archivo
+ * equivalente se importaba ANTES, así que cualquier regla que compitiera con el
+ * DS perdía ahí y costaba tiempo entender por qué. Acá gana el proyecto.
+ *
+ * Regla: aquí solo van correcciones justificadas y tokens que el DS no tiene.
+ * Nada de redefinir la paleta — para eso está el DS.
+ */
+
+:root {
+  /* Nada por ahora: el tema oscuro del DS pasa WCAG completo (lo más bajo,
+     --text-faint, da 6.23:1 sobre --surface-base). */
+}
+
+/**
+ * 🔴 Corrección de contraste del tema claro `neblina`.
+ *
+ * Medido contra `--surface-base` (#E7EBE9) del propio tema:
+ *   · --text-accent / --text-link = --luz-ink (#D9451C) → 3.62:1  ❌
+ *   · --text-faint = --graphite-2 (#6B7471)             → 4.00:1  ⚠️
+ *
+ * WCAG 1.4.3 pide 4.5:1 para texto normal. El primero es el que muerde de
+ * verdad, porque es el color de los ENLACES: un enlace a 16px en una nota larga
+ * —que es justo el caso de uso que el DS declara para `neblina`— no cumple.
+ *
+ * Es el mismo hallazgo que en Enfoque, donde el rojo de marca no daba 4.5:1 y
+ * hubo que separar un token de texto aparte; allá lo cazó Lighthouse cuando ya
+ * estaba en producción. Acá se corrige antes.
+ *
+ * `#BD3C18` conserva el tono (13°) y la saturación (87%) de `--luz-ink`, solo
+ * baja la luminosidad hasta 4.57:1. El `--luz-ink` original NO se toca: sigue
+ * sirviendo para superficies y bordes, donde el umbral es 3:1.
+ */
+[data-theme='neblina'] {
+  --text-accent-ink: #bd3c18; /* 4.57:1 sobre --surface-base */
+  --text-accent: var(--text-accent-ink);
+  --text-link: var(--text-accent-ink);
+
+  /* --text-faint se queda como está (4.00:1): cumple 3:1, así que es válido
+     para texto grande (≥24px, o ≥18.66px en bold). NO usarlo por debajo de eso
+     en tema claro. En el tema oscuro da 6.23:1 y no tiene restricción. */
+}

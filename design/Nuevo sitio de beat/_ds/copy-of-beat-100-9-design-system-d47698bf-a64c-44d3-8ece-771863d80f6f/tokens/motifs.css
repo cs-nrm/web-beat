@@ -1,0 +1,41 @@
+/* ── Motivos Beat: la luz en movimiento ────────────────────────────
+   Tres familias, todas derivadas de la referencia fotográfica: estelas
+   (traza de luz), glitch (desfase de canal) y barrido (blur de motion).
+   Se usan de a una por pieza. Nunca las tres juntas. */
+
+/* Estelas — 3 a 5 líneas horizontales de largo distinto, jamás centradas.
+   Sobre negro son luz real: el glow trabaja, no se apaga. */
+.beat-streak{position:absolute;height:2px;background:var(--grad-streak);filter:blur(.3px);box-shadow:0 0 18px rgba(255,120,90,.75);pointer-events:none}
+.beat-streak.is-soft{height:7px;filter:blur(8px);opacity:.85;box-shadow:none}
+.beat-streak.is-thin{height:1px;box-shadow:0 0 10px rgba(255,110,147,.7)}
+.beat-streak.is-animated{animation:beat-streak-in var(--dur-5) var(--ease-out) both}
+
+/* Glitch — aberración de canal, no sombra: los desfases son de distinta
+   magnitud, eje y nitidez en cada canal, de modo que nunca lee simétrico.
+   Sólo en display, nunca en cuerpo ni en interfaz funcional. */
+.beat-glitch{position:relative;display:inline-block;text-shadow:0.105em -0.032em 0 rgba(255,110,147,.7),-0.022em 0.056em 0.016em rgba(255,162,75,.6)}
+.beat-glitch.is-hard{text-shadow:0.165em -0.048em 0 rgba(255,110,147,.82),-0.034em 0.088em 0.02em rgba(255,162,75,.7),0.05em 0.006em 30px rgba(255,106,61,.24)}
+.beat-glitch.is-soft{text-shadow:0.05em -0.014em 0.01em rgba(255,110,147,.5),-0.018em 0.03em 0.014em rgba(255,162,75,.44)}
+/* Corte de señal: una banda desplazada atraviesa el texto fuera del centro */
+.beat-glitch.is-torn::after{content:"";position:absolute;left:-2%;right:-2%;top:54%;height:8%;background:linear-gradient(90deg,transparent,rgba(255,110,147,.75) 18%,rgba(255,138,91,.7) 52%,rgba(255,162,75,.6) 76%,transparent);mix-blend-mode:screen;filter:blur(.5px);pointer-events:none}
+.beat-glitch.is-torn::before{content:"";position:absolute;left:12%;right:34%;top:31%;height:3%;background:rgba(255,110,147,.55);mix-blend-mode:screen;pointer-events:none}
+.beat-glitch.is-live{animation:beat-glitch-shift 4.4s steps(1,end) infinite}
+
+/* Barrido — el sujeto se mueve: copia desplazada y desenfocada del bloque */
+.beat-smear{position:relative}
+.beat-smear::after{content:"";position:absolute;inset:0;background:inherit;filter:blur(14px);opacity:.6;transform:translateX(6%);pointer-events:none}
+
+/* Superficies con textura: retícula técnica y scanlines */
+.beat-grid{background-image:var(--tex-grid);background-size:var(--tex-grid-size)}
+.beat-scan{position:relative}
+.beat-scan::after{content:"";position:absolute;inset:0;background:var(--tex-scan);pointer-events:none;opacity:.7}
+
+@keyframes beat-streak-in{from{transform:translateX(-14%) scaleX(.6);opacity:0}to{transform:none;opacity:1}}
+@keyframes beat-glitch-shift{
+0%,72%{text-shadow:0.085em -0.024em 0 rgba(255,110,147,.72),-0.028em 0.05em 0.012em rgba(255,162,75,.62),0.014em 0.014em 0 rgba(217,69,28,.2)}
+73%{text-shadow:0.19em -0.05em 0 rgba(255,110,147,.9),-0.02em 0.03em 0.01em rgba(255,162,75,.5)}
+75%{text-shadow:-0.06em 0.07em 0 rgba(255,110,147,.8),0.15em -0.01em 0.014em rgba(255,162,75,.75),0.02em 0 0 rgba(217,69,28,.3)}
+76%{text-shadow:0.085em -0.024em 0 rgba(255,110,147,.72),-0.028em 0.05em 0.012em rgba(255,162,75,.62)}
+89%{text-shadow:0.24em 0.02em 0 rgba(255,110,147,.85),-0.09em -0.04em 0.02em rgba(255,162,75,.7)}
+90%{text-shadow:0.03em -0.08em 0 rgba(255,110,147,.6),-0.05em 0.09em 0.01em rgba(255,162,75,.8)}
+91%,100%{text-shadow:0.085em -0.024em 0 rgba(255,110,147,.72),-0.028em 0.05em 0.012em rgba(255,162,75,.62),0.014em 0.014em 0 rgba(217,69,28,.2)}}

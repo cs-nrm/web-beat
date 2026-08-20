@@ -1,0 +1,21 @@
+:root{
+--grid-max:1240px; /* @kind spacing */
+--grid-cols:12; /* @kind other */
+--grid-gutter:var(--s-8);--grid-margin:var(--s-9);
+--header-h:64px; /* @kind spacing */
+--player-h:76px; /* @kind spacing */
+--sidebar-w:264px; /* @kind spacing */
+--bp-sm:640px; /* @kind other */
+--bp-md:900px; /* @kind other */
+--bp-lg:1200px; /* @kind other */
+--bp-xl:1440px; /* @kind other */
+--z-base:0; /* @kind other */
+--z-raised:10; /* @kind other */
+--z-sticky:100; /* @kind other */
+--z-header:200; /* @kind other */
+--z-player:300; /* @kind other */
+--z-overlay:400; /* @kind other */
+--z-dialog:500; /* @kind other */
+--z-toast:600; /* @kind other */
+--container-pad:clamp(20px,5vw,var(--s-10)); /* @kind spacing */
+}

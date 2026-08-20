@@ -1,0 +1,73 @@
+:root{
+/* ── Noche: la base. El sistema vive en negro. ────────────────────── */
+--noche-0:#050706;--noche-1:#0B0E0D;--noche-2:#121615;--noche-3:#1A1F1E;--noche-4:#252B29;--noche-5:#39413F;
+/* ── Neblina: el texto. La luz que queda del gris-verde. ──────────── */
+--mist-0:#FAFBFA;--mist-1:#F1F3F2;--mist-2:#E7EBE9;--mist-3:#D9DEDC;--mist-4:#C7CFCC;--mist-5:#AEB8B5;
+/* ── Grafito: los tonos medios. Apagados, bordes, deshabilitados. ── */
+--graphite-1:#8B9491;--graphite-2:#6B7471;--graphite-3:#4A5350;--graphite-4:#2E3634;--graphite-5:#171C1B;
+/* ── Luz: el acento no es un color, es una gama cálida. ───────────── */
+--luz-rosa:#FF6E93;--luz-coral:#FF6A3D;--luz-ambar:#FFA24B;--luz-rubor:#FFB3C6;--luz-pale:#FFD9C9;--luz-ink:#D9451C;
+/* ── Semánticos de estado (uso escaso). ──────────────────────────── */
+--green-400:#2BD98A;--amber-400:#FFB020;--red-400:#FF4D4D;
+
+/* ── Aliases semánticos: construye con estos ─────────────────────── */
+--surface-canvas:var(--noche-0);
+--surface-base:var(--noche-1);
+--surface-raised:var(--noche-2);
+--surface-card:rgba(255,255,255,.045);
+--surface-card-hover:rgba(255,255,255,.08);
+--surface-sunken:#000000;
+--surface-inverse:var(--mist-0);
+--surface-accent:var(--mist-0);
+--surface-accent-hover:var(--mist-2);
+--surface-accent-quiet:rgba(255,106,61,.16);
+--surface-live:var(--luz-coral);
+--surface-live-quiet:rgba(255,110,147,.16);
+
+--text-primary:#FFFFFF;
+--text-body:var(--mist-2);
+--text-muted:var(--mist-5);
+--text-faint:var(--graphite-1);
+--text-accent:var(--luz-ambar);
+--text-live:var(--luz-ambar);
+--text-on-accent:var(--noche-0);
+--text-on-live:var(--noche-0);
+--text-on-inverse:var(--noche-0);
+--text-link:var(--luz-ambar);
+--text-link-hover:#FFFFFF;
+
+--border-hairline:rgba(255,255,255,.10);
+--border-quiet:rgba(255,255,255,.16);
+--border-strong:rgba(255,255,255,.30);
+--border-accent:var(--luz-coral);
+--border-live:rgba(255,106,61,.55);
+
+--state-success:var(--green-400);
+--state-warning:var(--amber-400);
+--state-danger:var(--red-400);
+--state-onair:var(--luz-coral);
+--state-disabled-text:var(--graphite-2);
+--state-disabled-surface:rgba(255,255,255,.05);
+
+--focus-ring:var(--luz-coral);
+}
+/* Neblina: el único set claro. Momentos de respiro — una sección de deck,
+   una nota larga, papel y prensa. Nunca una interfaz completa. */
+[data-theme="neblina"]{
+color-scheme:light;
+--surface-canvas:var(--mist-3);--surface-base:var(--mist-2);--surface-raised:var(--mist-1);
+--surface-card:rgba(255,255,255,.58);--surface-card-hover:rgba(255,255,255,.8);--surface-sunken:var(--mist-4);--surface-inverse:var(--noche-0);
+--surface-accent:var(--graphite-5);--surface-accent-hover:var(--graphite-4);--surface-accent-quiet:rgba(255,106,61,.14);
+--text-primary:var(--graphite-5);--text-body:var(--graphite-4);--text-muted:var(--graphite-3);--text-faint:var(--graphite-2);
+--text-accent:var(--luz-ink);--text-live:var(--luz-ink);--text-on-accent:#FFFFFF;--text-on-live:#FFFFFF;--text-on-inverse:#FFFFFF;
+--text-link:var(--luz-ink);--text-link-hover:var(--graphite-5);
+--border-hairline:rgba(23,28,27,.10);--border-quiet:rgba(23,28,27,.16);--border-strong:rgba(23,28,27,.30);
+--glass-fill:rgba(255,255,255,.58);--glass-edge:rgba(255,255,255,.9);--glass-highlight:inset 0 1px 0 rgba(255,255,255,.9); /* @kind shadow */
+--shadow-1:0 1px 2px rgba(23,28,27,.10);--shadow-2:0 10px 30px -14px rgba(23,28,27,.26);--shadow-3:0 26px 60px -26px rgba(23,28,27,.32);
+--tex-grid:linear-gradient(rgba(23,28,27,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(23,28,27,.055) 1px,transparent 1px); /* @kind other */
+--tex-scan:repeating-linear-gradient(to bottom,rgba(23,28,27,.055) 0 1px,transparent 1px 3px); /* @kind other */
+--grad-scrim-b:linear-gradient(to top,rgba(250,251,250,.94) 0%,rgba(250,251,250,.6) 44%,rgba(250,251,250,0) 100%); /* @kind other */
+--grad-hairline:linear-gradient(90deg,transparent,rgba(23,28,27,.16) 50%,transparent); /* @kind other */
+--state-success:#0F9D6B;--state-warning:#C77700;--state-danger:#D93025;
+--state-disabled-surface:rgba(23,28,27,.06);--state-disabled-text:var(--mist-5);
+}

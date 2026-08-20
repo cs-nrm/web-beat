@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/tokens/colors.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/tokens/typography.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/tokens/effects.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/tokens/motion.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/tokens/motifs.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/tokens/layout.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/tokens/base.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/components/beat-components.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/styles.css">
+<script src="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/_ds_bundle.js"></script>
+<script src="./image-slot.js"></script>
+<style>
+body{margin:0;background:#5A6360;font-family:"Schibsted Grotesk",system-ui,sans-serif}
+a{color:inherit;text-decoration:none}
+.beat-grid{pointer-events:none}
+.dv-turn{padding:40px 44px 32px;scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 20px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#FAFBFA;color:#050706;border-radius:4px;text-decoration:none}
+.dv-tname{font:600 13px/1.2 system-ui,sans-serif;color:#F1F3F2}
+.dv-opts{display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(255,255,255,.2);color:#FAFBFA;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11.5px/1.35 system-ui,sans-serif;color:#D9DEDC;max-width:1280px}
+.dv-card{max-width:100%;border:1px solid rgba(255,255,255,.2);border-radius:8px;box-shadow:0 24px 60px -30px rgba(0,0,0,.9);overflow:hidden;position:relative}
+.dv-opt:target .dv-oid{background:#FF6A3D;color:#050706}
+.dv-next{margin:24px 0 0;font:12px/1.6 system-ui,sans-serif;color:#C7CFCC}
+@keyframes bt-marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+</style>
+</helmet>
+
+<section class="dv-turn" id="t10">
+<div class="dv-thd"><a class="dv-tid" href="#t10">10</a><span class="dv-tname">Sobre la v9: el Fenómeno Residente abre el sitio, Beat Scanner recupera el mosaico de 8b y baja, y el marquee se simplifica.</span></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="10a">
+<div class="dv-olabel"><a class="dv-oid" href="#10a">10a</a><b>Mosaico monocromo</b> — el Fenómeno Residente primero (semana en curso + archivo), Beat Scanner después con el mosaico original.</div>
+<div class="dv-card" style="width:1280px">
+<div data-screen-label="10a Inicio" style="background:var(--noche-0)">
+
+<div style="position:relative;height:250px;background:var(--noche-1);box-shadow:inset 0 -1px 0 var(--border-hairline)">
+<image-slot id="beat-10a-portada-ad" shape="rect" placeholder="Arrastra el banner de portada · 1280 × 250" style="position:absolute;inset:0"></image-slot>
+<span class="beat-label" style="position:absolute;left:24px;top:12px;font-size:8px;letter-spacing:.22em;color:var(--text-faint);pointer-events:none">PUBLICIDAD</span>
+</div>
+
+<header style="display:flex;align-items:center;gap:24px;height:68px;padding:0 24px;background:rgba(255,255,255,.045);box-shadow:inset 0 -1px 0 var(--border-quiet)">
+<x-import component-from-global-scope="Beat1009DesignSystem_b52646.Logo" tone="white" height="{{ h20 }}" hint-size="74px,20px"></x-import>
+<nav style="display:flex;gap:18px">
+<sc-for list="{{ nav }}" as="it" hint-placeholder-count="8">
+<a href="#10a" class="beat-label" style="color:var(--text-muted);font-size:9.5px;white-space:nowrap" style-hover="color:var(--text-primary)">{{ it.short }}</a>
+</sc-for>
+</nav>
+<div style="margin-left:auto;display:flex;align-items:center;gap:14px;padding:6px 6px 6px 14px;background:rgba(255,255,255,.06);backdrop-filter:blur(18px) saturate(130%);box-shadow:inset 0 0 0 1px var(--glass-edge);color:var(--mist-2);--text-live:#FFFFFF">
+<x-import component-from-global-scope="Beat1009DesignSystem_b52646.LiveIndicator" label="AL AIRE" bars="{{ yes }}" hint-size="76px,12px"></x-import>
+<span style="font:600 12px/1.2 var(--font-text);white-space:nowrap">{{ track.title }}</span>
+<button onClick="{{ togglePlay }}" style="width:32px;height:32px;border:0;background:var(--mist-0);color:var(--noche-0);display:grid;place-items:center;cursor:pointer" style-hover="background:var(--mist-3)">
+<x-import component-from-global-scope="Beat1009DesignSystem_b52646.Icon" name="{{ playIcon }}" size="{{ h16 }}" hint-size="16px,16px"></x-import>
+</button>
+</div>
+<button style="width:40px;height:40px;border:0;background:transparent;color:var(--text-muted);display:grid;place-items:center;cursor:pointer" style-hover="color:var(--text-primary)">
+<x-import component-from-global-scope="Beat1009DesignSystem_b52646.Icon" name="search" size="{{ h18 }}" hint-size="18px,18px"></x-import>
+</button>
+</header>
+
+<div style="padding:32px 24px 0">
+<div style="display:flex;align-items:baseline;justify-content:space-between;padding-bottom:14px;border-bottom:1px solid var(--border-quiet)">
+<span class="beat-display" style="font-size:26px;font-weight:800;letter-spacing:-.01em;color:var(--mist-2)">EL FENÓMENO RESIDENTE</span>
+<span class="beat-label" style="color:var(--text-muted)">13 TEMAS · 143 CÁPSULAS</span>
+</div>
+
+<div style="display:flex;align-items:baseline;gap:16px;margin-top:26px">
+<span class="beat-display" style="font-size:44px;font-weight:800;line-height:.9;color:var(--mist-0)">01</span>
+<div style="min-width:0">
+<span class="beat-label" style="color:var(--mist-0)">TEMA DE LA SEMANA · {{ semana.rango }}</span>
+<h3 style="font:700 26px/1.1 var(--font-text);letter-spacing:-.016em;color:var(--mist-2);margin:8px 0 0">{{ semana.title }}</h3>
+</div>
+<span class="beat-label" style="margin-left:auto;color:var(--text-muted);white-space:nowrap">{{ semana.progreso }}</span>
+</div>
+
+<div style="display:grid;grid-template-columns:296px minmax(0,1fr) 320px;gap:24px;align-items:start;margin-top:20px">
+
+<div>
+<div style="position:relative;aspect-ratio:9/16;background:var(--grad-noche);overflow:hidden;box-shadow:inset 0 0 0 1px var(--border-quiet)">
+<image-slot id="beat-10a-fr-video" shape="rect" placeholder="Arrastra el video o la imagen vertical 9:16" style="position:absolute;inset:0"></image-slot>
+<div class="beat-grid" style="position:absolute;inset:0"></div>
+<span class="beat-label" style="position:absolute;left:14px;top:14px;padding:7px 11px;background:rgba(255,255,255,.14);backdrop-filter:blur(14px);color:var(--mist-0);font-size:9px;pointer-events:none">CÁPSULA 05 · HOY</span>
+<div style="position:absolute;inset:auto 0 0 0;padding:56px 16px 16px;background:var(--grad-scrim-b);pointer-events:none">
+<span style="display:flex;align-items:center;gap:12px">
+<span style="display:grid;place-items:center;width:44px;height:44px;border-radius:999px;background:var(--mist-0);color:var(--noche-0);flex:none">
+<x-import component-from-global-scope="Beat1009DesignSystem_b52646.Icon" name="play" size="{{ h20 }}" hint-size="20px,20px"></x-import>
+</span>
+<span style="min-width:0">
+<span style="display:block;font:600 15px/1.24 var(--font-text);color:var(--mist-1);text-wrap:pretty">{{ capsulaHoy.title }}</span>
+<span class="beat-label" style="display:block;margin-top:6px;font-size:9px;color:var(--mist-4)">{{ capsulaHoy.dur }}</span>
+</span>
+</span>
+</div>
+</div>
+<a href="#10a" style="display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:14px;margin-top:2px;padding:16px;background:var(--surface-card);box-shadow:inset 0 0 0 1px var(--border-hairline)" style-hover="background:var(--surface-card-hover)">
+<span style="display:grid;place-items:center;width:38px;height:38px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--border-strong);color:var(--mist-1)">
+<x-import component-from-global-scope="Beat1009DesignSystem_b52646.Icon" name="play" size="{{ h16 }}" hint-size="16px,16px"></x-import>
+</span>
+<span style="min-width:0">
+<span class="beat-label" style="display:block;font-size:9px;line-height:1.5;color:var(--mist-0)">EL ESPECIAL<br>SÁBADO 20:00</span>
+<span style="display:block;font:600 14px/1.26 var(--font-text);color:var(--mist-2);margin-top:6px;text-wrap:pretty">{{ especial.title }}</span>
+</span>
+<span class="beat-label" style="font-size:9px;color:var(--text-muted)">{{ especial.dur }}</span>
+</a>
+</div>
+
+<div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;padding-bottom:11px;border-bottom:1px solid var(--border-quiet)">
+<span class="beat-label" style="color:var(--mist-0)">LAS 11 CÁPSULAS</span>
+<span class="beat-label" style="color:var(--text-faint)">DE LUNES A VIERNES</span>
+</div>
+<sc-for list="{{ capsulas }}" as="c" hint-placeholder-count="11">
+<a href="#10a" style="display:grid;grid-template-columns:34px minmax(0,1fr) auto auto;align-items:center;gap:14px;padding:11px 8px;margin:0 -8px;border-bottom:1px solid var(--border-hairline)" style-hover="background:rgba(255,255,255,.055)">
+<span class="beat-label" style="font-size:9.5px;color:{{ c.numColor }}">{{ c.n }}</span>
+<span style="font:500 14.5px/1.3 var(--font-text);color:{{ c.titleColor }};text-wrap:pretty">{{ c.title }}</span>
+<span class="beat-label" style="font-size:8.5px;color:{{ c.estadoColor }};white-space:nowrap">{{ c.estado }}</span>
+<span class="beat-label" style="font-size:8.5px;color:var(--text-faint);white-space:nowrap">{{ c.dur }}</span>
+</a>
+</sc-for>
+</div>
+
+<div style="background:var(--surface-card);box-shadow:inset 0 0 0 1px var(--border-hairline);padding:18px">
+<div style="display:flex;flex-direction:column;gap:7px;padding-bottom:12px;border-bottom:1px solid var(--border-quiet)">
+<span class="beat-label" style="line-height:1.4;color:var(--mist-0)">PLAYLIST DEL TEMA</span>
+<span class="beat-label" style="line-height:1.4;color:var(--text-faint)">{{ playlist.total }}</span>
+</div>
+<sc-for list="{{ playlist.tracks }}" as="p" hint-placeholder-count="9">
+<div style="display:grid;grid-template-columns:22px minmax(0,1fr) auto;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border-hairline)">
+<span class="beat-label" style="font-size:8.5px;color:var(--text-faint)">{{ p.n }}</span>
+<span style="min-width:0">
+<span style="display:block;font:500 13px/1.24 var(--font-text);color:var(--mist-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.title }}</span>
+<span style="display:block;font:400 11.5px/1.2 var(--font-text);color:var(--text-muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.artist }}</span>
+</span>
+<span class="beat-label" style="font-size:8px;color:var(--text-faint)">{{ p.dur }}</span>
+</div>
+</sc-for>
+<div style="display:flex;gap:8px;margin-top:16px">
+<sc-for list="{{ playlist.tiendas }}" as="s" hint-placeholder-count="2">
+<a href="#10a" class="beat-label" style="flex:1;text-align:center;padding:10px 12px;box-shadow:inset 0 0 0 1px var(--border-quiet);color:var(--mist-2);font-size:9px;white-space:nowrap" style-hover="background:var(--mist-0);color:var(--noche-0)">{{ s }}</a>
+</sc-for>
+</div>
+</div>
+</div>
+</div>
+
+<div style="display:flex;align-items:baseline;justify-content:space-between;padding:38px 24px 14px;margin:0 24px;border-bottom:1px solid var(--border-quiet)">
+<span class="beat-label" style="color:var(--mist-0)">ARCHIVO · TEMAS ANTERIORES</span>
+<a href="#10a" class="beat-label" style="color:var(--text-muted)">VER LOS 13</a>
+</div>
+<div style="display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start;margin-top:20px;padding:0 24px">
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--border-hairline);padding:2px">
+<sc-for list="{{ temas }}" as="t" hint-placeholder-count="6">
+<a href="#10a" style="display:block;background:var(--noche-1);padding-bottom:16px" style-hover="background:var(--noche-2)">
+<div style="position:relative;aspect-ratio:1/1;background:{{ t.bg }};overflow:hidden;display:grid;place-items:center">
+<div class="beat-grid" style="position:absolute;inset:0"></div>
+<span class="beat-display" style="position:relative;font-size:52px;font-weight:800;color:{{ t.numColor }}">{{ t.n }}</span>
+<span class="beat-label" style="position:absolute;right:12px;top:12px;color:{{ t.numColor }};font-size:9px">{{ t.estado }}</span>
+</div>
+<div style="font:600 15px/1.25 var(--font-text);color:var(--mist-2);padding:14px 16px 0;text-wrap:pretty">{{ t.title }}</div>
+<span class="beat-label" style="display:block;padding:8px 16px 0;font-size:9px;color:var(--text-faint)">11 CÁPSULAS · PLAYLIST</span>
+</a>
+</sc-for>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:7px;position:sticky;top:16px">
+<span class="beat-label" style="font-size:8px;color:var(--text-faint)">PUBLICIDAD</span>
+<div style="position:relative;width:300px;height:250px;background:var(--surface-card);box-shadow:inset 0 0 0 1px var(--border-hairline)">
+<image-slot id="beat-10a-box" shape="rect" placeholder="Arrastra el banner 300 × 250" style="position:absolute;inset:0"></image-slot>
+</div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;align-items:center;gap:7px;padding:24px">
+<span class="beat-label" style="font-size:8px;color:var(--text-faint)">PUBLICIDAD</span>
+<a href="#10a" style="position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:26px;box-sizing:border-box;width:100%;max-width:728px;aspect-ratio:728/90;padding:0 22px;background:#F2EFE7;overflow:hidden" style-hover="background:#EBE7DC">
+<span style="font:800 17px/1 var(--font-text);letter-spacing:.14em;color:#14181C">NOVA</span>
+<span style="min-width:0">
+<span style="display:block;font:600 15px/1.2 var(--font-text);color:#14181C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Audífonos de estudio NV-7. Respuesta plana, sin colorear.</span>
+<span style="display:block;font:500 11px/1 var(--font-text);color:#6E6A5F;margin-top:5px">Envío sin costo a todo México</span>
+</span>
+<span style="padding:9px 15px;background:#14181C;color:#F2EFE7;font:700 11px/1 var(--font-text);white-space:nowrap">Ver el NV-7</span>
+</a>
+</div>
+
+<div style="padding:14px 0;background:var(--noche-2);color:var(--mist-2);overflow:hidden;box-shadow:inset 0 1px 0 var(--border-hairline),inset 0 -1px 0 var(--border-hairline)">
+<div style="display:flex;width:max-content;animation:bt-marquee 28s linear infinite">
+<span class="beat-display" style="flex:none;padding-right:44px;font-size:28px;font-weight:800;white-space:nowrap">{{ marquee }}</span>
+<span class="beat-display" style="flex:none;padding-right:44px;font-size:28px;font-weight:800;white-space:nowrap">{{ marquee }}</span>
+</div>
+</div>
+
+<div style="display:flex;align-items:baseline;justify-content:space-between;padding:32px 24px 14px;margin:0 24px;border-bottom:1px solid var(--border-quiet)">
+<span class="beat-display" style="font-size:26px;font-weight:800;letter-spacing:-.01em;color:var(--mist-2)">BEAT SCANNER</span>
+<span class="beat-label" style="color:var(--text-muted)">LO QUE PASA EN LA ESCENA · 11 AGO 2026</span>
+</div>
+
+<div style="display:grid;grid-template-columns:300px 1fr 300px;gap:2px;background:var(--border-hairline);padding:2px 0;margin-top:20px">
+<div style="display:flex;flex-direction:column;gap:2px;background:var(--noche-1)">
+<sc-for list="{{ mosaicoL }}" as="n" hint-placeholder-count="2">
+<a href="#10a" style="display:block;background:var(--noche-1);padding-bottom:18px" style-hover="background:var(--noche-2)">
+<div style="position:relative;aspect-ratio:1/1;background:var(--grad-noche);overflow:hidden">
+<image-slot id="beat-10a-nota-{{ n.idx }}" shape="rect" placeholder="Arrastra la foto de la nota" style="position:absolute;inset:0"></image-slot>
+<div class="beat-grid" style="position:absolute;inset:0"></div>
+</div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px 0">
+<span style="display:flex;align-items:center;gap:6px;color:var(--text-muted)">
+<x-import component-from-global-scope="Beat1009DesignSystem_b52646.Icon" name="clock" size="{{ h14 }}" hint-size="14px,14px"></x-import>
+<span class="beat-label" style="color:var(--text-muted);font-size:9.5px">{{ n.min }}</span>
+</span>
+<span class="beat-label" style="padding:7px 12px;background:var(--surface-card);box-shadow:inset 0 0 0 1px var(--border-hairline);color:var(--text-body);font-size:9px">{{ n.cat }}</span>
+</div>
+<div style="font:700 19px/1.22 var(--font-text);color:var(--mist-2);padding:14px 18px 0;text-wrap:pretty">{{ n.title }}</div>
+</a>
+</sc-for>
+</div>
+
+<a href="#10a" style="display:block;background:var(--noche-1)" style-hover="background:var(--noche-2)">
+<div style="position:relative;aspect-ratio:4/3.4;background:var(--grad-noche);overflow:hidden">
+<image-slot id="beat-10a-portada" shape="rect" placeholder="Arrastra el retrato principal" style="position:absolute;inset:0"></image-slot>
+<div class="beat-grid" style="position:absolute;inset:0"></div>
+<sc-if value="{{ estelas }}" hint-placeholder-val="{{ true }}">
+<div style="position:absolute;inset:0;pointer-events:none">
+<div class="beat-streak" style="left:14%;right:34%;top:36%"></div>
+<div class="beat-streak is-soft" style="left:26%;right:12%;top:44%"></div>
+<div class="beat-streak is-thin" style="left:38%;right:28%;top:52%"></div>
+</div>
+</sc-if>
+</div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 24px 0">
+<span style="display:flex;align-items:center;gap:6px;color:var(--text-muted)">
+<x-import component-from-global-scope="Beat1009DesignSystem_b52646.Icon" name="clock" size="{{ h16 }}" hint-size="16px,16px"></x-import>
+<span class="beat-label" style="color:var(--text-muted)">{{ featured.min }}</span>
+</span>
+<span class="beat-label" style="padding:8px 14px;background:var(--surface-card);box-shadow:inset 0 0 0 1px var(--border-hairline);color:var(--text-body)">{{ featured.cat }}</span>
+</div>
+<div style="font:700 34px/1.1 var(--font-text);letter-spacing:-.018em;color:var(--mist-2);padding:16px 24px 24px;text-wrap:pretty">{{ featured.title }}</div>
+</a>
+
+<div style="display:flex;flex-direction:column;gap:2px;background:var(--noche-1)">
+<sc-for list="{{ mosaicoR }}" as="n" hint-placeholder-count="2">
+<a href="#10a" style="display:block;background:var(--noche-1);padding-bottom:18px" style-hover="background:var(--noche-2)">
+<div style="position:relative;aspect-ratio:1/1;background:var(--grad-noche);overflow:hidden">
+<image-slot id="beat-10a-nota-{{ n.idx }}" shape="rect" placeholder="Arrastra la foto de la nota" style="position:absolute;inset:0"></image-slot>
+<div class="beat-grid" style="position:absolute;inset:0"></div>
+</div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px 0">
+<span style="display:flex;align-items:center;gap:6px;color:var(--text-muted)">
+<x-import component-from-global-scope="Beat1009DesignSystem_b52646.Icon" name="clock" size="{{ h14 }}" hint-size="14px,14px"></x-import>
+<span class="beat-label" style="color:var(--text-muted);font-size:9.5px">{{ n.min }}</span>
+</span>
+<span class="beat-label" style="padding:7px 12px;background:var(--surface-card);box-shadow:inset 0 0 0 1px var(--border-hairline);color:var(--text-body);font-size:9px">{{ n.cat }}</span>
+</div>
+<div style="font:700 19px/1.22 var(--font-text);color:var(--mist-2);padding:14px 18px 0;text-wrap:pretty">{{ n.title }}</div>
+</a>
+</sc-for>
+</div>
+</div>
+
+<div style="padding:44px 24px 0">
+<div style="display:flex;align-items:baseline;justify-content:space-between;padding-bottom:14px;border-bottom:1px solid var(--border-quiet)">
+<span class="beat-display" style="font-size:26px;font-weight:800;letter-spacing:-.01em;color:var(--mist-2)">BONUS BEAT</span>
+<span class="beat-label" style="color:var(--text-muted)">TRES TRACKS CADA VIERNES</span>
+</div>
+<sc-for list="{{ bonus }}" as="b" hint-placeholder-count="3">
+<div style="display:grid;grid-template-columns:44px 92px minmax(0,1fr) auto;align-items:center;gap:20px;padding:18px 0;border-bottom:1px solid var(--border-hairline)">
+<span class="beat-display" style="font-size:24px;font-weight:800;color:var(--text-faint)">{{ b.n }}</span>
+<div style="position:relative;aspect-ratio:1/1;background:var(--grad-noche);overflow:hidden">
+<image-slot id="beat-10a-bonus-{{ b.n }}" shape="rect" placeholder="Portada" style="position:absolute;inset:0"></image-slot>
+<div class="beat-grid" style="position:absolute;inset:0"></div>
+</div>
+<span style="min-width:0">
+<span style="display:block;font:600 19px/1.24 var(--font-text);color:var(--mist-2)">{{ b.title }}</span>
+<span style="display:block;font:500 14px/1.4 var(--font-text);color:var(--text-muted);margin-top:6px">{{ b.artist }} · {{ b.nota }}</span>
+</span>
+<span style="display:flex;gap:8px">
+<sc-for list="{{ b.tiendas }}" as="s" hint-placeholder-count="3">
+<a href="#10a" class="beat-label" style="padding:9px 13px;background:var(--surface-card);box-shadow:inset 0 0 0 1px var(--border-hairline);color:var(--text-body);font-size:9px;white-space:nowrap" style-hover="background:var(--mist-0);color:var(--noche-0)">{{ s }}</a>
+</sc-for>
+</span>
+</div>
+</sc-for>
+</div>
+
+<div style="padding:44px 24px 40px">
+<div style="display:flex;align-items:baseline;justify-content:space-between;padding-bottom:14px;border-bottom:1px solid var(--border-quiet)">
+<span class="beat-display" style="font-size:26px;font-weight:800;letter-spacing:-.01em;color:var(--mist-2)">AGENDA</span>
+<span style="display:flex;gap:8px">
+<sc-for list="{{ filtros }}" as="fl" hint-placeholder-count="4">
+<a href="#10a" class="beat-label" style="padding:8px 13px;border-radius:999px;background:{{ fl.bg }};box-shadow:inset 0 0 0 1px var(--border-hairline);color:{{ fl.color }};font-size:9px">{{ fl.label }}</a>
+</sc-for>
+</span>
+</div>
+<div style="display:grid;grid-template-columns:420px minmax(0,1fr);gap:28px;margin-top:24px;align-items:start">
+<div style="position:relative;aspect-ratio:16/10;background:var(--grad-noche);overflow:hidden">
+<image-slot id="beat-10a-agenda" shape="rect" placeholder="Arrastra la foto del próximo evento" style="position:absolute;inset:0"></image-slot>
+<div class="beat-grid" style="position:absolute;inset:0"></div>
+<span class="beat-label" style="position:absolute;left:14px;top:14px;padding:7px 11px;background:rgba(255,255,255,.14);backdrop-filter:blur(14px);color:var(--mist-0);font-size:9px;pointer-events:none">EL PRÓXIMO</span>
+</div>
+<div>
+<div style="display:flex;align-items:baseline;gap:14px">
+<span class="beat-display" style="font-size:40px;font-weight:800;color:var(--mist-2);line-height:1">{{ proximo.dia }}</span>
+<span class="beat-label" style="color:var(--text-muted)">{{ proximo.mes }} · {{ proximo.hora }}</span>
+</div>
+<h3 style="font:700 30px/1.1 var(--font-text);letter-spacing:-.016em;color:var(--mist-2);margin:14px 0 0">{{ proximo.title }}</h3>
+<p style="font:var(--type-body);color:var(--text-muted);margin:10px 0 0;max-width:48ch;text-wrap:pretty">{{ proximo.bajada }}</p>
+<div style="display:flex;align-items:center;gap:16px;margin-top:20px">
+<x-import component-from-global-scope="Beat1009DesignSystem_b52646.Button" hint-size="120px,40px">{{ proximo.accion }}</x-import>
+<span class="beat-label" style="color:var(--text-faint)">{{ proximo.lugar }}</span>
+</div>
+</div>
+</div>
+<div style="margin-top:26px">
+<sc-for list="{{ eventos }}" as="e" hint-placeholder-count="4">
+<a href="#10a" style="display:grid;grid-template-columns:64px minmax(0,1fr) 180px 130px auto;align-items:center;gap:20px;padding:15px 10px;margin:0 -10px;border-bottom:1px solid var(--border-hairline)" style-hover="background:rgba(255,255,255,.055)">
+<span style="display:flex;flex-direction:column;line-height:1">
+<span class="beat-display" style="font-size:22px;font-weight:800;color:var(--mist-2)">{{ e.dia }}</span>
+<span class="beat-label" style="margin-top:5px;font-size:9px;color:var(--text-faint)">{{ e.mes }}</span>
+</span>
+<span style="font:500 17px/1.3 var(--font-text);color:var(--mist-2);text-wrap:pretty">{{ e.title }}</span>
+<span class="beat-label" style="color:var(--text-muted);font-size:9px">{{ e.lugar }}</span>
+<span class="beat-label" style="color:var(--text-faint);font-size:9px">{{ e.tipo }}</span>
+<span class="beat-label" style="color:var(--mist-0);font-size:9px;white-space:nowrap">{{ e.accion }}</span>
+</a>
+</sc-for>
+</div>
+</div>
+
+<footer style="position:relative;padding:44px 56px 22px;background:var(--noche-1);overflow:hidden;box-shadow:inset 0 1px 0 var(--border-hairline)">
+<span class="beat-display" style="position:absolute;left:24px;bottom:-34px;font-size:210px;font-weight:800;line-height:.8;color:rgba(255,255,255,.032);white-space:nowrap;pointer-events:none">BEAT BEAT</span>
+<div style="position:relative;display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:44px;align-items:start">
+<div>
+<div style="font:700 15px/1.2 var(--font-text);color:var(--mist-1)">Nuestras Secciones</div>
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:18px">
+<sc-for list="{{ nav }}" as="it" hint-placeholder-count="8">
+<a href="#10a" style="color:var(--mist-5);font:400 13.5px/1.3 var(--font-text)" style-hover="color:var(--mist-1)">{{ it.label }}</a>
+</sc-for>
+</div>
+</div>
+<div>
+<div style="font:700 15px/1.2 var(--font-text);color:var(--mist-1)">Radio en vivo</div>
+<p style="font:400 13.5px/1.5 var(--font-text);color:var(--mist-5);margin:16px 0 0">Escucha nuestra señal <a href="#10a" style="color:var(--mist-1);font-weight:700">aquí.</a></p>
+<div style="margin-top:26px">
+<x-import component-from-global-scope="Beat1009DesignSystem_b52646.Logo" tone="white" height="{{ h34 }}" hint-size="112px,34px"></x-import>
+</div>
+<div class="beat-label" style="margin-top:22px;color:var(--mist-5);font-size:9px">ESCUCHA EN</div>
+<div style="display:flex;gap:8px;margin-top:10px">
+<span class="beat-label" style="padding:9px 13px;box-shadow:inset 0 0 0 1px var(--border-quiet);color:var(--mist-2);font-size:9px">IHEARTRADIO</span>
+<span class="beat-label" style="padding:9px 13px;box-shadow:inset 0 0 0 1px var(--border-quiet);color:var(--mist-2);font-size:9px">TUNEIN</span>
+</div>
+</div>
+<div>
+<div style="font:700 15px/1.2 var(--font-text);color:var(--mist-1)">Síguenos en redes sociales</div>
+<div style="display:flex;align-items:center;gap:14px;margin-top:18px;color:var(--mist-2)">
+<sc-for list="{{ redes }}" as="r" hint-placeholder-count="4">
+<a href="#10a" style="display:grid;place-items:center;width:36px;height:36px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--border-hairline)" style-hover="color:var(--mist-0);box-shadow:inset 0 0 0 1px var(--border-strong)">
+<x-import component-from-global-scope="Beat1009DesignSystem_b52646.Icon" name="{{ r }}" size="{{ h18 }}" hint-size="18px,18px"></x-import>
+</a>
+</sc-for>
+<a href="#10a" class="beat-label" style="padding:11px 12px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--border-hairline);color:var(--mist-2);font-size:9px" style-hover="color:var(--mist-0)">TIKTOK</a>
+</div>
+<div style="font:700 15px/1.2 var(--font-text);color:var(--mist-1);margin-top:32px">Descarga nuestras apps</div>
+<div style="display:flex;gap:10px;margin-top:16px">
+<sc-for list="{{ apps }}" as="ap" hint-placeholder-count="3">
+<a href="#10a" style="display:flex;flex-direction:column;gap:3px;padding:9px 14px;border-radius:var(--r-2);box-shadow:inset 0 0 0 1px var(--border-quiet)" style-hover="box-shadow:inset 0 0 0 1px var(--border-strong)">
+<span class="beat-label" style="font-size:7px;color:var(--mist-5);white-space:nowrap">{{ ap.k }}</span>
+<span style="font:600 13px/1 var(--font-text);color:var(--mist-2);white-space:nowrap">{{ ap.v }}</span>
+</a>
+</sc-for>
+</div>
+</div>
+<x-import component-from-global-scope="Beat1009DesignSystem_b52646.Logo" tone="white" height="{{ h30 }}" hint-size="98px,30px"></x-import>
+</div>
+<div style="position:relative;margin-top:40px;padding-top:20px;border-top:1px solid var(--border-hairline);text-align:center">
+<p class="beat-label" style="font-size:8.5px;line-height:1.7;color:var(--mist-5);margin:0;letter-spacing:.1em">© 2026 BEAT. TODOS LOS DERECHOS RESERVADOS. EL MATERIAL DE ESTE SITIO NO PUEDE REPRODUCIRSE, DISTRIBUIRSE, TRANSMITIRSE, ALMACENARSE EN CACHÉ NI UTILIZARSE DE OTRO MODO, EXCEPTO CON EL PERMISO PREVIO POR ESCRITO DE NRM COMUNICACIONES.</p>
+<p class="beat-label" style="font-size:8.5px;line-height:1.7;color:var(--mist-5);margin:8px 0 0;letter-spacing:.1em">BEAT Y BEAT 100.9 SON MARCAS REGISTRADAS CON DERECHOS DE AUTOR DE NRM COMUNICACIONES.</p>
+</div>
+</footer>
+
+</div>
+</div>
+</div>
+
+</div>
+<p class="dv-next">La numeración de cápsulas y el playlist son de muestra. Si el video vertical va con reproductor real (autoplay silenciado, tap para sonido) dímelo y lo armo.</p>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;estelas&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Motivos&quot;}}">
+class Component extends DCLogic {
+  state = { playing: true };
+
+  renderVals() {
+    const p = this.props;
+    const temasBase = [
+      { n: '02', title: 'Detroit sin nostalgia' },
+      { n: '03', title: 'El bajo como idioma' },
+      { n: '04', title: 'Rave y ley' },
+      { n: '05', title: 'Ambient para ciudades ruidosas' },
+      { n: '06', title: 'Máquinas que improvisan' },
+      { n: '07', title: 'Ruido blanco: la estética del error' },
+    ];
+    const notas = [
+      { idx: '01', cat: 'FESTIVALES', min: '4 MIN', title: 'Ceremonia suma a Overmono y Sherelle a su cartel 2026' },
+      { idx: '02', cat: 'ENTREVISTA', min: '9 MIN', title: 'Rebolledo abre estudio en Guadalajara y lo cuenta todo' },
+      { idx: '03', cat: 'LANZAMIENTOS', min: '5 MIN', title: 'Ocho discos de agosto que no deberías dejar pasar' },
+      { idx: '04', cat: 'ESCENA', min: '6 MIN', title: 'La escena de Tijuana ya no pide permiso' },
+    ];
+    const capsulasRaw = [
+      { n: '01', title: 'De dónde viene el sonido del vidrio', estado: 'LUN', dur: '4:12', pub: true },
+      { n: '02', title: 'El error como decisión, no como falla', estado: 'LUN', dur: '3:48', pub: true },
+      { n: '03', title: 'Quién grabó el primer clic', estado: 'MAR', dur: '5:02', pub: true },
+      { n: '04', title: 'Saturar sin romper: el límite útil', estado: 'MAR', dur: '4:30', pub: true },
+      { n: '05', title: 'Ruido de fondo como instrumento', estado: 'HOY', dur: '4:55', live: true },
+      { n: '06', title: 'Tres discos que nacieron de una falla', estado: 'MIÉ', dur: '6:10' },
+      { n: '07', title: 'La escuela de Colonia', estado: 'JUE', dur: '5:24' },
+      { n: '08', title: 'Cómo se masteriza el ruido', estado: 'JUE', dur: '4:02' },
+      { n: '09', title: 'El glitch en el pop mexicano', estado: 'VIE', dur: '5:38' },
+      { n: '10', title: 'Entrevista: dos productoras responden', estado: 'VIE', dur: '7:20' },
+      { n: '11', title: 'Lo que se queda del error', estado: 'VIE', dur: '3:56' },
+    ];
+    return {
+      yes: true, no: false, h14: 14, h16: 16, h18: 18, h20: 20, h30: 30, h34: 34,
+      estelas: p.estelas ?? true,
+      playing: this.state.playing,
+      playIcon: this.state.playing ? 'pause' : 'play',
+      togglePlay: () => this.setState((s) => ({ playing: !s.playing })),
+      nav: [
+        { n: '01', label: 'Inicio', short: 'Inicio' },
+        { n: '02', label: 'Escuchar en vivo', short: 'En vivo' },
+        { n: '03', label: 'Fenómeno Residente', short: 'Fenómeno' },
+        { n: '04', label: 'Bonus Beat', short: 'Bonus Beat' },
+        { n: '05', label: 'Beat Scanner', short: 'Scanner' },
+        { n: '06', label: 'Agenda', short: 'Agenda' },
+        { n: '07', label: 'Comunidad', short: 'Comunidad' },
+        { n: '08', label: 'Beat para marcas', short: 'Marcas' },
+      ],
+      track: { title: 'Coastal Haze · Bicep' },
+      marquee: 'BEAT 100.9 TOTAL MUSIC · BEAT 100.9 TOTAL MUSIC · BEAT 100.9 TOTAL MUSIC · ',
+      featured: {
+        cat: 'ESCENA', min: '7 MIN',
+        title: 'El regreso del breakbeat mexicano, explicado en diez tracks',
+      },
+      mosaicoL: notas.slice(0, 2),
+      mosaicoR: notas.slice(2, 4),
+      semana: {
+        rango: '10 — 16 AGO',
+        title: 'Ruido blanco: la estética del error',
+        progreso: '5 DE 11 PUBLICADAS',
+      },
+      capsulaHoy: { title: 'Ruido de fondo como instrumento', dur: '4:55 · VERTICAL' },
+      especial: { title: 'El programa de la semana, completo', dur: '52 MIN' },
+      capsulas: capsulasRaw.map((c) => ({
+        ...c,
+        numColor: c.live ? 'var(--mist-0)' : 'var(--text-faint)',
+        titleColor: c.live ? 'var(--mist-0)' : c.pub ? 'var(--mist-2)' : 'var(--text-muted)',
+        estadoColor: c.live ? 'var(--mist-0)' : c.pub ? 'var(--text-muted)' : 'var(--text-faint)',
+      })),
+      playlist: {
+        total: '24 TRACKS',
+        tiendas: ['SPOTIFY', 'APPLE MUSIC'],
+        tracks: [
+          { n: '01', title: 'Windowlicker', artist: 'Aphex Twin', dur: '6:07' },
+          { n: '02', title: 'Glass', artist: 'Autechre', dur: '4:38' },
+          { n: '03', title: 'Coastal Haze', artist: 'Bicep', dur: '5:12' },
+          { n: '04', title: 'Cliffs', artist: 'Objekt', dur: '5:44' },
+          { n: '05', title: 'Static Wing', artist: 'Actress', dur: '3:52' },
+          { n: '06', title: 'Ruido en la línea', artist: 'Concepción Huerta', dur: '7:18' },
+          { n: '07', title: 'Interferencia', artist: 'Wet Baes', dur: '4:06' },
+          { n: '08', title: 'Tape Hiss', artist: 'Andy Stott', dur: '6:30' },
+          { n: '09', title: 'Vidrio', artist: 'Rebolledo', dur: '5:58' },
+        ],
+      },
+      temas: temasBase.map((t) => ({
+        ...t, estado: 'ARCHIVO',
+        numColor: 'var(--text-faint)',
+        bg: 'var(--surface-card)',
+      })),
+      bonus: [
+        { n: '01', title: 'Coastal Haze', artist: 'Bicep', nota: 'Un loop que se niega a resolver', tiendas: ['SPOTIFY', 'APPLE MUSIC', 'BANDCAMP'] },
+        { n: '02', title: 'Tempest', artist: 'Overmono', nota: 'Breakbeat con modales de club', tiendas: ['SPOTIFY', 'YOUTUBE MUSIC', 'BEATPORT'] },
+        { n: '03', title: 'Vidrio', artist: 'Rebolledo', nota: 'Cumbia lenta para las tres de la mañana', tiendas: ['SPOTIFY', 'APPLE MUSIC', 'BEATPORT'] },
+      ],
+      filtros: ['Todos', 'Propios', 'Coberturas', 'Festivales'].map((label, i) => ({
+        label,
+        bg: i === 0 ? 'var(--mist-0)' : 'transparent',
+        color: i === 0 ? 'var(--noche-0)' : 'var(--text-muted)',
+      })),
+      proximo: {
+        dia: '22', mes: 'AGO', hora: '14:00 — 23:00',
+        title: 'Beat en Bahidorá',
+        bajada: 'Transmitimos en vivo desde el río con cuatro horas de cabina abierta y entrevistas a los actos del cartel.',
+        accion: 'Ver cobertura', lugar: 'Las Estacas, Morelos',
+      },
+      eventos: [
+        { dia: '05', mes: 'SEP', title: 'Fiesta Beat en Departamento', lugar: 'Departamento, Roma Nte.', tipo: 'Activación propia', accion: 'RSVP' },
+        { dia: '19', mes: 'SEP', title: 'Sesión abierta de cabina', lugar: 'Estudio Beat, CDMX', tipo: 'Puertas abiertas', accion: 'REGISTRO' },
+        { dia: '11', mes: 'OCT', title: 'Overmono en el Teatro Metropólitan', lugar: 'Teatro Metropólitan', tipo: 'Concierto', accion: 'BOLETOS' },
+        { dia: '12', mes: 'DIC', title: 'Festival Sinapsis 2026', lugar: 'Parque Bicentenario', tipo: 'Festival', accion: 'BOLETOS' },
+      ],
+      redes: ['facebook', 'twitter', 'instagram', 'youtube'],
+      apps: [
+        { k: 'DESCARGA EN', v: 'App Store' },
+        { k: 'DESCARGA EN', v: 'Google Play' },
+        { k: 'COMPATIBLE', v: 'Alexa' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

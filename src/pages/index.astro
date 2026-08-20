@@ -1,203 +1,123 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import Header from "../components/Header.astro";
-import CardNews from "../layouts/CardsHomeNews.astro";
-import CardTecnologia from "../layouts/CardsHomeTecnologia.astro";
-import CardUltra from "../layouts/CardsHomeUltra.astro";
-import CardNerdosis from "../layouts/CardsHomeNerdosis.astro";
-/*import CardTrends from '../layouts/CardsHomeTrends.astro';*/
-import SliderPodcast from "../layouts/SliderPodcast.astro";
-import SliderDestacadosPlan from "../layouts/SliderDestacadosPlan.astro";
-import SliderConciertosPlan from "../layouts/SliderConciertosPlan.astro";
-import Separator from "../components/Separator.astro";
-import HomeHeader from "../layouts/HomeHeader.astro";
-import DoubleBox from "../components/DoubleBox.astro";
-import BoxBanner from "../components/BoxBanner.astro";
-import LeaderBoard from "../components/LeaderBoard.astro";
-import LeaderBoard2 from "../components/LeaderBoard2.astro";
-import SuperLeader from "../components/SuperLeader.astro";
-import BillBoard from "../components/BillBoard.astro";
-import Modal from "../components/Modal.astro";
+/**
+ * ⏳ PROVISIONAL — no es el Inicio.
+ *
+ * Es la prueba de humo de la capa de datos: resuelve la estación contra
+ * `cms-estaciones` por `codigo`, y pide el "qué suena" a la bitácora. Sirve para
+ * verificar de punta a punta que el SSR habla con el CMS, que el filtro por
+ * estación se está inyectando, y que todo degrada en vez de tronar cuando el CMS
+ * no está.
+ *
+ * El Inicio de verdad (§1 del mapa de sitio: "responde en 3 segundos: qué suena,
+ * qué se cuenta, qué viene") llega con el design system — B3/B4 del plan.
+ */
+import Base from '@/layouts/Base.astro';
+import { obtenerEstacion } from '@/lib/cms/estacion';
+import { queSuena } from '@/lib/cms/aire';
+import { CMS_URL, ESTACION_CODIGO } from '@/config/site';
 
-import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
-import SliderPromociones from "../layouts/SliderPromociones.astro";
-import CardsHomeNerdosis from "../layouts/CardsHomeNerdosis.astro";
-import Notificacion from "../components/Notificacion.astro";
-/*import SliderBuenfin from '../layouts/SliderBuenfin.astro';*/
-import CardsHomeCorona from "../layouts/CardsHomeCorona.astro";
-import SliderPortada from "../layouts/SliderPortada.astro";
-/*import Navidad from "../components/Navidad.astro";*/
-/*import BarNrm from '../components/BarNrm.astro';*/
-import DiaRadio from "../components/DiaRadio.astro";
-import CardsHomeEdcVegas from "../layouts/CardsHomeEdcVegas.astro";
-import CardsHomeTomorrow from "../layouts/CardsHomeTomorrow.astro";
-import { getQuePlanPosts } from "../lib/quePlan.js";
+let estacion = null;
+let error: string | null = null;
 
-// Las 6 secciones que sí se renderizan en el home piden sus datos en paralelo
-// (antes cada componente hacía su propio fetch secuencial, lo que hacía que
-// el home tardara minutos en generarse).
-const [
-  portadaPosts,
-  newsPosts,
-  tomorrowPosts,
-  quePlanPosts,
-  promocionesPosts,
-  tecnologiaPosts,
-] = await Promise.all([
-  fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_fields=title,slug,yoast_head_json,acf&_embed&per_page=30&categories=842").then((r) => r.json()),
-  fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_fields=date,title,slug,sticky,acf,content,excerpt,_links,_embedded&_embed&per_page=4&categories=143").then((r) => r.json()),
-  fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_fields=date,title,slug,sticky,acf,content,excerpt,_links,_embedded&_embed&per_page=3&categories=861&order_by=date&order=desc&acf.fijo=false").then((r) => r.json()),
-  getQuePlanPosts(),
-  fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_fields=title,slug,yoast_head_json,_links,_embedded&_embed&per_page=30&categories=537,458").then((r) => r.json()),
-  fetch("https://beatdigital.com.mx/wp-json/wp/v2/posts?_fields=date,title,slug,sticky,acf,content,excerpt,_links,_embedded&_embed&per_page=3&categories=625&order_by=date&order=desc&acf.fijo=false").then((r) => r.json()),
-]);
+try {
+  estacion = await obtenerEstacion();
+} catch (err) {
+  error = err instanceof Error ? err.message : String(err);
+}
+
+const alAire = estacion ? await queSuena() : null;
+
+// El mapa de sitio del relanzamiento, con su estado. Se queda mientras el sitio
+// se construye: es la lista de trabajo visible.
+const SECCIONES = [
+  { n: 1, nombre: 'Inicio', ruta: '/', coleccion: '—', listo: false },
+  { n: 2, nombre: 'Escuchar en vivo', ruta: '/en-vivo', coleccion: 'transmisiones + bitacora', listo: false },
+  { n: 3, nombre: 'El Fenómeno Residente', ruta: '/fenomeno-residente', coleccion: 'especiales', listo: false },
+  { n: 4, nombre: 'Bonus Beat', ruta: '/bonus-beat', coleccion: 'bonus-beat (falta en el CMS)', listo: false },
+  { n: 5, nombre: 'Agenda / Eventos', ruta: '/eventos', coleccion: 'eventos (falta en el CMS)', listo: false },
+  { n: 6, nombre: 'Comunidad', ruta: '/comunidad', coleccion: 'oyentes + playlists (faltan)', listo: false },
+  { n: 7, nombre: 'Tienda', ruta: '/tienda', coleccion: 'productos (fase 2)', listo: false },
+  { n: 8, nombre: 'Beat para marcas', ruta: '/marcas', coleccion: 'paginas (falta en el CMS)', listo: false },
+  { n: 9, nombre: 'Programación', ruta: '/programacion', coleccion: 'programas', listo: false },
+];
 ---
- 
-<Layout
-    title={SITE_TITLE}
-    description={SITE_DESCRIPTION}
-    seccion="Beat 100.9"
-    mainId="home"
->
-    <div slot="before-header">
-        <!--BarNrm /-->
-        <!--SuperBillboard/-->
-        <!--div>
-            <a target="_blank" href="https://mexico.electricdaisycarnival.com/"
-                ><img
-                    class="img-prin w-full h-auto"
-                    src="https://storage.googleapis.com/nrm-web/beat/resources/img/portada-EDC.jpg"
-                    alt=""
-                /></a
-            >
 
-        </div-->
-        <SliderPortada posts={portadaPosts} />
-    </div>
+<Base titulo="web-beat v2 — scaffold" descripcion="Front Astro SSR de Beat 100.9 sobre cms-estaciones.">
+  <main class="mx-auto max-w-3xl px-6 py-12 font-sans text-neutral-100 antialiased">
+    <p class="mb-2 text-xs uppercase tracking-widest text-neutral-500">web-beat · rama beat</p>
+    <h1 class="mb-8 text-3xl font-bold">Scaffold del relanzamiento</h1>
 
-    <!--header-->
-    <!--HomeHeader /-->
-    <!--/header-->
-    <!--section>
-        <DiaRadio />    
-    </section-->
+    <section class="mb-10">
+      <h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-400">
+        Conexión con el CMS
+      </h2>
+      {error ? (
+        <div class="rounded border border-amber-600/40 bg-amber-950/30 p-4 text-sm">
+          <p class="mb-2 font-semibold text-amber-300">Sin datos del CMS</p>
+          <p class="mb-2 text-neutral-300">{error}</p>
+          <p class="text-neutral-400">
+            {CMS_URL
+              ? 'El CMS no respondió. Comprueba que esté arriba y que la estación esté sembrada.'
+              : 'Falta CMS_URL. Copia .env.example a .env — en desarrollo puedes apuntar al CMS de producción: su read es público.'}
+          </p>
+        </div>
+      ) : (
+        <dl class="grid grid-cols-[10rem_1fr] gap-y-2 text-sm">
+          <dt class="text-neutral-500">codigo</dt>
+          <dd><code>{estacion!.codigo}</code> <span class="text-neutral-500">(pedido: {ESTACION_CODIGO})</span></dd>
+          <dt class="text-neutral-500">id resuelto</dt>
+          <dd><code>{estacion!.id}</code></dd>
+          <dt class="text-neutral-500">nombre</dt>
+          <dd>{estacion!.nombre}</dd>
+          <dt class="text-neutral-500">publicación</dt>
+          <dd>{estacion!.nombrePublicacion}</dd>
+          <dt class="text-neutral-500">dominio</dt>
+          <dd>{estacion!.dominio}</dd>
+          <dt class="text-neutral-500">mount de Triton</dt>
+          <dd><code>{estacion!.tritonMount ?? '—'}</code></dd>
+        </dl>
+      )}
+    </section>
+
+    <section class="mb-10">
+      <h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-400">
+        Al aire
+      </h2>
+      {alAire ? (
+        <p class="text-sm">
+          <strong>{alAire.titulo}</strong>
+          {alAire.artista && <span class="text-neutral-400"> — {alAire.artista}</span>}
+        </p>
+      ) : (
+        <p class="text-sm text-neutral-400">
+          La bitácora está vacía. Es lo esperado: ninguna estación tiene cargada la lista blanca
+          <code class="mx-1">categoriasMusicales</code>, y la ingesta <strong>falla cerrado</strong>,
+          así que descarta todo lo que manda el playout. Es la tarea A6 del plan.
+        </p>
+      )}
+    </section>
 
     <section>
-        <div class="container-home p-4 mx-auto">
-            <div class="">
-                <CardNews poststi={newsPosts} />
-            </div>
-        </div>
+      <h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-400">
+        Mapa de sitio
+      </h2>
+      <ul class="divide-y divide-neutral-800 text-sm">
+        {SECCIONES.map((s) => (
+          <li class="flex items-baseline gap-3 py-2">
+            <span class="w-5 shrink-0 tabular-nums text-neutral-600">{s.n}</span>
+            <span class="w-52 shrink-0 font-medium">{s.nombre}</span>
+            <code class="w-40 shrink-0 text-neutral-500">{s.ruta}</code>
+            <span class="text-neutral-500">{s.coleccion}</span>
+          </li>
+        ))}
+      </ul>
     </section>
- 
-  
-    <!--section>
-            <div>
-                <img class="w-full h-auto hidden md:block" src="https://storage.googleapis.com/nrm-web/nrm/adManager/buen-fin%202.png"/>
-                <img class="w-full h-auto block md:hidden" src="https://storage.googleapis.com/nrm-web/nrm/adManager/buen-fin-movil2.png"/>
-            </div>
-            <div class="bg-[#e20612]">
-                <SliderBuenfin />
-                <div class="flex justify-end"><img class="w-full max-w-[100px]" src="https://storage.googleapis.com/nrm-web/nrm/adManager/buen-fin-qr.png"/></div>
-            </div>
-        </section-->
-    <!--section class="mt-16">
+  </main>
+</Base>
 
-            <div class="bg-[url('https://stereociendigital.com.mx/wp-content/uploads/2025/07/CORONA_CAPITAL-scaled.jpg')] bg-no-repeat bg-cover bg-bottom">
-                <div class="bg-[#411ED4] bg-[url('https://stereociendigital.com.mx/wp-content/uploads/2025/07/CORONA_CAPITAL_2025.png')] bg-no-repeat bg-contain 2xl:bg-cover bg-bottom">
-                    <img class="max-w-[328px] m-auto" src="https://stereociendigital.com.mx/wp-content/uploads/2025/07/corona-capital-logo.png" alt="Corona Capital"/>
-                </div>
-                <div class="w-full flex justify-center relative z-20 mt-8 mb-6">
-
-                </div>
-                <div class="container-home relative z-10 p-4 mx-auto">                            
-                    <CardsHomeCorona />        
-                </div>
-            </div>
-        </section-->
-    <section>
-        <div
-            class="bg-[url('https://storage.googleapis.com/nrm-web/beat/resources/img/portada-especial-tomorroland.jpg')] bg-no-repeat bg-cover bg-top"
-        >
-            <div class="backtomorrow">
-                <img
-                    class="max-w-[328px] m-auto"
-                    src="https://storage.googleapis.com/nrm-web/beat/resources/img/logo-tomorrow.png"
-                    alt="Tomorrowland"
-                />
-            </div>
-
-            <div class="container-home p-4 mx-auto">
-                <CardsHomeTomorrow posts={tomorrowPosts} />
-            </div>
-        </div>
-    </section>
-        <LeaderBoard />
-    <section id="que-plan" class="">
-        <div class="container-home p-4 mx-auto">
-            <h1
-                class="text-white text-center md:text-left py-4 font-bold text-3xl md:text-5xl lg:text-4xl xl:text-5xl"
-            >
-                ¿Qué Plan?
-            </h1>
-        </div>
-        <div class="w-full mx-auto">
-            <SliderConciertosPlan posts={quePlanPosts} />
-        </div>
-        <!--div class="m-auto text-center">
-            <a href="/que-plan" class="text-white hover:text-black">
-                <button
-                    class="ver-mas group relative h-8 w-36 m-4 overflow-hidden rounded-xl bg-[rgba(52,52,52,0.2)] hover:bg-white border-2 border-white uppercase text-xs poppins font-bold tracking-[3px]"
-                >
-                    <span>Ver más</span>
-                </button>
-            </a>
-        </div-->
-    </section>
-
-        <section>
-        <div class="container-home p-4 mx-auto">
-            <div class="">
-                <CardTecnologia posts={tecnologiaPosts} />
-            </div>
-        </div>
-        <BillBoard />
-    </section>
-
-    <section class="">
-        <div class="container-home p-4 mx-auto">
-            <h1
-                class="text-white text-center md:text-left py-4 font-bold text-3xl md:text-5xl lg:text-4xl xl:text-5xl"
-            >
-                Promociones
-            </h1>
-        </div>
-        <div class="w-full mx-auto">
-            <SliderPromociones posts={promocionesPosts} />
-        </div>
-    </section>
-    <SuperLeader />
-
-
-    <section class="">
-        <div class="container-home p-4 mx-auto">
-            <h1
-                class="text-white text-center md:text-left py-4 font-bold text-3xl md:text-5xl lg:text-4xl xl:text-5xl"
-            >
-                Podcast
-            </h1>
-            <div class="flex flex-wrap">
-                <div class="w-full lg:w-2/3">
-                    <SliderPodcast />
-                </div>
-                <div class="w-full mt-8 lg:w-1/3 lg:m-0 content-center">
-                    <BoxBanner />
-                </div>
-            </div>
-        </div>
-    </section>
-</Layout>
-
-<!--Navidad /-->
-<Modal />
-<Notificacion />
+<style is:global>
+  /* Provisional, solo para que el scaffold sea legible. Lo sustituye el DS. */
+  body {
+    background: #0b0b0c;
+  }
+</style>

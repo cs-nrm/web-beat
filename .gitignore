@@ -12,9 +12,18 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-
-# environment variables
-.env.production
+# 🔴 Variables de entorno. En el v1 solo `.env.production` estaba ignorado, y el
+# `.env` de la raíz estaba VERSIONADO. Ahí solo había un PUBLIC_API_URL (la URL
+# pública del WordPress, no un secreto), así que no hubo fuga — pero este repo va
+# a llevar config de servidor de verdad (CMS_URL con una IP privada de la VPC, y
+# más adelante la llave del proveedor de newsletter), así que se cierra ahora.
+.env
+.env.*
+!.env.example
 
 # macOS-specific files
 .DS_Store
+
+# Lienzo de Claude Design: el ZIP original no se versiona (pesa y es un artefacto
+# de descarga). Sí se versiona la carpeta extraída del lienzo.
+design/*.zip

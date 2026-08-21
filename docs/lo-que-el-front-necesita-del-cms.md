@@ -10,13 +10,19 @@ Convención: ✅ verificado contra el CMS o la API · ⚠️ inferido, confirmar
 
 ---
 
-## 1. 🔴 Colecciones que no existen y el sitio necesita
+## 1. Colecciones que faltaban — casi cerrado
 
-Tres de las nueve secciones del mapa de sitio **no tienen dónde guardarse**, así que
-el equipo editorial no puede capturarlas aunque quiera. Esto está en el camino
-crítico del CONTENIDO, no del código.
+> **Actualizado 2026-08-21.** De las tres que pedí: `eventos` ✅ aterrizó,
+> `bonus-beat` ❌ ya no hace falta (cabe en `listas`), y **solo queda `paginas`**.
 
-### `eventos` — Agenda (§5 del mapa)
+### ✅ `eventos` — Agenda (§5) — ATERRIZÓ el 2026-08-21
+
+Salió calcada de lo pedido, incluido el detalle marcado en rojo:
+`accion: 'ninguna' | 'rsvp' | 'boletos'` (los dos CTA distintos del diseño) y
+`tipo: 'propio' | 'cobertura' | 'festival'` (los filtros del lienzo). Fechas reales.
+
+<details><summary>Lo que se había pedido</summary>
+
 Campos derivados del lienzo v14 (`e.*` y `proximo.*`):
 `titulo`, `slug`, `descripcion`/`bajada`, `lugar`, `ciudad`, `inicio` (con hora),
 `fin`, `portada`, `estacion`, y
@@ -30,16 +36,27 @@ Campos derivados del lienzo v14 (`e.*` y `proximo.*`):
 - Fechas **como `date` reales**, no texto. El sitio viejo tenía cinco formatos
   distintos en ACF y un archivo entero (`formatters.js`) solo para lidiar con eso.
 
-### `bonus-beat` — §4
-El mapa pide "archivo cronológico de las 3 canciones semanales **con su viñeta**".
-Se intentó encajar en `especiales` (que ya tiene `playlist`, `numero`,
-`inicio`/`fin`) y **no cabe**: `especiales.playlist` es un array de relaciones
-plano, sin texto por ítem. Es una colección ligera:
+</details>
 
-`semana` (date), `slug` (derivable de la fecha), `estacion`, y un array de 3 ×
-`{ cancion → canciones, viñeta (textarea) }`.
+### ~~`bonus-beat`~~ — ❌ YA NO HACE FALTA (resuelto 2026-08-21)
 
-Los enlaces a plataformas salen gratis de `canciones.{spotify,appleMusic,youtube,deezer}`.
+Cabe en `listas`, y la vía es mejor que una colección propia.
+
+Mi requisito original decía que no cabía porque "`especiales.playlist` es un array de
+relaciones plano, sin texto por ítem" y el mapa de sitio pide "las 3 canciones
+semanales **con su viñeta**". Eso era cierto de `especiales` — pero yo estaba mirando
+la colección equivocada. `listas` ahora tiene **`canciones[].comentario`**, y la
+descripción del campo usa la palabra exacta del mapa de sitio: *"la **viñeta** que
+acompaña a la canción en el sitio: por qué está aquí, qué contar de ella"*.
+
+Así que Bonus Beat es un **tipo de lista**, no un tipo de contenido:
+- `tipos-de-lista` → la estación crea uno llamado «Bonus Beat»
+- `listas.tipo` → apunta a él · `listas.fecha` → la semana (el viernes)
+- `listas.canciones` → las 3 entradas, cada una con su `cancion` y su `comentario`
+- Los enlaces a plataformas salen de `canciones.{spotify,appleMusic,youtube,deezer}`
+
+Y encaja con la intención del cambio: "qué listas existen lo define cada estación, no
+el código". Si mañana quieren una lista nueva, la crean sin tocar código.
 
 ### `paginas` — §8 y legales
 Para «Beat para marcas» (§8: audiencia y perfil del oyente, espacios patrocinables,
@@ -86,7 +103,11 @@ nueva necesita su columna en `payload_locked_documents_rels`.
 
 No son colecciones nuevas, así que se olvidan. Y dos de ellos bloquean el SEO.
 
-### A4 — `getNewsURL` consciente de la estación
+### ✅ A4 — `getNewsURL` consciente de la estación — RESUELTO 2026-08-21
+
+Ya pasa la base de cada estación con `baseDeEstacion(estacion.dominio)`.
+
+<details><summary>El problema que era</summary>
 ✅ Verificado en `src/seo/site.ts`: arma `${SITE_URL}/noticias/<slug>` con `SITE_URL`
 saliendo de **un solo** `NEXT_PUBLIC_SITE_URL` para las 4 estaciones. O sea que **el
 sitemap de Beat saldría con el dominio del CMS**.
@@ -99,13 +120,21 @@ enhebrar la estación en `getNewsURL`/`getPodcastURL`, y que
 ℹ️ El PATH (`/noticias/<slug>`) ya es el correcto: el front adoptó el mismo contrato
 (una ruta por colección). Solo falta el host.
 
-### A5 — Feeds por estación
+</details>
+
+### ✅ A5 — Feeds por estación — RESUELTO 2026-08-21
+
+Cada estación con sus feeds, y el sitemap dejó de ser plano.
+
+<details><summary>El problema que era</summary>
 `sitemap.xml`, `news-sitemap.xml`, `rss.xml` y `podcasts/rss.xml` usan
 `overrideAccess: true` y filtran solo por `estado` → hoy emitirían **las 4 estaciones
 en un mismo feed**. Resolver por host (para eso está `dominio` indexado) o rutear.
 
 ⚠️ Y que el sitemap sea un **índice con hijos paginados**, no un `<urlset>` plano:
 en Enfoque el plano con tope de 1,000 dejó ~102,000 notas sin vía de descubrimiento.
+
+</details>
 
 ### A7 — Webhook de revalidación
 No existe ningún `afterChange` que avise al front. Mientras no exista, el front vive
@@ -119,6 +148,25 @@ falta**: la arquitectura es BFF y el navegador nunca habla con el CMS — el vot
 por un proxy `/api/votar` de Astro. Aplica a los otros tres fronts, no a este.
 
 ---
+
+## 3-bis. 🔴 Consecuencia del cambio de `listas.tipo` a relación
+
+`listas.tipo` pasó de un `select` con valores fijos a una relación con
+`tipos-de-lista`. La mitigación está bien —el slug solo se genera del nombre si está
+vacío, así que renombrar no rompe una ruta viva, y borrar un tipo en uso está
+bloqueado con `ON DELETE RESTRICT`—.
+
+Pero cambia una cosa para el front: **los slugs de las listas ahora son dato
+editorial, no valores de código.** Antes el enum garantizaba `topten` /
+`hot-parade` / `lanzamientos`. Ahora dependen de cómo se nombren al capturar.
+
+→ El front **no hardcodea** esas rutas: lee `tipos-de-lista` de la estación y las
+construye desde el slug. Es lo coherente con la intención del cambio ("qué listas
+existen lo define cada estación, no el código") y significa que crear «Bonus Beat» o
+cualquier lista nueva no necesita un despliegue.
+
+⚠️ Lo único que hace falta acordar es **cómo se van a llamar**, porque el slug ES la
+URL pública. Si el tipo se llama «Top Ten», la ruta será `/top-ten` y no `/topten`.
 
 ## 4. Datos de configuración (admin, no código)
 

@@ -151,3 +151,85 @@
        legible, y son las etiquetas del sistema (categoría, duración, minutos). */
   }
 }
+
+/* ============================================================
+   Barra del player — tokens y controles
+   ------------------------------------------------------------
+   🔴 Estos tokens existen por una razón concreta, y vale dejarla escrita porque
+   ya me costó una vuelta: **los modificadores de opacidad de Tailwind NO
+   funcionan sobre colores definidos con `var()`**. Está avisado en el comentario
+   de `tailwind.config.js` y caí igual.
+
+   Lo que pasa no es que se vea mal, es que se ve AL REVÉS y en silencio:
+     · `bg-noche-0/60`      → `rgba(0,0,0,0)`  → la waveform invisible.
+     · `text-text-faint/50` → el color HEREDADO → los enlaces "pendientes"
+        salían MÁS brillantes que los activos.
+   No hay error de compilación: la clase simplemente no existe y la propiedad se
+   queda con lo que había. Por eso: para transparencias, un token; nunca `/N`.
+   ============================================================ */
+:root {
+  /* La barra del player es la única superficie clara del sitio, así que necesita
+     sus propios valores: los tokens de texto del DS están calculados sobre negro. */
+  --onair-wave: #6b7471;         /* --graphite-2: decoración, no texto */
+  --onair-rule: rgba(5, 7, 6, 0.18);
+  --onair-track: rgba(5, 7, 6, 0.2);
+  --onair-ring: rgba(5, 7, 6, 0.22);
+}
+
+/** Volumen. El `appearance: none` borra el control nativo, incluido el pulgar:
+ *  hay que dibujar los dos, y con prefijos porque WebKit y Gecko no comparten
+ *  pseudo-elemento. Sin esto el track sale BLANCO sobre fondo claro. */
+.player-volumen {
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--onair-track);
+  height: 3px;
+  cursor: pointer;
+}
+.player-volumen::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--noche-0);
+}
+.player-volumen::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--noche-0);
+}
+.player-volumen:focus-visible {
+  outline: 2px solid var(--noche-0);
+  outline-offset: 3px;
+}
+
+/**
+ * Alturas del chrome — los valores del artboard, que NO coinciden con el DS.
+ *
+ * El DS declara `--header-h: 64px` y `--player-h: 76px`, pero `Cabecera-Beat`
+ * dibuja el header a 68px en escritorio y 56 en móvil, y la barra del player a
+ * 48px en ambos. Gana el artboard, que es posterior y es lo que se aprobó.
+ *
+ * Importan más allá de la estética: el player es `sticky`, así que cualquier
+ * `scroll-margin-top` de un ancla tiene que descontar la suma de los dos, o el
+ * titular al que apuntas queda tapado.
+ */
+:root {
+  --player-h: 48px;
+  --header-h: 68px;
+  --header-h-movil: 56px;
+  /* Lo que tapa el chrome pegajoso, para anclas y para `scroll-padding`. */
+  --chrome-h: calc(var(--player-h) + var(--header-h-movil));
+}
+@media (min-width: 900px) {
+  :root {
+    --chrome-h: calc(var(--player-h) + var(--header-h));
+  }
+}
+html {
+  scroll-padding-top: var(--chrome-h);
+}

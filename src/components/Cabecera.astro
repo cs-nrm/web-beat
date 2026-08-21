@@ -1,0 +1,196 @@
+---
+/**
+ * Cabecera: barra del player + navegación. Del artboard `Cabecera-Beat`.
+ *
+ * 🔴 El player va AQUÍ y es PERSISTENTE, y eso es requisito de producto, no
+ * decisión técnica. El §4.1 del `Mapa de sitio Beat 2026.pdf` lo dice así: "la
+ * decisión de producto más importante del sitio es esta: el reproductor en vivo es
+ * persistente… no es un detalle técnico, es la afirmación, en la propia
+ * experiencia de usuario, de que Beat sigue siendo, antes que cualquier otra cosa,
+ * una estación de radio en vivo".
+ *
+ * Por eso lleva `transition:persist`: con View Transitions el DOM se reemplaza
+ * completo en cada navegación, y sin esto la señal se cortaría al cambiar de
+ * página.
+ *
+ * ⏳ Los controles están MAQUETADOS pero todavía no CABLEADOS: el SDK de Triton, el
+ * polling del now-playing y el volumen llegan en B6, al portar el núcleo de
+ * `player.js`. Los `data-*` de aquí son los enganches que ese código va a usar.
+ * El texto del now-playing sí se renderiza en el servidor, con el fallback
+ * documentado ("Beat 100.9") cuando la bitácora no tiene nada.
+ */
+import Icono from './Icono.astro';
+import { SECCIONES } from '@/config/navegacion';
+import type { Estacion } from '@/lib/cms/estacion';
+import type { EntradaBitacora } from '@/lib/cms/aire';
+
+interface Props {
+  estacion: Estacion;
+  alAire: EntradaBitacora | null;
+}
+
+const { estacion, alAire } = Astro.props;
+const ruta = Astro.url.pathname;
+
+/**
+ * El fallback es el del sitio viejo, y es correcto: durante un corte comercial la
+ * bitácora no trae canción, y anunciar la marca es mejor que un hueco.
+ */
+const sonando = alAire
+  ? [alAire.titulo, alAire.artista].filter(Boolean).join(' · ')
+  : estacion.nombre;
+
+/** 72 barras en escritorio, 18 en móvil. Alturas fijas y deterministas: el
+ *  movimiento lo pone la animación `beat-bars` del DS, no el marcado. */
+const barras = (n: number) =>
+  Array.from({ length: n }, (_, i) => 24 + Math.round(52 * Math.abs(Math.sin(i * 1.7))));
+const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
+---
+
+<div
+  id="beat-cabecera"
+  transition:persist="cabecera"
+  class="sticky top-0 z-header"
+>
+  {/*
+    BARRA DEL PLAYER — clara sobre un sitio oscuro. Es la única inversión de la
+    paleta en todo el sitio, y es deliberada: lo que está al aire es lo que brilla.
+  */}
+  <div
+    id="player"
+    data-status="init"
+    data-mount={estacion.tritonMount}
+    class="flex h-player items-center gap-3 bg-mist-0 px-4 text-noche-0 md:gap-4 md:px-6"
+  >
+    <span class="flex flex-none items-center gap-2">
+      {/* `beat-pulse` es del DS y respeta prefers-reduced-motion. */}
+      <span class="h-[7px] w-[7px] rounded-pill bg-noche-0 motion-safe:animate-pulse"></span>
+      <span class="t-label whitespace-nowrap text-[8px] md:text-[9px]">
+        Al aire<span class="hidden md:inline"> · 100.9 FM</span>
+      </span>
+    </span>
+
+    <span class="hidden h-[18px] w-px flex-none bg-[var(--onair-rule)] md:block"></span>
+
+    <button
+      type="button"
+      data-accion="play"
+      aria-label={`Escuchar ${estacion.nombre} en vivo`}
+      class="grid h-[30px] w-[30px] flex-none place-items-center rounded-pill bg-noche-0 text-mist-0 transition-colors duration-2 ease-out hover:bg-graphite-4"
+    >
+      <Icono nombre="play" tamano={14} />
+    </button>
+
+    <span
+      data-campo="sonando"
+      class="min-w-0 flex-1 truncate font-text text-[12px] font-semibold leading-tight md:flex-none md:text-[13px]"
+    >{sonando}</span>
+
+    {/* Waveform. Decorativa: el dato real es el texto de al lado. */}
+    <span class="flex h-4 w-[52px] flex-none items-center gap-[1.5px] md:h-5 md:w-auto md:flex-1" aria-hidden="true">
+      {barras(18).map((h, i) => (
+        <span
+          class="flex-1 bg-[var(--onair-wave)] motion-safe:animate-bars md:hidden"
+          style={`height:${h}%;animation-delay:${i * 40}ms`}
+        ></span>
+      ))}
+      {barras(72).map((h, i) => (
+        <span
+          class="hidden flex-1 bg-[var(--onair-wave)] motion-safe:animate-bars md:block"
+          style={`height:${h}%;animation-delay:${i * 25}ms`}
+        ></span>
+      ))}
+    </span>
+
+    {/* Volumen: solo escritorio. En móvil lo controla el sistema. */}
+    <span class="hidden flex-none items-center gap-2 md:flex">
+      <Icono nombre="volume-2" tamano={16} />
+      <label class="sr-only" for="beat-volumen">Volumen</label>
+      <input
+        id="beat-volumen"
+        data-accion="volumen"
+        type="range"
+        min="0"
+        max="100"
+        value="62"
+        class="player-volumen w-[72px]"
+      />
+    </span>
+
+    <button
+      type="button"
+      data-accion="expandir"
+      aria-label="Ampliar el reproductor"
+      class="grid h-7 w-7 flex-none place-items-center shadow-[inset_0_0_0_1px_var(--onair-ring)] md:h-8 md:w-8"
+    >
+      <Icono nombre="chevron-down" tamano={14} />
+    </button>
+
+    <button
+      type="button"
+      data-accion="menu"
+      aria-label="Abrir el menú"
+      aria-expanded="false"
+      aria-controls="beat-menu"
+      class="hidden h-8 w-8 flex-none place-items-center bg-noche-0 text-mist-0 md:grid"
+    >
+      <Icono nombre="menu" tamano={16} />
+    </button>
+  </div>
+
+  {/* NAVEGACIÓN */}
+  <header
+    class="flex h-header-movil items-center gap-2 bg-surface-card px-4 shadow-[inset_0_-1px_0_var(--border-quiet)] md:h-header md:gap-6 md:px-6"
+  >
+    <a href="/" class="flex-none" aria-label={`${estacion.nombrePublicacion} — Inicio`}>
+      <img
+        src="/img/beat-blanco.svg"
+        alt={estacion.nombre}
+        width="112"
+        height="26"
+        class="block h-[22px] w-auto md:h-[26px]"
+      />
+    </a>
+
+    <nav aria-label="Secciones" class="hidden md:flex md:gap-5">
+      {SECCIONES.map((s) =>
+        s.pendiente ? (
+          <span
+            class="t-label cursor-default whitespace-nowrap text-[9.5px] text-state-disabled-text"
+            title="En construcción"
+          >{s.corto}</span>
+        ) : (
+          <a
+            href={s.href}
+            aria-current={activo(s.href) ? 'page' : undefined}
+            class:list={[
+              't-label whitespace-nowrap text-[9.5px] transition-colors duration-2 ease-out hover:text-mist-0',
+              activo(s.href) ? 'text-text-accent' : 'text-text-muted',
+            ]}
+          >{s.corto}</a>
+        ),
+      )}
+    </nav>
+
+    <button
+      type="button"
+      aria-label="Buscar"
+      class="ml-auto grid h-11 w-11 place-items-center text-text-muted transition-colors duration-2 ease-out hover:text-text-primary md:h-10 md:w-10"
+    >
+      <Icono nombre="search" tamano={20} class="md:hidden" />
+      <Icono nombre="search" tamano={18} class="hidden md:block" />
+    </button>
+
+    {/* Hamburguesa solo en móvil: en escritorio vive en la barra del player. */}
+    <button
+      type="button"
+      data-accion="menu"
+      aria-label="Abrir el menú"
+      aria-expanded="false"
+      aria-controls="beat-menu"
+      class="grid h-11 w-11 flex-none place-items-center bg-mist-0 text-noche-0 md:hidden"
+    >
+      <Icono nombre="menu" tamano={20} />
+    </button>
+  </header>
+</div>

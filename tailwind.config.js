@@ -148,11 +148,22 @@ export default {
         mono: 'var(--track-mono)',
       },
 
+      // 🔴 La escala numérica de Tailwind NO se toca, y es a propósito.
+      //
+      // Al principio se mapeó `1..15` a los pasos `--s-N` del DS, y fue un error
+      // que costó una vuelta: `h-12` dejó de ser 3rem y pasó a ser `--s-12` =
+      // 72px, así que la barra del player salió a 72px en vez de 48 y el header a
+      // 128 en vez de 68. Silencioso, porque la clase existe y compila.
+      //
+      // Al medirlo salió que el override no compraba nada: la escala por defecto
+      // de Tailwind ya expresa **14 de los 15 pasos del DS, exactos** —s-4=8px es
+      // `2`, s-6=16px es `4`, s-8=24px es `6`, s-9=32px es `8`…—. O sea que el DS
+      // y Tailwind ya hablan la misma escala, solo con otros números. Lo único que
+      // falta es el paso 15 (180px), que se agrega suelto.
+      //
+      // Aquí quedan solo los tokens SEMÁNTICOS, que sí aportan intención.
       spacing: {
-        1: 'var(--s-1)', 2: 'var(--s-2)', 3: 'var(--s-3)', 4: 'var(--s-4)',
-        5: 'var(--s-5)', 6: 'var(--s-6)', 7: 'var(--s-7)', 8: 'var(--s-8)',
-        9: 'var(--s-9)', 10: 'var(--s-10)', 11: 'var(--s-11)', 12: 'var(--s-12)',
-        13: 'var(--s-13)', 14: 'var(--s-14)', 15: 'var(--s-15)',
+        s15: 'var(--s-15)',
         card: 'var(--pad-card)',
         'card-lg': 'var(--pad-card-lg)',
         section: 'var(--pad-section)',
@@ -194,8 +205,13 @@ export default {
         grid: 'var(--grid-max)',
       },
 
+      // ⚠️ Los valores del ARTBOARD ganan sobre los del DS, que no coinciden: el
+      // DS declara `--header-h: 64px` y `--player-h: 76px`, pero `Cabecera-Beat`
+      // dibuja el header a 68px en escritorio y 56 en móvil, y la barra del player
+      // a 48px en los dos. Se redefinen los tokens en `beat.css`.
       height: {
         header: 'var(--header-h)',
+        'header-movil': 'var(--header-h-movil)',
         player: 'var(--player-h)',
       },
 

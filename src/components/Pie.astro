@@ -1,0 +1,165 @@
+---
+/**
+ * Pie institucional. Del artboard `Pie-Beat`.
+ *
+ * Cuatro columnas —secciones, radio en vivo, redes, apps—, el bloque legal y la
+ * tira de marcas de NRM.
+ */
+import { SECCIONES, SECCIONES_PIE, PLATAFORMAS_RADIO, APPS, LEGALES, MARCAS_NRM } from '@/config/navegacion';
+import type { Estacion } from '@/lib/cms/estacion';
+
+interface Props {
+  estacion: Estacion;
+  /** Redes de la estación, ya resueltas desde el CMS. */
+  redes: Array<{ red: string; url: string }>;
+}
+
+const { estacion, redes } = Astro.props;
+const anio = new Date().getFullYear();
+const todasLasSecciones = [...SECCIONES, ...SECCIONES_PIE];
+---
+
+<footer class="mt-13 border-t-hairline border-borde-hairline bg-surface-base">
+  <div class="mx-auto max-w-grid px-contenedor py-12">
+    <img
+      src="/img/beat-blanco.svg"
+      alt={estacion.nombre}
+      width="126"
+      height="30"
+      class="mb-11 block h-[30px] w-auto"
+    />
+
+    <div class="grid gap-11 md:grid-cols-4 md:gap-grid">
+      <nav aria-labelledby="pie-secciones">
+        <h2 id="pie-secciones" class="t-label mb-6 text-text-accent">Nuestras Secciones</h2>
+        <ul class="space-y-4 text-body-sm">
+          {todasLasSecciones.map((s) => (
+            <li>
+              {s.pendiente ? (
+                <span class="text-state-disabled-text">{s.largo}</span>
+              ) : (
+                <a href={s.href} class="text-text-muted transition-colors duration-2 ease-out hover:text-text-primary">
+                  {s.largo}
+                </a>
+              )}
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <div>
+        <h2 class="t-label mb-6 text-text-accent">Radio en vivo</h2>
+        <p class="mb-6 text-body-sm text-text-muted">
+          Escucha nuestra señal <a href="/en-vivo" class="text-text-link underline decoration-borde-quiet underline-offset-4 transition-colors duration-2 ease-out hover:text-text-link-hover">aquí</a>.
+        </p>
+        <h3 class="t-label mb-4 text-text-faint">Escucha en</h3>
+        <ul class="space-y-4 text-body-sm">
+          {PLATAFORMAS_RADIO.map((p) => (
+            <li>
+              <a
+                href={p.url}
+                rel="noopener noreferrer"
+                target="_blank"
+                class="text-text-muted transition-colors duration-2 ease-out hover:text-text-primary"
+              >{p.nombre}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="t-label mb-6 text-text-accent">Síguenos en redes sociales</h2>
+        {redes.length ? (
+          <ul class="space-y-4 text-body-sm">
+            {redes.map((r) => (
+              <li>
+                <a
+                  href={r.url}
+                  rel="noopener noreferrer me"
+                  target="_blank"
+                  class="text-text-muted transition-colors duration-2 ease-out hover:text-text-primary"
+                >{r.red}</a>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          /* Degrada en silencio: hoy las cinco redes de la estación están en `null`
+             en el CMS. Un hueco es mejor que cinco enlaces roto. */
+          <p class="text-body-sm text-text-faint">Próximamente.</p>
+        )}
+      </div>
+
+      <div>
+        <h2 class="t-label mb-6 text-text-accent">Descarga nuestras apps</h2>
+        <ul class="space-y-4 text-body-sm">
+          {APPS.map((a) => (
+            <li>
+              {a.url ? (
+                <a href={a.url} rel="noopener noreferrer" target="_blank" class="text-text-muted transition-colors duration-2 ease-out hover:text-text-primary">
+                  {a.tienda}
+                </a>
+              ) : (
+                /* Sin enlace hasta cerrar C1: las 4 estaciones tienen app en
+                   tiendas y todavía no sabemos qué consume la de Beat del
+                   WordPress viejo. Enlazar a algo que va a romperse en el corte es
+                   peor que no enlazarlo. */
+                <span class="text-state-disabled-text">{a.tienda}</span>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  {/* LEGAL */}
+  <div class="border-t-hairline border-borde-hairline">
+    <div class="mx-auto max-w-grid space-y-4 px-contenedor py-9">
+      <p class="t-label max-w-[110ch] leading-relaxed text-text-faint">
+        © {anio} {estacion.nombrePublicacion}. Todos los derechos reservados. El material de este
+        sitio no puede reproducirse, distribuirse, transmitirse, almacenarse en caché ni utilizarse de
+        otro modo, excepto con el permiso previo por escrito de NRM Comunicaciones.
+      </p>
+      <p class="t-label text-text-faint">
+        {estacion.nombrePublicacion} y {estacion.nombre} son marcas registradas con derechos de autor
+        de NRM Comunicaciones.
+      </p>
+    </div>
+  </div>
+
+  {/* TIRA DE MARCAS DE NRM */}
+  <div class="border-t-hairline border-borde-hairline bg-surface-canvas">
+    <div class="mx-auto flex max-w-grid flex-wrap items-baseline justify-between gap-8 px-contenedor py-9">
+      {MARCAS_NRM.map((m) => (
+        <a
+          href={m.url}
+          rel="noopener noreferrer"
+          target="_blank"
+          class="group flex items-baseline gap-2 transition-colors duration-2 ease-out"
+        >
+          <span class="t-title-2 text-[19px] text-text-muted transition-colors duration-2 ease-out group-hover:text-text-primary">
+            {m.nombre}
+          </span>
+          <span class="t-label text-text-faint">{m.sub}</span>
+        </a>
+      ))}
+    </div>
+  </div>
+
+  {/* ÚLTIMA LÍNEA */}
+  <div class="border-t-hairline border-borde-hairline">
+    <div class="mx-auto flex max-w-grid flex-wrap items-center gap-x-8 gap-y-4 px-contenedor py-6">
+      <a href="/marcas" class="t-label text-text-muted transition-colors duration-2 ease-out hover:text-text-primary">Ventas</a>
+      {LEGALES.map((l) =>
+        l.pendiente ? (
+          <span class="t-label text-state-disabled-text">{l.largo}</span>
+        ) : (
+          <a href={l.href} class="t-label text-text-muted transition-colors duration-2 ease-out hover:text-text-primary">{l.largo}</a>
+        ),
+      )}
+      <span class="t-label ml-auto text-text-faint">
+        NRM Comunicaciones © {anio}. Todos los derechos reservados.
+      </span>
+    </div>
+  </div>
+</footer>

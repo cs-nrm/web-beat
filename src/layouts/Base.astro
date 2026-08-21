@@ -8,6 +8,10 @@
  */
 import '@/styles/base.css';
 import { IDIOMA, NOINDEX_SITIO, SITE_URL, noIndexarHost } from '@/config/site';
+import Cabecera from '@/components/Cabecera.astro';
+import Pie from '@/components/Pie.astro';
+import { obtenerEstacion, redesEstacion } from '@/lib/cms/estacion';
+import { queSuena } from '@/lib/cms/aire';
 
 interface Props {
   titulo: string;
@@ -15,6 +19,30 @@ interface Props {
 }
 
 const { titulo, descripcion } = Astro.props;
+
+/**
+ * El chrome se resuelve UNA vez aquí y baja por props, en vez de que cada
+ * componente pida lo suyo. Los tres van en paralelo, y las tres consultas están
+ * memorizadas o cacheadas en el cliente del CMS, así que no cuestan por página.
+ *
+ * Si el CMS no responde, el sitio se sirve igual: la estación cae a un objeto
+ * mínimo y el player anuncia la marca. Degradar es la regla — `web-enfoque`
+ * responde 200 con cero notas cuando su CMS no está, y eso es lo correcto.
+ */
+const [estacion, redes, alAire] = await Promise.all([
+  obtenerEstacion().catch(() => null),
+  redesEstacion().catch(() => []),
+  queSuena().catch(() => null),
+]);
+
+const marca = estacion ?? {
+  id: 0,
+  nombre: 'Beat 100.9',
+  codigo: 'beat',
+  nombrePublicacion: 'BEAT',
+  dominio: 'beatdigital.mx',
+  tritonMount: 'XHSONFM',
+};
 
 // Las dos reglas de indexación, igual que en el middleware. La cabecera la pone el
 // middleware (protege TODA respuesta); el `<meta>` es la segunda capa.
@@ -54,6 +82,10 @@ const canonical = new URL(Astro.url.pathname, SITE_URL).href;
     */}
   </head>
   <body class="min-h-screen bg-surface-canvas font-text text-body text-text-body antialiased">
-    <slot />
+    <Cabecera estacion={marca} alAire={alAire} />
+    <main id="contenido">
+      <slot />
+    </main>
+    <Pie estacion={marca} redes={redes} />
   </body>
 </html>

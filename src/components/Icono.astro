@@ -1,0 +1,47 @@
+---
+/**
+ * Iconos inline.
+ *
+ * El DS los expone como componente de su bundle JS
+ * (`Beat1009DesignSystem.Icon`), que no se puede usar desde Astro. Los nombres que
+ * pide el lienzo —`pause`, `play`, `volume-2`, `chevron-down`, `menu`, `search`,
+ * `x`— son de **Lucide**, así que van inline con sus trazos.
+ *
+ * Inline y no un paquete: son siete iconos, y así no hay una petición más ni una
+ * dependencia que actualizar. Es el mismo criterio de `web-enfoque`.
+ */
+interface Props {
+  nombre: 'play' | 'pause' | 'volume-2' | 'chevron-down' | 'menu' | 'search' | 'x';
+  /** Píxeles. El lienzo usa 14, 16, 18 y 20. */
+  tamano?: number;
+  class?: string;
+}
+
+const { nombre, tamano = 16, class: clase } = Astro.props;
+
+const TRAZOS: Record<Props['nombre'], string> = {
+  play: '<polygon points="6 3 20 12 6 21 6 3"/>',
+  pause: '<rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/>',
+  'volume-2':
+    '<path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.364 18.364a9 9 0 0 0 0-12.728"/>',
+  'chevron-down': '<path d="m6 9 6 6 6-6"/>',
+  menu: '<path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/>',
+  search: '<path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/>',
+  x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+};
+---
+
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width={tamano}
+  height={tamano}
+  viewBox="0 0 24 24"
+  fill={nombre === 'play' || nombre === 'pause' ? 'currentColor' : 'none'}
+  stroke={nombre === 'play' || nombre === 'pause' ? 'none' : 'currentColor'}
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  class={clase}
+  aria-hidden="true"
+  set:html={TRAZOS[nombre]}
+/>

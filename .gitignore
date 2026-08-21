@@ -40,3 +40,6 @@ design/*.zip
 # comerciales revela quién anuncia y con qué frecuencia". Aquí aplica igual.
 .metadata-log/*.sse
 .metadata-log/*.txt
+# La vista renderizada lleva lo mismo que el .sse: anunciantes al aire, nombres de
+# cartucho de Dalet y material sin estrenar. No entra a git.
+.metadata-log/*.html

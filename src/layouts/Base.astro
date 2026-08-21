@@ -8,6 +8,7 @@
  */
 import '@/styles/base.css';
 import { IDIOMA, NOINDEX_SITIO, SITE_URL, noIndexarHost } from '@/config/site';
+import { ClientRouter } from 'astro:transitions';
 import Cabecera from '@/components/Cabecera.astro';
 import Pie from '@/components/Pie.astro';
 import { obtenerEstacion, redesEstacion } from '@/lib/cms/estacion';
@@ -68,6 +69,18 @@ const canonical = new URL(Astro.url.pathname, SITE_URL).href;
     <link rel="icon" href="/favicon/favicon.ico" sizes="any" />
     <link rel="apple-touch-icon" href="/favicon/apple-touch-icon.png" />
     <meta name="robots" content={noIndexar ? 'noindex, nofollow' : 'index, follow'} />
+
+    {/*
+      🔴 SIN ESTO el `transition:persist` de la cabecera NO HACE NADA.
+      Cada navegación sería una carga completa del documento y el radio se cortaría
+      al cambiar de página — que es justo lo contrario del §4.1 del mapa de sitio:
+      "el reproductor en vivo es persistente… es la afirmación de que Beat sigue
+      siendo una estación de radio en vivo".
+
+      Estuvo faltando desde que se construyó la cabecera: el atributo estaba puesto
+      y no servía de nada, porque no había router que lo respetara.
+    */}
+    <ClientRouter />
 
     {/*
       Las fuentes son AUTO-HOSPEDADAS (`public/fuentes/`, generadas con

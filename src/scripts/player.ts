@@ -13,6 +13,7 @@
  * módulo con dependencias explícitas.
  */
 import { eventoTriton } from './analitica';
+import { FUENTES, reclamarAudio, registrarAudio } from './audio';
 
 /** Los 6 códigos que emite `stream-status`. */
 type EstadoTriton =
@@ -54,6 +55,18 @@ let listo = false;
 /** El texto que renderizó el servidor, para restaurarlo tras un corte comercial
  *  o un "Conectando…". Se lee una sola vez, antes de pisarlo. */
 let textoOriginal: string | null = null;
+/**
+ * Tope de la conexión. Sin esto, si Triton no llega nunca a LIVE_PLAYING —red
+ * mala, mount caído, un VAST que se cuelga sin emitir evento— el oyente se queda
+ * mirando «Conectando…» indefinidamente, que es un cuelgue silencioso: parece que
+ * el sitio está roto sin decir por qué.
+ *
+ * 20 s es holgado a propósito: la cadena real son la descarga del SDK (854 KB), el
+ * pre-roll VAST y después la conexión al stream. Cortar antes daría falsos
+ * negativos en 3G.
+ */
+let topeConexion: number | null = null;
+const MS_TOPE_CONEXION = 20000;
 
 const el = <T extends HTMLElement>(sel: string): T | null =>
   document.querySelector<T>(sel);
@@ -70,10 +83,36 @@ function ctxAnalitica(): { station: string; dist: string } {
   };
 }
 
+function fallo(mensaje: string): void {
+  if (topeConexion !== null) window.clearTimeout(topeConexion);
+  topeConexion = null;
+  try {
+    sdk?.stop();
+  } catch {
+    /* si el SDK ya no responde, igual hay que devolver la UI a su sitio */
+  }
+  pintarEstado('init');
+  pintarSonando(mensaje);
+  window.setTimeout(restaurarSonando, 4000);
+}
+
 function pintarEstado(estado: EstadoUI): void {
   const p = contenedor();
   if (!p) return;
   p.dataset.status = estado;
+
+  // El tope corre mientras se conecta, y se cancela en cuanto hay señal (o en
+  // cuanto el oyente cancela).
+  if (topeConexion !== null) {
+    window.clearTimeout(topeConexion);
+    topeConexion = null;
+  }
+  if (estado === 'cargando') {
+    topeConexion = window.setTimeout(
+      () => fallo('No se pudo conectar'),
+      MS_TOPE_CONEXION,
+    );
+  }
 
   const boton = el<HTMLButtonElement>('[data-accion="play"]');
   if (boton) {
@@ -159,6 +198,9 @@ function alCambiarEstado(e: { data?: { code?: string } }): void {
 function reproducir(): void {
   const station = contenedor()?.dataset.mount;
   if (!sdk || !listo || !station) return;
+  // Red de seguridad: ya se reclamó en el clic, pero esto cubre las rutas que no
+  // pasan por ahí (reanudar tras un audio ad). Es idempotente.
+  reclamarAudio(FUENTES.radio);
   sdk.play({ station, trackingParameters: { Dist: 'WebBeat' } });
 }
 
@@ -171,6 +213,9 @@ function reproducir(): void {
  */
 function arrancar(): void {
   if (!sdk || !listo) return;
+  // Cualquier ruta de entrada deja señal visible, sin depender de que quien llamó
+  // se haya acordado de pintarla.
+  pintarEstado('cargando');
   const red = import.meta.env.PUBLIC_GAM_NETWORK_ID;
   const unidad = import.meta.env.PUBLIC_GAM_AD_UNIT;
 
@@ -260,6 +305,15 @@ export function prepararPlayer(): void {
   if (!p) return;
 
   const boton = el<HTMLButtonElement>('[data-accion="play"]');
+  /**
+   * 🔴 Guarda contra listeners DUPLICADOS. Con View Transitions este script puede
+   * volver a evaluarse en cada navegación, y como el botón vive en un bloque
+   * `transition:persist` es el MISMO nodo: sin esta marca acumularía un listener
+   * por página visitada, y a la quinta el clic dispararía cinco veces.
+   */
+  if (boton?.dataset.cableado === '1') return;
+  if (boton) boton.dataset.cableado = '1';
+
   boton?.addEventListener(
     'click',
     () => {
@@ -273,6 +327,19 @@ export function prepararPlayer(): void {
        * Si el indicador esperara al SDK, el primer tramo —el más largo en una red
        * lenta— pasaría sin ninguna señal y el botón parecería no responder.
        */
+      /**
+       * 🔴 Se reclama el canal AQUÍ, en la intención, y no en `reproducir()`.
+       *
+       * `reproducir()` solo corre cuando el SDK está listo, así que reclamar ahí
+       * dejaba una ventana de varios segundos —la descarga del SDK más el VAST— en
+       * la que el radio ya estaba "conectando" y el video de la nota SEGUÍA
+       * sonando. Los dos a la vez, que es exactamente lo que el árbitro existe
+       * para evitar.
+       *
+       * Y semánticamente es lo correcto: el oyente pidió radio, así que lo demás
+       * se calla ya, no cuando el stream tenga a bien conectar.
+       */
+      reclamarAudio(FUENTES.radio);
       pintarEstado('cargando');
       void cargarSdk()
         .then(() => {
@@ -280,14 +347,25 @@ export function prepararPlayer(): void {
           // El clic que disparó la carga sigue contando como gesto del usuario.
           arrancar();
         })
-        .catch(() => {
-          pintarEstado('init');
-          pintarSonando('No se pudo conectar');
-          setTimeout(restaurarSonando, 4000);
-        });
+        .catch(() => fallo('No se pudo conectar'));
     },
     // `once` no: si la carga falla, el siguiente clic debe volver a intentarlo.
   );
+
+  /**
+   * El radio entra al árbitro AQUÍ y no al construir el SDK, para quitar una
+   * dependencia de orden: si se registrara al cargar el SDK, el registro estaría
+   * vacío mientras nadie haya tocado el player. Hoy es inofensivo —sin SDK el
+   * radio no suena, así que no hay nada que pausar— pero deja una precondición
+   * implícita, y esas son las que muerden cuando alguien agregue una fuente nueva.
+   */
+  registrarAudio(FUENTES.radio, () => {
+    const estado = contenedor()?.dataset.status;
+    if (estado === 'sonando' || estado === 'cargando') {
+      sdk?.stop();
+      pintarEstado('init');
+    }
+  });
 
   // El botón nace usable, aunque el SDK no esté: el clic lo trae.
   if (boton) {
@@ -391,6 +469,7 @@ export function iniciarPlayer(): void {
       pintarEstado('init');
     } else {
       // Respuesta inmediata al clic: Triton tarda en emitir su primer estado.
+      reclamarAudio(FUENTES.radio);
       pintarEstado('cargando');
       arrancar();
     }
@@ -401,5 +480,17 @@ export function iniciarPlayer(): void {
     sdk?.setVolume?.(Number(volumen.value) / 100);
   });
 
-  pintarEstado('init');
+  /**
+   * 🔴 Solo se pinta `init` si NO hay nada en curso.
+   *
+   * En el camino frío —clic, descarga del SDK, inicializar, arrancar— el clic ya
+   * dejó el estado en `cargando`, y pintar `init` aquí lo borraba: el usuario veía
+   * el botón de play otra vez, como si su clic no hubiera hecho nada. Y si el VAST
+   * no emitía ningún evento, se quedaba así para siempre.
+   *
+   * Es justo el camino del visitante que llega por primera vez, o sea el caso más
+   * común.
+   */
+  const estadoActual = contenedor()?.dataset.status;
+  if (!estadoActual || estadoActual === 'init') pintarEstado('init');
 }

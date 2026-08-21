@@ -1,0 +1,77 @@
+---
+/**
+ * §2 del mapa de sitio — «Escuchar en vivo».
+ *
+ * ⏳ MÍNIMA por ahora: el diseño de esta pantalla no está en v14 (que trajo Inicio
+ * móvil, Scanner y nota), y las colecciones que la alimentan —`transmisiones` para
+ * el video en vivo y `bitacora` para el "qué sonó"— están vacías en producción.
+ *
+ * Existe ya porque cumple dos funciones inmediatas: es la segunda ruta del sitio,
+ * y sin dos rutas no había forma de verificar que el player sobrevive la
+ * navegación —que es requisito de producto, no detalle técnico—.
+ *
+ * Su función estratégica declarada en el mapa: "el sitio nunca compite con la
+ * señal: la sostiene".
+ */
+import Base from '@/layouts/Base.astro';
+import { loQueSono } from '@/lib/cms/aire';
+import { PLATAFORMAS_RADIO } from '@/config/navegacion';
+
+const sono = await loQueSono(20);
+const hora = (iso: string) =>
+  new Date(iso).toLocaleTimeString('es-MX', {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'America/Mexico_City',
+  });
+---
+
+<Base
+  titulo="Escuchar en vivo — Beat 100.9"
+  descripcion="La señal de Beat 100.9 en vivo, y lo que ha sonado."
+>
+  <div class="mx-auto max-w-grid px-contenedor py-13">
+    <p class="t-label mb-4 text-text-accent">Escuchar en vivo</p>
+    <h1 class="t-display-3 mb-6 text-text-primary">La señal, siempre</h1>
+    <p class="mb-12 max-w-[62ch] text-body-lg text-text-muted">
+      El reproductor de arriba no se detiene mientras navegas el sitio.
+    </p>
+
+    <section class="mb-12">
+      <h2 class="t-label mb-6 text-text-accent">Escucha en</h2>
+      <ul class="flex flex-wrap gap-4">
+        {PLATAFORMAS_RADIO.map((p) => (
+          <li>
+            <a
+              href={p.url}
+              rel="noopener noreferrer"
+              target="_blank"
+              class="t-label inline-block rounded-control border-hairline border-borde-quiet px-6 py-3 text-text-muted transition-colors duration-2 ease-out hover:border-borde-strong hover:text-text-primary"
+            >{p.nombre}</a>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section>
+      <h2 class="t-label mb-6 text-text-accent">Lo que ha sonado</h2>
+      {sono.length ? (
+        <ul class="divide-y divide-borde-hairline">
+          {sono.map((e) => (
+            <li class="flex items-baseline gap-6 py-5">
+              <span class="t-mono w-14 shrink-0 text-text-faint">{hora(e.sonoEn)}</span>
+              <span class="font-medium text-text-primary">{e.titulo}</span>
+              {e.artista && <span class="text-body-sm text-text-muted">{e.artista}</span>}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="max-w-[62ch] text-body-sm text-text-muted">
+          Todavía no hay registro. La bitácora se llena desde el playout, y para eso hace falta
+          cargar la lista blanca <code class="t-mono mx-1">categoriasMusicales</code> de la estación
+          en el CMS — la ingesta falla cerrado y hoy descarta todo.
+        </p>
+      )}
+    </section>
+  </div>
+</Base>

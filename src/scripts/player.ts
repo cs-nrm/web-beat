@@ -388,15 +388,37 @@ export function iniciarPlayer(): void {
         id: 'MediaPlayer',
         playerId: 'td_container',
         /**
-         * 🔴 `false` AQUÍ y `true` abajo. No es un descuido heredado: los cuatro
-         * sitios hermanos que funcionan lo tienen exactamente así, y a
-         * `web-enfoque` ponerlo en `true` en los dos le cortaba el stream a los
-         * 10–15 segundos. Se resolvió comparando con estos repos.
+         * 🔴 ESTE es el `audioAdaptive` que el SDK lee de verdad — el del módulo
+         * MediaPlayer. Verificado en el bundle 2.9:
+         *   `this.audioAdaptive = config.audioAdaptive != void 0 && config.audioAdaptive`
+         * y la config del módulo solo acepta diez claves: audioAdaptive, hls,
+         * idSync, omnyClipId, omnyOrganizationId, platformId, plugins, rawXML,
+         * sid, url.
+         *
+         * Lo que hace: el SDK clasifica los mounts de la estación en
+         * `audioAdaptive | aac | mp3`, y con esto en `true` prefiere el ADAPTATIVO
+         * (para Beat, `XHSONFM_ADP`).
+         *
+         * Así que `false` significa que HOY Beat está optando explícitamente por
+         * el mount fijo: MP3 a 48 kbps por HTTP progresivo, sin escalón al que
+         * caer. Es sospechoso de ser la causa de los cortes que reportan los
+         * oyentes — ver la nota de abajo.
+         *
+         * ⚠️ CORRECCIÓN de lo que este comentario decía antes: afirmaba que el
+         * `false` aquí y el `true` de abajo eran una pareja deliberada. No lo son.
+         * El de abajo NO ESTÁ en la config del módulo, así que no lo lee nadie: es
+         * decorativo. El único que cuenta es este.
          */
         audioAdaptive: false,
         plugins: [{ id: 'vastAd' }],
       },
     ],
+    /**
+     * ⚠️ Decorativo: `audioAdaptive` a nivel raíz NO está en la config que lee el
+     * SDK (solo lo lee el módulo MediaPlayer, arriba). Se conserva porque los
+     * cuatro repos hermanos lo tienen y quitarlo invita a que alguien "arregle" el
+     * de arriba por simetría. No cambia nada.
+     */
     audioAdaptive: true,
     /**
      * Sin esto el player nunca se habilita: es la señal de que el SDK terminó de

@@ -1,0 +1,231 @@
+---
+/**
+ * El mosaico de portada — `300px | 1fr | 300px` en 13a.
+ *
+ * La columna del centro es el retrato principal en 4:3.4, con las tres estelas del
+ * DS encima; a los lados dos notas por columna en 1:1. En móvil (14a) se convierte
+ * en portada a lo ancho + rejilla de 2, que es lo que ya hace `TarjetaNota`.
+ *
+ * 🔴 Igual que en Scanner: el `gap: 2px` con el fondo en `--border-hairline` es la
+ * línea que separa las piezas, así que cada pieza necesita fondo OPACO propio.
+ */
+import Icono from '@/components/Icono.astro';
+import TarjetaNota from '@/components/TarjetaNota.astro';
+import { urlMedia } from '@/lib/cms/client';
+import { minutosDeLectura } from '@/lib/cms/noticias';
+import { nombreCategoria } from '@/lib/nota';
+import type { Noticia } from '@/types/payload';
+
+interface Props {
+  portada: Noticia | null;
+  izquierda: Noticia[];
+  derecha: Noticia[];
+}
+
+const { portada, izquierda, derecha } = Astro.props;
+
+const foto = urlMedia(portada?.imagen, 'large');
+const min = portada ? minutosDeLectura(portada.contenido) : 0;
+const cat = portada ? nombreCategoria(portada) : null;
+const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.imagen.alt ?? '') : '';
+---
+
+{
+  portada && (
+    <div class="mosaico">
+      <div class="mosaico-lado">
+        {izquierda.map((n) => (
+          <TarjetaNota nota={n} variante="rejilla" />
+        ))}
+      </div>
+
+      <a href={`/noticias/${portada.slug}`} class="mosaico-centro">
+        <div class="mosaico-foto">
+          {foto && <img src={foto} alt={alt} fetchpriority="high" decoding="async" />}
+          <div class="beat-grid mosaico-trama" />
+          {/* Las tres estelas: el motivo de marca del DS, con las posiciones de 13a. */}
+          <div class="mosaico-estelas" aria-hidden="true">
+            <div class="beat-streak es-1" />
+            <div class="beat-streak is-soft es-2" />
+            <div class="beat-streak is-thin es-3" />
+          </div>
+        </div>
+        <div class="mosaico-meta">
+          <span class="beat-label mosaico-min">
+            <Icono nombre="clock" tamano={14} />
+            {min} MIN
+          </span>
+          {cat && <span class="beat-label mosaico-cat">{cat}</span>}
+        </div>
+        <h2 class="mosaico-titulo">{portada.titulo}</h2>
+        {portada.resumen && <p class="mosaico-bajada">{portada.resumen}</p>}
+      </a>
+
+      <div class="mosaico-lado">
+        {derecha.map((n) => (
+          <TarjetaNota nota={n} variante="rejilla" />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+<style>
+  .mosaico {
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr) 300px;
+    gap: 2px;
+    background: var(--border-hairline);
+    padding: 2px 0;
+  }
+  .mosaico-lado {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background: var(--border-hairline);
+  }
+  .mosaico-centro {
+    display: block;
+    background: var(--noche-1);
+    color: inherit;
+    text-decoration: none;
+    padding-bottom: 26px;
+    transition: background var(--dur-2) var(--ease-out);
+  }
+  .mosaico-centro:hover {
+    background: var(--noche-2);
+  }
+  .mosaico-foto {
+    position: relative;
+    aspect-ratio: 4 / 3.4;
+    background: var(--grad-noche);
+    overflow: hidden;
+  }
+  .mosaico-foto img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .mosaico-trama,
+  .mosaico-estelas {
+    position: absolute;
+    inset: 0;
+  }
+  .mosaico-estelas {
+    pointer-events: none;
+  }
+  .es-1 {
+    left: 14%;
+    right: 34%;
+    top: 36%;
+  }
+  .es-2 {
+    left: 26%;
+    right: 12%;
+    top: 44%;
+  }
+  .es-3 {
+    left: 38%;
+    right: 28%;
+    top: 52%;
+  }
+  .mosaico-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 20px 24px 0;
+  }
+  .mosaico-min {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-muted);
+    font-size: 9.5px;
+  }
+  .mosaico-cat {
+    padding: 7px 12px;
+    background: var(--surface-card);
+    box-shadow: inset 0 0 0 1px var(--border-hairline);
+    color: var(--text-body);
+    font-size: 9px;
+    white-space: nowrap;
+  }
+  .mosaico-titulo {
+    font: 700 var(--type-title-1);
+    letter-spacing: -0.022em;
+    color: var(--mist-1);
+    margin: 14px 0 0;
+    padding: 0 24px;
+    text-wrap: pretty;
+  }
+  .mosaico-bajada {
+    font: var(--type-body);
+    color: var(--text-muted);
+    margin: 12px 0 0;
+    padding: 0 24px;
+    max-width: 52ch;
+    text-wrap: pretty;
+  }
+
+  /* ── 14a: una columna. La portada a lo ancho, los lados en rejilla de 2 ── */
+  @media (max-width: 1199px) {
+    .mosaico {
+      grid-template-columns: minmax(0, 1fr) 300px;
+    }
+    /* La columna derecha se va debajo, ocupando el ancho completo en rejilla. */
+    .mosaico-lado:last-child {
+      grid-column: 1 / -1;
+      flex-direction: row;
+    }
+    .mosaico-lado:last-child > * {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+  @media (max-width: 899px) {
+    .mosaico {
+      grid-template-columns: 1fr;
+      padding: 0;
+      gap: 0;
+      background: none;
+    }
+    .mosaico-centro {
+      padding-bottom: 20px;
+    }
+    .mosaico-foto {
+      aspect-ratio: 4 / 3.2;
+    }
+    .mosaico-meta {
+      padding: 16px 16px 0;
+    }
+    .mosaico-cat {
+      font-size: 8.5px;
+    }
+    .mosaico-titulo {
+      font: 700 25px / 1.14 var(--font-text);
+      letter-spacing: -0.016em;
+      margin-top: 12px;
+      padding: 0 16px;
+    }
+    .mosaico-bajada {
+      font: 400 14.5px / 1.5 var(--font-text);
+      padding: 0 16px;
+      max-width: none;
+    }
+    /* Los dos lados se juntan en UNA rejilla de dos columnas, con la línea del
+       hairline asomando igual que en el escritorio. */
+    .mosaico-lado {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 2px;
+      padding: 2px 0;
+    }
+    .mosaico-lado:last-child {
+      grid-column: auto;
+      flex-direction: unset;
+    }
+  }
+</style>

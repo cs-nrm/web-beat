@@ -1,0 +1,514 @@
+---
+/**
+ * «EL FENÓMENO RESIDENTE» en el Inicio — el bloque de la semana de 13a.
+ *
+ * Tres columnas: el video vertical 9:16, la lista de las cápsulas, y el panel de
+ * la playlist. Todo sale de UN especial y sus `piezas`, que es una polimórfica
+ * ORDENADA: el orden numera las cápsulas, así que no se reordena nunca.
+ */
+import Icono from '@/components/Icono.astro';
+import { urlMedia } from '@/lib/cms/client';
+import { capsulasDe, listasDe } from '@/lib/cms/especiales';
+import { fechaCorta } from '@/lib/nota';
+import type { Especiale, Lista } from '@/types/payload';
+
+interface Props {
+  especial: Especiale | null;
+}
+
+const { especial } = Astro.props;
+
+const capsulas = capsulasDe(especial);
+const listas = listasDe(especial);
+const playlist = (listas[0]?.doc ?? null) as Lista | null;
+
+/**
+ * La cápsula que encabeza: la marcada como destacada si la hay, y si no la última
+ * publicada. Nunca «la de hoy» calculada contra el reloj: eso exigiría una fecha de
+ * emisión por cápsula que el CMS no tiene, y adivinarla pintaría «HOY» en algo que
+ * no salió hoy.
+ */
+const destacadaId =
+  especial?.piezaDestacada && typeof especial.piezaDestacada === 'object'
+    ? typeof especial.piezaDestacada.value === 'object'
+      ? especial.piezaDestacada.value?.id
+      : especial.piezaDestacada.value
+    : null;
+
+const encabeza = capsulas.find((c) => c.doc.id === destacadaId) ?? capsulas.at(-1) ?? null;
+
+const videoFoto = urlMedia(encabeza?.doc.imagen, 'large');
+const rango =
+  especial?.inicio && especial?.fin
+    ? `${fechaCorta(especial.inicio)} — ${fechaCorta(especial.fin)}`
+    : fechaCorta(especial?.inicio);
+
+const publicadas = capsulas.length;
+const patrocina = especial?.patrocinador?.nombre ? especial.patrocinador : null;
+const logoPatrocinio = urlMedia(patrocina?.logo, 'thumbnail');
+
+/** Los enlaces a plataformas de la playlist, solo los que existen. */
+const tiendas = (
+  [
+    ['SPOTIFY', playlist?.playlistSpotify],
+    ['APPLE MUSIC', playlist?.playlistAppleMusic],
+  ] as Array<[string, string | null | undefined]>
+).filter((t): t is [string, string] => Boolean(t[1]));
+---
+
+{
+  especial && (
+    <section class="fr">
+      <div class="fr-cabeza">
+        <h2 class="beat-display fr-seccion">EL FENÓMENO RESIDENTE</h2>
+        <a href="/fenomeno-residente" class="beat-label fr-todo">VER EL ARCHIVO</a>
+      </div>
+
+      <div class="fr-tema">
+        {especial.numero != null && (
+          <span class="beat-display fr-numero">{String(especial.numero).padStart(2, '0')}</span>
+        )}
+        <div class="fr-tema-texto">
+          <span class="beat-label fr-rango">
+            TEMA DE LA SEMANA{rango && ` · ${rango}`}
+          </span>
+          <h3 class="fr-titulo">{especial.titulo}</h3>
+        </div>
+      </div>
+
+      <div class="fr-columnas">
+        {/* ── el video vertical ── */}
+        {encabeza ? (
+          <a href={`/noticias/${encabeza.doc.slug}`} class="fr-video">
+            {videoFoto && <img src={videoFoto} alt="" loading="lazy" decoding="async" />}
+            <div class="beat-grid fr-video-trama" />
+            <span class="beat-label fr-insignia">
+              CÁPSULA {String(encabeza.n).padStart(2, '0')}
+            </span>
+            <div class="fr-video-pie">
+              <span class="fr-play">
+                <Icono nombre="play" tamano={20} />
+              </span>
+              <span class="fr-video-texto">
+                <span class="fr-video-titulo">{encabeza.doc.titulo}</span>
+                {encabeza.doc.video?.duracion && (
+                  <span class="beat-label fr-video-dur">{encabeza.doc.video.duracion}</span>
+                )}
+              </span>
+            </div>
+          </a>
+        ) : (
+          <div class="fr-video es-vacio" />
+        )}
+
+        {/* ── las cápsulas ── */}
+        <div class="fr-lista">
+          <div class="fr-lista-cabeza">
+            <span class="beat-label fr-lista-titulo">LAS CÁPSULAS</span>
+            <span class="beat-label fr-lista-nota">
+              {publicadas} PUBLICADA{publicadas === 1 ? '' : 'S'}
+            </span>
+          </div>
+          {capsulas.length > 0 ? (
+            capsulas.map((c) => (
+              <a
+                href={`/noticias/${c.doc.slug}`}
+                class:list={['fr-capsula', { 'es-destacada': c.n === encabeza?.n }]}
+              >
+                <span class="beat-label fr-capsula-n">{String(c.n).padStart(2, '0')}</span>
+                <span class="fr-capsula-titulo">{c.doc.titulo}</span>
+                {c.doc.video?.duracion && (
+                  <span class="beat-label fr-capsula-dur">{c.doc.video.duracion}</span>
+                )}
+              </a>
+            ))
+          ) : (
+            <p class="fr-vacio">
+              Las cápsulas de este tema todavía no se cargan. Se agregan al especial
+              como piezas.
+            </p>
+          )}
+
+          {patrocina && (
+            <div class="fr-patrocinio">
+              <span class="beat-label fr-patrocinio-rotulo">CON EL APOYO DE</span>
+              {logoPatrocinio ? (
+                <img src={logoPatrocinio} alt={patrocina.nombre ?? ''} class="fr-patrocinio-logo" />
+              ) : (
+                <span class="fr-patrocinio-nombre">{patrocina.nombre}</span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* ── la playlist ── */}
+        <div class="fr-playlist">
+          <div class="fr-playlist-cabeza">
+            <span class="beat-label fr-playlist-titulo">PLAYLIST DEL TEMA</span>
+            {playlist?.canciones && (
+              <span class="beat-label fr-playlist-nota">{playlist.canciones.length} TRACKS</span>
+            )}
+          </div>
+          {playlist?.canciones?.length ? (
+            <>
+              {playlist.canciones.slice(0, 6).map((c, i) => {
+                const cancion = typeof c.cancion === 'object' ? c.cancion : null;
+                return (
+                  <div class="fr-track">
+                    <span class="beat-label fr-track-n">{String(i + 1).padStart(2, '0')}</span>
+                    <span class="fr-track-texto">
+                      <span class="fr-track-titulo">{cancion?.titulo ?? '—'}</span>
+                      {cancion?.artista && <span class="fr-track-artista">{cancion.artista}</span>}
+                    </span>
+                    {cancion?.duracion && (
+                      <span class="beat-label fr-track-dur">{cancion.duracion}</span>
+                    )}
+                  </div>
+                );
+              })}
+              {tiendas.length > 0 && (
+                <div class="fr-tiendas">
+                  {tiendas.map(([etiqueta, url]) => (
+                    <a
+                      href={url}
+                      class="beat-label fr-tienda"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {etiqueta}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <p class="fr-vacio">
+              Sin playlist todavía. Se agrega al especial como una pieza de tipo lista.
+            </p>
+          )}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .fr {
+    padding: 32px 24px 0;
+  }
+  .fr-cabeza,
+  .fr-lista-cabeza,
+  .fr-playlist-cabeza {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-quiet);
+  }
+  .fr-seccion {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--mist-2);
+    margin: 0;
+  }
+  .fr-todo {
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .fr-todo:hover {
+    color: var(--mist-0);
+  }
+
+  .fr-tema {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-top: 26px;
+  }
+  .fr-numero {
+    font-size: 44px;
+    font-weight: 800;
+    line-height: 0.9;
+    color: var(--mist-0);
+    flex: none;
+  }
+  .fr-tema-texto {
+    min-width: 0;
+  }
+  .fr-rango {
+    color: var(--mist-0);
+  }
+  .fr-titulo {
+    font: 700 26px / 1.1 var(--font-text);
+    letter-spacing: -0.016em;
+    color: var(--mist-2);
+    margin: 8px 0 0;
+    text-wrap: pretty;
+  }
+
+  .fr-columnas {
+    display: grid;
+    grid-template-columns: 296px minmax(0, 1fr) 320px;
+    gap: 24px;
+    align-items: start;
+    margin-top: 20px;
+  }
+
+  /* ── video ── */
+  .fr-video {
+    position: relative;
+    display: block;
+    aspect-ratio: 9 / 16;
+    background: var(--grad-noche);
+    overflow: hidden;
+    box-shadow: inset 0 0 0 1px var(--border-quiet);
+  }
+  .fr-video img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .fr-video-trama {
+    position: absolute;
+    inset: 0;
+  }
+  .fr-insignia {
+    position: absolute;
+    left: 14px;
+    top: 14px;
+    padding: 7px 11px;
+    background: rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(14px);
+    color: var(--mist-0);
+    font-size: 9px;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .fr-video-pie {
+    position: absolute;
+    inset: auto 0 0 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 56px 16px 16px;
+    background: var(--grad-scrim-b);
+    pointer-events: none;
+  }
+  .fr-play {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    background: var(--mist-0);
+    color: var(--noche-0);
+    flex: none;
+  }
+  .fr-video-texto {
+    min-width: 0;
+  }
+  .fr-video-titulo {
+    display: block;
+    font: 600 15px / 1.24 var(--font-text);
+    color: var(--mist-1);
+    text-wrap: pretty;
+  }
+  .fr-video-dur {
+    display: block;
+    margin-top: 6px;
+    font-size: 9px;
+    color: var(--mist-4);
+  }
+
+  /* ── cápsulas ── */
+  .fr-lista-titulo {
+    color: var(--mist-0);
+  }
+  .fr-lista-nota {
+    color: var(--text-faint);
+    white-space: nowrap;
+  }
+  .fr-capsula {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    padding: 11px 8px;
+    margin: 0 -8px;
+    border-bottom: 1px solid var(--border-hairline);
+    color: inherit;
+    text-decoration: none;
+  }
+  .fr-capsula:hover {
+    background: var(--surface-card-hover);
+  }
+  .fr-capsula-n {
+    font-size: 9.5px;
+    color: var(--text-faint);
+  }
+  .fr-capsula-titulo {
+    font: 500 14.5px / 1.3 var(--font-text);
+    color: var(--text-body);
+    text-wrap: pretty;
+  }
+  .fr-capsula-dur {
+    font-size: 8.5px;
+    color: var(--text-faint);
+    white-space: nowrap;
+  }
+  .es-destacada .fr-capsula-n,
+  .es-destacada .fr-capsula-titulo {
+    color: var(--mist-0);
+  }
+
+  .fr-patrocinio {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 18px;
+    padding: 14px 16px;
+    background: var(--surface-card);
+    box-shadow: inset 0 0 0 1px var(--border-hairline);
+  }
+  .fr-patrocinio-rotulo {
+    font-size: 8px;
+    color: var(--text-faint);
+    white-space: nowrap;
+  }
+  .fr-patrocinio-logo {
+    height: 22px;
+    width: auto;
+  }
+  .fr-patrocinio-nombre {
+    font: 600 14px / 1 var(--font-text);
+    color: var(--mist-2);
+  }
+
+  /* ── playlist ── */
+  .fr-playlist {
+    background: var(--surface-card);
+    box-shadow: inset 0 0 0 1px var(--border-hairline);
+    padding: 18px;
+  }
+  .fr-playlist-titulo {
+    color: var(--mist-0);
+  }
+  .fr-playlist-nota {
+    color: var(--text-faint);
+    white-space: nowrap;
+  }
+  .fr-track {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border-hairline);
+  }
+  .fr-track-n {
+    font-size: 8.5px;
+    color: var(--text-faint);
+  }
+  .fr-track-texto {
+    min-width: 0;
+  }
+  .fr-track-titulo,
+  .fr-track-artista {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .fr-track-titulo {
+    font: 500 13px / 1.24 var(--font-text);
+    color: var(--mist-2);
+  }
+  .fr-track-artista {
+    font: 400 11.5px / 1.2 var(--font-text);
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  .fr-track-dur {
+    font-size: 8px;
+    color: var(--text-faint);
+  }
+  .fr-tiendas {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .fr-tienda {
+    flex: 1;
+    text-align: center;
+    padding: 10px 12px;
+    box-shadow: inset 0 0 0 1px var(--border-quiet);
+    color: var(--mist-2);
+    font-size: 9px;
+    white-space: nowrap;
+  }
+  .fr-tienda:hover {
+    background: var(--mist-0);
+    color: var(--noche-0);
+  }
+
+  .fr-vacio {
+    font: var(--type-body-sm);
+    color: var(--text-muted);
+    margin: 16px 0 0;
+    text-wrap: pretty;
+  }
+  .es-vacio {
+    box-shadow: inset 0 0 0 1px var(--border-hairline);
+  }
+
+  /* ── 14a/14g: una columna ── */
+  @media (max-width: 1199px) {
+    .fr-columnas {
+      grid-template-columns: 296px minmax(0, 1fr);
+    }
+    .fr-playlist {
+      grid-column: 1 / -1;
+    }
+  }
+  @media (max-width: 899px) {
+    .fr {
+      padding: 24px 16px 0;
+    }
+    .fr-seccion {
+      font-size: 20px;
+    }
+    .fr-tema {
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .fr-numero {
+      font-size: 34px;
+    }
+    .fr-rango {
+      font-size: 8.5px;
+    }
+    .fr-titulo {
+      font: 700 21px / 1.14 var(--font-text);
+    }
+    .fr-columnas {
+      grid-template-columns: 1fr;
+      gap: 18px;
+      margin-top: 18px;
+    }
+    /* El video pasa de 9:16 a 4:5: a lo ancho de 390px, un 9:16 ocuparía dos
+       pantallas de alto y empujaría todo lo demás fuera del pliegue. */
+    .fr-video {
+      aspect-ratio: 4 / 5;
+    }
+    .fr-video-pie {
+      padding: 48px 14px 14px;
+    }
+    .fr-playlist {
+      grid-column: auto;
+    }
+  }
+</style>

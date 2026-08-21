@@ -1,0 +1,64 @@
+---
+/**
+ * El cintillo del lema. Sobrevive del sitio v1 (`BEAT 100.9 TOTAL MUSIC`).
+ *
+ * El texto se repite DOS veces y la animación recorre exactamente la mitad: así el
+ * segundo ejemplar entra por donde sale el primero y el bucle no tiene costura.
+ * Con un solo ejemplar habría un hueco en cada vuelta.
+ */
+interface Props {
+  texto: string;
+}
+
+const { texto } = Astro.props;
+---
+
+<div class="marquee" role="presentation" aria-hidden="true">
+  <div class="marquee-pista">
+    <span class="beat-display marquee-texto">{texto}</span>
+    <span class="beat-display marquee-texto">{texto}</span>
+  </div>
+</div>
+
+<style>
+  .marquee {
+    padding: 14px 0;
+    background: var(--noche-2);
+    color: var(--mist-2);
+    overflow: hidden;
+    box-shadow:
+      inset 0 1px 0 var(--border-hairline),
+      inset 0 -1px 0 var(--border-hairline);
+  }
+  .marquee-pista {
+    display: flex;
+    width: max-content;
+    animation: beat-marquee 22s linear infinite;
+  }
+  .marquee-texto {
+    flex: none;
+    padding-right: 44px;
+    font-size: 28px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  /* Se detiene con `prefers-reduced-motion`: un texto en movimiento perpetuo es
+     justo lo que esa preferencia pide apagar. El DS ya lo respeta en sus
+     keyframes, pero la animación se declara aquí, así que aquí se apaga. */
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-pista {
+      animation: none;
+    }
+  }
+
+  @media (max-width: 899px) {
+    .marquee {
+      padding: 12px 0;
+    }
+    .marquee-texto {
+      padding-right: 32px;
+      font-size: 20px;
+    }
+  }
+</style>

@@ -1,119 +1,109 @@
 ---
 /**
- * ⏳ PROVISIONAL — no es el Inicio.
+ * El Inicio. Pantallas 13a (1280, «Entregable») y 14a (390).
  *
- * Es la prueba de humo de la capa de datos: resuelve la estación contra
- * `cms-estaciones` por `codigo`, y pide el "qué suena" a la bitácora. Sirve para
- * verificar de punta a punta que el SSR habla con el CMS, que el filtro por
- * estación se está inyectando, y que todo degrada en vez de tronar cuando el CMS
- * no está.
+ * El §1 del mapa de sitio le pone una prueba concreta: **responder en 3 segundos
+ * qué suena, qué se cuenta y qué viene**. De ahí sale el orden, que no es
+ * decorativo:
  *
- * El Inicio de verdad (§1 del mapa de sitio: "responde en 3 segundos: qué suena,
- * qué se cuenta, qué viene") llega con el design system — B3/B4 del plan.
+ *   1. qué suena  → el player (en la cabecera) + «HOY EN LA SEÑAL / LO QUE SONÓ»
+ *   2. qué se cuenta → el mosaico de portada, el Fenómeno, la pila de Scanner
+ *   3. qué viene  → Bonus Beat y la Agenda
+ *
+ * 🔴 UNA sección = UN componente, y cada uno DEGRADA SOLO: si su colección está
+ * vacía no se pinta, y el Inicio se acorta en vez de mostrar un encabezado con nada
+ * debajo. Es lo que permite lanzar con contenido parcial y que la página se vaya
+ * llenando sola conforme la redacción captura, sin un deploy por sección.
  */
 import Base from '@/layouts/Base.astro';
-import { obtenerEstacion } from '@/lib/cms/estacion';
-import { queSuena } from '@/lib/cms/aire';
-import { CMS_URL, ESTACION_CODIGO } from '@/config/site';
+import Anuncio from '@/components/inicio/Anuncio.astro';
+import PanelSenal from '@/components/inicio/PanelSenal.astro';
+import Mosaico from '@/components/inicio/Mosaico.astro';
+import Marquee from '@/components/inicio/Marquee.astro';
+import Fenomeno from '@/components/inicio/Fenomeno.astro';
+import ArchivoTemas from '@/components/inicio/ArchivoTemas.astro';
+import PilaScanner from '@/components/inicio/PilaScanner.astro';
+import BonusBeat from '@/components/inicio/BonusBeat.astro';
+import Agenda from '@/components/inicio/Agenda.astro';
 
-let estacion = null;
-let error: string | null = null;
+import { obtenerScanner } from '@/lib/cms/noticias';
+import { obtenerParrillaDeHoy } from '@/lib/cms/programacion';
+import { loQueSono } from '@/lib/cms/aire';
+import { obtenerEspecialVigente, obtenerEspeciales } from '@/lib/cms/especiales';
+import { obtenerTiposDeLista, obtenerListaReciente } from '@/lib/cms/listas';
+import { obtenerAgenda } from '@/lib/cms/eventos';
+import { SERIE_FENOMENO, TIPO_LISTA_DESTACADA } from '@/config/site';
 
-try {
-  estacion = await obtenerEstacion();
-} catch (err) {
-  error = err instanceof Error ? err.message : String(err);
-}
+/*
+  Todo en PARALELO. Son ocho consultas y ninguna depende de otra salvo la lista
+  destacada, que necesita saber qué tipos existen. Secuenciales sumarían sus
+  latencias; en paralelo el Inicio cuesta lo que la más lenta.
 
-const alAire = estacion ? await queSuena() : null;
+  Cada `obtener*` ya trae su propio `catch` que degrada a vacío, así que un
+  `Promise.all` es seguro: ninguna rechaza y una colección caída no tumba la
+  página. Y todas van cacheadas con dedup en el cliente del CMS, así que la
+  concurrencia real contra el CMS es una consulta por TTL, no una por visita.
+*/
+const [{ destacada, rejilla }, parrilla, sono, especial, especiales, tipos, agenda] =
+  await Promise.all([
+    obtenerScanner(12),
+    obtenerParrillaDeHoy(),
+    loQueSono(4).catch(() => []),
+    obtenerEspecialVigente(SERIE_FENOMENO),
+    obtenerEspeciales(SERIE_FENOMENO, 8),
+    obtenerTiposDeLista(),
+    obtenerAgenda(4),
+  ]);
 
-// El mapa de sitio del relanzamiento, con su estado. Se queda mientras el sitio
-// se construye: es la lista de trabajo visible.
-const SECCIONES = [
-  { n: 1, nombre: 'Inicio', ruta: '/', coleccion: '—', listo: false },
-  { n: 2, nombre: 'Escuchar en vivo', ruta: '/en-vivo', coleccion: 'transmisiones + bitacora', listo: false },
-  { n: 3, nombre: 'El Fenómeno Residente', ruta: '/fenomeno-residente', coleccion: 'especiales', listo: false },
-  { n: 4, nombre: 'Bonus Beat', ruta: '/bonus-beat', coleccion: 'listas + tipos-de-lista', listo: false },
-  { n: 5, nombre: 'Agenda / Eventos', ruta: '/eventos', coleccion: 'eventos', listo: false },
-  { n: 6, nombre: 'Comunidad', ruta: '/comunidad', coleccion: 'oyentes + playlists (faltan)', listo: false },
-  { n: 7, nombre: 'Tienda', ruta: '/tienda', coleccion: 'productos (fase 2)', listo: false },
-  { n: 8, nombre: 'Beat para marcas', ruta: '/marcas', coleccion: 'paginas (falta en el CMS)', listo: false },
-  { n: 9, nombre: 'Programación', ruta: '/programacion', coleccion: 'programas', listo: false },
-  { n: 10, nombre: 'Beat Scanner', ruta: '/scanner', coleccion: 'noticias + categorias', listo: true },
-  { n: 11, nombre: 'Nota', ruta: '/noticias/<slug>', coleccion: 'noticias', listo: true },
-];
+/*
+  El tipo de lista que va al Inicio se resuelve por SLUG contra lo que la estación
+  tenga creado, y si ese slug no existe se toma el primero que haya. Así el bloque
+  no desaparece porque alguien renombró «Bonus Beat», ni hay que desplegar cuando
+  inventen otro tipo.
+*/
+const tipoDestacado = tipos.find((t) => t.slug === TIPO_LISTA_DESTACADA) ?? tipos[0] ?? null;
+const listaDestacada = tipoDestacado?.slug ? await obtenerListaReciente(tipoDestacado.slug) : null;
+
+/*
+  El reparto del mosaico. `obtenerScanner` devuelve la destacada y el resto en una
+  sola consulta; aquí se corta:
+    portada  → la destacada
+    lados    → 2 + 2 en las columnas laterales
+    pila     → las 4 siguientes, para el bloque de Scanner
+  Los `slice` no fallan con menos notas: devuelven lo que haya.
+*/
+const izquierda = rejilla.slice(0, 2);
+const derecha = rejilla.slice(2, 4);
+const paraLaPila = rejilla.slice(4, 8);
+
+const lema = 'BEAT 100.9 · TOTAL MUSIC';
 ---
 
-<Base titulo="web-beat v2 — scaffold" descripcion="Front Astro SSR de Beat 100.9 sobre cms-estaciones.">
-  <div class="mx-auto max-w-grid px-contenedor py-13">
-    <p class="t-label mb-4 text-text-faint">web-beat · rama beat</p>
-    <h1 class="t-display-3 mb-11 text-text-primary">Scaffold del relanzamiento</h1>
+<Base
+  titulo="Beat 100.9 — Total Music"
+  descripcion="La estación de música electrónica de NRM. Qué suena ahora, el Fenómeno Residente, Beat Scanner y la agenda."
+>
+  {/*
+    El `h1` del Inicio va SOLO PARA LECTORES DE PANTALLA: el titular visible de
+    esta página es el wordmark de la cabecera, que es una imagen, así que sin esto
+    el documento se queda sin `h1` — medido, eran 0. No se promueve el titular de
+    la nota de portada a `h1` porque un `h1` describe la PÁGINA, no una de sus
+    piezas; el mosaico seguiría teniendo dos notas más al mismo nivel.
+  */}
+  <h1 class="solo-lectores">Beat 100.9 — Total Music</h1>
 
-    <section class="mb-12">
-      <h2 class="t-label mb-6 text-text-accent">
-        Conexión con el CMS
-      </h2>
-      {error ? (
-        <div class="rounded-card border-hairline border-borde-quiet bg-surface-card p-card text-body-sm">
-          <p class="mb-4 font-semibold text-state-warning">Sin datos del CMS</p>
-          <p class="mb-4 text-text-body">{error}</p>
-          <p class="text-text-muted">
-            {CMS_URL
-              ? 'El CMS no respondió. Comprueba que esté arriba y que la estación esté sembrada.'
-              : 'Falta CMS_URL. Copia .env.example a .env — en desarrollo puedes apuntar al CMS de producción: su read es público.'}
-          </p>
-        </div>
-      ) : (
-        <dl class="grid grid-cols-[11rem_1fr] gap-y-4 text-body-sm">
-          <dt class="text-text-faint">codigo</dt>
-          <dd><code class="t-mono">{estacion!.codigo}</code> <span class="text-text-faint">(pedido: {ESTACION_CODIGO})</span></dd>
-          <dt class="text-text-faint">id resuelto</dt>
-          <dd><code class="t-mono">{estacion!.id}</code></dd>
-          <dt class="text-text-faint">nombre</dt>
-          <dd>{estacion!.nombre}</dd>
-          <dt class="text-text-faint">publicación</dt>
-          <dd>{estacion!.nombrePublicacion}</dd>
-          <dt class="text-text-faint">dominio</dt>
-          <dd>{estacion!.dominio}</dd>
-          <dt class="text-text-faint">mount de Triton</dt>
-          <dd><code class="t-mono">{estacion!.tritonMount ?? '—'}</code></dd>
-        </dl>
-      )}
-    </section>
+  {/* 1. qué suena — el banner de portada y la señal */}
+  <Anuncio formato="portada" />
+  <PanelSenal parrilla={parrilla.bloques} alAire={parrilla.alAire} sono={sono} />
 
-    <section class="mb-12">
-      <h2 class="t-label mb-6 text-text-accent">
-        Al aire
-      </h2>
-      {alAire ? (
-        <p class="text-body">
-          <strong>{alAire.titulo}</strong>
-          {alAire.artista && <span class="text-text-muted"> — {alAire.artista}</span>}
-        </p>
-      ) : (
-        <p class="max-w-[62ch] text-body-sm text-text-muted">
-          La bitácora está vacía. Es lo esperado: ninguna estación tiene cargada la lista blanca
-          <code class="t-mono mx-1">categoriasMusicales</code>, y la ingesta <strong>falla cerrado</strong>,
-          así que descarta todo lo que manda el playout. Es la tarea A6 del plan.
-        </p>
-      )}
-    </section>
+  {/* 2. qué se cuenta */}
+  <Mosaico portada={destacada} izquierda={izquierda} derecha={derecha} />
+  <Marquee texto={lema} />
+  <Fenomeno especial={especial} />
+  <ArchivoTemas temas={especiales} excluir={especial?.id ?? null} />
+  <PilaScanner notas={paraLaPila} />
 
-    <section>
-      <h2 class="t-label mb-6 text-text-accent">
-        Mapa de sitio
-      </h2>
-      <ul class="divide-y divide-borde-hairline text-body-sm">
-        {SECCIONES.map((s) => (
-          <li class="flex items-baseline gap-6 py-5">
-            <span class="t-mono w-6 shrink-0 text-text-faint">{s.n}</span>
-            <span class="w-52 shrink-0 font-medium text-text-primary">{s.nombre}</span>
-            <code class="t-mono w-44 shrink-0 text-text-accent">{s.ruta}</code>
-            <span class="text-text-faint">{s.coleccion}</span>
-            {s.listo && <span class="t-mono ml-auto shrink-0 text-state-success">✓ construida</span>}
-          </li>
-        ))}
-      </ul>
-    </section>
-  </div>
+  {/* 3. qué viene */}
+  <BonusBeat lista={listaDestacada} tipo={tipoDestacado} />
+  <Agenda eventos={agenda} />
 </Base>

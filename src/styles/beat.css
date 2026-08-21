@@ -360,3 +360,54 @@ html {
 @media (prefers-reduced-motion: reduce) {
   .player-spinner { animation-duration: 2.4s; }
 }
+
+/* ============================================================
+   El panel claro del Inicio — «HOY EN LA SEÑAL» / «LO QUE SONÓ»
+   ------------------------------------------------------------
+   Es la ÚNICA superficie clara del Inicio (13a la pinta sobre `--mist-1`), y por
+   eso necesita sus propios tokens de tinta: los semánticos del DS están calculados
+   contra el fondo oscuro y aquí darían texto claro sobre claro.
+
+   🔴 Y hay una corrección de contraste medida. El lienzo usa `rgba(5,7,6,.45)`
+   para los rótulos de 8px en mayúsculas, y sobre `#F1F3F2` eso da **3.17:1**.
+   «AA grande» (3:1) solo aplica desde 18.66px en negrita o 24px normal, así que un
+   rótulo de 8px cae bajo la regla de 4.5:1 y NO la cumple. Con alfa `.60` da
+   **5.24:1**, y visualmente sigue leyéndose como texto secundario.
+
+   Es el mismo tipo de fallo que el `--gray-500` del DS a 4.16:1 que Lighthouse
+   cazó en decenas de tarjetas de `web-enfoque` ya en producción.
+   ============================================================ */
+:root {
+  /* Tinta plena del panel: 18.13:1 sobre --mist-1. */
+  --senal-tinta: var(--noche-0);
+  /* Tinta secundaria CORREGIDA: .45 → .60. 3.17:1 → 5.24:1. */
+  --senal-tinta-quieta: rgba(5, 7, 6, 0.6);
+  /* Separadores. No es texto: 1.4.11 pide 3:1 a controles y estados, no a una
+     línea divisoria decorativa, así que el valor del lienzo se conserva. */
+  --senal-linea: rgba(5, 7, 6, 0.12);
+}
+
+/* ============================================================
+   Solo para lectores de pantalla
+   ------------------------------------------------------------
+   El DS no trae esta utilidad y el Inicio la necesita: su titular es el WORDMARK,
+   que es una imagen en la cabecera, así que la página se quedaba **sin `<h1>`**
+   (verificado: 0 en el documento). Un `h1` es el ancla del esquema del documento —
+   los lectores de pantalla lo usan para saber en qué página están, y los
+   buscadores para entender de qué es.
+
+   🔴 No se usa `display:none` ni `visibility:hidden`: ésos lo sacan del árbol de
+   accesibilidad, o sea que tampoco lo lee nadie y no arregla nada. La técnica es
+   recortarlo a 1px fuera de la vista dejándolo en el flujo.
+   ============================================================ */
+.solo-lectores {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}

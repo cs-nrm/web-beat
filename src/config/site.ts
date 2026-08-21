@@ -96,6 +96,19 @@ export const CMS_URL_PUBLICA = (
  */
 export const ESTACION_CODIGO = envServidor('ESTACION_CODIGO', 'beat');
 
+/**
+ * La serie del Fenómeno Residente, y el tipo de lista que va al Inicio.
+ *
+ * Son SLUGS y no ids, y van en el env con un valor por omisión: el id solo existe
+ * en esta base de datos, y el slug es el mismo en local, staging y producción.
+ *
+ * ⚠️ Si el slug no coincide con nada, la sección degrada a vacío en vez de tronar
+ * —y en el caso de la lista, el Inicio cae al primer tipo que exista— porque un
+ * cambio de nombre en el CMS no debe apagar una sección del Inicio.
+ */
+export const SERIE_FENOMENO = envServidor('SERIE_FENOMENO', 'fenomeno-residente');
+export const TIPO_LISTA_DESTACADA = envServidor('TIPO_LISTA_DESTACADA', 'bonus-beat');
+
 export const IDIOMA = 'es';
 export const IDIOMA_REGION = 'es-MX';
 export const LOCALE_OG = 'es_MX';
@@ -108,7 +121,16 @@ export const LOCALE_OG = 'es_MX';
 export const rutaNota = (slug: string): string => `/noticias/${slug}`;
 export const rutaEspecial = (slug: string): string => `/especiales/${slug}`;
 export const rutaEvento = (slug: string): string => `/eventos/${slug}`;
-export const rutaBonusBeat = (slug: string): string => `/bonus-beat/${slug}`;
+/**
+ * La ruta de una edición de lista.
+ *
+ * 🔴 Recibe el slug del TIPO, no lo asume. Antes esta función escribía
+ * `/bonus-beat/<slug>` fijo, y eso dejó de ser correcto cuando `tipos-de-lista` se
+ * volvió una colección: la estación crea el tipo y su slug ES la URL pública. Si se
+ * hardcodea, el día que creen «Beat Ten» la ruta no existe y nadie se entera hasta
+ * que un lector reporta un 404.
+ */
+export const rutaLista = (tipoSlug: string, slug: string): string => `/${tipoSlug}/${slug}`;
 export const rutaPrograma = (slug: string): string => `/programas/${slug}`;
 export const rutaPagina = (slug: string): string => `/${slug}`;
 
@@ -128,6 +150,8 @@ export const SEGMENTOS_RESERVADOS = [
   'fenomeno-residente',
   'bonus-beat',
   'eventos',
+  'scanner',
+  'etiqueta',
   'programacion',
   'comunidad',
   'marcas',

@@ -1,0 +1,163 @@
+---
+/**
+ * «HOY EN LA SEÑAL» y «LO QUE SONÓ» — el panel claro bajo el player en 13a.
+ *
+ * Es la afirmación de que Beat es una estación en vivo: a la izquierda lo que
+ * viene hoy, a la derecha lo que acaba de sonar. Las dos mitades salen de
+ * colecciones distintas y **cada una degrada por su lado**: si la parrilla está
+ * vacía pero la bitácora tiene datos, se pinta la mitad que hay.
+ *
+ * Si las DOS están vacías el panel no se pinta: una franja clara con dos
+ * encabezados y nada debajo es peor que no tenerla.
+ */
+import type { Bloque } from '@/lib/cms/programacion';
+import type { EntradaBitacora } from '@/lib/cms/aire';
+
+interface Props {
+  parrilla: Bloque[];
+  alAire: Bloque | null;
+  sono: EntradaBitacora[];
+}
+
+const { parrilla, alAire, sono } = Astro.props;
+
+/**
+ * De la parrilla del día se muestran cuatro: el que está al aire y los tres que
+ * siguen. Si no hay nada al aire —una franja sin programa asignado— se muestran
+ * los cuatro próximos, que es lo útil a esa hora.
+ */
+const desde = alAire ? parrilla.indexOf(alAire) : parrilla.findIndex((b) => !b.alAire);
+const visibles = parrilla.slice(Math.max(0, desde), Math.max(0, desde) + 4);
+
+const hay = visibles.length > 0 || sono.length > 0;
+
+/** `13:05` en hora de México, no la del servidor. */
+const hora = (iso: string | null | undefined) => {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return new Intl.DateTimeFormat('es-MX', {
+    timeZone: 'America/Mexico_City',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(d);
+};
+---
+
+{
+  hay && (
+    <section class="senal" aria-label="La señal ahora">
+      {visibles.length > 0 && (
+        <div>
+          <h2 class="beat-label senal-titulo">HOY EN LA SEÑAL</h2>
+          {visibles.map((b) => (
+            <div class:list={['senal-fila', { 'es-aire': b.alAire }]}>
+              <span class="beat-label senal-hora">
+                {b.horaInicio}
+                {b.cruzaMedianoche && <span class="senal-cruce" title="Termina al día siguiente">
+                  +1
+                </span>}
+              </span>
+              <span class="senal-nombre">{b.programa.nombre}</span>
+              <span class="beat-label senal-estado">
+                {b.alAire ? 'AL AIRE' : b.esVivo ? 'EN VIVO' : 'REPETICIÓN'}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {sono.length > 0 && (
+        <div>
+          <h2 class="beat-label senal-titulo">LO QUE SONÓ</h2>
+          {sono.slice(0, 4).map((s) => (
+            <div class="senal-fila es-sono">
+              <span class="senal-cancion">
+                {s.titulo}
+                {s.artista && <span class="senal-artista"> · {s.artista}</span>}
+              </span>
+              <span class="beat-label senal-estado">{hora(s.sonoEn) ?? ''}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  )
+}
+
+<style>
+  .senal {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 36px;
+    padding: 22px 24px 24px;
+    background: var(--mist-1);
+    color: var(--senal-tinta);
+    box-shadow: inset 0 1px 0 var(--senal-linea);
+  }
+  .senal-titulo {
+    font-size: 9px;
+    color: var(--senal-tinta);
+    margin: 0;
+  }
+  .senal-fila {
+    display: grid;
+    grid-template-columns: 74px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--senal-linea);
+  }
+  .senal-fila.es-sono {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+  }
+  .senal-hora {
+    font-size: 9px;
+    color: var(--senal-tinta-quieta);
+    white-space: nowrap;
+  }
+  /* El bloque al aire se marca con TINTA PLENA, no con un color de acento: el
+     acento de la marca es cálido y sobre este fondo claro no da 4.5:1. */
+  .es-aire .senal-hora,
+  .es-aire .senal-nombre,
+  .es-aire .senal-estado {
+    color: var(--senal-tinta);
+    font-weight: 600;
+  }
+  .senal-cruce {
+    margin-left: 3px;
+    font-size: 7px;
+    vertical-align: super;
+    color: var(--senal-tinta-quieta);
+  }
+  .senal-nombre,
+  .senal-cancion {
+    font: 500 14px / 1.26 var(--font-text);
+    color: var(--senal-tinta);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .senal-artista {
+    color: var(--senal-tinta-quieta);
+  }
+  .senal-estado {
+    font-size: 8px;
+    color: var(--senal-tinta-quieta);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 899px) {
+    .senal {
+      grid-template-columns: 1fr;
+      gap: 22px;
+      padding: 18px 16px 20px;
+    }
+    .senal-fila {
+      grid-template-columns: 62px minmax(0, 1fr) auto;
+      gap: 10px;
+    }
+  }
+</style>

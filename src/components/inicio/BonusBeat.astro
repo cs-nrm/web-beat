@@ -1,0 +1,271 @@
+---
+/**
+ * «BONUS BEAT» en el Inicio — `TRES TRACKS CADA VIERNES` de 13a.
+ *
+ * Sale de `listas`, no de una colección propia: cada edición es una `lista` del
+ * tipo «Bonus Beat», y su `canciones[].comentario` es la VIÑETA que el mapa de
+ * sitio pedía («por qué está aquí, qué contar de ella»). Los enlaces a plataformas
+ * salen gratis del catálogo de `canciones`.
+ *
+ * 🔴 La ruta se construye desde el SLUG del tipo, que es dato editorial. Este
+ * componente no sabe que se llama «Bonus Beat»: recibe el tipo y lo usa.
+ */
+import { urlMedia } from '@/lib/cms/client';
+import { fechaCorta } from '@/lib/nota';
+import type { Lista, TiposDeLista } from '@/types/payload';
+
+interface Props {
+  lista: Lista | null;
+  tipo: TiposDeLista | null;
+}
+
+const { lista, tipo } = Astro.props;
+
+const rutaTipo = tipo?.slug ? `/${tipo.slug}` : null;
+const fecha = fechaCorta(lista?.fecha);
+
+/**
+ * Las plataformas de una canción, solo las que tienen enlace.
+ *
+ * Recibe `unknown` y no un tipo: `canciones[].cancion` es `number | Cancione`
+ * según el `depth`, y el parámetro suelto evita un cast dentro de la plantilla —
+ * que Astro no parsea cuando el cast lleva una unión.
+ */
+function plataformasDe(c: unknown): Array<[string, string]> {
+  if (!c || typeof c !== 'object') return [];
+  const campos: Array<[string, string]> = [
+    ['SPOTIFY', 'spotify'],
+    ['APPLE', 'appleMusic'],
+    ['YOUTUBE', 'youtube'],
+    ['DEEZER', 'deezer'],
+  ];
+  const doc = c as Record<string, unknown>;
+  return campos
+    .map(([etiqueta, campo]): [string, unknown] => [etiqueta, doc[campo]])
+    .filter((par): par is [string, string] => typeof par[1] === 'string' && par[1].length > 0);
+}
+---
+
+{
+  lista && (
+    <section class="bb">
+      <div class="bb-cabeza">
+        <h2 class="beat-display bb-seccion">{(tipo?.nombre ?? lista.titulo).toUpperCase()}</h2>
+        <span class="beat-label bb-nota">
+          {tipo?.descripcion ?? 'TRES TRACKS CADA VIERNES'}
+          {fecha && ` · ${fecha}`}
+        </span>
+      </div>
+
+      {lista.canciones?.length ? (
+        lista.canciones.map((c, i) => {
+          const cancion = typeof c.cancion === 'object' ? c.cancion : null;
+          const portada = urlMedia(cancion?.portada, 'thumbnail');
+          const plataformas = plataformasDe(cancion);
+          return (
+            <div class="bb-fila">
+              <span class="beat-display bb-n">{String(i + 1).padStart(2, '0')}</span>
+              <div class="bb-portada">
+                {portada && <img src={portada} alt="" loading="lazy" decoding="async" />}
+                <div class="beat-grid bb-trama" />
+              </div>
+              <div class="bb-texto">
+                <span class="bb-titulo">{cancion?.titulo ?? '—'}</span>
+                <span class="bb-linea">
+                  {cancion?.artista}
+                  {/* La viñeta es lo que distingue a Bonus Beat de una playlist
+                      cualquiera: es el comentario editorial, no un dato del track. */}
+                  {c.comentario && (
+                    <>
+                      {cancion?.artista && ' · '}
+                      <span class="bb-vineta">{c.comentario}</span>
+                    </>
+                  )}
+                </span>
+              </div>
+              {plataformas.length > 0 && (
+                <div class="bb-plataformas">
+                  {plataformas.map(([etiqueta, url]) => (
+                    <a
+                      href={url}
+                      class="beat-label bb-plataforma"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {etiqueta}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })
+      ) : (
+        <p class="bb-vacio">
+          Esta edición todavía no tiene canciones cargadas.
+        </p>
+      )}
+
+      {rutaTipo && (
+        <div class="bb-pie">
+          <a href={rutaTipo} class="beat-label bb-mas">
+            VER TODAS LAS EDICIONES
+          </a>
+        </div>
+      )}
+    </section>
+  )
+}
+
+<style>
+  .bb {
+    padding: 44px 24px 0;
+  }
+  .bb-cabeza {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-quiet);
+  }
+  .bb-seccion {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--mist-2);
+    margin: 0;
+  }
+  .bb-nota {
+    color: var(--text-muted);
+    text-align: right;
+  }
+  .bb-fila {
+    display: grid;
+    grid-template-columns: 44px 92px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 20px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--border-hairline);
+  }
+  .bb-n {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text-faint);
+  }
+  .bb-portada {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    background: var(--grad-noche);
+    overflow: hidden;
+  }
+  .bb-portada img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .bb-trama {
+    position: absolute;
+    inset: 0;
+  }
+  .bb-texto {
+    min-width: 0;
+  }
+  .bb-titulo {
+    display: block;
+    font: 600 19px / 1.24 var(--font-text);
+    color: var(--mist-2);
+  }
+  .bb-linea {
+    display: block;
+    font: 500 14px / 1.4 var(--font-text);
+    color: var(--text-muted);
+    margin-top: 6px;
+    text-wrap: pretty;
+  }
+  .bb-vineta {
+    color: var(--text-body);
+  }
+  .bb-plataformas {
+    display: flex;
+    gap: 8px;
+  }
+  .bb-plataforma {
+    padding: 9px 13px;
+    background: var(--surface-card);
+    box-shadow: inset 0 0 0 1px var(--border-hairline);
+    color: var(--text-body);
+    font-size: 9px;
+    white-space: nowrap;
+  }
+  .bb-plataforma:hover {
+    background: var(--mist-0);
+    color: var(--noche-0);
+  }
+  .bb-vacio {
+    font: var(--type-body-sm);
+    color: var(--text-muted);
+    padding: 20px 0 0;
+  }
+  .bb-pie {
+    display: flex;
+    justify-content: center;
+    padding: 26px 0 0;
+  }
+  .bb-mas {
+    padding: 13px 20px;
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px var(--border-strong);
+    color: var(--mist-2);
+    font-size: 9px;
+    white-space: nowrap;
+  }
+  .bb-mas:hover {
+    background: var(--mist-0);
+    color: var(--noche-0);
+  }
+
+  @media (max-width: 899px) {
+    .bb {
+      padding: 32px 16px 0;
+    }
+    .bb-cabeza {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    .bb-seccion {
+      font-size: 20px;
+    }
+    .bb-nota {
+      text-align: left;
+      font-size: 8.5px;
+    }
+    /* La portada y el número se juntan arriba; las plataformas bajan a su fila. */
+    .bb-fila {
+      grid-template-columns: 30px 64px minmax(0, 1fr);
+      gap: 12px;
+      padding: 14px 0;
+    }
+    .bb-n {
+      font-size: 17px;
+    }
+    .bb-titulo {
+      font-size: 16px;
+    }
+    .bb-linea {
+      font-size: 13px;
+    }
+    .bb-plataformas {
+      grid-column: 2 / -1;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .bb-plataforma {
+      padding: 8px 11px;
+      font-size: 8px;
+    }
+  }
+</style>

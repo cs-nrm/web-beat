@@ -1,0 +1,160 @@
+---
+/**
+ * El archivo del Fenómeno Residente en el Inicio — la rejilla de tres con el
+ * número gigante, y el box de 300×250 pegado al costado.
+ *
+ * Los temas anteriores, no el vigente: el de la semana ya tiene su bloque arriba.
+ */
+import Anuncio from './Anuncio.astro';
+import { urlMedia } from '@/lib/cms/client';
+import type { Especiale } from '@/types/payload';
+
+interface Props {
+  temas: Especiale[];
+  /** El vigente, que se excluye de la rejilla porque ya está arriba. */
+  excluir?: number | null;
+}
+
+const { temas, excluir = null } = Astro.props;
+
+const anteriores = temas.filter((t) => t.id !== excluir).slice(0, 3);
+---
+
+{
+  anteriores.length > 0 && (
+    <section class="at">
+      <div class="at-rejilla">
+        {anteriores.map((t) => {
+          const portada = urlMedia(t.portada, 'card');
+          return (
+            <a href={`/especiales/${t.slug}`} class="at-tema">
+              <div class="at-numero-caja">
+                {portada && <img src={portada} alt="" loading="lazy" decoding="async" />}
+                <div class="beat-grid at-trama" />
+                {t.numero != null && (
+                  <span class="beat-display at-numero">{String(t.numero).padStart(2, '0')}</span>
+                )}
+                {t.estado === 'archivado' && (
+                  <span class="beat-label at-estado">CERRADO</span>
+                )}
+              </div>
+              <div class="at-titulo">{t.titulo}</div>
+              {t.etiquetaPublica && <span class="beat-label at-nota">{t.etiquetaPublica}</span>}
+            </a>
+          );
+        })}
+      </div>
+
+      <aside class="at-riel">
+        <Anuncio formato="box" />
+      </aside>
+    </section>
+  )
+}
+
+<style>
+  .at {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 24px;
+    align-items: start;
+    margin-top: 38px;
+    padding: 0 24px;
+  }
+  .at-rejilla {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2px;
+    background: var(--border-hairline);
+    padding: 2px;
+  }
+  .at-tema {
+    display: block;
+    background: var(--noche-1);
+    padding-bottom: 16px;
+    color: inherit;
+    text-decoration: none;
+    transition: background var(--dur-2) var(--ease-out);
+  }
+  .at-tema:hover {
+    background: var(--noche-2);
+  }
+  .at-numero-caja {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    background: var(--grad-noche);
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+  }
+  .at-numero-caja img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* La foto va atenuada porque el protagonista es el NÚMERO: es el archivo, y
+       lo que se busca ahí es «el tema 07», no una imagen. */
+    opacity: 0.42;
+  }
+  .at-trama {
+    position: absolute;
+    inset: 0;
+  }
+  .at-numero {
+    position: relative;
+    font-size: 52px;
+    font-weight: 800;
+    color: var(--mist-1);
+  }
+  .at-estado {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    font-size: 9px;
+    color: var(--text-faint);
+  }
+  .at-titulo {
+    font: 600 15px / 1.25 var(--font-text);
+    color: var(--mist-2);
+    padding: 14px 16px 0;
+    text-wrap: pretty;
+  }
+  .at-nota {
+    display: block;
+    padding: 8px 16px 0;
+    font-size: 9px;
+    color: var(--text-faint);
+  }
+  .at-riel {
+    position: sticky;
+    top: calc(var(--chrome-h) + 16px);
+  }
+
+  @media (max-width: 1199px) {
+    .at {
+      grid-template-columns: 1fr;
+    }
+    .at-riel {
+      position: static;
+      justify-self: center;
+    }
+  }
+  @media (max-width: 899px) {
+    .at {
+      margin-top: 26px;
+      padding: 0 16px;
+      gap: 20px;
+    }
+    .at-rejilla {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+    .at-numero {
+      font-size: 34px;
+    }
+    .at-titulo {
+      font-size: 14px;
+      padding: 12px 14px 0;
+    }
+  }
+</style>

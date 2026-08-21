@@ -1,5 +1,5 @@
 /* ⚠️ GENERADO — NO EDITAR A MANO.
- * Vendorizado desde cms-estaciones:src/payload-types.ts en el ref f6fe81b908bf79f621f91cf3f40359598dfbbd8c.
+ * Vendorizado desde cms-estaciones:src/payload-types.ts en el ref abfd52a03db4f67c827fcf9afafd21f49bc590b9.
  * Regenerar con: pnpm sync:types  (el pin vive en payload-types.lock.json).
  * Nota: se quita la augmentation `declare module 'payload'` del upstream
  *       (el front no instala el paquete payload; solo usa las interfaces).
@@ -81,10 +81,11 @@ export interface Config {
     categorias: Categoria;
     etiquetas: Etiqueta;
     especiales: Especiale;
+    listas: Lista;
     transmisiones: Transmisione;
     autores: Autore;
-    canciones: Cancione;
     bitacora: Bitacora;
+    canciones: Cancione;
     'estado-muestras': EstadoMuestra;
     avisos: Aviso;
     estaciones: Estacione;
@@ -114,10 +115,11 @@ export interface Config {
     categorias: CategoriasSelect<false> | CategoriasSelect<true>;
     etiquetas: EtiquetasSelect<false> | EtiquetasSelect<true>;
     especiales: EspecialesSelect<false> | EspecialesSelect<true>;
+    listas: ListasSelect<false> | ListasSelect<true>;
     transmisiones: TransmisionesSelect<false> | TransmisionesSelect<true>;
     autores: AutoresSelect<false> | AutoresSelect<true>;
-    canciones: CancionesSelect<false> | CancionesSelect<true>;
     bitacora: BitacoraSelect<false> | BitacoraSelect<true>;
+    canciones: CancionesSelect<false> | CancionesSelect<true>;
     'estado-muestras': EstadoMuestrasSelect<false> | EstadoMuestrasSelect<true>;
     avisos: AvisosSelect<false> | AvisosSelect<true>;
     estaciones: EstacionesSelect<false> | EstacionesSelect<true>;
@@ -550,7 +552,7 @@ export interface Etiqueta {
   createdAt: string;
 }
 /**
- * Agrupa contenido bajo una cobertura o una lista: la del tema de la semana, un top ten, la de un festival, la de una serie.
+ * Agrupa contenido bajo una cobertura o un tema: el de la semana, un festival, una serie. Para una lista de canciones (top ten, lanzamientos) usa «Listas».
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "especiales".
@@ -577,7 +579,30 @@ export interface Especiale {
    */
   inicio?: string | null;
   fin?: string | null;
+  /**
+   * La imagen con la que esto aparece LISTADO en otras páginas (tarjetas, módulos). El encabezado de su propia página se arma abajo, en «Cabecera».
+   */
   portada?: (number | null) | Media;
+  /**
+   * Cómo se ve el encabezado de la página. Todo es opcional: sin nada, el sitio usa su diseño de siempre.
+   */
+  cabecera?: {
+    fondo?: ('ninguno' | 'imagen' | 'color' | 'degradado') | null;
+    /**
+     * Se recorta según la pantalla, así que lo importante debe estar al centro. El texto va encima: mejor una imagen con zonas tranquilas que una llena de detalle.
+     */
+    imagen?: (number | null) | Media;
+    color?: string | null;
+    colorFin?: string | null;
+    /**
+     * Se guarda como el ángulo de CSS, tal cual lo usa el degradado.
+     */
+    direccion?: ('180deg' | '0deg' | '90deg' | '135deg') | null;
+    /**
+     * El logotipo propio de esto, si lo tiene. Se muestra en la cabecera en vez del título escrito. Conviene PNG o SVG con fondo transparente.
+     */
+    logo?: (number | null) | Media;
+  };
   /**
    * Lo que compone la lista, en el orden en que se muestra: arrastra para reordenar. Admite tipos distintos —una nota de video, un podcast, una transmisión— porque justo eso es lo que la hace una lista y no una categoría.
    */
@@ -594,6 +619,10 @@ export interface Especiale {
         | {
             relationTo: 'transmisiones';
             value: number | Transmisione;
+          }
+        | {
+            relationTo: 'listas';
+            value: number | Lista;
           }
       )[]
     | null;
@@ -612,13 +641,11 @@ export interface Especiale {
     | ({
         relationTo: 'transmisiones';
         value: number | Transmisione;
+      } | null)
+    | ({
+        relationTo: 'listas';
+        value: number | Lista;
       } | null);
-  /**
-   * Se eligen del catálogo, que se llena solo con lo que suena al aire (ver `canciones`). Arrastra para ordenar.
-   */
-  playlist?: (number | Cancione)[] | null;
-  playlistSpotify?: string | null;
-  playlistAppleMusic?: string | null;
   /**
    * Va como grupo de campos y no como colección propia: hoy hay un solo caso real. Cuando el segundo llegue de verdad (el mapa promete espacios patrocinables en eventos y en Beat MDMA), se extrae a su colección y esto se migra.
    */
@@ -665,6 +692,20 @@ export interface Podcast {
    */
   embedUrl?: string | null;
   audio?: (number | null) | Media;
+  /**
+   * Opcional. Si el episodio también está filmado, aquí va: enlace de YouTube o Vimeo, o un archivo mp4 subido a Media.
+   */
+  video?: {
+    fuente?: ('ninguno' | 'youtube' | 'vimeo' | 'archivo') | null;
+    /**
+     * Pega el enlace del video, o el código <iframe> completo que da la plataforma: se limpia solo. Aceptadas: YouTube, Vimeo.
+     */
+    url?: string | null;
+    /**
+     * Se sube a Media como cualquier archivo (Sharp solo procesa imágenes, el video se guarda tal cual). Un mp4 pesa mucho más que una foto: si el video ya está en YouTube o Vimeo, conviene enlazarlo en vez de subirlo.
+     */
+    archivo?: (number | null) | Media;
+  };
   /**
    * Ordena el listado y el RSS de podcasts. Se llena sola con la hora de creación.
    */
@@ -796,7 +837,83 @@ export interface Transmisione {
   createdAt: string;
 }
 /**
- * Se llena sola con lo que suena al aire. Enriquécela con portada y enlaces a plataformas.
+ * Top ten, hot parade, lanzamientos. Cada edición es su propio documento: para la de la semana que entra, duplica la anterior y cámbiale la fecha.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "listas".
+ */
+export interface Lista {
+  id: number;
+  estacion?: (number | null) | Estacione;
+  titulo: string;
+  /**
+   * Con esto el sitio sabe qué lista pedir. Es parte de la URL.
+   */
+  tipo: 'topten' | 'hot-parade' | 'lanzamientos' | 'otra';
+  /**
+   * Qué edición es. Ordena las listas y forma parte de la URL.
+   */
+  fecha: string;
+  /**
+   * Opcional. Un par de líneas para la página de la lista.
+   */
+  descripcion?: string | null;
+  /**
+   * El orden de la lista es el orden de aquí: arrastra para reordenar. Las canciones salen del catálogo, que se llena solo con lo que suena al aire.
+   */
+  canciones?:
+    | {
+        cancion: number | Cancione;
+        /**
+         * Los escribe el sitio público; aquí solo se ven.
+         */
+        votos?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  playlistSpotify?: string | null;
+  playlistAppleMusic?: string | null;
+  /**
+   * La imagen con la que la lista aparece LISTADA en otras páginas. El encabezado de su propia página se arma abajo.
+   */
+  portada?: (number | null) | Media;
+  /**
+   * Cómo se ve el encabezado de la página. Todo es opcional: sin nada, el sitio usa su diseño de siempre.
+   */
+  cabecera?: {
+    fondo?: ('ninguno' | 'imagen' | 'color' | 'degradado') | null;
+    /**
+     * Se recorta según la pantalla, así que lo importante debe estar al centro. El texto va encima: mejor una imagen con zonas tranquilas que una llena de detalle.
+     */
+    imagen?: (number | null) | Media;
+    color?: string | null;
+    colorFin?: string | null;
+    /**
+     * Se guarda como el ángulo de CSS, tal cual lo usa el degradado.
+     */
+    direccion?: ('180deg' | '0deg' | '90deg' | '135deg') | null;
+    /**
+     * El logotipo propio de esto, si lo tiene. Se muestra en la cabecera en vez del título escrito. Conviene PNG o SVG con fondo transparente.
+     */
+    logo?: (number | null) | Media;
+  };
+  /**
+   * URL pública. Se arma sola con el tipo y la fecha; cambia la fecha y cambia esto.
+   */
+  slug?: string | null;
+  /**
+   * Nace despublicada: publícala cuando la lista esté completa.
+   */
+  estado?: ('publicada' | 'despublicada') | null;
+  /**
+   * Mientras esté encendida, el sitio puede sumar votos a las canciones de esta lista. Apagarla cierra la votación sin borrar los conteos.
+   */
+  votacionAbierta?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Se llena sola con lo que suena al aire en Dalet. Enriquécela con portada, reproductor y enlaces a plataformas.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "canciones".
@@ -814,10 +931,18 @@ export interface Cancione {
    * Opcional. Dalet no la manda; se sube a mano.
    */
   portada?: (number | null) | Media;
+  /**
+   * Pega la URL del video o del audio, o el código <iframe> completo que da la plataforma: se limpia solo. Aceptadas: OmnyStudio, SoundCloud, Mixcloud, Spotify, Apple Podcasts, Amazon Music, Deezer, Spreaker, Audioboom, Podbean, Buzzsprout, Simplecast, Libsyn, Megaphone, iono.fm, iVoox, Anchor, YouTube, Vimeo.
+   */
+  embedUrl?: string | null;
   spotify?: string | null;
   appleMusic?: string | null;
   youtube?: string | null;
   deezer?: string | null;
+  /**
+   * Quién creó la ficha. «Dalet» = la creó sola la ingesta la primera vez que la canción sonó al aire.
+   */
+  origen?: ('dalet' | 'manual') | null;
   /**
    * Id de biblioteca de Dalet. Lo escribe la ingesta y no se edita: es la llave que evita duplicados y permite cruzar con lo que salió Al Aire.
    */
@@ -1387,6 +1512,10 @@ export interface PayloadLockedDocument {
         value: number | Especiale;
       } | null)
     | ({
+        relationTo: 'listas';
+        value: number | Lista;
+      } | null)
+    | ({
         relationTo: 'transmisiones';
         value: number | Transmisione;
       } | null)
@@ -1395,12 +1524,12 @@ export interface PayloadLockedDocument {
         value: number | Autore;
       } | null)
     | ({
-        relationTo: 'canciones';
-        value: number | Cancione;
-      } | null)
-    | ({
         relationTo: 'bitacora';
         value: number | Bitacora;
+      } | null)
+    | ({
+        relationTo: 'canciones';
+        value: number | Cancione;
       } | null)
     | ({
         relationTo: 'estado-muestras';
@@ -1663,6 +1792,13 @@ export interface PodcastsSelect<T extends boolean = true> {
   fuente?: T;
   embedUrl?: T;
   audio?: T;
+  video?:
+    | T
+    | {
+        fuente?: T;
+        url?: T;
+        archivo?: T;
+      };
   fecha?: T;
   categorias?: T;
   etiquetas?: T;
@@ -1732,11 +1868,18 @@ export interface EspecialesSelect<T extends boolean = true> {
   inicio?: T;
   fin?: T;
   portada?: T;
+  cabecera?:
+    | T
+    | {
+        fondo?: T;
+        imagen?: T;
+        color?: T;
+        colorFin?: T;
+        direccion?: T;
+        logo?: T;
+      };
   piezas?: T;
   piezaDestacada?: T;
-  playlist?: T;
-  playlistSpotify?: T;
-  playlistAppleMusic?: T;
   patrocinador?:
     | T
     | {
@@ -1746,6 +1889,42 @@ export interface EspecialesSelect<T extends boolean = true> {
       };
   slug?: T;
   estado?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "listas_select".
+ */
+export interface ListasSelect<T extends boolean = true> {
+  estacion?: T;
+  titulo?: T;
+  tipo?: T;
+  fecha?: T;
+  descripcion?: T;
+  canciones?:
+    | T
+    | {
+        cancion?: T;
+        votos?: T;
+        id?: T;
+      };
+  playlistSpotify?: T;
+  playlistAppleMusic?: T;
+  portada?: T;
+  cabecera?:
+    | T
+    | {
+        fondo?: T;
+        imagen?: T;
+        color?: T;
+        colorFin?: T;
+        direccion?: T;
+        logo?: T;
+      };
+  slug?: T;
+  estado?: T;
+  votacionAbierta?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1791,25 +1970,6 @@ export interface AutoresSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "canciones_select".
- */
-export interface CancionesSelect<T extends boolean = true> {
-  estacion?: T;
-  titulo?: T;
-  artista?: T;
-  duracion?: T;
-  portada?: T;
-  spotify?: T;
-  appleMusic?: T;
-  youtube?: T;
-  deezer?: T;
-  selector?: T;
-  categoriaPlayout?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "bitacora_select".
  */
 export interface BitacoraSelect<T extends boolean = true> {
@@ -1821,6 +1981,27 @@ export interface BitacoraSelect<T extends boolean = true> {
   selector?: T;
   categoriaPlayout?: T;
   duracion?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "canciones_select".
+ */
+export interface CancionesSelect<T extends boolean = true> {
+  estacion?: T;
+  titulo?: T;
+  artista?: T;
+  duracion?: T;
+  portada?: T;
+  embedUrl?: T;
+  spotify?: T;
+  appleMusic?: T;
+  youtube?: T;
+  deezer?: T;
+  origen?: T;
+  selector?: T;
+  categoriaPlayout?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2242,10 +2423,11 @@ export interface TaskCreateCollectionExport {
       | 'categorias'
       | 'etiquetas'
       | 'especiales'
+      | 'listas'
       | 'transmisiones'
       | 'autores'
-      | 'canciones'
       | 'bitacora'
+      | 'canciones'
       | 'estado-muestras'
       | 'avisos'
       | 'estaciones'

@@ -68,3 +68,86 @@
 .t-body-sm   { font: var(--type-body-sm); }
 .t-label     { font: var(--type-label); letter-spacing: var(--track-label); text-transform: uppercase; }
 .t-mono      { font: var(--type-mono); letter-spacing: var(--track-mono); }
+
+/* ============================================================
+   Escala responsiva y titular editorial
+   ------------------------------------------------------------
+   Dos huecos del DS que el lienzo v14 destapó. Los valores de escritorio y de
+   móvil salen de MEDIR los artboards en el navegador, no de inventarlos.
+   ============================================================ */
+
+/**
+ * 1. TITULAR EDITORIAL — el DS no lo tiene.
+ *
+ * Sus roles `--type-h1`/`--type-h2` usan `--font-display` (Archivo expandido), pero
+ * el lienzo pone los titulares de NOTA en la cara de TEXTO en bold:
+ *   · 14c (nota, escritorio) → Schibsted Grotesk 700, 52px / 54.08px, -0.026em
+ *   · 14f (nota, móvil)      → Schibsted Grotesk 700, 30px / 32.4px
+ * Mientras que el Fenómeno Residente (14d/14g) SÍ usa Archivo 800 (64px / 34px).
+ *
+ * O sea que la regla real es: **Archivo se reserva para títulos de SECCIÓN y de
+ * marca; los titulares editoriales van en la cara de texto**. Tiene sentido —
+ * Archivo expandido en un titular de 52px sería agresivo— pero no está escrito en
+ * ningún token, así que se escribe aquí.
+ *
+ * Los tamaños 52px y 26px no existen en la escala del DS (que salta 48 → 40 y
+ * 30 → 23), y por eso son tokens nuevos en vez de un rol reciclado.
+ */
+:root {
+  --size-title-1: 52px;
+  --size-title-2: 26px;
+  --lh-title: 1.04;
+  --track-title: -0.026em;
+  --type-title-1: var(--w-bold) var(--size-title-1) / var(--lh-title) var(--font-text);
+  --type-title-2: var(--w-bold) var(--size-title-2) / var(--lh-heading) var(--font-text);
+}
+
+.t-title-1 { font: var(--type-title-1); letter-spacing: var(--track-title); }
+.t-title-2 { font: var(--type-title-2); letter-spacing: var(--track-heading); }
+
+/**
+ * 2. ESCALA MÓVIL — el DS no la tiene.
+ *
+ * Sus `--size-*` son px FIJOS "calzados a una retícula de 1240px", y el lienzo
+ * resuelve el móvil con px EN LÍNEA por pantalla: no hay `clamp()` ni `vw` en
+ * ningún artboard (verificado recorriendo las hojas de estilo). O sea que la
+ * escala móvil está DIBUJADA, no sistematizada.
+ *
+ * Se sistematiza aquí, redefiniendo los `--size-*` en el breakpoint. Así el sitio
+ * escala solo y ningún componente carga tamaños propios — si cada uno los llevara
+ * en línea acabaríamos con decenas de números sueltos imposibles de mantener.
+ *
+ * Medido en los artboards (390px):
+ *   ·  --size-title-1   52 → 30   (14f)
+ *   ·  --size-title-2   26 → 22   (14f)
+ *   ·  --size-display-2 64 → 34   (14g, Archivo 800)
+ *   ·  --size-body-lg   18 → 16   (14f: "cuerpo a 16px")
+ *   ·  --size-body      16 → 15   (14a/14g, cuerpo de tarjeta)
+ *
+ * ⚠️ El resto se escala en la misma proporción (~0.6–0.9 según el escalón), que es
+ * una INFERENCIA, no una medición: el lienzo solo trae 390 y 1280.
+ *
+ * ⚠️ Y el corte va en `--bp-md` (900px) y no en 640, también a falta de artboard:
+ * entre 640 y 900 no hay diseño, y quedarse con la escala chica de más es seguro
+ * (un titular pequeño nunca rompe la retícula; uno grande sí). Revisar cuando haya
+ * un artboard de tableta.
+ */
+@media (max-width: 899px) {
+  :root {
+    --size-display-1: 44px;
+    --size-display-2: 34px;
+    --size-display-3: 30px;
+    --size-title-1: 30px;
+    --size-title-2: 22px;
+    --size-h1: 28px;
+    --size-h2: 24px;
+    --size-h3: 20px;
+    --size-h4: 18px;
+    --size-body-lg: 16px;
+    --size-body: 15px;
+    --size-body-sm: 14px;
+    --size-caption: 12px;
+    /* --size-micro y los de mono NO se bajan: 11px y 12px ya son el piso
+       legible, y son las etiquetas del sistema (categoría, duración, minutos). */
+  }
+}

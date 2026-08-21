@@ -462,6 +462,73 @@ export function iniciarPlayer(): void {
 
   sdk.addEventListener('stream-status', alCambiarEstado);
 
+  /**
+   * ───────── Metadata en banda (cue points de Triton) ─────────
+   *
+   * 🔴 Esta es la fuente correcta del "qué suena", y no un JSON encuestado.
+   *
+   * El sitio viejo consulta `cdn.nrm.com.mx/.../cancion.json` cada 15-60 s y de
+   * paso adivina los cortes comerciales revisando si `categoria` está en una lista
+   * (COMERCIALES, DROP, ELEMENTOS…). Dos problemas:
+   *
+   *  1. Ese JSON refleja lo que hace el PLAYOUT, no lo que el oyente está
+   *     escuchando. Con el búfer del stream de por medio, el sitio muestra una
+   *     canción que todavía no suena. Es un desfase que el polling no puede
+   *     arreglar por más frecuente que sea.
+   *  2. Y encuestar cuesta una petición por intervalo, por oyente, para siempre.
+   *
+   * Los cue points vienen DENTRO del stream por el canal SBM (el `_SBM` que se ve
+   * como `eventsource` en la red), así que llegan **alineados con el audio** y solo
+   * cuando algo cambia. El SDK ya tiene ese canal abierto: el sitio viejo lo tiene
+   * conectado y no lo usa.
+   *
+   * ⚠️ Los nombres de campo NO están verificados: en este entorno el stream no se
+   * establece, así que no he visto un cue point real. Se leen de forma tolerante y
+   * se vuelca el payload crudo en dev, que es cómo se fija el parser contra lo
+   * observado en vez de escribirlo a ciegas.
+   */
+  const leerCue = (data: unknown): { titulo?: string; artista?: string } => {
+    const cp = (data as { cuePoint?: Record<string, unknown> })?.cuePoint ?? {};
+    const tomar = (...claves: string[]): string | undefined => {
+      for (const k of claves) {
+        const v = cp[k];
+        if (typeof v === 'string' && v.trim()) return v.trim();
+      }
+      return undefined;
+    };
+    return {
+      titulo: tomar('cueTitle', 'title', 'trackTitle', 'songTitle'),
+      artista: tomar('artistName', 'artist', 'trackArtist'),
+    };
+  };
+
+  sdk.addEventListener('track-cue-point', (e) => {
+    if (import.meta.env.DEV) console.info('[player] track-cue-point', e);
+    const { titulo, artista } = leerCue(e);
+    if (!titulo) return; // sin título no se pisa lo que ya está
+    textoOriginal = [titulo, artista].filter(Boolean).join(' · ');
+    // Durante un corte no se pisa el aviso; al terminar se restaura este valor.
+    if (contenedor()?.dataset.status !== 'anuncio') restaurarSonando();
+  });
+
+  /**
+   * Marcadores de corte comercial, en banda. Sustituyen a la heurística de
+   * categorías del sitio viejo, que dependía de mantener una lista a mano y se
+   * rompía cuando el playout agregaba una categoría nueva.
+   *
+   * Es distinto de `ad-playback-*`, que son los audio ads que inserta el propio
+   * SDK: esto marca los cortes de la señal al aire.
+   */
+  sdk.addEventListener('ad-break-cue-point', () => {
+    pintarEstado('anuncio');
+    pintarSonando('PAUSA COMERCIAL');
+  });
+
+  sdk.addEventListener('ad-break-cue-point-complete', () => {
+    if (contenedor()?.dataset.status === 'anuncio') pintarEstado('sonando');
+    restaurarSonando();
+  });
+
   sdk.addEventListener('ad-playback-start', () => {
     pintarEstado('anuncio');
     pintarSonando('PAUSA COMERCIAL');

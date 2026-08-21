@@ -530,8 +530,26 @@ export function iniciarPlayer(): void {
       // snake_case es lo que manda el canal; camelCase por si el SDK lo normaliza.
       titulo: tomar('cue_title', 'cueTitle', 'title'),
       artista: tomar('track_artist_name', 'artistName', 'artist', 'trackArtist'),
-      // 🔴 `name` es el discriminador. `ad_type` NO sirve: llega "endbreak" en todos.
-      esCancion: nombre === '' || nombre === 'track',
+      /**
+       * 🔴 LISTA BLANCA ESTRICTA: solo `track` se pinta. Nada más.
+       *
+       * Antes esto decía `nombre === '' || nombre === 'track'`, y ese `''` era un
+       * agujero: un cue point SIN nombre se habría tratado como canción y su
+       * `cue_title` habría salido en pantalla.
+       *
+       * Importa porque el universo de tipos es más grande de lo que parece — el SDK
+       * conoce SIETE: track, ad-break, custom, hls, metadata, speech y empty. El de
+       * `custom` es lo que cada estación configure, así que puede traer cualquier
+       * cosa, incluidos códigos internos. Y ya vimos que los de `ad` traen nombres
+       * de asset como «FRASE BEAT 100.9 FM (ROMPECORTE)-01» y de anunciante como
+       * «RDF1382026 \ BANXICO CONTIGO 2026».
+       *
+       * Con lista negra, un tipo nuevo entra solo y aparece en la barra sin que
+       * nadie se entere. Con lista blanca, lo que no se conoce simplemente no se
+       * muestra. Es el mismo criterio que el CMS aplica a `categoriasMusicales`, y
+       * por la misma razón.
+       */
+      esCancion: nombre === 'track',
     };
   };
 

@@ -4,8 +4,24 @@
     {
       "name": "web-beat",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["dev", "--port", "4321"],
+      "runtimeArgs": [
+        "dev",
+        "--port",
+        "4321"
+      ],
       "port": 4321
+    },
+    {
+      "name": "design",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4399",
+        "--directory",
+        "design/Nuevo sitio de beat full"
+      ],
+      "port": 4399
     }
   ]
 }

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/tokens/colors.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/tokens/typography.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/tokens/effects.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/tokens/motion.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/tokens/motifs.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/tokens/layout.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/tokens/base.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/components/beat-components.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/styles.css">
+<script src="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/_ds_bundle.js"></script>
+<style>
+body{margin:0;background:#050706;font-family:"Schibsted Grotesk",system-ui,sans-serif}
+a{color:inherit;text-decoration:none}
+</style>
+</helmet>
+
+<sc-if value="{{ escritorio }}" hint-placeholder-val="{{ true }}">
+<div>
+<div style="display:flex;align-items:center;gap:16px;height:48px;padding:0 24px;background:var(--mist-0);color:var(--noche-0)">
+<span style="display:flex;align-items:center;gap:8px;flex:none">
+<span style="width:7px;height:7px;border-radius:999px;background:var(--noche-0)"></span>
+<span class="beat-label" style="font-size:9px;color:var(--noche-0);white-space:nowrap">AL AIRE · 100.9 FM</span>
+</span>
+<span style="width:1px;height:18px;background:rgba(5,7,6,.18);flex:none"></span>
+<span style="display:flex;align-items:center;gap:9px;flex:none">
+<span style="display:grid;place-items:center;width:30px;height:30px;border-radius:999px;background:var(--noche-0);color:var(--mist-0)">
+<x-import component-from-global-scope="Beat1009DesignSystem_b52646.Icon" name="pause" size="{{ h14 }}" hint-size="14px,14px"></x-import>
+</span>
+<span style="font:600 13px/1.2 var(--font-text);white-space:nowrap">Coastal Haze · Bicep</span>
+</span>
+<span style="flex:1;display:flex;align-items:center;gap:1.5px;height:20px;min-width:0">
+<sc-for list="{{ waveInk }}" as="w" hint-placeholder-count="72">
+<span style="flex:1;background:{{ w.color }};height:{{ w.h }}"></span>
+</sc-for>
+</span>
+<span style="display:flex;align-items:center;gap:9px;flex:none;color:var(--noche-0)">
+<x-import component-from-global-scope="Beat1009DesignSystem_b52646.Icon" name="volume-2" size="{{ h16 }}" hint-size="16px,16px"></x-import>
+<span style="position:relative;display:block;width:72px;height:3px;background:rgba(5,7,6,.2)">
+<span style="position:absolute;left:0;top:0;bottom:0;width:62%;background:var(--noche-0)"></span>
+<span style="position:absolute;left:62%;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:999px;background:var(--noche-0)"></span>
+</span>
+</span>
+<span class="beat-label" style="flex:none;font-size:8.5px;color:rgba(5,7,6,.55);white-space:nowrap">4 218 ESCUCHANDO</span>
+<span style="flex:none;display:grid;place-items:center;width:32px;height:32px;box-shadow:inset 0 0 0 1px rgba(5,7,6,.22);color:var(--noche-0)">
+<x-import component-from-global-scope="Beat1009DesignSystem_b52646.Icon" name="chevron-down" size="{{ h16 }}" hint-size="16px,16px"></x-import>
+</span>
+<span style="flex:none;display:grid;place-items:center;width:32px;height:32px;background:var(--noche-0);color:var(--mist-0)">
+<x-import component-from-global-scope="Beat1009DesignSystem_b52646.Icon" name="menu" size="{{ h16 }}" hint-size="16px,16px"></x-import>
+</span>
+</div>
+<header style="display:flex;align-items:center;gap:24px;height:68px;padding:0 24px;background:rgba(255,255,255,.045);box-shadow:inset 0 -1px 0 var(--border-quiet)">
+<a href="{{ anchor }}" style="flex:none;display:block">
+<img src="assets/logo/beat-blanco.svg" alt="Beat 100.9" style="height:26px;width:auto;display:block">
+</a>
+<nav style="display:flex;gap:18px">
+<sc-for list="{{ nav }}" as="it" hint-placeholder-count="8">
+<a href="{{ anchor }}" class="beat-label" style="color:{{ it.color }};font-size:9.5px;white-space:nowrap" style-hover="color:var(--mist-0)">{{ it.short }}</a>
+</sc-for>
+</nav>
+<span style="margin-left:auto;width:40px;height:40px;color:var(--text-muted);display:grid;place-items:center">
+<x-import component-from-global-scope="Beat1009DesignSystem_b52646.Icon" name="search" size="{{ h18 }}" hint-size="18px,18px"></x-import>
+</span>
+</header>
+</div>
+</sc-if>
+
+<sc-if value="{{ movil }}" hint-placeholder-val="{{ false }}">
+<div>
+<div style="display:flex;align-items:center;gap:10px;height:48px;padding:0 12px;background:var(--mist-0);color:var(--noche-0)">
+<span style="display:flex;align-items:center;gap:7px;flex:none">
+<span style="width:6px;height:6px;border-radius:999px;background:var(--noche-0)"></span>
+<span class="beat-label" style="font-size:8px;color:var(--noche-0);white-space:nowrap">AL AIRE</span>
+</span>
+<span style="display:grid;place-items:center;width:30px;height:30px;border-radius:999px;background:var(--noche-0);color:var(--mist-0);flex:none">
+<x-import component-from-global-scope="Beat1009DesignSystem_b52646.Icon" name="pause" size="{{ h14 }}" hint-size="14px,14px"></x-import>
+</span>
+<span style="flex:1;min-width:0;font:600 12px/1.2 var(--font-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Coastal Haze · Bicep</span>
+<span style="display:flex;align-items:center;gap:1.5px;height:16px;width:52px;flex:none">
+<sc-for list="{{ waveMini }}" as="w" hint-placeholder-count="18">
+<span style="flex:1;background:{{ w.color }};height:{{ w.h }}"></span>
+</sc-for>
+</span>
+<span style="flex:none;display:grid;place-items:center;width:28px;height:28px;box-shadow:inset 0 0 0 1px rgba(5,7,6,.22);color:var(--noche-0)">
+<x-import component-from-global-scope="Beat1009DesignSystem_b52646.Icon" name="chevron-down" size="{{ h14 }}" hint-size="14px,14px"></x-import>
+</span>
+</div>
+<header style="display:flex;align-items:center;gap:8px;height:56px;padding:0 8px 0 16px;background:rgba(255,255,255,.045);box-shadow:inset 0 -1px 0 var(--border-quiet)">
+<a href="{{ anchor }}" style="flex:none;display:block">
+<img src="assets/logo/beat-blanco.svg" alt="Beat 100.9" style="height:22px;width:auto;display:block">
+</a>
+<span style="margin-left:auto;display:grid;place-items:center;width:44px;height:44px;color:var(--text-muted)">
+<x-import component-from-global-scope="Beat1009DesignSystem_b52646.Icon" name="search" size="{{ h20 }}" hint-size="20px,20px"></x-import>
+</span>
+<span style="display:grid;place-items:center;width:44px;height:44px;background:var(--mist-0);color:var(--noche-0)">
+<x-import component-from-global-scope="Beat1009DesignSystem_b52646.Icon" name="menu" size="{{ h20 }}" hint-size="20px,20px"></x-import>
+</span>
+</header>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:116},&quot;movil&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;activa&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;anchor&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;#&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const movil = this.props.movil ?? false;
+    const activa = this.props.activa ?? '';
+    const items = [
+      { short: 'Inicio' }, { short: 'En vivo' }, { short: 'Fenómeno' }, { short: 'Bonus Beat' },
+      { short: 'Scanner' }, { short: 'Agenda' }, { short: 'Comunidad' }, { short: 'Marcas' },
+    ];
+    const mk = (n, amp) => Array.from({ length: n }, (_, i) => {
+      const h = 3 + Math.round(Math.abs(Math.sin(i * 0.7) * Math.cos(i * 0.31)) * amp);
+      return { h: h + 'px', color: i < Math.round(n * 0.62) ? 'var(--noche-0)' : 'rgba(5,7,6,.26)' };
+    });
+    return {
+      h14: 14, h16: 16, h18: 18, h20: 20,
+      movil,
+      escritorio: !movil,
+      anchor: this.props.anchor ?? '#',
+      nav: items.map((it) => ({ ...it, color: it.short === activa ? 'var(--mist-0)' : 'var(--text-muted)' })),
+      waveInk: mk(72, 15),
+      waveMini: mk(18, 11),
+    };
+  }
+}
+</script>
+</body>
+</html>

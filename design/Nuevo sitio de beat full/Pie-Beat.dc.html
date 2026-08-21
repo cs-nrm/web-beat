@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/tokens/colors.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/tokens/typography.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/tokens/effects.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/tokens/motion.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/tokens/motifs.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/tokens/layout.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/tokens/base.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/components/beat-components.css">
+<link rel="stylesheet" href="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/styles.css">
+<script src="_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/_ds_bundle.js"></script>
+<style>
+body{margin:0;background:#050706;font-family:"Schibsted Grotesk",system-ui,sans-serif}
+a{color:inherit;text-decoration:none}
+</style>
+</helmet>
+
+<sc-if value="{{ escritorio }}" hint-placeholder-val="{{ true }}">
+<div style="background:var(--noche-0)">
+<footer style="position:relative;padding:44px 56px 22px;background:var(--noche-1);overflow:hidden;box-shadow:inset 0 1px 0 var(--border-hairline)">
+<span class="beat-display" style="position:absolute;left:24px;bottom:-34px;font-size:210px;font-weight:800;line-height:.8;color:rgba(255,255,255,.032);white-space:nowrap;pointer-events:none">BEAT BEAT</span>
+<div style="position:relative;display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:44px;align-items:start">
+<div>
+<div style="font:700 15px/1.2 var(--font-text);color:var(--mist-1)">Nuestras Secciones</div>
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:18px">
+<sc-for list="{{ secciones }}" as="it" hint-placeholder-count="8">
+<a href="{{ anchor }}" style="color:var(--mist-5);font:400 13.5px/1.3 var(--font-text)" style-hover="color:var(--mist-1)">{{ it }}</a>
+</sc-for>
+</div>
+</div>
+<div>
+<div style="font:700 15px/1.2 var(--font-text);color:var(--mist-1)">Radio en vivo</div>
+<p style="font:400 13.5px/1.5 var(--font-text);color:var(--mist-5);margin:16px 0 0">Escucha nuestra señal <a href="{{ anchor }}" style="color:var(--mist-1);font-weight:700">aquí.</a></p>
+<div style="margin-top:26px">
+<img src="assets/logo/beat-blanco.svg" alt="Beat 100.9" style="height:46px;width:auto;display:block">
+</div>
+<div class="beat-label" style="margin-top:22px;color:var(--mist-5);font-size:9px;white-space:nowrap">ESCUCHA EN</div>
+<div style="display:flex;gap:8px;margin-top:10px">
+<span class="beat-label" style="padding:9px 13px;box-shadow:inset 0 0 0 1px var(--border-quiet);color:var(--mist-2);font-size:9px;white-space:nowrap">IHEARTRADIO</span>
+<span class="beat-label" style="padding:9px 13px;box-shadow:inset 0 0 0 1px var(--border-quiet);color:var(--mist-2);font-size:9px;white-space:nowrap">TUNEIN</span>
+</div>
+</div>
+<div>
+<div style="font:700 15px/1.2 var(--font-text);color:var(--mist-1)">Síguenos en redes sociales</div>
+<div style="display:flex;align-items:center;gap:14px;margin-top:18px;color:var(--mist-2)">
+<sc-for list="{{ redes }}" as="r" hint-placeholder-count="4">
+<a href="{{ anchor }}" style="display:grid;place-items:center;width:36px;height:36px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--border-hairline)" style-hover="color:var(--mist-0);box-shadow:inset 0 0 0 1px var(--border-strong)">
+<x-import component-from-global-scope="Beat1009DesignSystem_b52646.Icon" name="{{ r }}" size="{{ h18 }}" hint-size="18px,18px"></x-import>
+</a>
+</sc-for>
+<a href="{{ anchor }}" class="beat-label" style="padding:11px 12px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--border-hairline);color:var(--mist-2);font-size:9px;white-space:nowrap" style-hover="color:var(--mist-0)">TIKTOK</a>
+</div>
+<div style="font:700 15px/1.2 var(--font-text);color:var(--mist-1);margin-top:32px">Descarga nuestras apps</div>
+<div style="display:flex;gap:10px;margin-top:16px">
+<sc-for list="{{ apps }}" as="ap" hint-placeholder-count="3">
+<a href="{{ anchor }}" style="display:flex;flex-direction:column;gap:3px;padding:9px 14px;border-radius:var(--r-2);box-shadow:inset 0 0 0 1px var(--border-quiet)" style-hover="box-shadow:inset 0 0 0 1px var(--border-strong)">
+<span class="beat-label" style="font-size:7px;color:var(--mist-5);white-space:nowrap">{{ ap.k }}</span>
+<span style="font:600 13px/1 var(--font-text);color:var(--mist-2);white-space:nowrap">{{ ap.v }}</span>
+</a>
+</sc-for>
+</div>
+</div>
+<img src="assets/logo/beat-blanco.svg" alt="Beat 100.9" style="height:38px;width:auto;display:block">
+</div>
+<div style="position:relative;margin-top:40px;padding-top:20px;border-top:1px solid var(--border-hairline);text-align:center">
+<p class="beat-label" style="font-size:8.5px;line-height:1.7;color:var(--mist-5);margin:0;letter-spacing:.1em">© 2026 BEAT. TODOS LOS DERECHOS RESERVADOS. EL MATERIAL DE ESTE SITIO NO PUEDE REPRODUCIRSE, DISTRIBUIRSE, TRANSMITIRSE, ALMACENARSE EN CACHÉ NI UTILIZARSE DE OTRO MODO, EXCEPTO CON EL PERMISO PREVIO POR ESCRITO DE NRM COMUNICACIONES.</p>
+<p class="beat-label" style="font-size:8.5px;line-height:1.7;color:var(--mist-5);margin:8px 0 0;letter-spacing:.1em">BEAT Y BEAT 100.9 SON MARCAS REGISTRADAS CON DERECHOS DE AUTOR DE NRM COMUNICACIONES.</p>
+</div>
+</footer>
+<div style="background:var(--noche-0);padding:34px 56px 26px;box-shadow:inset 0 1px 0 var(--border-hairline)">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:32px">
+<sc-for list="{{ estaciones }}" as="es" hint-placeholder-count="5">
+<a href="{{ anchor }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--mist-5)" style-hover="color:var(--mist-0)">
+<span class="beat-display" style="font-size:19px;font-weight:800;letter-spacing:-.01em;white-space:nowrap">{{ es.name }}</span>
+<span class="beat-label" style="font-size:8px;white-space:nowrap">{{ es.sub }}</span>
+</a>
+</sc-for>
+</div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:32px;margin-top:30px;padding-top:20px;border-top:1px solid var(--border-hairline)">
+<div style="display:flex;align-items:center;gap:12px">
+<a href="{{ anchor }}" style="font:600 13px/1 var(--font-text);color:var(--mist-1)" style-hover="color:#FFFFFF">Ventas</a>
+<span style="color:var(--graphite-3)">|</span>
+<a href="{{ anchor }}" style="font:400 13px/1 var(--font-text);color:var(--mist-5)" style-hover="color:var(--mist-1)">Aviso de privacidad</a>
+<span style="color:var(--graphite-3)">|</span>
+<a href="{{ anchor }}" style="font:400 13px/1 var(--font-text);color:var(--mist-5)" style-hover="color:var(--mist-1)">Términos y condiciones</a>
+</div>
+<span style="font:400 13px/1 var(--font-text);color:var(--mist-5)">NRM Comunicaciones (C) 2026 Todos los Derechos Reservados.</span>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ movil }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--noche-0)">
+<footer style="position:relative;padding:30px 20px 20px;background:var(--noche-1);overflow:hidden;box-shadow:inset 0 1px 0 var(--border-hairline)">
+<span class="beat-display" style="position:absolute;left:-8px;bottom:-22px;font-size:120px;font-weight:800;line-height:.8;color:rgba(255,255,255,.03);white-space:nowrap;pointer-events:none">BEAT</span>
+<div style="position:relative">
+<img src="assets/logo/beat-blanco.svg" alt="Beat 100.9" style="height:34px;width:auto;display:block">
+<p style="font:400 13.5px/1.5 var(--font-text);color:var(--mist-5);margin:16px 0 0">Escucha nuestra señal <a href="{{ anchor }}" style="color:var(--mist-1);font-weight:700">aquí.</a></p>
+<div style="font:700 14px/1.2 var(--font-text);color:var(--mist-1);margin-top:28px">Nuestras Secciones</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin-top:14px">
+<sc-for list="{{ secciones }}" as="it" hint-placeholder-count="8">
+<a href="{{ anchor }}" style="color:var(--mist-5);font:400 13px/1.3 var(--font-text)" style-hover="color:var(--mist-1)">{{ it }}</a>
+</sc-for>
+</div>
+<div style="font:700 14px/1.2 var(--font-text);color:var(--mist-1);margin-top:28px">Síguenos</div>
+<div style="display:flex;align-items:center;gap:10px;margin-top:14px;color:var(--mist-2)">
+<sc-for list="{{ redes }}" as="r" hint-placeholder-count="4">
+<a href="{{ anchor }}" style="display:grid;place-items:center;width:44px;height:44px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--border-hairline)" style-hover="color:var(--mist-0)">
+<x-import component-from-global-scope="Beat1009DesignSystem_b52646.Icon" name="{{ r }}" size="{{ h18 }}" hint-size="18px,18px"></x-import>
+</a>
+</sc-for>
+<a href="{{ anchor }}" class="beat-label" style="display:grid;place-items:center;height:44px;padding:0 14px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--border-hairline);color:var(--mist-2);font-size:9px;white-space:nowrap">TIKTOK</a>
+</div>
+<div style="font:700 14px/1.2 var(--font-text);color:var(--mist-1);margin-top:28px">Descarga nuestras apps</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px">
+<sc-for list="{{ apps }}" as="ap" hint-placeholder-count="3">
+<a href="{{ anchor }}" style="display:flex;flex-direction:column;gap:3px;padding:10px 14px;border-radius:var(--r-2);box-shadow:inset 0 0 0 1px var(--border-quiet)">
+<span class="beat-label" style="font-size:7px;color:var(--mist-5);white-space:nowrap">{{ ap.k }}</span>
+<span style="font:600 13px/1 var(--font-text);color:var(--mist-2);white-space:nowrap">{{ ap.v }}</span>
+</a>
+</sc-for>
+</div>
+<div class="beat-label" style="margin-top:26px;color:var(--mist-5);font-size:9px;white-space:nowrap">ESCUCHA EN</div>
+<div style="display:flex;gap:8px;margin-top:10px">
+<span class="beat-label" style="padding:10px 13px;box-shadow:inset 0 0 0 1px var(--border-quiet);color:var(--mist-2);font-size:9px;white-space:nowrap">IHEARTRADIO</span>
+<span class="beat-label" style="padding:10px 13px;box-shadow:inset 0 0 0 1px var(--border-quiet);color:var(--mist-2);font-size:9px;white-space:nowrap">TUNEIN</span>
+</div>
+</div>
+<div style="position:relative;margin-top:28px;padding-top:18px;border-top:1px solid var(--border-hairline)">
+<p class="beat-label" style="font-size:8px;line-height:1.8;color:var(--mist-5);margin:0;letter-spacing:.08em">© 2026 BEAT. TODOS LOS DERECHOS RESERVADOS. EL MATERIAL DE ESTE SITIO NO PUEDE REPRODUCIRSE, DISTRIBUIRSE, TRANSMITIRSE, ALMACENARSE EN CACHÉ NI UTILIZARSE DE OTRO MODO, EXCEPTO CON EL PERMISO PREVIO POR ESCRITO DE NRM COMUNICACIONES.</p>
+</div>
+</footer>
+<div style="padding:24px 20px 22px;box-shadow:inset 0 1px 0 var(--border-hairline)">
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 12px">
+<sc-for list="{{ estaciones }}" as="es" hint-placeholder-count="5">
+<a href="{{ anchor }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--mist-5)">
+<span class="beat-display" style="font-size:15px;font-weight:800;letter-spacing:-.01em;white-space:nowrap">{{ es.name }}</span>
+<span class="beat-label" style="font-size:7px;white-space:nowrap">{{ es.sub }}</span>
+</a>
+</sc-for>
+</div>
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:24px;padding-top:18px;border-top:1px solid var(--border-hairline)">
+<a href="{{ anchor }}" style="font:600 12.5px/1 var(--font-text);color:var(--mist-1)">Ventas</a>
+<span style="color:var(--graphite-3)">|</span>
+<a href="{{ anchor }}" style="font:400 12.5px/1 var(--font-text);color:var(--mist-5)">Aviso de privacidad</a>
+<span style="color:var(--graphite-3)">|</span>
+<a href="{{ anchor }}" style="font:400 12.5px/1 var(--font-text);color:var(--mist-5)">Términos y condiciones</a>
+</div>
+<p style="font:400 12px/1.5 var(--font-text);color:var(--mist-5);margin:14px 0 0">NRM Comunicaciones (C) 2026 Todos los Derechos Reservados.</p>
+</div>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:520},&quot;movil&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;anchor&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;#&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const movil = this.props.movil ?? false;
+    return {
+      h18: 18,
+      movil,
+      escritorio: !movil,
+      anchor: this.props.anchor ?? '#',
+      secciones: ['Beat News', 'Beat Life', 'Promociones', 'Beat Ten', 'Lanzamientos', 'Programación', 'Playlist', 'Beat para marcas'],
+      redes: ['facebook', 'twitter', 'instagram', 'youtube'],
+      apps: [
+        { k: 'DESCARGA EN', v: 'App Store' },
+        { k: 'DESCARGA EN', v: 'Google Play' },
+        { k: 'COMPATIBLE', v: 'Alexa' },
+      ],
+      estaciones: [
+        { name: 'NRM', sub: 'COMUNICACIONES' },
+        { name: 'OYE', sub: '89.7 FM' },
+        { name: 'STEREO CIEN', sub: '100.1 FM' },
+        { name: 'SABROSITA', sub: '590 AM' },
+        { name: 'EN ENFOQUE', sub: 'NOTICIAS' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -27,3 +27,16 @@ pnpm-debug.log*
 # Lienzo de Claude Design: el ZIP original no se versiona (pesa y es un artefacto
 # de descarga). Sí se versiona la carpeta extraída del lienzo.
 design/*.zip
+
+# 🔴 Capturas del canal de metadata de Triton (SBM). NO se versionan.
+#
+# No es por peso: ese canal emite cue points de `name: "ad"` con los nombres de los
+# anunciantes al aire y su duración —RENAULT, BANXICO, BANCO NU…—, o sea que una
+# captura es un registro de QUIÉN anuncia y CON QUÉ FRECUENCIA. Es información
+# comercial sensible.
+#
+# Es la misma razón por la que `cms-estaciones` filtra la bitácora con una lista
+# blanca de categorías musicales: su comentario lo dice explícito, "la bitácora de
+# comerciales revela quién anuncia y con qué frecuencia". Aquí aplica igual.
+.metadata-log/*.sse
+.metadata-log/*.txt

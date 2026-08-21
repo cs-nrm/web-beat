@@ -482,30 +482,71 @@ export function iniciarPlayer(): void {
    * cuando algo cambia. El SDK ya tiene ese canal abierto: el sitio viejo lo tiene
    * conectado y no lo usa.
    *
-   * ⚠️ Los nombres de campo NO están verificados: en este entorno el stream no se
-   * establece, así que no he visto un cue point real. Se leen de forma tolerante y
-   * se vuelca el payload crudo en dev, que es cómo se fija el parser contra lo
-   * observado en vez de escribirlo a ciegas.
+   * ✅ Nombres de campo VERIFICADOS el 2026-08-21, conectando al canal SBM directo
+   * (`XHSONFMAAC_SBM`) y observando la señal real de Beat. El payload crudo es:
+   *
+   *   { "type": "onCuePoint",
+   *     "name": "track" | "ad",
+   *     "timestamp": 0,                    // ms desde que abrió TU conexión
+   *     "parameters": {
+   *       "cue_title": "LIFT ME UP (MATHAME REMIX)",
+   *       "track_artist_name": "MOBY",
+   *       "cue_time_duration": "4010",     // ⚠️ décimas de segundo (401.0 s), inferido
+   *       "cue_time_start": "1787325103373",
+   *       "cue_id": "87183538-...",
+   *       "program_id": "554372:1000217683:8826810",
+   *       "ad_type": "endbreak" } }
+   *
+   * Tres cosas que importan:
+   *  · Los campos van en **snake_case** dentro de `parameters`. Yo había adivinado
+   *    `cueTitle`/`artistName` en camelCase y NINGUNO habría coincidido: el título
+   *    nunca se habría pintado. El SDK puede normalizarlos a camelCase (sus
+   *    constantes dicen `CUE_TITLE:'cueTitle'`), así que se aceptan las dos formas.
+   *  · Lo que distingue canción de cortinilla es **`name`**, no `ad_type`: ese
+   *    último venía `"endbreak"` en TODOS, incluida la canción.
+   *  · Al conectar, Triton manda el estado actual con `timestamp: 0`. O sea que no
+   *    hay que esperar el próximo cambio de canción para saber qué suena.
    */
-  const leerCue = (data: unknown): { titulo?: string; artista?: string } => {
-    const cp = (data as { cuePoint?: Record<string, unknown> })?.cuePoint ?? {};
+  const leerCue = (
+    data: unknown,
+  ): { titulo?: string; artista?: string; esCancion: boolean } => {
+    const d = data as {
+      cuePoint?: Record<string, unknown>;
+      name?: string;
+      parameters?: Record<string, unknown>;
+    };
+    // El SDK envuelve en `cuePoint`; el canal SBM crudo trae `parameters`. Se
+    // aceptan las dos por si el SDK cambia de forma entre versiones.
+    const cp = d?.cuePoint ?? d?.parameters ?? {};
+    const nombre = String(d?.name ?? (cp as Record<string, unknown>).name ?? '');
     const tomar = (...claves: string[]): string | undefined => {
       for (const k of claves) {
-        const v = cp[k];
+        const v = (cp as Record<string, unknown>)[k];
         if (typeof v === 'string' && v.trim()) return v.trim();
       }
       return undefined;
     };
     return {
-      titulo: tomar('cueTitle', 'title', 'trackTitle', 'songTitle'),
-      artista: tomar('artistName', 'artist', 'trackArtist'),
+      // snake_case es lo que manda el canal; camelCase por si el SDK lo normaliza.
+      titulo: tomar('cue_title', 'cueTitle', 'title'),
+      artista: tomar('track_artist_name', 'artistName', 'artist', 'trackArtist'),
+      // 🔴 `name` es el discriminador. `ad_type` NO sirve: llega "endbreak" en todos.
+      esCancion: nombre === '' || nombre === 'track',
     };
   };
 
   sdk.addEventListener('track-cue-point', (e) => {
     if (import.meta.env.DEV) console.info('[player] track-cue-point', e);
-    const { titulo, artista } = leerCue(e);
+    const { titulo, artista, esCancion } = leerCue(e);
     if (!titulo) return; // sin título no se pisa lo que ya está
+    /**
+     * 🔴 Las cortinillas NO se muestran. La señal de Beat manda cue points de
+     * `name: "ad"` con títulos como «FRASE APP» o «FRASE BEAT 100.9 FM
+     * (ROMPECORTE)-01» — son elementos de continuidad de la estación, no música, y
+     * pintarlos en la barra sería peor que no pintar nada: el oyente vería el
+     * nombre interno de una cortinilla donde espera una canción.
+     */
+    if (!esCancion) return;
     textoOriginal = [titulo, artista].filter(Boolean).join(' · ');
     // Durante un corte no se pisa el aviso; al terminar se restaura este valor.
     if (contenedor()?.dataset.status !== 'anuncio') restaurarSonando();

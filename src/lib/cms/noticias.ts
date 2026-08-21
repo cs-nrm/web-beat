@@ -40,6 +40,33 @@ const SOLO_NOTICIAS: ParamsCms = {
 /** Orden público: primero lo fijado, luego por fecha. Igual que el CMS. */
 const ORDEN = '-fijada,-fecha';
 
+/** El filtro de una vista de índice: una categoría o una etiqueta. */
+export interface FiltroScanner {
+  tipo: 'categoria' | 'etiqueta';
+  id: number;
+  nombre: string;
+  slug: string;
+}
+
+/**
+ * Traduce el filtro a parámetros del CMS.
+ *
+ * ✨ Se filtra por **id** y no por slug, y aquí sí es lo correcto: el id sale de
+ * una consulta ya cacheada (`obtenerCategoria`), y `where[categorias][in]` con un
+ * id acierta la misma entrada de caché para todas las notas de esa categoría. El
+ * slug obligaría a `where[categorias.slug]`, que en Payload es un join y cuesta.
+ *
+ * ⚠️ Lo que NO se hace es meter algo que varíe por DOCUMENTO en el `where` — esa
+ * es la regla de oro del cliente, y es distinta: aquí varía por vista, y hay tantas
+ * vistas como categorías, no como notas.
+ */
+function acotar(filtro?: FiltroScanner | null): ParamsCms {
+  if (!filtro) return {};
+  return filtro.tipo === 'categoria'
+    ? { 'where[categorias][in]': String(filtro.id) }
+    : { 'where[etiquetas][in]': String(filtro.id) };
+}
+
 /**
  * Portada de Beat Scanner: la nota principal y la rejilla.
  *
@@ -48,7 +75,10 @@ const ORDEN = '-fijada,-fecha';
  * independientes y podrían quedar desfasadas —la destacada vieja con la rejilla
  * nueva—. Le pasó a `web-enfoque` y se arregló exactamente así.
  */
-export async function obtenerScanner(cuantas = 10): Promise<{
+export async function obtenerScanner(
+  cuantas = 10,
+  filtro?: FiltroScanner | null,
+): Promise<{
   destacada: Noticia | null;
   rejilla: Noticia[];
 }> {
@@ -56,6 +86,7 @@ export async function obtenerScanner(cuantas = 10): Promise<{
     const r = await cmsFetchEstacion<RespuestaLista<Noticia>>('noticias', {
       ...BASE_INDICE,
       ...SOLO_NOTICIAS,
+      ...acotar(filtro),
       sort: ORDEN,
       limit: cuantas + 1,
     });

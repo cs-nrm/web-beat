@@ -1,0 +1,520 @@
+---
+/**
+ * El índice de Beat Scanner. Pantallas 14b (1280) y 14e (390).
+ *
+ * Es un COMPONENTE y no una página porque tres rutas lo usan con el mismo
+ * marcado: la sección completa, una categoría y una etiqueta. Duplicarlo
+ * significaría mantener 400 líneas de CSS en tres archivos, que es exactamente
+ * como el sitio viejo terminó con los tokens de marca repartidos.
+ */
+import TarjetaNota from '@/components/TarjetaNota.astro';
+import Icono from '@/components/Icono.astro';
+import { obtenerScanner, minutosDeLectura } from '@/lib/cms/noticias';
+import { obtenerCategorias } from '@/lib/cms/categorias';
+import { nombreCategoria, fechaCorta } from '@/lib/nota';
+import { urlMedia } from '@/lib/cms/client';
+
+interface Props {
+  /** El filtro activo, si la ruta es una categoría o una etiqueta. */
+  filtro?: { tipo: 'categoria' | 'etiqueta'; id: number; nombre: string; slug: string } | null;
+}
+
+const { filtro = null } = Astro.props;
+
+/**
+ * Se piden 11: 1 destacada + 6 de rejilla + 4 de «Más en Scanner». Es una sola
+ * consulta repartida en memoria, para que las tres zonas no puedan quedar
+ * desfasadas entre sí (ver el comentario de `obtenerScanner`).
+ */
+const [{ destacada, rejilla }, categorias] = await Promise.all([
+  obtenerScanner(10, filtro),
+  obtenerCategorias(),
+]);
+
+const enRejilla = rejilla.slice(0, 6);
+const enLista = rejilla.slice(6, 10);
+
+// El diseño rotula «ACTUALIZADO <fecha>». Sale de la nota más reciente, que es el
+// dato honesto: es cuándo se actualizó la sección de verdad.
+const actualizado = fechaCorta(destacada?.fecha ?? destacada?.createdAt);
+
+const minDestacada = destacada ? minutosDeLectura(destacada.contenido) : 0;
+const catDestacada = destacada ? nombreCategoria(destacada) : null;
+const fotoDestacada = urlMedia(destacada?.imagen, 'large');
+
+// El titular y la bajada cambian con el filtro: una categoría no se anuncia como
+// si fuera la sección entera.
+const titulo = filtro ? filtro.nombre.toUpperCase() : 'BEAT SCANNER';
+const bajada = filtro
+  ? filtro.tipo === 'etiqueta'
+    ? `Todo lo que hemos publicado sobre ${filtro.nombre}.`
+    : `Notas, entrevistas y reportajes de ${filtro.nombre}.`
+  : 'Noticias, entrevistas y reportajes de la escena electrónica. Se actualiza todos los días.';
+---
+
+  <div class="sc-envoltura">
+    {/* ── Encabezado de sección ── */}
+    <header class="sc-cabeza">
+      <div class="sc-cabeza-fila">
+        <div>
+          {actualizado && <span class="beat-label sc-actualizado">ACTUALIZADO {actualizado}</span>}
+          <h1 class="beat-display sc-titulo">{titulo}</h1>
+          <p class="sc-bajada">{bajada}</p>
+        </div>
+      </div>
+
+      {
+        categorias.length > 0 && (
+          <nav class="sc-filtros" aria-label="Filtrar por categoría">
+            <a
+              href="/scanner"
+              class:list={['beat-label', 'sc-filtro', { 'es-activo': !filtro }]}
+            >
+              TODO
+            </a>
+            {categorias.map((c) => (
+              <a
+                href={`/scanner/${c.slug}`}
+                class:list={[
+                  'beat-label',
+                  'sc-filtro',
+                  { 'es-activo': filtro?.tipo === 'categoria' && filtro.slug === c.slug },
+                ]}
+                aria-current={
+                  filtro?.tipo === 'categoria' && filtro.slug === c.slug ? 'page' : undefined
+                }
+              >
+                {c.nombre}
+              </a>
+            ))}
+          </nav>
+        )
+      }
+    </header>
+
+    {
+      destacada ? (
+        <>
+          {/* ── La nota principal, a dos columnas ── */}
+          <a href={`/noticias/${destacada.slug}`} class="sc-lead">
+            <div class="sc-lead-foto">
+              {fotoDestacada && (
+                <img
+                  src={fotoDestacada}
+                  alt={
+                    destacada.imagen && typeof destacada.imagen === 'object'
+                      ? (destacada.imagen.alt ?? '')
+                      : ''
+                  }
+                  fetchpriority="high"
+                  decoding="async"
+                />
+              )}
+              <div class="beat-grid sc-lead-trama" />
+              {/* Las estelas del DS: son el motivo de marca, no decoración suelta. */}
+              <div class="beat-streak sc-estela" />
+              <div class="beat-streak is-soft sc-estela-suave" />
+            </div>
+
+            <div class="sc-lead-texto">
+              <div class="sc-lead-meta">
+                {catDestacada && <span class="beat-label sc-lead-cat">{catDestacada}</span>}
+                <span class="beat-label sc-lead-min">
+                  <Icono nombre="clock" tamano={16} />
+                  {minDestacada} MIN
+                </span>
+              </div>
+              <h2 class="sc-lead-titulo">{destacada.titulo}</h2>
+              {destacada.resumen && <p class="sc-lead-bajada">{destacada.resumen}</p>}
+              <span class="sc-lead-cta">
+                Leer la nota
+                <Icono nombre="arrow-up-right" tamano={16} />
+              </span>
+            </div>
+          </a>
+
+          {/* ── La rejilla de seis ── */}
+          {enRejilla.length > 0 && (
+            <div class="sc-rejilla">
+              {enRejilla.map((n) => (
+                <TarjetaNota nota={n} variante="rejilla" />
+              ))}
+            </div>
+          )}
+
+          {/* ── Publicidad: el leaderboard ── */}
+          <div class="sc-anuncio">
+            <span class="beat-label sc-anuncio-rotulo">PUBLICIDAD</span>
+            <div class="sc-anuncio-hueco sc-anuncio-leader" />
+          </div>
+
+          {/* ── Segunda tanda + riel ── */}
+          <div class="sc-abajo">
+            <div>
+              <div class="sc-mas-cabeza">
+                <span class="beat-display sc-mas-titulo">MÁS EN SCANNER</span>
+              </div>
+              {enLista.length > 0 ? (
+                enLista.map((n) => <TarjetaNota nota={n} variante="fila" />)
+              ) : (
+                <p class="sc-vacio">
+                  Por ahora no hay más notas publicadas. En cuanto la redacción cargue más, aparecen
+                  aquí.
+                </p>
+              )}
+            </div>
+
+            <aside class="sc-riel">
+              <div class="sc-anuncio">
+                <span class="beat-label sc-anuncio-rotulo">PUBLICIDAD</span>
+                <div class="sc-anuncio-hueco sc-anuncio-box" />
+              </div>
+            </aside>
+          </div>
+        </>
+      ) : (
+        /*
+          Degrada en vez de tronar. Es la regla de la casa: `web-enfoque` responde
+          200 con cero notas cuando su CMS no está, y eso es lo correcto.
+        */
+        <p class="sc-vacio sc-vacio-grande">
+          {
+            filtro
+              ? `Todavía no hay notas publicadas en ${filtro.nombre}.`
+              : 'Todavía no hay notas publicadas en Beat Scanner. Si el CMS está arriba y esperabas ver contenido, revisa que las notas estén en estado «publicada» y con la estación correspondiente.'
+          }
+        </p>
+      )
+    }
+  </div>
+
+<style>
+  .sc-envoltura {
+    max-width: var(--grid-max);
+    margin: 0 auto;
+  }
+
+  /* ── cabecera ── */
+  .sc-cabeza {
+    padding: 44px 24px 0;
+  }
+  .sc-cabeza-fila {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 32px;
+    align-items: end;
+  }
+  .sc-actualizado {
+    color: var(--mist-0);
+  }
+  .sc-titulo {
+    margin: 12px 0 0;
+    color: var(--mist-1);
+    font-size: var(--size-display-2);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 0.94;
+  }
+  .sc-bajada {
+    font: var(--type-body-lg);
+    color: var(--text-muted);
+    margin: 16px 0 0;
+    max-width: 56ch;
+    text-wrap: pretty;
+  }
+  .sc-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 28px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--border-quiet);
+  }
+  .sc-filtro {
+    padding: 9px 14px;
+    border-radius: 999px;
+    background: var(--surface-card);
+    box-shadow: inset 0 0 0 1px var(--border-hairline);
+    color: var(--text-body);
+    font-size: 9px;
+    white-space: nowrap;
+    transition: color var(--dur-2) var(--ease-out);
+  }
+  .sc-filtro:hover {
+    color: var(--mist-0);
+  }
+  /* El activo se invierte. 🔴 No se resuelve con opacidad sobre el inactivo: en
+     este proyecto ya pasó que los enlaces "pendientes" quedaran MÁS brillantes
+     que el activo por usar un modificador de opacidad sobre un `var()`. */
+  .sc-filtro.es-activo {
+    background: var(--mist-0);
+    box-shadow: none;
+    color: var(--noche-0);
+  }
+  .sc-filtro.es-activo:hover {
+    color: var(--noche-0);
+  }
+
+  /* ── nota principal ── */
+  .sc-lead {
+    display: grid;
+    grid-template-columns: 700px minmax(0, 1fr);
+    gap: 36px;
+    align-items: center;
+    padding: 28px 24px 0;
+    color: inherit;
+    text-decoration: none;
+  }
+  .sc-lead-foto {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    background: var(--grad-noche);
+    overflow: hidden;
+  }
+  .sc-lead-foto img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .sc-lead-trama {
+    position: absolute;
+    inset: 0;
+  }
+  .sc-estela {
+    left: 8%;
+    right: 34%;
+    top: 26%;
+  }
+  .sc-estela-suave {
+    left: 22%;
+    right: 12%;
+    top: 62%;
+  }
+  .sc-lead-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .sc-lead-cat {
+    padding: 8px 13px;
+    background: var(--surface-card);
+    box-shadow: inset 0 0 0 1px var(--border-hairline);
+    color: var(--text-body);
+    white-space: nowrap;
+  }
+  .sc-lead-min {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-muted);
+  }
+  .sc-lead-titulo {
+    font: 700 var(--type-title-1);
+    letter-spacing: -0.024em;
+    color: var(--mist-1);
+    margin: 18px 0 0;
+    text-wrap: pretty;
+  }
+  .sc-lead-bajada {
+    font: var(--type-body);
+    color: var(--text-muted);
+    margin: 14px 0 0;
+    max-width: 44ch;
+    text-wrap: pretty;
+  }
+  .sc-lead-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 22px;
+    padding: 12px 22px;
+    border-radius: 999px;
+    background: var(--mist-0);
+    color: var(--noche-0);
+    font: 600 12.5px/1 var(--font-text);
+  }
+  .sc-lead:hover .sc-lead-cta {
+    background: var(--mist-1);
+  }
+
+  /* ── rejilla: la línea entre tarjetas ES el fondo asomando ── */
+  .sc-rejilla {
+    display: grid;
+    /* 🔴 `minmax(0, 1fr)` y no `1fr`: `1fr` es `minmax(auto, 1fr)`, así que un
+       hijo indivisible ensancha SU columna y las demás se encogen. Medido: la
+       tarjeta de «Fenómeno Residente» pedía 191px de mínimo por el rótulo con
+       `nowrap`, y dejaba a su vecina en 178. */
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2px;
+    background: var(--border-hairline);
+    padding: 2px;
+    margin: 32px 24px 0;
+  }
+
+  /* ── publicidad ── */
+  .sc-anuncio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    padding: 32px 24px;
+  }
+  .sc-anuncio-rotulo {
+    font-size: 8px;
+    color: var(--text-faint);
+  }
+  .sc-anuncio-hueco {
+    position: relative;
+    background: var(--surface-card);
+    box-shadow: inset 0 0 0 1px var(--border-hairline);
+  }
+  .sc-anuncio-leader {
+    width: 100%;
+    max-width: 728px;
+    aspect-ratio: 728 / 90;
+  }
+  .sc-anuncio-box {
+    width: 300px;
+    height: 250px;
+  }
+
+  /* ── segunda tanda ── */
+  .sc-abajo {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 32px;
+    align-items: start;
+    padding: 0 24px 44px;
+  }
+  .sc-mas-cabeza {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-quiet);
+  }
+  .sc-mas-titulo {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--mist-2);
+  }
+  .sc-riel {
+    position: sticky;
+    top: calc(var(--chrome-h) + 16px);
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+  }
+  .sc-riel .sc-anuncio {
+    padding: 0;
+  }
+  .sc-vacio {
+    font: var(--type-body-sm);
+    color: var(--text-muted);
+    max-width: 60ch;
+    padding: 26px 0 0;
+    text-wrap: pretty;
+  }
+  .sc-vacio-grande {
+    padding: 40px 24px 64px;
+    font: var(--type-body);
+  }
+
+  /* ── 14e: móvil ── */
+  @media (max-width: 899px) {
+    .sc-cabeza {
+      padding: 26px 16px 0;
+    }
+    .sc-cabeza-fila {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+    .sc-actualizado {
+      font-size: 8.5px;
+    }
+    .sc-titulo {
+      font-size: 38px;
+    }
+    .sc-bajada {
+      font: 400 14.5px/1.5 var(--font-text);
+      margin-top: 12px;
+    }
+    .sc-filtros {
+      gap: 7px;
+      margin-top: 20px;
+      padding-bottom: 18px;
+    }
+    .sc-filtro {
+      padding: 10px 13px;
+      font-size: 8.5px;
+    }
+
+    .sc-lead {
+      grid-template-columns: 1fr;
+      gap: 0;
+      padding: 20px 16px 0;
+    }
+    .sc-lead-meta {
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .sc-lead-cat {
+      padding: 7px 12px;
+      font-size: 8.5px;
+    }
+    .sc-lead-min {
+      color: var(--text-faint);
+      font-size: 8.5px;
+    }
+    .sc-lead-min :global(svg) {
+      display: none;
+    }
+    .sc-lead-titulo {
+      font: 700 25px/1.12 var(--font-text);
+      letter-spacing: -0.02em;
+      margin-top: 12px;
+    }
+    .sc-lead-bajada {
+      font: 400 14.5px/1.5 var(--font-text);
+      margin-top: 10px;
+      max-width: none;
+    }
+    .sc-lead-cta {
+      margin-top: 18px;
+    }
+
+    .sc-rejilla {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      margin: 22px 0 0;
+    }
+
+    .sc-anuncio {
+      gap: 6px;
+      padding: 22px 16px;
+    }
+    .sc-anuncio-rotulo {
+      font-size: 7px;
+    }
+    /* 320×100 en móvil: el 728×90 no cabe en 390px. */
+    .sc-anuncio-leader {
+      width: 320px;
+      max-width: 100%;
+      aspect-ratio: 320 / 100;
+    }
+
+    .sc-abajo {
+      grid-template-columns: 1fr;
+      gap: 26px;
+      padding: 0 16px 34px;
+    }
+    .sc-mas-titulo {
+      font-size: 19px;
+    }
+    .sc-riel {
+      position: static;
+    }
+  }
+</style>

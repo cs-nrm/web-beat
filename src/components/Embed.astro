@@ -1,0 +1,134 @@
+---
+/**
+ * El bloque `embed` del contenido Lexical.
+ *
+ * 🔴 El CMS guarda **solo la URL**, nunca HTML crudo del editor — es una decisión
+ * de seguridad explícita de `src/blocks/Embed.ts`: *"el frontend arma el
+ * <iframe>/embed real a partir de la URL, en vez de insertar HTML que venga del
+ * editor"*. Este componente es esa mitad del contrato, así que la URL se **valida
+ * y se reconstruye**; nunca se interpola tal cual en un atributo.
+ *
+ * 🔴 Y todos van por `<iframe>`, sin el script de la plataforma. Instagram,
+ * Facebook y X ofrecen un `embed.js` que es lo que casi todo el mundo pega, y cada
+ * uno pesa entre 100 y 300 KB, corre en el documento principal y rastrea al lector
+ * en toda la página. Sus rutas `/embed` hacen lo mismo dentro de un iframe aislado
+ * y con `loading="lazy"` no cuestan nada hasta que se acercan.
+ */
+interface Props {
+  plataforma: 'youtube' | 'twitter' | 'instagram' | 'facebook' | 'otro' | null | undefined;
+  url: string | null | undefined;
+}
+
+const { plataforma, url } = Astro.props;
+
+/**
+ * Convierte la URL editorial en la URL de inserción de la plataforma.
+ *
+ * Devuelve `null` cuando no se reconoce, y entonces NO se pinta un iframe: se
+ * degrada a un enlace. Es deliberado — un `<iframe>` a una URL que no supimos leer
+ * es exactamente el agujero que el CMS quiso cerrar guardando solo la URL.
+ */
+function resolver(p: Props['plataforma'], crudo: string): { src: string; alto: string } | null {
+  let u: URL;
+  try {
+    u = new URL(crudo);
+  } catch {
+    return null;
+  }
+  // Solo https. Un `javascript:` o un `data:` en un src es ejecución en la página.
+  if (u.protocol !== 'https:') return null;
+
+  switch (p) {
+    case 'youtube': {
+      // Las cuatro formas que el editor puede pegar: watch?v=, youtu.be/, /shorts/, /embed/.
+      const id =
+        u.searchParams.get('v') ??
+        (/^\/(shorts|embed|live)\//.test(u.pathname)
+          ? u.pathname.split('/')[2]
+          : u.hostname.endsWith('youtu.be')
+            ? u.pathname.slice(1)
+            : null);
+      if (!id || !/^[\w-]{11}$/.test(id)) return null;
+      // `-nocookie` no siembra cookies de perfilado hasta que se le da play.
+      return { src: `https://www.youtube-nocookie.com/embed/${id}?rel=0`, alto: '56.25%' };
+    }
+    case 'instagram': {
+      // /p/<code>/, /reel/<code>/ y /tv/<code>/ comparten la ruta de inserción.
+      const m = u.pathname.match(/^\/(?:p|reel|tv)\/([\w-]+)/);
+      if (!m) return null;
+      return { src: `https://www.instagram.com/p/${m[1]}/embed/captioned/`, alto: '125%' };
+    }
+    case 'twitter': {
+      const m = u.pathname.match(/\/status\/(\d+)/);
+      if (!m) return null;
+      return {
+        src: `https://platform.twitter.com/embed/Tweet.html?id=${m[1]}&theme=dark`,
+        alto: '80%',
+      };
+    }
+    case 'facebook':
+      return {
+        src: `https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(u.href)}&show_text=true`,
+        alto: '110%',
+      };
+    default:
+      return null;
+  }
+}
+
+const insercion = url ? resolver(plataforma, url) : null;
+---
+
+{
+  insercion ? (
+    <figure class="embed-bloque" style={`--embed-alto:${insercion.alto}`}>
+      <iframe
+        src={insercion.src}
+        loading="lazy"
+        title={`Publicación de ${plataforma}`}
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+      />
+    </figure>
+  ) : url ? (
+    /*
+      Se degrada a enlace. Pasa cuando la URL no encaja con el patrón conocido
+      (o cuando `plataforma` es "otro"): mejor un enlace que funciona que un
+      iframe a una URL que no supimos leer.
+    */
+    <p class="embed-suelto">
+      <a href={url} target="_blank" rel="noopener noreferrer nofollow">
+        Ver la publicación en {plataforma === 'otro' ? 'el sitio original' : plataforma}
+      </a>
+    </p>
+  ) : null
+}
+
+<style>
+  .embed-bloque {
+    position: relative;
+    margin: var(--s-9) 0 0;
+    padding-bottom: var(--embed-alto);
+    background: var(--surface-card);
+    box-shadow: inset 0 0 0 1px var(--border-hairline);
+  }
+  .embed-bloque iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  .embed-suelto {
+    margin: var(--s-9) 0 0;
+    padding: var(--s-7) var(--s-8);
+    background: var(--surface-card);
+    box-shadow: inset 0 0 0 1px var(--border-hairline);
+    font: var(--type-body-sm);
+  }
+  .embed-suelto a {
+    color: var(--text-link);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>

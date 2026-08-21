@@ -33,12 +33,14 @@ const SECCIONES = [
   { n: 1, nombre: 'Inicio', ruta: '/', coleccion: '—', listo: false },
   { n: 2, nombre: 'Escuchar en vivo', ruta: '/en-vivo', coleccion: 'transmisiones + bitacora', listo: false },
   { n: 3, nombre: 'El Fenómeno Residente', ruta: '/fenomeno-residente', coleccion: 'especiales', listo: false },
-  { n: 4, nombre: 'Bonus Beat', ruta: '/bonus-beat', coleccion: 'bonus-beat (falta en el CMS)', listo: false },
-  { n: 5, nombre: 'Agenda / Eventos', ruta: '/eventos', coleccion: 'eventos (falta en el CMS)', listo: false },
+  { n: 4, nombre: 'Bonus Beat', ruta: '/bonus-beat', coleccion: 'listas + tipos-de-lista', listo: false },
+  { n: 5, nombre: 'Agenda / Eventos', ruta: '/eventos', coleccion: 'eventos', listo: false },
   { n: 6, nombre: 'Comunidad', ruta: '/comunidad', coleccion: 'oyentes + playlists (faltan)', listo: false },
   { n: 7, nombre: 'Tienda', ruta: '/tienda', coleccion: 'productos (fase 2)', listo: false },
   { n: 8, nombre: 'Beat para marcas', ruta: '/marcas', coleccion: 'paginas (falta en el CMS)', listo: false },
   { n: 9, nombre: 'Programación', ruta: '/programacion', coleccion: 'programas', listo: false },
+  { n: 10, nombre: 'Beat Scanner', ruta: '/scanner', coleccion: 'noticias + categorias', listo: true },
+  { n: 11, nombre: 'Nota', ruta: '/noticias/<slug>', coleccion: 'noticias', listo: true },
 ];
 ---
 
@@ -108,6 +110,7 @@ const SECCIONES = [
             <span class="w-52 shrink-0 font-medium text-text-primary">{s.nombre}</span>
             <code class="t-mono w-44 shrink-0 text-text-accent">{s.ruta}</code>
             <span class="text-text-faint">{s.coleccion}</span>
+            {s.listo && <span class="t-mono ml-auto shrink-0 text-state-success">✓ construida</span>}
           </li>
         ))}
       </ul>

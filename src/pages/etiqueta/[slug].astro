@@ -1,0 +1,26 @@
+---
+/**
+ * Todo lo publicado bajo una etiqueta — el destino de las pastillas del pie de la
+ * nota (14c/14f).
+ *
+ * Va en `/etiqueta/` y no dentro de `/scanner/` a propósito: una etiqueta puede
+ * cruzar secciones (una nota y una cápsula del Fenómeno Residente pueden compartir
+ * «Ibiza»), así que no es un subconjunto de Scanner.
+ */
+import Base from '@/layouts/Base.astro';
+import IndiceScanner from '@/components/IndiceScanner.astro';
+import { obtenerEtiqueta } from '@/lib/cms/categorias';
+
+const { slug } = Astro.params;
+const et = slug ? await obtenerEtiqueta(slug) : null;
+if (!et) return Astro.rewrite('/404');
+---
+
+<Base
+  titulo={`${et.nombre} — Beat 100.9`}
+  descripcion={`Todo lo que hemos publicado sobre ${et.nombre} en Beat 100.9.`}
+>
+  <IndiceScanner
+    filtro={{ tipo: 'etiqueta', id: et.id, nombre: et.nombre ?? '', slug: et.slug ?? '' }}
+  />
+</Base>

@@ -1,0 +1,282 @@
+---
+/**
+ * La tarjeta de nota. Sirve a las tres densidades que el diseño usa, para que la
+ * medida de una tarjeta viva en UN archivo y no en tres pantallas:
+ *
+ *   `rejilla`  14b/14e — la cuadrícula (3 columnas en escritorio, 2 en móvil)
+ *   `fila`     14b/14e — «Más en Scanner»: foto de 160px, texto, botón redondo
+ *   `relacionada` 14c/14f — las tres del pie de la nota
+ *
+ * 🔴 La cuadrícula NO lleva `gap` de color: el diseño pone `gap:2px` con el fondo
+ * en `--border-hairline` y `padding:2px`, así que la línea que separa las tarjetas
+ * ES el fondo del contenedor asomando. Por eso cada tarjeta necesita su propio
+ * fondo opaco (`--noche-1`); si fuera transparente, se vería la rejilla completa.
+ */
+import Icono from './Icono.astro';
+import { urlMedia } from '@/lib/cms/client';
+import { minutosDeLectura } from '@/lib/cms/noticias';
+import { nombreCategoria } from '@/lib/nota';
+import type { Noticia } from '@/types/payload';
+
+interface Props {
+  nota: Noticia;
+  variante?: 'rejilla' | 'fila' | 'relacionada';
+  /** `eager` solo para lo que está sobre el pliegue. El resto, `lazy`. */
+  prioridad?: boolean;
+}
+
+const { nota, variante = 'rejilla', prioridad = false } = Astro.props;
+
+const href = `/noticias/${nota.slug}`;
+const min = minutosDeLectura(nota.contenido);
+const cat = nombreCategoria(nota);
+const foto = urlMedia(nota.imagen, variante === 'fila' ? 'card' : 'card');
+---
+
+<a href={href} class:list={['tarjeta', `es-${variante}`]}>
+  <div class="tarjeta-foto">
+    {
+      foto ? (
+        <img
+          src={foto}
+          alt={nota.imagen && typeof nota.imagen === 'object' ? (nota.imagen.alt ?? '') : ''}
+          loading={prioridad ? 'eager' : 'lazy'}
+          decoding="async"
+        />
+      ) : null
+    }
+    <div class="beat-grid tarjeta-trama"></div>
+  </div>
+
+  <div class="tarjeta-cuerpo">
+    <div class="tarjeta-meta">
+      {
+        variante === 'rejilla' ? (
+          <>
+            <span class="beat-label tarjeta-min">
+              <Icono nombre="clock" tamano={14} />
+              {min} MIN
+            </span>
+            {cat && <span class="beat-label tarjeta-cat">{cat}</span>}
+          </>
+        ) : (
+          <>
+            {cat && <span class="beat-label tarjeta-cat-plana">{cat}</span>}
+            <span class="beat-label tarjeta-min-plano">{min} MIN</span>
+          </>
+        )
+      }
+    </div>
+    <span class="tarjeta-titulo">{nota.titulo}</span>
+  </div>
+
+  {
+    variante === 'fila' && (
+      <span class="tarjeta-flecha">
+        <Icono nombre="arrow-up-right" tamano={16} />
+      </span>
+    )
+  }
+</a>
+
+<style>
+  .tarjeta {
+    display: block;
+    background: var(--noche-1);
+    color: inherit;
+    text-decoration: none;
+    transition: background var(--dur-2) var(--ease-out);
+  }
+  .tarjeta:hover {
+    background: var(--noche-2);
+  }
+
+  .tarjeta-foto {
+    position: relative;
+    background: var(--grad-noche);
+    overflow: hidden;
+  }
+  .tarjeta-foto img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .tarjeta-trama {
+    position: absolute;
+    inset: 0;
+  }
+
+  .tarjeta-meta {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
+  .tarjeta-min,
+  .tarjeta-min-plano {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .tarjeta-min-plano {
+    color: var(--text-faint);
+    font-size: 9px;
+  }
+  .tarjeta-cat {
+    padding: 7px 12px;
+    background: var(--surface-card);
+    box-shadow: inset 0 0 0 1px var(--border-hairline);
+    color: var(--text-body);
+    font-size: 9px;
+    white-space: nowrap;
+  }
+  .tarjeta-cat-plana {
+    color: var(--mist-0);
+    font-size: 9px;
+    white-space: nowrap;
+  }
+
+  /* ── rejilla (14b: 3 col · 14e: 2 col) ── */
+  .es-rejilla .tarjeta-foto {
+    aspect-ratio: 16 / 10;
+  }
+  .es-rejilla .tarjeta-meta {
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 18px 0;
+  }
+  .es-rejilla .tarjeta-titulo {
+    display: block;
+    font: 700 19px / 1.22 var(--font-text);
+    color: var(--mist-2);
+    padding: 14px 18px 0;
+    text-wrap: pretty;
+  }
+  .es-rejilla {
+    padding-bottom: 18px;
+  }
+
+  /* ── fila (14b «Más en Scanner») ── */
+  .es-fila {
+    display: grid;
+    grid-template-columns: 160px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 22px;
+    padding: 18px 10px;
+    margin: 0 -10px;
+    border-bottom: 1px solid var(--border-hairline);
+    background: transparent;
+  }
+  .es-fila:hover {
+    background: var(--surface-card-hover);
+  }
+  .es-fila .tarjeta-foto {
+    aspect-ratio: 16 / 10;
+  }
+  .es-fila .tarjeta-cuerpo {
+    min-width: 0;
+  }
+  .es-fila .tarjeta-meta {
+    gap: 10px;
+  }
+  .es-fila .tarjeta-titulo {
+    display: block;
+    font: 600 20px / 1.24 var(--font-text);
+    color: var(--mist-2);
+    margin-top: 10px;
+    text-wrap: pretty;
+  }
+  .tarjeta-flecha {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px var(--border-quiet);
+    color: var(--mist-4);
+  }
+  .es-fila:hover .tarjeta-flecha {
+    color: var(--mist-0);
+    box-shadow: inset 0 0 0 1px var(--border-strong);
+  }
+
+  /* ── relacionada (14c, pie de la nota) ── */
+  .es-relacionada .tarjeta-foto {
+    aspect-ratio: 16 / 10;
+  }
+  .es-relacionada .tarjeta-meta {
+    gap: 10px;
+    padding: 14px 0 0;
+  }
+  .es-relacionada .tarjeta-titulo {
+    display: block;
+    font: 600 17px / 1.26 var(--font-text);
+    color: var(--mist-2);
+    margin-top: 8px;
+    text-wrap: pretty;
+  }
+  .es-relacionada {
+    background: transparent;
+  }
+  .es-relacionada:hover {
+    background: transparent;
+  }
+  .es-relacionada:hover .tarjeta-titulo {
+    color: var(--mist-0);
+  }
+
+  @media (max-width: 899px) {
+    .es-rejilla .tarjeta-foto {
+      aspect-ratio: 4 / 3;
+    }
+    .es-rejilla .tarjeta-meta {
+      justify-content: flex-start;
+      gap: 8px;
+      padding: 12px 14px 0;
+    }
+    .es-rejilla .tarjeta-cat {
+      padding: 0;
+      background: none;
+      box-shadow: none;
+      color: var(--mist-0);
+      font-size: 8px;
+      /* Con dos columnas iguales las categorías de hoy caben, pero una más larga
+         desbordaría: se trunca en vez de empujar. */
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .es-rejilla .tarjeta-min {
+      order: 2;
+      color: var(--text-faint);
+      font-size: 8px;
+    }
+    .es-rejilla .tarjeta-min :global(svg) {
+      display: none;
+    }
+    .es-rejilla .tarjeta-titulo {
+      font: 600 14.5px / 1.26 var(--font-text);
+      padding: 10px 14px 0;
+    }
+    .es-rejilla {
+      padding-bottom: 16px;
+    }
+    /* La fila pierde el botón redondo y encoge la foto: a 390px no caben. */
+    .es-fila {
+      grid-template-columns: 108px minmax(0, 1fr);
+      gap: 14px;
+      padding: 14px 0;
+      margin: 0;
+    }
+    .es-fila .tarjeta-titulo {
+      font-size: 15.5px;
+      margin-top: 8px;
+    }
+    .tarjeta-flecha {
+      display: none;
+    }
+  }
+</style>

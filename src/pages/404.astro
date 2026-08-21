@@ -1,0 +1,95 @@
+---
+/**
+ * 404.
+ *
+ * ⚠️ En `web-enfoque` los 404 son el **28% del tráfico** —bots y enlaces viejos—,
+ * así que esta página se sirve muchísimo. Por eso es barata: no consulta el CMS
+ * más de lo que ya consulta el layout, y el middleware la cachea
+ * (`s-maxage=60, swr=600`).
+ *
+ * Y va a importar más de lo normal en el corte: cientos de URLs de
+ * `beatdigital.mx` están indexadas y su contenido NO va a existir en el sitio
+ * nuevo (C4 del plan). Hasta que se decida el 301/410 por grupo, caen aquí.
+ */
+import Base from '@/layouts/Base.astro';
+---
+
+<Base
+  titulo="No encontramos esa página — Beat 100.9"
+  descripcion="La página que buscas no existe o cambió de lugar."
+>
+  <div class="e404">
+    <span class="beat-label e404-codigo">ERROR 404</span>
+    <h1 class="beat-display e404-titulo">ESTA PÁGINA<br />NO EXISTE</h1>
+    <p class="e404-texto">
+      Puede que el enlace esté roto, o que la página haya cambiado de lugar con el nuevo sitio.
+      La radio sigue al aire mientras lo averiguas.
+    </p>
+    <div class="e404-salidas">
+      <a href="/" class="beat-label e404-cta">IR AL INICIO</a>
+      <a href="/scanner" class="beat-label e404-cta es-hueco">VER BEAT SCANNER</a>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .e404 {
+    max-width: 62ch;
+    margin: 0 auto;
+    padding: 88px 24px 120px;
+    text-align: center;
+  }
+  .e404-codigo {
+    color: var(--text-accent);
+  }
+  .e404-titulo {
+    margin: 18px 0 0;
+    font-size: var(--size-display-2);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 0.94;
+    color: var(--mist-1);
+  }
+  .e404-texto {
+    font: var(--type-body-lg);
+    color: var(--text-muted);
+    margin: 22px auto 0;
+    text-wrap: pretty;
+  }
+  .e404-salidas {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 34px;
+  }
+  .e404-cta {
+    padding: 13px 22px;
+    border-radius: 999px;
+    background: var(--mist-0);
+    color: var(--noche-0);
+    font-size: 9px;
+    white-space: nowrap;
+  }
+  .e404-cta.es-hueco {
+    background: none;
+    box-shadow: inset 0 0 0 1px var(--border-strong);
+    color: var(--mist-2);
+  }
+  .e404-cta.es-hueco:hover {
+    background: var(--mist-0);
+    color: var(--noche-0);
+  }
+
+  @media (max-width: 899px) {
+    .e404 {
+      padding: 56px 16px 80px;
+    }
+    .e404-titulo {
+      font-size: 38px;
+    }
+    .e404-texto {
+      font: 400 14.5px/1.5 var(--font-text);
+    }
+  }
+</style>

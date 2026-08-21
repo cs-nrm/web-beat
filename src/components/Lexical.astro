@@ -1,0 +1,331 @@
+---
+/**
+ * Renderizador del contenido Lexical de `noticias.contenido`.
+ *
+ * Se escribió contra el ÁRBOL REAL de las notas capturadas, no contra los tipos:
+ * `noticias.contenido` está tipado suelto en `payload-types.ts` (los hijos son
+ * `unknown`), así que los tipos no dicen qué nodos existen. Inspeccionados el
+ * 2026-08-21: `paragraph`, `heading`, `text`, `link`, `upload`, `block:embed`.
+ * Los de lista y cita se cubren porque el editor los ofrece aunque todavía no se
+ * hayan usado.
+ *
+ * 🔴 Nada de `set:html` con contenido del CMS. El texto sale como texto y el
+ * formato como etiquetas, así que un `<script>` escrito en el editor se ve como
+ * las letras que es. `web-enfoque` sí usa `set:html` y por eso tiene una guarda de
+ * grep en CI; aquí el problema no existe.
+ */
+import Embed from './Embed.astro';
+import { urlMedia, type DocMedia } from '@/lib/cms/client';
+
+interface Props {
+  contenido: unknown;
+}
+
+const { contenido } = Astro.props;
+
+/** Nodo de Lexical, con lo que este renderizador consulta de verdad. */
+interface Nodo {
+  type?: string;
+  tag?: string;
+  text?: string;
+  format?: number | string;
+  listType?: string;
+  children?: Nodo[];
+  fields?: Record<string, unknown>;
+  relationTo?: string;
+  value?: unknown;
+}
+
+const raiz = (contenido as { root?: Nodo } | null)?.root;
+const nodos: Nodo[] = raiz?.children ?? [];
+
+/**
+ * ¿El nodo aporta algo? Los párrafos VACÍOS son comunes —la nota inspeccionada
+ * traía 4 de 11— porque el editor los deja al separar bloques. Pintarlos como
+ * `<p>` mete huecos de un margen cada uno en mitad del texto.
+ */
+function tieneSustancia(n: Nodo): boolean {
+  if (n.type === 'upload' || n.type === 'block' || n.type === 'horizontalrule') return true;
+  const texto = (n.children ?? [])
+    .map((h) => h.text ?? (h.children ?? []).map((x) => x.text ?? '').join(''))
+    .join('')
+    .trim();
+  return texto.length > 0;
+}
+
+const visibles = nodos.filter(tieneSustancia);
+
+/** Bits de formato de Lexical. Solo los que el editor del CMS puede producir. */
+const NEGRITA = 1;
+const CURSIVA = 2;
+const TACHADO = 4;
+const SUBRAYADO = 8;
+const CODIGO = 16;
+
+function marcas(f: unknown): string[] {
+  const n = typeof f === 'number' ? f : 0;
+  const t: string[] = [];
+  if (n & NEGRITA) t.push('strong');
+  if (n & CURSIVA) t.push('em');
+  if (n & TACHADO) t.push('s');
+  if (n & SUBRAYADO) t.push('u');
+  if (n & CODIGO) t.push('code');
+  return t;
+}
+
+/** El `href` de un nodo `link`, ya sea externo o a un documento del CMS. */
+function hrefDe(n: Nodo): string | null {
+  const f = (n.fields ?? {}) as { url?: string; linkType?: string; doc?: unknown };
+  if (f.linkType === 'internal') {
+    const doc = f.doc as { value?: { slug?: string }; relationTo?: string } | undefined;
+    const slug = doc?.value?.slug;
+    // Solo `noticias` por ahora: es la única ruta de detalle que existe.
+    return slug && doc?.relationTo === 'noticias' ? `/noticias/${slug}` : null;
+  }
+  return f.url ?? null;
+}
+
+/** Un enlace que sale del dominio necesita `rel`; uno interno, no. */
+function esExterno(href: string): boolean {
+  return /^https?:\/\//i.test(href);
+}
+---
+
+{
+  visibles.map((n) => {
+    switch (n.type) {
+      case 'heading': {
+        /*
+          🔴 ESTRUCTURA y ESTILO se deciden por separado, y no es rebuscado:
+          apuntan a cosas distintas.
+
+          La ESTRUCTURA baja un nivel, porque el titular de la nota ya es el `h1`
+          del documento y un segundo `h1` rompe el esquema para lectores de
+          pantalla y para Google.
+
+          El ESTILO va por el nivel que el editor eligió, no por la etiqueta que
+          sale. Si se estilara por la etiqueta, el encabezado principal del cuerpo
+          —que la redacción escribe como `h2`— saldría `h3` y heredaría el tamaño
+          chico: 21px donde 14c pide 26px. Medido en la nota de Hï Ibiza.
+        */
+        const original = Number((n.tag ?? 'h2').slice(1)) || 2;
+        const nivel = Math.min(original + 1, 6);
+        const Tag = `h${nivel}` as 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+        return (
+          <Tag class:list={['lx-h', { 'es-menor': original >= 3 }]}>
+            <Fragment set:text={(n.children ?? []).map((h) => h.text ?? '').join('')} />
+          </Tag>
+        );
+      }
+
+      case 'quote':
+        return (
+          <blockquote class="lx-cita">
+            <p class="beat-display">
+              <Fragment
+                set:text={(n.children ?? [])
+                  .flatMap((h) => [h.text ?? '', ...(h.children ?? []).map((x) => x.text ?? '')])
+                  .join('')}
+              />
+            </p>
+          </blockquote>
+        );
+
+      case 'list': {
+        const Tag = n.listType === 'number' ? 'ol' : 'ul';
+        return (
+          <Tag class="lx-lista">
+            {(n.children ?? []).map((li) => (
+              <li>
+                {(li.children ?? []).map((t) => {
+                  const href = t.type === 'link' ? hrefDe(t) : null;
+                  const texto = t.text ?? (t.children ?? []).map((x) => x.text ?? '').join('');
+                  return href ? (
+                    <a
+                      href={href}
+                      rel={esExterno(href) ? 'noopener noreferrer' : undefined}
+                      set:text={texto}
+                    />
+                  ) : (
+                    <Fragment set:text={texto} />
+                  );
+                })}
+              </li>
+            ))}
+          </Tag>
+        );
+      }
+
+      case 'upload': {
+        if (n.relationTo !== 'media' || typeof n.value !== 'object' || n.value === null) return null;
+        const media = n.value as DocMedia;
+        const src = urlMedia(media, 'large');
+        if (!src) return null;
+        return (
+          <figure class="lx-figura">
+            <img src={src} alt={media.alt ?? ''} loading="lazy" decoding="async" />
+            {media.alt && <figcaption class="beat-label">{media.alt}</figcaption>}
+          </figure>
+        );
+      }
+
+      case 'block': {
+        const f = (n.fields ?? {}) as { blockType?: string; plataforma?: string; url?: string };
+        if (f.blockType !== 'embed') return null;
+        return <Embed plataforma={f.plataforma as never} url={f.url} />;
+      }
+
+      case 'horizontalrule':
+        return <hr class="lx-regla" />;
+
+      case 'paragraph':
+      default:
+        return (
+          <p class="lx-p">
+            {(n.children ?? []).map((h) => {
+              // Un `link` trae su propio texto adentro, con su propio formato.
+              if (h.type === 'link') {
+                const href = hrefDe(h);
+                const texto = (h.children ?? []).map((x) => x.text ?? '').join('');
+                if (!href) return <Fragment set:text={texto} />;
+                const externo = esExterno(href);
+                return (
+                  <a
+                    href={href}
+                    target={externo ? '_blank' : undefined}
+                    rel={externo ? 'noopener noreferrer' : undefined}
+                    set:text={texto}
+                  />
+                );
+              }
+              // Nodo de texto: se envuelve en tantas etiquetas como marcas traiga.
+              const texto = h.text ?? '';
+              const etiquetas = marcas(h.format);
+              if (!etiquetas.length) return <Fragment set:text={texto} />;
+              return etiquetas.reduce(
+                (dentro, et) => {
+                  const T = et as 'strong';
+                  return <T>{dentro}</T>;
+                },
+                <Fragment set:text={texto} /> as unknown as astroHTML.JSX.Element,
+              );
+            })}
+          </p>
+        );
+    }
+  })
+}
+
+<style>
+  /* Los valores salen de 14c: cuerpo 17/1.72, entrada 20/1.62, h2 26/1.16. */
+  .lx-p {
+    font: 400 17px / 1.72 var(--font-text);
+    color: var(--text-body);
+    margin: 22px 0 0;
+    text-wrap: pretty;
+  }
+  /* La ENTRADA va más grande y más clara: es la regla del diseño, y se resuelve
+     con el selector en vez de marcando el párrafo desde el CMS. */
+  .lx-p:first-child {
+    font: 500 20px / 1.62 var(--font-text);
+    color: var(--mist-2);
+    margin: 0;
+  }
+  .lx-h {
+    font: 700 26px / 1.16 var(--font-text);
+    letter-spacing: -0.018em;
+    color: var(--mist-1);
+    margin: 36px 0 0;
+    text-wrap: balance;
+  }
+  .lx-h + .lx-p {
+    margin-top: 16px;
+  }
+  .lx-h.es-menor {
+    font-size: 21px;
+    margin-top: 30px;
+  }
+  .lx-p a,
+  .lx-lista a {
+    color: var(--text-link);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+  }
+  .lx-p a:hover,
+  .lx-lista a:hover {
+    color: var(--text-link-hover);
+  }
+  .lx-p code {
+    font: var(--type-mono);
+    background: var(--surface-card);
+    padding: 2px 5px;
+  }
+  .lx-cita {
+    margin: 32px 0 0;
+    padding: 26px 0;
+    border-top: 1px solid var(--border-quiet);
+    border-bottom: 1px solid var(--border-quiet);
+  }
+  .lx-cita p {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.06;
+    color: var(--mist-1);
+    margin: 0;
+    text-align: center;
+    text-wrap: balance;
+  }
+  .lx-lista {
+    margin: 20px 0 0;
+    padding-left: 22px;
+    font: 400 17px / 1.72 var(--font-text);
+    color: var(--text-body);
+  }
+  .lx-lista li {
+    margin-top: 8px;
+  }
+  .lx-lista li::marker {
+    color: var(--text-accent);
+  }
+  .lx-figura {
+    margin: 32px 0 0;
+  }
+  .lx-figura img {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: var(--grad-noche);
+  }
+  .lx-figura figcaption {
+    display: block;
+    margin-top: 10px;
+    font-size: 8.5px;
+    color: var(--text-faint);
+  }
+  .lx-regla {
+    margin: 34px 0 0;
+    border: 0;
+    border-top: 1px solid var(--border-quiet);
+  }
+
+  @media (max-width: 899px) {
+    .lx-p {
+      font-size: 16px;
+      line-height: 1.68;
+    }
+    .lx-p:first-child {
+      font-size: 18px;
+    }
+    .lx-h {
+      font-size: 22px;
+    }
+    .lx-h.es-menor {
+      font-size: 18.5px;
+    }
+    .lx-cita p {
+      font-size: 23px;
+    }
+  }
+</style>

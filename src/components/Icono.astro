@@ -7,11 +7,26 @@
  * pide el lienzo —`pause`, `play`, `volume-2`, `chevron-down`, `menu`, `search`,
  * `x`— son de **Lucide**, así que van inline con sus trazos.
  *
- * Inline y no un paquete: son siete iconos, y así no hay una petición más ni una
- * dependencia que actualizar. Es el mismo criterio de `web-enfoque`.
+ * Inline y no un paquete: así no hay una petición más ni una dependencia que
+ * actualizar. Es el mismo criterio de `web-enfoque`.
+ *
+ * ⚠️ `x` es la CRUZ de cerrar (Lucide). La marca de la red se llama `x-marca`,
+ * para que no se confundan: uno cierra un menú y el otro comparte una nota.
  */
 interface Props {
-  nombre: 'play' | 'pause' | 'volume-2' | 'chevron-down' | 'menu' | 'search' | 'x';
+  nombre:
+    | 'play'
+    | 'pause'
+    | 'volume-2'
+    | 'chevron-down'
+    | 'menu'
+    | 'search'
+    | 'x'
+    | 'clock'
+    | 'arrow-up-right'
+    | 'link'
+    | 'facebook'
+    | 'x-marca';
   /** Píxeles. El lienzo usa 14, 16, 18 y 20. */
   tamano?: number;
   class?: string;
@@ -28,6 +43,18 @@ const TRAZOS: Record<Props['nombre'], string> = {
   menu: '<path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/>',
   search: '<path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/>',
   x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  // El `min` de cada tarjeta y el tiempo de lectura de la nota.
+  clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  // El remate de "Leer la nota" y el botón redondo de las filas de «Más en Scanner».
+  'arrow-up-right': '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>',
+  // Los tres de compartir (14c). `link` es "copiar enlace".
+  link:
+    '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
+  // Las dos marcas van RELLENAS, no de trazo: un logo de trazo se ve roto a 16px.
+  facebook:
+    '<path fill="currentColor" stroke="none" d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.77-3.89 1.1 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.45 2.89h-2.33v6.99A10 10 0 0 0 22 12"/>',
+  'x-marca':
+    '<path fill="currentColor" stroke="none" d="M18.24 2.25h3.31l-7.23 8.26 8.5 11.24h-6.64l-5.2-6.8-5.96 6.8H1.71l7.74-8.84L1.3 2.25h6.8l4.71 6.23zm-1.16 17.52h1.83L5.7 4.13H3.74z"/>',
 };
 ---
 

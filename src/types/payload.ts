@@ -1,5 +1,5 @@
 /* ⚠️ GENERADO — NO EDITAR A MANO.
- * Vendorizado desde cms-estaciones:src/payload-types.ts en el ref ffa1e73058fb404cac79f8d9538840324a90ee50.
+ * Vendorizado desde cms-estaciones:src/payload-types.ts en el ref f27f53e01cf51a665a01615d68e25cc3378ad343.
  * Regenerar con: pnpm sync:types  (el pin vive en payload-types.lock.json).
  * Nota: se quita la augmentation `declare module 'payload'` del upstream
  *       (el front no instala el paquete payload; solo usa las interfaces).
@@ -349,11 +349,15 @@ export interface Noticia {
    */
   formato?: ('estandar' | 'video' | 'galeria' | 'audio') | null;
   video?: {
-    plataforma?: ('youtube' | 'vimeo') | null;
+    plataforma?: ('youtube' | 'vimeo' | 'archivo') | null;
     /**
      * URL pública en YouTube o Vimeo. Se guarda solo la URL.
      */
     url?: string | null;
+    /**
+     * Se sube a Media como cualquier archivo (Sharp solo procesa imágenes; el video se guarda tal cual). Un mp4 pesa mucho más que una foto: si el video ya está en YouTube o Vimeo, conviene enlazarlo en vez de subirlo.
+     */
+    archivo?: (number | null) | Media;
     /**
      * Se muestra en la lista de la colección (ej. 4:12).
      */
@@ -381,7 +385,10 @@ export interface Noticia {
     embedUrl?: string | null;
     archivo?: (number | null) | Media;
   };
-  imagen?: (number | null) | Media;
+  /**
+   * La imagen de la nota: portada, tarjetas, RSS y lo que se ve al compartirla. Es obligatoria para publicar.
+   */
+  imagen: number | Media;
   /**
    * Cuerpo de la nota. Opcional en formatos Video/Galería/Audio.
    */
@@ -476,6 +483,7 @@ export interface Noticia {
   wpId?: number | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -566,6 +574,10 @@ export interface Especiale {
   estacion?: (number | null) | Estacione;
   titulo: string;
   descripcion?: string | null;
+  /**
+   * Opcional. Si este especial es de un programa en particular, elígelo aquí.
+   */
+  programa?: (number | null) | Programa;
   /**
    * La sección del sitio de la que es entrega (ej. "El Fenómeno Residente"). Vacío = lista suelta, que vive por su cuenta.
    */
@@ -665,6 +677,60 @@ export interface Especiale {
   estado?: ('activo' | 'archivado') | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "programas".
+ */
+export interface Programa {
+  id: number;
+  estacion?: (number | null) | Estacione;
+  nombre: string;
+  /**
+   * Una línea para la celda de la parrilla y las tarjetas. Si se deja vacía, el front tendrá que recortar la descripción larga.
+   */
+  descripcionCorta?: string | null;
+  descripcion?: string | null;
+  /**
+   * Fichas de la colección Autores con el tipo "Locutor".
+   */
+  locutores?: (number | Autore)[] | null;
+  /**
+   * Portada del programa: parrilla, tarjetas y su página.
+   */
+  imagen?: (number | null) | Media;
+  /**
+   * Un bloque por cada rango que se repite igual. "Lunes a viernes 06:00–10:00" es UN bloque con los cinco días marcados; si el sábado va a otra hora, ese es un segundo bloque.
+   */
+  horarios?:
+    | {
+        /**
+         * Los días en que este bloque se transmite a la misma hora.
+         */
+        dias: ('lun' | 'mar' | 'mie' | 'jue' | 'vie' | 'sab' | 'dom')[];
+        horaInicio: string;
+        horaFin: string;
+        /**
+         * Las repeticiones se marcan para que el front pueda distinguirlas en la parrilla y no anunciar como "en vivo" algo grabado.
+         */
+        tipo?: ('vivo' | 'repeticion') | null;
+        id?: string | null;
+      }[]
+    | null;
+  whatsapp?: string | null;
+  telefono?: string | null;
+  hashtag?: string | null;
+  /**
+   * URL pública (/programas/...). Si queda vacío, se genera del nombre.
+   */
+  slug?: string | null;
+  /**
+   * Archivar lo saca de la parrilla sin borrar su página ni sus episodios.
+   */
+  estado?: ('activo' | 'archivado') | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -754,59 +820,7 @@ export interface Podcast {
   estado?: ('publicada' | 'despublicada') | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "programas".
- */
-export interface Programa {
-  id: number;
-  estacion?: (number | null) | Estacione;
-  nombre: string;
-  /**
-   * Una línea para la celda de la parrilla y las tarjetas. Si se deja vacía, el front tendrá que recortar la descripción larga.
-   */
-  descripcionCorta?: string | null;
-  descripcion?: string | null;
-  /**
-   * Fichas de la colección Autores con el tipo "Locutor".
-   */
-  locutores?: (number | Autore)[] | null;
-  /**
-   * Portada del programa: parrilla, tarjetas y su página.
-   */
-  imagen?: (number | null) | Media;
-  /**
-   * Un bloque por cada rango que se repite igual. "Lunes a viernes 06:00–10:00" es UN bloque con los cinco días marcados; si el sábado va a otra hora, ese es un segundo bloque.
-   */
-  horarios?:
-    | {
-        /**
-         * Los días en que este bloque se transmite a la misma hora.
-         */
-        dias: ('lun' | 'mar' | 'mie' | 'jue' | 'vie' | 'sab' | 'dom')[];
-        horaInicio: string;
-        horaFin: string;
-        /**
-         * Las repeticiones se marcan para que el front pueda distinguirlas en la parrilla y no anunciar como "en vivo" algo grabado.
-         */
-        tipo?: ('vivo' | 'repeticion') | null;
-        id?: string | null;
-      }[]
-    | null;
-  whatsapp?: string | null;
-  telefono?: string | null;
-  hashtag?: string | null;
-  /**
-   * URL pública (/programas/...). Si queda vacío, se genera del nombre.
-   */
-  slug?: string | null;
-  /**
-   * Archivar lo saca de la parrilla sin borrar su página ni sus episodios.
-   */
-  estado?: ('activo' | 'archivado') | null;
-  updatedAt: string;
-  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -841,7 +855,7 @@ export interface Transmisione {
   createdAt: string;
 }
 /**
- * Las listas de canciones del sitio. Cada edición es su propio documento: para la de la semana que entra, duplica la anterior y cámbiale la fecha. Qué listas existen se define en «Tipos de lista».
+ * Las listas de canciones del sitio. Cada edición es su propio documento: para la de esta semana, duplica la anterior y cámbiale las canciones —la fecha y la URL se ponen solas. Qué listas existen se define en «Tipos de lista».
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "listas".
@@ -854,10 +868,11 @@ export interface Lista {
    * Qué lista es. Se elige de las que tenga definidas esta estación (colección «Tipos de lista»). Es parte de la URL.
    */
   tipo: number | TiposDeLista;
-  /**
-   * Qué edición es. Ordena las listas y forma parte de la URL.
-   */
   fecha: string;
+  /**
+   * Opcional. Si esta lista es de un programa en particular, elígelo aquí.
+   */
+  programa?: (number | null) | Programa;
   /**
    * Opcional. Un par de líneas para la página de la lista.
    */
@@ -882,29 +897,9 @@ export interface Lista {
   playlistSpotify?: string | null;
   playlistAppleMusic?: string | null;
   /**
-   * La imagen con la que la lista aparece LISTADA en otras páginas. El encabezado de su propia página se arma abajo.
+   * La imagen de la lista: con la que aparece listada en otras páginas y con la que se comparte.
    */
   portada?: (number | null) | Media;
-  /**
-   * Cómo se ve el encabezado de la página. Todo es opcional: sin nada, el sitio usa su diseño de siempre.
-   */
-  cabecera?: {
-    fondo?: ('ninguno' | 'imagen' | 'color' | 'degradado') | null;
-    /**
-     * Se recorta según la pantalla, así que lo importante debe estar al centro. El texto va encima: mejor una imagen con zonas tranquilas que una llena de detalle.
-     */
-    imagen?: (number | null) | Media;
-    color?: string | null;
-    colorFin?: string | null;
-    /**
-     * Se guarda como el ángulo de CSS, tal cual lo usa el degradado.
-     */
-    direccion?: ('180deg' | '0deg' | '90deg' | '135deg') | null;
-    /**
-     * El logotipo propio de esto, si lo tiene. Se muestra en la cabecera en vez del título escrito. Conviene PNG o SVG con fondo transparente.
-     */
-    logo?: (number | null) | Media;
-  };
   /**
    * URL pública. Se arma sola con el tipo y la fecha; cambia la fecha y cambia esto.
    */
@@ -919,6 +914,7 @@ export interface Lista {
   votacionAbierta?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * Las listas que existen en el sitio de esta estación (Top Ten, Bonus Beat, Lanzamientos). Cada estación define las suyas; al capturar una lista se elige de aquí.
@@ -1033,6 +1029,7 @@ export interface Evento {
   estado?: ('publicada' | 'despublicada') | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * La escribe Dalet automáticamente. Se conservan los últimos 7 días.
@@ -1789,6 +1786,7 @@ export interface NoticiasSelect<T extends boolean = true> {
     | {
         plataforma?: T;
         url?: T;
+        archivo?: T;
         duracion?: T;
         orientacion?: T;
       };
@@ -1834,6 +1832,7 @@ export interface NoticiasSelect<T extends boolean = true> {
   wpId?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1906,6 +1905,7 @@ export interface PodcastsSelect<T extends boolean = true> {
   estado?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1950,6 +1950,7 @@ export interface EspecialesSelect<T extends boolean = true> {
   estacion?: T;
   titulo?: T;
   descripcion?: T;
+  programa?: T;
   serie?: T;
   etiquetaPublica?: T;
   numero?: T;
@@ -1979,6 +1980,7 @@ export interface EspecialesSelect<T extends boolean = true> {
   estado?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1989,6 +1991,7 @@ export interface ListasSelect<T extends boolean = true> {
   titulo?: T;
   tipo?: T;
   fecha?: T;
+  programa?: T;
   descripcion?: T;
   canciones?:
     | T
@@ -2001,21 +2004,12 @@ export interface ListasSelect<T extends boolean = true> {
   playlistSpotify?: T;
   playlistAppleMusic?: T;
   portada?: T;
-  cabecera?:
-    | T
-    | {
-        fondo?: T;
-        imagen?: T;
-        color?: T;
-        colorFin?: T;
-        direccion?: T;
-        logo?: T;
-      };
   slug?: T;
   estado?: T;
   votacionAbierta?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2049,6 +2043,7 @@ export interface EventosSelect<T extends boolean = true> {
   estado?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

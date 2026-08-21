@@ -200,7 +200,20 @@ async function pedirAlCms<T>(url: URL, ruta: string, timeoutMs: number): Promise
 // caché, que es lo correcto.
 // ============================================================
 
-/** Colecciones de `cms-estaciones` que llevan el campo `estacion`. */
+/**
+ * Colecciones de `cms-estaciones` que llevan el campo `estacion`.
+ *
+ * 🔴 Esta lista NO es documentación: `cmsFetchEstacion` la comprueba antes de
+ * inyectar el filtro. Sin la comprobación, pedir una colección que no lleva el
+ * campo devuelve un **400 de Payload** —`The following path cannot be queried:
+ * estacion`— que se ve igual que "el CMS está mal" y no dice qué hiciste mal.
+ * Con la comprobación, el error nombra la causa en el acto.
+ *
+ * Verificado contra producción el 2026-08-21, colección por colección.
+ * `media` queda FUERA a propósito: la biblioteca es **compartida** entre las 4
+ * estaciones (decisión 6), y filtrarla es justo el 400 de arriba.
+ * `estaciones`, `redirects` y `forms` tampoco lo llevan.
+ */
 export const COLECCIONES_POR_ESTACION = [
   'noticias',
   'podcasts',
@@ -212,7 +225,29 @@ export const COLECCIONES_POR_ESTACION = [
   'etiquetas',
   'canciones',
   'bitacora',
+  'listas',
+  'tipos-de-lista',
+  'eventos',
+  'search',
 ] as const;
+
+export type ColeccionPorEstacion = (typeof COLECCIONES_POR_ESTACION)[number];
+
+/**
+ * Colecciones que el plan necesita y que TODAVÍA NO EXISTEN en el CMS.
+ *
+ * Están aquí para que el error las distinga: pedir `paginas` hoy da un 404
+ * `Route not found`, y sin esta lista el mensaje sonaría a ruta mal escrita
+ * cuando en realidad es trabajo pendiente del carril A.
+ */
+const PENDIENTES_EN_EL_CMS: Record<string, string> = {
+  paginas: 'A1 — «Beat para marcas» (§8) y los avisos legales',
+  productos: 'fase 2 — la Tienda (§7)',
+  oyentes: 'A2 — Comunidad (§6)',
+  playlists: 'A2 — Comunidad (§6)',
+  guardados: 'A2 — Comunidad (§6)',
+  suscripciones: 'A2 — Comunidad (§6)',
+};
 
 /** Lo mínimo de `estaciones` que necesita el transporte. El resto vive en `estacion.ts`. */
 interface EstacionMinima {
@@ -269,10 +304,24 @@ export function idEstacion(): Promise<number> {
  * Sabrosita y Stereo Cien mezclado — de ahí que el nombre sea explícito.
  */
 export async function cmsFetchEstacion<T>(
-  ruta: string,
+  ruta: ColeccionPorEstacion,
   params: ParamsCms = {},
   timeoutMs = 8000,
 ): Promise<T> {
+  // El tipo ya lo impide en compilación; esto cubre las llamadas dinámicas —
+  // un slug que venga de `tipos-de-lista`, por ejemplo — que TypeScript no ve.
+  if (!(COLECCIONES_POR_ESTACION as readonly string[]).includes(ruta)) {
+    const pendiente = PENDIENTES_EN_EL_CMS[ruta];
+    throw new ErrorCms(
+      pendiente
+        ? `La colección "${ruta}" todavía no existe en cms-estaciones (${pendiente}).`
+        : `La colección "${ruta}" no lleva el campo "estacion", así que no se puede ` +
+          `filtrar por estación. Si es la biblioteca compartida (media) usa cmsFetch. ` +
+          `Colecciones válidas: ${COLECCIONES_POR_ESTACION.join(', ')}.`,
+      0,
+      ruta,
+    );
+  }
   const id = await idEstacion();
   return cmsFetch<T>(ruta, { ...params, 'where[estacion][equals]': id }, timeoutMs);
 }

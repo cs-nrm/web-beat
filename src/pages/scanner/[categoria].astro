@@ -1,0 +1,24 @@
+---
+/**
+ * Beat Scanner filtrado por categoría — los filtros de 14b/14e.
+ *
+ * Se resuelve por SLUG, nunca por id: el sitio viejo tiene IDs de categoría
+ * hardcodeados en 55 URLs porque su WordPress no exponía el slug.
+ */
+import Base from '@/layouts/Base.astro';
+import IndiceScanner from '@/components/IndiceScanner.astro';
+import { obtenerCategoria } from '@/lib/cms/categorias';
+
+const { categoria: slug } = Astro.params;
+const cat = slug ? await obtenerCategoria(slug) : null;
+if (!cat) return Astro.rewrite('/404');
+---
+
+<Base
+  titulo={`${cat.nombre} — Beat Scanner — Beat 100.9`}
+  descripcion={`Notas, entrevistas y reportajes de ${cat.nombre} en Beat 100.9.`}
+>
+  <IndiceScanner
+    filtro={{ tipo: 'categoria', id: cat.id, nombre: cat.nombre ?? '', slug: cat.slug ?? '' }}
+  />
+</Base>

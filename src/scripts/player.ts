@@ -51,6 +51,9 @@ let iniciado = false;
  * entender por qué.
  */
 let listo = false;
+/** El texto que renderizó el servidor, para restaurarlo tras un corte comercial
+ *  o un "Conectando…". Se lee una sola vez, antes de pisarlo. */
+let textoOriginal: string | null = null;
 
 const el = <T extends HTMLElement>(sel: string): T | null =>
   document.querySelector<T>(sel);
@@ -71,19 +74,38 @@ function pintarEstado(estado: EstadoUI): void {
   const p = contenedor();
   if (!p) return;
   p.dataset.status = estado;
+
   const boton = el<HTMLButtonElement>('[data-accion="play"]');
   if (boton) {
-    const sonando = estado === 'sonando';
+    const cargando = estado === 'cargando';
+    const sonando = estado === 'sonando' || estado === 'anuncio';
+
     boton.setAttribute('aria-pressed', String(sonando));
+    /**
+     * `aria-busy` y no `disabled`: deshabilitar el botón mientras conecta le
+     * quitaría el foco a quien navega con teclado, y además el oyente debe poder
+     * cancelar una conexión que tarda. Sigue siendo pulsable.
+     */
+    if (cargando) boton.setAttribute('aria-busy', 'true');
+    else boton.removeAttribute('aria-busy');
+
     boton.setAttribute(
       'aria-label',
-      sonando ? 'Pausar la transmisión' : 'Escuchar en vivo',
+      cargando ? 'Conectando con la señal' : sonando ? 'Pausar la transmisión' : 'Escuchar en vivo',
     );
-    // Los dos iconos viven en el marcado; se alterna cuál se ve, para no
+
+    // Los tres iconos viven en el marcado; se alterna cuál se ve, para no
     // reconstruir SVG en cada cambio de estado.
-    boton.querySelector('[data-icono="play"]')?.classList.toggle('hidden', sonando);
-    boton.querySelector('[data-icono="pause"]')?.classList.toggle('hidden', !sonando);
+    const icono = (n: string, visible: boolean) =>
+      boton.querySelector(`[data-icono="${n}"]`)?.classList.toggle('hidden', !visible);
+    icono('play', !cargando && !sonando);
+    icono('pause', !cargando && sonando);
+    icono('cargando', cargando);
   }
+
+  // El texto acompaña, porque el spinner solo no dice QUÉ está pasando.
+  if (estado === 'cargando') pintarSonando('Conectando…');
+  else if (estado === 'sonando' || estado === 'init') restaurarSonando();
 }
 
 /**
@@ -93,7 +115,15 @@ function pintarEstado(estado: EstadoUI): void {
  */
 function pintarSonando(texto: string): void {
   const campo = el('[data-campo="sonando"]');
-  if (campo) campo.textContent = texto;
+  if (!campo) return;
+  if (textoOriginal === null) textoOriginal = campo.textContent;
+  campo.textContent = texto;
+}
+
+/** Vuelve al texto que puso el servidor (la canción, o el nombre de la estación). */
+function restaurarSonando(): void {
+  const campo = el('[data-campo="sonando"]');
+  if (campo && textoOriginal !== null) campo.textContent = textoOriginal;
 }
 
 function alCambiarEstado(e: { data?: { code?: string } }): void {
@@ -234,14 +264,27 @@ export function prepararPlayer(): void {
     'click',
     () => {
       if (iniciado) return; // ya hay SDK: el handler de iniciarPlayer se encarga
-      boton.setAttribute('aria-busy', 'true');
+      /**
+       * 🔴 Se pinta `cargando` AQUÍ, no al recibir el primer `stream-status`.
+       *
+       * Lo que el oyente percibe como una sola espera son dos apiladas: la
+       * descarga del SDK (854 KB) y después la conexión de Triton
+       * (GETTING_STATION_INFORMATION -> LIVE_CONNECTING -> LIVE_BUFFERING).
+       * Si el indicador esperara al SDK, el primer tramo —el más largo en una red
+       * lenta— pasaría sin ninguna señal y el botón parecería no responder.
+       */
+      pintarEstado('cargando');
       void cargarSdk()
         .then(() => {
           iniciarPlayer();
           // El clic que disparó la carga sigue contando como gesto del usuario.
           arrancar();
         })
-        .catch(() => boton.removeAttribute('aria-busy'));
+        .catch(() => {
+          pintarEstado('init');
+          pintarSonando('No se pudo conectar');
+          setTimeout(restaurarSonando, 4000);
+        });
     },
     // `once` no: si la carga falla, el siguiente clic debe volver a intentarlo.
   );
@@ -343,9 +386,12 @@ export function iniciarPlayer(): void {
   // ---- Controles ----
   el<HTMLButtonElement>('[data-accion="play"]')?.addEventListener('click', () => {
     const estado = contenedor()?.dataset.status;
-    if (estado === 'sonando' || estado === 'cargando') {
+    if (estado === 'sonando' || estado === 'cargando' || estado === 'anuncio') {
       sdk?.stop();
+      pintarEstado('init');
     } else {
+      // Respuesta inmediata al clic: Triton tarda en emitir su primer estado.
+      pintarEstado('cargando');
       arrancar();
     }
   });

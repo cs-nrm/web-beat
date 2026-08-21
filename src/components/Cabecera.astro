@@ -76,9 +76,13 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
       type="button"
       data-accion="play"
       aria-label={`Escuchar ${estacion.nombre} en vivo`}
-      class="grid h-[30px] w-[30px] flex-none place-items-center rounded-pill bg-noche-0 text-mist-0 transition-colors duration-2 ease-out hover:bg-graphite-4"
+      aria-pressed="false"
+      disabled
+      aria-busy="true"
+      class="grid h-[30px] w-[30px] flex-none place-items-center rounded-pill bg-noche-0 text-mist-0 disabled:opacity-60 transition-colors duration-2 ease-out hover:bg-graphite-4"
     >
-      <Icono nombre="play" tamano={14} />
+      <span data-icono="play" class="contents"><Icono nombre="play" tamano={14} /></span>
+      <span data-icono="pause" class="contents hidden"><Icono nombre="pause" tamano={14} /></span>
     </button>
 
     <span
@@ -194,3 +198,49 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     </button>
   </header>
 </div>
+
+{/*
+  🔴 `#td_container` lo exige el SDK: es el `playerId` de su módulo MediaPlayer, y
+  ahí monta el elemento de audio y el pre-roll VAST. Va DENTRO del bloque
+  persistente y no en la página, porque si desapareciera al navegar la señal se
+  cortaría.
+*/}
+<div id="td_container" class="hidden" aria-hidden="true"></div>
+
+{/*
+  El SDK de Triton va como script CLÁSICO y no como módulo: es un bundle de
+  terceros que se cuelga de `window.TDSdk`. `is:inline` para que Astro no intente
+  procesarlo.
+*/}
+<script is:inline src="//sdk.listenlive.co/web/2.9/td-sdk.min.js"></script>
+
+<script>
+  import { iniciarPlayer } from '@/scripts/player';
+
+  /**
+   * El SDK es un script clásico y este es un módulo, así que puede evaluarse antes
+   * de que `window.TDSdk` exista. Se espera con reintentos acotados en vez de
+   * asumir el orden: encadenar un `defer` no sirve —los módulos ya van diferidos—
+   * y el orden entre un clásico y un módulo no está garantizado.
+   */
+  const esperarSdk = (intentos = 40) => {
+    if (typeof (window as any).TDSdk !== 'undefined') {
+      iniciarPlayer();
+      return;
+    }
+    if (intentos > 0) setTimeout(() => esperarSdk(intentos - 1), 100);
+  };
+
+  esperarSdk();
+
+  /**
+   * ⚠️ NO se re-inicializa en `astro:page-load`. El bloque de la cabecera lleva
+   * `transition:persist`, así que sobrevive la navegación con sus listeners y su
+   * instancia del SDK intactos: llamar otra vez a `iniciarPlayer()` crearía una
+   * SEGUNDA instancia de TDSdk y el audio se duplicaría. La guarda `iniciado` del
+   * módulo lo evita igual, pero el punto es que aquí no hace falta el hook.
+   *
+   * Es lo contrario de `initGPT()`, que SÍ debe re-ejecutarse en cada navegación
+   * porque los `div` de los anuncios sí se reemplazan (ver src/js/README.md).
+   */
+</script>

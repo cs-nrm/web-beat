@@ -239,15 +239,22 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
       <Icono nombre="menu" tamano={20} />
     </button>
   </header>
-</div>
 
-{/*
-  🔴 `#td_container` lo exige el SDK: es el `playerId` de su módulo MediaPlayer, y
-  ahí monta el elemento de audio y el pre-roll VAST. Va DENTRO del bloque
-  persistente y no en la página, porque si desapareciera al navegar la señal se
-  cortaría.
-*/}
-<div id="td_container" class="hidden" aria-hidden="true"></div>
+  {/*
+    🔴 `#td_container` lo exige el SDK: es el `playerId` de su módulo MediaPlayer,
+    y ahí monta el elemento de audio y el pre-roll VAST. Tiene que estar DENTRO
+    del bloque con `transition:persist`, porque si el elemento de audio se
+    destruye al navegar, la señal se corta.
+
+    ⚠️ Estuvo FUERA por un `</div>` mal puesto: el comentario decía «va dentro del
+    bloque persistente» y el div quedaba después del cierre. El efecto era el
+    exacto contrario del que se buscaba —Astro lo reemplazaba por un div vacío en
+    cada navegación—, y no se notaba porque la cabecera sí persistía: lo visible
+    seguía ahí y solo se iba el audio. Comprobado con un testigo en `dataset`
+    antes y después de navegar.
+  */}
+  <div id="td_container" class="hidden" aria-hidden="true"></div>
+</div>
 
 <script>
   import { prepararPlayer } from '@/scripts/player';

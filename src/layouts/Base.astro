@@ -95,6 +95,19 @@ const canonical = new URL(Astro.url.pathname, SITE_URL).href;
     */}
   </head>
   <body class="min-h-screen bg-surface-canvas font-text text-body text-text-body antialiased">
+    {/*
+      Hueco POR ENCIMA del chrome. Hoy lo usa solo el Inicio, para el banner de
+      portada: el orden del lienzo es **publicidad → player → menú** (13a lo pinta
+      así, y 14a igual en móvil). Los interiores no lo llenan y arrancan directo
+      con la cabecera.
+
+      Va aquí y no dentro de la página porque el `<slot />` de contenido está
+      DEBAJO de la cabecera: desde ahí es imposible pintar algo encima. Y no va
+      dentro de `Cabecera` porque la cabecera lleva `transition:persist` — lo que
+      entra ahí sobrevive a la navegación, y un banner de portada que se quedara
+      pegado al navegar a una nota sería un error de facturación, no de maquetado.
+    */}
+    <slot name="sobre-cabecera" />
     <Cabecera estacion={marca} alAire={alAire} />
     <main id="contenido">
       <slot />

@@ -40,10 +40,32 @@ const sonando = alAire
   ? [alAire.titulo, alAire.artista].filter(Boolean).join(' · ')
   : estacion.nombre;
 
-/** 72 barras en escritorio, 18 en móvil. Alturas fijas y deterministas: el
- *  movimiento lo pone la animación `beat-bars` del DS, no el marcado. */
+/**
+ * Las barras de la onda: 72 en escritorio, 18 en móvil.
+ *
+ * Cada una lleva su propio periodo, amplitud y retardo. Es lo que hace que NO se
+ * lea como una ola de estadio, que es como se veía cuando todas compartían la
+ * misma animación con un desfase progresivo.
+ *
+ * Deterministas a propósito (`Math.sin` sobre el índice, sin `Math.random`): el
+ * SSR y el cliente tienen que producir el mismo marcado o Astro reporta
+ * desajuste de hidratación, y además el diseño se ve igual en cada carga.
+ *
+ * La amplitud cae hacia los agudos —las barras de la izquierda son más altas—
+ * porque así se ve un espectro de verdad: la energía vive en los graves.
+ */
 const barras = (n: number) =>
-  Array.from({ length: n }, (_, i) => 24 + Math.round(52 * Math.abs(Math.sin(i * 1.7))));
+  Array.from({ length: n }, (_, i) => {
+    const t = i / n;
+    // Envolvente descendente con ondulación, para que no sea una rampa limpia.
+    const pico = 0.34 + 0.62 * (1 - t) ** 1.5 + 0.12 * Math.sin(i * 2.3);
+    return {
+      // Periodos entre ~520 y ~1180 ms, sin relación armónica entre vecinas.
+      dur: Math.round(520 + 330 * (1 + Math.sin(i * 1.13)) + 60 * Math.sin(i * 0.37)),
+      peak: Math.min(1, Math.max(0.22, pico)).toFixed(3),
+      delay: Math.round(((i * 137) % 900)),
+    };
+  });
 const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
 ---
 
@@ -92,16 +114,16 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
 
     {/* Waveform. Decorativa: el dato real es el texto de al lado. */}
     <span class="flex h-4 w-[52px] flex-none items-center gap-[1.5px] md:h-5 md:w-auto md:flex-1" aria-hidden="true">
-      {barras(18).map((h, i) => (
+      {barras(18).map((b) => (
         <span
-          class="flex-1 bg-[var(--onair-wave)] motion-safe:animate-bars md:hidden"
-          style={`height:${h}%;animation-delay:${i * 40}ms`}
+          class="onda-barra h-full flex-1 bg-[var(--onair-wave)] md:hidden"
+          style={`--dur:${b.dur}ms;--peak:${b.peak};--delay:${b.delay}ms`}
         ></span>
       ))}
-      {barras(72).map((h, i) => (
+      {barras(72).map((b) => (
         <span
-          class="hidden flex-1 bg-[var(--onair-wave)] motion-safe:animate-bars md:block"
-          style={`height:${h}%;animation-delay:${i * 25}ms`}
+          class="onda-barra hidden h-full flex-1 bg-[var(--onair-wave)] md:block"
+          style={`--dur:${b.dur}ms;--peak:${b.peak};--delay:${b.delay}ms`}
         ></span>
       ))}
     </span>
@@ -207,40 +229,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
 */}
 <div id="td_container" class="hidden" aria-hidden="true"></div>
 
-{/*
-  El SDK de Triton va como script CLÁSICO y no como módulo: es un bundle de
-  terceros que se cuelga de `window.TDSdk`. `is:inline` para que Astro no intente
-  procesarlo.
-*/}
-<script is:inline src="//sdk.listenlive.co/web/2.9/td-sdk.min.js"></script>
-
 <script>
-  import { iniciarPlayer } from '@/scripts/player';
-
-  /**
-   * El SDK es un script clásico y este es un módulo, así que puede evaluarse antes
-   * de que `window.TDSdk` exista. Se espera con reintentos acotados en vez de
-   * asumir el orden: encadenar un `defer` no sirve —los módulos ya van diferidos—
-   * y el orden entre un clásico y un módulo no está garantizado.
-   */
-  const esperarSdk = (intentos = 40) => {
-    if (typeof (window as any).TDSdk !== 'undefined') {
-      iniciarPlayer();
-      return;
-    }
-    if (intentos > 0) setTimeout(() => esperarSdk(intentos - 1), 100);
-  };
-
-  esperarSdk();
-
-  /**
-   * ⚠️ NO se re-inicializa en `astro:page-load`. El bloque de la cabecera lleva
-   * `transition:persist`, así que sobrevive la navegación con sus listeners y su
-   * instancia del SDK intactos: llamar otra vez a `iniciarPlayer()` crearía una
-   * SEGUNDA instancia de TDSdk y el audio se duplicaría. La guarda `iniciado` del
-   * módulo lo evita igual, pero el punto es que aquí no hace falta el hook.
-   *
-   * Es lo contrario de `initGPT()`, que SÍ debe re-ejecutarse en cada navegación
-   * porque los `div` de los anuncios sí se reemplazan (ver src/js/README.md).
-   */
+  import { prepararPlayer } from '@/scripts/player';
+  prepararPlayer();
 </script>

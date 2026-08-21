@@ -156,6 +156,105 @@ function arrancar(): void {
   sdk.playAd('vastAd', { url: vast });
 }
 
+const URL_SDK = 'https://sdk.listenlive.co/web/2.9/td-sdk.min.js';
+let promesaSdk: Promise<void> | null = null;
+
+/**
+ * Carga el SDK de Triton a demanda.
+ *
+ * 🔴 Por qué a demanda y no en el `<head>`: medido en el cable, `td-sdk.min.js`
+ * son **363 KB** (gzip, 1.5 MB sin comprimir) y al construirse con el plugin
+ * `vastAd` arrastra el IMA de Google, que son **491 KB más y viajan SIN
+ * comprimir** —el CDN de Google no lo gzipea—. Total: **854 KB**.
+ *
+ * Como el player vive en la cabecera, eso se bajaba en TODAS las páginas aunque
+ * nadie le diera play. Para comparar: el CSS del sitio entero —design system,
+ * tipografía, cabecera y pie— son 10 KB gzip.
+ *
+ * Se carga como script CLÁSICO y no como módulo porque es un bundle de terceros
+ * que se cuelga de `window.TDSdk`.
+ */
+function cargarSdk(): Promise<void> {
+  if (promesaSdk) return promesaSdk;
+  promesaSdk = new Promise<void>((resolver, rechazar) => {
+    if (typeof TDSdk !== 'undefined') return resolver();
+    const et = document.createElement('script');
+    et.src = URL_SDK;
+    et.async = true;
+    et.onload = () => resolver();
+    et.onerror = () => rechazar(new Error('No cargó el SDK de Triton'));
+    document.head.appendChild(et);
+  });
+  return promesaSdk;
+}
+
+/**
+ * Precarga al primer indicio de INTENCIÓN, no cuando el navegador esté ocioso.
+ *
+ * La diferencia importa: con `requestIdleCallback` los 854 KB salían de la ruta
+ * crítica del pintado, pero se descargaban igual en cada visita — así que quien
+ * nunca le da play pagaba los datos completos. En datos móviles en México eso no
+ * es un detalle.
+ *
+ * «Intención» es acercar el puntero a la barra del player, enfocarla con el
+ * teclado, o tocarla. Cuando alguien va a escuchar radio, mueve el cursor hacia el
+ * botón antes de hacer clic, así que en la práctica la descarga ya empezó cuando
+ * el clic llega. Y quien solo viene a leer una nota no paga nada.
+ */
+function precargarEnIntencion(): void {
+  const barra = contenedor();
+  if (!barra) return;
+  const arrancar = () => {
+    quitar();
+    void cargarSdk().then(iniciarPlayer).catch(() => {});
+  };
+  const eventos: Array<keyof HTMLElementEventMap> = [
+    'pointerenter',
+    'focusin',
+    'touchstart',
+  ];
+  const quitar = () =>
+    eventos.forEach((e) => barra.removeEventListener(e, arrancar));
+  eventos.forEach((e) =>
+    barra.addEventListener(e, arrancar, { once: true, passive: true }),
+  );
+}
+
+/**
+ * Punto de entrada. Deja el botón usable de inmediato: si el oyente hace clic
+ * antes de que el SDK esté, se carga en ese momento y se arranca al terminar, así
+ * que el clic nunca se pierde.
+ */
+export function prepararPlayer(): void {
+  const p = contenedor();
+  if (!p) return;
+
+  const boton = el<HTMLButtonElement>('[data-accion="play"]');
+  boton?.addEventListener(
+    'click',
+    () => {
+      if (iniciado) return; // ya hay SDK: el handler de iniciarPlayer se encarga
+      boton.setAttribute('aria-busy', 'true');
+      void cargarSdk()
+        .then(() => {
+          iniciarPlayer();
+          // El clic que disparó la carga sigue contando como gesto del usuario.
+          arrancar();
+        })
+        .catch(() => boton.removeAttribute('aria-busy'));
+    },
+    // `once` no: si la carga falla, el siguiente clic debe volver a intentarlo.
+  );
+
+  // El botón nace usable, aunque el SDK no esté: el clic lo trae.
+  if (boton) {
+    boton.disabled = false;
+    boton.removeAttribute('aria-busy');
+  }
+
+  precargarEnIntencion();
+}
+
 export function iniciarPlayer(): void {
   if (iniciado) return;
   const p = contenedor();

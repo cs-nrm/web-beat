@@ -233,3 +233,62 @@
 html {
   scroll-padding-top: var(--chrome-h);
 }
+
+/* ============================================================
+   Onda del player
+   ------------------------------------------------------------
+   El movimiento es PROCEDURAL, no reactivo al audio, y es una decisión
+   consciente: analizar el audio de verdad exige reproducir por hls.js sobre el
+   mount `_ADP` (el mount normal deja el nodo *tainted* y el analizador devuelve
+   ceros sin dar error), y eso significa saltarse el Player SDK de Triton — o sea
+   perder la inserción de audio ads y la sesión en Webcast Metrics, que son
+   ingresos y son los números que NRM le reporta a los anunciantes. Ver el handoff
+   del visualizador, §8 y §10.1.
+
+   Lo que sí había que arreglar era que se veía mecánico, y eso no era culpa de la
+   falta de análisis: las 72 barras corrían la MISMA animación con un desfase
+   progresivo, y el ojo lee eso como una ola de estadio, no como audio.
+
+   Tres cambios y deja de parecerlo:
+     · Periodo distinto por barra (`--dur`), sin relación armónica entre vecinas.
+     · Amplitud distinta por barra (`--peak`), con las graves más altas — que es
+       cómo se ve un espectro real.
+     · Retardo desalineado (`--delay`), no progresivo.
+   Todo con animaciones CSS y no un bucle de rAF: lo maneja el compositor, no
+   despierta el hilo principal 60 veces por segundo y no gasta batería en móvil.
+   ============================================================ */
+
+.onda-barra {
+  /* Valores por defecto; el marcado los sobreescribe por barra. */
+  --dur: 900ms;
+  --peak: 0.8;
+  --delay: 0ms;
+  transform-origin: center;
+  /* Sin animación mientras no suena: una onda moviéndose con el audio detenido es
+     una mentira, y además gasta. */
+  transform: scaleY(0.16);
+  transition: transform var(--dur-3) var(--ease-out);
+}
+
+/* Solo se mueve cuando de verdad está sonando. En `anuncio` se queda quieta: es
+   coherente con que el texto diga PAUSA COMERCIAL. */
+#player[data-status='sonando'] .onda-barra {
+  animation: onda var(--dur) var(--ease-in-out) var(--delay) infinite;
+}
+
+@keyframes onda {
+  0%,
+  100% {
+    transform: scaleY(0.18);
+  }
+  50% {
+    transform: scaleY(var(--peak));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #player[data-status='sonando'] .onda-barra {
+    animation: none;
+    transform: scaleY(var(--peak));
+  }
+}

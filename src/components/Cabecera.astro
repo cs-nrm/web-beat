@@ -253,7 +253,14 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     seguía ahí y solo se iba el audio. Comprobado con un testigo en `dataset`
     antes y después de navegar.
   */}
-  <div id="td_container" class="hidden" aria-hidden="true"></div>
+  <div id="td_container" class="td-contenedor" aria-hidden="true"></div>
+
+  {/*
+    El telón del anuncio. Va aquí dentro por la misma razón que el contenedor: si
+    el DOM lo reemplazara al navegar, un anuncio en curso se quedaría con el telón
+    puesto y sin nada detrás.
+  */}
+  <div id="td-telon" class="td-telon" hidden></div>
 </div>
 
 <script>

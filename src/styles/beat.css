@@ -411,3 +411,81 @@ html {
   white-space: nowrap;
   border: 0;
 }
+
+/* ============================================================
+   El modal del pre-roll VAST
+   ------------------------------------------------------------
+   🔴 `#td_container` NO puede llevar `display:none`. Es el `playerId` del SDK, y
+   ahí dentro el IMA de Google monta el `<lima-video>` del anuncio: un elemento en
+   `display:none` no tiene caja, así que el IMA no puede medirlo ni renderizarlo y
+   el video ad no se ve. El inventario de VideoVast se serviría a un contenedor
+   invisible.
+
+   El patrón es el del sitio actual, y es correcto: el contenedor vive SIEMPRE en
+   la página como **1×1 píxel fijo y centrado**, y cuando arranca el anuncio crece
+   a la medida del creativo. Nunca se oculta, solo cambia de tamaño.
+
+   La medida sale del propio VAST que pedimos: `sz=600x360` en la URL de
+   `/23349147378/Beat/VideoVast`. Si algún día cambia el tamaño en Ad Manager, este
+   valor cambia con él.
+   ============================================================ */
+.td-contenedor {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: 1px;
+  height: 1px;
+  z-index: var(--z-dialog);
+  overflow: hidden;
+  /*
+    🔴 SIN transición de `width`/`height`, a propósito.
+    El IMA de Google MIDE el contenedor cuando arranca el anuncio para decidir a
+    qué tamaño renderizar el creativo. Si en ese instante la caja va animándose
+    desde 1px, mide una caja equivocada. El sitio actual tiene `transition: all
+    .3s` aquí y funciona por suerte, no por diseño.
+    Lo que sí se puede animar sin tocar el layout es el telón, con opacidad.
+  */
+}
+
+/* La añade `player.ts` en `ad-playback-start` y la quita en complete/error. */
+.td-contenedor.es-anuncio {
+  width: 600px;
+  height: 360px;
+  background: var(--noche-0);
+  box-shadow: var(--shadow-3);
+}
+
+.td-telon {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  background: rgba(5, 7, 6, 0.82);
+  backdrop-filter: blur(6px);
+  /* La opacidad no afecta al layout, así que animarla no puede desalinear al IMA. */
+  animation: beat-telon-entra var(--dur-2) var(--ease-out);
+}
+.td-telon[hidden] {
+  display: none;
+}
+
+@keyframes beat-telon-entra {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 767px) {
+  .td-contenedor.es-anuncio {
+    width: 90vw;
+    height: 260px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .td-telon {
+    animation: none;
+  }
+}

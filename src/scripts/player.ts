@@ -52,6 +52,24 @@ let iniciado = false;
  * entender por qué.
  */
 let listo = false;
+
+/**
+ * 🔴 Intención de arranque pendiente.
+ *
+ * `iniciarPlayer()` solo CONSTRUYE el SDK; `playerReady` llega después, asíncrono.
+ * El clic hacía `cargarSdk().then(() => { iniciarPlayer(); arrancar(); })`, así que
+ * `arrancar()` corría con `listo === false`, salía por su propia guarda y **la
+ * intención se perdía**: el primer clic de la sesión no reproducía nada y el estado
+ * se quedaba en `init`. El segundo sí funcionaba, porque ya estaba listo.
+ *
+ * Era el camino que toma TODO visitante nuevo, y silencioso: sin error en consola,
+ * sin nada raro en pantalla, solo un botón que parece no hacer caso.
+ *
+ * Con esto la intención se guarda y `playerReady` la ejecuta. El gesto sigue
+ * valiendo: una vez que el usuario interactúa con el documento, la activación es
+ * «pegajosa» en los navegadores, así que un `play()` posterior no se bloquea.
+ */
+let arranquePendiente = false;
 /** El texto que renderizó el servidor, para restaurarlo tras un corte comercial
  *  o un "Conectando…". Se lee una sola vez, antes de pisarlo. */
 let textoOriginal: string | null = null;
@@ -341,13 +359,21 @@ export function prepararPlayer(): void {
        */
       reclamarAudio(FUENTES.radio);
       pintarEstado('cargando');
+      arranquePendiente = true;
       void cargarSdk()
         .then(() => {
           iniciarPlayer();
-          // El clic que disparó la carga sigue contando como gesto del usuario.
-          arrancar();
+          // Si el SDK ya estaba listo —porque la precarga por intención se
+          // adelantó— se arranca aquí. Si no, `playerReady` recoge la intención.
+          if (listo) {
+            arranquePendiente = false;
+            arrancar();
+          }
         })
-        .catch(() => fallo('No se pudo conectar'));
+        .catch(() => {
+          arranquePendiente = false;
+          fallo('No se pudo conectar');
+        });
     },
     // `once` no: si la carga falla, el siguiente clic debe volver a intentarlo.
   );
@@ -436,6 +462,13 @@ export function iniciarPlayer(): void {
       const volumen = el<HTMLInputElement>('[data-accion="volumen"]');
       const actual = sdk?.getVolume?.();
       if (volumen && typeof actual === 'number') volumen.value = String(Math.round(actual * 100));
+
+      // La intención que quedó pendiente mientras el SDK cargaba. Es lo que hace
+      // que el PRIMER clic de la sesión reproduzca.
+      if (arranquePendiente) {
+        arranquePendiente = false;
+        arrancar();
+      }
     },
     /**
      * Un módulo que no carga se ve aquí, y es la única forma de enterarse: el SDK
@@ -588,13 +621,49 @@ export function iniciarPlayer(): void {
     restaurarSonando();
   });
 
+  /**
+   * Abre o cierra el modal del anuncio.
+   *
+   * 🔴 Esto FALTABA, y era una regresión respecto al v1: el estado y la analítica
+   * del ad estaban bien, pero nadie mostraba `#td_container`, así que el IMA
+   * montaba el `<lima-video>` dentro de una caja de 1×1 y **el video ad no se veía**.
+   *
+   * `aria-hidden` se apaga mientras el anuncio corre: el creativo puede traer un
+   * botón de omitir, y un control que no se puede alcanzar con teclado ni con
+   * lector de pantalla es peor que no tenerlo.
+   */
+  const modalAnuncio = (abierto: boolean): void => {
+    document.getElementById('td_container')?.classList.toggle('es-anuncio', abierto);
+    const contenedorAd = document.getElementById('td_container');
+    if (contenedorAd) contenedorAd.setAttribute('aria-hidden', abierto ? 'false' : 'true');
+    const telon = document.getElementById('td-telon');
+    if (telon) telon.hidden = !abierto;
+  };
+
+  /**
+   * Red de seguridad. Si `ad-playback-complete` no llega nunca —el SDK se atora,
+   * la red se cae a media pausa— el telón se queda puesto a pantalla completa y el
+   * sitio queda inservible. El v1 tiene ese riesgo abierto; aquí el modal se cierra
+   * solo pasados 45 s, que es más de lo que dura cualquier pre-roll de 30.
+   */
+  let relojAnuncio: ReturnType<typeof setTimeout> | null = null;
+  const cerrarAnuncio = (): void => {
+    if (relojAnuncio) clearTimeout(relojAnuncio);
+    relojAnuncio = null;
+    modalAnuncio(false);
+  };
+
   sdk.addEventListener('ad-playback-start', () => {
     pintarEstado('anuncio');
     pintarSonando('PAUSA COMERCIAL');
+    modalAnuncio(true);
+    if (relojAnuncio) clearTimeout(relojAnuncio);
+    relojAnuncio = setTimeout(cerrarAnuncio, 45_000);
     eventoTriton('ad_start', ctxAnalitica());
   });
 
   sdk.addEventListener('ad-playback-complete', () => {
+    cerrarAnuncio();
     eventoTriton('ad_complete', ctxAnalitica());
     reproducir();
   });
@@ -605,6 +674,7 @@ export function iniciarPlayer(): void {
    * como «comportamiento esperado, no bug».
    */
   sdk.addEventListener('ad-playback-error', () => {
+    cerrarAnuncio();
     eventoTriton('ad_error', ctxAnalitica());
     reproducir();
   });

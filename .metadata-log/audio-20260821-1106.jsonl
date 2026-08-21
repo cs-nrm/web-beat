@@ -1,0 +1,45 @@
+{"ev": "inicio", "min": 150.0, "umbral_s": 2.0, "url": "https://14023.live.streamtheworld.com/XHSONFMAAC.aac", "t": "2026-08-21T11:06:03-06:00"}
+{"ev": "conectado", "http": 200, "reconexion": 0, "t": "2026-08-21T11:06:04-06:00"}
+{"ev": "caudal", "kbps": 58.4, "vs_nominal": "1.22x", "total_mb": 0.42, "t": "2026-08-21T11:07:04-06:00"}
+{"ev": "HUECO", "segundos": 2.0, "total_bytes": 487424, "t": "2026-08-21T11:07:13-06:00"}
+{"ev": "caudal", "kbps": 49.3, "vs_nominal": "1.03x", "total_mb": 0.77, "t": "2026-08-21T11:08:04-06:00"}
+{"ev": "HUECO", "segundos": 2.01, "total_bytes": 1048576, "t": "2026-08-21T11:08:45-06:00"}
+{"ev": "caudal", "kbps": 49.1, "vs_nominal": "1.02x", "total_mb": 1.13, "t": "2026-08-21T11:09:05-06:00"}
+{"ev": "HUECO", "segundos": 2.14, "total_bytes": 1286144, "t": "2026-08-21T11:09:24-06:00"}
+{"ev": "caudal", "kbps": 49.2, "vs_nominal": "1.03x", "total_mb": 1.48, "t": "2026-08-21T11:10:06-06:00"}
+{"ev": "caudal", "kbps": 49.3, "vs_nominal": "1.03x", "total_mb": 1.84, "t": "2026-08-21T11:11:06-06:00"}
+{"ev": "HUECO", "segundos": 2.19, "total_bytes": 2273280, "t": "2026-08-21T11:12:04-06:00"}
+{"ev": "caudal", "kbps": 49.6, "vs_nominal": "1.03x", "total_mb": 2.2, "t": "2026-08-21T11:12:06-06:00"}
+{"ev": "HUECO", "segundos": 2.04, "total_bytes": 2318336, "t": "2026-08-21T11:12:11-06:00"}
+{"ev": "caudal", "kbps": 48.5, "vs_nominal": "1.01x", "total_mb": 2.54, "t": "2026-08-21T11:13:06-06:00"}
+{"ev": "caudal", "kbps": 49.8, "vs_nominal": "1.04x", "total_mb": 2.9, "t": "2026-08-21T11:14:07-06:00"}
+{"ev": "HUECO", "segundos": 2.04, "total_bytes": 3084288, "t": "2026-08-21T11:14:16-06:00"}
+{"ev": "caudal", "kbps": 49.2, "vs_nominal": "1.02x", "total_mb": 3.26, "t": "2026-08-21T11:15:08-06:00"}
+{"ev": "HUECO", "segundos": 2.21, "total_bytes": 3608576, "t": "2026-08-21T11:15:41-06:00"}
+{"ev": "HUECO", "segundos": 2.33, "total_bytes": 3657728, "t": "2026-08-21T11:15:49-06:00"}
+{"ev": "caudal", "kbps": 48.6, "vs_nominal": "1.01x", "total_mb": 3.61, "t": "2026-08-21T11:16:08-06:00"}
+{"ev": "HUECO", "segundos": 2.05, "total_bytes": 3809280, "t": "2026-08-21T11:16:14-06:00"}
+{"ev": "HUECO", "segundos": 2.08, "total_bytes": 4132864, "t": "2026-08-21T11:17:06-06:00"}
+{"ev": "HUECO", "segundos": 2.02, "total_bytes": 4157440, "t": "2026-08-21T11:17:10-06:00"}
+{"ev": "caudal", "kbps": 49.0, "vs_nominal": "1.02x", "total_mb": 3.97, "t": "2026-08-21T11:17:10-06:00"}
+{"ev": "caudal", "kbps": 49.6, "vs_nominal": "1.03x", "total_mb": 4.33, "t": "2026-08-21T11:18:11-06:00"}
+{"ev": "HUECO", "segundos": 2.01, "total_bytes": 4718592, "t": "2026-08-21T11:18:41-06:00"}
+{"ev": "caudal", "kbps": 49.3, "vs_nominal": "1.03x", "total_mb": 4.68, "t": "2026-08-21T11:19:11-06:00"}
+{"ev": "HUECO", "segundos": 2.15, "total_bytes": 4997120, "t": "2026-08-21T11:19:27-06:00"}
+{"ev": "caudal", "kbps": 49.2, "vs_nominal": "1.02x", "total_mb": 5.04, "t": "2026-08-21T11:20:12-06:00"}
+{"ev": "caudal", "kbps": 49.3, "vs_nominal": "1.03x", "total_mb": 5.39, "t": "2026-08-21T11:21:12-06:00"}
+{"ev": "caudal", "kbps": 49.3, "vs_nominal": "1.03x", "total_mb": 5.75, "t": "2026-08-21T11:22:13-06:00"}
+{"ev": "HUECO", "segundos": 2.16, "total_bytes": 6115328, "t": "2026-08-21T11:22:28-06:00"}
+{"ev": "HUECO", "segundos": 2.04, "total_bytes": 6209536, "t": "2026-08-21T11:22:44-06:00"}
+{"ev": "caudal", "kbps": 48.6, "vs_nominal": "1.01x", "total_mb": 6.1, "t": "2026-08-21T11:23:13-06:00"}
+{"ev": "caudal", "kbps": 49.7, "vs_nominal": "1.04x", "total_mb": 6.46, "t": "2026-08-21T11:24:14-06:00"}
+{"ev": "HUECO", "segundos": 2.1, "total_bytes": 6889472, "t": "2026-08-21T11:24:35-06:00"}
+{"ev": "HUECO", "segundos": 2.09, "total_bytes": 6942720, "t": "2026-08-21T11:24:43-06:00"}
+{"ev": "caudal", "kbps": 48.7, "vs_nominal": "1.01x", "total_mb": 6.81, "t": "2026-08-21T11:25:15-06:00"}
+{"ev": "caudal", "kbps": 49.9, "vs_nominal": "1.04x", "total_mb": 7.17, "t": "2026-08-21T11:26:15-06:00"}
+{"ev": "HUECO", "segundos": 2.03, "total_bytes": 7704576, "t": "2026-08-21T11:26:47-06:00"}
+{"ev": "HUECO", "segundos": 2.12, "total_bytes": 7749632, "t": "2026-08-21T11:26:54-06:00"}
+{"ev": "caudal", "kbps": 48.6, "vs_nominal": "1.01x", "total_mb": 7.52, "t": "2026-08-21T11:27:16-06:00"}
+{"ev": "caudal", "kbps": 49.9, "vs_nominal": "1.04x", "total_mb": 7.88, "t": "2026-08-21T11:28:16-06:00"}
+{"ev": "caudal", "kbps": 48.7, "vs_nominal": "1.02x", "total_mb": 8.23, "t": "2026-08-21T11:29:17-06:00"}
+{"ev": "caudal", "kbps": 48.9, "vs_nominal": "1.02x", "total_mb": 8.59, "t": "2026-08-21T11:30:18-06:00"}

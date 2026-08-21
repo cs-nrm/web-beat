@@ -1,5 +1,5 @@
 /* ⚠️ GENERADO — NO EDITAR A MANO.
- * Vendorizado desde cms-estaciones:src/payload-types.ts en el ref abfd52a03db4f67c827fcf9afafd21f49bc590b9.
+ * Vendorizado desde cms-estaciones:src/payload-types.ts en el ref ffa1e73058fb404cac79f8d9538840324a90ee50.
  * Regenerar con: pnpm sync:types  (el pin vive en payload-types.lock.json).
  * Nota: se quita la augmentation `declare module 'payload'` del upstream
  *       (el front no instala el paquete payload; solo usa las interfaces).
@@ -82,6 +82,8 @@ export interface Config {
     etiquetas: Etiqueta;
     especiales: Especiale;
     listas: Lista;
+    'tipos-de-lista': TiposDeLista;
+    eventos: Evento;
     transmisiones: Transmisione;
     autores: Autore;
     bitacora: Bitacora;
@@ -116,6 +118,8 @@ export interface Config {
     etiquetas: EtiquetasSelect<false> | EtiquetasSelect<true>;
     especiales: EspecialesSelect<false> | EspecialesSelect<true>;
     listas: ListasSelect<false> | ListasSelect<true>;
+    'tipos-de-lista': TiposDeListaSelect<false> | TiposDeListaSelect<true>;
+    eventos: EventosSelect<false> | EventosSelect<true>;
     transmisiones: TransmisionesSelect<false> | TransmisionesSelect<true>;
     autores: AutoresSelect<false> | AutoresSelect<true>;
     bitacora: BitacoraSelect<false> | BitacoraSelect<true>;
@@ -837,7 +841,7 @@ export interface Transmisione {
   createdAt: string;
 }
 /**
- * Top ten, hot parade, lanzamientos. Cada edición es su propio documento: para la de la semana que entra, duplica la anterior y cámbiale la fecha.
+ * Las listas de canciones del sitio. Cada edición es su propio documento: para la de la semana que entra, duplica la anterior y cámbiale la fecha. Qué listas existen se define en «Tipos de lista».
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "listas".
@@ -847,9 +851,9 @@ export interface Lista {
   estacion?: (number | null) | Estacione;
   titulo: string;
   /**
-   * Con esto el sitio sabe qué lista pedir. Es parte de la URL.
+   * Qué lista es. Se elige de las que tenga definidas esta estación (colección «Tipos de lista»). Es parte de la URL.
    */
-  tipo: 'topten' | 'hot-parade' | 'lanzamientos' | 'otra';
+  tipo: number | TiposDeLista;
   /**
    * Qué edición es. Ordena las listas y forma parte de la URL.
    */
@@ -864,6 +868,10 @@ export interface Lista {
   canciones?:
     | {
         cancion: number | Cancione;
+        /**
+         * Opcional. La viñeta que acompaña a la canción en el sitio: por qué está aquí, qué contar de ella.
+         */
+        comentario?: string | null;
         /**
          * Los escribe el sitio público; aquí solo se ven.
          */
@@ -913,6 +921,30 @@ export interface Lista {
   createdAt: string;
 }
 /**
+ * Las listas que existen en el sitio de esta estación (Top Ten, Bonus Beat, Lanzamientos). Cada estación define las suyas; al capturar una lista se elige de aquí.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tipos-de-lista".
+ */
+export interface TiposDeLista {
+  id: number;
+  estacion?: (number | null) | Estacione;
+  /**
+   * Como lo llama la estación: «Top Ten», «Bonus Beat», «Hot Parade».
+   */
+  nombre: string;
+  /**
+   * Opcional. Qué es esta lista, para la página de su archivo histórico en el sitio.
+   */
+  descripcion?: string | null;
+  /**
+   * Con esto el sitio pide esta lista, y con esto empieza la URL de cada edición. Si queda vacío se genera del nombre. Cambiarlo después le cambia la URL a las ediciones.
+   */
+  slug?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Se llena sola con lo que suena al aire en Dalet. Enriquécela con portada, reproductor y enlaces a plataformas.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -951,6 +983,54 @@ export interface Cancione {
    * Como la reporta Dalet (ej. MUSICA-HOUSE). Informativa.
    */
   categoriaPlayout?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Lo que la estación organiza, cubre o donde tiene presencia. Las fechas llevan hora, y el evento dice por sí mismo si lleva RSVP o venta de boletos.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "eventos".
+ */
+export interface Evento {
+  id: number;
+  estacion?: (number | null) | Estacione;
+  titulo: string;
+  /**
+   * Con esto el sitio arma sus filtros de la agenda.
+   */
+  tipo: 'propio' | 'cobertura' | 'festival';
+  /**
+   * Día y hora. Es lo que ordena la agenda.
+   */
+  inicio: string;
+  /**
+   * Opcional. Solo para lo que dura varios días o toda una tarde.
+   */
+  fin?: string | null;
+  /**
+   * Un párrafo: qué es, quién toca, por qué importa.
+   */
+  descripcion?: string | null;
+  lugar?: string | null;
+  ciudad?: string | null;
+  accion?: ('ninguna' | 'rsvp' | 'boletos') | null;
+  /**
+   * La liga del registro o de la venta. Puede ser de un tercero.
+   */
+  enlace?: string | null;
+  /**
+   * La imagen con la que el evento aparece en la agenda y al compartirlo.
+   */
+  portada?: (number | null) | Media;
+  /**
+   * URL pública. Si queda vacío, se genera del título.
+   */
+  slug?: string | null;
+  /**
+   * Despublicar lo saca de la agenda sin borrarlo.
+   */
+  estado?: ('publicada' | 'despublicada') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1516,6 +1596,14 @@ export interface PayloadLockedDocument {
         value: number | Lista;
       } | null)
     | ({
+        relationTo: 'tipos-de-lista';
+        value: number | TiposDeLista;
+      } | null)
+    | ({
+        relationTo: 'eventos';
+        value: number | Evento;
+      } | null)
+    | ({
         relationTo: 'transmisiones';
         value: number | Transmisione;
       } | null)
@@ -1906,6 +1994,7 @@ export interface ListasSelect<T extends boolean = true> {
     | T
     | {
         cancion?: T;
+        comentario?: T;
         votos?: T;
         id?: T;
       };
@@ -1925,6 +2014,39 @@ export interface ListasSelect<T extends boolean = true> {
   slug?: T;
   estado?: T;
   votacionAbierta?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tipos-de-lista_select".
+ */
+export interface TiposDeListaSelect<T extends boolean = true> {
+  estacion?: T;
+  nombre?: T;
+  descripcion?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "eventos_select".
+ */
+export interface EventosSelect<T extends boolean = true> {
+  estacion?: T;
+  titulo?: T;
+  tipo?: T;
+  inicio?: T;
+  fin?: T;
+  descripcion?: T;
+  lugar?: T;
+  ciudad?: T;
+  accion?: T;
+  enlace?: T;
+  portada?: T;
+  slug?: T;
+  estado?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2424,6 +2546,8 @@ export interface TaskCreateCollectionExport {
       | 'etiquetas'
       | 'especiales'
       | 'listas'
+      | 'tipos-de-lista'
+      | 'eventos'
       | 'transmisiones'
       | 'autores'
       | 'bitacora'

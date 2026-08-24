@@ -134,7 +134,11 @@ const canonical = new URL(Astro.url.pathname, SITE_URL).href;
 
     <script>
       import { prepararAnuncios } from '@/scripts/anuncios';
+      import { prepararVideo } from '@/scripts/video';
       prepararAnuncios();
+      // Solo CABLEA los visores; Plyr (110 KB) no se baja hasta que alguien
+      // pide un video.
+      prepararVideo();
     </script>
   </body>
 </html>

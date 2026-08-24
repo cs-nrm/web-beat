@@ -22,7 +22,6 @@ interface Slot {
 interface PubAds {
   refresh(slots?: Slot[]): void;
   enableSingleRequest(): void;
-  collapseEmptyDivs(collapse?: boolean): void;
   disableInitialLoad(): void;
   addEventListener(evento: string, cb: (e: never) => void): void;
 }
@@ -37,6 +36,7 @@ interface ConstructorMapping {
 }
 interface GoogleTag {
   cmd: Array<() => void>;
+  setConfig(config: Record<string, unknown>): void;
   apiReady?: boolean;
   destroySlots(slots?: Slot[]): boolean;
   defineSlot(ruta: string, tamanos: unknown, div: string): SlotEnConstruccion | null;
@@ -134,9 +134,17 @@ export function iniciarAnuncios(): void {
 
     if (!definidos.length) return;
 
-    // `collapseEmptyDivs` evita el hueco en blanco cuando no hay qué servir. El
-    // v1 no lo tenía y dejaba marcos vacíos en la página.
-    gt.pubads().collapseEmptyDivs(true);
+    /*
+      Cierra el hueco cuando GAM no tiene qué servir. El v1 no lo hacía y dejaba
+      marcos vacíos en la página.
+
+      ⚠️ Va por `setConfig({ collapseDiv })` y no por `pubads().collapseEmptyDivs()`:
+      GPT avisa en consola que ese método está **deprecado**. Lo cazamos en la
+      consola del navegador el mismo día que se escribió, así que no llegó a
+      producción — pero es el tipo de aviso que se ignora hasta que un día el
+      método desaparece y los huecos vacíos vuelven sin que nadie toque nada.
+    */
+    gt.setConfig({ collapseDiv: 'ON_NO_FILL' });
     gt.pubads().enableSingleRequest();
     gt.enableServices();
 

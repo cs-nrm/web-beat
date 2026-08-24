@@ -9,6 +9,7 @@
 import Icono from '@/components/Icono.astro';
 import { urlMedia } from '@/lib/cms/client';
 import { capsulasDe, listasDe } from '@/lib/cms/especiales';
+import { fuenteDeVideo } from '@/lib/video';
 import { fechaCorta } from '@/lib/nota';
 import type { Especiale, Lista } from '@/types/payload';
 
@@ -38,6 +39,16 @@ const destacadaId =
 const encabeza = capsulas.find((c) => c.doc.id === destacadaId) ?? capsulas.at(-1) ?? null;
 
 const videoFoto = urlMedia(encabeza?.doc.imagen, 'large');
+
+/**
+ * Cada cápsula con su fuente de video ya resuelta en el SERVIDOR: el navegador
+ * recibe un id validado, no una URL que tenga que interpretar.
+ *
+ * Las que no traen video utilizable se quedan como enlace a su nota — un botón de
+ * reproducir que no reproduce es peor que no tenerlo.
+ */
+const capsulasConVideo = capsulas.map((c) => ({ ...c, fuente: fuenteDeVideo(c.doc.video) }));
+const fuenteEncabeza = encabeza ? fuenteDeVideo(encabeza.doc.video) : null;
 const rango =
   especial?.inicio && especial?.fin
     ? `${fechaCorta(especial.inicio)} — ${fechaCorta(especial.fin)}`
@@ -58,7 +69,7 @@ const tiendas = (
 
 {
   especial && (
-    <section class="fr">
+    <section class="fr" data-fenomeno>
       <div class="fr-cabeza">
         <h2 class="beat-display fr-seccion">EL FENÓMENO RESIDENTE</h2>
         <a href="/fenomeno-residente" class="beat-label fr-todo">VER EL ARCHIVO</a>
@@ -79,30 +90,78 @@ const tiendas = (
       <div class="fr-columnas">
         {/* ── el video vertical ── */}
         {encabeza ? (
-          <a href={`/noticias/${encabeza.doc.slug}`} class="fr-video">
-            {videoFoto && <img src={videoFoto} alt="" loading="lazy" decoding="async" />}
-            <div class="beat-grid fr-video-trama" />
-            <span class="beat-label fr-insignia">
-              CÁPSULA {String(encabeza.n).padStart(2, '0')}
-            </span>
-            <div class="fr-video-pie">
-              <span class="fr-play">
-                <Icono nombre="play" tamano={20} />
+          /*
+            EL VISOR. No es un enlace a la nota: es donde se reproduce. Al elegir
+            una cápsula de la lista del centro, su video se carga AQUÍ.
+
+            `data-orientacion` reserva la forma de la caja antes de que exista el
+            video, y cambia al elegir otra cápsula. Es para lo que el CMS tiene ese
+            campo: «el front no la puede adivinar antes de cargar el video, y de eso
+            depende cómo reserva el espacio».
+          */
+          <div
+            class="fr-video"
+            id="fr-visor"
+            data-visor
+            data-estado="portada"
+            data-orientacion={fuenteEncabeza?.orientacion ?? 'vertical'}
+          >
+            {/*
+              🔴 Un `<video>`, no un `<div>` vacío. Plyr necesita un elemento de
+              MEDIOS para construirse; sobre un div sin `data-plyr-provider` se
+              instancia a medias y no monta nada — el estado decía «sonando» y no
+              había ni reproductor ni iframe. Al asignarle una fuente de YouTube,
+              Plyr sustituye este elemento por el iframe del proveedor.
+            */}
+            <video class="fr-visor-montaje" data-visor-montaje playsinline />
+
+            <div class="fr-visor-portada" data-visor-portada>
+              {videoFoto && <img src={videoFoto} alt="" loading="lazy" decoding="async" />}
+              <div class="beat-grid fr-video-trama" />
+              <span class="beat-label fr-insignia">
+                CÁPSULA {String(encabeza.n).padStart(2, '0')}
               </span>
-              <span class="fr-video-texto">
-                <span class="fr-video-titulo">{encabeza.doc.titulo}</span>
-                {encabeza.doc.video?.duracion && (
-                  <span class="beat-label fr-video-dur">{encabeza.doc.video.duracion}</span>
-                )}
-              </span>
+
+              {fuenteEncabeza ? (
+                /*
+                  Es un `<button>` y no un div con onclick: tiene que alcanzarse con
+                  teclado y anunciarse como control. Lleva los mismos `data-` que las
+                  filas de la lista, así que el mismo manejador lo atiende.
+                */
+                <button
+                  type="button"
+                  class="fr-visor-arranque"
+                  data-proveedor={fuenteEncabeza.proveedor}
+                  data-fuente={fuenteEncabeza.src}
+                  data-orientacion={fuenteEncabeza.orientacion}
+                  data-titulo={encabeza.doc.titulo}
+                >
+                  <span class="fr-play">
+                    <Icono nombre="play" tamano={20} />
+                  </span>
+                  <span class="fr-video-texto">
+                    <span class="fr-video-titulo">{encabeza.doc.titulo}</span>
+                    {fuenteEncabeza.duracion && (
+                      <span class="beat-label fr-video-dur">{fuenteEncabeza.duracion}</span>
+                    )}
+                  </span>
+                </button>
+              ) : (
+                /* Sin video utilizable: se degrada a enlace a la nota. */
+                <a href={`/noticias/${encabeza.doc.slug}`} class="fr-visor-arranque es-enlace">
+                  <span class="fr-video-texto">
+                    <span class="fr-video-titulo">{encabeza.doc.titulo}</span>
+                  </span>
+                </a>
+              )}
             </div>
-          </a>
+          </div>
         ) : (
           <div class="fr-video es-vacio" />
         )}
 
         {/* ── las cápsulas ── */}
-        <div class="fr-lista">
+        <div class="fr-lista" data-capsulas>
           <div class="fr-lista-cabeza">
             <span class="beat-label fr-lista-titulo">LAS CÁPSULAS</span>
             <span class="beat-label fr-lista-nota">
@@ -110,18 +169,38 @@ const tiendas = (
             </span>
           </div>
           {capsulas.length > 0 ? (
-            capsulas.map((c) => (
-              <a
-                href={`/noticias/${c.doc.slug}`}
-                class:list={['fr-capsula', { 'es-destacada': c.n === encabeza?.n }]}
-              >
-                <span class="beat-label fr-capsula-n">{String(c.n).padStart(2, '0')}</span>
-                <span class="fr-capsula-titulo">{c.doc.titulo}</span>
-                {c.doc.video?.duracion && (
-                  <span class="beat-label fr-capsula-dur">{c.doc.video.duracion}</span>
-                )}
-              </a>
-            ))
+            capsulasConVideo.map((c) =>
+              /*
+                La que TIENE video es un botón: carga el visor de la izquierda sin
+                salir de la página. La que no, sigue siendo un enlace a su nota, que
+                es lo honesto — no se ofrece reproducir algo que no se puede.
+              */
+              c.fuente ? (
+                <button
+                  type="button"
+                  class:list={['fr-capsula', { 'es-destacada': c.n === encabeza?.n }]}
+                  data-proveedor={c.fuente.proveedor}
+                  data-fuente={c.fuente.src}
+                  data-orientacion={c.fuente.orientacion}
+                  data-titulo={c.doc.titulo}
+                  data-activa={c.n === encabeza?.n ? 'sí' : undefined}
+                >
+                  <span class="beat-label fr-capsula-n">{String(c.n).padStart(2, '0')}</span>
+                  <span class="fr-capsula-titulo">{c.doc.titulo}</span>
+                  <span class="fr-capsula-icono">
+                    <Icono nombre="play" tamano={14} />
+                  </span>
+                  {c.fuente.duracion && (
+                    <span class="beat-label fr-capsula-dur">{c.fuente.duracion}</span>
+                  )}
+                </button>
+              ) : (
+                <a href={`/noticias/${c.doc.slug}`} class="fr-capsula">
+                  <span class="beat-label fr-capsula-n">{String(c.n).padStart(2, '0')}</span>
+                  <span class="fr-capsula-titulo">{c.doc.titulo}</span>
+                </a>
+              ),
+            )
           ) : (
             <p class="fr-vacio">
               Las cápsulas de este tema todavía no se cargan. Se agregan al especial
@@ -193,6 +272,10 @@ const tiendas = (
 }
 
 <style>
+  /* La piel de Plyr. Va aquí y no en la hoja base para que solo pese en las
+     páginas que de verdad tienen un visor. */
+  @import 'plyr/dist/plyr.css';
+
   .fr {
     padding: 32px 24px 0;
   }
@@ -256,16 +339,86 @@ const tiendas = (
     margin-top: 20px;
   }
 
-  /* ── video ── */
+  /* ── el visor ── */
   .fr-video {
     position: relative;
     display: block;
+    /* La forma la fija `data-orientacion`, no una medida fija: las cápsulas
+       pueden ser verticales (Shorts) u horizontales, y la caja se reserva ANTES
+       de que el video exista para que no empuje el layout al aparecer. */
     aspect-ratio: 9 / 16;
     background: var(--grad-noche);
     overflow: hidden;
     box-shadow: inset 0 0 0 1px var(--border-quiet);
   }
-  .fr-video img {
+  .fr-video[data-orientacion='horizontal'] {
+    aspect-ratio: 16 / 9;
+  }
+  .fr-visor-montaje,
+  .fr-visor-portada {
+    position: absolute;
+    inset: 0;
+  }
+  .fr-visor-portada[hidden] {
+    display: none;
+  }
+  /*
+    Plyr tiene que LLENAR la caja del visor.
+
+    ⚠️ Los selectores cuelgan de `.fr-video` y no de `.fr-visor-montaje`: al
+    construirse, Plyr REEMPLAZA el `<video>` que llevaba esa clase por su propio
+    marcado, así que cualquier regla anclada ahí deja de aplicar. Se vio como un
+    iframe de 640×360 dentro de un panel de 296×526.
+
+    Y hay que anular el `padding-bottom` con el que Plyr fija la proporción del
+    proveedor: aquí la proporción la manda el panel (`data-orientacion`), que es
+    la que el CMS declara para cada cápsula.
+  */
+  .fr-video :global(.plyr) {
+    width: 100%;
+    height: 100%;
+    --plyr-color-main: var(--luz-coral);
+  }
+  .fr-video :global(.plyr__video-wrapper) {
+    height: 100%;
+    padding-bottom: 0 !important;
+  }
+  .fr-video :global(.plyr iframe),
+  .fr-video :global(.plyr video) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .fr-visor-arranque {
+    position: absolute;
+    inset: auto 0 0 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 56px 16px 16px;
+    background: var(--grad-scrim-b);
+    border: 0;
+    color: inherit;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  /* Mientras carga Plyr (110 KB), el botón dice que algo está pasando. */
+  .fr-video[data-estado='cargando'] .fr-play {
+    opacity: 0.6;
+  }
+  .fr-video[data-estado='error']::after {
+    content: 'No se pudo cargar el video';
+    position: absolute;
+    inset: auto 0 0 0;
+    padding: 14px 16px;
+    background: var(--grad-scrim-b);
+    font: var(--type-body-sm);
+    color: var(--text-muted);
+  }
+  .fr-visor-portada img {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -286,16 +439,6 @@ const tiendas = (
     color: var(--mist-0);
     font-size: 9px;
     white-space: nowrap;
-    pointer-events: none;
-  }
-  .fr-video-pie {
-    position: absolute;
-    inset: auto 0 0 0;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 56px 16px 16px;
-    background: var(--grad-scrim-b);
     pointer-events: none;
   }
   .fr-play {
@@ -334,14 +477,42 @@ const tiendas = (
   }
   .fr-capsula {
     display: grid;
-    grid-template-columns: 34px minmax(0, 1fr) auto;
+    grid-template-columns: 34px minmax(0, 1fr) auto auto;
     align-items: center;
     gap: 14px;
+    width: 100%;
     padding: 11px 8px;
     margin: 0 -8px;
+    border: 0;
     border-bottom: 1px solid var(--border-hairline);
+    background: none;
     color: inherit;
+    font: inherit;
+    text-align: left;
     text-decoration: none;
+    cursor: pointer;
+  }
+  /* El icono solo aparece al apuntar o cuando esa cápsula está sonando: en reposo
+     once iconos de play seguidos son ruido, no información. */
+  .fr-capsula-icono {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    color: var(--noche-0);
+    background: var(--mist-0);
+    opacity: 0;
+    transition: opacity var(--dur-2) var(--ease-out);
+  }
+  .fr-capsula:hover .fr-capsula-icono,
+  .fr-capsula:focus-visible .fr-capsula-icono,
+  .fr-capsula[data-activa] .fr-capsula-icono {
+    opacity: 1;
+  }
+  .fr-capsula[data-activa] .fr-capsula-titulo,
+  .fr-capsula[data-activa] .fr-capsula-n {
+    color: var(--mist-0);
   }
   .fr-capsula:hover {
     background: var(--surface-card-hover);

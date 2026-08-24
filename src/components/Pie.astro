@@ -20,7 +20,7 @@ const todasLasSecciones = [...SECCIONES, ...SECCIONES_PIE];
 ---
 
 <footer class="mt-13 border-t-hairline border-borde-hairline bg-surface-base">
-  <div class="mx-auto max-w-grid px-contenedor py-12">
+  <div class="px-pie py-12">
     <img
       src="/img/beat-blanco.svg"
       alt={estacion.nombre}
@@ -114,7 +114,7 @@ const todasLasSecciones = [...SECCIONES, ...SECCIONES_PIE];
 
   {/* LEGAL */}
   <div class="border-t-hairline border-borde-hairline">
-    <div class="mx-auto max-w-grid space-y-4 px-contenedor py-9">
+    <div class="space-y-4 px-pie py-9">
       <p class="t-label max-w-[110ch] leading-relaxed text-text-faint">
         © {anio} {estacion.nombrePublicacion}. Todos los derechos reservados. El material de este
         sitio no puede reproducirse, distribuirse, transmitirse, almacenarse en caché ni utilizarse de
@@ -129,7 +129,7 @@ const todasLasSecciones = [...SECCIONES, ...SECCIONES_PIE];
 
   {/* TIRA DE MARCAS DE NRM */}
   <div class="border-t-hairline border-borde-hairline bg-surface-canvas">
-    <div class="mx-auto flex max-w-grid flex-wrap items-baseline justify-between gap-8 px-contenedor py-9">
+    <div class="flex flex-wrap items-baseline justify-between gap-8 px-pie py-9">
       {MARCAS_NRM.map((m) => (
         <a
           href={m.url}
@@ -148,7 +148,7 @@ const todasLasSecciones = [...SECCIONES, ...SECCIONES_PIE];
 
   {/* ÚLTIMA LÍNEA */}
   <div class="border-t-hairline border-borde-hairline">
-    <div class="mx-auto flex max-w-grid flex-wrap items-center gap-x-8 gap-y-4 px-contenedor py-6">
+    <div class="flex flex-wrap items-center gap-x-8 gap-y-4 px-pie py-6">
       <a href="/marcas" class="t-label text-text-muted transition-colors duration-2 ease-out hover:text-text-primary">Ventas</a>
       {LEGALES.map((l) =>
         l.pendiente ? (

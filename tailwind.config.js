@@ -169,6 +169,9 @@ export default {
         section: 'var(--pad-section)',
         'section-sm': 'var(--pad-section-sm)',
         contenedor: 'var(--container-pad)',
+        // El pie va A SANGRE (decisión de Carlos, 2026-08-24) y en 13a lleva 56px
+        // de respiro lateral, más generoso que el del contenido capado.
+        pie: 'var(--pad-pie)',
       },
 
       gap: {

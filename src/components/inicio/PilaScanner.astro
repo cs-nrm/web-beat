@@ -1,16 +1,20 @@
 ---
 /**
- * «BEAT SCANNER» en el Inicio — la PILA de 13a.
+ * «BEAT SCANNER» en el Inicio — la PILA.
  *
- * Es el gesto más particular del diseño: las notas se apilan como cartas. Las de
- * abajo asoman en 88px con solo su titular; las dos de arriba están abiertas, con
- * foto y bajada, y cada nivel sube su fondo (.078 → .092) y su radio. Lee como un
- * mazo del que se está sacando la de arriba.
+ * Las notas se apilan como cartas AL HACER SCROLL: cada una queda fija mostrando
+ * solo su franja de título, la siguiente se desliza encima, y las de atrás se
+ * encogen para dar profundidad. La última queda arriba, completa.
  *
- * ⚠️ El orden visual va AL REVÉS del orden de lectura: en el marcado las asomadas
- * van primero (arriba en pantalla) y las abiertas después, porque cada una se monta
- * sobre la anterior. Así que la nota MÁS reciente es la última del bloque, no la
- * primera. Se ordena aquí, una vez, y no en la plantilla.
+ * 🔴 Antes esto era un dibujo, no un comportamiento: dos tarjetas «asomadas» de
+ * 88px y dos abiertas, todas quietas. Se veía como la referencia solo si nadie
+ * hacía scroll. Ahora todas las tarjetas son iguales y el apilado lo produce el
+ * scroll (referencia que mandó Carlos, 2026-08-24).
+ *
+ * 🔴 Y se hace con `position: sticky`, sin JavaScript. El apilado funciona en
+ * cualquier navegador; el encogido de las de atrás va como MEJORA sobre animación
+ * ligada al scroll, que Chrome y Edge ya tienen y Safari y Firefox todavía no. Sin
+ * soporte, las tarjetas se apilan igual — solo no encogen.
  */
 import Icono from '@/components/Icono.astro';
 import { urlMedia } from '@/lib/cms/client';
@@ -25,25 +29,22 @@ interface Props {
 const { notas } = Astro.props;
 
 /*
-  Cuatro piezas: dos asomadas y dos abiertas. Las abiertas son las DOS PRIMERAS del
-  listado (las más recientes), y van al final del marcado para quedar encima de la
-  pila. Con menos de cuatro notas la pila se acorta sola en vez de dejar huecos.
+  Cuatro como máximo. No es un tope estético: cada tarjeta de la pila ocupa una
+  pantalla de scroll, así que con más de cuatro la sección se vuelve un túnel del
+  que cuesta salir. El resto de las notas está a un clic en `/scanner`.
 */
-const abiertas = notas.slice(0, 2);
-const asomadas = notas.slice(2, 4);
-
-const preparar = (n: Noticia) => ({
+const enLaPila = notas.slice(0, 4).map((n) => ({
   nota: n,
   href: `/noticias/${n.slug}`,
   foto: urlMedia(n.imagen, 'card'),
   min: minutosDeLectura(n.contenido),
   cat: nombreCategoria(n),
   alt: n.imagen && typeof n.imagen === 'object' ? (n.imagen.alt ?? '') : '',
-});
+}));
 ---
 
 {
-  notas.length > 0 && (
+  enLaPila.length > 0 && (
     <section class="pila">
       <div class="pila-cabeza">
         <h2 class="beat-display pila-seccion">BEAT SCANNER</h2>
@@ -51,26 +52,31 @@ const preparar = (n: Noticia) => ({
       </div>
 
       <div class="pila-mazo">
-        {asomadas.map(preparar).map((p) => (
-          <a href={p.href} class="pila-asomada">
-            <div class="pila-asomada-foto">
-              {p.foto && <img src={p.foto} alt={p.alt} loading="lazy" decoding="async" />}
-              <div class="beat-grid pila-trama" />
-            </div>
-            <span class="pila-asomada-titulo">{p.nota.titulo}</span>
-          </a>
-        ))}
+        {/*
+          `--i` manda tres cosas: a qué altura se queda fija la tarjeta, cuánto se
+          encoge cuando la tapan, y quién queda encima de quién. Va como variable
+          de CSS para no escribir una regla por cada posición de la pila.
 
-        {abiertas.map(preparar).map((p, i) => (
-          <a href={p.href} class:list={['pila-abierta', i === 1 && 'es-cima']}>
-            <div class="pila-abierta-foto">
+          ⚠️ El comentario va AQUÍ y no entre los atributos: Astro no admite
+          comentarios dentro de la lista de atributos de una etiqueta, y los parsea
+          como atributos sueltos. Es el tercer tropiezo igual en este repo.
+        */}
+        {enLaPila.map((p, i) => (
+          <a href={p.href} class="pila-carta" style={`--i:${i}`}>
+            <div class="pila-carta-foto">
               {p.foto && <img src={p.foto} alt={p.alt} loading="lazy" decoding="async" />}
               <div class="beat-grid pila-trama" />
             </div>
-            <div class="pila-abierta-texto">
-              <h3 class="pila-abierta-titulo">{p.nota.titulo}</h3>
-              {p.nota.resumen && <p class="pila-abierta-bajada">{p.nota.resumen}</p>}
-              <div class="pila-abierta-meta">
+
+            <div class="pila-carta-texto">
+              {/*
+                El titular va PRIMERO y solo, porque es lo único que se ve cuando la
+                tarjeta queda al fondo de la pila: esa franja tiene que decir de qué
+                es la nota sin nada más.
+              */}
+              <h3 class="pila-carta-titulo">{p.nota.titulo}</h3>
+              {p.nota.resumen && <p class="pila-carta-bajada">{p.nota.resumen}</p>}
+              <div class="pila-carta-meta">
                 {p.cat && <span class="beat-label pila-cat">{p.cat}</span>}
                 <span class="beat-label pila-min">{p.min} MIN</span>
               </div>
@@ -81,6 +87,18 @@ const preparar = (n: Noticia) => ({
             </div>
           </a>
         ))}
+
+        {/*
+          🔴 Un espaciador REAL, no `padding` ni `margin`.
+
+          El rango en que una tarjeta `sticky` se queda fija termina donde termina
+          la última caja del contenedor. Medido: ni el `padding-bottom` del mazo ni
+          el `margin-bottom` de la cuarta tarjeta lo extendían — la pila completa se
+          alcanzaba y se deshacía en 40px de scroll, o sea que el gesto terminaba en
+          el mismo instante en que se completaba. Con un elemento de verdad después
+          de la última carta, la pila armada se sostiene mientras se recorre.
+        */}
+        <div class="pila-remanso" aria-hidden="true" />
       </div>
 
       <div class="pila-pie">
@@ -117,76 +135,76 @@ const preparar = (n: Noticia) => ({
     color: var(--mist-0);
   }
 
-  /* ── las asomadas: 88px, solo el titular ── */
-  .pila-asomada {
-    position: relative;
+  .pila-mazo {
+    /*
+      🔴 Sin `overflow` aquí. Un `overflow: hidden` o `auto` en un ancestro anula
+      el `position: sticky` de los hijos, y la pila se vuelve una lista normal sin
+      que nada avise.
+    */
+    margin-top: 26px;
+  }
+
+  /*
+    El recorrido que sostiene la pila ya armada. Es contenido, no espacio: ver el
+    comentario del marcado.
+  */
+  .pila-remanso {
+    height: min(72vh, 640px);
+  }
+
+  /* ── la carta ── */
+  .pila-carta {
+    position: sticky;
+    /*
+      Se queda fija BAJO el chrome, escalonada por índice: cada tarjeta se detiene
+      22px más abajo que la anterior, y ese escalón es la franja de título que
+      queda a la vista cuando la tapan.
+    */
+    top: calc(var(--chrome-h) + 20px + var(--i) * 22px);
+    /* La de más arriba en el marcado queda ABAJO en la pila. */
+    z-index: calc(var(--i) + 1);
     display: grid;
     grid-template-columns: 400px minmax(0, 1fr);
     gap: 36px;
     align-items: center;
-    height: 88px;
-    box-sizing: border-box;
-    padding: 0 36px;
-    margin-top: 26px;
-    background: var(--grad-noche);
-    border-radius: var(--r-3) var(--r-3) 0 0;
-    overflow: hidden;
-    color: inherit;
-    text-decoration: none;
-  }
-  .pila-asomada + .pila-asomada {
-    margin-top: 2px;
-  }
-  .pila-asomada-foto {
-    display: none;
-  }
-  .pila-asomada-titulo {
-    grid-column: 2;
-    font: 700 24px / 1.2 var(--font-text);
-    letter-spacing: -0.016em;
-    color: var(--mist-4);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-align: center;
-  }
-  .pila-asomada:hover .pila-asomada-titulo {
-    color: var(--mist-2);
-  }
+    /*
+      🔴 Este margen ES el recorrido de scroll entre una carta y la siguiente, no
+      un respiro visual: mientras se recorre, la carta de abajo va subiendo a tapar
+      a la de arriba.
 
-  /* ── las abiertas: cada nivel sube el fondo y la sombra ── */
-  .pila-abierta {
-    position: relative;
-    display: grid;
-    grid-template-columns: 400px minmax(0, 1fr);
-    gap: 36px;
-    align-items: start;
-    padding: 26px 36px 36px;
-    margin-top: 2px;
+      Con los 26px que tenía, medido: las cuatro pasaban de sueltas a apiladas y
+      desaparecían en menos de 500px de scroll — el gesto ocurría, pero tan rápido
+      que no se leía. Con ~34vh cada transición ocupa aproximadamente una pantalla,
+      que es el ritmo de la referencia.
+
+      Se acota con `min()` para que en un monitor muy alto no se vuelva un túnel.
+    */
+    margin-bottom: min(30vh, 265px);
+    padding: 26px 36px;
     border-radius: var(--r-4);
-    background: rgba(255, 255, 255, 0.078);
+    /*
+      Fondo OPACO, no translúcido. Las cartas se tapan entre sí, así que una
+      translúcida dejaría ver la de atrás y el apilado se leería como suciedad.
+    */
+    background: var(--noche-1);
     box-shadow:
       inset 0 0 0 1px var(--border-quiet),
-      0 -18px 40px rgba(5, 7, 6, 0.5);
+      0 -18px 44px rgba(5, 7, 6, 0.55);
     color: inherit;
     text-decoration: none;
+    transform-origin: center top;
   }
-  .pila-abierta.es-cima {
-    margin-top: 20px;
-    background: rgba(255, 255, 255, 0.092);
-    box-shadow:
-      inset 0 0 0 1px var(--border-quiet),
-      0 -18px 44px rgba(5, 7, 6, 0.58);
-  }
-  .pila-abierta-foto {
+  /* La última CONSERVA su margen: es el recorrido que le da su momento completo
+     en pantalla antes de que la pila se suelte. */
+
+  .pila-carta-foto {
     position: relative;
     aspect-ratio: 16 / 10;
     background: var(--grad-noche);
     border-radius: var(--r-3);
     overflow: hidden;
   }
-  .pila-abierta-foto img,
-  .pila-asomada-foto img {
+  .pila-carta-foto img {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -197,32 +215,29 @@ const preparar = (n: Noticia) => ({
     position: absolute;
     inset: 0;
   }
-  .pila-abierta-texto {
+  .pila-carta-texto {
     min-width: 0;
-    text-align: center;
-    padding: 0 12px;
   }
-  .pila-abierta-titulo {
+  .pila-carta-titulo {
     font: 700 25px / 1.24 var(--font-text);
     letter-spacing: -0.016em;
     color: var(--mist-1);
-    margin: 0 auto;
+    margin: 0;
     max-width: 24ch;
     text-wrap: pretty;
   }
-  .pila-abierta-bajada {
+  .pila-carta-bajada {
     font: var(--type-body);
     color: var(--text-muted);
-    margin: 16px auto 0;
-    max-width: 44ch;
+    margin: 14px 0 0;
+    max-width: 46ch;
     text-wrap: pretty;
   }
-  .pila-abierta-meta {
+  .pila-carta-meta {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 12px;
-    margin-top: 18px;
+    margin-top: 16px;
   }
   .pila-cat {
     color: var(--mist-0);
@@ -238,21 +253,45 @@ const preparar = (n: Noticia) => ({
     display: inline-flex;
     align-items: center;
     gap: 9px;
-    margin-top: 20px;
+    margin-top: 18px;
     padding: 12px 22px;
     border-radius: 999px;
     background: var(--mist-0);
     color: var(--noche-0);
     font: 600 12.5px/1 var(--font-text);
   }
-  .pila-abierta:hover .pila-cta {
+  .pila-carta:hover .pila-cta {
     background: var(--mist-1);
+  }
+
+  /*
+    ── La profundidad, como MEJORA ──
+    La tarjeta se encoge y se apaga conforme sale de la vista, que es lo que da la
+    sensación de que se va al fondo del mazo. Va con animación ligada al scroll:
+    donde no hay soporte —hoy Safari y Firefox— las tarjetas se apilan igual, solo
+    que sin encoger. Es degradación limpia: el gesto principal no depende de esto.
+  */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .pila-carta {
+        animation: pila-al-fondo linear both;
+        animation-timeline: view();
+        /* Empieza a encogerse solo cuando ya está saliendo por arriba. */
+        animation-range: exit 0% exit 90%;
+      }
+      @keyframes pila-al-fondo {
+        to {
+          transform: scale(0.93);
+          filter: brightness(0.72);
+        }
+      }
+    }
   }
 
   .pila-pie {
     display: flex;
     justify-content: center;
-    padding: 26px 0 0;
+    padding: 34px 0 0;
   }
   .pila-mas {
     padding: 13px 20px;
@@ -275,67 +314,45 @@ const preparar = (n: Noticia) => ({
       font-size: 20px;
     }
     /*
-      🔴 En móvil la pila SE DESARMA, y es una decisión, no una simplificación.
-      El gesto de las cartas necesita una columna de 400px para la foto y otra para
-      el texto; a 390px de ancho total, apilar con sombras y radios superpuestos
-      solo produce ruido. Cada nota pasa a ser una tarjeta normal, apilada.
+      🔴 En móvil la pila NO se apila.
+      Con el chrome ocupando 104px y una tarjeta que necesita foto + texto, el
+      escalonado dejaría cada carta con menos de media pantalla útil. Vuelven a ser
+      tarjetas apiladas normales, que es lo que 14a dibuja.
     */
-    .pila-asomada,
-    .pila-abierta {
+    .pila-carta {
+      position: static;
       grid-template-columns: 1fr;
       gap: 0;
-      height: auto;
       padding: 0 0 18px;
-      margin-top: 18px;
+      margin-bottom: 12px;
+      top: auto;
       border-radius: var(--r-3);
-      background: var(--noche-1);
       box-shadow: inset 0 0 0 1px var(--border-hairline);
       overflow: hidden;
+      animation: none;
     }
-    .pila-asomada + .pila-asomada,
-    .pila-abierta.es-cima {
-      margin-top: 12px;
-      background: var(--noche-1);
-      box-shadow: inset 0 0 0 1px var(--border-hairline);
-    }
-    .pila-asomada-foto {
-      display: block;
-      position: relative;
-      aspect-ratio: 16 / 10;
-      background: var(--grad-noche);
-    }
-    .pila-abierta-foto {
+    .pila-carta-foto {
       border-radius: 0;
     }
-    .pila-asomada-titulo {
-      grid-column: auto;
-      font: 600 16px / 1.26 var(--font-text);
-      white-space: normal;
-      text-align: left;
-      padding: 14px 16px 0;
-      color: var(--mist-2);
-    }
-    .pila-abierta-texto {
-      text-align: left;
+    .pila-carta-texto {
       padding: 14px 16px 0;
     }
-    .pila-abierta-titulo {
+    .pila-carta-titulo {
       font: 700 19px / 1.2 var(--font-text);
-      margin: 0;
       max-width: none;
     }
-    .pila-abierta-bajada {
+    .pila-carta-bajada {
       font: 400 14.5px / 1.5 var(--font-text);
-      margin: 10px 0 0;
+      margin-top: 10px;
       max-width: none;
-    }
-    .pila-abierta-meta {
-      justify-content: flex-start;
-      margin-top: 14px;
     }
     .pila-cta {
-      margin-top: 16px;
+      margin-top: 14px;
       padding: 11px 18px;
+    }
+    /* Sin apilado no hay recorrido que sostener. */
+    .pila-remanso {
+      display: none;
     }
   }
 </style>

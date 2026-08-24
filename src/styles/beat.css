@@ -489,3 +489,14 @@ html {
     animation: none;
   }
 }
+
+/* El respiro lateral del pie, que va a sangre. 13a lo dibuja a 56px; en móvil
+   baja al mismo del contenido para no desperdiciar ancho de pantalla. */
+:root {
+  --pad-pie: 56px;
+}
+@media (max-width: 899px) {
+  :root {
+    --pad-pie: var(--container-pad);
+  }
+}

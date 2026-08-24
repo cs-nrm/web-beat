@@ -513,8 +513,22 @@ html {
   padding-bottom: 4px;
   transition: opacity var(--dur-2) var(--ease-out);
 }
-.beat-nav-enlace:hover {
-  opacity: 0.7;
+.beat-nav-enlace:hover,
+.beat-nav-enlace:focus-visible {
+  /* En vez de apagarse al pasar el cursor, se ENCIENDE. Es más coherente con un
+     sitio cuyo motivo es la luz, y no castiga al enlace que estás por pulsar. */
+  text-shadow: var(--resplandor-tenue);
+}
+/* La sección en curso está encendida de forma permanente. */
+.beat-nav-enlace.es-activo {
+  text-shadow: var(--resplandor-tenue);
+}
+@media (prefers-contrast: more) {
+  .beat-nav-enlace:hover,
+  .beat-nav-enlace:focus-visible,
+  .beat-nav-enlace.es-activo {
+    text-shadow: none;
+  }
 }
 .beat-nav-enlace.es-activo::after {
   content: '';
@@ -522,4 +536,127 @@ html {
   inset: auto 0 0 0;
   height: 2px;
   background: var(--luz-coral);
+}
+
+/* ============================================================
+   RESPLANDOR — luz emitida
+   ------------------------------------------------------------
+   Referencia que trajo Carlos (2026-08-24): campaña de Mazda, letras y logotipo
+   blancos con un halo suave, como retroiluminados.
+
+   🔴 Es distinto de lo que el DS ya tiene. Sus `--glow-*` son sombras ARROJADAS:
+   llevan desplazamiento en Y y spread negativo (`--glow-blanco: 0 10px 30px -16px`),
+   así que leen como un objeto flotando sobre una superficie. Esto es lo contrario:
+   sin desplazamiento y en todas direcciones, así que lee como un objeto que EMITE.
+
+   Encaja con la marca sin forzarla: el sistema ya usa la luz como motivo —las
+   estelas, la gama cálida del acento— y esto la lleva al texto.
+
+   La luz es `--mist-0`, no blanco puro: es el blanco de la paleta.
+   ============================================================ */
+:root {
+  /* Para texto pequeño y elementos de interfaz: se nota sin emborronar. */
+  --resplandor-tenue:
+    0 0 10px rgba(250, 251, 250, calc(0.28 * var(--resplandor-intensidad))),
+    0 0 26px rgba(250, 251, 250, calc(0.12 * var(--resplandor-intensidad)));
+  /* Para lo que de verdad debe brillar: titulares, el logotipo, lo que está al aire. */
+  --resplandor:
+    0 0 8px rgba(250, 251, 250, calc(0.45 * var(--resplandor-intensidad))),
+    0 0 22px rgba(250, 251, 250, calc(0.26 * var(--resplandor-intensidad))),
+    0 0 52px rgba(250, 251, 250, calc(0.14 * var(--resplandor-intensidad)));
+  /* La versión cálida, para cuando el acento de marca es el que emite. */
+  --resplandor-luz:
+    0 0 10px rgba(255, 106, 61, 0.5),
+    0 0 30px rgba(255, 138, 91, 0.28);
+
+  /*
+    🔴 EL DIAL. Todo el resplandor del sitio se sube o se baja desde aquí, sin
+    tocar una sola regla.
+
+    Está en 1.4. A 1 se lee discreto y la referencia de Mazda es bastante más
+    luminosa; a 2 el texto de 9.5px de la nav empieza a emborronarse. 1.4 se acerca
+    a la referencia sin costarle nitidez a lo pequeño.
+
+    Es una decisión de MARCA, no técnica: si se quiere más luz, se sube aquí.
+  */
+  --resplandor-intensidad: 1.4;
+}
+
+/* En texto va por `text-shadow`; en cajas, por `box-shadow`. Son propiedades
+   distintas, así que hacen falta dos clases y no una. */
+.beat-resplandor {
+  text-shadow: var(--resplandor-tenue);
+}
+.beat-resplandor.es-fuerte {
+  text-shadow: var(--resplandor);
+}
+.beat-resplandor-caja {
+  box-shadow: var(--resplandor-tenue);
+}
+.beat-resplandor-caja.es-fuerte {
+  box-shadow: var(--resplandor);
+}
+
+/*
+  🔴 Se apaga con `prefers-contrast: more`.
+  Un halo difumina el borde de la letra, que es justo lo que esa preferencia pide
+  evitar: quien la activa necesita cantos definidos, no luz alrededor.
+*/
+@media (prefers-contrast: more) {
+  .beat-resplandor,
+  .beat-resplandor.es-fuerte,
+  .beat-resplandor-caja,
+  .beat-resplandor-caja.es-fuerte {
+    text-shadow: none;
+    box-shadow: none;
+  }
+}
+
+/* ============================================================
+   La barra del player, como fuente de luz
+   ------------------------------------------------------------
+   Es la única superficie CLARA del sitio —`--mist-0` sobre un fondo casi negro—,
+   así que un halo alrededor la convierte en lo que ya era conceptualmente: lo que
+   está al aire es lo que brilla.
+
+   ⚠️ El halo va hacia ABAJO nada más (`0 6px …`, sin desplazamiento negativo): la
+   barra está pegada al borde superior de la ventana, así que la luz que subiera se
+   perdería fuera de la pantalla. Y es el lado que importa, porque abajo tiene la
+   nav oscura donde el resplandor sí se ve.
+   ============================================================ */
+.beat-player-emite {
+  position: relative;
+  z-index: 1;
+  box-shadow:
+    0 6px 18px rgba(250, 251, 250, calc(0.16 * var(--resplandor-intensidad))),
+    0 10px 46px rgba(250, 251, 250, calc(0.09 * var(--resplandor-intensidad)));
+}
+
+@media (prefers-contrast: more) {
+  .beat-player-emite {
+    box-shadow: none;
+  }
+}
+
+/* ============================================================
+   El wordmark, encendido
+   ------------------------------------------------------------
+   Es el equivalente directo del logotipo de la referencia. Va con `drop-shadow` y
+   no con `box-shadow`: el logo es un SVG con transparencia, y `box-shadow` seguiría
+   su caja rectangular en vez de su silueta — se vería un recuadro luminoso alrededor
+   de una marca que no es rectangular.
+
+   Se apilan dos capas porque `drop-shadow` no admite varias sombras en una sola
+   función, como sí hace `box-shadow`.
+   ============================================================ */
+.beat-wordmark-emite {
+  filter:
+    drop-shadow(0 0 6px rgba(250, 251, 250, calc(0.34 * var(--resplandor-intensidad))))
+    drop-shadow(0 0 18px rgba(250, 251, 250, calc(0.18 * var(--resplandor-intensidad))));
+}
+
+@media (prefers-contrast: more) {
+  .beat-wordmark-emite {
+    filter: none;
+  }
 }

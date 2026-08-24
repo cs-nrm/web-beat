@@ -565,9 +565,15 @@ html {
     0 0 22px rgba(250, 251, 250, calc(0.26 * var(--resplandor-intensidad))),
     0 0 52px rgba(250, 251, 250, calc(0.14 * var(--resplandor-intensidad)));
   /* La versión cálida, para cuando el acento de marca es el que emite. */
+  /*
+    ⚠️ Las bases van BAJAS a propósito. El dial las multiplica, y con las que tenía
+    (0.5 y 0.28) a intensidad 2.6 la primera capa llegaba a alfa 1.0: dejaba de ser
+    luz y se veía como un anillo naranja sólido alrededor del botón.
+    Con 0.26 y 0.15, a 2.6 quedan en 0.68 y 0.39 — halo, no borde.
+  */
   --resplandor-luz:
-    0 0 10px rgba(255, 106, 61, 0.5),
-    0 0 30px rgba(255, 138, 91, 0.28);
+    0 0 10px rgba(255, 106, 61, calc(0.26 * var(--resplandor-intensidad))),
+    0 0 30px rgba(255, 138, 91, calc(0.15 * var(--resplandor-intensidad)));
 
   /*
     🔴 EL DIAL. Todo el resplandor del sitio se sube o se baja desde aquí, sin
@@ -624,28 +630,39 @@ html {
 }
 
 /* ============================================================
-   La barra del player, como fuente de luz
+   El botón de aire, encendido
    ------------------------------------------------------------
-   Es la única superficie CLARA del sitio —`--mist-0` sobre un fondo casi negro—,
-   así que un halo alrededor la convierte en lo que ya era conceptualmente: lo que
-   está al aire es lo que brilla.
+   🔴 Aquí la luz es CÁLIDA, no blanca, y por una razón física: el botón es un
+   círculo oscuro sobre la barra clara (`--mist-0`), así que un halo blanco sería
+   blanco sobre blanco — invisible. El acento de marca sí contrasta contra esa
+   superficie.
 
-   ⚠️ El halo va hacia ABAJO nada más (`0 6px …`, sin desplazamiento negativo): la
-   barra está pegada al borde superior de la ventana, así que la luz que subiera se
-   perdería fuera de la pantalla. Y es el lado que importa, porque abajo tiene la
-   nav oscura donde el resplandor sí se ve.
+   El DS ya lo anticipaba con `--glow-onair`, un anillo del mismo color pensado
+   justamente para lo que está al aire.
+
+   Y el icono de adentro sí lleva luz blanca: es blanco sobre el círculo oscuro, o
+   sea que ahí sí hay fondo que ocupar. Va por `drop-shadow` sobre el `svg` y no
+   sobre el botón — un `filter` en el botón seguiría la silueta del círculo entero
+   y devolvería el halo blanco invisible del principio.
+
+   ⚠️ NO se pone resplandor en la barra del player: se probó y Carlos la prefirió
+   sin él (2026-08-24). La barra ya es la superficie más luminosa del sitio por su
+   propio color; sumarle halo la volvía pesada.
    ============================================================ */
-.beat-player-emite {
-  position: relative;
-  z-index: 1;
-  box-shadow:
-    0 6px 18px rgba(250, 251, 250, calc(0.16 * var(--resplandor-intensidad))),
-    0 10px 46px rgba(250, 251, 250, calc(0.09 * var(--resplandor-intensidad)));
+.beat-play-emite {
+  box-shadow: var(--resplandor-luz);
+}
+.beat-play-emite svg {
+  filter: drop-shadow(
+    0 0 5px rgba(250, 251, 250, calc(0.4 * var(--resplandor-intensidad)))
+  );
 }
 
 @media (prefers-contrast: more) {
-  .beat-player-emite {
+  .beat-play-emite,
+  .beat-play-emite svg {
     box-shadow: none;
+    filter: none;
   }
 }
 

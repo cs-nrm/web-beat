@@ -86,7 +86,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     id="player"
     data-status="init"
     data-mount={estacion.tritonMount}
-    class="beat-player-emite flex h-player items-center gap-3 bg-mist-0 px-4 text-noche-0 md:gap-4 md:px-6"
+    class="flex h-player items-center gap-3 bg-mist-0 px-4 text-noche-0 md:gap-4 md:px-6"
   >
     <span class="flex flex-none items-center gap-2">
       {/* `beat-pulse` es del DS y respeta prefers-reduced-motion. */}
@@ -105,10 +105,10 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
       aria-pressed="false"
       disabled
       aria-busy="true"
-      class="grid h-[30px] w-[30px] flex-none place-items-center rounded-pill bg-noche-0 text-mist-0 disabled:opacity-60 transition-colors duration-2 ease-out hover:bg-graphite-4"
+      class="beat-play-emite grid h-[34px] w-[34px] flex-none place-items-center rounded-pill bg-noche-0 text-mist-0 disabled:opacity-60 transition-colors duration-2 ease-out hover:bg-graphite-4"
     >
-      <span data-icono="play" class="contents"><Icono nombre="play" tamano={14} /></span>
-      <span data-icono="pause" class="contents hidden"><Icono nombre="pause" tamano={14} /></span>
+      <span data-icono="play" class="contents"><Icono nombre="play" tamano={15} /></span>
+      <span data-icono="pause" class="contents hidden"><Icono nombre="pause" tamano={15} /></span>
       {/* Anillo de progreso indeterminado: un arco de 3/4 girando. */}
       <span data-icono="cargando" class="hidden">
         <svg
@@ -192,9 +192,9 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
       <img
         src="/img/beat-blanco.svg"
         alt={estacion.nombre}
-        width="112"
-        height="26"
-        class="beat-wordmark-emite block h-[22px] w-auto md:h-[26px]"
+        width="155"
+        height="36"
+        class="beat-wordmark-emite block h-[30px] w-auto md:h-[36px]"
       />
     </a>
 

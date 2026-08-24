@@ -632,36 +632,38 @@ html {
 /* ============================================================
    El botón de aire, encendido
    ------------------------------------------------------------
-   🔴 Aquí la luz es CÁLIDA, no blanca, y por una razón física: el botón es un
-   círculo oscuro sobre la barra clara (`--mist-0`), así que un halo blanco sería
-   blanco sobre blanco — invisible. El acento de marca sí contrasta contra esa
-   superficie.
+   🔴 La luz va DENTRO del botón, no alrededor.
 
-   El DS ya lo anticipaba con `--glow-onair`, un anillo del mismo color pensado
-   justamente para lo que está al aire.
+   Se probó el halo cálido rodeando el círculo y Carlos lo descartó (2026-08-24):
+   sobre la barra clara, un anillo naranja lee como un borde de alerta, no como
+   luz. Lo que sí funciona es el triángulo blanco encendido contra el círculo
+   oscuro — ahí hay fondo que ocupar, que es la condición para que un resplandor
+   se lea.
 
-   Y el icono de adentro sí lleva luz blanca: es blanco sobre el círculo oscuro, o
-   sea que ahí sí hay fondo que ocupar. Va por `drop-shadow` sobre el `svg` y no
-   sobre el botón — un `filter` en el botón seguiría la silueta del círculo entero
-   y devolvería el halo blanco invisible del principio.
+   Va por `drop-shadow` sobre el `svg` y no sobre el botón: un `filter` en el botón
+   seguiría la silueta del círculo entero y volvería a poner blanco sobre blanco.
+
+   Dos capas —un núcleo apretado y un bloom ancho— porque `drop-shadow` no admite
+   varias sombras en una sola función.
 
    ⚠️ NO se pone resplandor en la barra del player: se probó y Carlos la prefirió
    sin él (2026-08-24). La barra ya es la superficie más luminosa del sitio por su
    propio color; sumarle halo la volvía pesada.
    ============================================================ */
-.beat-play-emite {
-  box-shadow: var(--resplandor-luz);
-}
+/*
+  ⚠️ Las bases son BAJAS porque el dial las multiplica: con la que tenía (0.4) a
+  intensidad 2.6 el alfa llegaba a 1.04 y se recortaba en 1. O sea que subirle luz
+  al icono no hacía nada — ya estaba saturado. Para que se note «tantito más» hay
+  que ampliar el RADIO y sumar una capa, no subir el alfa.
+*/
 .beat-play-emite svg {
-  filter: drop-shadow(
-    0 0 5px rgba(250, 251, 250, calc(0.4 * var(--resplandor-intensidad)))
-  );
+  filter:
+    drop-shadow(0 0 4px rgba(250, 251, 250, calc(0.3 * var(--resplandor-intensidad))))
+    drop-shadow(0 0 11px rgba(250, 251, 250, calc(0.2 * var(--resplandor-intensidad))));
 }
 
 @media (prefers-contrast: more) {
-  .beat-play-emite,
   .beat-play-emite svg {
-    box-shadow: none;
     filter: none;
   }
 }

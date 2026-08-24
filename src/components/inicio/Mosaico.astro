@@ -81,8 +81,19 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
   .mosaico-lado {
     display: flex;
     flex-direction: column;
-    gap: 2px;
-    background: var(--border-hairline);
+    /*
+      🔴 Fondo OSCURO, y la línea como borde explícito.
+
+      Antes esta columna usaba el truco de `gap` + fondo `--border-hairline`. El
+      truco funciona cuando el gris solo asoma en 2px, pero una columna de rejilla
+      se estira al alto de la fila: en cuanto el centro es más alto que las dos
+      tarjetas de al lado, TODO el sobrante se pinta de gris. Medido a 1920: la
+      columna medía 1263px y sus tarjetas ~800.
+    */
+    background: var(--noche-1);
+  }
+  .mosaico-lado > * + * {
+    border-top: 2px solid var(--border-hairline);
   }
   .mosaico-centro {
     display: block;
@@ -217,11 +228,22 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
     }
     /* Los dos lados se juntan en UNA rejilla de dos columnas, con la línea del
        hairline asomando igual que en el escritorio. */
+    /*
+      En móvil la columna vuelve al truco del `gap`: aquí son dos tarjetas a lo
+      ancho y de alto parecido, así que el gris solo asoma en los 2px para los que
+      está pensado. El problema de la superficie gris es exclusivo del escritorio,
+      donde la columna se estira al alto del centro.
+    */
     .mosaico-lado {
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       gap: 2px;
       padding: 2px 0;
+      background: var(--border-hairline);
+    }
+    /* El borde es del apilado vertical de escritorio; aquí separa el `gap`. */
+    .mosaico-lado > * + * {
+      border-top: 0;
     }
     .mosaico-lado:last-child {
       grid-column: auto;

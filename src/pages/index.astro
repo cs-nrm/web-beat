@@ -102,14 +102,39 @@ const lema = 'BEAT 100.9 · TOTAL MUSIC';
   {/* 1. qué suena — la señal */}
   <PanelSenal parrilla={parrilla.bloques} alAire={parrilla.alAire} sono={sono} />
 
-  {/* 2. qué se cuenta */}
-  <Mosaico portada={destacada} izquierda={izquierda} derecha={derecha} />
-  <Marquee texto={lema} />
-  <Fenomeno especial={especial} />
-  <ArchivoTemas temas={especiales} excluir={especial?.id ?? null} />
-  <PilaScanner notas={paraLaPila} />
+  {/*
+    2 y 3 van dentro del contenedor con TOPE de ancho.
 
-  {/* 3. qué viene */}
-  <BonusBeat lista={listaDestacada} tipo={tipoDestacado} />
-  <Agenda eventos={agenda} />
+    🔴 Sin tope, el Inicio crecía sin límite mientras Scanner y la nota sí estaban
+    capados a `--grid-max`. Medido a 1920: la columna central del mosaico llegaba a
+    **1316px** —más de cuatro veces las laterales— y su foto a 1316×1119. El lienzo
+    dibuja el Inicio a 1280, así que ese ancho ES el diseño, no un mínimo.
+
+    Fuera del contenedor se quedan las tres FRANJAS —el banner de portada, el panel
+    de la señal y el marquee—, que en 13a van a sangre a propósito: son bandas, no
+    contenido.
+  */}
+  <div class="inicio-contenido">
+    {/* 2. qué se cuenta */}
+    <Mosaico portada={destacada} izquierda={izquierda} derecha={derecha} />
+  </div>
+
+  <Marquee texto={lema} />
+
+  <div class="inicio-contenido">
+    <Fenomeno especial={especial} />
+    <ArchivoTemas temas={especiales} excluir={especial?.id ?? null} />
+    <PilaScanner notas={paraLaPila} />
+
+    {/* 3. qué viene */}
+    <BonusBeat lista={listaDestacada} tipo={tipoDestacado} />
+    <Agenda eventos={agenda} />
+  </div>
 </Base>
+
+<style>
+  .inicio-contenido {
+    max-width: var(--grid-max);
+    margin-inline: auto;
+  }
+</style>

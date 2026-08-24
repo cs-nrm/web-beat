@@ -573,17 +573,28 @@ html {
     🔴 EL DIAL. Todo el resplandor del sitio se sube o se baja desde aquí, sin
     tocar una sola regla.
 
-    Está en 1.4. A 1 se lee discreto y la referencia de Mazda es bastante más
-    luminosa; a 2 el texto de 9.5px de la nav empieza a emborronarse. 1.4 se acerca
-    a la referencia sin costarle nitidez a lo pequeño.
+    Está en 2.6, y llegar ahí costó una lección: a 1.4 —donde estaba— Carlos no lo
+    notaba, y tenía razón.
 
-    Es una decisión de MARCA, no técnica: si se quiere más luz, se sube aquí.
+    🔴 El resplandor necesita HUECO OSCURO alrededor del trazo para ocuparlo. La
+    referencia de Mazda son letras finas con muchísimo tracking: cada letra está
+    rodeada de fondo. Nuestra nav son 9.5px en NEGRITA y con tracking cerrado — no
+    hay dónde poner luz, y por más que se suba el dial ahí no va a lucir.
+
+    De ahí que el resplandor se reserve para donde sí tiene espacio: superficies
+    grandes (la barra del player), el wordmark, y los titulares de display.
   */
-  --resplandor-intensidad: 1.4;
+  --resplandor-intensidad: 2.6;
 }
 
-/* En texto va por `text-shadow`; en cajas, por `box-shadow`. Son propiedades
-   distintas, así que hacen falta dos clases y no una. */
+/*
+   En texto va por `text-shadow`; en cajas, por `box-shadow`. Son propiedades
+   distintas, así que hacen falta dos clases y no una.
+
+   ⚠️ Dónde SÍ funciona: tipografía grande y de peso ligero o normal, con aire
+   alrededor. En texto pequeño y en negrita el halo no tiene dónde caer y solo
+   ensucia el canto de la letra.
+*/
 .beat-resplandor {
   text-shadow: var(--resplandor-tenue);
 }

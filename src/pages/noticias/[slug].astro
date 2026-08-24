@@ -363,7 +363,14 @@ const etiquetas = (nota.etiquetas ?? []).filter(
     padding: 40px 24px 44px;
   }
   .nt-cuerpo {
-    max-width: 680px;
+    /*
+      🔴 `width` explícito, no solo `max-width`.
+      Con `max-width` + `margin: 0 auto` en un ítem de rejilla, los márgenes
+      automáticos ganan sobre el estirado y la caja se encoge a su CONTENIDO: una
+      nota de un párrafo salía a 521px y una larga a 680, o sea que la medida de
+      la columna dependía del largo del texto. Medido en dos notas reales.
+    */
+    width: min(100%, 680px);
     margin: 0 auto;
   }
   .nt-riel {

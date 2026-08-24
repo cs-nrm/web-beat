@@ -198,17 +198,29 @@ function esExterno(href: string): boolean {
                   />
                 );
               }
-              // Nodo de texto: se envuelve en tantas etiquetas como marcas traiga.
+              /*
+                Nodo de texto: se envuelve en tantas etiquetas como marcas traiga.
+
+                Se anidan con componentes explícitos y no con un `reduce` sobre
+                elementos JSX: aquello necesitaba un `as unknown as
+                astroHTML.JSX.Element` para compilar, y el compilador de Astro 7 ya
+                no acepta ese cast dentro de una expresión de plantilla. Además el
+                bitmask de Lexical solo combina cinco marcas, así que anidar a mano
+                es más claro que acumular.
+              */
               const texto = h.text ?? '';
               const etiquetas = marcas(h.format);
               if (!etiquetas.length) return <Fragment set:text={texto} />;
-              return etiquetas.reduce(
-                (dentro, et) => {
-                  const T = et as 'strong';
-                  return <T>{dentro}</T>;
-                },
-                <Fragment set:text={texto} /> as unknown as astroHTML.JSX.Element,
-              );
+              // De dentro hacia fuera: la primera marca queda más pegada al texto.
+              // ⚠️ Los `as` aquí NO pueden llevar una unión: un cast con `|` dentro
+              // de una expresión de plantilla no lo parsea el compilador de Astro.
+              const Primera = etiquetas[0] as 'strong';
+              let salida = <Primera set:text={texto} />;
+              for (let i = 1; i < etiquetas.length; i++) {
+                const Siguiente = etiquetas[i] as 'strong';
+                salida = <Siguiente>{salida}</Siguiente>;
+              }
+              return salida;
             })}
           </p>
         );

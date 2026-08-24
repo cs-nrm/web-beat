@@ -26,6 +26,6 @@
 
 @import './beat.css';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Tailwind 4: una sola importación en vez de las tres directivas de la v3. */
+@import 'tailwindcss';
+@config '../../tailwind.config.js';

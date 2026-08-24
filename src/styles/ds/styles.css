@@ -1,10 +1,26 @@
-@import url("tokens/fonts.css");
-@import url("tokens/colors.css");
-@import url("tokens/typography.css");
-@import url("tokens/spacing.css");
-@import url("tokens/effects.css");
-@import url("tokens/motion.css");
-@import url("tokens/motifs.css");
-@import url("tokens/layout.css");
-@import url("tokens/base.css");
-@import url("components/beat-components.css");
+/*
+ * 🔴 SEGUNDA intervención sobre la copia del DS, y es de PIPELINE, no de estilo.
+ *
+ * El lienzo escribe `@import url("tokens/…")`. Tailwind 4 procesa el CSS con
+ * Lightning y esa forma la trata como importación EXTERNA: no la inlinea y la
+ * descarta al empaquetar. Resultado medido: los 9 archivos de tokens no se cargan,
+ * y con ellos desaparecen TODAS las variables de marca —`--surface-card`,
+ * `--grid-max`, `--noche-0`, `--font-text`—. El sitio no truena: se degrada en
+ * silencio a fondo transparente y tipografías del sistema.
+ *
+ * La forma con comillas (`@import "tokens/…"`) sí se resuelve e inlinea.
+ *
+ * ⚠️ Al re-sincronizar la copia desde `design/`, hay que volver a aplicar esto.
+ * (La otra intervención es haber neutralizado el `@import` de Google Fonts: las
+ * fuentes son auto-hospedadas.)
+ */
+@import "tokens/fonts.css";
+@import "tokens/colors.css";
+@import "tokens/typography.css";
+@import "tokens/spacing.css";
+@import "tokens/effects.css";
+@import "tokens/motion.css";
+@import "tokens/motifs.css";
+@import "tokens/layout.css";
+@import "tokens/base.css";
+@import "components/beat-components.css";

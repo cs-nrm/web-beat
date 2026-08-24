@@ -6,7 +6,7 @@
   "description": "Front público de Beat 100.9 — Astro SSR sobre cms-estaciones (Payload multi-estación).",
   "packageManager": "pnpm@9.0.0",
   "engines": {
-    "node": ">=20"
+    "node": ">=22.12"
   },
   "scripts": {
     "dev": "astro dev",
@@ -21,10 +21,10 @@
     "guardas": "node scripts/guardas.mjs"
   },
   "dependencies": {
-    "@astrojs/node": "^9.5.1",
-    "@astrojs/tailwind": "^5.1.0",
-    "astro": "^5.4.2",
-    "tailwindcss": "^3.4.1"
+    "@astrojs/node": "^11.1.4",
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^7.2.6",
+    "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",

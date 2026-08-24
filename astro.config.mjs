@@ -1,6 +1,6 @@
 import { defineConfig } from 'astro/config';
 import node from '@astrojs/node';
-import tailwind from '@astrojs/tailwind';
+import tailwind from '@tailwindcss/vite';
 
 // Front público de Beat 100.9 — Astro SSR sobre `cms-estaciones`.
 // Modelo: `web-enfoque` (que a su vez copió de `web-mundial`). Las tres
@@ -15,13 +15,18 @@ import tailwind from '@astrojs/tailwind';
 //      que anunciaba un archivo que nunca se generaba.)
 //   3. Tailwind con los tokens de marca mapeados, no el config vacío de los
 //      repos hermanos: acá sí hay design system.
+//
+// ⚠️ Tailwind entra por el PLUGIN DE VITE, no por `@astrojs/tailwind`. Esa
+// integración se quedó en Tailwind 3 y en Astro 5 (su última versión declara
+// `tailwindcss: ^3.0.24` y `astro: ^3||^4||^5`), así que es un callejón sin
+// salida: mantenerla obligaba a quedarse dos majors atrás en las dos cosas.
 export default defineConfig({
   // Dominio canónico de Beat, sin `www`. El `www` se resuelve con un 301 en el
   // edge (Caddy/Cloudflare), no aquí.
   site: process.env.PUBLIC_SITE_URL || 'https://beatdigital.mx',
   output: 'server',
   adapter: node({ mode: 'standalone' }),
-  integrations: [tailwind()],
+  vite: { plugins: [tailwind()] },
   security: {
     checkOrigin: true,
     /**

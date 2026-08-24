@@ -20,12 +20,32 @@
  */
 /* Las @font-face auto-hospedadas van PRIMERO: tienen que existir antes de que el
    DS declare las familias en `tokens/typography.css`. Generado por `pnpm fuentes`. */
+/*
+ * 🔴 EL ORDEN DE CAPAS. Sin esto, el design system le gana a TODA utilidad de
+ * Tailwind, en silencio.
+ *
+ * El CSS sin capa vence al CSS en capas — es la regla de la cascada, y muerde
+ * porque Tailwind 4 mete todo lo suyo en `@layer` y el DS venía suelto. Dos casos
+ * medidos en el sitio ya construido:
+ *
+ *   · `ds/tokens/base.css` declara `img,svg,video{display:block}`, así que `hidden`
+ *     NO ocultaba ninguno de los tres. Se vio como dos lupas apiladas en la
+ *     cabecera: una era la de móvil, que debía estar oculta.
+ *   · `.beat-label` fijaba 11px y le ganaba a `text-[9.5px]` de la nav. El tamaño
+ *     escrito en el marcado no era el que se pintaba.
+ *
+ * Con el orden declarado: el DS le gana al preflight de Tailwind (que es lo que
+ * queremos: los resets de marca mandan), `beat.css` le gana al DS (son los deltas
+ * del proyecto), y las utilidades le ganan a los dos — que es para lo que existen.
+ */
+@layer theme, base, ds, proyecto, components, utilities;
+
+/* Las `@font-face` van sueltas: no compiten con nada y tienen que existir antes de
+   que el DS declare las familias. */
 @import './fuentes.css';
 
-@import './ds/styles.css';
-
-@import './beat.css';
-
-/* Tailwind 4: una sola importación en vez de las tres directivas de la v3. */
 @import 'tailwindcss';
 @config '../../tailwind.config.js';
+
+@import './ds/styles.css' layer(ds);
+@import './beat.css' layer(proyecto);

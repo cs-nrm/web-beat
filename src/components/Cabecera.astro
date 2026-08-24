@@ -209,23 +209,33 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
           <a
             href={s.href}
             aria-current={activo(s.href) ? 'page' : undefined}
+            /*
+              Blanco y negrita (decisión de Carlos, 2026-08-24). Antes el enlace
+              activo iba en el ámbar de marca; el resto en gris.
+
+              🔴 La sección en la que estás ya NO se distingue por color, así que se
+              marca con una línea debajo. Si se distinguiera solo por el ámbar
+              —o solo por el blanco frente al gris—, quien no percibe bien el color
+              se quedaría sin saber dónde está: WCAG 1.4.1 pide justamente que el
+              color no sea el único portador de información.
+            */
             class:list={[
-              't-label whitespace-nowrap text-[9.5px] transition-colors duration-2 ease-out hover:text-mist-0',
-              activo(s.href) ? 'text-text-accent' : 'text-text-muted',
+              'beat-nav-enlace t-label whitespace-nowrap text-[9.5px] font-bold text-mist-0',
+              activo(s.href) && 'es-activo',
             ]}
           >{s.corto}</a>
         ),
       )}
     </nav>
 
-    <button
-      type="button"
-      aria-label="Buscar"
-      class="ml-auto grid h-11 w-11 place-items-center text-text-muted transition-colors duration-2 ease-out hover:text-text-primary md:h-10 md:w-10"
-    >
-      <Icono nombre="search" tamano={20} class="md:hidden" />
-      <Icono nombre="search" tamano={18} class="hidden md:block" />
-    </button>
+    {/*
+      Sin buscador. Beat no lo lleva (decisión de Carlos, 2026-08-24), así que el
+      botón se retira en vez de dejarlo inerte: un control que no hace nada enseña
+      al lector a desconfiar de los demás.
+
+      El `ml-auto` que lo empujaba a la derecha pasa a la hamburguesa, que ahora es
+      lo último de la fila.
+    */}
 
     {/* Hamburguesa solo en móvil: en escritorio vive en la barra del player. */}
     <button
@@ -234,7 +244,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
       aria-label="Abrir el menú"
       aria-expanded="false"
       aria-controls="beat-menu"
-      class="grid h-11 w-11 flex-none place-items-center bg-mist-0 text-noche-0 md:hidden"
+      class="ml-auto grid h-11 w-11 flex-none place-items-center bg-mist-0 text-noche-0 md:hidden"
     >
       <Icono nombre="menu" tamano={20} />
     </button>

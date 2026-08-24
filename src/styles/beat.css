@@ -500,3 +500,26 @@ html {
     --pad-pie: var(--container-pad);
   }
 }
+
+/* ============================================================
+   La nav de la cabecera
+   ------------------------------------------------------------
+   Los enlaces van en blanco y negrita. La sección en curso se marca con una línea
+   debajo y NO con un color distinto: si el color fuera la única diferencia, quien
+   no lo percibe bien se quedaría sin saber en qué sección está (WCAG 1.4.1).
+   ============================================================ */
+.beat-nav-enlace {
+  position: relative;
+  padding-bottom: 4px;
+  transition: opacity var(--dur-2) var(--ease-out);
+}
+.beat-nav-enlace:hover {
+  opacity: 0.7;
+}
+.beat-nav-enlace.es-activo::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 2px;
+  background: var(--luz-coral);
+}

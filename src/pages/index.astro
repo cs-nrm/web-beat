@@ -105,19 +105,23 @@ const lema = 'BEAT 100.9 · TOTAL MUSIC';
   {/*
     2 y 3 van dentro del contenedor con TOPE de ancho.
 
-    🔴 Sin tope, el Inicio crecía sin límite mientras Scanner y la nota sí estaban
-    capados a `--grid-max`. Medido a 1920: la columna central del mosaico llegaba a
-    **1316px** —más de cuatro veces las laterales— y su foto a 1316×1119. El lienzo
-    dibuja el Inicio a 1280, así que ese ancho ES el diseño, no un mínimo.
+    🔴 Sin tope, estas secciones crecían sin límite mientras Scanner y la nota sí
+    estaban capados a `--grid-max`: una lista de cápsulas o una pila de notas a
+    1900px de ancho no se lee.
 
-    Fuera del contenedor se quedan las tres FRANJAS —el banner de portada, el panel
-    de la señal y el marquee—, que en 13a van a sangre a propósito: son bandas, no
-    contenido.
+    Fuera del contenedor van, a propósito: las tres FRANJAS —banner de portada,
+    panel de la señal y marquee—, que en 13a son bandas a sangre; y el MOSAICO, que
+    también va a sangre pero controla su proporción interna.
   */}
-  <div class="inicio-contenido">
-    {/* 2. qué se cuenta */}
-    <Mosaico portada={destacada} izquierda={izquierda} derecha={derecha} />
-  </div>
+  {/*
+    2. qué se cuenta — el mosaico va A SANGRE, fuera del contenedor.
+
+    Es decisión de Carlos y es la correcta para esta pieza: la portada es la
+    afirmación editorial del día y en el lienzo ocupa todo el ancho. Lo que se
+    controla no es el ancho total sino la PROPORCIÓN de sus columnas, para que el
+    centro no se coma la pantalla (ver `Mosaico.astro`).
+  */}
+  <Mosaico portada={destacada} izquierda={izquierda} derecha={derecha} />
 
   <Marquee texto={lema} />
 

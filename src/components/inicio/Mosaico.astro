@@ -73,7 +73,20 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
 <style>
   .mosaico {
     display: grid;
-    grid-template-columns: 300px minmax(0, 1fr) 300px;
+    /*
+      🔴 PROPORCIONALES, no una lateral fija con el centro elástico.
+
+      El lienzo dibuja 300 / 676 / 300 a 1280, o sea 1 : 2.25 : 1. Con la lateral
+      fija en 300px, todo el ancho extra se lo comía el centro: medido a 1920, la
+      columna central llegaba a 1316px —más de cuatro veces las laterales— con una
+      foto de 1316×1119. Con `fr` la composición del lienzo se conserva a cualquier
+      ancho.
+
+      El `minmax` pone piso a las laterales para que no se encojan hasta dejar de
+      leerse. Con 220px las tres columnas aguantan hasta el corte móvil (900px):
+      220 + 456 + 220 + gaps = 900 justo.
+    */
+    grid-template-columns: minmax(220px, 1fr) minmax(0, 2.25fr) minmax(220px, 1fr);
     gap: 2px;
     background: var(--border-hairline);
     padding: 2px 0;
@@ -94,6 +107,26 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
   }
   .mosaico-lado > * + * {
     border-top: 2px solid var(--border-hairline);
+  }
+  /*
+    Las dos tarjetas se REPARTEN el alto de la columna en vez de dejar sobrante.
+
+    Una rejilla estira sus columnas al alto de la más alta, y el centro casi
+    siempre gana: antes quedaban entre 100 y 650px muertos al pie de cada lateral
+    según el ancho. Con `flex: 1` en la tarjeta y en su foto, la imagen absorbe la
+    diferencia recortando —ya lleva `object-fit: cover`— y el bloque se ve
+    deliberado a cualquier ancho, no con un hueco al final.
+  */
+  .mosaico-lado > :global(.tarjeta) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .mosaico-lado :global(.tarjeta-foto) {
+    flex: 1;
+    min-height: 120px;
+    aspect-ratio: auto;
   }
   .mosaico-centro {
     display: block;
@@ -181,21 +214,7 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
     text-wrap: pretty;
   }
 
-  /* ── 14a: una columna. La portada a lo ancho, los lados en rejilla de 2 ── */
-  @media (max-width: 1199px) {
-    .mosaico {
-      grid-template-columns: minmax(0, 1fr) 300px;
-    }
-    /* La columna derecha se va debajo, ocupando el ancho completo en rejilla. */
-    .mosaico-lado:last-child {
-      grid-column: 1 / -1;
-      flex-direction: row;
-    }
-    .mosaico-lado:last-child > * {
-      flex: 1;
-      min-width: 0;
-    }
-  }
+  /* ── 14a: una columna ── */
   @media (max-width: 899px) {
     .mosaico {
       grid-template-columns: 1fr;
@@ -241,9 +260,18 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
       padding: 2px 0;
       background: var(--border-hairline);
     }
-    /* El borde es del apilado vertical de escritorio; aquí separa el `gap`. */
+    /* El borde y el reparto de alto son del apilado vertical de escritorio; aquí
+       son dos tarjetas a lo ancho y cada una vale por su proporción. */
     .mosaico-lado > * + * {
       border-top: 0;
+    }
+    .mosaico-lado > :global(.tarjeta) {
+      display: block;
+      flex: none;
+    }
+    .mosaico-lado :global(.tarjeta-foto) {
+      flex: none;
+      aspect-ratio: 4 / 3;
     }
     .mosaico-lado:last-child {
       grid-column: auto;

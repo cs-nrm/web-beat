@@ -5,7 +5,7 @@
  *
  * Los temas anteriores, no el vigente: el de la semana ya tiene su bloque arriba.
  */
-import Anuncio from './Anuncio.astro';
+import Anuncio from '@/components/Anuncio.astro';
 import { urlMedia } from '@/lib/cms/client';
 import type { Especiale } from '@/types/payload';
 
@@ -46,7 +46,7 @@ const anteriores = temas.filter((t) => t.id !== excluir).slice(0, 3);
       </div>
 
       <aside class="at-riel">
-        <Anuncio formato="box" />
+        <Anuncio formato="box" nombre="inicio-box" unidad="Box2" />
       </aside>
     </section>
   )

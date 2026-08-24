@@ -12,6 +12,11 @@
  *
  * ⚠️ `x` es la CRUZ de cerrar (Lucide). La marca de la red se llama `x-marca`,
  * para que no se confundan: uno cierra un menú y el otro comparte una nota.
+ *
+ * guarda-ok set:html: `TRAZOS` son constantes de ESTE archivo (trazos de Lucide).
+ * Nunca entra contenido del CMS, así que aquí no hay vía de XSS. Es el único uso
+ * legítimo de `set:html` en el proyecto — el contenido editorial se pinta como
+ * texto en `Lexical.astro`.
  */
 interface Props {
   nombre:

@@ -1,0 +1,12 @@
+{"ev": "inicio", "min": 316.0, "umbral_s": 2.0, "url": "https://14023.live.streamtheworld.com/XHSONFMAAC.aac", "t": "2026-08-24T11:39:19-06:00"}
+{"ev": "conectado", "http": 200, "reconexion": 0, "t": "2026-08-24T11:39:20-06:00"}
+{"ev": "caudal", "kbps": 58.6, "vs_nominal": "1.22x", "total_mb": 0.43, "t": "2026-08-24T11:40:21-06:00"}
+{"ev": "caudal", "kbps": 49.7, "vs_nominal": "1.04x", "total_mb": 0.78, "t": "2026-08-24T11:41:21-06:00"}
+{"ev": "caudal", "kbps": 49.1, "vs_nominal": "1.02x", "total_mb": 1.13, "t": "2026-08-24T11:42:21-06:00"}
+{"ev": "caudal", "kbps": 49.4, "vs_nominal": "1.03x", "total_mb": 1.49, "t": "2026-08-24T11:43:21-06:00"}
+{"ev": "caudal", "kbps": 49.1, "vs_nominal": "1.02x", "total_mb": 1.84, "t": "2026-08-24T11:44:22-06:00"}
+{"ev": "caudal", "kbps": 48.8, "vs_nominal": "1.02x", "total_mb": 2.2, "t": "2026-08-24T11:45:23-06:00"}
+{"ev": "caudal", "kbps": 49.6, "vs_nominal": "1.03x", "total_mb": 2.55, "t": "2026-08-24T11:46:23-06:00"}
+{"ev": "caudal", "kbps": 49.1, "vs_nominal": "1.02x", "total_mb": 2.9, "t": "2026-08-24T11:47:23-06:00"}
+{"ev": "caudal", "kbps": 49.4, "vs_nominal": "1.03x", "total_mb": 3.26, "t": "2026-08-24T11:48:23-06:00"}
+{"ev": "caudal", "kbps": 49.2, "vs_nominal": "1.02x", "total_mb": 3.61, "t": "2026-08-24T11:49:24-06:00"}

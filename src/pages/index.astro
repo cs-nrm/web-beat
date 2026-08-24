@@ -16,7 +16,7 @@
  * llenando sola conforme la redacción captura, sin un deploy por sección.
  */
 import Base from '@/layouts/Base.astro';
-import Anuncio from '@/components/inicio/Anuncio.astro';
+import Anuncio from '@/components/Anuncio.astro';
 import PanelSenal from '@/components/inicio/PanelSenal.astro';
 import Mosaico from '@/components/inicio/Mosaico.astro';
 import Marquee from '@/components/inicio/Marquee.astro';
@@ -97,7 +97,7 @@ const lema = 'BEAT 100.9 · TOTAL MUSIC';
     menú. Por eso entra por el slot `sobre-cabecera` del layout y no aquí, donde
     quedaría debajo de la cabecera.
   */}
-  <Anuncio formato="portada" slot="sobre-cabecera" />
+  <Anuncio formato="portada" nombre="inicio-portada" slot="sobre-cabecera" />
 
   {/* 1. qué suena — la señal */}
   <PanelSenal parrilla={parrilla.bloques} alAire={parrilla.alAire} sono={sono} />

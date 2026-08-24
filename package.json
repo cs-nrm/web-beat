@@ -11,13 +11,14 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro check && astro build",
+    "build": "astro check && node scripts/guardas.mjs && astro build",
     "preview": "astro preview",
-    "check": "astro check",
+    "check": "astro check && node scripts/guardas.mjs",
     "astro": "astro",
     "sync:types": "node scripts/sync-payload-types.mjs",
     "sync:types:check": "node scripts/sync-payload-types.mjs --check",
-    "fuentes": "node scripts/fuentes.mjs"
+    "fuentes": "node scripts/fuentes.mjs",
+    "guardas": "node scripts/guardas.mjs"
   },
   "dependencies": {
     "@astrojs/node": "^9.5.1",

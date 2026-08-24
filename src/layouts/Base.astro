@@ -83,6 +83,24 @@ const canonical = new URL(Astro.url.pathname, SITE_URL).href;
     <ClientRouter />
 
     {/*
+      GPT, la librería de Google Ad Manager.
+
+      Va `async` porque así lo pide Google y porque no debe bloquear el render: el
+      snippet crea `window.googletag.cmd` de inmediato, así que nuestro módulo
+      puede encolar trabajo antes de que la librería termine de bajar. Esa es la
+      razón de que TODO lo de GPT vaya dentro de `cmd.push` — sin eso, en móvil o
+      con red lenta `googletag` es solo el stub y el TypeError cancela la
+      inicialización entera.
+
+      🔴 El ad unit NO está aquí ni en ningún archivo: sale de
+      `PUBLIC_GAM_NETWORK_ID` y `PUBLIC_GAM_AD_UNIT`. Ver `src/scripts/anuncios.ts`.
+    */}
+    <script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js" is:inline></script>
+    <script is:inline>
+      window.googletag = window.googletag || { cmd: [] };
+    </script>
+
+    {/*
       Las fuentes son AUTO-HOSPEDADAS (`public/fuentes/`, generadas con
       `pnpm fuentes`). Antes iban por `<link>` a Google, y antes de eso por un
       `@import` dentro del CSS del DS. Ya no hay ninguna de las dos: los `.woff2`
@@ -113,5 +131,10 @@ const canonical = new URL(Astro.url.pathname, SITE_URL).href;
       <slot />
     </main>
     <Pie estacion={marca} redes={redes} />
+
+    <script>
+      import { prepararAnuncios } from '@/scripts/anuncios';
+      prepararAnuncios();
+    </script>
   </body>
 </html>

@@ -1,0 +1,157 @@
+---
+/**
+ * El hueco de publicidad.
+ *
+ * DECLARA el slot con `data-*` y `src/scripts/anuncios.ts` lo descubre. En el v1
+ * los 13 slots estaban escritos a mano en el script: agregar un hueco pedía tocar
+ * el JS, y quitarlo dejaba un `display()` huérfano.
+ *
+ * 🔴 El marco se dibuja SIEMPRE, con su medida, aunque no haya anuncio. Si el
+ * espacio se reservara al cargar el creativo, todo lo de abajo se movería: eso es
+ * CLS, y penaliza. `collapseEmptyDivs` se encarga de cerrar el hueco cuando GAM no
+ * tiene qué servir.
+ *
+ * ⚠️ Los tamaños salen del LIENZO v13/v14, y NO coinciden con los del sitio
+ * actual. Antes de lanzar, AdOps tiene que confirmar que estas medidas existen
+ * en Ad Manager, o los slots nunca se van a llenar:
+ *   · 1280 × 350 y 390 × 110 (portada) — NUEVAS, no existen hoy
+ *   · 320 × 100 (leaderboard móvil)    — hoy es 320 × 50
+ *   · 728 × 90 y 300 × 250             — ya existen
+ * Y quedan sin usar tres formatos del v1: 300×600, 600×800 y 400×311.
+ */
+interface Props {
+  /** Los tres formatos del lienzo. */
+  formato: 'portada' | 'leaderboard' | 'box';
+  /**
+   * Id del div, y por tanto la llave con la que GAM reporta este hueco. Tiene que
+   * ser ÚNICO en la página: dos huecos con el mismo id hacen que GPT pinte solo
+   * uno y el otro quede muerto.
+   */
+  nombre?: string;
+  /**
+   * Sub-unidad de Ad Manager (`Box`, `Box2`…), para darle inventario propio a un
+   * hueco. Se concatena al ad unit del env; el script valida el formato.
+   */
+  unidad?: string;
+  class?: string;
+}
+
+const { formato, nombre = formato, unidad, class: clase } = Astro.props;
+
+/**
+ * Medidas por formato: la lista completa que el slot puede servir, y el mapeo por
+ * ancho de viewport. El corte es 900px, el mismo `md` del design system — si aquí
+ * fuera 768 y allá 900, habría un tramo en el que el CSS pinta el marco de
+ * escritorio y GPT sirve el creativo de móvil.
+ */
+const MEDIDAS = {
+  portada: {
+    tamanos: [[1280, 350], [390, 110]],
+    mapping: [
+      [[900, 0], [[1280, 350]]],
+      [[0, 0], [[390, 110]]],
+    ],
+  },
+  leaderboard: {
+    tamanos: [[728, 90], [320, 100]],
+    mapping: [
+      [[900, 0], [[728, 90]]],
+      [[0, 0], [[320, 100]]],
+    ],
+  },
+  box: {
+    tamanos: [[300, 250]],
+    mapping: [[[0, 0], [[300, 250]]]],
+  },
+} as const;
+
+const medidas = MEDIDAS[formato];
+const idSlot = `ad-${nombre}`;
+---
+
+<div class:list={['anuncio', `es-${formato}`, clase]}>
+  <span class="beat-label anuncio-rotulo">PUBLICIDAD</span>
+  <div
+    id={idSlot}
+    class="anuncio-hueco"
+    data-anuncio={formato}
+    data-unidad={unidad}
+    data-tamanos={JSON.stringify(medidas.tamanos)}
+    data-mapping={JSON.stringify(medidas.mapping)}
+  >
+  </div>
+</div>
+
+<style>
+  .anuncio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+  }
+  .anuncio-rotulo {
+    font-size: 8px;
+    letter-spacing: 0.22em;
+    color: var(--text-faint);
+  }
+  .anuncio-hueco {
+    position: relative;
+    width: 100%;
+    background: var(--surface-card);
+    box-shadow: inset 0 0 0 1px var(--border-hairline);
+  }
+
+  /* El banner de portada va a sangre y con el rótulo ENCIMA, no arriba: es lo
+     primero de la página y una línea de texto suelta antes del banner se lee como
+     contenido del sitio. */
+  .es-portada {
+    position: relative;
+    display: block;
+    height: 350px;
+    background: var(--noche-1);
+    box-shadow: inset 0 -1px 0 var(--border-hairline);
+  }
+  .es-portada .anuncio-rotulo {
+    position: absolute;
+    left: 24px;
+    top: 12px;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .es-portada .anuncio-hueco {
+    height: 100%;
+    background: none;
+    box-shadow: none;
+  }
+
+  .es-leaderboard .anuncio-hueco {
+    max-width: 728px;
+    aspect-ratio: 728 / 90;
+  }
+  .es-box .anuncio-hueco {
+    width: 300px;
+    height: 250px;
+  }
+
+  @media (max-width: 899px) {
+    .es-portada {
+      height: 110px;
+    }
+    .es-portada .anuncio-rotulo {
+      left: 12px;
+      top: 8px;
+      font-size: 7px;
+      letter-spacing: 0.2em;
+    }
+    /* 320×100 en móvil: el 728×90 no cabe en 390px. */
+    .es-leaderboard .anuncio-hueco {
+      width: 320px;
+      max-width: 100%;
+      aspect-ratio: 320 / 100;
+    }
+    .es-box .anuncio-hueco {
+      width: 300px;
+      max-width: 100%;
+    }
+  }
+</style>

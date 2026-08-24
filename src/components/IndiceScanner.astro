@@ -8,6 +8,7 @@
  * como el sitio viejo terminó con los tokens de marca repartidos.
  */
 import TarjetaNota from '@/components/TarjetaNota.astro';
+import Anuncio from '@/components/Anuncio.astro';
 import Icono from '@/components/Icono.astro';
 import { obtenerScanner, minutosDeLectura } from '@/lib/cms/noticias';
 import { obtenerCategorias } from '@/lib/cms/categorias';
@@ -143,9 +144,8 @@ const bajada = filtro
           )}
 
           {/* ── Publicidad: el leaderboard ── */}
-          <div class="sc-anuncio">
-            <span class="beat-label sc-anuncio-rotulo">PUBLICIDAD</span>
-            <div class="sc-anuncio-hueco sc-anuncio-leader" />
+          <div class="sc-franja-anuncio">
+            <Anuncio formato="leaderboard" nombre="scanner-leader" />
           </div>
 
           {/* ── Segunda tanda + riel ── */}
@@ -165,10 +165,7 @@ const bajada = filtro
             </div>
 
             <aside class="sc-riel">
-              <div class="sc-anuncio">
-                <span class="beat-label sc-anuncio-rotulo">PUBLICIDAD</span>
-                <div class="sc-anuncio-hueco sc-anuncio-box" />
-              </div>
+              <Anuncio formato="box" nombre="scanner-box" unidad="Box" />
             </aside>
           </div>
         </>
@@ -353,31 +350,8 @@ const bajada = filtro
     margin: 32px 24px 0;
   }
 
-  /* ── publicidad ── */
-  .sc-anuncio {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 7px;
+  .sc-franja-anuncio {
     padding: 32px 24px;
-  }
-  .sc-anuncio-rotulo {
-    font-size: 8px;
-    color: var(--text-faint);
-  }
-  .sc-anuncio-hueco {
-    position: relative;
-    background: var(--surface-card);
-    box-shadow: inset 0 0 0 1px var(--border-hairline);
-  }
-  .sc-anuncio-leader {
-    width: 100%;
-    max-width: 728px;
-    aspect-ratio: 728 / 90;
-  }
-  .sc-anuncio-box {
-    width: 300px;
-    height: 250px;
   }
 
   /* ── segunda tanda ── */
@@ -407,9 +381,6 @@ const bajada = filtro
     display: flex;
     flex-direction: column;
     gap: 26px;
-  }
-  .sc-riel .sc-anuncio {
-    padding: 0;
   }
   .sc-vacio {
     font: var(--type-body-sm);

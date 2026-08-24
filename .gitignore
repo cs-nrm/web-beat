@@ -40,6 +40,12 @@ design/*.zip
 # comerciales revela quién anuncia y con qué frecuencia". Aquí aplica igual.
 .metadata-log/*.sse
 .metadata-log/*.txt
+# Las salidas de una corrida: se reescriben cada minuto mientras el monitor vive,
+# así que versionarlas deja el `git status` sucio de forma permanente y arriesga
+# commitear un archivo a medio escribir. Los HALLAZGOS viven en el plan y en los
+# mensajes de commit; lo que sí se versiona son las herramientas.
+.metadata-log/*.jsonl
+.metadata-log/*.log
 # La vista renderizada lleva lo mismo que el .sse: anunciantes al aire, nombres de
 # cartucho de Dalet y material sin estrenar. No entra a git.
 .metadata-log/*.html

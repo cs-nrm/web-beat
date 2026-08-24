@@ -26,7 +26,27 @@ export default defineConfig({
   site: process.env.PUBLIC_SITE_URL || 'https://beatdigital.mx',
   output: 'server',
   adapter: node({ mode: 'standalone' }),
-  vite: { plugins: [tailwind()] },
+  vite: {
+    plugins: [tailwind()],
+    server: {
+      watch: {
+        /*
+         * 🔴 Sin esto, CUALQUIER escritura dentro del proyecto reinicia el
+         * servidor de desarrollo.
+         *
+         * Medido: las capturas de `.metadata-log/` escriben una muestra cada 60 s,
+         * y el log del dev server mostraba un `program reload` cada 60 s clavado.
+         * En pantalla se ve como un parpadeo periódico —la página se recarga
+         * entera— y en medio de una verificación visual es imposible saber si lo
+         * que ves es tu cambio o el rebote.
+         *
+         * `design/` va por lo mismo: son megabytes de `.dc.html` que no alimentan
+         * el build (viven en `.dockerignore`), y vigilarlos no compra nada.
+         */
+        ignored: ['**/.metadata-log/**', '**/design/**', '**/dist/**'],
+      },
+    },
+  },
   security: {
     checkOrigin: true,
     /**

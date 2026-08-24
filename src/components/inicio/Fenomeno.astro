@@ -104,8 +104,14 @@ const tiendas = (
             id="fr-visor"
             data-visor
             data-estado="portada"
-            data-orientacion={fuenteEncabeza?.orientacion ?? 'vertical'}
           >
+            {/*
+              El MARCO es lo que flota al salir de pantalla. El `.fr-video` de
+              afuera se queda en el flujo conservando su alto, así que al despegarse
+              no se abre un hueco ni salta la página — y sirve de centinela para
+              saber cuándo el visor volvió a la vista.
+            */}
+            <div class="fr-visor-marco" data-visor-marco>
             {/*
               🔴 Un `<video>`, no un `<div>` vacío. Plyr necesita un elemento de
               MEDIOS para construirse; sobre un div sin `data-plyr-provider` se
@@ -133,7 +139,6 @@ const tiendas = (
                   class="fr-visor-arranque"
                   data-proveedor={fuenteEncabeza.proveedor}
                   data-fuente={fuenteEncabeza.src}
-                  data-orientacion={fuenteEncabeza.orientacion}
                   data-titulo={encabeza.doc.titulo}
                 >
                   <span class="fr-play">
@@ -154,6 +159,21 @@ const tiendas = (
                   </span>
                 </a>
               )}
+            </div>
+
+            {/*
+              Solo se ve cuando el visor está flotando: devuelve el video a su
+              lugar. Sin esta salida, un reproductor fijo que el lector no quiere
+              es una trampa.
+            */}
+              <button
+                type="button"
+                class="fr-visor-cerrar"
+                data-visor-cerrar
+                aria-label="Cerrar el video"
+              >
+                <Icono nombre="x" tamano={16} />
+              </button>
             </div>
           </div>
         ) : (
@@ -181,7 +201,6 @@ const tiendas = (
                   class:list={['fr-capsula', { 'es-destacada': c.n === encabeza?.n }]}
                   data-proveedor={c.fuente.proveedor}
                   data-fuente={c.fuente.src}
-                  data-orientacion={c.fuente.orientacion}
                   data-titulo={c.doc.titulo}
                   data-activa={c.n === encabeza?.n ? 'sí' : undefined}
                 >
@@ -343,16 +362,25 @@ const tiendas = (
   .fr-video {
     position: relative;
     display: block;
-    /* La forma la fija `data-orientacion`, no una medida fija: las cápsulas
-       pueden ser verticales (Shorts) u horizontales, y la caja se reserva ANTES
-       de que el video exista para que no empuje el layout al aparecer. */
+    /*
+      🔴 9:16 SIEMPRE. Las cápsulas se publican como reels, así que el formato es
+      del formato de la serie, no de cada archivo.
+
+      Antes la caja seguía `video.orientacion` del CMS. Se quitó por decisión de
+      Carlos: el material horizontal que había era una prueba, y adaptar la caja a
+      cada pieza significaba que un archivo mal capturado deformaba el layout de la
+      portada. Con la medida fija, un horizontal se ve con bandas —que es correcto—
+      y nada se mueve.
+    */
     aspect-ratio: 9 / 16;
     background: var(--grad-noche);
-    overflow: hidden;
     box-shadow: inset 0 0 0 1px var(--border-quiet);
   }
-  .fr-video[data-orientacion='horizontal'] {
-    aspect-ratio: 16 / 9;
+  .fr-visor-marco {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: var(--grad-noche);
   }
   .fr-visor-montaje,
   .fr-visor-portada {
@@ -382,6 +410,13 @@ const tiendas = (
   .fr-video :global(.plyr__video-wrapper) {
     height: 100%;
     padding-bottom: 0 !important;
+  }
+  /* Un video horizontal dentro de una caja vertical: se ve entero con bandas, en
+     vez de recortarse. `contain` y no `cover` porque en una cápsula lo que importa
+     es lo que se ve, no llenar la caja. */
+  .fr-video :global(.plyr iframe),
+  .fr-video :global(.plyr video) {
+    object-fit: contain;
   }
   .fr-video :global(.plyr iframe),
   .fr-video :global(.plyr video) {
@@ -626,6 +661,68 @@ const tiendas = (
     color: var(--noche-0);
   }
 
+  /* ── el visor flotante ── */
+  .fr-visor-marco[data-flotante] {
+    position: fixed;
+    /* Debajo del chrome, que es sticky y tiene z-index de header. */
+    /* Debajo del chrome (que es sticky con z-index de header) y encima del
+       contenido. Nunca por encima del modal del anuncio, que es `--z-dialog`. */
+    z-index: var(--z-sticky);
+    inset: auto 24px 24px auto;
+    width: 200px;
+    aspect-ratio: 9 / 16;
+    border-radius: var(--r-3);
+    box-shadow:
+      inset 0 0 0 1px var(--border-strong),
+      0 18px 44px rgba(5, 7, 6, 0.6);
+    animation: fr-flota-entra var(--dur-3) var(--ease-out);
+  }
+  @keyframes fr-flota-entra {
+    from {
+      opacity: 0;
+      transform: translateY(16px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fr-visor-marco[data-flotante] {
+      animation: none;
+    }
+  }
+  .fr-visor-cerrar {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    z-index: 2;
+    display: none;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(5, 7, 6, 0.72);
+    backdrop-filter: blur(10px);
+    color: var(--mist-1);
+    cursor: pointer;
+  }
+  .fr-visor-marco[data-flotante] .fr-visor-cerrar {
+    display: grid;
+  }
+  .fr-visor-cerrar:hover {
+    background: var(--mist-0);
+    color: var(--noche-0);
+  }
+
+  @media (max-width: 899px) {
+    .fr-visor-marco[data-flotante] {
+      inset: auto 12px 12px auto;
+      width: 132px;
+    }
+  }
+
   .fr-vacio {
     font: var(--type-body-sm);
     color: var(--text-muted);
@@ -670,10 +767,11 @@ const tiendas = (
       gap: 18px;
       margin-top: 18px;
     }
-    /* El video pasa de 9:16 a 4:5: a lo ancho de 390px, un 9:16 ocuparía dos
-       pantallas de alto y empujaría todo lo demás fuera del pliegue. */
+    /* 🔴 En móvil el visor NO cambia de proporción: el formato de la serie manda.
+       Lo que se limita es su ALTO, para que un 9:16 a lo ancho de 390px no ocupe
+       dos pantallas y empuje todo lo demás fuera del pliegue. */
     .fr-video {
-      aspect-ratio: 4 / 5;
+      max-height: 74vh;
     }
     .fr-video-pie {
       padding: 48px 14px 14px;

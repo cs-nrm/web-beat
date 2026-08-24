@@ -66,8 +66,11 @@ function cargarPlyr(): Promise<void> {
 /** Un visor: el panel, su portada y la instancia de Plyr cuando exista. */
 interface Visor {
   panel: HTMLElement;
+  /** Lo que se despega al salir de pantalla. El panel se queda en el flujo. */
+  marco: HTMLElement;
   montaje: HTMLVideoElement;
   portada: HTMLElement;
+  observador?: IntersectionObserver;
   reproductor: PlyrInstancia | null;
   id: string;
   /** Los escuchas vigentes, para poder quitarlos antes de volver a ponerlos. */
@@ -76,6 +79,38 @@ interface Visor {
 }
 
 const visores = new Map<string, Visor>();
+
+/**
+ * Despega o devuelve el visor.
+ *
+ * Solo flota si está SONANDO: un video pausado que se persigue por la pantalla es
+ * una molestia, no una comodidad. Es la diferencia entre «sigue viéndolo mientras
+ * lee» y «no te puedes deshacer de esto».
+ */
+function flotar(visor: Visor, si: boolean): void {
+  if (si && visor.panel.dataset.estado !== 'sonando') return;
+  if (si) visor.marco.dataset.flotante = 'sí';
+  else delete visor.marco.dataset.flotante;
+}
+
+/**
+ * Vigila si el visor sigue a la vista.
+ *
+ * Observa el PANEL, que nunca se mueve del flujo — si observara el marco, al
+ * despegarse (`position: fixed`) quedaría siempre visible y nunca volvería.
+ *
+ * El umbral es 0.25: se despega cuando queda menos de un cuarto a la vista, no al
+ * primer píxel. Así un scroll corto no lo hace saltar de ida y vuelta.
+ */
+function vigilarViewport(visor: Visor): void {
+  if (typeof IntersectionObserver === 'undefined') return;
+  visor.observador?.disconnect();
+  visor.observador = new IntersectionObserver(
+    ([entrada]) => flotar(visor, !entrada.isIntersecting),
+    { threshold: 0.25 },
+  );
+  visor.observador.observe(visor.panel);
+}
 
 /**
  * Refleja en el panel lo que el reproductor está haciendo, para que el CSS pueda
@@ -91,6 +126,9 @@ function enlazarEventos(visor: Visor): void {
   };
   const pausa = () => {
     visor.panel.dataset.estado = 'pausa';
+    // Al pausar deja de flotar: perseguir al lector con un video detenido no
+    // aporta nada.
+    flotar(visor, false);
   };
   p.off('playing', visor.alSonar ?? sonando);
   p.off('pause', visor.alPausar ?? pausa);
@@ -109,7 +147,7 @@ function enlazarEventos(visor: Visor): void {
  * dos a la vez — que es exactamente lo que el árbitro existe para evitar.
  */
 async function reproducirEn(visor: Visor, boton: HTMLElement): Promise<void> {
-  const { proveedor, fuente, titulo, orientacion } = boton.dataset as Record<string, string>;
+  const { proveedor, fuente, titulo } = boton.dataset as Record<string, string>;
   if (!proveedor || !fuente) return;
 
   /*
@@ -122,9 +160,6 @@ async function reproducirEn(visor: Visor, boton: HTMLElement): Promise<void> {
   */
   reclamarAudio(visor.id);
   visor.panel.dataset.estado = 'cargando';
-  // La caja cambia de forma ANTES de cargar: es para lo que existe `orientacion`
-  // en el CMS, y evita que el video empuje el layout al aparecer.
-  if (orientacion) visor.panel.dataset.orientacion = orientacion;
 
   try {
     await cargarPlyr();
@@ -144,6 +179,8 @@ async function reproducirEn(visor: Visor, boton: HTMLElement): Promise<void> {
     });
     // El visor entra al árbitro: si alguien le da play al radio, este se pausa.
     registrarAudio(visor.id, () => visor.reproductor?.pause());
+    // Y empieza a vigilar el viewport, para poder flotar mientras suena.
+    vigilarViewport(visor);
   }
 
   visor.reproductor.source =
@@ -226,6 +263,7 @@ async function reproducirEn(visor: Visor, boton: HTMLElement): Promise<void> {
  */
 export function iniciarVisores(): void {
   visores.forEach((v, id) => {
+    v.observador?.disconnect();
     v.reproductor?.destroy();
     olvidarAudio(id);
   });
@@ -236,15 +274,26 @@ export function iniciarVisores(): void {
     const portada = panel.querySelector<HTMLElement>('[data-visor-portada]');
     if (!montaje || !portada) return;
 
+    const marco = panel.querySelector<HTMLElement>('[data-visor-marco]') ?? panel;
     const id = `${FUENTES.video}:${panel.id || i}`;
-    const visor: Visor = { panel, montaje, portada, reproductor: null, id };
+    const visor: Visor = { panel, marco, montaje, portada, reproductor: null, id };
     visores.set(id, visor);
 
     // Delegación en el contenedor: la lista de cápsulas puede ser larga y así no
     // hay un listener por fila.
     const raiz = panel.closest('[data-fenomeno]') ?? document;
     raiz.addEventListener('click', (ev) => {
-      const boton = (ev.target as HTMLElement | null)?.closest<HTMLElement>('[data-fuente]');
+      const objetivo = ev.target as HTMLElement | null;
+
+      // La salida del flotante: lo pausa y lo devuelve a su lugar.
+      if (objetivo?.closest('[data-visor-cerrar]')) {
+        ev.preventDefault();
+        visor.reproductor?.pause();
+        flotar(visor, false);
+        return;
+      }
+
+      const boton = objetivo?.closest<HTMLElement>('[data-fuente]');
       if (!boton) return;
       ev.preventDefault();
       void reproducirEn(visor, boton);

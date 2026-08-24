@@ -4,6 +4,16 @@
 # Uso: ./capturar-largo.sh <minutos>
 set -u
 MIN="${1:-170}"
+
+# 🔴 Sin esto una captura larga NO SIRVE en una laptop.
+# Medido el 2026-08-21: una captura de 420 min murió a los 111 porque se cerró la
+# tapa («Entering Sleep state due to Clamshell Sleep», 17:06). Los cue points se
+# cortan de golpe y el archivo PARECE el fallo del emisor que estamos buscando —
+# horas de conexión abierta sin un solo evento— cuando es la máquina durmiendo.
+# `caffeinate -is` mantiene el sistema despierto mientras dure el proceso.
+if command -v caffeinate >/dev/null && [ -z "${SIN_CAFEINA:-}" ]; then
+  exec caffeinate -is env SIN_CAFEINA=1 "$0" "$@"
+fi
 DIR="$(cd "$(dirname "$0")" && pwd)"
 STAMP=$(date +%Y%m%d-%H%M)
 SALIDA="$DIR/largo-$STAMP.sse"

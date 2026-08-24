@@ -1,1 +1,6 @@
 2026-08-21T21:15:17Z inicio sbmid=c64fa556-09df-41f9-bdd9-6493f33be5f3 min=420
+2026-08-22T03:35:36Z conexion=1 http=corte bytes=32971 espera=1s audio=si
+2026-08-22T03:35:37Z conexion=2 http=corte bytes=33129 espera=1s audio=si
+2026-08-22T03:35:39Z conexion=3 http=corte bytes=33287 espera=1s audio=si
+2026-08-22T03:52:19Z conexion=4 http=corte bytes=33445 espera=1s audio=NO
+2026-08-22T03:52:19Z audio caido, fin

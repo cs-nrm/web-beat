@@ -53,16 +53,17 @@ const enLaPila = notas.slice(0, 4).map((n) => ({
 
       <div class="pila-mazo">
         {/*
-          `--i` manda tres cosas: a qué altura se queda fija la tarjeta, cuánto se
-          encoge cuando la tapan, y quién queda encima de quién. Va como variable
-          de CSS para no escribir una regla por cada posición de la pila.
+          `--i` manda cuatro cosas: a qué altura se queda fija la tarjeta, quién
+          queda encima de quién, cuánto se encoge, y —con `--total`— cuántas tiene
+          delante. Van como variables de CSS para no escribir una regla por cada
+          posición de la pila.
 
           ⚠️ El comentario va AQUÍ y no entre los atributos: Astro no admite
           comentarios dentro de la lista de atributos de una etiqueta, y los parsea
           como atributos sueltos. Es el tercer tropiezo igual en este repo.
         */}
         {enLaPila.map((p, i) => (
-          <a href={p.href} class="pila-carta" style={`--i:${i}`}>
+          <a href={p.href} class="pila-carta" style={`--i:${i}; --total:${enLaPila.length}`}>
             <div class="pila-carta-foto">
               {p.foto && <img src={p.foto} alt={p.alt} loading="lazy" decoding="async" />}
               <div class="beat-grid pila-trama" />
@@ -149,7 +150,9 @@ const enLaPila = notas.slice(0, 4).map((n) => ({
     comentario del marcado.
   */
   .pila-remanso {
-    height: min(72vh, 640px);
+    /* Al subir las franjas de 22 a 94px la última carta se fija MÁS TARDE, así que
+       necesita más recorrido detrás para sostener la pila armada. */
+    height: min(115vh, 1020px);
   }
 
   /* ── la carta ── */
@@ -157,16 +160,29 @@ const enLaPila = notas.slice(0, 4).map((n) => ({
     position: sticky;
     /*
       Se queda fija BAJO el chrome, escalonada por índice: cada tarjeta se detiene
-      22px más abajo que la anterior, y ese escalón es la franja de título que
-      queda a la vista cuando la tapan.
+      76px más abajo que la anterior, y ese escalón ES la franja que queda a la
+      vista cuando la tapan.
+
+      🔴 94px no es un número redondo, es la medida del titular acotado a DOS
+      líneas: 24px de padding superior + 62px de dos líneas a 25px/1.24 + aire.
+
+      Con los 22px que tenía se veía una rendija de color y nada más. Y 76px
+      tampoco alcanzaban: la referencia usa títulos de una línea («Nuestros
+      Ingredientes») y los nuestros son titulares de noticia — medido con el
+      contenido real, ocupaban 3 líneas y 86px.
     */
-    top: calc(var(--chrome-h) + 20px + var(--i) * 22px);
+    top: calc(var(--chrome-h) + 20px + var(--i) * 94px);
     /* La de más arriba en el marcado queda ABAJO en la pila. */
     z-index: calc(var(--i) + 1);
     display: grid;
     grid-template-columns: 400px minmax(0, 1fr);
     gap: 36px;
-    align-items: center;
+    /*
+      🔴 `start`, no `center`. Con el contenido centrado verticalmente el titular
+      queda a media altura de la tarjeta, o sea FUERA de la franja que se ve cuando
+      la tapan: se apilaban cuatro franjas de color sin una palabra.
+    */
+    align-items: start;
     /*
       🔴 Este margen ES el recorrido de scroll entre una carta y la siguiente, no
       un respiro visual: mientras se recorre, la carta de abajo va subiendo a tapar
@@ -192,6 +208,18 @@ const enLaPila = notas.slice(0, 4).map((n) => ({
       0 -18px 44px rgba(5, 7, 6, 0.55);
     color: inherit;
     text-decoration: none;
+    /*
+      Se encoge según cuántas tiene DELANTE: la de enfrente queda a tamaño natural
+      y cada una detrás pierde 2.5%. Con cuatro son 7.5% entre la primera y la
+      última — «poquito», como lo pidió Carlos, y en la misma dirección que la
+      referencia (que va de 977 a 1119px de ancho entre la del fondo y la de
+      enfrente).
+
+      El origen arriba-centro es lo que mantiene alineadas las franjas: si
+      encogiera desde el centro, cada tarjeta bajaría su borde superior y el
+      escalonado se desordenaría.
+    */
+    transform: scale(calc(1 - (var(--total) - 1 - var(--i)) * 0.025));
     transform-origin: center top;
   }
   /* La última CONSERVA su margen: es el recorrido que le da su momento completo
@@ -223,8 +251,19 @@ const enLaPila = notas.slice(0, 4).map((n) => ({
     letter-spacing: -0.016em;
     color: var(--mist-1);
     margin: 0;
-    max-width: 24ch;
+    /* Más ancho que antes (24ch): en la franja el título es lo ÚNICO que se lee,
+       así que conviene que quepa en una línea o dos, no en tres. */
+    max-width: 34ch;
     text-wrap: pretty;
+    /*
+      Acotado a DOS líneas. La franja de la pila mide lo que miden dos líneas, así
+      que un titular de tres se cortaría a media palabra sin avisar. Con el
+      recorte, el corte es explícito y con puntos suspensivos.
+    */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
   }
   .pila-carta-bajada {
     font: var(--type-body);
@@ -264,29 +303,6 @@ const enLaPila = notas.slice(0, 4).map((n) => ({
     background: var(--mist-1);
   }
 
-  /*
-    ── La profundidad, como MEJORA ──
-    La tarjeta se encoge y se apaga conforme sale de la vista, que es lo que da la
-    sensación de que se va al fondo del mazo. Va con animación ligada al scroll:
-    donde no hay soporte —hoy Safari y Firefox— las tarjetas se apilan igual, solo
-    que sin encoger. Es degradación limpia: el gesto principal no depende de esto.
-  */
-  @supports (animation-timeline: view()) {
-    @media (prefers-reduced-motion: no-preference) {
-      .pila-carta {
-        animation: pila-al-fondo linear both;
-        animation-timeline: view();
-        /* Empieza a encogerse solo cuando ya está saliendo por arriba. */
-        animation-range: exit 0% exit 90%;
-      }
-      @keyframes pila-al-fondo {
-        to {
-          transform: scale(0.93);
-          filter: brightness(0.72);
-        }
-      }
-    }
-  }
 
   .pila-pie {
     display: flex;
@@ -329,7 +345,9 @@ const enLaPila = notas.slice(0, 4).map((n) => ({
       border-radius: var(--r-3);
       box-shadow: inset 0 0 0 1px var(--border-hairline);
       overflow: hidden;
-      animation: none;
+      /* Sin apilado, el encogido por posición no significa nada: sería una
+         tarjeta más chica que las otras sin motivo. */
+      transform: none;
     }
     .pila-carta-foto {
       border-radius: 0;

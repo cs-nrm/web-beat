@@ -43,7 +43,23 @@ export default defineConfig({
          * `design/` va por lo mismo: son megabytes de `.dc.html` que no alimentan
          * el build (viven en `.dockerignore`), y vigilarlos no compra nada.
          */
-        ignored: ['**/.metadata-log/**', '**/design/**', '**/dist/**'],
+        /*
+          🔴 Las exclusiones por omisión van INCLUIDAS a mano.
+
+          `ignored` como lista REEMPLAZA la lista por omisión de Vite, que trae
+          `node_modules` y `.git`. Al poner solo las nuestras, el vigilante se puso
+          a observar node_modules entero y dejó de avisar de los cambios en `src`:
+          el servidor sirvió CSS viejo durante varias sesiones de medición y me hizo
+          perseguir problemas de layout que no existían. Se nota tarde porque el
+          `build` sí toma los cambios — solo el dev queda atrás.
+        */
+        ignored: [
+          '**/node_modules/**',
+          '**/.git/**',
+          '**/.metadata-log/**',
+          '**/design/**',
+          '**/dist/**',
+        ],
       },
     },
   },

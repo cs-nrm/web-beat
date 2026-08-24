@@ -557,13 +557,13 @@ html {
 :root {
   /* Para texto pequeño y elementos de interfaz: se nota sin emborronar. */
   --resplandor-tenue:
-    0 0 10px rgba(250, 251, 250, calc(0.28 * var(--resplandor-intensidad))),
-    0 0 26px rgba(250, 251, 250, calc(0.12 * var(--resplandor-intensidad)));
+    0 0 calc(4px * var(--resplandor-intensidad)) rgba(250, 251, 250, 0.26),
+    0 0 calc(10px * var(--resplandor-intensidad)) rgba(250, 251, 250, 0.13);
   /* Para lo que de verdad debe brillar: titulares, el logotipo, lo que está al aire. */
   --resplandor:
-    0 0 8px rgba(250, 251, 250, calc(0.45 * var(--resplandor-intensidad))),
-    0 0 22px rgba(250, 251, 250, calc(0.26 * var(--resplandor-intensidad))),
-    0 0 52px rgba(250, 251, 250, calc(0.14 * var(--resplandor-intensidad)));
+    0 0 calc(3px * var(--resplandor-intensidad)) rgba(250, 251, 250, 0.42),
+    0 0 calc(8px * var(--resplandor-intensidad)) rgba(250, 251, 250, 0.24),
+    0 0 calc(20px * var(--resplandor-intensidad)) rgba(250, 251, 250, 0.13);
   /* La versión cálida, para cuando el acento de marca es el que emite. */
   /*
     ⚠️ Las bases van BAJAS a propósito. El dial las multiplica, y con las que tenía
@@ -579,7 +579,14 @@ html {
     🔴 EL DIAL. Todo el resplandor del sitio se sube o se baja desde aquí, sin
     tocar una sola regla.
 
-    Está en 2.6, y llegar ahí costó una lección: a 1.4 —donde estaba— Carlos no lo
+    🔴 EL DIAL MODULA EL RADIO, NO EL ALFA. Es un cambio que costó dos tropiezos
+    idénticos: multiplicando el alfa, cualquier valor alto lo empujaba por encima
+    de 1 y el navegador lo recortaba. El halo del botón se volvió un anillo naranja
+    sólido, y el del icono ya estaba saturado sin que se notara — subirle luz no
+    hacía absolutamente nada. Con el radio no hay techo: 5 es de verdad cinco veces
+    más luz que 1, y el alfa se queda donde se ve como luz.
+
+    Está en 2.6, y llegar ahí costó otra lección: a 1.4 —donde estaba— Carlos no lo
     notaba, y tenía razón.
 
     🔴 El resplandor necesita HUECO OSCURO alrededor del trazo para ocuparlo. La
@@ -650,16 +657,11 @@ html {
    sin él (2026-08-24). La barra ya es la superficie más luminosa del sitio por su
    propio color; sumarle halo la volvía pesada.
    ============================================================ */
-/*
-  ⚠️ Las bases son BAJAS porque el dial las multiplica: con la que tenía (0.4) a
-  intensidad 2.6 el alfa llegaba a 1.04 y se recortaba en 1. O sea que subirle luz
-  al icono no hacía nada — ya estaba saturado. Para que se note «tantito más» hay
-  que ampliar el RADIO y sumar una capa, no subir el alfa.
-*/
 .beat-play-emite svg {
+  --resplandor-intensidad: 5;
   filter:
-    drop-shadow(0 0 4px rgba(250, 251, 250, calc(0.3 * var(--resplandor-intensidad))))
-    drop-shadow(0 0 11px rgba(250, 251, 250, calc(0.2 * var(--resplandor-intensidad))));
+    drop-shadow(0 0 calc(1.4px * var(--resplandor-intensidad)) rgba(250, 251, 250, 0.42))
+    drop-shadow(0 0 calc(3.4px * var(--resplandor-intensidad)) rgba(250, 251, 250, 0.24));
 }
 
 @media (prefers-contrast: more) {
@@ -679,10 +681,18 @@ html {
    Se apilan dos capas porque `drop-shadow` no admite varias sombras en una sola
    función, como sí hace `box-shadow`.
    ============================================================ */
+/*
+  ✨ El dial se puede reescribir POR ELEMENTO, que es la ventaja de que sea una
+  variable y no un valor escrito en cada regla. Carlos calibró cada pieza por
+  separado (2026-08-24): el wordmark pide menos luz que el resto porque su trazo ya
+  es grueso, y el triángulo del play pide bastante más porque es diminuto y vive
+  dentro de un círculo oscuro que le da mucho fondo que ocupar.
+*/
 .beat-wordmark-emite {
+  --resplandor-intensidad: 2;
   filter:
-    drop-shadow(0 0 6px rgba(250, 251, 250, calc(0.34 * var(--resplandor-intensidad))))
-    drop-shadow(0 0 18px rgba(250, 251, 250, calc(0.18 * var(--resplandor-intensidad))));
+    drop-shadow(0 0 calc(3px * var(--resplandor-intensidad)) rgba(250, 251, 250, 0.34))
+    drop-shadow(0 0 calc(9px * var(--resplandor-intensidad)) rgba(250, 251, 250, 0.18));
 }
 
 @media (prefers-contrast: more) {

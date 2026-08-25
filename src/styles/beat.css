@@ -1378,3 +1378,112 @@ html[data-cursor] body::after {
     display: none;
   }
 }
+
+/* ============================================================
+   Luz que recorre la cuadrícula
+   ------------------------------------------------------------
+   `rejilla.ts` elige de nuevo línea, eje, sentido, velocidad y espera en CADA
+   pasada — aquí solo está el aspecto. La aleatoriedad tiene que vivir en el script:
+   una animación CSS en bucle tiene periodo fijo y el ojo detecta esa periodicidad
+   aunque no sepa nombrarla.
+   ============================================================ */
+.rejilla-vida {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  /*
+    🔴 `-1` es lo que cumple el «no en todo». Deja la capa ENCIMA de la trama del
+    `body` —que se pinta en el lienzo— y DEBAJO de cualquier bloque con fondo
+    propio. La luz asoma por los huecos y desaparece tras las secciones, así que se
+    lee como algo que pasa por DETRÁS del sitio en vez de por encima.
+  */
+  z-index: -1;
+}
+
+.rejilla-vida i {
+  position: absolute;
+  display: block;
+  opacity: 0;
+  /*
+    El degradado se apaga en los dos extremos: sin eso sería una barra que entra y
+    sale por el borde, no una luz que recorre.
+  */
+  background: linear-gradient(
+    var(--eje, 90deg),
+    transparent,
+    rgb(250 251 250 / 0.34) 44%,
+    rgb(250 251 250 / 0.34) 56%,
+    transparent
+  );
+  animation-duration: var(--dur, 10s);
+  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+  animation-fill-mode: both;
+  /*
+    🔴 El sentido se invierte con `reverse`, no multiplicando por -1.
+    Con el signo, el punto de PARTIDA se convertía en `+260px` —dentro de la
+    pantalla— en vez de en el borde opuesto: la luz aparecía de la nada a un
+    palmo del borde. Invertir la reproducción intercambia inicio y fin, que es lo
+    que de verdad se quiere, y evita duplicar los keyframes.
+  */
+  animation-direction: var(--dir, normal);
+}
+
+/* Horizontal: recorre a lo ancho, apoyada en una línea horizontal de la trama. */
+.rejilla-vida i.es-h {
+  --eje: 90deg;
+  top: var(--linea, 0);
+  left: 0;
+  width: 260px;
+  height: 1px;
+  animation-name: rejilla-h;
+}
+
+/* Vertical: el tramo es más corto porque la ventana suele serlo, y 260px en
+   vertical ocupan proporcionalmente mucho más. */
+.rejilla-vida i.es-v {
+  --eje: 180deg;
+  left: var(--linea, 0);
+  top: 0;
+  width: 1px;
+  height: 200px;
+  animation-name: rejilla-v;
+}
+
+/* La opacidad entra y sale dentro del recorrido, así que la luz nunca aparece ni
+   desaparece de golpe en mitad de la pantalla. */
+@keyframes rejilla-h {
+  0% {
+    opacity: 0;
+    translate: -260px 0;
+  }
+  12%,
+  84% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: 100vw 0;
+  }
+}
+
+@keyframes rejilla-v {
+  0% {
+    opacity: 0;
+    translate: 0 -200px;
+  }
+  12%,
+  84% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: 0 100vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rejilla-vida {
+    display: none;
+  }
+}

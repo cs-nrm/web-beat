@@ -873,3 +873,35 @@ html {
     transform: none;
   }
 }
+
+/* ============================================================
+   LA CUADRÍCULA, EN TODO EL SITIO  —  🧪 A PRUEBA
+   ------------------------------------------------------------
+   Idea de Carlos (2026-08-24): llevar al fondo del sitio la misma trama que hoy
+   solo va encima de las imágenes, y ver cómo se siente.
+
+   Va con dial propio y NO con el `--tex-grid` del DS, por dos razones:
+
+   · El alfa que funciona sobre una foto no es el que funciona sobre el lienzo. La
+     trama de las imágenes está al 5% contra fotos brillantes; aquí compite con un
+     fondo casi negro y en una superficie enorme, donde la textura se acumula. Con
+     el mismo valor se ve sucio.
+   · Separarlos permite calibrar uno sin mover el otro, y apagar este poniendo el
+     alfa en 0 sin tocar las imágenes.
+
+   El PASO sí es el mismo (48px) a propósito: así la trama del fondo y la de las
+   fotos leen como un solo sustrato y no como dos tramas distintas superpuestas.
+
+   ⚠️ PARA QUITARLO: borrar este bloque, o poner `--cuadricula-alfa: 0`.
+   ============================================================ */
+:root {
+  --cuadricula-alfa: 0.04;
+  --cuadricula-paso: 48px;
+}
+
+body {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, var(--cuadricula-alfa)) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, var(--cuadricula-alfa)) 1px, transparent 1px);
+  background-size: var(--cuadricula-paso) var(--cuadricula-paso);
+}

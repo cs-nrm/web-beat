@@ -63,7 +63,7 @@ const enLaPila = notas.slice(0, 4).map((n) => ({
           como atributos sueltos. Es el tercer tropiezo igual en este repo.
         */}
         {enLaPila.map((p, i) => (
-          <a href={p.href} class="pila-carta" style={`--i:${i}; --total:${enLaPila.length}`}>
+          <a href={p.href} class="pila-carta" data-luz style={`--i:${i}; --total:${enLaPila.length}`}>
             <div class="pila-carta-foto" transition:name={`foto-nota-${p.nota.id}`}>
               {/*
                 ⚠️ SIN `data-revelar`, a propósito. Esta tarjeta ya trae su propio
@@ -89,7 +89,7 @@ const enLaPila = notas.slice(0, 4).map((n) => ({
                 {p.cat && <span class="beat-label pila-cat">{p.cat}</span>}
                 <span class="beat-label pila-min">{p.min} MIN</span>
               </div>
-              <span class="pila-cta">
+              <span class="pila-cta" data-flecha>
                 Leer la nota
                 <Icono nombre="arrow-up-right" tamano={16} />
               </span>

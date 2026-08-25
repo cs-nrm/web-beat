@@ -39,7 +39,7 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
         ))}
       </div>
 
-      <a href={`/noticias/${portada.slug}`} class="mosaico-centro">
+      <a href={`/noticias/${portada.slug}`} class="mosaico-centro" data-luz>
         <div class="mosaico-foto" transition:name={`foto-nota-${portada.id}`}>
           {foto && <img src={foto} alt={alt} fetchpriority="high" decoding="async" data-revelar />}
           <div class="beat-grid mosaico-trama" />

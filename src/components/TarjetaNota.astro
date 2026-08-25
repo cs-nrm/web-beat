@@ -33,7 +33,7 @@ const cat = nombreCategoria(nota);
 const foto = urlMedia(nota.imagen, variante === 'fila' ? 'card' : 'card');
 ---
 
-<a href={href} class:list={['tarjeta', `es-${variante}`]}>
+<a href={href} data-luz class:list={['tarjeta', `es-${variante}`]}>
   {/*
     🔴 `transition:name` es lo que hace que la foto de esta tarjeta CREZCA hasta
     convertirse en el hero de la nota, en vez de que la página corte en seco. El
@@ -82,7 +82,7 @@ const foto = urlMedia(nota.imagen, variante === 'fila' ? 'card' : 'card');
 
   {
     variante === 'fila' && (
-      <span class="tarjeta-flecha">
+      <span class="tarjeta-flecha" data-flecha>
         <Icono nombre="arrow-up-right" tamano={16} />
       </span>
     )

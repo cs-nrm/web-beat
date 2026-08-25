@@ -1144,3 +1144,80 @@ body {
     display: none;
   }
 }
+
+/* ============================================================
+   Luz que sigue al puntero
+   ------------------------------------------------------------
+   `cursor.ts` solo publica `--mx` / `--my` sobre el elemento con `data-luz`.
+   Todo lo que se ve se decide aquí.
+
+   ✨ Este efecto NO esconde nada, a diferencia del revelado: es una capa aditiva
+   encima. Si el script no corre, `--mx`/`--my` se quedan en su valor por defecto
+   (el centro) y la tarjeta se ve exactamente igual, solo que la luz no persigue el
+   cursor. Es la lección de las fotos en negro, aplicada desde el principio.
+   ============================================================ */
+[data-luz] {
+  position: relative;
+  --mx: 50%;
+  --my: 50%;
+}
+[data-luz]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity var(--dur-3) var(--ease-out);
+  background: radial-gradient(
+    340px circle at var(--mx) var(--my),
+    rgb(250 251 250 / 0.07),
+    transparent 62%
+  );
+}
+@media (hover: hover) and (pointer: fine) {
+  [data-luz]:hover::after {
+    opacity: 1;
+  }
+}
+
+/* ── La foto respira al pasar por encima ──
+   Zoom muy corto: 1.03. Más que eso, en una tarjeta de nota, deja de leerse como
+   respuesta y empieza a leerse como carrusel. */
+@media (hover: hover) and (pointer: fine) {
+  .tarjeta-foto img,
+  .mosaico-foto img {
+    transition: transform var(--dur-4) var(--ease-out);
+  }
+  .tarjeta:hover .tarjeta-foto img,
+  .mosaico-centro:hover .mosaico-foto img {
+    transform: scale(1.03);
+  }
+}
+
+/* ── La flecha se adelanta ──
+   El gesto más barato que existe para que un enlace conteste. */
+@media (hover: hover) and (pointer: fine) {
+  [data-flecha] svg {
+    transition: transform var(--dur-2) var(--ease-out);
+  }
+  /* 🔴 El hover se toma del ENLACE, no del `span` de la flecha: la flecha vive
+     dentro de la tarjeta, así que apuntando al `span` solo reaccionaría si el
+     cursor cayera justo encima de ella — que es casi nunca. */
+  [data-luz]:hover [data-flecha] svg,
+  [data-flecha]:hover svg {
+    transform: translateX(3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-luz]::after {
+    display: none;
+  }
+  .tarjeta:hover .tarjeta-foto img,
+  .mosaico-centro:hover .mosaico-foto img,
+  [data-luz]:hover [data-flecha] svg,
+  [data-flecha]:hover svg {
+    transform: none;
+  }
+}

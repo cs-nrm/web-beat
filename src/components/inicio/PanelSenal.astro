@@ -52,7 +52,14 @@ const hora = (iso: string | null | undefined) => {
         <div>
           <h2 class="beat-label senal-titulo">HOY EN LA SEÑAL</h2>
           {visibles.map((b) => (
-            <div class:list={['senal-fila', { 'es-aire': b.alAire }]}>
+            <div
+              class:list={['senal-fila', { 'es-aire': b.alAire }]}
+              data-bloque
+              data-desde={b.desde}
+              data-hasta={b.hasta}
+              data-vivo={b.esVivo ? '1' : '0'}
+              data-cruza={b.cruzaMedianoche ? '1' : '0'}
+            >
               <span class="beat-label senal-hora">
                 {b.horaInicio}
                 {b.cruzaMedianoche && <span class="senal-cruce" title="Termina al día siguiente">
@@ -60,7 +67,7 @@ const hora = (iso: string | null | undefined) => {
                 </span>}
               </span>
               <span class="senal-nombre">{b.programa.nombre}</span>
-              <span class="beat-label senal-estado">
+              <span class="beat-label senal-estado" data-estado>
                 {b.alAire ? 'AL AIRE' : b.esVivo ? 'EN VIVO' : 'REPETICIÓN'}
               </span>
             </div>

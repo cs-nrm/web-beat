@@ -291,6 +291,37 @@ html {
  * Y `onda` pasa de 2 a 5 paradas con valores asimétricos: antes rebotaba entre dos
  * alturas como un metrónomo; ahora deriva.
  */
+/**
+ * REPOSO — la señal respira aunque nadie haya dado play.
+ *
+ * 🔴 Este es el estado que faltaba, y era el más importante de los tres. La onda
+ * solo se movía con `data-status='sonando'`, o sea que quien llegaba al sitio y no
+ * pulsaba nada veía 72 barras CONGELADAS: precisamente el elemento que representa
+ * "hay señal en vivo", muerto. Un sitio de radio no puede recibirte con la señal
+ * plana.
+ *
+ * La amplitud es deliberadamente baja (0.10–0.22 contra el 1.0 de `--peak`) y el
+ * periodo más largo. No pretende ser audio —no lo hay todavía— sino portadora: la
+ * línea está viva y espera. Al dar play, la regla de `sonando` la sustituye y la
+ * onda sube de golpe, que es justo el salto que se quiere sentir.
+ */
+.onda-barra {
+  animation: onda-reposo calc(var(--dur2) * 1.7) var(--ease-onda) var(--delay) infinite;
+}
+
+@keyframes onda-reposo {
+  0%,
+  100% {
+    transform: scaleY(0.1);
+  }
+  38% {
+    transform: scaleY(0.22);
+  }
+  64% {
+    transform: scaleY(0.14);
+  }
+}
+
 #player[data-status='sonando'] .onda-barra {
   animation:
     onda var(--dur) var(--ease-onda) var(--delay) infinite,

@@ -689,7 +689,7 @@ html {
   dentro de un círculo oscuro que le da mucho fondo que ocupar.
 */
 .beat-wordmark-emite {
-  --resplandor-intensidad: 2;
+  --resplandor-intensidad: 2.4;
   filter:
     drop-shadow(0 0 calc(3px * var(--resplandor-intensidad)) rgba(250, 251, 250, 0.34))
     drop-shadow(0 0 calc(9px * var(--resplandor-intensidad)) rgba(250, 251, 250, 0.18));

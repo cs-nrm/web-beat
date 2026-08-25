@@ -669,16 +669,28 @@ html {
    sin él (2026-08-24). La barra ya es la superficie más luminosa del sitio por su
    propio color; sumarle halo la volvía pesada.
    ============================================================ */
+/*
+  🔴 El techo de este efecto no es el dial, es la GEOMETRÍA.
+
+  El halo solo se ve donde hay fondo oscuro que ocupar, y aquí ese fondo es el
+  anillo de círculo que queda alrededor del triángulo — más allá está la barra
+  clara, donde un resplandor blanco es invisible. Con el círculo en 34px y el
+  icono en 15 quedaban ~9px de anillo: por más alfa que se le pusiera, no había
+  dónde derramar la luz. Por eso el círculo subió a 40px.
+
+  Los topes van más altos que en el resto del sitio por lo mismo: sobre un fondo
+  casi negro y en una superficie pequeña, hace falta más brillo para leer lo mismo.
+*/
 .beat-play-emite svg {
-  --resplandor-intensidad: 5;
+  --resplandor-intensidad: 6;
   filter:
     drop-shadow(
-      0 0 calc(2px + 0.8px * var(--resplandor-intensidad))
-        rgba(250, 251, 250, min(calc(0.17 * var(--resplandor-intensidad)), 0.9))
+      0 0 calc(2px + 0.9px * var(--resplandor-intensidad))
+        rgba(250, 251, 250, min(calc(0.18 * var(--resplandor-intensidad)), 0.98))
     )
     drop-shadow(
-      0 0 calc(5px + 1.6px * var(--resplandor-intensidad))
-        rgba(250, 251, 250, min(calc(0.1 * var(--resplandor-intensidad)), 0.55))
+      0 0 calc(5px + 1.8px * var(--resplandor-intensidad))
+        rgba(250, 251, 250, min(calc(0.12 * var(--resplandor-intensidad)), 0.72))
     );
 }
 

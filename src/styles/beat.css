@@ -736,3 +736,140 @@ html {
     filter: none;
   }
 }
+
+/* ============================================================
+   MICRO-INTERACCIONES — lo que hace que un sitio se sienta vivo
+   ------------------------------------------------------------
+   Del sitio de referencia del lienzo (readbyte.webflow.io) salió un dato que
+   reordena la prioridad: sus 65 interacciones son casi todas de HOVER —20 en
+   tarjetas, 10 en botones, 12 en enlaces— y ninguna es una animación de scroll.
+   Lo que se percibe como «tiene muchas animaciones» es en realidad que **cada
+   cosa pulsable responde al cursor**.
+
+   Es barato y no necesita librería. Tres reglas para no caer en el ruido:
+
+   1. La imagen se acerca, la caja NO se mueve. Escalar la tarjeta entera empuja a
+      sus vecinas en una rejilla; escalar la foto dentro de su marco recortado da
+      la misma sensación sin tocar el layout.
+   2. Se transforma, no se re-dimensiona. `transform` y `opacity` los resuelve el
+      compositor; `width`, `top` o `margin` obligan a recalcular el layout en cada
+      fotograma.
+   3. Solo con puntero FINO. En una pantalla táctil no hay hover: el navegador lo
+      simula al tocar y el efecto se queda pegado hasta que tocas otra cosa.
+   ============================================================ */
+@media (hover: hover) and (pointer: fine) {
+  /* ── la foto se acerca dentro de su marco ── */
+  .tarjeta-foto img,
+  .mosaico-foto img,
+  .pila-carta-foto img,
+  .sc-lead-foto img,
+  .at-numero-caja img {
+    transition: transform var(--dur-4) var(--ease-out);
+  }
+  .tarjeta:hover .tarjeta-foto img,
+  .mosaico-centro:hover .mosaico-foto img,
+  .pila-carta:hover .pila-carta-foto img,
+  .sc-lead:hover .sc-lead-foto img,
+  .at-tema:hover .at-numero-caja img {
+    transform: scale(1.045);
+  }
+
+  /*
+    ── el titular se enciende ──
+
+    🔴 Aquí SOLO va la transición; el color de hover vive en cada componente, y no
+    por gusto.
+
+    Los `<style>` de componente de Astro se emiten SIN CAPA, y en la cascada **las
+    capas mandan sobre la especificidad**: lo que no está en una capa le gana a
+    todo lo que sí, por mucha especificidad que se le ponga. Este archivo vive en
+    `layer(proyecto)`, así que el `color` que cada componente declara para su
+    titular siempre iba a ganarle. Se intentó subir la especificidad repitiendo la
+    clase y no sirvió — no podía servir.
+
+    La transición sí funciona desde aquí porque ningún componente declara una que
+    compita.
+  */
+  .tarjeta-titulo,
+  .mosaico-titulo,
+  .pila-carta-titulo,
+  .sc-lead-titulo,
+  .at-titulo {
+    transition: color var(--dur-2) var(--ease-out);
+  }
+
+  /* ── los botones de acción avanzan hacia donde llevan ── */
+  .sc-lead-cta,
+  .pila-cta,
+  .ag-accion,
+  .pila-mas,
+  .bb-mas,
+  .e404-cta {
+    transition:
+      transform var(--dur-2) var(--ease-out),
+      background-color var(--dur-2) var(--ease-out),
+      color var(--dur-2) var(--ease-out);
+  }
+  .sc-lead:hover .sc-lead-cta,
+  .pila-carta:hover .pila-cta,
+  .ag-accion:hover,
+  .pila-mas:hover,
+  .bb-mas:hover,
+  .e404-cta:hover {
+    transform: translateY(-2px);
+  }
+
+  /* ── la flecha de «Más en Scanner» se va hacia su esquina ── */
+  .tarjeta-flecha {
+    transition: transform var(--dur-2) var(--ease-out);
+  }
+  .es-fila:hover .tarjeta-flecha {
+    transform: translate(2px, -2px);
+  }
+
+  /* ── las pastillas de filtro y etiqueta ── */
+  .sc-filtro,
+  .nt-etiqueta,
+  .ag-filtro,
+  .bb-plataforma,
+  .fr-tienda {
+    transition:
+      transform var(--dur-2) var(--ease-out),
+      background-color var(--dur-2) var(--ease-out),
+      color var(--dur-2) var(--ease-out);
+  }
+  .sc-filtro:not(.es-activo):hover,
+  .nt-etiqueta:hover,
+  .ag-filtro:not(.es-activo):hover,
+  .bb-plataforma:hover,
+  .fr-tienda:hover {
+    transform: translateY(-1px);
+  }
+}
+
+/*
+  🔴 Nada de esto ocurre si el lector pidió menos movimiento. El DS ya trae un
+  reset global que recorta las transiciones a 0.01ms, y esto lo refuerza donde
+  importa: aquí las transformaciones se anulan del todo, no solo se aceleran.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .tarjeta:hover .tarjeta-foto img,
+  .mosaico-centro:hover .mosaico-foto img,
+  .pila-carta:hover .pila-carta-foto img,
+  .sc-lead:hover .sc-lead-foto img,
+  .at-tema:hover .at-numero-caja img,
+  .sc-lead:hover .sc-lead-cta,
+  .pila-carta:hover .pila-cta,
+  .es-fila:hover .tarjeta-flecha,
+  .ag-accion:hover,
+  .pila-mas:hover,
+  .bb-mas:hover,
+  .e404-cta:hover,
+  .sc-filtro:hover,
+  .nt-etiqueta:hover,
+  .ag-filtro:hover,
+  .bb-plataforma:hover,
+  .fr-tienda:hover {
+    transform: none;
+  }
+}

@@ -236,6 +236,11 @@ const foto = urlMedia(nota.imagen, variante === 'fila' ? 'card' : 'card');
   .es-relacionada:hover .tarjeta-titulo {
     color: var(--mist-0);
   }
+  /* El titular se enciende al pasar el cursor. Vive aquí y no en `beat.css`
+     porque los estilos de componente van sin capa y le ganan a los que sí. */
+  .tarjeta:hover .tarjeta-titulo {
+    color: var(--mist-0);
+  }
 
   @media (max-width: 899px) {
     .es-rejilla .tarjeta-foto {

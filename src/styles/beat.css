@@ -1065,22 +1065,37 @@ body {
 [data-barrido][data-animando]::after {
   content: '';
   position: absolute;
-  inset: -20% -10%;
+  /*
+    🔴 `inset: 0` y el movimiento por FONDO, no por `transform`.
+
+    La primera versión movía la franja con `translateX(±130%)` y la sacaba 1859px
+    fuera del contenedor. Como la cabecera no recorta, eso le daba a la página
+    1859px de scroll HORIZONTAL — medido, y era justo lo que se veía al llegar a la
+    altura de Fenómeno.
+
+    `overflow: hidden` en la cabecera lo habría tapado, pero recortando también el
+    anillo de foco del enlace que va dentro. Moviendo el fondo, la geometría nunca
+    sale de la caja: no hay nada que recortar y el desbordamiento es imposible por
+    construcción, no por una regla que lo contenga.
+  */
+  inset: 0;
   pointer-events: none;
-  background: linear-gradient(
+  background-image: linear-gradient(
     100deg,
     transparent 42%,
     rgb(250 251 250 / 0.14) 50%,
     transparent 58%
   );
-  transform: translateX(-130%);
+  background-size: 300% 100%;
+  background-repeat: no-repeat;
+  background-position: 100% 0;
 }
 [data-barrido][data-animando][data-visto]::after {
   animation: beat-barrido 1200ms var(--ease-out) forwards;
 }
 @keyframes beat-barrido {
   to {
-    transform: translateX(130%);
+    background-position: 0% 0;
   }
 }
 

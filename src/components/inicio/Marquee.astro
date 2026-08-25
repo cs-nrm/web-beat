@@ -2,21 +2,41 @@
 /**
  * El cintillo del lema. Sobrevive del sitio v1 (`BEAT 100.9 TOTAL MUSIC`).
  *
- * El texto se repite DOS veces y la animación recorre exactamente la mitad: así el
- * segundo ejemplar entra por donde sale el primero y el bucle no tiene costura.
- * Con un solo ejemplar habría un hueco en cada vuelta.
+ * 🔴 Se repite en dos GRUPOS iguales y la animación recorre exactamente la mitad:
+ * el segundo grupo entra por donde sale el primero y el bucle no tiene costura.
+ *
+ * ⚠️ Lo que hace falta y antes faltaba: **un grupo tiene que ser más ancho que la
+ * pantalla**. La versión anterior repetía el texto solo dos veces —un ejemplar por
+ * grupo— y medía 998px de pista en una ventana de 1440. O sea que tras recorrer
+ * sus 499px quedaban 941px de VACÍO a la derecha, y el bucle reiniciaba a la
+ * vista: el texto avanzaba un poco, aparecía el hueco y saltaba. La técnica de las
+ * dos copias es correcta; le faltaba esta condición.
+ *
+ * Con 8 ejemplares por grupo el grupo mide ~4000px en escritorio, que cubre
+ * cualquier pantalla real, ultrapanorámicas incluidas.
  */
 interface Props {
   texto: string;
 }
 
 const { texto } = Astro.props;
+
+/**
+ * Ejemplares por grupo. Sube este número si aparece hueco en pantallas más anchas
+ * —la velocidad se ajusta sola, ver `--marquee-dur`—.
+ */
+const COPIAS = 8;
+const ejemplares = Array.from({ length: COPIAS });
 ---
 
 <div class="marquee" role="presentation" aria-hidden="true">
-  <div class="marquee-pista">
-    <span class="beat-display marquee-texto">{texto}</span>
-    <span class="beat-display marquee-texto">{texto}</span>
+  <div class="marquee-pista" style={`--copias: ${COPIAS}`}>
+    <div class="marquee-grupo">
+      {ejemplares.map(() => <span class="beat-display marquee-texto">{texto}</span>)}
+    </div>
+    <div class="marquee-grupo">
+      {ejemplares.map(() => <span class="beat-display marquee-texto">{texto}</span>)}
+    </div>
   </div>
 </div>
 
@@ -33,7 +53,22 @@ const { texto } = Astro.props;
   .marquee-pista {
     display: flex;
     width: max-content;
-    animation: beat-marquee 22s linear infinite;
+    /*
+      🔴 La duración cuelga del NÚMERO DE COPIAS, no es un número suelto.
+
+      Antes eran 22s fijos para recorrer un ejemplar de 499px: 23 px/s, o sea casi
+      parado. Y con un número fijo, cambiar la cantidad de copias cambiaría la
+      velocidad en silencio — más copias, misma duración, más rápido.
+
+      Atada a `--copias`, el recorrido por ejemplar es siempre 6.6s (~75 px/s en
+      escritorio) sin importar cuántos haya.
+    */
+    --marquee-dur: calc(var(--copias, 2) * 6.6s);
+    animation: beat-marquee var(--marquee-dur) linear infinite;
+  }
+  .marquee-grupo {
+    display: flex;
+    flex: none;
   }
   .marquee-texto {
     flex: none;

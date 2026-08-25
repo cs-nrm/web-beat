@@ -258,20 +258,12 @@ function iniciar(): void {
   corriendo = false;
 
   /*
-   * 🔴 En una pestaña OCULTA no se toca nada, y esto tapa el agujero más serio del
-   * diseño.
+   * En una pestaña OCULTA no se hace nada y se reintenta al mirarla.
    *
-   * El revoltijo se monta al inicio y solo se deshace cuando el observador avisa
-   * de que el bloque entró en pantalla. Pero un documento oculto ni corre
-   * `requestAnimationFrame` ni dispara el observador — comprobado: el titular se
-   * quedaba revuelto indefinidamente. O sea, un titular ILEGIBLE de forma
-   * permanente porque alguien abrió el sitio en una pestaña de fondo.
-   *
-   * El rescate por `setTimeout` no salvaba este caso, porque se arma dentro de
-   * `arrancar()` y `arrancar()` nunca llegaba a correr.
-   *
-   * Así que aquí no se revuelve nada: el texto se queda como vino del servidor y
-   * se reintenta cuando la pestaña se mire de verdad.
+   * ⚠️ Esto ya NO es la defensa contra dejar el texto revuelto —de eso se encarga
+   * el orden del observador, más abajo—. Se queda por dos razones propias: evita
+   * partir el texto en cientos de `span` para nadie, y mantiene el buscador del
+   * navegador funcionando sobre el titular real mientras la pestaña esté al fondo.
    */
   if (document.visibilityState === 'hidden') {
     document.addEventListener('visibilitychange', function alVerse() {
@@ -322,15 +314,11 @@ function iniciar(): void {
     if (!letras.length) return;
 
     el.dataset.escribiendo = '';
+    /*
+     * Los anchos se miden AQUÍ, con el texto real en pantalla — es el único
+     * momento en que se pueden medir bien. Congelarlos no esconde nada.
+     */
     congelarAnchos(letras);
-
-    // Arranca revuelto, para que la revelación tenga de dónde salir.
-    for (const l of letras) {
-      const c = alAzar(l.fuente);
-      l.el.textContent = c;
-      l.puesto = c;
-      delete l.el.dataset.on;
-    }
 
     const t: Texto = {
       el,
@@ -354,15 +342,45 @@ function iniciar(): void {
    * Y se deja de observar en cuanto arranca: cada bloque se descifra UNA vez. Que
    * se volviera a revolver al subir y bajar sería un truco, no un efecto.
    */
+  /*
+   * 🔴 EL ORDEN IMPORTA: no se revuelve NADA hasta que el observador entrega su
+   * primera tanda, que es la prueba de que funciona.
+   *
+   * Al revés —revolver al arrancar y esperar que el observador lo deshaga— basta
+   * con que el observador no entregue para dejar un titular ilegible de forma
+   * permanente. Pasó de verdad con el efecto hermano de `revelar.ts`: 13 elementos
+   * escondidos, 0 devueltos, las fotos del Home desaparecidas. Aquí la seguridad no
+   * depende de que yo enumere los modos de falla: si la prueba no llega, el texto
+   * real se queda donde está.
+   */
+  let primeraTanda = true;
+
   vigia = new IntersectionObserver(
     (entradas) => {
       for (const e of entradas) {
-        if (!e.isIntersecting) continue;
         const t = porElemento.get(e.target);
         if (!t) continue;
+
+        if (primeraTanda) {
+          for (const l of t.letras) {
+            const c = alAzar(l.fuente);
+            l.el.textContent = c;
+            l.puesto = c;
+            delete l.el.dataset.on;
+          }
+          if (e.isIntersecting) {
+            // Un respiro para que el revoltijo llegue a pintarse antes de resolver.
+            setTimeout(() => arrancar(t), 40);
+            vigia?.unobserve(e.target);
+          }
+          continue;
+        }
+
+        if (!e.isIntersecting) continue;
         arrancar(t);
         vigia?.unobserve(e.target);
       }
+      primeraTanda = false;
     },
     { threshold: 0.35, rootMargin: '0px 0px -12% 0px' },
   );

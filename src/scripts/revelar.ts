@@ -101,21 +101,6 @@ function iniciar(): void {
    */
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-  /*
-   * 🔴 Pestaña oculta: tampoco se marca nada, y se reintenta al mirarla. Un
-   * documento oculto no dispara el observador, así que marcar aquí dejaría las
-   * fotos recortadas y las listas transparentes de forma permanente.
-   */
-  if (document.visibilityState === 'hidden') {
-    document.addEventListener('visibilitychange', function alVerse() {
-      if (document.visibilityState !== 'hidden') {
-        document.removeEventListener('visibilitychange', alVerse);
-        iniciar();
-      }
-    });
-    return;
-  }
-
   const objetivos = Array.from(document.querySelectorAll<HTMLElement>(SELECTOR)).filter(
     (el) => !('visto' in el.dataset),
   );
@@ -128,18 +113,54 @@ function iniciar(): void {
         (hijo as HTMLElement).style.setProperty('--i', String(Math.min(i, ESCALON_TOPE)));
       });
     }
-    el.dataset.animando = '';
   }
+
+  /*
+   * 🔴 EL ORDEN IMPORTA, y es la corrección más importante de este archivo.
+   *
+   * La versión anterior escondía todo al arrancar y esperaba que el observador lo
+   * devolviera. Resultado real, no hipotético: 13 elementos escondidos y 0
+   * devueltos — las fotos del Home desaparecieron. Bastaba con que el observador no
+   * entregara para que el contenido quedara invisible de forma permanente.
+   *
+   * Aquí no se esconde NADA hasta que el observador entrega su primera tanda, que
+   * es la prueba de que funciona. Si no entrega nunca —pestaña oculta, motor sin
+   * soporte, lo que sea— sencillamente no se esconde nada y la página se ve
+   * completa. La seguridad deja de depender de que yo enumere los modos de falla.
+   *
+   * En esa primera tanda, lo que ya está en pantalla se esconde y se revela
+   * enseguida, para que la animación se vea igual. Lo que está más abajo se esconde
+   * y espera su turno.
+   */
+  let primeraTanda = true;
+
+  const revelar = (el: HTMLElement): void => {
+    el.dataset.visto = '';
+    if ('contar' in el.dataset) contar(el);
+    vigia?.unobserve(el);
+  };
 
   vigia = new IntersectionObserver(
     (entradas) => {
       for (const e of entradas) {
-        if (!e.isIntersecting) continue;
         const el = e.target as HTMLElement;
-        el.dataset.visto = '';
-        if ('contar' in el.dataset) contar(el);
-        vigia?.unobserve(el);
+
+        if (primeraTanda) {
+          el.dataset.animando = '';
+          if (e.isIntersecting) {
+            /*
+             * Un respiro antes de revelar: el navegador tiene que llegar a pintar
+             * el estado escondido, o no hay transición que animar — saltaría del
+             * estado final al estado final.
+             */
+            setTimeout(() => revelar(el), 40);
+          }
+          continue;
+        }
+
+        if (e.isIntersecting) revelar(el);
       }
+      primeraTanda = false;
     },
     { threshold: 0.2, rootMargin: '0px 0px -8% 0px' },
   );

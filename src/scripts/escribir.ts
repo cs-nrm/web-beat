@@ -1,15 +1,19 @@
 /**
- * El texto se DESCIFRA conforme se lee.
+ * El texto se DESCIFRA al aparecer.
  *
- * Cada letra empieza siendo otra —un carácter al azar que va cambiando— y al
- * llegar el scroll se revela la real, de izquierda a derecha. Es lo que Carlos
- * pidió: "como si se escribiera otra cosa y al llegar el scroll se revela el texto
- * real".
+ * Cada letra arranca siendo otra —un carácter al azar que va cambiando— y se
+ * revela la real, de izquierda a derecha, en cuanto el bloque entra en pantalla.
+ *
+ * 🔴 La animación va por TIEMPO, no atada al scroll. Hubo una versión atada al
+ * scroll y el defecto salta a la vista: si el lector no baja lo suficiente, el
+ * titular se queda a medio descifrar y ahí se queda. Un titular a medias no es un
+ * efecto, es un texto roto. Disparando al entrar en pantalla, la animación siempre
+ * termina — se baje como se baje.
  *
  * 🔴 El texto real NUNCA depende de esto para existir. Va completo en el HTML del
  * servidor; el revoltijo lo monta el navegador encima. Si el JS falla, si el
  * navegador no lo soporta o si alguien pidió menos movimiento, se lee el titular
- * de siempre. Un efecto no puede ser la única vía al contenido.
+ * de siempre.
  *
  * 🔴 Y el original queda en `aria-label` con las letras en `aria-hidden`, así que
  * un lector de pantalla anuncia el titular de verdad y no el revoltijo — que sería
@@ -20,10 +24,29 @@
 const REVOLTIJO_ALTA = 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ0123456789#%&/*+=<>';
 const REVOLTIJO_BAJA = 'abcdefghijklmnñopqrstuvwxyz0123456789#%&/*+=<>';
 
+/**
+ * Cuánto dura. Crece con el largo del texto para que un titular de 30 letras no
+ * se despache en el mismo tiempo que uno de 10, con tope para que uno muy largo no
+ * se eternice.
+ */
+const DURACION_BASE = 950;
+const DURACION_POR_LETRA = 30;
+const DURACION_TOPE = 2800;
+
+/** Cada 3 fotogramas (~20/s). A 60 el revoltijo parpadea de más. */
+const CADA_CUANTOS_CUADROS = 3;
+
 interface Letra {
   el: HTMLElement;
   real: string;
   fuente: string;
+  /**
+   * En qué punto del avance (0–1) le toca resolverse. Va sobre todo por posición
+   * —de izquierda a derecha— con una pizca de azar para que no sea una marcha
+   * rígida: unas letras se adelantan y otras se quedan, que es como se lee un
+   * descifrado de verdad.
+   */
+  umbral: number;
   /** Qué se está mostrando ahora, para no reescribir el DOM sin necesidad. */
   puesto: string;
 }
@@ -31,12 +54,18 @@ interface Letra {
 interface Texto {
   el: HTMLElement;
   letras: Letra[];
-  resueltas: number;
+  duracion: number;
+  /** Marca de tiempo del arranque, o `null` si todavía no ha entrado en pantalla. */
+  arranque: number | null;
+  listo: boolean;
+  /** El temporizador de rescate; ver `arrancar()`. */
+  rescate: number | null;
 }
 
 const textos: Texto[] = [];
-let pendiente = false;
+let corriendo = false;
 let cuadro = 0;
+let vigia: IntersectionObserver | null = null;
 
 const alAzar = (fuente: string): string => fuente[Math.floor(Math.random() * fuente.length)];
 
@@ -94,6 +123,7 @@ function partir(el: HTMLElement): Letra[] {
         real: caracter,
         // La caja se respeta: una mayúscula se sustituye por mayúsculas.
         fuente: caracter === caracter.toUpperCase() ? REVOLTIJO_ALTA : REVOLTIJO_BAJA,
+        umbral: 0,
         puesto: caracter,
       });
     }
@@ -107,6 +137,13 @@ function partir(el: HTMLElement): Letra[] {
       el.appendChild(espacio);
     }
   });
+
+  // 80% posición, 20% azar. Ver el comentario de `Letra.umbral`.
+  const n = letras.length;
+  letras.forEach((l, i) => {
+    l.umbral = (i / n) * 0.8 + Math.random() * 0.2;
+  });
+
   return letras;
 }
 
@@ -119,7 +156,7 @@ function partir(el: HTMLElement): Letra[] {
  *
  * ✨ El ancho que se congela es el del carácter real, así que cuando el bloque
  * termina de resolverse el candado ya no cambia nada y se puede quitar: el estado
- * final queda idéntico al diseñado.
+ * final queda idéntico al diseñado, con su kerning.
  *
  * Se MIDE todo primero y se ESCRIBE todo después. Intercalar las dos cosas obliga
  * al navegador a recalcular la maquetación en cada vuelta.
@@ -131,55 +168,72 @@ function congelarAnchos(letras: Letra[]): void {
   });
 }
 
-function descongelar(letras: Letra[]): void {
-  for (const l of letras) l.el.style.width = '';
+/** Deja el bloque en su texto real y suelta los candados de ancho. */
+function rematar(t: Texto): void {
+  for (const l of t.letras) {
+    if (l.puesto !== l.real) {
+      l.el.textContent = l.real;
+      l.puesto = l.real;
+    }
+    l.el.dataset.on = '';
+    l.el.style.width = '';
+  }
+  t.listo = true;
+  t.arranque = null;
+  if (t.rescate !== null) {
+    clearTimeout(t.rescate);
+    t.rescate = null;
+  }
 }
 
 /**
- * Cuánto se ha descifrado del bloque, de 0 a 1.
+ * Arranca el descifrado de un bloque.
  *
- * Empieza en cuanto su borde superior asoma por el 95% de la pantalla y termina
- * cuando su borde inferior llega al 35%, o sea ANTES de que el bloque llegue al
- * centro: si terminara al salir, uno leería el final todavía en revoltijo.
- *
- * El recorrido es de 0.6 × el alto del viewport (540px en una pantalla de 900).
- * Cuanto más largo el trecho, más se lee como escritura y menos como interruptor.
+ * 🔴 El temporizador de rescate no es paranoia. La animación va por
+ * `requestAnimationFrame`, que el navegador DETIENE en una pestaña oculta. Si
+ * alguien abre el sitio en segundo plano, el bloque se queda revuelto; y si por lo
+ * que sea los fotogramas nunca llegan, se queda revuelto para siempre — o sea, un
+ * titular ilegible de forma permanente. `setTimeout` sí corre en segundo plano
+ * (ralentizado), así que garantiza que el texto real acabe en pantalla pase lo que
+ * pase.
  */
-function avance(el: HTMLElement): number {
-  const r = el.getBoundingClientRect();
-  const alto = window.innerHeight;
-  const inicio = alto * 0.95;
-  const fin = alto * 0.35;
-  const recorrido = r.top - fin + (r.height || 1);
-  const total = inicio - fin + (r.height || 1);
-  return Math.min(1, Math.max(0, 1 - recorrido / total));
+function arrancar(t: Texto): void {
+  if (t.listo || t.arranque !== null) return;
+  t.arranque = performance.now();
+  t.rescate = window.setTimeout(() => rematar(t), t.duracion + 2000);
+
+  if (!corriendo) {
+    corriendo = true;
+    requestAnimationFrame(pintar);
+  }
 }
 
 /**
- * Pinta el estado actual.
+ * Pinta un fotograma.
  *
- * Primero se mide TODO y después se escribe, por lo mismo que en `congelarAnchos`.
- * Y solo se toca el DOM de la letra que de verdad cambia de carácter.
+ * Solo se toca el DOM de la letra que de verdad cambia de carácter, y el bucle se
+ * apaga solo en cuanto no queda ningún bloque a medias.
  */
-function pintar(): void {
-  pendiente = false;
+function pintar(ahora: number): void {
   cuadro++;
-  // El revoltijo se remueve cada 3 fotogramas (~20/s). A 60 parpadea de más.
-  const remover = cuadro % 3 === 0;
+  const remover = cuadro % CADA_CUANTOS_CUADROS === 0;
+  let vivos = 0;
 
-  const objetivos = textos.map((t) => Math.round(avance(t.el) * t.letras.length));
+  for (const t of textos) {
+    if (t.listo || t.arranque === null) continue;
 
-  textos.forEach((t, n) => {
-    const objetivo = objetivos[n];
-    const total = t.letras.length;
-    const parcial = objetivo > 0 && objetivo < total;
+    const bruto = Math.min(1, (ahora - t.arranque) / t.duracion);
+    // Suavizado de salida: entra decidido y se asienta al final.
+    const avance = bruto * (2 - bruto);
 
-    // Nada que hacer: ya está resuelto del todo y sin candados que quitar.
-    if (objetivo === t.resueltas && !parcial && !remover) return;
+    if (bruto >= 1) {
+      rematar(t);
+      continue;
+    }
+    vivos++;
 
-    for (let i = 0; i < total; i++) {
-      const l = t.letras[i];
-      if (i < objetivo) {
+    for (const l of t.letras) {
+      if (avance >= l.umbral) {
         if (l.puesto !== l.real) {
           l.el.textContent = l.real;
           l.puesto = l.real;
@@ -192,38 +246,42 @@ function pintar(): void {
         delete l.el.dataset.on;
       }
     }
+  }
 
-    /*
-     * Al completarse se sueltan los candados de ancho: ya sobran —cada letra
-     * muestra su carácter real— y sin ellos vuelve el kerning del diseño.
-     */
-    if (objetivo === total && t.resueltas !== total) descongelar(t.letras);
-    else if (objetivo < total && t.resueltas === total) congelarAnchos(t.letras);
-
-    t.resueltas = objetivo;
-  });
-
-  /*
-   * 🔴 Aquí NO se pide otro fotograma. Hubo una versión que se auto-repetía
-   * mientras algún bloque estuviera a medias, para que el revoltijo siguiera
-   * vivo con el scroll quieto — pero eso significa girar a 60 fps para siempre
-   * en cuanto alguien se para a media revelación. Un efecto decorativo no puede
-   * dejar el teléfono trabajando indefinidamente.
-   *
-   * El revoltijo se mueve con el scroll, que es cuando se está mirando. Parado,
-   * se congela — y se lee como una revelación en pausa, no como un error.
-   */
-}
-
-function alDesplazar(): void {
-  if (pendiente) return;
-  pendiente = true;
-  requestAnimationFrame(pintar);
+  if (vivos) requestAnimationFrame(pintar);
+  else corriendo = false;
 }
 
 function iniciar(): void {
+  vigia?.disconnect();
   textos.length = 0;
-  pendiente = false;
+  corriendo = false;
+
+  /*
+   * 🔴 En una pestaña OCULTA no se toca nada, y esto tapa el agujero más serio del
+   * diseño.
+   *
+   * El revoltijo se monta al inicio y solo se deshace cuando el observador avisa
+   * de que el bloque entró en pantalla. Pero un documento oculto ni corre
+   * `requestAnimationFrame` ni dispara el observador — comprobado: el titular se
+   * quedaba revuelto indefinidamente. O sea, un titular ILEGIBLE de forma
+   * permanente porque alguien abrió el sitio en una pestaña de fondo.
+   *
+   * El rescate por `setTimeout` no salvaba este caso, porque se arma dentro de
+   * `arrancar()` y `arrancar()` nunca llegaba a correr.
+   *
+   * Así que aquí no se revuelve nada: el texto se queda como vino del servidor y
+   * se reintenta cuando la pestaña se mire de verdad.
+   */
+  if (document.visibilityState === 'hidden') {
+    document.addEventListener('visibilitychange', function alVerse() {
+      if (document.visibilityState !== 'hidden') {
+        document.removeEventListener('visibilitychange', alVerse);
+        iniciar();
+      }
+    });
+    return;
+  }
 
   /*
    * Si el lector pidió menos movimiento no se parte nada: el bloque se queda como
@@ -231,6 +289,8 @@ function iniciar(): void {
    * de golpe — y evita el destrozo del lector de pantalla.
    */
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const porElemento = new Map<Element, Texto>();
 
   document.querySelectorAll<HTMLElement>('[data-escribir]').forEach((el) => {
     /*
@@ -241,39 +301,72 @@ function iniciar(): void {
      * guarda de contenido enriquecido vería los `span` de las letras como marcado,
      * se negaría a actuar, y el titular se quedaría clavado en revoltijo.
      */
-    const yaPartido = 'escribiendo' in el.dataset;
     let letras: Letra[];
-
-    if (yaPartido) {
-      const original = el.getAttribute('aria-label') ?? '';
+    if ('escribiendo' in el.dataset) {
+      const reales = (el.getAttribute('aria-label') ?? '').replace(/ /g, '');
       const cajas = Array.from(el.querySelectorAll<HTMLElement>('.escribir-letra'));
-      const reales = original.replace(/ /g, '');
+      const n = cajas.length;
       letras = cajas.map((caja, i) => {
         const real = reales[i] ?? caja.textContent ?? '';
         return {
           el: caja,
           real,
           fuente: real === real.toUpperCase() ? REVOLTIJO_ALTA : REVOLTIJO_BAJA,
+          umbral: (i / n) * 0.8 + Math.random() * 0.2,
           puesto: caja.textContent ?? '',
         };
       });
     } else {
       letras = partir(el);
     }
-
     if (!letras.length) return;
+
     el.dataset.escribiendo = '';
     congelarAnchos(letras);
-    /*
-     * `-1`, no `0`: obliga a que el primer pintado recorra las letras y las
-     * revuelva. Con `0` la salida temprana de `pintar()` daba por bueno el estado
-     * —cero resueltas, cero objetivo— y el bloque se quedaba mostrando su texto
-     * REAL hasta que algo más lo tocara. O sea, sin efecto.
-     */
-    textos.push({ el, letras, resueltas: -1 });
+
+    // Arranca revuelto, para que la revelación tenga de dónde salir.
+    for (const l of letras) {
+      const c = alAzar(l.fuente);
+      l.el.textContent = c;
+      l.puesto = c;
+      delete l.el.dataset.on;
+    }
+
+    const t: Texto = {
+      el,
+      letras,
+      duracion: Math.min(DURACION_TOPE, DURACION_BASE + letras.length * DURACION_POR_LETRA),
+      arranque: null,
+      listo: false,
+      rescate: null,
+    };
+    textos.push(t);
+    porElemento.set(el, t);
   });
 
-  if (textos.length) pintar();
+  if (!textos.length) return;
+
+  /*
+   * Se dispara cuando el bloque está bien dentro de la pantalla, no al asomar por
+   * el borde: si arrancara en el filo, la mitad del descifrado ocurriría fuera de
+   * la vista. El margen inferior recorta el 12% de abajo justo para eso.
+   *
+   * Y se deja de observar en cuanto arranca: cada bloque se descifra UNA vez. Que
+   * se volviera a revolver al subir y bajar sería un truco, no un efecto.
+   */
+  vigia = new IntersectionObserver(
+    (entradas) => {
+      for (const e of entradas) {
+        if (!e.isIntersecting) continue;
+        const t = porElemento.get(e.target);
+        if (!t) continue;
+        arrancar(t);
+        vigia?.unobserve(e.target);
+      }
+    },
+    { threshold: 0.35, rootMargin: '0px 0px -12% 0px' },
+  );
+  for (const t of textos) vigia.observe(t.el);
 }
 
 export function prepararEscritura(): void {
@@ -281,7 +374,20 @@ export function prepararEscritura(): void {
   if (w.__beatEscrituraLista) return;
   w.__beatEscrituraLista = true;
 
+  /*
+   * Sin `IntersectionObserver` no hay efecto, y punto. Es lo que decide cuándo
+   * deshacer el revoltijo: sin él, revolver el texto sería dejarlo ilegible.
+   */
+  if (!('IntersectionObserver' in window)) return;
+
   document.addEventListener('astro:page-load', iniciar);
-  addEventListener('scroll', alDesplazar, { passive: true });
-  addEventListener('resize', alDesplazar, { passive: true });
+
+  /*
+   * Al imprimir se resuelve todo de golpe. Un titular que el lector no llegó a ver
+   * sigue revuelto en el DOM, y en papel eso saldría como basura — sin scroll que
+   * lo arregle y sin vuelta atrás.
+   */
+  addEventListener('beforeprint', () => {
+    for (const t of textos) if (!t.listo) rematar(t);
+  });
 }

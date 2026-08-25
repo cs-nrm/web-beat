@@ -300,12 +300,20 @@ function iniciar(): void {
       const n = cajas.length;
       letras = cajas.map((caja, i) => {
         const real = reales[i] ?? caja.textContent ?? '';
+        /*
+         * 🔴 Se DEVUELVE la letra real antes de nada. Por lo mismo que en
+         * `revelar.ts`: el revoltijo vive en el DOM y el DOM sobrevive a la
+         * navegación, así que un titular podía volver revuelto de una visita
+         * anterior. Se parte del texto legible; si el observador entrega, lo
+         * revuelve él.
+         */
+        caja.textContent = real;
         return {
           el: caja,
           real,
           fuente: real === real.toUpperCase() ? REVOLTIJO_ALTA : REVOLTIJO_BAJA,
           umbral: (i / n) * 0.8 + Math.random() * 0.2,
-          puesto: caja.textContent ?? '',
+          puesto: real,
         };
       });
     } else {
@@ -355,10 +363,48 @@ function iniciar(): void {
    */
   let primeraTanda = true;
 
+  /*
+   * 🔴 En la primera tanda no se cree lo que dice el observador sobre qué está en
+   * pantalla: se mide. Es la misma lección que en `revelar.ts` — al volver de una
+   * nota, el observador entrega mientras la transición de vista aún no ha pintado
+   * los elementos, así que los reporta fuera de pantalla aunque se estén viendo. El
+   * titular se revolvía y, como su intersección ya no volvía a *cambiar*, nadie lo
+   * resolvía nunca.
+   */
+  const fueraDeVista = (el: HTMLElement): boolean => {
+    const r = el.getBoundingClientRect();
+    return r.top >= window.innerHeight || r.bottom <= 0 || r.height === 0;
+  };
+
+  /*
+   * 🔴 La misma red que en `revelar.ts`, y aquí importa todavía más: un titular
+   * revuelto no es un adorno incompleto, es texto que no se puede leer. Mira la
+   * geometría de lo que sigue pendiente y lo resuelve si está a la vista, sin
+   * depender de que el observador avise. Se desengancha sola al terminar.
+   */
+  let repescando = false;
+  const repescar = (): void => {
+    repescando = false;
+    let quedan = false;
+    for (const t2 of textos) {
+      if (t2.listo || t2.arranque !== null) continue;
+      if (!fueraDeVista(t2.el)) arrancar(t2);
+      else quedan = true;
+    }
+    if (!quedan) removeEventListener('scroll', alDesplazar);
+  };
+  const alDesplazar = (): void => {
+    if (repescando) return;
+    repescando = true;
+    setTimeout(repescar, 150);
+  };
+  addEventListener('scroll', alDesplazar, { passive: true });
+
   vigia = new IntersectionObserver(
     (entradas) => {
       for (const e of entradas) {
-        const t = porElemento.get(e.target);
+        const el = e.target as HTMLElement;
+        const t = porElemento.get(el);
         if (!t) continue;
 
         if (primeraTanda) {
@@ -368,19 +414,35 @@ function iniciar(): void {
             l.puesto = c;
             delete l.el.dataset.on;
           }
-          if (e.isIntersecting) {
+          if (!fueraDeVista(el)) {
             // Un respiro para que el revoltijo llegue a pintarse antes de resolver.
             setTimeout(() => arrancar(t), 40);
-            vigia?.unobserve(e.target);
+            vigia?.unobserve(el);
           }
           continue;
         }
 
         if (!e.isIntersecting) continue;
         arrancar(t);
-        vigia?.unobserve(e.target);
+        vigia?.unobserve(el);
       }
-      primeraTanda = false;
+
+      if (primeraTanda) {
+        primeraTanda = false;
+        /*
+         * Una repesca, una sola vez: lo que quedó revuelto pero para entonces ya
+         * está a la vista, se resuelve. Cubre el hueco entre "el observador ya
+         * opinó" y "el observador volverá a opinar solo si algo cambia".
+         */
+        /*
+         * Tres repescas acotadas, no una. Todos los fallos que hemos cazado
+         * ocurren en la ventana de carga o de navegación —la maquetación se
+         * acomoda, se restaura el scroll, acaba la transición de vista—, y una
+         * sola comprobación a los 800ms puede caer antes de que eso termine.
+         * Después de los 4s, el observador y el scroll ya se bastan.
+         */
+        for (const cuando of [800, 2000, 4000]) setTimeout(repescar, cuando);
+      }
     },
     { threshold: 0.35, rootMargin: '0px 0px -12% 0px' },
   );

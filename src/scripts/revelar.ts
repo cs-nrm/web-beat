@@ -107,6 +107,23 @@ function iniciar(): void {
    */
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
+  /*
+   * 🔴 Se barre cualquier resto del efecto ANTES de decidir nada.
+   *
+   * El estado escondido vive en un atributo del DOM, y el DOM SOBREVIVE a la
+   * navegación: al volver al Home desde una nota, las fotos volvían con su
+   * `data-animando` puesto de la visita anterior y se quedaban en negro. Peor aún,
+   * las que ya tenían `data-visto` quedaban fuera del filtro de abajo, así que
+   * nadie las tocaba nunca más.
+   *
+   * Quitando la marca aquí, todo arranca desde el estado natural —visible— y a
+   * partir de ahí se decide limpio. Un resto de una visita anterior no puede
+   * esconder nada.
+   */
+  document.querySelectorAll<HTMLElement>('[data-animando]').forEach((el) => {
+    delete el.dataset.animando;
+  });
+
   const objetivos = Array.from(document.querySelectorAll<HTMLElement>(SELECTOR)).filter(
     (el) => !('visto' in el.dataset),
   );
@@ -140,6 +157,23 @@ function iniciar(): void {
    */
   let primeraTanda = true;
 
+  /*
+   * 🔴 En la primera tanda NO se cree lo que dice el observador sobre qué está en
+   * pantalla: se mide.
+   *
+   * Al volver al Home desde una nota, el observador entrega su primera tanda
+   * mientras la transición de vista todavía tiene los elementos sin pintar, así
+   * que los reporta FUERA de pantalla aunque estén a la vista. Se escondían, y como
+   * su intersección ya no volvía a *cambiar*, el observador no disparaba otra vez y
+   * se quedaban escondidos. Medido: 2 de 5 imágenes, en pantalla y en negro.
+   *
+   * La geometría no tiene ese problema — dice dónde está el elemento ahora mismo.
+   */
+  const fueraDeVista = (el: HTMLElement): boolean => {
+    const r = el.getBoundingClientRect();
+    return r.top >= window.innerHeight || r.bottom <= 0 || r.height === 0;
+  };
+
   const revelar = (el: HTMLElement): void => {
     el.dataset.visto = '';
     if ('contar' in el.dataset) contar(el);
@@ -167,6 +201,35 @@ function iniciar(): void {
     }, LIMPIEZA_MS);
   };
 
+  /*
+   * 🔴 La red de seguridad: una repesca por GEOMETRÍA, atada al scroll.
+   *
+   * El observador es el camino principal y funciona. Pero mientras el único modo
+   * de volver a mostrar algo dependa de que él avise, existe la posibilidad de que
+   * un elemento se quede escondido para siempre — y eso ya pasó dos veces.
+   *
+   * Esto no depende de él: mira dónde está cada pendiente y revela lo que esté a
+   * la vista. Va sobre el evento de scroll, así que no cuesta nada cuando nadie se
+   * mueve, y se desengancha sola en cuanto no queda nada pendiente.
+   */
+  let repescando = false;
+  const repescar = (): void => {
+    repescando = false;
+    let quedan = false;
+    for (const el of objetivos) {
+      if ('visto' in el.dataset) continue;
+      if (!fueraDeVista(el)) revelar(el);
+      else quedan = true;
+    }
+    if (!quedan) removeEventListener('scroll', alDesplazar);
+  };
+  const alDesplazar = (): void => {
+    if (repescando) return;
+    repescando = true;
+    setTimeout(repescar, 150);
+  };
+  addEventListener('scroll', alDesplazar, { passive: true });
+
   vigia = new IntersectionObserver(
     (entradas) => {
       for (const e of entradas) {
@@ -174,7 +237,7 @@ function iniciar(): void {
 
         if (primeraTanda) {
           el.dataset.animando = '';
-          if (e.isIntersecting) {
+          if (!fueraDeVista(el)) {
             /*
              * Un respiro antes de revelar: el navegador tiene que llegar a pintar
              * el estado escondido, o no hay transición que animar — saltaría del
@@ -187,7 +250,23 @@ function iniciar(): void {
 
         if (e.isIntersecting) revelar(el);
       }
-      primeraTanda = false;
+      if (primeraTanda) {
+        primeraTanda = false;
+        /*
+         * Una repesca, una sola vez. Si algo quedó escondido pero para entonces ya
+         * está a la vista —la maquetación se acomodó, se restauró el scroll, acabó
+         * la transición—, se revela. Cubre el hueco entre "el observador ya opinó"
+         * y "el observador volverá a opinar solo si algo cambia".
+         */
+        /*
+         * Tres repescas acotadas, no una. Todos los fallos que hemos cazado
+         * ocurren en la ventana de carga o de navegación —la maquetación se
+         * acomoda, se restaura el scroll, acaba la transición de vista—, y una
+         * sola comprobación a los 800ms puede caer antes de que eso termine.
+         * Después de los 4s, el observador y el scroll ya se bastan.
+         */
+        for (const cuando of [800, 2000, 4000]) setTimeout(repescar, cuando);
+      }
     },
     { threshold: 0.2, rootMargin: '0px 0px -8% 0px' },
   );

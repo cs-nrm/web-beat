@@ -22,10 +22,30 @@
  */
 
 /** Cuántas luces a la vez. Tres: rara vez coinciden dos, nunca parece una lluvia. */
-const CUANTAS = 3;
+const CUANTAS = 9;
 
 /** El paso de la cuadrícula, para que la luz caiga SOBRE una línea y no entre dos. */
 const PASO = 48;
+
+/**
+ * Velocidad, en píxeles por segundo. 🔴 Velocidad, no duración — y la diferencia
+ * importa.
+ *
+ * Antes se sorteaba una DURACIÓN igual para los dos ejes, pero los dos ejes no
+ * recorren lo mismo: en una ventana de 1440×900 una horizontal cruza ~1700px y una
+ * vertical ~1100. Con la misma duración, las verticales iban un 35% más lentas —
+ * que es justo lo que se siente como "va lento" sin poder señalar cuál.
+ *
+ * Sorteando la velocidad y calculando la duración a partir del recorrido real,
+ * todas se mueven igual de rápido a la vista, y estos dos números significan lo que
+ * dicen: son la perilla para ajustar el ritmo.
+ */
+const VELOCIDAD_MIN = 160;
+const VELOCIDAD_MAX = 330;
+
+/** Lo que asoma por fuera de la ventana: el largo de la propia luz. Ver el CSS. */
+const LARGO_H = 260;
+const LARGO_V = 200;
 
 const entre = (a: number, b: number): number => a + Math.random() * (b - a);
 
@@ -58,9 +78,15 @@ function lanzar(luz: HTMLElement): void {
     return;
   }
 
+  // El recorrido incluye el largo de la luz: entra y sale del todo por los bordes.
+  const recorrido = horizontal
+    ? window.innerWidth + LARGO_H
+    : window.innerHeight + LARGO_V;
+  const segundos = recorrido / entre(VELOCIDAD_MIN, VELOCIDAD_MAX);
+
   luz.className = horizontal ? 'es-h' : 'es-v';
   luz.style.setProperty('--linea', `${linea}px`);
-  luz.style.setProperty('--dur', `${entre(7, 15).toFixed(1)}s`);
+  luz.style.setProperty('--dur', `${segundos.toFixed(2)}s`);
   luz.style.setProperty('--dir', alReves ? 'reverse' : 'normal');
 
   /*

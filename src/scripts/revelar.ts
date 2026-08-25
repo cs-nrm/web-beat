@@ -30,6 +30,12 @@ const ESCALON_TOPE = 12;
 
 const DURACION_CONTEO = 900;
 
+/**
+ * Cuándo se retira el andamiaje del efecto, en ms. Tiene que superar la transición
+ * más larga que hay en `beat.css` (la escala del revelado, 1100ms).
+ */
+const LIMPIEZA_MS = 1400;
+
 const SELECTOR = '[data-revelar], [data-cascada], [data-barrido], [data-contar]';
 
 let vigia: IntersectionObserver | null = null;
@@ -138,6 +144,27 @@ function iniciar(): void {
     el.dataset.visto = '';
     if ('contar' in el.dataset) contar(el);
     vigia?.unobserve(el);
+
+    /*
+     * 🔴 Al terminar se RETIRA el andamiaje, y esto es lo que garantiza el
+     * resultado.
+     *
+     * Hasta aquí el estado final dependía de que una transición CSS llegara a su
+     * fin: si no corría —por lo que fuera— la foto se quedaba en
+     * `clip-path: inset(100%)`, o sea invisible para siempre. Un efecto decorativo
+     * no puede tener como modo de falla "el contenido no aparece".
+     *
+     * Quitando `data-animando` dejan de aplicar TANTO la regla del escondido como
+     * la del revelado, y el elemento vuelve a su estado natural, sin recorte y sin
+     * escala. Ese estado no depende de ninguna animación: es simplemente el
+     * elemento sin nada encima.
+     *
+     * `data-visto` se conserva porque es la marca de "este ya está hecho" que mira
+     * `iniciar()` para no volver a esconderlo en la siguiente navegación.
+     */
+    setTimeout(() => {
+      delete el.dataset.animando;
+    }, LIMPIEZA_MS);
   };
 
   vigia = new IntersectionObserver(

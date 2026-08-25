@@ -1185,13 +1185,13 @@ body {
    Zoom muy corto: 1.03. Más que eso, en una tarjeta de nota, deja de leerse como
    respuesta y empieza a leerse como carrusel. */
 @media (hover: hover) and (pointer: fine) {
-  .tarjeta-foto img,
-  .mosaico-foto img {
-    transition: transform var(--dur-4) var(--ease-out);
-  }
+  /* 🔴 El zoom va en la propiedad `scale`, no en `transform`.
+     El parallax de más abajo anima `translate`, y si los dos usaran `transform`
+     pelearían por la misma propiedad — con las animaciones ganando siempre, así
+     que el hover no se vería nunca. Separados, se componen. */
   .tarjeta:hover .tarjeta-foto img,
   .mosaico-centro:hover .mosaico-foto img {
-    transform: scale(1.03);
+    scale: calc(var(--foto-base, 1) * 1.035);
   }
 }
 
@@ -1215,9 +1215,119 @@ body {
     display: none;
   }
   .tarjeta:hover .tarjeta-foto img,
-  .mosaico-centro:hover .mosaico-foto img,
+  .mosaico-centro:hover .mosaico-foto img {
+    scale: var(--foto-base, 1);
+  }
   [data-luz]:hover [data-flecha] svg,
   [data-flecha]:hover svg {
     transform: none;
+  }
+}
+
+/* ============================================================
+   Movimiento ambiente y movimiento ligado al scroll
+   ------------------------------------------------------------
+   Las dos últimas capas de las cuatro. Comparten diagnóstico: todo lo anterior
+   eran ENTRADAS —se ejecutan una vez y se apagan—, así que fuera del instante en
+   que algo aparece, la página estaba quieta.
+
+   · AMBIENTE: algo que se mueve sin que nadie lo dispare, siempre.
+   · LIGADO AL SCROLL: elementos que se mueven CONTINUAMENTE mientras bajas, no que
+     se disparan al cruzar un umbral. Es la diferencia de sensación más grande.
+   ============================================================ */
+
+/* ── 1. Las estelas de marca derivan ──
+   El motivo del design system existía y estaba clavado. Periodos largos y
+   distintos entre sí para que el conjunto no se repita a ojo. */
+.mosaico-estelas .beat-streak {
+  animation: beat-deriva var(--dur-deriva, 19s) var(--ease-onda) infinite;
+}
+.mosaico-estelas .es-2 {
+  --dur-deriva: 26s;
+  animation-delay: -7s;
+}
+.mosaico-estelas .es-3 {
+  --dur-deriva: 33s;
+  animation-delay: -14s;
+}
+
+@keyframes beat-deriva {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0.75;
+  }
+  33% {
+    transform: translate3d(2.5%, -0.4%, 0);
+    opacity: 1;
+  }
+  66% {
+    transform: translate3d(-1.5%, 0.5%, 0);
+    opacity: 0.85;
+  }
+}
+
+/* ── 2. Parallax ligado al scroll ──
+   🔴 `animation-timeline: view()` ata el avance de la animación a la posición del
+   elemento en la pantalla. No es un efecto que se dispare: es el scroll moviendo
+   la imagen directamente, fotograma a fotograma, y responde igual al subir que al
+   bajar. Eso es lo que se siente distinto.
+
+   ⚠️ Va dentro de `@supports` porque Firefox todavía no lo trae. Donde no está,
+   no pasa nada: la foto se queda quieta, que es exactamente como está hoy. Nunca
+   se esconde nada — la lección de siempre.
+
+   El recorrido es corto (4%) a propósito: en una foto de nota, más que eso se lee
+   como que la imagen "resbala" dentro de su marco. */
+.tarjeta-foto img,
+.mosaico-foto img {
+  --foto-base: 1;
+  scale: var(--foto-base);
+  transition: scale var(--dur-4) var(--ease-out);
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /*
+      🔴 La línea de tiempo se NOMBRA en el contenedor. `view()` a secas se resuelve
+      contra el contenedor de scroll más cercano, y `.tarjeta-foto` lleva
+      `overflow: hidden` — que en CSS ya la convierte en uno. O sea que el parallax
+      medía el avance de la imagen dentro de un marco donde no se mueve jamás:
+      progreso cero y `transform: none` a cualquier altura de la página. Medido.
+
+      Nombrándola aquí, el sujeto es el contenedor y la referencia es la página, que
+      es lo que se quiere. Los descendientes la encuentran por nombre.
+    */
+    .tarjeta-foto,
+    .mosaico-foto {
+      view-timeline: --beat-foto block;
+    }
+    .tarjeta-foto img,
+    .mosaico-foto img {
+      /* Con el recorrido de ±4% hace falta algo de escala, o asomarían los bordes. */
+      --foto-base: 1.09;
+      animation: beat-parallax linear both;
+      animation-timeline: --beat-foto;
+      animation-range: cover 0% cover 100%;
+    }
+  }
+}
+
+/* Anima `translate`, no `transform`: así el zoom del hover se compone encima en
+   vez de competir. El recorrido es corto a propósito — más que esto, en una foto
+   de nota, se lee como que la imagen resbala dentro de su marco. */
+@keyframes beat-parallax {
+  from {
+    translate: 0 -4%;
+  }
+  to {
+    translate: 0 4%;
+  }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .mosaico-estelas .beat-streak {
+    animation: none;
   }
 }

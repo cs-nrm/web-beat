@@ -923,3 +923,49 @@ body {
 #beat-cabecera {
   background-color: var(--surface-canvas);
 }
+
+/* ============================================================
+   EL TEXTO SE ENCIENDE AL LEERLO
+   ------------------------------------------------------------
+   Referencia de Carlos: sk-visualarchive.vercel.app, que además está hecho con
+   Astro igual que nosotros. Las letras arrancan APAGADAS pero legibles y suben a
+   full conforme el párrafo cruza la pantalla.
+
+   🔴 El reposo no es 0, es 0.65. Y los dos números importan.
+
+   Que no sea 0: un texto que empieza invisible es contenido rehén de una
+   animación. Si el JS falla, si el navegador no lo soporta o si alguien llega con
+   la página a media altura, el texto NO ESTÁ. Encendiendo desde un valor legible,
+   el peor caso es un párrafo algo apagado — nunca un párrafo ausente.
+
+   Que sea 0.65 y no 0.4: **medido, no estimado.** A 0.4 la bajada de una nota
+   (18 px, `rgb(174,184,181)` sobre `rgb(5,7,6)`) da **2.37:1**, y WCAG 1.4.3 exige
+   4.5:1. O sea que el estado apagado era, literalmente, texto que no se puede leer.
+   0.65 es el piso exacto que lo cumple:
+
+     reposo   bajada 18px   cuerpo 20px
+     0.40        2.37 ❌       3.29 ❌
+     0.60        4.06 ❌       6.25 ✅
+     0.65        4.60 ✅       7.21 ✅
+     1.00        9.93 ✅      16.79 ✅
+
+   Y el efecto no se pierde por subir el piso: de 4.60 a 9.93 el salto sigue siendo
+   de más del doble de contraste, que es muchísimo a la vista.
+
+   ⚠️ Y las reglas solo aplican cuando el script ya partió el texto
+   (`[data-escribiendo]`). Sin JS, el párrafo se queda como vino del servidor: a
+   opacidad plena y sin partir.
+   ============================================================ */
+[data-escribiendo] .escribir-palabra {
+  /* La palabra entera es la unidad de salto de línea; las letras van dentro. */
+  display: inline-block;
+  white-space: nowrap;
+}
+
+[data-escribiendo] .escribir-letra {
+  opacity: var(--escribir-reposo, 0.65);
+  transition: opacity var(--dur-3) var(--ease-out);
+}
+[data-escribiendo] .escribir-letra[data-on] {
+  opacity: 1;
+}

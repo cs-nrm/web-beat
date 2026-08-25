@@ -58,7 +58,7 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
           {cat && <span class="beat-label mosaico-cat">{cat}</span>}
         </div>
         <h2 class="mosaico-titulo">{portada.titulo}</h2>
-        {portada.resumen && <p class="mosaico-bajada">{portada.resumen}</p>}
+        {portada.resumen && <p class="mosaico-bajada" data-escribir>{portada.resumen}</p>}
       </a>
 
       <div class="mosaico-lado">

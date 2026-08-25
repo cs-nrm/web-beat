@@ -64,7 +64,7 @@ const enLaPila = notas.slice(0, 4).map((n) => ({
         */}
         {enLaPila.map((p, i) => (
           <a href={p.href} class="pila-carta" style={`--i:${i}; --total:${enLaPila.length}`}>
-            <div class="pila-carta-foto">
+            <div class="pila-carta-foto" transition:name={`foto-nota-${p.nota.id}`}>
               {p.foto && <img src={p.foto} alt={p.alt} loading="lazy" decoding="async" />}
               <div class="beat-grid pila-trama" />
             </div>

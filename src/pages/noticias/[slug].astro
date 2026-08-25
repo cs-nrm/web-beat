@@ -133,7 +133,9 @@ const etiquetas = (nota.etiquetas ?? []).filter(
     {
       hero && (
         <figure class="nt-hero-caja">
-          <div class="nt-hero">
+          {/* El otro extremo de la transición: comparte nombre con la foto de la
+              tarjeta desde la que se llegó. Ver `TarjetaNota.astro`. */}
+          <div class="nt-hero" transition:name={`foto-nota-${nota.id}`}>
             <img src={hero} alt={pieDeFoto ?? ''} fetchpriority="high" decoding="async" />
             <div class="beat-grid nt-hero-trama" />
           </div>

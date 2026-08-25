@@ -34,7 +34,16 @@ const foto = urlMedia(nota.imagen, variante === 'fila' ? 'card' : 'card');
 ---
 
 <a href={href} class:list={['tarjeta', `es-${variante}`]}>
-  <div class="tarjeta-foto">
+  {/*
+    🔴 `transition:name` es lo que hace que la foto de esta tarjeta CREZCA hasta
+    convertirse en el hero de la nota, en vez de que la página corte en seco. El
+    navegador interpola entre las dos posiciones porque las dos comparten nombre.
+
+    El nombre lleva el id de la nota, no el índice: tiene que ser único en la
+    página Y coincidir con el de la otra. Dos elementos con el mismo nombre en una
+    misma página anulan la transición sin avisar.
+  */}
+  <div class="tarjeta-foto" transition:name={`foto-nota-${nota.id}`}>
     {
       foto ? (
         <img

@@ -98,7 +98,7 @@ const bajada = filtro
         <>
           {/* ── La nota principal, a dos columnas ── */}
           <a href={`/noticias/${destacada.slug}`} class="sc-lead">
-            <div class="sc-lead-foto">
+            <div class="sc-lead-foto" transition:name={`foto-nota-${destacada.id}`}>
               {fotoDestacada && (
                 <img
                   src={fotoDestacada}

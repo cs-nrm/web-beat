@@ -905,3 +905,21 @@ body {
     linear-gradient(90deg, rgba(255, 255, 255, var(--cuadricula-alfa)) 1px, transparent 1px);
   background-size: var(--cuadricula-paso) var(--cuadricula-paso);
 }
+
+/*
+  🔴 El chrome NO lleva cuadrícula (decisión de Carlos, 2026-08-24): la trama
+  empieza debajo del menú.
+
+  No se resuelve desplazando el fondo, y ahí está el detalle: la cabecera es
+  STICKY, así que al hacer scroll se coloca sobre cualquier parte de la página.
+  Un desplazamiento solo funcionaría con la página arriba del todo.
+
+  Lo que hay que hacer es taparla, y la cabecera no lo hacía porque su fondo es
+  SEMITRANSPARENTE (`--surface-card` es blanco al 4.5%): la trama se veía a través.
+  Aquí se le pone el lienzo debajo como color sólido, de modo que ese mismo tinte
+  componga contra un fondo opaco en vez de contra la cuadrícula. Se ve idéntico y
+  ya no deja pasar nada.
+*/
+#beat-cabecera {
+  background-color: var(--surface-canvas);
+}

@@ -1331,3 +1331,50 @@ body {
     animation: none;
   }
 }
+
+/* ============================================================
+   El halo que acompaña al cursor por todo el sitio
+   ------------------------------------------------------------
+   La luz de las tarjetas gustó, pero solo existía DENTRO de ellas — o sea, solo
+   donde el cursor ya era una manita. Esto la saca a toda la página.
+
+   Las dos conviven a propósito y no se estorban: el halo es ambiente y flojo, la
+   luz de la tarjeta es local y más fuerte. Al pasar sobre una tarjeta se suman, que
+   es lo que hace un foco de verdad al cruzar por encima de un objeto.
+
+   ✨ Aditivo, como todo lo del cursor: si el script no corre, el atributo
+   `data-cursor` no aparece nunca y la capa no se pinta. Cero riesgo de tapar nada.
+   ============================================================ */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-4) var(--ease-out);
+  background: radial-gradient(
+    460px circle at var(--cursor-x, 50vw) var(--cursor-y, 50vh),
+    rgb(250 251 250 / 0.05),
+    rgb(250 251 250 / 0.018) 42%,
+    transparent 68%
+  );
+}
+
+/*
+  Se enciende con el primer movimiento del ratón y se apaga al salir de la ventana.
+
+  🔴 El `z-index: 40` lo deja por encima del contenido pero DEBAJO de la cabecera
+  persistente y del modal del pre-roll. Una capa de luz cruzando por encima del
+  player o de un anuncio VAST sería un problema: lo primero se vería sucio y lo
+  segundo puede tener consecuencias de facturación.
+*/
+html[data-cursor] body::after {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::after {
+    display: none;
+  }
+}

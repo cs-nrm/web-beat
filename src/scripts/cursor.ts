@@ -17,10 +17,23 @@
 let pendiente: HTMLElement | null = null;
 let x = 0;
 let y = 0;
+/** Posición en la ventana, para el halo que acompaña al cursor por todo el sitio. */
+let vx = 0;
+let vy = 0;
 let encolado = false;
 
 function pintar(): void {
   encolado = false;
+
+  /*
+   * El halo global va sobre `<html>` y en píxeles de ventana, porque su capa es
+   * `position: fixed`: no depende de qué haya debajo ni de si el cursor está sobre
+   * algo interactivo.
+   */
+  const raiz = document.documentElement;
+  raiz.style.setProperty('--cursor-x', `${vx}px`);
+  raiz.style.setProperty('--cursor-y', `${vy}px`);
+
   const el = pendiente;
   if (!el) return;
   el.style.setProperty('--mx', `${x}%`);
@@ -35,15 +48,26 @@ function alMover(e: PointerEvent): void {
    */
   if (e.pointerType !== 'mouse') return;
 
-  const el = (e.target as Element | null)?.closest<HTMLElement>('[data-luz]');
-  if (!el) return;
+  vx = e.clientX;
+  vy = e.clientY;
 
-  const r = el.getBoundingClientRect();
-  if (!r.width || !r.height) return;
+  /*
+   * El halo se enciende en el PRIMER movimiento, no antes. Si la capa naciera
+   * visible, se pintaría en la esquina superior izquierda hasta que alguien moviera
+   * el ratón — una mancha de luz en un rincón, sin explicación.
+   */
+  document.documentElement.dataset.cursor = '';
 
-  x = ((e.clientX - r.left) / r.width) * 100;
-  y = ((e.clientY - r.top) / r.height) * 100;
+  const el = (e.target as Element | null)?.closest<HTMLElement>('[data-luz]') ?? null;
   pendiente = el;
+
+  if (el) {
+    const r = el.getBoundingClientRect();
+    if (r.width && r.height) {
+      x = ((e.clientX - r.left) / r.width) * 100;
+      y = ((e.clientY - r.top) / r.height) * 100;
+    }
+  }
 
   /*
    * Un solo fotograma pendiente para todo el documento. `pointermove` dispara
@@ -74,4 +98,16 @@ export function prepararCursor(): void {
    * navegación supera al del efecto — y este no hay que volver a montarlo nunca.
    */
   document.addEventListener('pointermove', alMover, { passive: true });
+
+  /*
+   * Al salir el cursor de la ventana el halo se apaga. Si no, se queda encendido
+   * en el último punto donde estuvo, y una luz fija donde no hay cursor deja de
+   * leerse como respuesta y pasa a leerse como una mancha.
+   */
+  document.addEventListener('pointerleave', () => {
+    delete document.documentElement.dataset.cursor;
+  });
+  document.addEventListener('pointerenter', () => {
+    document.documentElement.dataset.cursor = '';
+  });
 }

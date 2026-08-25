@@ -28,6 +28,20 @@ export default defineConfig({
   adapter: node({ mode: 'standalone' }),
   vite: {
     plugins: [tailwind()],
+    /*
+     * 🔴 Plyr se declara aquí aunque se importe de forma DINÁMICA.
+     *
+     * Vite descubre las dependencias al vuelo; con un `import()` perezoso no se
+     * entera hasta que alguien lo dispara, y entonces re-optimiza y **invalida la
+     * petición en curso**: el navegador recibe `504 Outdated Optimize Dep` y la
+     * carga falla. En pantalla se ve como «se descompuso el reproductor de video»,
+     * y no hay nada roto en el código — el build de producción siempre estuvo bien.
+     *
+     * Nos costó tres falsas alarmas hoy. Declarándolo, Vite lo optimiza al
+     * arrancar y el `import()` perezoso encuentra el paquete ya listo. Sigue sin
+     * bajar hasta que se pide: esto es del servidor de desarrollo, no del bundle.
+     */
+    optimizeDeps: { include: ['plyr'] },
     server: {
       watch: {
         /*

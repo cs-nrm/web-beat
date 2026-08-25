@@ -82,7 +82,7 @@ const fotoProximo = urlMedia(proximo?.portada, 'large');
           <h3 class="ag-titulo">
             <a href={`/eventos/${proximo.slug}`}>{proximo.titulo}</a>
           </h3>
-          {proximo.descripcion && <p class="ag-bajada" data-escribir>{proximo.descripcion}</p>}
+          {proximo.descripcion && <p class="ag-bajada">{proximo.descripcion}</p>}
           <div class="ag-pie">
             {(proximo.lugar || proximo.ciudad) && (
               <span class="beat-label ag-lugar">

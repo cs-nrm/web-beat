@@ -57,8 +57,8 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
           </span>
           {cat && <span class="beat-label mosaico-cat">{cat}</span>}
         </div>
-        <h2 class="mosaico-titulo">{portada.titulo}</h2>
-        {portada.resumen && <p class="mosaico-bajada" data-escribir>{portada.resumen}</p>}
+        <h2 class="mosaico-titulo" data-escribir>{portada.titulo}</h2>
+        {portada.resumen && <p class="mosaico-bajada">{portada.resumen}</p>}
       </a>
 
       <div class="mosaico-lado">
@@ -201,7 +201,7 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
     white-space: nowrap;
   }
   .mosaico-titulo {
-    font: 700 var(--type-title-1);
+    font: var(--type-title-1);
     letter-spacing: -0.022em;
     color: var(--mist-1);
     margin: 14px 0 0;

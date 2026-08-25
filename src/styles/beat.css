@@ -931,26 +931,24 @@ body {
    Astro igual que nosotros. Las letras arrancan APAGADAS pero legibles y suben a
    full conforme el párrafo cruza la pantalla.
 
-   🔴 El reposo no es 0, es 0.65. Y los dos números importan.
+   🔴 El reposo no es 0, es 0.4. Y los dos números importan.
 
    Que no sea 0: un texto que empieza invisible es contenido rehén de una
    animación. Si el JS falla, si el navegador no lo soporta o si alguien llega con
    la página a media altura, el texto NO ESTÁ. Encendiendo desde un valor legible,
-   el peor caso es un párrafo algo apagado — nunca un párrafo ausente.
+   el peor caso es un titular algo apagado — nunca un titular ausente.
 
-   Que sea 0.65 y no 0.4: **medido, no estimado.** A 0.4 la bajada de una nota
-   (18 px, `rgb(174,184,181)` sobre `rgb(5,7,6)`) da **2.37:1**, y WCAG 1.4.3 exige
-   4.5:1. O sea que el estado apagado era, literalmente, texto que no se puede leer.
-   0.65 es el piso exacto que lo cumple:
+   Que sea 0.4 y no más: es el valor de la referencia, y aquí es legítimo **solo
+   porque el efecto está restringido a texto grande**. WCAG 1.4.3 pide 4.5:1 para
+   texto normal pero 3:1 para texto grande (≥24px, o ≥18.66px en negrita). Medido
+   sobre nuestro fondo:
 
-     reposo   bajada 18px   cuerpo 20px
-     0.40        2.37 ❌       3.29 ❌
-     0.60        4.06 ❌       6.25 ✅
-     0.65        4.60 ✅       7.21 ✅
-     1.00        9.93 ✅      16.79 ✅
+     a 0.4                      contraste   ¿pasa?
+     display blanco 26px          3.37       ✅ (umbral 3:1)
+     bajada gris 16px             2.37       ❌ (umbral 4.5:1)
 
-   Y el efecto no se pierde por subir el piso: de 4.60 a 9.93 el salto sigue siendo
-   de más del doble de contraste, que es muchísimo a la vista.
+   Por eso `escribir.ts` COMPRUEBA el tamaño antes de partir nada: sobre texto
+   chico simplemente no actúa. La garantía es de código, no de comentario.
 
    ⚠️ Y las reglas solo aplican cuando el script ya partió el texto
    (`[data-escribiendo]`). Sin JS, el párrafo se queda como vino del servidor: a
@@ -963,8 +961,21 @@ body {
 }
 
 [data-escribiendo] .escribir-letra {
-  opacity: var(--escribir-reposo, 0.65);
-  transition: opacity var(--dur-3) var(--ease-out);
+  /*
+    `inline-block` + ancho congelado desde el script: sin eso el revoltijo sacude
+    la página, porque una `W` y una `i` no miden lo mismo y la palabra cambia de
+    ancho en cada fotograma. El centrado reparte la diferencia cuando el carácter
+    del revoltijo es más angosto que el real.
+  */
+  display: inline-block;
+  text-align: center;
+
+  opacity: var(--escribir-reposo, 0.4);
+  /*
+    SIN transición, a propósito. Aquí no se desvanece nada: la letra cambia de
+    carácter y de luz a la vez, de golpe. Un desvanecido las solaparía y el efecto
+    dejaría de leerse como escritura.
+  */
 }
 [data-escribiendo] .escribir-letra[data-on] {
   opacity: 1;

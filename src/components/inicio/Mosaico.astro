@@ -41,7 +41,7 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
 
       <a href={`/noticias/${portada.slug}`} class="mosaico-centro">
         <div class="mosaico-foto" transition:name={`foto-nota-${portada.id}`}>
-          {foto && <img src={foto} alt={alt} fetchpriority="high" decoding="async" />}
+          {foto && <img src={foto} alt={alt} fetchpriority="high" decoding="async" data-revelar />}
           <div class="beat-grid mosaico-trama" />
           {/* Las tres estelas: el motivo de marca del DS, con las posiciones de 13a. */}
           <div class="mosaico-estelas" aria-hidden="true">

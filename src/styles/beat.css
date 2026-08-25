@@ -980,3 +980,121 @@ body {
 [data-escribiendo] .escribir-letra[data-on] {
   opacity: 1;
 }
+
+/* ============================================================
+   Efectos de entrada — revelado, cascada y barrido
+   ------------------------------------------------------------
+   Los dirige `revelar.ts` con un solo observador: marca `data-animando` al
+   arrancar y `data-visto` cuando el elemento entra en pantalla. Aquí no hay
+   JavaScript de por medio; son transiciones que resuelve el compositor.
+
+   🔴 El estado inicial cuelga de `[data-animando]`, que solo existe si el script
+   corrió. Sin JS, sin observador o con la pestaña oculta no se marca nada y todo
+   se ve normal. Si el estado escondido viviera suelto en el CSS, un documento
+   oculto —que no dispara el observador— dejaría las fotos recortadas y las listas
+   transparentes DE FORMA PERMANENTE.
+
+   ⚠️ Un elemento lleva UN efecto, nunca dos. Es lo que evita que el conjunto se
+   sature: descifrado para los titulares, revelado para las fotos, cascada para las
+   listas, barrido para las cabeceras de sección.
+   ============================================================ */
+
+/* ── 1. Revelado de imágenes ──
+   La máscara sube desde abajo mientras la escala se asienta. La escala dura más
+   que la máscara a propósito: el recorte termina y la imagen sigue acomodándose
+   un instante, que es lo que lo hace sentir suave en vez de mecánico. */
+[data-revelar][data-animando] {
+  clip-path: inset(100% 0 0 0);
+  transform: scale(1.04);
+  /*
+    🔴 `none` a propósito, y no sobra: estas imágenes YA traen
+    `transition: transform 450ms` de otra regla. Sin anularla, el momento en que el
+    script esconde la foto se animaría con esa transición ajena — la imagen se
+    escalaría a la vista antes de recortarse. Declarar la propia en el estado final
+    no basta; hay que apagar la que ya estaba.
+  */
+  transition: none;
+}
+[data-revelar][data-animando][data-visto] {
+  clip-path: inset(0 0 0 0);
+  transform: none;
+  /*
+    🔴 La transición va AQUÍ, en el estado final, no en el escondido.
+
+    Puesta en el estado escondido, el momento en que el script marca el elemento
+    también se anima: la foto se escala y se recorta a la vista, y el lector ve la
+    imagen IRSE antes de volver. Declarada en el estado final, esconder es
+    instantáneo —nadie lo ve— y solo la aparición se anima, que es lo que se
+    quiere. El navegador toma la transición del estado de destino, así que basta
+    con tenerla aquí.
+  */
+  transition:
+    clip-path 700ms var(--ease-out),
+    transform 1100ms var(--ease-out);
+}
+
+/* ── 2. Cascada en listas ──
+   `--i` lo pone el script sobre cada hijo. El desplazamiento es de 12px: lo justo
+   para que se lea como entrada sin que la lista parezca saltar. */
+[data-cascada][data-animando] > * {
+  opacity: 0;
+  transform: translateY(12px);
+  /* Por lo mismo que el revelado: los ítems de lista suelen traer su propia
+     transición, y esconderlos con ella los desvanecería a la vista. */
+  transition: none;
+}
+[data-cascada][data-animando][data-visto] > * {
+  opacity: 1;
+  transform: none;
+  /* En el estado final, por lo mismo que el revelado: si no, la lista se
+     desvanece a la vista antes de volver a entrar. */
+  transition:
+    opacity 520ms var(--ease-out),
+    transform 520ms var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 70ms);
+}
+
+/* ── 3. Barrido de luz ──
+   Una franja diagonal cruza la cabecera de sección una sola vez.
+
+   ✨ Este no esconde nada, así que no necesita la red de seguridad de los otros
+   dos: si nunca se dispara, simplemente no pasa nada y el texto está donde debe. */
+[data-barrido][data-animando] {
+  position: relative;
+}
+[data-barrido][data-animando]::after {
+  content: '';
+  position: absolute;
+  inset: -20% -10%;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    transparent 42%,
+    rgb(250 251 250 / 0.14) 50%,
+    transparent 58%
+  );
+  transform: translateX(-130%);
+}
+[data-barrido][data-animando][data-visto]::after {
+  animation: beat-barrido 1200ms var(--ease-out) forwards;
+}
+@keyframes beat-barrido {
+  to {
+    transform: translateX(130%);
+  }
+}
+
+/* Menos movimiento: se anula todo. El script ya evita marcar, pero si algo quedara
+   marcado —una navegación a medias, un estado restaurado— esto lo desactiva. */
+@media (prefers-reduced-motion: reduce) {
+  [data-revelar][data-animando],
+  [data-cascada][data-animando] > * {
+    clip-path: none;
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  [data-barrido][data-animando]::after {
+    display: none;
+  }
+}

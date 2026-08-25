@@ -47,6 +47,7 @@ const foto = urlMedia(nota.imagen, variante === 'fila' ? 'card' : 'card');
     {
       foto ? (
         <img
+          data-revelar
           src={foto}
           alt={nota.imagen && typeof nota.imagen === 'object' ? (nota.imagen.alt ?? '') : ''}
           loading={prioridad ? 'eager' : 'lazy'}

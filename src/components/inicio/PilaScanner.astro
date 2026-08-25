@@ -46,7 +46,7 @@ const enLaPila = notas.slice(0, 4).map((n) => ({
 {
   enLaPila.length > 0 && (
     <section class="pila">
-      <div class="pila-cabeza">
+      <div class="pila-cabeza" data-barrido>
         <h2 class="beat-display pila-seccion" data-escribir>BEAT SCANNER</h2>
         <a href="/scanner" class="beat-label pila-todo">TODAS LAS NOTAS</a>
       </div>
@@ -65,7 +65,7 @@ const enLaPila = notas.slice(0, 4).map((n) => ({
         {enLaPila.map((p, i) => (
           <a href={p.href} class="pila-carta" style={`--i:${i}; --total:${enLaPila.length}`}>
             <div class="pila-carta-foto" transition:name={`foto-nota-${p.nota.id}`}>
-              {p.foto && <img src={p.foto} alt={p.alt} loading="lazy" decoding="async" />}
+              {p.foto && <img src={p.foto} alt={p.alt} loading="lazy" decoding="async" data-revelar />}
               <div class="beat-grid pila-trama" />
             </div>
 

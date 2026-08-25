@@ -70,7 +70,7 @@ const tiendas = (
 {
   especial && (
     <section class="fr" data-fenomeno>
-      <div class="fr-cabeza">
+      <div class="fr-cabeza" data-barrido>
         <h2 class="beat-display fr-seccion" data-escribir>EL FENÓMENO RESIDENTE</h2>
         <a href="/fenomeno-residente" class="beat-label fr-todo">VER EL ARCHIVO</a>
       </div>
@@ -181,10 +181,10 @@ const tiendas = (
         )}
 
         {/* ── las cápsulas ── */}
-        <div class="fr-lista" data-capsulas>
+        <div class="fr-lista" data-capsulas data-cascada>
           <div class="fr-lista-cabeza">
             <span class="beat-label fr-lista-titulo">LAS CÁPSULAS</span>
-            <span class="beat-label fr-lista-nota">
+            <span class="beat-label fr-lista-nota" data-contar>
               {publicadas} PUBLICADA{publicadas === 1 ? '' : 'S'}
             </span>
           </div>

@@ -1185,13 +1185,44 @@ body {
    Zoom muy corto: 1.03. Más que eso, en una tarjeta de nota, deja de leerse como
    respuesta y empieza a leerse como carrusel. */
 @media (hover: hover) and (pointer: fine) {
-  /* 🔴 El zoom va en la propiedad `scale`, no en `transform`.
-     El parallax de más abajo anima `translate`, y si los dos usaran `transform`
-     pelearían por la misma propiedad — con las animaciones ganando siempre, así
-     que el hover no se vería nunca. Separados, se componen. */
+  /*
+    ── La tarjeta se inclina y la foto se mueve dentro de ella ──
+
+    Sustituye al zoom, que Carlos encontraba básico —y lo era: un zoom no dice nada
+    del cursor, solo que hay hover—. Esto responde a DÓNDE está el puntero, así que
+    la tarjeta se siente como un objeto que estás tocando.
+
+    🔴 Tres propiedades distintas, y no es capricho: `transform` para la
+    inclinación de la tarjeta, `transform` para el desplazamiento de la foto (que
+    es otro elemento), `translate` reservado al parallax del scroll y `scale` al
+    aire que necesita el desplazamiento. Si dos de estos compartieran propiedad,
+    uno anularía al otro — y con las animaciones de por medio, ganaría siempre la
+    animación. Ya pasó una vez.
+  */
+  .tarjeta,
+  .mosaico-centro {
+    transition: transform var(--dur-3) var(--ease-out);
+  }
+  .tarjeta:hover,
+  .mosaico-centro:hover {
+    transform: perspective(900px) rotateY(calc(var(--cx, 0) * 4.5deg))
+      rotateX(calc(var(--cy, 0) * -4.5deg));
+  }
+
+  .tarjeta-foto img,
+  .mosaico-foto img {
+    transition:
+      transform var(--dur-3) var(--ease-out),
+      scale var(--dur-4) var(--ease-out);
+  }
   .tarjeta:hover .tarjeta-foto img,
   .mosaico-centro:hover .mosaico-foto img {
-    scale: calc(var(--foto-base, 1) * 1.035);
+    /* Al CONTRARIO del cursor: así la foto parece estar detrás del marco y no
+       pegada a él. Es lo que produce la sensación de profundidad. */
+    transform: translate3d(calc(var(--cx, 0) * -9px), calc(var(--cy, 0) * -9px), 0);
+    /* Un poco de aire para que el desplazamiento no descubra los bordes. No es el
+       efecto: es el margen que el efecto necesita. */
+    scale: calc(var(--foto-base, 1) * 1.06);
   }
 }
 
@@ -1214,8 +1245,13 @@ body {
   [data-luz]::after {
     display: none;
   }
+  .tarjeta:hover,
+  .mosaico-centro:hover {
+    transform: none;
+  }
   .tarjeta:hover .tarjeta-foto img,
   .mosaico-centro:hover .mosaico-foto img {
+    transform: none;
     scale: var(--foto-base, 1);
   }
   [data-luz]:hover [data-flecha] svg,

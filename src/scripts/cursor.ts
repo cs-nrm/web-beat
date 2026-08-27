@@ -38,6 +38,19 @@ function pintar(): void {
   if (!el) return;
   el.style.setProperty('--mx', `${x}%`);
   el.style.setProperty('--my', `${y}%`);
+
+  /*
+   * 🔴 Los mismos datos, CENTRADOS y sin unidad: -1 en un borde, 0 en el centro,
+   * 1 en el otro.
+   *
+   * `--mx`/`--my` van en porcentaje porque es lo que quiere un `radial-gradient`.
+   * Pero para inclinar o desplazar hace falta un número con signo que se pueda
+   * multiplicar por grados o por píxeles, y en CSS no se puede dividir un
+   * porcentaje para obtenerlo. Publicar los dos pares cuesta dos escrituras más en
+   * el mismo fotograma y evita duplicar la lógica en cada regla.
+   */
+  el.style.setProperty('--cx', ((x - 50) / 50).toFixed(3));
+  el.style.setProperty('--cy', ((y - 50) / 50).toFixed(3));
 }
 
 function alMover(e: PointerEvent): void {
@@ -107,6 +120,23 @@ export function prepararCursor(): void {
   document.addEventListener('pointerleave', () => {
     delete document.documentElement.dataset.cursor;
   });
+
+  /*
+   * Al salir de una tarjeta se devuelven sus valores al centro. Si no, la última
+   * posición se queda grabada: la tarjeta se quedaría inclinada mientras el hover
+   * se apaga, y al volver a entrar arrancaría torcida desde donde se quedó.
+   */
+  document.addEventListener(
+    'pointerout',
+    (e) => {
+      const el = (e.target as Element | null)?.closest<HTMLElement>('[data-luz]');
+      if (!el || el.contains(e.relatedTarget as Node | null)) return;
+      el.style.setProperty('--cx', '0');
+      el.style.setProperty('--cy', '0');
+      if (pendiente === el) pendiente = null;
+    },
+    { passive: true },
+  );
   document.addEventListener('pointerenter', () => {
     document.documentElement.dataset.cursor = '';
   });

@@ -1,0 +1,40 @@
+---
+/**
+ * El enlace de «ver más» al pie de una sección.
+ *
+ * 🔴 Lleva TEXTO, no una flecha sola. Un enlace necesita nombre accesible de todas
+ * formas, así que el texto hay que escribirlo igual: poner solo la flecha no ahorra
+ * la decisión, únicamente se la esconde a quien ve — y en un sitio de ocho
+ * secciones, «→» no dice a dónde lleva. La animación va en la flecha ADEMÁS del
+ * texto, no en su lugar.
+ *
+ * Existe como componente y no como cinco copias porque son cinco: Fenómeno,
+ * Scanner, Bonus Beat, Agenda y la parrilla. Cuando el remate cambie —y va a
+ * cambiar— tiene que cambiar en los cinco a la vez.
+ */
+import Icono from '@/components/Icono.astro';
+
+interface Props {
+  href: string;
+  texto: string;
+  /** Clase de la sección, para su color o su posición dentro de la cabecera. */
+  clase?: string;
+}
+
+const { href, texto, clase } = Astro.props;
+---
+
+<a href={href} class:list={['beat-label beat-remate', clase]}>
+  <span>{texto}</span>
+  {/*
+    Dos flechas, y hacen falta las dos: al pasar el cursor la primera sale por la
+    derecha y la segunda entra por la izquierda. Con una sola, o vuelve de golpe a
+    su sitio al terminar —un salto— o se queda fuera de la caja.
+
+    `aria-hidden` porque no aportan nada al nombre del enlace: eso lo dice el texto.
+  */}
+  <i aria-hidden="true">
+    <Icono nombre="arrow-up-right" tamano={16} />
+    <Icono nombre="arrow-up-right" tamano={16} />
+  </i>
+</a>

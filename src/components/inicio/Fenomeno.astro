@@ -7,6 +7,7 @@
  * ORDENADA: el orden numera las cápsulas, así que no se reordena nunca.
  */
 import Icono from '@/components/Icono.astro';
+import Remate from '@/components/Remate.astro';
 import { urlMedia } from '@/lib/cms/client';
 import { capsulasDe, listasDe } from '@/lib/cms/especiales';
 import { fuenteDeVideo } from '@/lib/video';
@@ -72,7 +73,7 @@ const tiendas = (
     <section class="fr" data-fenomeno>
       <div class="fr-cabeza" data-barrido>
         <h2 class="beat-display fr-seccion" data-escribir>EL FENÓMENO RESIDENTE</h2>
-        <a href="/fenomeno-residente" class="beat-label fr-todo">VER EL ARCHIVO</a>
+        <Remate href="/fenomeno-residente" texto="VER EL ARCHIVO" clase="fr-todo" />
       </div>
 
       <div class="fr-tema">

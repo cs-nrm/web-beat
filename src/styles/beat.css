@@ -1546,3 +1546,91 @@ html[data-cursor] body::after {
     display: none;
   }
 }
+
+/* ============================================================
+   Remate de sección — el enlace de «ver más»
+   ------------------------------------------------------------
+   🔴 Lleva TEXTO, no una flecha sola. Un enlace necesita nombre accesible de
+   todas formas, así que el texto hay que escribirlo igual: poner solo la flecha no
+   ahorra la decisión, únicamente se la esconde a quien ve, y esa persona tiene que
+   adivinar a dónde lleva. En un sitio de ocho secciones, «→» no dice nada. La
+   animación va en la flecha ADEMÁS del texto, no en su lugar.
+
+   Dos gestos que se leen como uno:
+   · la flecha sale por la derecha y otra entra por la izquierda
+   · una línea se dibuja bajo el texto, de izquierda a derecha
+   ============================================================ */
+.beat-remate {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  transition: color var(--dur-2) var(--ease-out);
+}
+.beat-remate:hover {
+  color: var(--mist-0);
+}
+
+/* El texto y su subrayado, que se dibuja en vez de aparecer. */
+.beat-remate span {
+  position: relative;
+}
+.beat-remate span::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 1px;
+  background: currentColor;
+  scale: 0 1;
+  transform-origin: left;
+  transition: scale var(--dur-3) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .beat-remate:hover span::after {
+    scale: 1 1;
+  }
+}
+
+/*
+  La flecha: dos copias en la misma casilla de una rejilla. Al pasar, la de dentro
+  sale por la derecha y la de fuera entra por la izquierda.
+
+  🔴 Se necesitan DOS. Con una sola, o vuelve de golpe a su sitio al terminar —un
+  salto— o se queda fuera de la caja. Dos hacen que el movimiento sea continuo sin
+  que nada retroceda a la vista.
+*/
+.beat-remate i {
+  display: grid;
+  overflow: hidden;
+  /* La caja se ajusta al icono; sin esto el recorte cortaría el trazo. */
+  width: 16px;
+  height: 16px;
+}
+.beat-remate i > * {
+  grid-area: 1 / 1;
+  transition: translate var(--dur-3) var(--ease-out);
+}
+.beat-remate i > :last-child {
+  translate: -140% 0;
+}
+@media (hover: hover) and (pointer: fine) {
+  .beat-remate:hover i > :first-child {
+    translate: 140% 0;
+  }
+  .beat-remate:hover i > :last-child {
+    translate: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beat-remate span::after,
+  .beat-remate i > :last-child {
+    display: none;
+  }
+  .beat-remate:hover i > :first-child {
+    translate: 0 0;
+  }
+}

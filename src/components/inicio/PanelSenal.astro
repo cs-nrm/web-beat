@@ -10,6 +10,7 @@
  * Si las DOS están vacías el panel no se pinta: una franja clara con dos
  * encabezados y nada debajo es peor que no tenerla.
  */
+import Remate from '@/components/Remate.astro';
 import type { Bloque } from '@/lib/cms/programacion';
 import type { EntradaBitacora } from '@/lib/cms/aire';
 
@@ -50,7 +51,16 @@ const hora = (iso: string | null | undefined) => {
     <section class="senal" aria-label="La señal ahora">
       {visibles.length > 0 && (
         <div>
-          <h2 class="beat-label senal-titulo">HOY EN LA SEÑAL</h2>
+          {/*
+            🔴 Este remate faltaba de verdad, y no por decoración: el panel enseña
+            cuatro bloques del día y no había NINGUNA forma de llegar al resto de la
+            parrilla desde el inicio. Era un callejón sin salida en la sección que
+            justamente afirma que Beat es una estación en vivo.
+          */}
+          <div class="senal-cabeza">
+            <h2 class="beat-label senal-titulo">HOY EN LA SEÑAL</h2>
+            <Remate href="/programacion" texto="LA PARRILLA" clase="senal-todo" />
+          </div>
           {visibles.map((b) => (
             <div
               class:list={['senal-fila', { 'es-aire': b.alAire }]}
@@ -94,6 +104,21 @@ const hora = (iso: string | null | undefined) => {
 }
 
 <style>
+  .senal-cabeza {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .senal-todo {
+    /* El panel es CLARO, así que el remate hereda los tonos oscuros del panel y no
+       los del resto del sitio. */
+    color: var(--graphite-2);
+  }
+  .senal-todo:hover {
+    color: var(--noche-0);
+  }
+
   .senal {
     display: grid;
     grid-template-columns: 1fr 1fr;

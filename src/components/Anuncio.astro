@@ -1,6 +1,10 @@
 ---
 /**
- * El hueco de publicidad.
+ * El hueco de publicidad. UN marco, DOS fuentes que lo pueden llenar:
+ *
+ *   · venta DIRECTA — el banner de la colección `publicidad` del CMS, con su
+ *     anunciante y su vigencia. Llega por la prop `banner` y tiene prioridad.
+ *   · PROGRAMÁTICO  — Google Ad Manager, cuando no hay campaña vendida.
  *
  * DECLARA el slot con `data-*` y `src/scripts/anuncios.ts` lo descubre. En el v1
  * los 13 slots estaban escritos a mano en el script: agregar un hueco pedía tocar
@@ -19,6 +23,10 @@
  *   · 728 × 90 y 300 × 250             — ya existen
  * Y quedan sin usar tres formatos del v1: 300×600, 600×800 y 400×311.
  */
+import { urlMedia } from '@/lib/cms/client';
+import type { Banner } from '@/lib/cms/publicidad';
+import { HOST_CANONICO } from '@/config/site';
+
 interface Props {
   /** Los tres formatos del lienzo. */
   formato: 'portada' | 'leaderboard' | 'box';
@@ -33,10 +41,22 @@ interface Props {
    * hueco. Se concatena al ad unit del env; el script valida el formato.
    */
   unidad?: string;
+  /**
+   * La campaña VENDIDA que va en este hueco, si hay alguna corriendo
+   * (`src/lib/cms/publicidad.ts`).
+   *
+   * 🔴 Cuando viene, GANA: en su lugar NO se declara el hueco de GPT —sin
+   * `data-anuncio` el script ni lo descubre— así que no hay dos anuncios peleando
+   * el mismo espacio ni una petición a GAM que nadie va a ver. La venta directa
+   * tiene anunciante, fechas y compromiso; el programático rellena lo que sobra.
+   *
+   * Solo aplica al formato `portada`: es el único tipo que el CMS coloca aquí.
+   */
+  banner?: Banner | null;
   class?: string;
 }
 
-const { formato, nombre = formato, unidad, class: clase } = Astro.props;
+const { formato, nombre = formato, unidad, banner = null, class: clase } = Astro.props;
 
 /**
  * Medidas por formato: la lista completa que el slot puede servir, y el mapeo por
@@ -67,19 +87,86 @@ const MEDIDAS = {
 
 const medidas = MEDIDAS[formato];
 const idSlot = `ad-${nombre}`;
+
+/**
+ * La creatividad lista para pintar, o `null` si este hueco cae a GAM.
+ *
+ * Dos archivos y no uno recortado por CSS, como promete el CMS: el creativo de
+ * portada es una franja ancha y en un teléfono ese mismo archivo se ve ilegible.
+ * Si la campaña no trae versión de móvil se usa la de escritorio — es la
+ * degradación que el propio campo documenta.
+ *
+ * Si la media no resuelve (un upload borrado del bucket, por ejemplo) devuelve
+ * `null` y el hueco vuelve a GAM: mejor un anuncio programático que un `<img>`
+ * roto a todo lo ancho de lo primero que se ve del sitio.
+ */
+const creatividad = (() => {
+  if (formato !== 'portada' || !banner) return null;
+
+  const escritorio = urlMedia(banner.imagen, 'large');
+  if (!escritorio) return null;
+  const movil = urlMedia(banner.imagenMovil ?? banner.imagen, 'card') ?? escritorio;
+
+  const media = typeof banner.imagen === 'object' ? banner.imagen : null;
+  /*
+    El `alt` sale de la media y si viene vacío se nombra al anunciante: un banner
+    con `alt=""` desaparece para quien navega con lector de pantalla, y lo que se
+    vendió es una presencia.
+  */
+  const alt = media?.alt?.trim() || `Publicidad de ${banner.anunciante}`;
+
+  /*
+    Fuera del sitio se abre en pestaña nueva, dentro no: sacar al lector de su
+    visita para llevarlo a otra página del propio Beat es un tropiezo, no una
+    salida. `sponsored` es obligado —es un enlace pagado— y `noopener` cierra el
+    acceso a `window.opener` desde el destino.
+  */
+  let externo = false;
+  try {
+    externo = new URL(banner.enlace, `https://${HOST_CANONICO}`).host !== HOST_CANONICO;
+  } catch {
+    externo = false;
+  }
+
+  return { enlace: banner.enlace, escritorio, movil, alt, externo };
+})();
 ---
 
-<div class:list={['anuncio', `es-${formato}`, clase]}>
+<div class:list={['anuncio', `es-${formato}`, creatividad && 'tiene-creatividad', clase]}>
   <span class="beat-label anuncio-rotulo">PUBLICIDAD</span>
-  <div
-    id={idSlot}
-    class="anuncio-hueco"
-    data-anuncio={formato}
-    data-unidad={unidad}
-    data-tamanos={JSON.stringify(medidas.tamanos)}
-    data-mapping={JSON.stringify(medidas.mapping)}
-  >
-  </div>
+  {
+    creatividad ? (
+      <a
+        class="anuncio-creatividad"
+        href={creatividad.enlace}
+        target={creatividad.externo ? '_blank' : undefined}
+        rel={creatividad.externo ? 'sponsored noopener' : 'sponsored'}
+      >
+        {/*
+          El corte del `source` es el mismo 900px del design system y del
+          `sizeMapping` de GAM. Si aquí fuera otro, habría un tramo de anchos con
+          el marco de escritorio y el creativo de móvil dentro.
+
+          Sin `fetchpriority="high"` a propósito: el banner es lo primero de la
+          página, pero el LCP que importa es el retrato del mosaico. Adelantar el
+          anuncio en la cola le quita ancho de banda al contenido editorial.
+        */}
+        <picture>
+          <source media="(max-width: 899px)" srcset={creatividad.movil} />
+          <img src={creatividad.escritorio} alt={creatividad.alt} decoding="async" />
+        </picture>
+      </a>
+    ) : (
+      <div
+        id={idSlot}
+        class="anuncio-hueco"
+        data-anuncio={formato}
+        data-unidad={unidad}
+        data-tamanos={JSON.stringify(medidas.tamanos)}
+        data-mapping={JSON.stringify(medidas.mapping)}
+      />
+    )
+  }
 </div>
 
 <style>
@@ -122,6 +209,32 @@ const idSlot = `ad-${nombre}`;
     height: 100%;
     background: none;
     box-shadow: none;
+  }
+
+  /* La creatividad del CMS. `contain` y no `cover`: un creativo vendido no se
+     recorta ni se estira —el anunciante mandó ESE archivo— así que se centra en la
+     banda y lo que sobra queda en negro, que es el fondo de la franja. */
+  .anuncio-creatividad {
+    display: block;
+    height: 100%;
+  }
+  .anuncio-creatividad picture,
+  .anuncio-creatividad img {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .anuncio-creatividad img {
+    object-fit: contain;
+  }
+  /* Con creativo debajo, el rótulo necesita su propio fondo: a 8px y en
+     `--text-faint` se pierde sobre cualquier imagen clara. Y el color va fijo y no
+     por token porque la banda es negra en los dos temas. */
+  .tiene-creatividad .anuncio-rotulo {
+    padding: 3px 6px;
+    border-radius: 2px;
+    background: rgb(5 7 6 / 0.62);
+    color: var(--mist-4);
   }
 
   .es-leaderboard .anuncio-hueco {

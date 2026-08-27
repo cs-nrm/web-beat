@@ -213,6 +213,10 @@ async function pedirAlCms<T>(url: URL, ruta: string, timeoutMs: number): Promise
  * `media` queda FUERA a propósito: la biblioteca es **compartida** entre las 4
  * estaciones (decisión 6), y filtrarla es justo el 400 de arriba.
  * `estaciones`, `redirects` y `forms` tampoco lo llevan.
+ *
+ * `publicidad` se agregó el 2026-08-27: la colección es más nueva que aquella
+ * revisión y sí lleva el campo (está en el plugin multi-tenant del CMS con
+ * `useTenantAccess: false`, como noticias).
  */
 export const COLECCIONES_POR_ESTACION = [
   'noticias',
@@ -228,6 +232,7 @@ export const COLECCIONES_POR_ESTACION = [
   'listas',
   'tipos-de-lista',
   'eventos',
+  'publicidad',
   'search',
 ] as const;
 

@@ -32,10 +32,11 @@ import { loQueSono } from '@/lib/cms/aire';
 import { obtenerEspecialVigente, obtenerEspeciales } from '@/lib/cms/especiales';
 import { obtenerTiposDeLista, obtenerListaReciente } from '@/lib/cms/listas';
 import { obtenerAgenda } from '@/lib/cms/eventos';
+import { obtenerBanner } from '@/lib/cms/publicidad';
 import { SERIE_FENOMENO, TIPO_LISTA_DESTACADA } from '@/config/site';
 
 /*
-  Todo en PARALELO. Son ocho consultas y ninguna depende de otra salvo la lista
+  Todo en PARALELO. Son nueve consultas y ninguna depende de otra salvo la lista
   destacada, que necesita saber qué tipos existen. Secuenciales sumarían sus
   latencias; en paralelo el Inicio cuesta lo que la más lenta.
 
@@ -44,7 +45,7 @@ import { SERIE_FENOMENO, TIPO_LISTA_DESTACADA } from '@/config/site';
   página. Y todas van cacheadas con dedup en el cliente del CMS, así que la
   concurrencia real contra el CMS es una consulta por TTL, no una por visita.
 */
-const [{ destacada, rejilla }, parrilla, sono, especial, especiales, tipos, agenda] =
+const [{ destacada, rejilla }, parrilla, sono, especial, especiales, tipos, agenda, banner] =
   await Promise.all([
     obtenerScanner(12),
     obtenerParrillaDeHoy(),
@@ -53,6 +54,7 @@ const [{ destacada, rejilla }, parrilla, sono, especial, especiales, tipos, agen
     obtenerEspeciales(SERIE_FENOMENO, 8),
     obtenerTiposDeLista(),
     obtenerAgenda(4),
+    obtenerBanner('portada'),
   ]);
 
 /*
@@ -96,8 +98,12 @@ const lema = 'BEAT 100.9 · TOTAL MUSIC';
     El banner de portada va ENCIMA del chrome: el orden es publicidad → player →
     menú. Por eso entra por el slot `sobre-cabecera` del layout y no aquí, donde
     quedaría debajo de la cabecera.
+
+    `banner` es la campaña VENDIDA que esté corriendo hoy (colección `publicidad`
+    del CMS, tipo «Portada»). Si no hay ninguna llega `null` y el hueco lo pide a
+    Ad Manager, como antes.
   */}
-  <Anuncio formato="portada" nombre="inicio-portada" slot="sobre-cabecera" />
+  <Anuncio formato="portada" nombre="inicio-portada" banner={banner} slot="sobre-cabecera" />
 
   {/* 1. qué suena — la señal */}
   <PanelSenal parrilla={parrilla.bloques} alAire={parrilla.alAire} sono={sono} />

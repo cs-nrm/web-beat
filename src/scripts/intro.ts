@@ -35,23 +35,32 @@ function apuntarQueSeVio(): void {
 }
 
 export function prepararIntro(): void {
+  /*
+   * 🔴 Quien decide si el intro corre es el script EN LÍNEA de `Intro.astro`, que
+   * se ejecuta de forma síncrona antes de pintar. Aquí solo se atiende el caso en
+   * que ya decidió que sí.
+   *
+   * Este módulo no puede tomar la decisión: va diferido —se vería un destello del
+   * sitio antes de taparlo— y se evalúa una sola vez por contexto de JavaScript,
+   * así que en una navegación de Astro no vuelve a correr. Ese reparto es
+   * exactamente lo que estaba mal antes.
+   */
+  if (document.documentElement.dataset.intro !== 'corre') return;
+
   const intro = document.getElementById('beat-intro');
   if (!intro) return;
-
-  /*
-   * Ya visto: fuera de inmediato y sin animación. Se quita del DOM en vez de
-   * ocultarlo — durante el resto de la sesión no vuelve a hacer falta.
-   */
-  if (yaSeVio()) {
-    intro.remove();
-    return;
-  }
 
   let cerrado = false;
   const cerrar = (): void => {
     if (cerrado) return;
     cerrado = true;
     apuntarQueSeVio();
+    /*
+     * Se quita la autorización ANTES que el nodo: mientras `data-intro` siga
+     * puesto, cualquier overlay que llegue en una navegación posterior volvería a
+     * animarse. Es la marca de «esto ya pasó», no solo de «esto está corriendo».
+     */
+    delete document.documentElement.dataset.intro;
     intro.remove();
     document.removeEventListener('keydown', alTeclado);
   };

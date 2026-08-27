@@ -25,6 +25,34 @@
  */
 ---
 
+{/*
+  🔴 Esta decisión se toma AQUÍ, en línea y de forma síncrona, no en el módulo de
+  abajo. Dos razones:
+
+  · El módulo va diferido: corre después de analizar el DOM, y para entonces el
+    navegador ya pudo pintar. Se vería un destello del sitio antes de que el intro
+    lo tape, que es peor que no tener intro.
+
+  · Y es lo que arregla el fallo que vio Carlos: el intro NO salía en la primera
+    carga y SÍ al volver de una interior, justo al revés. El módulo se evalúa una
+    vez por contexto de JavaScript, y una navegación de Astro no recarga el
+    contexto — así que al volver al inicio nadie quitaba el overlay y la animación
+    corría sola. Ahora el overlay no se muestra salvo que esto lo autorice, y esto
+    se ejecuta en cada carga de documento pero se marca a sí mismo para no repetir.
+*/}
+<script is:inline>
+  (function () {
+    try {
+      if (window.__beatIntroDecidido) return;
+      window.__beatIntroDecidido = 1;
+      if (sessionStorage.getItem('beat-intro-visto') === '1') return;
+      document.documentElement.dataset.intro = 'corre';
+    } catch (e) {
+      /* Sin sessionStorage no hay intro. Es decoración: ante la duda, se salta. */
+    }
+  })();
+</script>
+
 <div class="beat-intro" id="beat-intro" aria-hidden="true">
   <div class="beat-intro__zoom">
     <div class="beat-intro__mark">
@@ -52,7 +80,24 @@
 </div>
 
 <style>
+  /*
+    🔴 El overlay NO EXISTE salvo que el script en línea de arriba lo autorice.
+
+    Antes estaba visible por defecto y el JS lo quitaba, y eso producía justo el
+    comportamiento invertido que vio Carlos: no salía en la primera carga —el módulo
+    corría, veía la marca de sesión y lo retiraba— pero SÍ al volver de una interior,
+    porque una navegación de Astro no recarga el contexto de JavaScript y entonces
+    nadie lo retiraba.
+
+    ✨ Y esta forma es más segura que la anterior: sin JavaScript no hay intro y el
+    sitio se ve entero. Antes el sitio dependía de que la animación de salida llegara
+    a correr.
+  */
   .beat-intro {
+    display: none;
+  }
+
+  :global(html[data-intro='corre']) .beat-intro {
     /*
       🔴 2.5s en total —entrada + pausa + zoom—, que es lo que Carlos le pidió a
       Claude Design. El handoff llegó con 4.1s, así que los tres tiempos se escalan

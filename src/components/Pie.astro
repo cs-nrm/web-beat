@@ -31,7 +31,7 @@ const todasLasSecciones = [...SECCIONES, ...SECCIONES_PIE];
 
     <div class="grid gap-11 md:grid-cols-4 md:gap-grid">
       <nav aria-labelledby="pie-secciones">
-        <h2 id="pie-secciones" class="t-label mb-6 text-text-accent">Nuestras Secciones</h2>
+        <h2 id="pie-secciones" class="t-label mb-6 font-bold text-text-primary">Nuestras Secciones</h2>
         <ul class="space-y-4 text-body-sm">
           {todasLasSecciones.map((s) => (
             <li>
@@ -48,7 +48,7 @@ const todasLasSecciones = [...SECCIONES, ...SECCIONES_PIE];
       </nav>
 
       <div>
-        <h2 class="t-label mb-6 text-text-accent">Radio en vivo</h2>
+        <h2 class="t-label mb-6 font-bold text-text-primary">Radio en vivo</h2>
         <p class="mb-6 text-body-sm text-text-muted">
           Escucha nuestra señal <a href="/en-vivo" class="text-text-link underline decoration-borde-quiet underline-offset-4 transition-colors duration-2 ease-out hover:text-text-link-hover">aquí</a>.
         </p>
@@ -68,7 +68,7 @@ const todasLasSecciones = [...SECCIONES, ...SECCIONES_PIE];
       </div>
 
       <div>
-        <h2 class="t-label mb-6 text-text-accent">Síguenos en redes sociales</h2>
+        <h2 class="t-label mb-6 font-bold text-text-primary">Síguenos en redes sociales</h2>
         {redes.length ? (
           <ul class="space-y-4 text-body-sm">
             {redes.map((r) => (
@@ -90,7 +90,7 @@ const todasLasSecciones = [...SECCIONES, ...SECCIONES_PIE];
       </div>
 
       <div>
-        <h2 class="t-label mb-6 text-text-accent">Descarga nuestras apps</h2>
+        <h2 class="t-label mb-6 font-bold text-text-primary">Descarga nuestras apps</h2>
         <ul class="space-y-4 text-body-sm">
           {APPS.map((a) => (
             <li>

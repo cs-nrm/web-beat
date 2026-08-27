@@ -9,9 +9,30 @@
  * Nada de redefinir la paleta — para eso está el DS.
  */
 
+/* ============================================================
+   🔴 EL SITIO VA EN BLANCO Y NEGRO
+   ------------------------------------------------------------
+   Decisión de Carlos, 2026-08-27. El design system trae una paleta cálida
+   —`--luz-ambar`, `--luz-coral`, `--luz-ink`— y Beat no la usa: lo que resalta va
+   en BLANCO Y NEGRITA, y si hace falta se le pone luz (`beat-resplandor`). Lo demás
+   en gris, o sin negrita.
+
+   ✨ Se hace REDEFINIENDO los tres tokens y no tocando los usos. Son 14 sitios en
+   siete archivos; cambiarlos uno a uno garantiza que el próximo componente vuelva a
+   traer naranja, porque el token seguiría diciendo ámbar. Redefiniéndolo, quien
+   escriba `--text-accent` obtiene el color correcto sin saber que hubo una decisión.
+
+   ⚠️ Los tokens `--luz-*` NO se tocan: siguen sirviendo en superficies, bordes y
+   estelas de marca —donde el umbral es 3:1 y el naranja es identidad, no texto—.
+   Lo que cambia es a qué apunta el TEXTO.
+
+   ⚠️ Y el enlace pierde el color pero conserva el subrayado, que ya tenía. Sin él
+   esto rompería WCAG 1.4.1: el color no puede ser lo único que distingue un enlace.
+   ============================================================ */
 :root {
-  /* Nada por ahora: el tema oscuro pasa WCAG completo. Lo más bajo es
-     --text-faint con 6.23:1 sobre --surface-base, y --state-onair con 6.82:1. */
+  --text-accent: var(--mist-0);
+  --text-link: var(--mist-0);
+  --text-link-hover: #ffffff;
 }
 
 /**

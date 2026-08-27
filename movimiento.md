@@ -157,7 +157,39 @@ página**.
 
 ---
 
-## 8. Cómo se verifica
+## 8. 🔴 El sitio va en blanco y negro
+
+Decisión de Carlos, 2026-08-27. El design system trae una paleta cálida
+—`--luz-ambar`, `--luz-coral`, `--luz-ink`— y **Beat no la usa para texto**.
+
+| Qué | Cómo |
+|---|---|
+| Lo que resalta | **blanco y en negrita**, y si hace falta con luz (`beat-resplandor`) |
+| Lo demás | gris, o sin negrita |
+| Enlaces | blanco **+ subrayado** |
+
+✨ Se aplica **redefiniendo los tokens**, no cambiando los usos:
+
+```css
+--text-accent: var(--mist-0);
+--text-link:   var(--mist-0);
+```
+
+Eran 14 usos en siete archivos. Cambiarlos uno a uno garantizaba que el próximo
+componente volviera a traer naranja, porque el token seguiría diciendo ámbar.
+Redefiniéndolo, quien escriba `--text-accent` obtiene el color correcto sin
+enterarse de que hubo una decisión — que es como debe funcionar un token.
+
+⚠️ Los `--luz-*` NO se tocan. Siguen sirviendo en superficies, bordes y las estelas
+de marca, donde el umbral es 3:1 y el naranja es identidad, no texto. Lo que cambia
+es a qué apunta el TEXTO.
+
+⚠️ Y el enlace pierde el color pero **conserva el subrayado**, que ya tenía. Sin él
+esto rompería WCAG 1.4.1: el color no puede ser lo único que distingue un enlace.
+
+---
+
+## 9. Cómo se verifica
 
 🔴 **Recargar no basta.** Los tres fallos de contenido inalcanzable aparecieron
 solo en el flujo **Home → nota → atrás**, porque el estado vive en el DOM y el DOM

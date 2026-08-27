@@ -31,14 +31,14 @@ const hora = (iso: string) =>
   descripcion="La señal de Beat 100.9 en vivo, y lo que ha sonado."
 >
   <div class="mx-auto max-w-grid px-contenedor py-13">
-    <p class="t-label mb-4 text-text-accent">Escuchar en vivo</p>
+    <p class="t-label mb-4 font-bold text-text-primary">Escuchar en vivo</p>
     <h1 class="t-display-3 mb-6 text-text-primary">La señal, siempre</h1>
     <p class="mb-12 max-w-[62ch] text-body-lg text-text-muted">
       El reproductor de arriba no se detiene mientras navegas el sitio.
     </p>
 
     <section class="mb-12">
-      <h2 class="t-label mb-6 text-text-accent">Escucha en</h2>
+      <h2 class="t-label mb-6 font-bold text-text-primary">Escucha en</h2>
       <ul class="flex flex-wrap gap-4">
         {PLATAFORMAS_RADIO.map((p) => (
           <li>
@@ -54,7 +54,7 @@ const hora = (iso: string) =>
     </section>
 
     <section>
-      <h2 class="t-label mb-6 text-text-accent">Lo que ha sonado</h2>
+      <h2 class="t-label mb-6 font-bold text-text-primary">Lo que ha sonado</h2>
       {sono.length ? (
         <ul class="divide-y divide-borde-hairline">
           {sono.map((e) => (

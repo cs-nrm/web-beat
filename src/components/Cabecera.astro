@@ -88,11 +88,30 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     data-mount={estacion.tritonMount}
     class="flex h-player items-center gap-3 bg-mist-0 px-4 text-noche-0 md:gap-4 md:px-6"
   >
+    {/*
+      El wordmark en la barra CLARA. Aparece solo cuando la barra oscura se recoge,
+      así que las dos nunca lo enseñan a la vez: se lee como que el logo pasa de una
+      a la otra.
+
+      🔴 `filter: invert(1)` y no un archivo aparte. El SVG es blanco y esta barra
+      también, así que hay que darle la vuelta — pero mantener dos archivos que
+      tienen que decir exactamente lo mismo es garantía de que un día dejen de
+      decirlo. Un filtro no puede desincronizarse del original.
+    */}
+    <a
+      href="/"
+      class="cabecera-logo-claro flex-none"
+      aria-label={`${estacion.nombrePublicacion} — Inicio`}
+      tabindex="-1"
+    >
+      <img src="/img/beat-blanco.svg" alt={estacion.nombre} width="155" height="36" />
+    </a>
+
     <span class="flex flex-none items-center gap-2">
       {/* `beat-pulse` es del DS y respeta prefers-reduced-motion. */}
       <span class="h-[7px] w-[7px] rounded-pill bg-noche-0 motion-safe:animate-pulse"></span>
       <span class="t-label whitespace-nowrap text-[8px] md:text-[9px]">
-        Al aire<span class="hidden md:inline"> · 100.9 FM</span>
+        Al aire
       </span>
     </span>
 
@@ -178,7 +197,8 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
       aria-label="Abrir el menú"
       aria-expanded="false"
       aria-controls="beat-menu"
-      class="hidden h-8 w-8 flex-none place-items-center bg-noche-0 text-mist-0 md:grid"
+      class="cabecera-menu-claro hidden h-8 w-8 flex-none place-items-center bg-noche-0 text-mist-0 md:grid"
+      tabindex="-1"
     >
       <Icono nombre="menu" tamano={16} />
     </button>
@@ -282,3 +302,32 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
   import { prepararPlayer } from '@/scripts/player';
   prepararPlayer();
 </script>
+
+<style>
+  /*
+    ── El plegado de la barra de navegación ──
+
+    🔴 Vive AQUÍ y no en `beat.css`, y no es preferencia. El alto de esta barra lo
+    pone una utilidad de Tailwind (`h-header-movil` / `md:h-header`), y las
+    utilidades van en una capa posterior a `proyecto`: desde allí un `height: 0` no
+    gana ni con toda la especificidad del mundo, porque las capas mandan sobre la
+    especificidad. Los estilos de componente Astro no llevan capa, así que ganan a
+    todas. Medido antes de moverlo: la barra se quedaba en 56px.
+  */
+  #beat-cabecera header {
+    overflow: hidden;
+    transition:
+      height var(--dur-3) var(--ease-out),
+      opacity var(--dur-2) var(--ease-out);
+  }
+  #beat-cabecera[data-compacta] header {
+    height: 0;
+    opacity: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #beat-cabecera header {
+      transition: none;
+    }
+  }
+</style>

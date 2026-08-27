@@ -141,6 +141,7 @@ const canonical = new URL(Astro.url.pathname, SITE_URL).href;
       import { prepararCursor } from '@/scripts/cursor';
       import { prepararRejilla } from '@/scripts/rejilla';
       import { prepararIntro } from '@/scripts/intro';
+      import { prepararCabecera } from '@/scripts/cabecera';
       prepararAnuncios();
       prepararEscritura();
       prepararRevelado();
@@ -148,6 +149,7 @@ const canonical = new URL(Astro.url.pathname, SITE_URL).href;
       prepararCursor();
       prepararRejilla();
       prepararIntro();
+      prepararCabecera();
       // Solo CABLEA los visores; Plyr (110 KB) no se baja hasta que alguien
       // pide un video.
       prepararVideo();

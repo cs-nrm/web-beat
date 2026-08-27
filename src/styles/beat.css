@@ -1340,7 +1340,8 @@ body {
    El recorrido es corto (4%) a propósito: en una foto de nota, más que eso se lee
    como que la imagen "resbala" dentro de su marco. */
 .tarjeta-foto img,
-.mosaico-foto img {
+.mosaico-foto img,
+.nt-hero img {
   --foto-base: 1;
   scale: var(--foto-base);
   transition: scale var(--dur-4) var(--ease-out);
@@ -1359,11 +1360,13 @@ body {
       es lo que se quiere. Los descendientes la encuentran por nombre.
     */
     .tarjeta-foto,
-    .mosaico-foto {
+    .mosaico-foto,
+    .nt-hero {
       view-timeline: --beat-foto block;
     }
     .tarjeta-foto img,
-    .mosaico-foto img {
+    .mosaico-foto img,
+    .nt-hero img {
       /* Con el recorrido de ±4% hace falta algo de escala, o asomarían los bordes. */
       --foto-base: 1.09;
       animation: beat-parallax linear both;
@@ -1692,5 +1695,68 @@ html[data-cursor] body::after {
   }
   .beat-remate:hover i > :first-child {
     translate: 0 0;
+  }
+}
+
+/* ============================================================
+   Cabecera compacta: la barra oscura se recoge al bajar
+   ------------------------------------------------------------
+   Al hacer scroll, la barra de navegación se pliega y el wordmark aparece en la
+   barra clara del player. Las dos nunca lo muestran a la vez, así que se lee como
+   que el logo PASA de una barra a la otra en vez de duplicarse.
+
+   `cabecera.ts` solo pone y quita `data-compacta`; lo demás es CSS.
+   ============================================================ */
+
+/* ⚠️ El plegado de la barra oscura NO vive aquí, vive en `Cabecera.astro`.
+   Su alto lo pone una utilidad de Tailwind (`h-header-movil`), y las utilidades van
+   en una capa POSTERIOR a `proyecto`: desde aquí el `height: 0` no puede ganar por
+   mucha especificidad que se le eche, porque las capas mandan sobre la
+   especificidad. Los estilos de un componente Astro no llevan capa, así que ganan a
+   todas. Medido: desde aquí la barra se quedaba en 56px.
+
+/*
+  El wordmark de la barra clara y su hamburguesa: apagados arriba del todo,
+  encendidos al recogerse la oscura.
+
+  ✨ Suben 6px al aparecer. Es lo que hace que se lea como un traspaso y no como
+  dos logos independientes: uno se va hacia arriba con su barra, el otro llega
+  desde abajo.
+*/
+.cabecera-logo-claro,
+.cabecera-menu-claro {
+  opacity: 0;
+  translate: 0 6px;
+  pointer-events: none;
+  transition:
+    opacity var(--dur-3) var(--ease-out),
+    translate var(--dur-3) var(--ease-out);
+}
+#beat-cabecera[data-compacta] .cabecera-logo-claro,
+#beat-cabecera[data-compacta] .cabecera-menu-claro {
+  opacity: 1;
+  translate: 0 0;
+  pointer-events: auto;
+}
+
+/* 🔴 El ancho se reserva SIEMPRE, esté visible o no. Si el logo apareciera con su
+   ancho al hacer scroll, empujaría todo lo demás de la barra y el título saltaría
+   de sitio en el momento justo en que el lector está leyendo. */
+.cabecera-logo-claro {
+  width: 96px;
+}
+.cabecera-logo-claro img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* El SVG es blanco y la barra también. Ver el comentario del marcado. */
+  filter: invert(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #beat-cabecera header,
+  .cabecera-logo-claro,
+  .cabecera-menu-claro {
+    transition: none;
   }
 }

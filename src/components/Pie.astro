@@ -135,12 +135,19 @@ const todasLasSecciones = [...SECCIONES, ...SECCIONES_PIE];
           href={m.url}
           rel="noopener noreferrer"
           target="_blank"
-          class="group flex items-baseline gap-2 transition-colors duration-2 ease-out"
+          aria-label={`${m.nombre} ${m.sub}`}
+          class="marca-nrm"
         >
-          <span class="t-title-2 text-[19px] text-text-muted transition-colors duration-2 ease-out group-hover:text-text-primary">
-            {m.nombre}
-          </span>
-          <span class="t-label text-text-faint">{m.sub}</span>
+          {/*
+            🔴 `loading="lazy"` y con medidas: el pie está al final de la página, así
+            que estos cinco logos no tienen por qué competir por el ancho de banda con
+            lo que el lector está mirando. Y sin `width`/`height` cada uno provocaría
+            un salto de maquetado al llegar.
+
+            El `alt` va vacío porque el nombre ya lo dice el `aria-label` del enlace:
+            repetirlo haría que un lector de pantalla anunciara la marca dos veces.
+          */}
+          <img src={m.logo} alt="" width="120" height="40" loading="lazy" decoding="async" />
         </a>
       ))}
     </div>
@@ -163,3 +170,66 @@ const todasLasSecciones = [...SECCIONES, ...SECCIONES_PIE];
     </div>
   </div>
 </footer>
+
+<style>
+</style>
+
+<style>
+  /* ── La tira de marcas del corporativo ── */
+  .marca-nrm img {
+    display: block;
+    width: auto;
+    height: 26px;
+    /*
+      🔴 A escala de grises, y no por capricho: el sitio va en blanco y negro
+      (movimiento.md §8) y estos son cinco logos de marcas distintas, cada uno con
+      su color. Puestos tal cual, la tira sería la única mancha de color del sitio
+      — y además la más ruidosa, porque son cinco paletas que no conversan entre sí.
+
+      Al pasar el cursor recupera brillo pero NO color: se ilumina, que es como
+      responde todo lo demás en el sitio.
+    */
+    filter: grayscale(1) brightness(1.7) contrast(0.85);
+    opacity: 0.55;
+    transition:
+      opacity var(--dur-2) var(--ease-out),
+      filter var(--dur-2) var(--ease-out);
+  }
+  .marca-nrm:hover img {
+    opacity: 1;
+    filter: grayscale(1) brightness(2.1) contrast(0.9);
+  }
+
+  /*
+    ── Marca de agua ──
+
+    Del pie de v1, donde era el wordmark al 2% abajo a la derecha. Se conserva la
+    idea y sube a 3.5%: aquí el fondo es más oscuro y al 2% no se distinguía.
+
+    ⚠️ `z-index: -1` la deja DETRÁS del contenido del pie, y `pointer-events: none`
+    evita que capture clics. Es textura, no contenido: no debe estorbar ni al ratón
+    ni a un lector de pantalla —por eso es un pseudo-elemento y no un `<img>`—.
+
+    ⚠️ Y el `isolation: isolate` del pie es lo que impide que ese `z-index: -1` se
+    escape del pie y acabe detrás del fondo de la página, donde no se vería.
+  */
+  footer {
+    position: relative;
+    isolation: isolate;
+  }
+  footer::before {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    width: min(65%, 760px);
+    height: 80%;
+    background-image: url('/img/beat-blanco.svg');
+    background-repeat: no-repeat;
+    background-position: right bottom;
+    background-size: contain;
+    opacity: 0.035;
+    pointer-events: none;
+  }
+</style>

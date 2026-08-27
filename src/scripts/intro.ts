@@ -11,8 +11,8 @@
  * el nodo cuando ya no pinta nada.
  */
 
-/** 2.06 + 0.84 + 1.2 + 0.6 de salida. Se usa como red, no como reloj. */
-const DURACION_MS = 4800;
+/** 1.26 + 0.5 + 0.74 de intro + 0.4 de salida, con margen. Es red, no reloj. */
+const DURACION_MS = 3400;
 
 const MARCA = 'beat-intro-visto';
 

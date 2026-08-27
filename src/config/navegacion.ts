@@ -106,10 +106,21 @@ export const LEGALES: EntradaNav[] = [
  * daría una lista incompleta y una consulta por render para un dato que cambia
  * cada varios años.
  */
+/**
+ * 🔴 Los logos salen del bucket del corporativo, el mismo que usan los cuatro
+ * repos hermanos. No se copian a `public/`: son marcas de OTRAS empresas del grupo
+ * y quien las actualiza es el corporativo, no nosotros. Copiándolas tendríamos
+ * cinco copias envejeciendo por su cuenta en cinco repos.
+ *
+ * `nombre` se conserva aunque haya logo: es el `alt`, y es lo que se ve si la
+ * imagen no carga.
+ */
+const LOGOS = 'https://storage.googleapis.com/nrm-web/nrm/images/footer/';
+
 export const MARCAS_NRM = [
-  { nombre: 'NRM', sub: 'Comunicaciones', url: 'https://nrm.com.mx' },
-  { nombre: 'OYE', sub: '89.7', url: 'https://oyedigital.mx' },
-  { nombre: 'Stereo Cien', sub: '100.1', url: 'https://stereociendigital.mx' },
-  { nombre: 'Sabrosita', sub: '590', url: 'https://sabrositadigital.mx' },
-  { nombre: 'En Enfoque', sub: 'Noticias', url: 'https://enfoquenoticias.com.mx' },
+  { nombre: 'NRM', sub: 'Comunicaciones', url: 'https://nrm.com.mx', logo: `${LOGOS}NRM-2.png` },
+  { nombre: 'OYE', sub: '89.7', url: 'https://oyedigital.mx', logo: `${LOGOS}OYE2.png` },
+  { nombre: 'Stereo Cien', sub: '100.1', url: 'https://stereociendigital.mx', logo: `${LOGOS}stereocien_footer-jul26.png` },
+  { nombre: 'Sabrosita', sub: '590', url: 'https://sabrositadigital.mx', logo: `${LOGOS}sabrosita.png` },
+  { nombre: 'En Enfoque', sub: 'Noticias', url: 'https://enfoquenoticias.com.mx', logo: `${LOGOS}enfoque-footer.png` },
 ] as const;

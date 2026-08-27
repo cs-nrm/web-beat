@@ -53,10 +53,18 @@
 
 <style>
   .beat-intro {
-    --intro-enter: 2.06s;
-    --intro-hold: 0.84s;
-    --intro-zoom: 1.2s;
-    --intro-reveal: 0.6s;
+    /*
+      🔴 2.5s en total —entrada + pausa + zoom—, que es lo que Carlos le pidió a
+      Claude Design. El handoff llegó con 4.1s, así que los tres tiempos se escalan
+      por el MISMO factor (0.61) en vez de recortar uno.
+      Recortar solo la pausa, por ejemplo, mataría el compás: la pausa es el silencio
+      antes del zoom, y sin ella el barrido y el arranque se pisan.
+          entrada  2.06 → 1.26     pausa  0.84 → 0.50     zoom  1.20 → 0.74
+    */
+    --intro-enter: 1.26s;
+    --intro-hold: 0.5s;
+    --intro-zoom: 0.74s;
+    --intro-reveal: 0.4s;
     --ease-zoom: cubic-bezier(0.5, 0, 0.9, 0.35);
 
     position: fixed;
@@ -72,7 +80,9 @@
     place-items: center;
     overflow: hidden;
     animation: intro-out var(--intro-reveal) var(--ease-out) forwards;
-    animation-delay: calc(var(--intro-enter) + var(--intro-hold) + var(--intro-zoom) - 0.34s);
+    /* El solape también se escala: 0.34s sobre un zoom de 1.2s es un adelanto
+       discreto; sobre uno de 0.74s sería arrancar el fundido a mitad del zoom. */
+    animation-delay: calc(var(--intro-enter) + var(--intro-hold) + var(--intro-zoom) - 0.21s);
   }
 
   /* La capa del superzoom. El origen es la contraforma del primer `0` de 100.9

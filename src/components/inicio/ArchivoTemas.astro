@@ -27,7 +27,7 @@ const anteriores = temas.filter((t) => t.id !== excluir).slice(0, 3);
         {anteriores.map((t) => {
           const portada = urlMedia(t.portada, 'card');
           return (
-            <a href={`/especiales/${t.slug}`} class="at-tema">
+            <a href={`/especiales/${t.slug}`} class="at-tema" data-luz>
               <div class="at-numero-caja">
                 {portada && <img src={portada} alt="" loading="lazy" decoding="async" />}
                 <div class="beat-grid at-trama" />

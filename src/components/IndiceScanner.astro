@@ -97,7 +97,7 @@ const bajada = filtro
       destacada ? (
         <>
           {/* ── La nota principal, a dos columnas ── */}
-          <a href={`/noticias/${destacada.slug}`} class="sc-lead">
+          <a href={`/noticias/${destacada.slug}`} class="sc-lead" data-luz>
             <div class="sc-lead-foto" transition:name={`foto-nota-${destacada.id}`}>
               {fotoDestacada && (
                 <img

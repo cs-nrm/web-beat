@@ -1487,3 +1487,62 @@ html[data-cursor] body::after {
     display: none;
   }
 }
+
+/* ============================================================
+   La luz recorre las estelas de marca
+   ------------------------------------------------------------
+   Lo pidió Carlos al ver que las estelas de la portada estaban quietas: «o
+   deberían igual tener movimiento o ser blancas que salgan de vez en cuando».
+
+   🔴 Se hace lo primero y NO lo segundo, a propósito. El naranja de la estela es
+   el motivo de marca del design system; volverla blanca la dejaría indistinguible
+   de las luces de la cuadrícula y el sitio perdería una de sus dos firmas. Lo que
+   pasa por ella sí es blanco: la estela conserva su color como base y la luz que la
+   recorre habla el mismo idioma que la cuadrícula. Se gana movimiento sin gastar
+   la marca.
+
+   `rejilla.ts` decide CUÁNDO y cuánto dura cada pasada — aquí solo está el aspecto.
+   ============================================================ */
+.mosaico-estelas .beat-streak {
+  /* Recorta el punto que la recorre para que no se salga por los extremos. */
+  overflow: hidden;
+}
+
+.mosaico-estelas .beat-streak::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  /* Corto y con los bordes apagados: un punto de luz, no un barrido. */
+  background: linear-gradient(
+    90deg,
+    transparent 34%,
+    rgb(255 255 255 / 0.9) 50%,
+    transparent 66%
+  );
+}
+
+.mosaico-estelas .beat-streak.es-pasa::after {
+  animation: estela-pasa var(--dur-pasa, 1.6s) cubic-bezier(0.4, 0, 0.25, 1) both;
+}
+
+@keyframes estela-pasa {
+  0% {
+    opacity: 0;
+    translate: -70% 0;
+  }
+  18%,
+  74% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: 170% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mosaico-estelas .beat-streak::after {
+    display: none;
+  }
+}

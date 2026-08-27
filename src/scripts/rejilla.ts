@@ -107,6 +107,48 @@ function programar(luz: HTMLElement): void {
   window.setTimeout(() => lanzar(luz), entre(400, 6000));
 }
 
+/**
+ * Las estelas de marca se encienden de vez en cuando.
+ *
+ * 🔴 Por qué hacía falta: son el motivo del design system sobre la foto de
+ * portada, y estaban clavadas. Se les había puesto una deriva de ±2.5% en 19
+ * segundos, que sobre el papel es movimiento y en pantalla es nada — Carlos lo
+ * notó enseguida.
+ *
+ * Y por qué NO se vuelven blancas, que era la otra idea: el naranja es el motivo
+ * de marca. Volverlas blancas las haría indistinguibles de las luces de la
+ * cuadrícula y el sitio perdería una de sus dos firmas visuales. Lo que sí se
+ * puede es que un punto BLANCO las recorra: la estela conserva su color como base
+ * y la luz que pasa por ella es la misma gramática de la cuadrícula. Se gana el
+ * movimiento sin gastar la marca.
+ *
+ * ✨ Esto además resuelve que arriba no se vieran luces: la capa de la cuadrícula
+ * va en `z-index: -1` y el mosaico ocupa todo el ancho con fondos opacos, así que
+ * ahí no tenía por dónde asomar. La parte de arriba se anima por su cuenta.
+ */
+function encenderEstela(estela: HTMLElement): void {
+  estela.style.setProperty('--dur-pasa', `${entre(1.1, 2.2).toFixed(2)}s`);
+  estela.classList.add('es-pasa');
+}
+
+function programarEstela(estela: HTMLElement): void {
+  /*
+   * Una sola vez por elemento. `astro:page-load` puede dispararse sobre un DOM que
+   * ya se procesó —al volver con el botón de atrás, por ejemplo— y sin esto se
+   * apilarían oyentes y temporizadores: la estela acabaría parpadeando varias veces
+   * a la vez, cada vez más seguido.
+   */
+  if ('estelaLista' in estela.dataset) return;
+  estela.dataset.estelaLista = '';
+
+  estela.addEventListener('animationend', (e) => {
+    if ((e as AnimationEvent).animationName !== 'estela-pasa') return;
+    estela.classList.remove('es-pasa');
+    window.setTimeout(() => encenderEstela(estela), entre(3500, 14000));
+  });
+  window.setTimeout(() => encenderEstela(estela), entre(1200, 9000));
+}
+
 export function prepararRejilla(): void {
   const w = window as Window & { __beatRejillaLista?: boolean };
   if (w.__beatRejillaLista) return;
@@ -136,4 +178,17 @@ export function prepararRejilla(): void {
    * precisamente el compás que se quiere evitar.
    */
   document.body.appendChild(capa);
+
+  /*
+   * Las estelas SÍ se rehacen en cada navegación, al revés que la capa de la
+   * cuadrícula: viven dentro del contenido, así que al cambiar de página el
+   * navegador las sustituye por otras y las anteriores dejan de existir.
+   */
+  const montarEstelas = (): void => {
+    document
+      .querySelectorAll<HTMLElement>('.mosaico-estelas .beat-streak')
+      .forEach(programarEstela);
+  };
+  montarEstelas();
+  document.addEventListener('astro:page-load', montarEstelas);
 }

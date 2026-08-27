@@ -20,10 +20,26 @@ let y = 0;
 /** Posición en la ventana, para el halo que acompaña al cursor por todo el sitio. */
 let vx = 0;
 let vy = 0;
-let encolado = false;
+
+/**
+ * El fotograma pedido y todavía sin pintar, o `0` si no hay ninguno.
+ *
+ * 🔴 Es un IDENTIFICADOR, no un booleano, y la diferencia es la vida del efecto.
+ *
+ * Antes había un candado: «si ya hay uno pedido, no pidas otro», y solo se soltaba
+ * DENTRO del callback. O sea que si un fotograma se pedía y nunca llegaba, el
+ * candado se quedaba echado y no volvía a pedirse ninguno — jamás. El efecto moría
+ * en silencio y sin forma de recuperarse: exactamente lo que Carlos vio al volver
+ * de una nota, donde solo sobrevivía la parte del hover que no depende del cursor.
+ *
+ * Guardando el id se cancela el anterior y se pide uno nuevo en cada movimiento.
+ * Sigue habiendo como mucho un fotograma pendiente —que era el objetivo— pero
+ * ahora es imposible quedarse esperando uno que no va a venir.
+ */
+let solicitud = 0;
 
 function pintar(): void {
-  encolado = false;
+  solicitud = 0;
 
   /*
    * El halo global va sobre `<html>` y en píxeles de ventana, porque su capa es
@@ -87,11 +103,13 @@ function alMover(e: PointerEvent): void {
    * decenas de veces por segundo y escribir una variable CSS obliga a recalcular
    * estilo: sin esta cola, mover el ratón en diagonal sobre una rejilla de
    * tarjetas basta para que se note.
+   *
+   * Se cancela el pendiente y se pide otro, en vez de no pedir nada si ya hay uno.
+   * Ver el comentario de `solicitud`: la versión con candado se moría si un
+   * fotograma no llegaba.
    */
-  if (!encolado) {
-    encolado = true;
-    requestAnimationFrame(pintar);
-  }
+  if (solicitud) cancelAnimationFrame(solicitud);
+  solicitud = requestAnimationFrame(pintar);
 }
 
 export function prepararCursor(): void {

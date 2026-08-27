@@ -36,7 +36,12 @@ const DURACION_CONTEO = 900;
  */
 const LIMPIEZA_MS = 1400;
 
-const SELECTOR = '[data-revelar], [data-cascada], [data-barrido], [data-contar]';
+/*
+ * ⚠️ Aquí VIVÍA `[data-revelar]`: una máscara que subía desde abajo sobre cada
+ * foto. Se retiró a petición de Carlos —«una cortinilla que se abre hacia arriba»,
+ * y no convencía—. El mecanismo se queda porque lo usan los otros tres efectos.
+ */
+const SELECTOR = '[data-cascada], [data-barrido], [data-contar]';
 
 let vigia: IntersectionObserver | null = null;
 

@@ -18,7 +18,7 @@ resuelta, y apartarse de ella exige razón escrita en el mismo commit.
 | Rol | Tratamiento | Dónde vive |
 |---|---|---|
 | Título de sección o titular display | **Descifrado** al entrar en pantalla, una vez | `escribir.ts` · `[data-escribir]` |
-| Imagen editorial | **Revelado** con máscara al entrar + **parallax** ligado al scroll | `revelar.ts` · `[data-revelar]` |
+| Imagen editorial | **Parallax** ligado al scroll. Nada al entrar. | `animation-timeline: view()` |
 | Lista de texto | **Cascada** de entrada, 70 ms entre ítems | `[data-cascada]` |
 | Cabecera de sección | **Barrido** de luz, una vez | `[data-barrido]` |
 | Cifra que es un dato | **Conteo** desde cero | `[data-contar]` |
@@ -40,6 +40,16 @@ independientes y se componen).
 | `translate` | parallax del scroll |
 | `scale` | el aire que el desplazamiento necesita |
 | `transform` | el desplazamiento hacia el cursor |
+
+---
+
+⚠️ **La imagen NO tiene animación de entrada, y es una decisión.** Hubo una: una
+máscara que subía desde abajo al aparecer. Se retiró porque se leía como una
+cortinilla abriéndose, y en una rejilla de tarjetas eso ocurre varias veces por
+pantalla — con la agravante de que se repetía en cada vuelta al inicio. Lo que
+conserva la imagen es el parallax, que **responde al lector** en vez de ejecutarse
+solo. Si alguna vez vuelve a plantearse una entrada para la media, esta es la razón
+por la que no la hay.
 
 ---
 

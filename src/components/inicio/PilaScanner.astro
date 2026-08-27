@@ -66,15 +66,7 @@ const enLaPila = notas.slice(0, 4).map((n) => ({
         {enLaPila.map((p, i) => (
           <a href={p.href} class="pila-carta" data-luz style={`--i:${i}; --total:${enLaPila.length}`}>
             <div class="pila-carta-foto" transition:name={`foto-nota-${p.nota.id}`}>
-              {/*
-                ⚠️ SIN `data-revelar`, a propósito. Esta tarjeta ya trae su propio
-                movimiento —se apila, se fija y se encoge— y encima es la única
-                estructura del sitio donde la foto vive dentro de un `sticky` con
-                `transform`. Ahí el revelado falló dos veces dejando el hueco en
-                negro. No vale la pena arriesgar el contenido por un efecto que
-                aquí, además, sobra.
-              */}
-              {p.foto && <img src={p.foto} alt={p.alt} loading="lazy" decoding="async" />}
+                            {p.foto && <img src={p.foto} alt={p.alt} loading="lazy" decoding="async" />}
               <div class="beat-grid pila-trama" />
             </div>
 

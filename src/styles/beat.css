@@ -1033,35 +1033,12 @@ body {
    La máscara sube desde abajo mientras la escala se asienta. La escala dura más
    que la máscara a propósito: el recorte termina y la imagen sigue acomodándose
    un instante, que es lo que lo hace sentir suave en vez de mecánico. */
-[data-revelar][data-animando] {
-  clip-path: inset(100% 0 0 0);
-  transform: scale(1.04);
-  /*
-    🔴 `none` a propósito, y no sobra: estas imágenes YA traen
-    `transition: transform 450ms` de otra regla. Sin anularla, el momento en que el
-    script esconde la foto se animaría con esa transición ajena — la imagen se
-    escalaría a la vista antes de recortarse. Declarar la propia en el estado final
-    no basta; hay que apagar la que ya estaba.
-  */
-  transition: none;
-}
-[data-revelar][data-animando][data-visto] {
-  clip-path: inset(0 0 0 0);
-  transform: none;
-  /*
-    🔴 La transición va AQUÍ, en el estado final, no en el escondido.
-
-    Puesta en el estado escondido, el momento en que el script marca el elemento
-    también se anima: la foto se escala y se recorta a la vista, y el lector ve la
-    imagen IRSE antes de volver. Declarada en el estado final, esconder es
-    instantáneo —nadie lo ve— y solo la aparición se anima, que es lo que se
-    quiere. El navegador toma la transición del estado de destino, así que basta
-    con tenerla aquí.
-  */
-  transition:
-    clip-path 700ms var(--ease-out),
-    transform 1100ms var(--ease-out);
-}
+/* ── 1. (retirado) El revelado con máscara ──
+   Subía un `clip-path` desde abajo sobre cada foto al entrar en pantalla. Se quitó
+   a petición de Carlos: se leía como una cortinilla abriéndose, y en una rejilla de
+   tarjetas eso ocurría varias veces por pantalla. Las fotos ahora aparecen sin más;
+   el movimiento que conservan es el parallax ligado al scroll, que responde al
+   lector en vez de ejecutarse solo. */
 
 /* ── 2. Cascada en listas ──
    `--i` lo pone el script sobre cada hijo. El desplazamiento es de 12px: lo justo
@@ -1132,7 +1109,6 @@ body {
 /* Menos movimiento: se anula todo. El script ya evita marcar, pero si algo quedara
    marcado —una navegación a medias, un estado restaurado— esto lo desactiva. */
 @media (prefers-reduced-motion: reduce) {
-  [data-revelar][data-animando],
   [data-cascada][data-animando] > * {
     clip-path: none;
     opacity: 1;

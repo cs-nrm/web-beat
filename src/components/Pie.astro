@@ -20,7 +20,7 @@ const todasLasSecciones = [...SECCIONES, ...SECCIONES_PIE];
 ---
 
 <footer class="mt-13 border-t-hairline border-borde-hairline bg-surface-base">
-  <div class="px-pie py-12">
+  <div class="px-pie py-12 pie-menu">
     <img
       src="/img/beat-blanco.svg"
       alt={estacion.nombre}
@@ -147,7 +147,7 @@ const todasLasSecciones = [...SECCIONES, ...SECCIONES_PIE];
             El `alt` va vacío porque el nombre ya lo dice el `aria-label` del enlace:
             repetirlo haría que un lector de pantalla anunciara la marca dos veces.
           */}
-          <img src={m.logo} alt="" width="120" height="40" loading="lazy" decoding="async" />
+          <img src={m.logo} alt="" width="150" height="150" loading="lazy" decoding="async" />
         </a>
       ))}
     </div>
@@ -179,7 +179,12 @@ const todasLasSecciones = [...SECCIONES, ...SECCIONES_PIE];
   .marca-nrm img {
     display: block;
     width: auto;
-    height: 26px;
+    /*
+      🔴 56px de caja, no 26. Los cinco archivos son lienzos CUADRADOS de 150x150
+      con el logo dentro y aire alrededor: a 26px de alto, el trazo real quedaba en
+      unos 13 y la tira parecía una fila de motas. Medido antes de subirlo.
+    */
+    height: 56px;
     /*
       🔴 A escala de grises, y no por capricho: el sitio va en blanco y negro
       (movimiento.md §8) y estos son cinco logos de marcas distintas, cada uno con
@@ -213,11 +218,17 @@ const todasLasSecciones = [...SECCIONES, ...SECCIONES_PIE];
     ⚠️ Y el `isolation: isolate` del pie es lo que impide que ese `z-index: -1` se
     escape del pie y acabe detrás del fondo de la página, donde no se vería.
   */
-  footer {
+  /*
+    ⚠️ La marca de agua va en el bloque del MENÚ, no en el pie entero.
+    Puesta en el pie, caía sobre el bloque legal —el texto más pequeño y menos
+    contrastado de la página— y competía justo donde peor. Aquí queda detrás de las
+    cuatro columnas, que es el bloque con aire para sostenerla.
+  */
+  .pie-menu {
     position: relative;
     isolation: isolate;
   }
-  footer::before {
+  .pie-menu::before {
     content: '';
     position: absolute;
     right: 0;

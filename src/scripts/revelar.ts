@@ -41,6 +41,17 @@ const SELECTOR = '[data-revelar], [data-cascada], [data-barrido], [data-contar]'
 let vigia: IntersectionObserver | null = null;
 
 /**
+ * El oyente de scroll de la repesca actual.
+ *
+ * 🔴 Hay que guardarlo para poder RETIRARLO. Se crea dentro de `iniciar()`, así que
+ * es un cierre distinto en cada navegación y `removeEventListener` con una función
+ * nueva no quita la vieja. Sin esto, cada visita dejaba otro oyente de scroll
+ * recorriendo una lista de elementos que ya no están en la página: no se ve, no da
+ * error, y va cargando el scroll visita tras visita.
+ */
+let repescaEnCurso: (() => void) | null = null;
+
+/**
  * Sube una cifra desde cero hasta su valor real.
  *
  * 🔴 Se conserva el texto alrededor del número. Estas cifras no son números
@@ -100,6 +111,10 @@ function contar(el: HTMLElement): void {
 function iniciar(): void {
   vigia?.disconnect();
   vigia = null;
+  if (repescaEnCurso) {
+    removeEventListener('scroll', repescaEnCurso);
+    repescaEnCurso = null;
+  }
 
   /*
    * Menos movimiento: no se marca nada. Todo se ve en su estado final, que es lo
@@ -228,6 +243,7 @@ function iniciar(): void {
     repescando = true;
     setTimeout(repescar, 150);
   };
+  repescaEnCurso = alDesplazar;
   addEventListener('scroll', alDesplazar, { passive: true });
 
   vigia = new IntersectionObserver(

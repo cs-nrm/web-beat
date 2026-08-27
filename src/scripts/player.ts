@@ -275,8 +275,31 @@ function cargarSdk(): Promise<void> {
     et.src = URL_SDK;
     et.async = true;
     et.onload = () => resolver();
-    et.onerror = () => rechazar(new Error('No cargó el SDK de Triton'));
+    et.onerror = () => {
+      // Se quita el que falló: si no, el reintento añadiría otro al lado del roto.
+      et.remove();
+      rechazar(new Error('No cargó el SDK de Triton'));
+    };
     document.head.appendChild(et);
+  }).catch((err: unknown) => {
+    /*
+     * 🔴 El fallo NO se memoriza, y esto es lo más serio de todo el archivo.
+     *
+     * Antes se guardaba la promesa tal cual, así que un fallo de carga —red
+     * inestable, CDN bloqueado, un bloqueador de anuncios— quedaba memorizado como
+     * promesa RECHAZADA. Cada intento posterior devolvía esa misma promesa ya
+     * rechazada: la radio no volvía a arrancar EN TODA LA SESIÓN aunque la red se
+     * recuperara. El oyente da play, no pasa nada; da play otra vez, nada. Sin
+     * error visible y sin salida.
+     *
+     * Y siendo el player, esto no es solo una mala experiencia: los audio ads del
+     * pre-roll VAST son ingresos.
+     *
+     * El mismo razonamiento ya estaba escrito en `video.ts` para Plyr; aquí
+     * faltaba.
+     */
+    promesaSdk = null;
+    throw err;
   });
   return promesaSdk;
 }
@@ -408,90 +431,108 @@ export function iniciarPlayer(): void {
   if (!p || typeof TDSdk === 'undefined') return;
   iniciado = true;
 
-  sdk = new TDSdk({
-    coreModules: [
-      {
-        id: 'MediaPlayer',
-        playerId: 'td_container',
-        /**
-         * 🔴 ESTE es el `audioAdaptive` que el SDK lee de verdad — el del módulo
-         * MediaPlayer. Verificado en el bundle 2.9:
-         *   `this.audioAdaptive = config.audioAdaptive != void 0 && config.audioAdaptive`
-         * y la config del módulo solo acepta diez claves: audioAdaptive, hls,
-         * idSync, omnyClipId, omnyOrganizationId, platformId, plugins, rawXML,
-         * sid, url.
-         *
-         * Lo que hace: el SDK clasifica los mounts de la estación en
-         * `audioAdaptive | aac | mp3`, y con esto en `true` prefiere el ADAPTATIVO
-         * (para Beat, `XHSONFM_ADP`).
-         *
-         * Así que `false` significa que HOY Beat está optando explícitamente por
-         * el mount fijo: MP3 a 48 kbps por HTTP progresivo, sin escalón al que
-         * caer. Es sospechoso de ser la causa de los cortes que reportan los
-         * oyentes — ver la nota de abajo.
-         *
-         * ⚠️ CORRECCIÓN de lo que este comentario decía antes: afirmaba que el
-         * `false` aquí y el `true` de abajo eran una pareja deliberada. No lo son.
-         * El de abajo NO ESTÁ en la config del módulo, así que no lo lee nadie: es
-         * decorativo. El único que cuenta es este.
-         */
-        audioAdaptive: false,
-        plugins: [{ id: 'vastAd' }],
-      },
-    ],
-    /**
-     * ⚠️ Decorativo: `audioAdaptive` a nivel raíz NO está en la config que lee el
-     * SDK (solo lo lee el módulo MediaPlayer, arriba). Se conserva porque los
-     * cuatro repos hermanos lo tienen y quitarlo invita a que alguien "arregle" el
-     * de arriba por simetría. No cambia nada.
-     */
-    audioAdaptive: true,
-    /**
-     * Sin esto el player nunca se habilita: es la señal de que el SDK terminó de
-     * cargar sus módulos y ya acepta comandos.
-     */
-    playerReady: () => {
-      listo = true;
-      const boton = el<HTMLButtonElement>('[data-accion="play"]');
-      if (boton) {
-        boton.disabled = false;
-        boton.removeAttribute('aria-busy');
-      }
-      // El volumen del SDK manda sobre el del marcado: si el navegador recordó
-      // otro nivel, el control debe reflejarlo y no mentir.
-      const volumen = el<HTMLInputElement>('[data-accion="volumen"]');
-      const actual = sdk?.getVolume?.();
-      if (volumen && typeof actual === 'number') volumen.value = String(Math.round(actual * 100));
+  /*
+   * 🔴 El `try` no es decorativo: `iniciado` se pone ANTES de construir, para
+   * evitar reentradas, así que si el constructor lanzara la bandera se quedaría
+   * echada con `sdk` en null — y el player no volvería a inicializarse EN TODA LA
+   * SESIÓN. Sin error visible, sin salida, y con el pre-roll VAST de por medio,
+   * que son ingresos.
+   *
+   * Es el mismo patrón que ya nos costó la inclinación de las tarjetas y las fotos
+   * en negro: un estado muerto del que nada saca al programa. Aquí se deshace lo
+   * andado y se permite reintentar.
+   */
+  try {
+    sdk = new TDSdk({
+      coreModules: [
+        {
+          id: 'MediaPlayer',
+          playerId: 'td_container',
+          /**
+           * 🔴 ESTE es el `audioAdaptive` que el SDK lee de verdad — el del módulo
+           * MediaPlayer. Verificado en el bundle 2.9:
+           *   `this.audioAdaptive = config.audioAdaptive != void 0 && config.audioAdaptive`
+           * y la config del módulo solo acepta diez claves: audioAdaptive, hls,
+           * idSync, omnyClipId, omnyOrganizationId, platformId, plugins, rawXML,
+           * sid, url.
+           *
+           * Lo que hace: el SDK clasifica los mounts de la estación en
+           * `audioAdaptive | aac | mp3`, y con esto en `true` prefiere el ADAPTATIVO
+           * (para Beat, `XHSONFM_ADP`).
+           *
+           * Así que `false` significa que HOY Beat está optando explícitamente por
+           * el mount fijo: MP3 a 48 kbps por HTTP progresivo, sin escalón al que
+           * caer. Es sospechoso de ser la causa de los cortes que reportan los
+           * oyentes — ver la nota de abajo.
+           *
+           * ⚠️ CORRECCIÓN de lo que este comentario decía antes: afirmaba que el
+           * `false` aquí y el `true` de abajo eran una pareja deliberada. No lo son.
+           * El de abajo NO ESTÁ en la config del módulo, así que no lo lee nadie: es
+           * decorativo. El único que cuenta es este.
+           */
+          audioAdaptive: false,
+          plugins: [{ id: 'vastAd' }],
+        },
+      ],
+      /**
+       * ⚠️ Decorativo: `audioAdaptive` a nivel raíz NO está en la config que lee el
+       * SDK (solo lo lee el módulo MediaPlayer, arriba). Se conserva porque los
+       * cuatro repos hermanos lo tienen y quitarlo invita a que alguien "arregle" el
+       * de arriba por simetría. No cambia nada.
+       */
+      audioAdaptive: true,
+      /**
+       * Sin esto el player nunca se habilita: es la señal de que el SDK terminó de
+       * cargar sus módulos y ya acepta comandos.
+       */
+      playerReady: () => {
+        listo = true;
+        const boton = el<HTMLButtonElement>('[data-accion="play"]');
+        if (boton) {
+          boton.disabled = false;
+          boton.removeAttribute('aria-busy');
+        }
+        // El volumen del SDK manda sobre el del marcado: si el navegador recordó
+        // otro nivel, el control debe reflejarlo y no mentir.
+        const volumen = el<HTMLInputElement>('[data-accion="volumen"]');
+        const actual = sdk?.getVolume?.();
+        if (volumen && typeof actual === 'number') volumen.value = String(Math.round(actual * 100));
 
-      // La intención que quedó pendiente mientras el SDK cargaba. Es lo que hace
-      // que el PRIMER clic de la sesión reproduzca.
-      if (arranquePendiente) {
-        arranquePendiente = false;
-        arrancar();
-      }
-    },
-    /**
-     * Un módulo que no carga se ve aquí, y es la única forma de enterarse: el SDK
-     * no lanza. Lo típico es el `vastAd` bloqueado por un adblocker, que NO es un
-     * problema —el stream funciona igual— pero conviene poder distinguirlo de una
-     * config mal puesta.
-     */
-    moduleError: (e: { data?: { errors?: unknown } }) => {
-      console.warn('[player] módulo de Triton con error:', e?.data?.errors ?? e);
-    },
-    adBlockerDetected: () => {
-      console.info('[player] adblocker detectado: el audio ad no va a sonar. El stream sí.');
-    },
-    analytics: {
-      active: true,
-      debug: false,
-      appInstallerId: 'beatpag',
-      trackingId: import.meta.env.PUBLIC_GA_ID || undefined,
-      trackingEvents: ['play', 'stop', 'pause', 'resume', 'all'],
-      sampleRate: 100,
-      category: 'Reproduccion Radio Pag',
-    },
-  });
+        // La intención que quedó pendiente mientras el SDK cargaba. Es lo que hace
+        // que el PRIMER clic de la sesión reproduzca.
+        if (arranquePendiente) {
+          arranquePendiente = false;
+          arrancar();
+        }
+      },
+      /**
+       * Un módulo que no carga se ve aquí, y es la única forma de enterarse: el SDK
+       * no lanza. Lo típico es el `vastAd` bloqueado por un adblocker, que NO es un
+       * problema —el stream funciona igual— pero conviene poder distinguirlo de una
+       * config mal puesta.
+       */
+      moduleError: (e: { data?: { errors?: unknown } }) => {
+        console.warn('[player] módulo de Triton con error:', e?.data?.errors ?? e);
+      },
+      adBlockerDetected: () => {
+        console.info('[player] adblocker detectado: el audio ad no va a sonar. El stream sí.');
+      },
+      analytics: {
+        active: true,
+        debug: false,
+        appInstallerId: 'beatpag',
+        trackingId: import.meta.env.PUBLIC_GA_ID || undefined,
+        trackingEvents: ['play', 'stop', 'pause', 'resume', 'all'],
+        sampleRate: 100,
+        category: 'Reproduccion Radio Pag',
+      },
+    });
+  } catch (err) {
+    iniciado = false;
+    sdk = null;
+    if (import.meta.env.DEV) console.error('[player] el SDK no se pudo construir', err);
+    return;
+  }
 
   sdk.addEventListener('stream-status', alCambiarEstado);
 

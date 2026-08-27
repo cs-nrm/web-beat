@@ -63,9 +63,33 @@ interface Texto {
 }
 
 const textos: Texto[] = [];
-let corriendo = false;
+/**
+ * El fotograma pedido y todavía sin pintar, o `0` si no hay ninguno.
+ *
+ * 🔴 Un ID, no un booleano — y por la misma razón que en `cursor.ts`, donde este
+ * mismo patrón mató el efecto. Con un candado del tipo «si ya hay uno pedido, no
+ * pidas otro», soltado solo DENTRO del callback, basta con que un fotograma no
+ * llegue para que no se vuelva a pedir ninguno nunca más.
+ *
+ * Aquí el daño era más sutil que en el cursor y por eso costaba más verlo: el
+ * rescate por `setTimeout` sigue poniendo el texto real, así que nada queda
+ * ilegible. Lo que se pierde es el efecto — cada titular siguiente se revolvería,
+ * esperaría, y saltaría de golpe a su texto en vez de descifrarse.
+ */
+let solicitud = 0;
 let cuadro = 0;
 let vigia: IntersectionObserver | null = null;
+
+/**
+ * El oyente de scroll de la repesca actual.
+ *
+ * 🔴 Hay que guardarlo para poder RETIRARLO. Se crea dentro de `iniciar()`, así que
+ * es un cierre distinto en cada navegación y `removeEventListener` con una función
+ * nueva no quita la vieja. Sin esto, cada visita dejaba otro oyente de scroll
+ * recorriendo una lista de elementos que ya no están en la página: no se ve, no da
+ * error, y va cargando el scroll visita tras visita.
+ */
+let repescaEnCurso: (() => void) | null = null;
 
 const alAzar = (fuente: string): string => fuente[Math.floor(Math.random() * fuente.length)];
 
@@ -202,10 +226,13 @@ function arrancar(t: Texto): void {
   t.arranque = performance.now();
   t.rescate = window.setTimeout(() => rematar(t), t.duracion + 2000);
 
-  if (!corriendo) {
-    corriendo = true;
-    requestAnimationFrame(pintar);
-  }
+  /*
+   * Se cancela el pendiente y se pide otro, en vez de no pedir nada si ya hay uno.
+   * `arrancar()` corre una vez por titular, así que el coste es nulo — y así ni
+   * siquiera aquí queda un camino en el que se espere un fotograma que no viene.
+   */
+  if (solicitud) cancelAnimationFrame(solicitud);
+  solicitud = requestAnimationFrame(pintar);
 }
 
 /**
@@ -215,6 +242,7 @@ function arrancar(t: Texto): void {
  * apaga solo en cuanto no queda ningún bloque a medias.
  */
 function pintar(ahora: number): void {
+  solicitud = 0;
   cuadro++;
   const remover = cuadro % CADA_CUANTOS_CUADROS === 0;
   let vivos = 0;
@@ -248,14 +276,18 @@ function pintar(ahora: number): void {
     }
   }
 
-  if (vivos) requestAnimationFrame(pintar);
-  else corriendo = false;
+  solicitud = vivos ? requestAnimationFrame(pintar) : 0;
 }
 
 function iniciar(): void {
   vigia?.disconnect();
+  if (repescaEnCurso) {
+    removeEventListener('scroll', repescaEnCurso);
+    repescaEnCurso = null;
+  }
   textos.length = 0;
-  corriendo = false;
+  if (solicitud) cancelAnimationFrame(solicitud);
+  solicitud = 0;
 
   /*
    * En una pestaña OCULTA no se hace nada y se reintenta al mirarla.
@@ -398,6 +430,7 @@ function iniciar(): void {
     repescando = true;
     setTimeout(repescar, 150);
   };
+  repescaEnCurso = alDesplazar;
   addEventListener('scroll', alDesplazar, { passive: true });
 
   vigia = new IntersectionObserver(

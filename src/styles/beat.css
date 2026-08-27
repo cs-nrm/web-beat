@@ -797,8 +797,19 @@ html {
   .at-numero-caja img {
     transition: transform var(--dur-4) var(--ease-out);
   }
-  .tarjeta:hover .tarjeta-foto img,
-  .mosaico-centro:hover .mosaico-foto img,
+  /*
+    ⚠️ `.tarjeta` y `.mosaico-centro` YA NO están aquí, y es a propósito.
+
+    Estas dos tienen su propio hover más abajo —la tarjeta se inclina y la foto se
+    desplaza siguiendo al cursor— que también escribe `transform`. Teniéndolas en
+    los dos sitios, dos reglas de la misma capa y la misma especificidad peleaban
+    por la misma propiedad y ganaba la que quedara más abajo en el archivo: un
+    empate resuelto por accidente de orden, que es exactamente el tipo de cosa que
+    se rompe al mover un bloque de sitio.
+
+    Las que siguen aquí no tienen hover propio, así que el acercamiento simple es
+    lo que les toca.
+  */
   .pila-carta:hover .pila-carta-foto img,
   .sc-lead:hover .sc-lead-foto img,
   .at-tema:hover .at-numero-caja img {

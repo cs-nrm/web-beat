@@ -112,7 +112,7 @@ parte el texto en `span` ni se registran oyentes.
 
 ---
 
-## 7. Forma de la media: retícula o pieza suelta
+## 6. Forma de la media: retícula o pieza suelta
 
 La pregunta «¿por qué unas imágenes tienen esquinas redondeadas y otras no?» tiene
 respuesta, pero no era la que parecía. No son dos criterios en conflicto: son dos
@@ -133,7 +133,7 @@ la nota y el marco del visor estaban en cero por descuido, no por decisión.
 
 ---
 
-## 8. Qué recibe el hover del cursor
+## 7. Qué recibe el hover del cursor
 
 Mismo criterio: no es «todas las imágenes», es **todo lo que sea un enlace a otra
 página**.
@@ -147,7 +147,7 @@ página**.
 
 ---
 
-## 6. Cómo se verifica
+## 8. Cómo se verifica
 
 🔴 **Recargar no basta.** Los tres fallos de contenido inalcanzable aparecieron
 solo en el flujo **Home → nota → atrás**, porque el estado vive en el DOM y el DOM

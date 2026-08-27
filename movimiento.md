@@ -112,6 +112,41 @@ parte el texto en `span` ni se registran oyentes.
 
 ---
 
+## 7. Forma de la media: retícula o pieza suelta
+
+La pregunta «¿por qué unas imágenes tienen esquinas redondeadas y otras no?» tiene
+respuesta, pero no era la que parecía. No son dos criterios en conflicto: son dos
+**contextos** distintos, y los dos son deliberados.
+
+| Contexto | Radio | Por qué |
+|---|---|---|
+| Pieza de una **retícula** — mosaico, índice de Scanner | **0** | El `gap: 2px` sobre `--border-hairline` ES la línea que separa las piezas. Redondearlas rompe la retícula y deja huecos grises en las esquinas. |
+| Pieza que **flota** sobre el fondo — tarjetas apiladas, visor, hero de nota | `--r-media` | Necesita borde propio: no hay retícula que la delimite. |
+| **Publicidad** | lo que sirva el anunciante | No se toca. Ver §2. |
+
+Se usa el token semántico `--r-media`, no `--r-3`. Valen lo mismo hoy, pero uno
+dice *qué es* y el otro *cuánto mide*: el día que la marca cambie el radio de la
+media, se cambia en un sitio.
+
+⚠️ Inventariado el 2026-08-27: solo las tarjetas apiladas cumplían esto. El hero de
+la nota y el marco del visor estaban en cero por descuido, no por decisión.
+
+---
+
+## 8. Qué recibe el hover del cursor
+
+Mismo criterio: no es «todas las imágenes», es **todo lo que sea un enlace a otra
+página**.
+
+| | Recibe |
+|---|---|
+| Tarjeta que es un enlace | luz + inclinación + la foto se desplaza |
+| Tarjeta que ya usa su `transform` (la pila) | luz + la foto se desplaza, **sin** inclinación |
+| Media que NO es un enlace — hero de nota, visor | nada: no lleva a ningún sitio, así que no debe insinuar que sí |
+| Publicidad | nada |
+
+---
+
 ## 6. Cómo se verifica
 
 🔴 **Recargar no basta.** Los tres fallos de contenido inalcanzable aparecieron

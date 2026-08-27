@@ -336,6 +336,8 @@ const etiquetas = (nota.etiquetas ?? []).filter(
     aspect-ratio: 16 / 7;
     background: var(--grad-noche);
     overflow: hidden;
+    /* Flota sobre el fondo, así que lleva radio de media. Ver movimiento.md §7. */
+    border-radius: var(--r-media);
   }
   .nt-hero img {
     position: absolute;

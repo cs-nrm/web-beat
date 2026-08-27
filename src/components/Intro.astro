@@ -1,0 +1,247 @@
+---
+/**
+ * El intro de carga. Del handoff «Barrido mono» de Claude Design.
+ *
+ * El wordmark entra en movimiento sobre negro, se detiene, y un superzoom atraviesa
+ * la contraforma del primer `0` de `100.9` hasta abrir el inicio.
+ *
+ * 🔴 CORRE UNA SOLA VEZ POR SESIÓN, y solo en el inicio. Un intro de 4.1s que se
+ * repite en cada visita deja de ser una entrada y pasa a ser un peaje. Lo controla
+ * `sessionStorage`, no una cookie: una cookie haría que la respuesta variara por
+ * visitante y eso rompería la caché de borde del HTML, que es de las pocas cosas que
+ * el plan da por decididas.
+ *
+ * 🔴 SE RETIRA SOLO, SIN JAVASCRIPT. La animación de salida termina en opacidad 0 y
+ * `pointer-events: none`, así que aunque el script no corra —falle, esté bloqueado,
+ * lo que sea— el overlay deja de tapar el sitio. Es la regla §3 del contrato: ningún
+ * efecto puede dejar el contenido inalcanzable. El script solo apunta que ya se vio y
+ * limpia el nodo.
+ *
+ * ⚠️ NO se porta la animación `site-in` del handoff, y el propio handoff explica por
+ * qué: deja un `transform` sobre el contenedor del sitio, y un elemento transformado
+ * se convierte en bloque contenedor de sus hijos `position: fixed`. Aquí eso
+ * desanclaría el halo del cursor, el modal del pre-roll VAST y la cabecera. El
+ * superzoom ya resuelve la transición sin necesidad de tocar el sitio.
+ */
+---
+
+<div class="beat-intro" id="beat-intro" aria-hidden="true">
+  <div class="beat-intro__zoom">
+    <div class="beat-intro__mark">
+      {/* El rastro de movimiento: el mismo trazo, desenfocado y detrás. */}
+      <div class="beat-intro__smear">
+        <img src="/img/beat-intro.svg" alt="" width="503" height="171" />
+      </div>
+      <div class="beat-intro__logo">
+        <img src="/img/beat-intro.svg" alt="" width="503" height="171" />
+      </div>
+      {/* Dos estelas asimétricas: nunca centradas ni simétricas. */}
+      <span class="beat-intro__streak beat-intro__streak--soft"></span>
+      <span class="beat-intro__streak beat-intro__streak--thin"></span>
+    </div>
+  </div>
+
+  {/*
+    🔴 Un BOTÓN, no «clic en cualquier parte».
+    Con la superficie entera escuchando, un clic suelto mientras carga la página
+    —o el que dispara un navegador al enfocar— se lleva el intro sin que nadie lo
+    pidiera. Pasó al probarlo: desaparecía al instante. Un botón se pulsa a
+    propósito, sale en el orden de tabulación y dice lo que hace.
+  */}
+  <button type="button" class="beat-intro__saltar" data-saltar>Saltar</button>
+</div>
+
+<style>
+  .beat-intro {
+    --intro-enter: 2.06s;
+    --intro-hold: 0.84s;
+    --intro-zoom: 1.2s;
+    --intro-reveal: 0.6s;
+    --ease-zoom: cubic-bezier(0.5, 0, 0.9, 0.35);
+
+    position: fixed;
+    inset: 0;
+    /*
+      Por encima de todo lo del sitio: la cabecera va en 200 y el modal del VAST en
+      500. El intro tapa incluso al modal a propósito — durante el intro no hay
+      todavía reproducción, así que no hay anuncio que pueda quedar oculto.
+    */
+    z-index: 9999;
+    background: var(--noche-0);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    animation: intro-out var(--intro-reveal) var(--ease-out) forwards;
+    animation-delay: calc(var(--intro-enter) + var(--intro-hold) + var(--intro-zoom) - 0.34s);
+  }
+
+  /* La capa del superzoom. El origen es la contraforma del primer `0` de 100.9
+     cuando el logo mide 58% del ancho; si cambia ese ancho, hay que recalcularlo. */
+  .beat-intro__zoom {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    transform-origin: 55.5% 60%;
+    animation: intro-zoom var(--intro-zoom) var(--ease-zoom) forwards;
+    animation-delay: calc(var(--intro-enter) + var(--intro-hold));
+    will-change: transform;
+  }
+
+  .beat-intro__mark {
+    position: relative;
+    width: min(58vw, 720px);
+  }
+  @media (max-aspect-ratio: 1 / 1) {
+    .beat-intro__mark {
+      width: 76vw;
+    }
+  }
+  .beat-intro__mark img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .beat-intro__logo {
+    animation: intro-in var(--intro-enter) var(--ease-out) both;
+    will-change: transform, filter, opacity;
+  }
+
+  .beat-intro__smear {
+    position: absolute;
+    inset: 0;
+    filter: blur(12px) grayscale(1) brightness(0.62);
+    animation: intro-smear var(--intro-enter) var(--ease-out) both;
+  }
+
+  .beat-intro__streak {
+    position: absolute;
+    left: 0;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.45), transparent);
+    animation: intro-streak calc(var(--intro-enter) * 0.95) var(--ease-out) both;
+  }
+  .beat-intro__streak--soft {
+    top: 52%;
+    width: 55%;
+    height: 24px;
+    filter: blur(15px);
+  }
+  .beat-intro__streak--thin {
+    top: 39%;
+    width: 34%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.75), transparent);
+    animation-delay: 0.18s;
+  }
+
+  @keyframes intro-in {
+    0% {
+      opacity: 0;
+      transform: translateX(-16%) scaleX(1.18);
+      filter: blur(16px);
+    }
+    18% {
+      opacity: 1;
+    }
+    62% {
+      transform: translateX(1.6%) scaleX(1.02);
+      filter: blur(2.5px);
+    }
+    100% {
+      opacity: 1;
+      transform: none;
+      filter: blur(0);
+    }
+  }
+  @keyframes intro-smear {
+    0% {
+      opacity: 0;
+      transform: translateX(-24%) scaleX(1.3);
+    }
+    18% {
+      opacity: 0.55;
+    }
+    72% {
+      opacity: 0;
+      transform: translateX(4%) scaleX(1.05);
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+  @keyframes intro-streak {
+    0% {
+      opacity: 0;
+      transform: translateX(-70%);
+    }
+    28% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(120%);
+    }
+  }
+  @keyframes intro-zoom {
+    0% {
+      transform: scale(1);
+    }
+    52% {
+      transform: scale(4.5);
+    }
+    100% {
+      transform: scale(26);
+    }
+  }
+  /*
+    🔴 La salida termina en `pointer-events: none` y `visibility: hidden`, no solo en
+    opacidad 0. Con la opacidad sola, el overlay seguiría capturando los clics de todo
+    el sitio: invisible y bloqueando. Y así es el CSS quien libera la página, no el
+    script.
+  */
+  @keyframes intro-out {
+    0% {
+      opacity: 1;
+    }
+    99% {
+      opacity: 0;
+      visibility: visible;
+    }
+    100% {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+  }
+
+  .beat-intro__saltar {
+    position: absolute;
+    right: 20px;
+    bottom: 18px;
+    z-index: 1;
+    padding: 9px 16px;
+    border-radius: var(--r-pill);
+    background: rgb(250 251 250 / 0.1);
+    color: var(--mist-2);
+    font: var(--type-label);
+    letter-spacing: var(--track-label);
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out);
+  }
+  .beat-intro__saltar:hover {
+    background: rgb(250 251 250 / 0.18);
+    color: var(--mist-0);
+  }
+
+  /*
+    Menos movimiento: no hay intro. Un superzoom a escala 26 es exactamente lo que
+    esa preferencia existe para evitar. Se oculta de entrada, sin animación.
+  */
+  @media (prefers-reduced-motion: reduce) {
+    .beat-intro {
+      display: none;
+    }
+  }
+</style>

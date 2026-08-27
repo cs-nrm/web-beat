@@ -16,6 +16,7 @@
  * llenando sola conforme la redacción captura, sin un deploy por sección.
  */
 import Base from '@/layouts/Base.astro';
+import Intro from '@/components/Intro.astro';
 import Anuncio from '@/components/Anuncio.astro';
 import PanelSenal from '@/components/inicio/PanelSenal.astro';
 import Mosaico from '@/components/inicio/Mosaico.astro';
@@ -103,6 +104,13 @@ const lema = 'BEAT 100.9 · TOTAL MUSIC';
     del CMS, tipo «Portada»). Si no hay ninguna llega `null` y el hueco lo pide a
     Ad Manager, como antes.
   */}
+  {/*
+    El intro va por el mismo slot que la portada, y por la misma razón: el `<slot />`
+    de contenido está DEBAJO de la cabecera, así que desde ahí sería imposible tapar
+    la página entera. Es `position: fixed`, así que su sitio en el árbol solo importa
+    para el apilamiento — y aquí ningún ancestro crea contexto propio.
+  */}
+  <Intro slot="sobre-cabecera" />
   <Anuncio formato="portada" nombre="inicio-portada" banner={banner} slot="sobre-cabecera" />
 
   {/* 1. qué suena — la señal */}

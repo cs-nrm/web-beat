@@ -63,16 +63,38 @@ export const PLATAFORMAS_RADIO = [
  * viejo. Enlazar a una app que va a romperse en el corte sería peor que no
  * enlazarla.
  */
+/**
+ * Las apps de la estación.
+ *
+ * 🔴 Las URLs salen del pie del sitio v1 (`git show main:src/components/Footer.astro`),
+ * no de la nada: son las fichas REALES en tiendas, con el id de la app publicada.
+ * Inventarlas habría mandado gente a una ficha que no existe.
+ *
+ * ⚠️ `Alexa` apuntaba a `/alexa`, una página del v1 que en v2 no existe todavía.
+ * Se deja en `null` —el pie la pinta apagada— en vez de enlazar a un 404: mejor
+ * decir «esto aún no» que romper la promesa del enlace. Ver C1/D3 del plan: la
+ * skill de Alexa es de las cosas que hay que inventariar antes del corte.
+ */
 export const APPS: Array<{ tienda: string; url: string | null }> = [
-  { tienda: 'App Store', url: null },
-  { tienda: 'Google Play', url: null },
+  { tienda: 'App Store', url: 'https://apps.apple.com/mx/app/beat-100-9/id444090239' },
+  { tienda: 'Google Play', url: 'https://play.google.com/store/apps/details?id=com.sferea.beat' },
   { tienda: 'Alexa', url: null },
 ];
 
-/** Legales. Son `paginas` en el CMS (pendiente, A1); por ahora la ruta se reserva. */
+/**
+ * Legales y corporativos.
+ *
+ * Los dos primeros son `paginas` en el CMS (pendiente, A1); por ahora la ruta se
+ * reserva y el pie los pinta apagados.
+ *
+ * ⚠️ `Ventas` es del CORPORATIVO, no de la estación: sale del pie del v1 y del de
+ * los repos hermanos, y apunta al contacto de NRM. Es el enlace por el que entra el
+ * dinero, así que es el que menos conviene perder en un relanzamiento.
+ */
 export const LEGALES: EntradaNav[] = [
   { corto: 'Aviso de privacidad', largo: 'Aviso de privacidad', href: '/aviso-de-privacidad', pendiente: true },
   { corto: 'Términos y condiciones', largo: 'Términos y condiciones', href: '/terminos-y-condiciones', pendiente: true },
+  { corto: 'Ventas', largo: 'Ventas', href: 'https://nrm.com.mx/contacto/' },
 ];
 
 /**

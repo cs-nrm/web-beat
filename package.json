@@ -18,7 +18,8 @@
     "sync:types": "node scripts/sync-payload-types.mjs",
     "sync:types:check": "node scripts/sync-payload-types.mjs --check",
     "fuentes": "node scripts/fuentes.mjs",
-    "guardas": "node scripts/guardas.mjs && node scripts/guarda-cascada.mjs"
+    "guardas": "node scripts/guardas.mjs && node scripts/guarda-cascada.mjs",
+    "preview:cms": "CMS_URL=https://admin.nrm.com.mx astro preview"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.2.4",

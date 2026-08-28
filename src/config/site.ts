@@ -79,6 +79,32 @@ export function noIndexarHost(hostname: string): boolean {
  *  la VPC (p. ej. http://10.0.0.5:3000). El navegador nunca lo ve. */
 export const CMS_URL = envServidor('CMS_URL').replace(/\/$/, '');
 
+/**
+ * 🔴 Si falta, se grita. No es paranoia: es el fallo que ya costó un despliegue.
+ *
+ * `CMS_URL` va SIN prefijo `PUBLIC_`, así que se lee en ejecución y Vite no la
+ * hornea en el bundle —solo inlinea las `PUBLIC_*`—. Cuando el proceso arranca sin
+ * ella, cada consulta sale contra una URL vacía, falla, y el sitio responde **200
+ * con cero contenido**: cabecera, pie y menú perfectos, y ni una noticia.
+ *
+ * Es el peor modo de falla que existe. No hay error en pantalla, el monitoreo ve
+ * 200, y quien lo mira piensa que el CMS está vacío. Pasó en el beta de
+ * `web-enfoque` (31 jul 2026) y volvió a pasar aquí con `pnpm preview`, que tampoco
+ * carga `.env`.
+ *
+ * Un aviso en el arranque no lo arregla, pero convierte media hora de buscar a
+ * ciegas en una línea que dice qué hacer.
+ */
+if (!CMS_URL) {
+  console.error(
+    '\n🔴 CMS_URL está vacía. El sitio va a responder 200 SIN CONTENIDO.\n' +
+      '   Es una variable de EJECUCIÓN (sin prefijo PUBLIC_), así que no basta con\n' +
+      '   tenerla en `.env`: `astro preview` y el contenedor no lo cargan.\n' +
+      '   · en local:  CMS_URL=https://admin.nrm.com.mx pnpm preview\n' +
+      '   · en Docker: ya la pasa docker-compose; revisa que llegue al contenedor.\n',
+  );
+}
+
 /** Origen PÚBLICO del CMS: la media que carga el navegador.
  *  Si no se define, cae a `CMS_URL` (setup de un solo host). Separarlos hace
  *  trivial el corte «IP interna ↔ dominio público». */

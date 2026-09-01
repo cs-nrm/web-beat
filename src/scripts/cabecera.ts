@@ -90,6 +90,40 @@ function alDesplazar(): void {
 }
 
 /**
+ * Marca en la nav la sección en la que estamos.
+ *
+ * 🔴 Esto lo pinta el SERVIDOR en la primera carga, y en una navegación del lado
+ * del cliente esa marca se queda CONGELADA: la cabecera lleva `transition:persist`,
+ * así que el nodo que sobrevive es el de la página anterior, con su `es-activo`
+ * intacto y con el `aria-current` que ya no corresponde.
+ *
+ * El síntoma que lo destapó: entrar a Agenda, volver al Inicio, y ver «AGENDA»
+ * subrayada sobre el mosaico del Inicio. No era un problema del subrayado —era
+ * este— y además le mentía a un lector de pantalla, que oía «página actual» de una
+ * sección en la que no estaba.
+ *
+ * ⚠️ La regla tiene que ser LA MISMA que la del servidor
+ * (`Cabecera.astro`: `ruta === href || ruta.startsWith(href + '/')`). Si las dos
+ * divergen, la marca cambia al navegar y nadie sabe cuál de las dos manda.
+ */
+function marcarSeccion(): void {
+  const ruta = location.pathname;
+  const enlaces = document.querySelectorAll<HTMLAnchorElement>(
+    '#beat-cabecera .beat-nav-enlace',
+  );
+
+  for (const a of enlaces) {
+    // `getAttribute` y no `a.pathname`: el href del marcado es relativo y lo que
+    // se compara tiene que ser exactamente lo que declara la config de navegación.
+    const href = a.getAttribute('href') ?? '';
+    const activo = href !== '' && (ruta === href || ruta.startsWith(`${href}/`));
+    a.classList.toggle('es-activo', activo);
+    if (activo) a.setAttribute('aria-current', 'page');
+    else a.removeAttribute('aria-current');
+  }
+}
+
+/**
  * Reconcilia tras una navegación.
  *
  * 🔴 La cabecera lleva `transition:persist`: el nodo sobrevive intacto y con él el
@@ -115,6 +149,7 @@ function reconciliar(): void {
     coincide con el que se cree tener.
   */
   compacta = document.getElementById('beat-cabecera')?.hasAttribute('data-compacta') ?? false;
+  marcarSeccion();
   pintar();
 }
 

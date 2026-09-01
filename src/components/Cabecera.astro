@@ -244,10 +244,19 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
         Los enlaces van en BLANCO y NEGRITA (decisión de Carlos, 2026-08-24). Antes
         el activo iba en el ámbar de marca y el resto en gris.
 
-        🔴 Al quitar el color, la sección en curso se marca con una LÍNEA debajo. Si
-        se distinguiera solo por el color, quien no lo percibe bien se quedaría sin
-        saber dónde está — WCAG 1.4.1 pide justamente que el color no sea el único
-        portador de información.
+        🔴 La sección en curso se marca en BLANCO Y NEGRITA, y el resto en gris sin
+        negrita. Antes llevaba una línea coral debajo, que era el último naranja que
+        quedaba en la interfaz.
+
+        El PESO es lo que sostiene la accesibilidad: WCAG 1.4.1 pide que el color no
+        sea el único portador, y la negrita no es color — es una diferencia
+        tipográfica, visible también para quien no distingue tonos.
+
+        ⚠️ Ni el color ni el peso van como utilidades de Tailwind aquí. Las
+        utilidades viven en una capa POSTERIOR a `proyecto`, así que desde `beat.css`
+        no habría forma de cambiarlos: `font-bold text-mist-0` en esta línea dejaba
+        los cinco enlaces idénticos y sin manera de distinguir el activo salvo
+        añadiéndole algo encima. Que es exactamente de dónde salió la línea coral.
 
         ⚠️ Y el comentario va AQUÍ, no entre los atributos del `<a>`. Astro no admite
         comentarios dentro de la lista de atributos: los parsea como atributos
@@ -266,7 +275,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
             href={s.href}
             aria-current={activo(s.href) ? 'page' : undefined}
             class:list={[
-              'beat-nav-enlace t-label whitespace-nowrap text-[9.5px] font-bold text-mist-0',
+              'beat-nav-enlace t-label whitespace-nowrap text-[9.5px]',
               { 'es-activo': activo(s.href) },
             ]}
           >{s.corto}</a>

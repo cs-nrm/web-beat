@@ -28,9 +28,16 @@
 
    ⚠️ Y el enlace pierde el color pero conserva el subrayado, que ya tenía. Sin él
    esto rompería WCAG 1.4.1: el color no puede ser lo único que distingue un enlace.
+
+   ⚠️ `--text-live` se sumó el 2026-09-01. Se había quedado fuera y hoy no se ve,
+   porque ninguna página usa todavía `.beat-live` ni `.beat-sectionhead__kicker` —
+   que es exactamente el descuido que este bloque existe para evitar: el token
+   seguía diciendo ámbar, así que el primero que usara esas clases habría traído el
+   naranja de vuelta sin enterarse de que hubo una decisión.
    ============================================================ */
 :root {
   --text-accent: var(--mist-0);
+  --text-live: var(--mist-0);
   --text-link: var(--mist-0);
   --text-link-hover: #ffffff;
 }
@@ -560,20 +567,45 @@ html {
    debajo y NO con un color distinto: si el color fuera la única diferencia, quien
    no lo percibe bien se quedaría sin saber en qué sección está (WCAG 1.4.1).
    ============================================================ */
+/*
+  🔴 En reposo, GRIS y sin negrita. La sección en curso, BLANCA, en negrita y con
+  luz. Es la regla del §8 de movimiento.md aplicada al menú, y de paso se lleva el
+  último naranja que quedaba en la interfaz: una línea coral de 2px debajo del
+  activo.
+
+  Por qué estaba esa línea: los cinco enlaces se pintaban iguales —`font-bold
+  text-mist-0` en el marcado— así que no había NADA que distinguiera al activo, y
+  hubo que añadirle algo encima. Con los inactivos apagados, el activo se
+  distingue por lo que ya es, y no hace falta subrayarlo.
+
+  ⚠️ WCAG 1.4.1: el portador no es el color, es el PESO. Un enlace blanco y en
+  negrita entre cuatro grises y regulares se distingue aunque no se perciba el
+  tono. Por eso los inactivos bajan de peso además de color: si todos siguieran en
+  negrita, lo único que quedaría sería el tono, y eso es justo lo que la norma
+  prohíbe.
+
+  ⚠️ Y el hover NO cambia el peso, solo el color y la luz. Cambiar la negrita al
+  pasar el cursor movería a los vecinos de sitio en la fila.
+*/
 .beat-nav-enlace {
   position: relative;
   padding-bottom: 4px;
-  transition: opacity var(--dur-2) var(--ease-out);
+  color: var(--text-muted);
+  font-weight: var(--w-medium);
+  transition: color var(--dur-2) var(--ease-out);
 }
 .beat-nav-enlace:hover,
 .beat-nav-enlace:focus-visible {
   /* En vez de apagarse al pasar el cursor, se ENCIENDE. Es más coherente con un
      sitio cuyo motivo es la luz, y no castiga al enlace que estás por pulsar. */
+  color: var(--mist-0);
   text-shadow: var(--resplandor-tenue);
 }
 /* La sección en curso está encendida de forma permanente. */
 .beat-nav-enlace.es-activo {
-  text-shadow: var(--resplandor-tenue);
+  color: var(--mist-0);
+  font-weight: var(--w-bold);
+  text-shadow: var(--resplandor);
 }
 @media (prefers-contrast: more) {
   .beat-nav-enlace:hover,
@@ -581,13 +613,6 @@ html {
   .beat-nav-enlace.es-activo {
     text-shadow: none;
   }
-}
-.beat-nav-enlace.es-activo::after {
-  content: '';
-  position: absolute;
-  inset: auto 0 0 0;
-  height: 2px;
-  background: var(--luz-coral);
 }
 
 /* ============================================================

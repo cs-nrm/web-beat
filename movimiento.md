@@ -167,13 +167,32 @@ Decisión de Carlos, 2026-08-27. El design system trae una paleta cálida
 | Lo que resalta | **blanco y en negrita**, y si hace falta con luz (`beat-resplandor`) |
 | Lo demás | gris, o sin negrita |
 | Enlaces | blanco **+ subrayado** |
+| Sección en curso en la nav | blanco, **negrita** y con luz; el resto gris y sin negrita |
 
 ✨ Se aplica **redefiniendo los tokens**, no cambiando los usos:
 
 ```css
 --text-accent: var(--mist-0);
+--text-live:   var(--mist-0);
 --text-link:   var(--mist-0);
 ```
+
+⚠️ Quedaban dos naranjas fuera del alcance de los tokens, y se cerraron el
+2026-09-01:
+
+- **La línea coral bajo la sección activa de la nav.** Estaba ahí porque los cinco
+  enlaces se pintaban idénticos —`font-bold text-mist-0` como utilidades en el
+  marcado— y no había nada que distinguiera al activo, así que hubo que añadirle
+  algo encima. Con los inactivos en gris y sin negrita, el activo se distingue por
+  lo que ya es. **El portador de la accesibilidad pasa a ser el PESO**, que no es
+  color y por tanto cumple WCAG 1.4.1 sin necesidad de la línea.
+- **El acento de Plyr** (`--plyr-color-main`), que era la barra de progreso del
+  visor de cápsulas: naranja a pantalla completa.
+
+⚠️ Y una trampa de capas que se repite: el color y el peso NO pueden ir como
+utilidades de Tailwind en el marcado si `beat.css` tiene que poder cambiarlos. Las
+utilidades van en una capa POSTERIOR a `proyecto`, así que desde ahí no hay
+especificidad que valga.
 
 Eran 14 usos en siete archivos. Cambiarlos uno a uno garantizaba que el próximo
 componente volviera a traer naranja, porque el token seguiría diciendo ámbar.
@@ -295,6 +314,18 @@ los eventos de scroll y las líneas de tiempo de scroll. Un elemento correctamen
 animado y uno atascado se leen IGUAL. Para medir el estado de destino, inyecta
 `* { transition: none !important; animation: none !important }` antes de leer — o
 mejor, lee el DOM (atributos, clases) en vez de valores calculados.
+
+🔴 **Quinto caso, 2026-09-01:** la marca de «sección en curso» de la nav se
+quedaba pegada al navegar. La pinta el servidor, y la cabecera es persistente, así
+que el nodo que sobrevive es el de la página ANTERIOR: entrar a Agenda y volver al
+Inicio dejaba «AGENDA» marcada sobre el mosaico del Inicio, y le decía «página
+actual» a un lector de pantalla desde una sección en la que ya no estabas. Se
+reconcilia en `astro:after-swap`, con **la misma regla que el servidor** — si las
+dos divergen, la marca cambia al navegar y no se sabe cuál manda.
+
+**La lección general, que ya va por tres formas distintas: nada que dependa de la
+RUTA puede quedarse escrito dentro del bloque persistente.** Ni el estado plegado,
+ni la sección activa, ni lo que venga después.
 
 🔴 **Cuarto caso, 2026-09-01, cazado exactamente en ese flujo:** al volver de un
 interior al Inicio la barra oscura se quedaba plegada. La causa era una lectura

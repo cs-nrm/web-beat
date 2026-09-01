@@ -1,0 +1,90 @@
+---
+/**
+ * La cabecera de un interior. Una sola, para las cinco secciones.
+ *
+ * 🔴 Existe para que no vuelva a haber cinco cabeceras distintas. Antes cada
+ * sección se maquetaba en su archivo, y así fue como acabamos con tres tamaños de
+ * titular, dos alturas de tira y una bajada que decía «Notas, entrevistas y
+ * reportajes de…» en secciones donde no hay notas ni entrevistas ni reportajes.
+ *
+ * ⚠️ NO lleva bajada, y es decisión: esas líneas eran relleno («Notas,
+ * entrevistas y reportajes…», «Se actualiza todos los días»), prometían cosas que
+ * el sitio no sostiene y empujaban el contenido real media pantalla hacia abajo.
+ * Lo que describe la sección sigue estando donde sirve —la `<meta description>`,
+ * que es lo que lee un buscador—, no en pantalla repitiéndole al lector dónde
+ * acaba de entrar.
+ *
+ * ⚠️ El `rotulo` sí se queda cuando es un DATO —«ACTUALIZADO 28 AGO», «7
+ * TEMAS»—: eso no describe, informa.
+ */
+import NavSecciones from '@/components/NavSecciones.astro';
+
+interface Props {
+  /** El titular grande. Va en mayúsculas tal cual llega. */
+  titulo: string;
+  /** El `href` de la sección en curso, para marcarla en la tira. */
+  activa?: string | null;
+  /** Un dato corto encima del titular. Nunca una descripción. */
+  rotulo?: string | null;
+}
+
+const { titulo, activa = null, rotulo = null } = Astro.props;
+---
+
+<header class="cs">
+  <NavSecciones activa={activa} class="cs-nav" />
+  <div class="cs-titular">
+    {rotulo && <span class="beat-label cs-rotulo">{rotulo}</span>}
+    <h1 class="beat-display beat-resplandor es-fuerte cs-titulo" data-escribir>{titulo}</h1>
+  </div>
+  <slot />
+</header>
+
+<style>
+  .cs {
+    padding: 28px 24px 0;
+  }
+  /*
+    La tira va ARRIBA del titular, no debajo.
+
+    Es la única navegación visible del interior —la barra oscura va recogida— así
+    que ocupa el sitio donde el lector busca un menú. Debajo del titular se leería
+    como un filtro de esta sección, que es justo lo que dejó de ser.
+  */
+  .cs-nav {
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border-quiet);
+  }
+  .cs-titular {
+    padding-top: 26px;
+  }
+  .cs-rotulo {
+    color: var(--mist-0);
+  }
+  .cs-titulo {
+    margin: 12px 0 0;
+    color: var(--mist-1);
+    font-size: var(--size-display-2);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 0.94;
+  }
+
+  @media (max-width: 899px) {
+    .cs {
+      padding: 18px 16px 0;
+    }
+    .cs-nav {
+      padding-bottom: 18px;
+    }
+    .cs-titular {
+      padding-top: 20px;
+    }
+    .cs-rotulo {
+      font-size: 8.5px;
+    }
+    .cs-titulo {
+      font-size: 38px;
+    }
+  }
+</style>

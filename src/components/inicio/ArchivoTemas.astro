@@ -13,16 +13,34 @@ interface Props {
   temas: Especiale[];
   /** El vigente, que se excluye de la rejilla porque ya está arriba. */
   excluir?: number | null;
+  /**
+   * Cuántos se pintan. `null` = todos.
+   *
+   * En el Inicio son tres —es un adelanto del archivo, no el archivo—; en
+   * `/fenomeno-residente` no se corta nada, porque ahí la lista completa ES la
+   * página.
+   */
+  limite?: number | null;
+  /**
+   * El box de 300×250 pegado al costado.
+   *
+   * Va en el Inicio, donde este bloque comparte pantalla con otras seis secciones.
+   * En la sección propia se retira: la rejilla es el contenido principal de la
+   * página y no debe encogerse 300px para hacerle sitio a un anuncio, que además
+   * ya tiene su hueco más abajo.
+   */
+  riel?: boolean;
 }
 
-const { temas, excluir = null } = Astro.props;
+const { temas, excluir = null, limite = 3, riel = true } = Astro.props;
 
-const anteriores = temas.filter((t) => t.id !== excluir).slice(0, 3);
+const filtrados = temas.filter((t) => t.id !== excluir);
+const anteriores = limite == null ? filtrados : filtrados.slice(0, limite);
 ---
 
 {
   anteriores.length > 0 && (
-    <section class="at">
+    <section class:list={['at', { 'sin-riel': !riel }]}>
       <div class="at-rejilla">
         {anteriores.map((t) => {
           const portada = urlMedia(t.portada, 'card');
@@ -45,9 +63,11 @@ const anteriores = temas.filter((t) => t.id !== excluir).slice(0, 3);
         })}
       </div>
 
-      <aside class="at-riel">
-        <Anuncio formato="box" nombre="inicio-box" unidad="Box2" />
-      </aside>
+      {riel && (
+        <aside class="at-riel">
+          <Anuncio formato="box" nombre="inicio-box" unidad="Box2" />
+        </aside>
+      )}
     </section>
   )
 }
@@ -132,6 +152,10 @@ const anteriores = temas.filter((t) => t.id !== excluir).slice(0, 3);
   .at-riel {
     position: sticky;
     top: calc(var(--chrome-h) + 16px);
+  }
+  /* Sin box al lado, la rejilla ocupa el ancho entero. */
+  .at.sin-riel {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   @media (max-width: 1199px) {

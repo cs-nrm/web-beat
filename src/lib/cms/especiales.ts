@@ -103,3 +103,23 @@ export async function obtenerEspeciales(serieSlug?: string, cuantos = 24): Promi
     return [];
   }
 }
+
+/**
+ * Un especial por slug — la página de un tema.
+ *
+ * `depth: 2` como el vigente: sin él las piezas llegan como ids y la página se
+ * queda sin cápsulas ni playlist.
+ *
+ * ⚠️ NO lleva `catch`: quien llama tiene que poder distinguir «no existe» de «el
+ * CMS no contesta». Un 404 cacheable sobre un especial que sí existe se queda
+ * pegado en el borde y en el índice de Google; la respuesta honesta es 503. Es el
+ * mismo reparto que ya usa `obtenerNota`.
+ */
+export async function obtenerEspecial(slug: string): Promise<Especiale | null> {
+  const r = await cmsFetchEstacion<RespuestaLista<Especiale>>('especiales', {
+    'where[slug][equals]': slug,
+    depth: 2,
+    limit: 1,
+  });
+  return r.docs[0] ?? null;
+}

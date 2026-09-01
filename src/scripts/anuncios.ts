@@ -19,11 +19,16 @@ import { ga4 } from './analitica';
 interface Slot {
   getSlotElementId(): string;
 }
+/** Lo único que nos interesa de `slotRenderEnded`: quién y si vino vacío. */
+interface EventoRender {
+  slot: Slot;
+  isEmpty: boolean;
+}
 interface PubAds {
   refresh(slots?: Slot[]): void;
   enableSingleRequest(): void;
   disableInitialLoad(): void;
-  addEventListener(evento: string, cb: (e: never) => void): void;
+  addEventListener(evento: 'slotRenderEnded', cb: (e: EventoRender) => void): void;
 }
 interface SlotEnConstruccion extends Slot {
   defineSizeMapping(m: unknown): SlotEnConstruccion;
@@ -55,6 +60,42 @@ declare global {
 
 /** Los slots definidos en la página actual, para destruirlos al navegar. */
 let definidos: Slot[] = [];
+
+/**
+ * El plazo tras el cual un hueco del que no se sabe nada se da por vacío.
+ *
+ * 🔴 Existe porque el fallo más común de la publicidad no es «GAM dice que no
+ * tiene»: es que GAM **no contesta nunca** —un bloqueador, una red que corta
+ * `securepubads`, un `gpt.js` que no bajó—. En ese caso `slotRenderEnded` no
+ * llega, y sin este plazo la banda de portada se queda abierta y negra para
+ * siempre. Es el patrón de «bandera que solo se suelta en el callback» que ya
+ * costó la inclinación de las tarjetas y la radio entera de una sesión.
+ *
+ * 3.5 s: por encima de cualquier respuesta normal de GAM (cientos de ms) y por
+ * debajo de lo que alguien aguanta mirando un hueco.
+ */
+const PLAZO_VACIO = 3500;
+
+let temporizador: ReturnType<typeof setTimeout> | undefined;
+
+/** El `.anuncio` que envuelve a un hueco, que es lo que se esconde. */
+function marcoDe(id: string): HTMLElement | null {
+  return document.getElementById(id)?.closest<HTMLElement>('.anuncio') ?? null;
+}
+
+/**
+ * Cierra el hueco, o lo reabre si esta vez sí hubo anuncio.
+ *
+ * Reabrir importa: al navegar, GPT redefine los slots sobre un DOM nuevo, pero si
+ * un `data-vacio` sobreviviera el hueco quedaría escondido con un creativo dentro
+ * — servido, facturado y sin que nadie lo vea.
+ */
+function marcar(id: string, vacio: boolean): void {
+  const marco = marcoDe(id);
+  if (!marco) return;
+  if (vacio) marco.dataset.vacio = '';
+  else delete marco.dataset.vacio;
+}
 
 /**
  * La ruta del ad unit.
@@ -94,13 +135,25 @@ type Regla = [Medida, Medida[]];
  */
 export function iniciarAnuncios(): void {
   const gt = window.googletag;
-  if (!gt) return;
+  /*
+    Sin `googletag` no hay nada que esperar: ni el stub llegó a existir, así que
+    ningún hueco se va a llenar. Se cierran de una vez en vez de dejar los marcos
+    abiertos indefinidamente.
+  */
+  if (!gt) {
+    for (const h of document.querySelectorAll<HTMLElement>('[data-anuncio]')) {
+      h.closest<HTMLElement>('.anuncio')?.setAttribute('data-vacio', '');
+    }
+    return;
+  }
 
   gt.cmd.push(() => {
     // Al navegar, los divs de la página anterior ya no existen. Sin esto, GPT
     // guarda slots apuntando a nodos muertos y los `refresh` no pintan nada.
     if (definidos.length) gt.destroySlots(definidos);
     definidos = [];
+    // Y el plazo de la página anterior tampoco vale: sus ids ya no están.
+    clearTimeout(temporizador);
 
     const huecos = Array.from(document.querySelectorAll<HTMLElement>('[data-anuncio]'));
     if (!huecos.length) return;
@@ -132,7 +185,16 @@ export function iniciarAnuncios(): void {
       definidos.push(slot);
     }
 
-    if (!definidos.length) return;
+    /*
+      Ningún slot se pudo definir —falta el ad unit del env, o los `data-` vienen
+      mal—: se cierran los marcos. Con `return` a secas quedaban abiertos, y el
+      caso NO es hipotético: es exactamente lo que pasa en cualquier despliegue sin
+      `PUBLIC_GAM_NETWORK_ID`, que es como corre hoy el sitio en local.
+    */
+    if (!definidos.length) {
+      for (const hueco of huecos) marcar(hueco.id, true);
+      return;
+    }
 
     /*
       Cierra el hueco cuando GAM no tiene qué servir. El v1 no lo hacía y dejaba
@@ -145,10 +207,39 @@ export function iniciarAnuncios(): void {
       método desaparece y los huecos vacíos vuelven sin que nadie toque nada.
     */
     gt.setConfig({ collapseDiv: 'ON_NO_FILL' });
+
+    /*
+      `collapseDiv` cierra el DIV del slot, pero no el marco que lo envuelve: el
+      rótulo «PUBLICIDAD» y el alto reservado son nuestros, no de GPT. Esto es lo
+      que se lleva el marco entero.
+
+      ⚠️ Se registra ANTES de `enableServices()`. Después, el primer render puede
+      haber ocurrido ya y el evento se pierde — con la banda quedándose abierta
+      justo en la carga inicial, que es la que importa.
+
+      🔴 `atendidos` es lo que distingue «GAM dijo que no tiene» de «GAM no
+      contestó». Sin esa distinción el plazo de abajo escondería también los huecos
+      que sí se llenaron, si el creativo tardó más que el plazo.
+    */
+    const atendidos = new Set<string>();
+    gt.pubads().addEventListener('slotRenderEnded', (e) => {
+      const id = e.slot.getSlotElementId();
+      atendidos.add(id);
+      marcar(id, e.isEmpty);
+    });
+
     gt.pubads().enableSingleRequest();
     gt.enableServices();
 
     for (const slot of definidos) gt.display(slot.getSlotElementId());
+
+    /*
+      Y el plazo: lo que no contestó, se cierra. Ver `PLAZO_VACIO`.
+    */
+    const pendientes = definidos.map((s) => s.getSlotElementId());
+    temporizador = setTimeout(() => {
+      for (const id of pendientes) if (!atendidos.has(id)) marcar(id, true);
+    }, PLAZO_VACIO);
   });
 }
 

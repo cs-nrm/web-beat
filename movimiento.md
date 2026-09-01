@@ -189,12 +189,118 @@ esto rompería WCAG 1.4.1: el color no puede ser lo único que distingue un enla
 
 ---
 
-## 9. Cómo se verifica
+---
+
+## 9. 🔴 El cromo de un interior, y qué es una tira de pastillas
+
+Decisión de Carlos, 2026-09-01. Son dos reglas y salen del mismo problema: había
+**dos controles con la misma pinta haciendo cosas distintas**.
+
+### La barra oscura no se muestra en un interior
+
+Fuera del Inicio, la página nace como si ya se hubiera hecho scroll: solo la barra
+CLARA del player, con su wordmark y su hamburguesa. Lo decide `Base.astro` por
+RUTA (`data-vista` en el `body`), no cada página — lo que hay que acordarse de
+poner en cada archivo nuevo es lo que un día se olvida.
+
+Dentro de una sección, lo que orienta es dónde estás, y eso ya lo dice la tira de
+secciones. Dos navegaciones apiladas repiten el mismo trabajo y se comen 56px de
+la primera pantalla justo donde empieza a leerse.
+
+⚠️ La cabecera lleva `transition:persist`, así que su marcado del servidor se
+descarta al navegar. El estado se reconcilia en `astro:after-swap` —antes de
+pintar— y NO en `astro:page-load`, que llega un fotograma tarde y deja ver la
+barra oscura aparecer y plegarse.
+
+### Una tira de pastillas son las SECCIONES, nunca un filtro
+
+| | Forma | Dónde |
+|---|---|---|
+| Navegar el sitio | **pastillas**, la activa invertida en blanco | `NavSecciones.astro`, arriba del titular |
+| Filtrar una lista | **texto con subrayado**, la activa en negrita | dentro de la página, pegado a lo que filtra |
+
+🔴 Y sin «TODO» en las secciones: no hay nada que reiniciar, porque una sección no
+es un estado de filtro.
+
+De dónde sale: en el Scanner la tira eran las CATEGORÍAS de `noticias`, y las que
+la redacción creó se llaman igual que las secciones —`Agenda`, `Beat Scanner`,
+`Bonus Beat`, `Fenómeno Residente`—. Parecía el menú del sitio y no lo era: pulsar
+«Fenómeno Residente» llevaba a un listado de notas etiquetadas, no a la sección.
+La Agenda del Inicio repetía el mismo gesto con sus tipos de evento.
+
+**La regla general: si dos controles hacen cosas de distinto alcance, tienen que
+verse distintos.** Cuando la forma no significa nada, el lector deja de leerla.
+
+### Nada de bajadas de sección
+
+Ninguna cabecera de interior lleva una frase describiendo la sección. Eran relleno
+—«Notas, entrevistas y reportajes…», «TRES TRACKS CADA VIERNES»—, prometían cosas
+que el sitio no sostiene, y empujaban el contenido real media pantalla hacia
+abajo. Lo que describe la sección va en la `<meta description>`, que es quien lo
+lee.
+
+Lo que sí va encima del titular es un **dato**: `ACTUALIZADO 21 AGO`, `7 TEMAS`,
+`2 EDICIONES · 21 AGO`. Un dato informa; una descripción le repite al lector dónde
+acaba de entrar.
+
+---
+
+## 10. 🔴 Un hueco de publicidad se reserva, y luego desaparece
+
+Las dos mitades hacen falta, y por razones distintas:
+
+- **Se reserva** con su medida antes de que llegue nada. Si el espacio apareciera
+  al cargar el creativo, todo lo de abajo se movería: eso es CLS y penaliza.
+- **Desaparece** si no hay nada que poner. Una banda negra de 350px encabezando el
+  Inicio, vacía, no es un marco: es un agujero en lo primero que se ve. Es lo que
+  pasaba, porque las medidas de portada del lienzo (1280×350) todavía no existen
+  en Ad Manager y el hueco no se llenaba nunca.
+
+Lo cierra `anuncios.ts` con `data-vacio`, y por DOS caminos:
+
+1. GAM contesta «sin relleno» (`slotRenderEnded` con `isEmpty`).
+2. **Pasa el plazo y GAM no contesta** — un bloqueador, un `gpt.js` que no bajó,
+   la red que corta `securepubads`.
+
+🔴 El segundo no es un extra: es el modo de falla MÁS COMÚN, y sin él la banda se
+queda abierta para siempre. Es el patrón de «bandera que solo se suelta dentro del
+callback» de §3, aplicado al dinero.
+
+⚠️ Y `data-vacio` se RETIRA cuando sí hay anuncio. Si sobreviviera a una
+navegación, el hueco quedaría escondido con un creativo dentro: servido,
+facturado y sin que nadie lo vea.
+
+**La portada admite varias campañas a la vez** y rota entre ellas por MINUTO, en
+el servidor. No es un carrusel, a propósito: uno que cambia solo cae bajo WCAG
+2.2.2 (haría falta poder pararlo), descarga N creativos de 1280×350 para enseñar
+uno, y la entrega se mide en impresiones, no en segundos en pantalla. Y la
+elección es determinista y no `Math.random()`: la respuesta se cachea en el borde,
+así que una elección al azar quedaría congelada para todos los lectores de ese TTL
+— la campaña «rotatoria» sería siempre la misma.
+
+
+## 11. Cómo se verifica
 
 🔴 **Recargar no basta.** Los tres fallos de contenido inalcanzable aparecieron
 solo en el flujo **Home → nota → atrás**, porque el estado vive en el DOM y el DOM
 sobrevive a la navegación.
 
 ⚠️ Y el servidor de desarrollo **sirve hojas de estilo viejas** tras una navegación
-del lado del cliente. Nos ha engañado tres veces. Ante cualquier duda:
-`pnpm build && pnpm preview --port 4322`, o reiniciar el servidor.
+del lado del cliente. Nos ha engañado cinco veces. Ante cualquier duda:
+`pnpm build && CMS_URL=… node dist/server/entry.mjs`, o reiniciar el servidor.
+
+⚠️ El panel del navegador reporta `visibilityState: hidden`, y con eso están
+CONGELADAS las transiciones, `requestAnimationFrame`, el `IntersectionObserver`,
+los eventos de scroll y las líneas de tiempo de scroll. Un elemento correctamente
+animado y uno atascado se leen IGUAL. Para medir el estado de destino, inyecta
+`* { transition: none !important; animation: none !important }` antes de leer — o
+mejor, lee el DOM (atributos, clases) en vez de valores calculados.
+
+🔴 **Cuarto caso, 2026-09-01, cazado exactamente en ese flujo:** al volver de un
+interior al Inicio la barra oscura se quedaba plegada. La causa era una lectura
+`!!cabecera.dataset.compacta` sobre un atributo que se escribe como
+`data-compacta` a secas — su valor es la CADENA VACÍA, y `!!''` es `false`. El
+estado que se creía tener nunca coincidía con el real, así que la función se salía
+por su atajo sin tocar nada. El bug llevaba semanas en el archivo y solo se
+manifestó cuando algo distinto del scroll empezó a poner el atributo. **Para leer
+un atributo sin valor, `hasAttribute`.**

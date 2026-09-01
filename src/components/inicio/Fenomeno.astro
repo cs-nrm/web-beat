@@ -16,9 +16,29 @@ import type { Especiale, Lista } from '@/types/payload';
 
 interface Props {
   especial: Especiale | null;
+  /**
+   * Dónde se está pintando este bloque. Solo cambia cuánta presentación lleva
+   * encima; el tema —visor, cápsulas y playlist— es idéntico en los tres.
+   *
+   * 🔴 Es UN parámetro y no dos booleanos sueltos, porque los tres casos son
+   * excluyentes y con dos banderas habría cuatro combinaciones, una de ellas sin
+   * sentido. Un enum de tres valores no se puede poner en un estado imposible.
+   *
+   *   `inicio`  — con la barra de sección y su remate al archivo, y con el
+   *               titular del tema. Es un bloque entre otros seis.
+   *   `seccion` — `/fenomeno-residente`: sin la barra (ya estás dentro, y el
+   *               remate llevaría al archivo desde el archivo), con el titular.
+   *   `tema`    — `/especiales/<slug>`: sin la barra y SIN el titular, porque el
+   *               `h1` de la página ya es el nombre del tema. Repetirlo dejaba el
+   *               mismo texto dos veces seguidas.
+   */
+  contexto?: 'inicio' | 'seccion' | 'tema';
 }
 
-const { especial } = Astro.props;
+const { especial, contexto = 'inicio' } = Astro.props;
+
+const conCabeza = contexto === 'inicio';
+const conTitular = contexto !== 'tema';
 
 const capsulas = capsulasDe(especial);
 const listas = listasDe(especial);
@@ -71,22 +91,26 @@ const tiendas = (
 {
   especial && (
     <section class="fr" data-fenomeno>
-      <div class="fr-cabeza" data-barrido>
-        <h2 class="beat-display fr-seccion" data-escribir>EL FENÓMENO RESIDENTE</h2>
-        <Remate href="/fenomeno-residente" texto="VER EL ARCHIVO" clase="fr-todo" />
-      </div>
-
-      <div class="fr-tema">
-        {especial.numero != null && (
-          <span class="beat-display fr-numero">{String(especial.numero).padStart(2, '0')}</span>
-        )}
-        <div class="fr-tema-texto">
-          <span class="beat-label fr-rango">
-            TEMA DE LA SEMANA{rango && ` · ${rango}`}
-          </span>
-          <h3 class="fr-titulo" data-escribir>{especial.titulo}</h3>
+      {conCabeza && (
+        <div class="fr-cabeza" data-barrido>
+          <h2 class="beat-display fr-seccion" data-escribir>EL FENÓMENO RESIDENTE</h2>
+          <Remate href="/fenomeno-residente" texto="VER EL ARCHIVO" clase="fr-todo" />
         </div>
-      </div>
+      )}
+
+      {conTitular && (
+        <div class="fr-tema">
+          {especial.numero != null && (
+            <span class="beat-display fr-numero">{String(especial.numero).padStart(2, '0')}</span>
+          )}
+          <div class="fr-tema-texto">
+            <span class="beat-label fr-rango">
+              TEMA DE LA SEMANA{rango && ` · ${rango}`}
+            </span>
+            <h3 class="fr-titulo" data-escribir>{especial.titulo}</h3>
+          </div>
+        </div>
+      )}
 
       <div class="fr-columnas">
         {/* ── el video vertical ── */}
@@ -330,6 +354,12 @@ const tiendas = (
     gap: 16px;
     margin-top: 26px;
   }
+  /* Sin la barra de sección no hay de qué separarse: el margen de arriba lo pone
+     quien envuelve. `:first-child` y no una clase, para que no haya dos formas de
+     decir lo mismo. */
+  .fr-tema:first-child {
+    margin-top: 0;
+  }
   .fr-numero {
     font-size: 44px;
     font-weight: 800;
@@ -357,6 +387,9 @@ const tiendas = (
     gap: 24px;
     align-items: start;
     margin-top: 20px;
+  }
+  .fr-columnas:first-child {
+    margin-top: 0;
   }
 
   /* ── el visor ── */

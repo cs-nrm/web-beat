@@ -82,7 +82,19 @@ function ahoraAlMinuto(): string {
 }
 
 /**
- * El banner que está corriendo AHORA para un tipo, o `null`.
+ * TODAS las campañas vigentes de un tipo, en el orden en que deben rotar.
+ *
+ * 🔴 Devuelve una LISTA y no un documento, y ese es el cambio que pidió Carlos
+ * (2026-09-01): «pueden haber activas más de una a la vez». Antes esto pedía
+ * `limit: 1` y la segunda campaña vendida simplemente no salía —sin error, sin
+ * aviso, y sin que nadie lo notara hasta el reporte de fin de mes—. Comercial
+ * puede vender dos portadas para la misma semana, y las dos tienen que entregar.
+ *
+ * El orden lo manda `orden` y desempata la que empezó después. La rotación entre
+ * ellas la hace el navegador (ver `Anuncio.astro`), no el servidor: si el servidor
+ * eligiera una al azar, la caché de borde congelaría esa elección para todos los
+ * lectores de ese TTL y la campaña «rotatoria» sería, en la práctica, siempre la
+ * misma.
  *
  * El filtro de vigencia va en la consulta **además** de estar en el `read` de la
  * colección (que ya lo aplica porque este front consulta sin sesión). Es a
@@ -94,15 +106,15 @@ function ahoraAlMinuto(): string {
  * filas con NULL, de ahí el `or` con `exists: false` — el mismo tropiezo que ya
  * está documentado en `noticias.ts`.
  *
- * ⚠️ Devuelve UNO. Si hay varias campañas vigentes del mismo tipo gana la de
- * `orden` más bajo (y a igualdad, la que empezó después); NO hay rotación entre
- * ellas todavía.
+ * ⚠️ Tope de 6. No es una restricción de producto: es que una franja que rota
+ * entre más de seis creativos no la ve completa nadie, y sin tope una captura
+ * equivocada podría traerse la colección entera al HTML de la portada.
  *
- * Degrada a `null` si el CMS falla: el hueco cae al inventario de GAM y la página
- * se pinta igual. Un Inicio sin banner es un problema comercial; un Inicio en 500
- * es otro problema, peor.
+ * Degrada a lista vacía si el CMS falla: el hueco cae al inventario de GAM y la
+ * página se pinta igual. Un Inicio sin banner es un problema comercial; un Inicio
+ * en 500 es otro problema, peor.
  */
-export async function obtenerBanner(tipo: TipoBanner): Promise<Banner | null> {
+export async function obtenerBanners(tipo: TipoBanner, cuantos = 6): Promise<Banner[]> {
   const ahora = ahoraAlMinuto();
   const params: ParamsCms = {
     'where[tipo][equals]': tipo,
@@ -111,7 +123,7 @@ export async function obtenerBanner(tipo: TipoBanner): Promise<Banner | null> {
     'where[or][0][fin][greater_than_equal]': ahora,
     'where[or][1][fin][exists]': false,
     sort: 'orden,-inicio',
-    limit: 1,
+    limit: cuantos,
     // `depth: 1` para que `imagen` e `imagenMovil` lleguen pobladas; con 0 serían
     // ids y habría que pedir la media aparte.
     depth: 1,
@@ -120,11 +132,17 @@ export async function obtenerBanner(tipo: TipoBanner): Promise<Banner | null> {
 
   try {
     const r = await cmsFetchEstacion<RespuestaLista<Banner>>('publicidad', params, 3000);
-    const banner = r.docs[0];
-    if (!banner) return null;
-    const enlace = enlaceSeguro(banner.enlace);
-    return enlace ? { ...banner, enlace } : null;
+    /*
+      Una campaña sin enlace utilizable se descarta ENTERA, no se pinta sin
+      enlace: un banner que no lleva a ningún lado no es la campaña que se vendió.
+      Y descartar una no tumba a las demás, que es la ventaja de resolverlo aquí y
+      no en la plantilla.
+    */
+    return r.docs.flatMap((banner) => {
+      const enlace = enlaceSeguro(banner.enlace);
+      return enlace ? [{ ...banner, enlace }] : [];
+    });
   } catch {
-    return null;
+    return [];
   }
 }

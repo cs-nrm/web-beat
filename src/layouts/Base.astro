@@ -17,9 +17,30 @@ import { queSuena } from '@/lib/cms/aire';
 interface Props {
   titulo: string;
   descripcion?: string;
+  /**
+   * `inicio` deja la cabecera completa; `interior` nace con la barra oscura ya
+   * recogida. Se calcula solo a partir de la ruta y casi nunca hay que pasarlo.
+   */
+  vista?: 'inicio' | 'interior';
 }
 
 const { titulo, descripcion } = Astro.props;
+
+/**
+ * 🔴 En los INTERIORES la barra oscura de navegación no se muestra: la página
+ * arranca como si ya se hubiera hecho scroll, con la barra clara del player, su
+ * wordmark y su hamburguesa. Decisión de Carlos (2026-09-01).
+ *
+ * El razonamiento: dentro de una sección lo que orienta es dónde estás, y eso ya
+ * lo dice la tira de `NavSecciones`. Dos navegaciones apiladas —el menú y la
+ * tira— repiten el mismo trabajo y roban 56px de la primera pantalla justo donde
+ * empieza a leerse.
+ *
+ * Se calcula por RUTA y no lo declara cada página, por la razón de siempre: lo
+ * que hay que acordarse de poner en cada archivo nuevo es lo que un día se
+ * olvida.
+ */
+const vista = Astro.props.vista ?? (Astro.url.pathname === '/' ? 'inicio' : 'interior');
 
 /**
  * El chrome se resuelve UNA vez aquí y baja por props, en vez de que cada
@@ -112,7 +133,17 @@ const canonical = new URL(Astro.url.pathname, SITE_URL).href;
       archivos y las familias de `ds/tokens/typography.css`.
     */}
   </head>
-  <body class="min-h-screen bg-surface-canvas font-text text-body text-text-body antialiased">
+  {/*
+    `data-vista` es lo que le dice al CSS y a `cabecera.ts` si esta página lleva
+    la barra oscura. Va en el `body` y no en `<html>` a propósito: el `body` SÍ lo
+    reemplaza el router en cada navegación, así que el dato viaja con la página.
+    La cabecera, en cambio, lleva `transition:persist` y sobrevive — su marcado
+    del servidor se descarta al navegar, y por eso el estado no puede vivir ahí.
+  */}
+  <body
+    data-vista={vista}
+    class="min-h-screen bg-surface-canvas font-text text-body text-text-body antialiased"
+  >
     {/*
       Hueco POR ENCIMA del chrome. Hoy lo usa solo el Inicio, para el banner de
       portada: el orden del lienzo es **publicidad → player → menú** (13a lo pinta
@@ -126,7 +157,7 @@ const canonical = new URL(Astro.url.pathname, SITE_URL).href;
       pegado al navegar a una nota sería un error de facturación, no de maquetado.
     */}
     <slot name="sobre-cabecera" />
-    <Cabecera estacion={marca} alAire={alAire} />
+    <Cabecera estacion={marca} alAire={alAire} compacta={vista === 'interior'} />
     <main id="contenido">
       <slot />
     </main>

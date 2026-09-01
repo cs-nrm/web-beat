@@ -1,0 +1,161 @@
+---
+/**
+ * La Agenda — §5 del mapa de sitio.
+ *
+ * El filtro por tipo (`?tipo=propio|cobertura|festival`) va en la URL y se
+ * resuelve en el SERVIDOR, no escondiendo filas con JavaScript: así cada vista
+ * tiene su enlace, se puede compartir, y funciona sin JS.
+ */
+import Base from '@/layouts/Base.astro';
+import CabezaSeccion from '@/components/CabezaSeccion.astro';
+import Agenda from '@/components/inicio/Agenda.astro';
+import Anuncio from '@/components/Anuncio.astro';
+import { obtenerAgenda, TIPOS_EVENTO } from '@/lib/cms/eventos';
+
+/*
+  🔴 El `tipo` viene de la URL, o sea de cualquiera. Se valida contra la lista
+  cerrada ANTES de acercarlo al CMS, y por dos razones:
+
+    · un valor arbitrario entraría en el `where` y, como la clave de caché del
+      cliente es la URL de la consulta, `?tipo=<lo que sea>` generaría una entrada
+      de caché por visita. Es la regla de oro del cliente del CMS, y es el bug que
+      en `web-enfoque` produjo 836 de 1,103 errores por hora;
+    · y de paso se acaba cualquier intento de inyectar operadores en la consulta.
+
+  Lo que no está en la lista se trata como «sin filtro», no como error: una URL
+  vieja o mal copiada debe enseñar la agenda completa, no un 404.
+*/
+const solicitado = Astro.url.searchParams.get('tipo');
+const tipo = TIPOS_EVENTO.find((t) => t.valor === solicitado)?.valor ?? null;
+
+const eventos = await obtenerAgenda(40, tipo);
+
+const cuantos = eventos.length;
+const rotulo = cuantos ? `${cuantos} EVENTO${cuantos === 1 ? '' : 'S'} POR VENIR` : null;
+
+const activo = TIPOS_EVENTO.find((t) => t.valor === tipo) ?? null;
+const titulo = 'AGENDA';
+---
+
+<Base
+  titulo={activo ? `Agenda · ${activo.etiqueta} — Beat 100.9` : 'Agenda — Beat 100.9'}
+  descripcion="Coberturas, activaciones propias y presencia en festivales. Lo que viene, del más cercano al más lejano."
+>
+  <div class="ag-pagina">
+    <CabezaSeccion titulo={titulo} activa="/eventos" rotulo={rotulo} />
+
+    {/*
+      El filtro por TIPO, y a propósito NO se parece a la tira de secciones de
+      arriba: es texto subrayado, no píldoras.
+
+      🔴 Dos controles con la misma pinta y distinto alcance —uno cambia de
+      sección, el otro filtra esta lista— es exactamente lo que hacía que la tira
+      de categorías del Scanner se leyera como el menú del sitio. Si dos cosas
+      hacen cosas distintas, tienen que verse distintas.
+    */}
+    <nav class="ag-tipos" aria-label="Filtrar la agenda por tipo">
+      <a
+        href="/eventos"
+        aria-current={!tipo ? 'true' : undefined}
+        class:list={['beat-label ag-tipo', { 'es-activo': !tipo }]}
+      >
+        TODOS
+      </a>
+      {
+        TIPOS_EVENTO.map((t) => (
+          <a
+            href={`/eventos?tipo=${t.valor}`}
+            aria-current={tipo === t.valor ? 'true' : undefined}
+            class:list={['beat-label ag-tipo', { 'es-activo': tipo === t.valor }]}
+          >
+            {t.etiqueta}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="ag-lista">
+      {
+        eventos.length > 0 ? (
+          <Agenda eventos={eventos} contexto="seccion" />
+        ) : (
+          <p class="ag-vacio">
+            {activo
+              ? `No hay eventos de tipo ${activo.etiqueta.toLowerCase()} por venir. Prueba con la agenda completa.`
+              : 'Todavía no hay eventos publicados. En cuanto la estación cargue el calendario, aparecen aquí.'}
+          </p>
+        )
+      }
+    </div>
+
+    <div class="ag-franja-anuncio">
+      <Anuncio formato="leaderboard" nombre="agenda-leader" />
+    </div>
+  </div>
+</Base>
+
+<style>
+  .ag-pagina {
+    max-width: var(--grid-max);
+    margin: 0 auto;
+  }
+  .ag-tipos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin: 26px 24px 0;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-quiet);
+  }
+  .ag-tipo {
+    color: var(--text-muted);
+    font-size: 9.5px;
+    white-space: nowrap;
+    padding-bottom: 3px;
+    /* El subrayado se dibuja transparente desde el principio: así el activo no
+       empuja a sus vecinos un pixel al aparecer. */
+    border-bottom: 2px solid transparent;
+    transition: color var(--dur-2) var(--ease-out);
+  }
+  .ag-tipo:hover {
+    color: var(--mist-0);
+  }
+  /* 🔴 Subrayado ADEMÁS del color, no en su lugar: WCAG 1.4.1 — el color no puede
+     ser lo único que dice cuál está activo. */
+  .ag-tipo.es-activo {
+    color: var(--mist-0);
+    font-weight: 700;
+    border-bottom-color: var(--mist-0);
+  }
+  .ag-lista {
+    padding: 30px 24px 0;
+  }
+  .ag-vacio {
+    font: var(--type-body);
+    color: var(--text-muted);
+    max-width: 62ch;
+    text-wrap: pretty;
+  }
+  .ag-franja-anuncio {
+    padding: 44px 24px;
+  }
+
+  @media (max-width: 899px) {
+    .ag-tipos {
+      gap: 16px;
+      margin: 20px 16px 0;
+    }
+    .ag-tipo {
+      font-size: 8.5px;
+    }
+    .ag-lista {
+      padding: 24px 16px 0;
+    }
+    .ag-vacio {
+      font: var(--type-body-sm);
+    }
+    .ag-franja-anuncio {
+      padding: 32px 16px;
+    }
+  }
+</style>

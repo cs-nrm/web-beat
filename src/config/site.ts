@@ -174,7 +174,18 @@ export const rutaPagina = (slug: string): string => `/${slug}`;
 export const SEGMENTOS_RESERVADOS = [
   'en-vivo',
   'fenomeno-residente',
-  'bonus-beat',
+  /*
+    ⚠️ `bonus-beat` NO va en esta lista, y es el único caso así.
+
+    Deja de ser una ruta escrita en `src/pages/` para ser un DATO: el primer
+    segmento es el `slug` de un documento de `tipos-de-lista`, y lo resuelve
+    `src/pages/[tipoLista]/`. Reservarlo aquí lo habría bloqueado justamente a él
+    —esta lista se comprueba ANTES que nada— y `/bonus-beat` respondería 404 con
+    el contenido cargado y todo en su sitio.
+
+    Es la contrapartida de que la estación pueda crear «Beat Ten» sin que nadie
+    despliegue: si el código no elige los nombres, tampoco puede reservarlos.
+  */
   'eventos',
   'scanner',
   'etiqueta',

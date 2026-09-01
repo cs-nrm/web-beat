@@ -1741,9 +1741,19 @@ html[data-cursor] body::after {
 
 /* 🔴 El ancho se reserva SIEMPRE, esté visible o no. Si el logo apareciera con su
    ancho al hacer scroll, empujaría todo lo demás de la barra y el título saltaría
-   de sitio en el momento justo en que el lector está leyendo. */
+   de sitio en el momento justo en que el lector está leyendo.
+
+   ⚠️ En móvil se reserva MENOS. El ancho es el mismo dato en las dos medidas, pero
+   96px de una barra de 343 no es lo mismo que de una de 1280: allí se los quitaba
+   al título de lo que suena, que es el contenido. A 72px el logo sigue leyéndose y
+   la reserva sigue evitando el salto. */
 .cabecera-logo-claro {
-  width: 96px;
+  width: 72px;
+}
+@media (min-width: 900px) {
+  .cabecera-logo-claro {
+    width: 96px;
+  }
 }
 .cabecera-logo-claro img {
   display: block;

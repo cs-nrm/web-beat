@@ -33,7 +33,7 @@ import { loQueSono } from '@/lib/cms/aire';
 import { obtenerEspecialVigente, obtenerEspeciales } from '@/lib/cms/especiales';
 import { obtenerTiposDeLista, obtenerListaReciente } from '@/lib/cms/listas';
 import { obtenerAgenda } from '@/lib/cms/eventos';
-import { obtenerBanner } from '@/lib/cms/publicidad';
+import { obtenerBanners } from '@/lib/cms/publicidad';
 import { SERIE_FENOMENO, TIPO_LISTA_DESTACADA } from '@/config/site';
 
 /*
@@ -46,7 +46,7 @@ import { SERIE_FENOMENO, TIPO_LISTA_DESTACADA } from '@/config/site';
   página. Y todas van cacheadas con dedup en el cliente del CMS, así que la
   concurrencia real contra el CMS es una consulta por TTL, no una por visita.
 */
-const [{ destacada, rejilla }, parrilla, sono, especial, especiales, tipos, agenda, banner] =
+const [{ destacada, rejilla }, parrilla, sono, especial, especiales, tipos, agenda, banners] =
   await Promise.all([
     obtenerScanner(12),
     obtenerParrillaDeHoy(),
@@ -55,7 +55,7 @@ const [{ destacada, rejilla }, parrilla, sono, especial, especiales, tipos, agen
     obtenerEspeciales(SERIE_FENOMENO, 8),
     obtenerTiposDeLista(),
     obtenerAgenda(4),
-    obtenerBanner('portada'),
+    obtenerBanners('portada'),
   ]);
 
 /*
@@ -100,9 +100,10 @@ const lema = 'BEAT 100.9 · TOTAL MUSIC';
     menú. Por eso entra por el slot `sobre-cabecera` del layout y no aquí, donde
     quedaría debajo de la cabecera.
 
-    `banner` es la campaña VENDIDA que esté corriendo hoy (colección `publicidad`
-    del CMS, tipo «Portada»). Si no hay ninguna llega `null` y el hueco lo pide a
-    Ad Manager, como antes.
+    `banners` son TODAS las campañas vendidas vigentes (colección `publicidad` del
+    CMS, tipo «Portada»): pueden ser varias a la vez y el hueco rota entre ellas
+    por minuto. Si no hay ninguna llega vacío, el hueco se lo pide a Ad Manager, y
+    si Ad Manager tampoco tiene, la franja se cierra sola y no queda hueco.
   */}
   {/*
     El intro va por el mismo slot que la portada, y por la misma razón: el `<slot />`
@@ -111,7 +112,7 @@ const lema = 'BEAT 100.9 · TOTAL MUSIC';
     para el apilamiento — y aquí ningún ancestro crea contexto propio.
   */}
   <Intro slot="sobre-cabecera" />
-  <Anuncio formato="portada" nombre="inicio-portada" banner={banner} slot="sobre-cabecera" />
+  <Anuncio formato="portada" nombre="inicio-portada" banners={banners} slot="sobre-cabecera" />
 
   {/* 1. qué suena — la señal */}
   <PanelSenal parrilla={parrilla.bloques} alAire={parrilla.alAire} sono={sono} />

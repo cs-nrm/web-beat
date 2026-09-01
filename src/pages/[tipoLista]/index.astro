@@ -1,0 +1,176 @@
+---
+/**
+ * El índice de un tipo de lista — hoy, `/bonus-beat`.
+ *
+ * 🔴 La ruta es DINÁMICA y no `src/pages/bonus-beat/`. El primer segmento es el
+ * `slug` de un documento de `tipos-de-lista`, que es dato editorial: la estación
+ * crea «Bonus Beat» hoy y «Beat Ten» mañana, y las dos secciones tienen que
+ * existir sin que nadie despliegue. Escribir la carpeta a mano habría dejado la
+ * segunda en 404 el día que la crearan, y nadie se entera hasta que un lector lo
+ * reporta.
+ *
+ * ⚠️ Por eso `bonus-beat` NO está en `SEGMENTOS_RESERVADOS` — está explicado
+ * allí. Las rutas estáticas del sitio ganan igual a esta por especificidad, así
+ * que lo único que hay que descartar aquí son los segmentos reservados que
+ * todavía no tienen página.
+ */
+import Base from '@/layouts/Base.astro';
+import CabezaSeccion from '@/components/CabezaSeccion.astro';
+import BonusBeat from '@/components/inicio/BonusBeat.astro';
+import RejillaEdiciones from '@/components/RejillaEdiciones.astro';
+import Anuncio from '@/components/Anuncio.astro';
+import { obtenerTipoDeLista, obtenerListas } from '@/lib/cms/listas';
+import { fechaCorta } from '@/lib/nota';
+import { SEGMENTOS_RESERVADOS } from '@/config/site';
+
+const { tipoLista: slug } = Astro.params;
+
+/*
+  Descarte barato antes de tocar el CMS. `comunidad`, `tienda`, `marcas`,
+  `programacion`… todavía no tienen página propia, así que caerían aquí y
+  dispararían una consulta por cada visita a una sección que no existe.
+*/
+if (!slug || (SEGMENTOS_RESERVADOS as readonly string[]).includes(slug)) {
+  return Astro.rewrite('/404');
+}
+
+const tipo = await obtenerTipoDeLista(slug);
+if (!tipo) return Astro.rewrite('/404');
+
+const ediciones = await obtenerListas(slug, 24);
+const reciente = ediciones[0] ?? null;
+
+/*
+  El rótulo es un DATO: cuántas ediciones hay y de cuándo es la última. No una
+  descripción de la sección ni una promesa de periodicidad — ver `BonusBeat.astro`.
+*/
+const cuantas = ediciones.length;
+const rotulo = cuantas
+  ? [
+      `${cuantas} EDICI${cuantas === 1 ? 'ÓN' : 'ONES'}`,
+      fechaCorta(reciente?.fecha),
+    ]
+      .filter(Boolean)
+      .join(' · ')
+  : null;
+---
+
+<Base
+  titulo={`${tipo.nombre} — Beat 100.9`}
+  descripcion={tipo.descripcion ?? `${tipo.nombre} en Beat 100.9.`}
+>
+  <div class="tl-pagina">
+    <CabezaSeccion
+      titulo={tipo.nombre.toUpperCase()}
+      activa={`/${slug}`}
+      rotulo={rotulo}
+    />
+
+    {
+      reciente ? (
+        <>
+          {/*
+            La última edición va ENTERA, no como una miniatura más de la retícula.
+            Es lo que alguien viene a ver: quien entra a Bonus Beat quiere las
+            canciones de esta semana, no un índice desde el que dar otro clic.
+          */}
+          <div class="tl-ultima">
+            <div class="tl-corte">
+              <span class="beat-display tl-corte-titulo">{reciente.titulo}</span>
+              {fechaCorta(reciente.fecha) && (
+                <span class="beat-label tl-corte-fecha">{fechaCorta(reciente.fecha)}</span>
+              )}
+            </div>
+            <BonusBeat lista={reciente} tipo={tipo} contexto="edicion" />
+          </div>
+
+          {ediciones.length > 1 && (
+            <>
+              <div class="tl-corte tl-corte-archivo" data-barrido>
+                <span class="beat-display tl-corte-titulo">EDICIONES ANTERIORES</span>
+              </div>
+              <RejillaEdiciones
+                tipoSlug={slug}
+                ediciones={ediciones}
+                excluir={reciente.id}
+              />
+            </>
+          )}
+        </>
+      ) : (
+        <p class="tl-vacio">
+          Todavía no hay ediciones publicadas de {tipo.nombre}. Cada edición es un
+          documento de «listas» con este tipo y sus canciones.
+        </p>
+      )
+    }
+
+    <div class="tl-franja-anuncio">
+      <Anuncio formato="leaderboard" nombre="lista-leader" />
+    </div>
+  </div>
+</Base>
+
+<style>
+  .tl-pagina {
+    max-width: var(--grid-max);
+    margin: 0 auto;
+  }
+  .tl-ultima {
+    padding: 0 24px;
+  }
+  .tl-corte {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 14px;
+    margin-top: 32px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-quiet);
+  }
+  .tl-corte-archivo {
+    margin: 44px 24px 0;
+  }
+  .tl-corte-titulo {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--mist-2);
+  }
+  .tl-corte-fecha {
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .tl-vacio {
+    font: var(--type-body);
+    color: var(--text-muted);
+    max-width: 62ch;
+    padding: 40px 24px 0;
+    text-wrap: pretty;
+  }
+  .tl-franja-anuncio {
+    padding: 44px 24px;
+  }
+
+  @media (max-width: 899px) {
+    .tl-ultima {
+      padding: 0 16px;
+    }
+    .tl-corte {
+      margin-top: 24px;
+    }
+    .tl-corte-archivo {
+      margin: 32px 16px 0;
+    }
+    .tl-corte-titulo {
+      font-size: 19px;
+    }
+    .tl-vacio {
+      padding: 28px 16px 0;
+      font: var(--type-body-sm);
+    }
+    .tl-franja-anuncio {
+      padding: 32px 16px;
+    }
+  }
+</style>

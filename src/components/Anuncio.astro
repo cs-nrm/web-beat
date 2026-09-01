@@ -2,18 +2,28 @@
 /**
  * El hueco de publicidad. UN marco, DOS fuentes que lo pueden llenar:
  *
- *   · venta DIRECTA — el banner de la colección `publicidad` del CMS, con su
- *     anunciante y su vigencia. Llega por la prop `banner` y tiene prioridad.
+ *   · venta DIRECTA — las campañas de la colección `publicidad` del CMS, con su
+ *     anunciante y su vigencia. Llegan por la prop `banners` y tienen prioridad.
  *   · PROGRAMÁTICO  — Google Ad Manager, cuando no hay campaña vendida.
  *
  * DECLARA el slot con `data-*` y `src/scripts/anuncios.ts` lo descubre. En el v1
  * los 13 slots estaban escritos a mano en el script: agregar un hueco pedía tocar
  * el JS, y quitarlo dejaba un `display()` huérfano.
  *
- * 🔴 El marco se dibuja SIEMPRE, con su medida, aunque no haya anuncio. Si el
- * espacio se reservara al cargar el creativo, todo lo de abajo se movería: eso es
- * CLS, y penaliza. `collapseEmptyDivs` se encarga de cerrar el hueco cuando GAM no
- * tiene qué servir.
+ * 🔴 El marco se reserva, y después DESAPARECE si no hay nada que poner.
+ *
+ * Las dos mitades hacen falta y por razones distintas. Se reserva porque si el
+ * espacio apareciera al cargar el creativo, todo lo de abajo se movería —eso es
+ * CLS, y penaliza—. Y desaparece porque una banda negra de 350px encabezando el
+ * Inicio, sin un anuncio dentro, no es un marco: es un agujero en lo primero que
+ * ve el lector. Es lo que se veía hoy, porque las medidas de portada (1280×350)
+ * todavía no existen en Ad Manager y el hueco no se llena nunca.
+ *
+ * Quien lo cierra es `anuncios.ts` poniendo `data-vacio`, en cuanto GAM contesta
+ * «sin relleno» **o** cuando pasa el plazo sin que conteste —un bloqueador, un
+ * `gpt.js` que no bajó—. Ese segundo camino no es un detalle: sin él, el modo de
+ * falla más común deja la banda abierta para siempre, que es exactamente el
+ * patrón de «estado muerto sin salida» de movimiento.md §3.
  *
  * ⚠️ Los tamaños salen del LIENZO v13/v14, y NO coinciden con los del sitio
  * actual. Antes de lanzar, AdOps tiene que confirmar que estas medidas existen
@@ -42,21 +52,24 @@ interface Props {
    */
   unidad?: string;
   /**
-   * La campaña VENDIDA que va en este hueco, si hay alguna corriendo
+   * Las campañas VENDIDAS vigentes para este hueco
    * (`src/lib/cms/publicidad.ts`).
    *
-   * 🔴 Cuando viene, GANA: en su lugar NO se declara el hueco de GPT —sin
+   * 🔴 Es una LISTA porque puede haber varias corriendo a la vez, y las dos se
+   * vendieron. Antes era una sola y la segunda no salía nunca.
+   *
+   * 🔴 Cuando viene alguna, GANA: en su lugar NO se declara el hueco de GPT —sin
    * `data-anuncio` el script ni lo descubre— así que no hay dos anuncios peleando
    * el mismo espacio ni una petición a GAM que nadie va a ver. La venta directa
    * tiene anunciante, fechas y compromiso; el programático rellena lo que sobra.
    *
    * Solo aplica al formato `portada`: es el único tipo que el CMS coloca aquí.
    */
-  banner?: Banner | null;
+  banners?: Banner[];
   class?: string;
 }
 
-const { formato, nombre = formato, unidad, banner = null, class: clase } = Astro.props;
+const { formato, nombre = formato, unidad, banners = [], class: clase } = Astro.props;
 
 /**
  * Medidas por formato: la lista completa que el slot puede servir, y el mapeo por
@@ -100,8 +113,32 @@ const idSlot = `ad-${nombre}`;
  * `null` y el hueco vuelve a GAM: mejor un anuncio programático que un `<img>`
  * roto a todo lo ancho de lo primero que se ve del sitio.
  */
+/**
+ * Cuál de las campañas vigentes va en ESTA respuesta.
+ *
+ * 🔴 Rota por MINUTO, en el servidor, y no con un carrusel en el navegador. Tres
+ * razones, en orden de peso:
+ *
+ *   1. Un carrusel que cambia solo cae bajo WCAG 2.2.2: contenido que se
+ *      actualiza automáticamente por encima de 5 s necesita una forma de pararlo.
+ *      Un banner no la va a tener, así que mejor que no se mueva.
+ *   2. Se baja UNA sola imagen. Un carrusel de tres descarga tres creativos
+ *      —a 1280×350— en lo primero que pinta la página, y dos no se llegan a ver.
+ *   3. La entrega se reparte igual entre anunciantes a lo largo del día, que es
+ *      como se mide una campaña (impresiones), no por segundos en pantalla.
+ *
+ * ⚠️ Es una elección DETERMINISTA y no `Math.random()`: la respuesta se cachea en
+ * el borde (`s-maxage=60`), así que una elección al azar quedaría congelada para
+ * todos los lectores de ese TTL — la campaña «rotatoria» sería siempre la misma.
+ * Con el minuto, la caché y la rotación avanzan al mismo paso.
+ */
+const elegida = banners.length
+  ? banners[Math.floor(Date.now() / 60000) % banners.length]
+  : null;
+
 const creatividad = (() => {
-  if (formato !== 'portada' || !banner) return null;
+  if (formato !== 'portada' || !elegida) return null;
+  const banner = elegida;
 
   const escritorio = urlMedia(banner.imagen, 'large');
   if (!escritorio) return null;
@@ -175,6 +212,17 @@ const creatividad = (() => {
     flex-direction: column;
     align-items: center;
     gap: 7px;
+  }
+
+  /*
+    Sin anuncio, no hay hueco. Lo pone `anuncios.ts`.
+
+    `display: none` y no `height: 0`: hay que llevarse también el rótulo
+    «PUBLICIDAD» y los `gap`/`padding` del contenedor, o queda una franja de 20px
+    con una palabra suelta anunciando un anuncio que no existe.
+  */
+  .anuncio[data-vacio] {
+    display: none;
   }
   .anuncio-rotulo {
     font-size: 8px;

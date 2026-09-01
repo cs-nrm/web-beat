@@ -27,9 +27,19 @@ import type { EntradaBitacora } from '@/lib/cms/aire';
 interface Props {
   estacion: Estacion;
   alAire: EntradaBitacora | null;
+  /**
+   * Nace con la barra oscura recogida. Lo pone `Base.astro` en los interiores.
+   *
+   * ⚠️ Solo vale para la PRIMERA carga. Este bloque lleva `transition:persist`, o
+   * sea que al navegar el navegador conserva el nodo vivo y descarta el marcado
+   * que manda el servidor — si la señal se cortara al cambiar de página no habría
+   * radio persistente. De la reconciliación en cada navegación se encarga
+   * `cabecera.ts`, que lee `document.body.dataset.vista`.
+   */
+  compacta?: boolean;
 }
 
-const { estacion, alAire } = Astro.props;
+const { estacion, alAire, compacta = false } = Astro.props;
 const ruta = Astro.url.pathname;
 
 /**
@@ -76,6 +86,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
 <div
   id="beat-cabecera"
   transition:persist="cabecera"
+  data-compacta={compacta ? '' : undefined}
   class="sticky top-0 z-header"
 >
   {/*
@@ -102,7 +113,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
       href="/"
       class="cabecera-logo-claro flex-none"
       aria-label={`${estacion.nombrePublicacion} — Inicio`}
-      tabindex="-1"
+      tabindex={compacta ? undefined : '-1'}
     >
       <img src="/img/beat-blanco.svg" alt={estacion.nombre} width="155" height="36" />
     </a>
@@ -151,14 +162,16 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
       class="min-w-0 flex-1 truncate font-text text-[12px] font-semibold leading-tight md:flex-none md:text-[13px]"
     >{sonando}</span>
 
-    {/* Waveform. Decorativa: el dato real es el texto de al lado. */}
-    <span class="flex h-4 w-[52px] flex-none items-center gap-[1.5px] md:h-5 md:w-auto md:flex-1" aria-hidden="true">
-      {barras(18).map((b) => (
-        <span
-          class="onda-barra h-full flex-1 bg-[var(--onair-wave)] md:hidden"
-          style={`--i:${b.i};--dur:${b.dur}ms;--dur2:${b.dur2}ms;--peak:${b.peak};--delay:${b.delay}ms`}
-        ></span>
-      ))}
+    {/*
+      Waveform. Decorativa: el dato real es el texto de al lado.
+
+      🔴 En MÓVIL no va. Ocupaba 52px de una barra de 343, y con eso el título de
+      lo que suena se quedaba en **5 píxeles** —medido a 375px, con «Beat 100.9»
+      reducido a una letra—. Es el peor reparto posible: la barra existe para
+      decir qué suena, y lo que sobrevivía era el adorno. La onda vuelve a partir
+      de 900px, donde sí sobra sitio.
+    */}
+    <span class="hidden h-4 flex-none items-center gap-[1.5px] md:flex md:h-5 md:w-auto md:flex-1" aria-hidden="true">
       {barras(72).map((b) => (
         <span
           class="onda-barra hidden h-full flex-1 bg-[var(--onair-wave)] md:block"
@@ -198,14 +211,22 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
       aria-expanded="false"
       aria-controls="beat-menu"
       class="cabecera-menu-claro hidden h-8 w-8 flex-none place-items-center bg-noche-0 text-mist-0 md:grid"
-      tabindex="-1"
+      tabindex={compacta ? undefined : '-1'}
     >
       <Icono nombre="menu" tamano={16} />
     </button>
   </div>
 
   {/* NAVEGACIÓN */}
+  {/*
+    🔴 `inert={compacta}` y NO `inert={compacta ? '' : undefined}`. `inert` es un
+    atributo booleano y Astro lo pinta cuando el valor es CIERTO; una cadena vacía
+    es falsa, así que la versión «correcta en HTML» no se emitía nunca. Comprobado
+    en el HTML servido: cero apariciones de `inert`, y la barra plegada seguía
+    siendo navegable con el tabulador.
+  */}
   <header
+    inert={compacta}
     class="flex h-header-movil items-center gap-2 bg-surface-card px-4 shadow-[inset_0_-1px_0_var(--border-quiet)] md:h-header md:gap-6 md:px-6"
   >
     <a href="/" class="flex-none" aria-label={`${estacion.nombrePublicacion} — Inicio`}>

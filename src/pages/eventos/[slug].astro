@@ -1,0 +1,322 @@
+---
+/**
+ * Un evento de la Agenda.
+ *
+ * Lo que tiene que resolver esta página es una sola pregunta: **¿voy o no voy?**
+ * De ahí el orden —cuándo, dónde, qué es, y el botón— y de ahí que la acción
+ * (`RSVP` o `BOLETOS`) se repita arriba y abajo: es lo único que se viene a hacer.
+ */
+import Base from '@/layouts/Base.astro';
+import CabezaSeccion from '@/components/CabezaSeccion.astro';
+import Agenda from '@/components/inicio/Agenda.astro';
+import Anuncio from '@/components/Anuncio.astro';
+import Icono from '@/components/Icono.astro';
+import { obtenerEvento, obtenerAgenda, TIPOS_EVENTO } from '@/lib/cms/eventos';
+import { urlMedia } from '@/lib/cms/client';
+
+const { slug } = Astro.params;
+
+let evento = null;
+try {
+  evento = slug ? await obtenerEvento(slug) : null;
+} catch {
+  return new Response('El CMS no responde. Vuelve a intentarlo en un momento.', {
+    status: 503,
+    headers: { 'cache-control': 'no-store', 'retry-after': '30' },
+  });
+}
+
+if (!evento) return Astro.rewrite('/404');
+
+const proximos = await obtenerAgenda(4);
+const otros = proximos.filter((e) => e.id !== evento.id).slice(0, 3);
+
+/**
+ * Las partes de la fecha, en hora de MÉXICO.
+ *
+ * 🔴 La zona va fija y no se deja al reloj del visitante: un evento a las 21:00 en
+ * la Ciudad de México es a las 21:00, lo mire alguien desde Tijuana o desde
+ * Madrid. Formatear en la zona del lector convertiría el dato en una hora a la que
+ * nadie va a poder ir.
+ */
+function partes(iso: string | null | undefined) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  const f = (opts: Intl.DateTimeFormatOptions) =>
+    new Intl.DateTimeFormat('es-MX', { timeZone: 'America/Mexico_City', ...opts }).format(d);
+  return {
+    largo: f({ weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase(),
+    hora: f({ hour: '2-digit', minute: '2-digit', hour12: false }),
+    iso: d.toISOString(),
+  };
+}
+
+const inicio = partes(evento.inicio);
+const fin = partes(evento.fin);
+
+const ETIQUETA_ACCION: Record<string, string> = { rsvp: 'RESERVAR LUGAR', boletos: 'BOLETOS' };
+const etiquetaTipo =
+  TIPOS_EVENTO.find((t) => t.valor === evento.tipo)?.etiqueta ?? evento.tipo.toUpperCase();
+
+const accion =
+  evento.accion && evento.accion !== 'ninguna' && evento.enlace
+    ? { etiqueta: ETIQUETA_ACCION[evento.accion] ?? 'VER MÁS', enlace: evento.enlace }
+    : null;
+
+const foto = urlMedia(evento.portada, 'large');
+const lugar = [evento.lugar, evento.ciudad].filter(Boolean).join(' · ');
+
+/* El rótulo del encabezado: el dato que ubica el evento, sin adjetivos. */
+const rotulo = [etiquetaTipo, inicio?.largo].filter(Boolean).join(' · ');
+---
+
+<Base
+  titulo={`${evento.titulo} — Agenda — Beat 100.9`}
+  descripcion={evento.descripcion ?? undefined}
+>
+  <article class="ev">
+    <CabezaSeccion titulo={evento.titulo} activa="/eventos" rotulo={rotulo} />
+
+    <div class="ev-columnas">
+      <div class="ev-principal">
+        {
+          foto && (
+            <div class="ev-foto">
+              <img src={foto} alt="" fetchpriority="high" decoding="async" />
+              <div class="beat-grid ev-trama" />
+              <div class="beat-streak ev-estela" />
+            </div>
+          )
+        }
+
+        {evento.descripcion && <p class="ev-descripcion">{evento.descripcion}</p>}
+      </div>
+
+      {/*
+        La ficha con los datos duros. Es lo que alguien copia, apunta o comprueba
+        antes de salir de casa, así que va junta y no repartida por la página.
+      */}
+      <aside class="ev-ficha">
+        <div class="ev-dato">
+          <span class="beat-label ev-dato-rotulo">CUÁNDO</span>
+          {
+            inicio ? (
+              <span class="ev-dato-valor">
+                <time datetime={inicio.iso}>
+                  {inicio.largo} · {inicio.hora}
+                </time>
+                {fin && <span class="ev-dato-extra">hasta {fin.largo} · {fin.hora}</span>}
+              </span>
+            ) : (
+              <span class="ev-dato-valor">Por confirmar</span>
+            )
+          }
+        </div>
+
+        {
+          lugar && (
+            <div class="ev-dato">
+              <span class="beat-label ev-dato-rotulo">DÓNDE</span>
+              <span class="ev-dato-valor">{lugar}</span>
+            </div>
+          )
+        }
+
+        <div class="ev-dato">
+          <span class="beat-label ev-dato-rotulo">QUÉ ES</span>
+          <span class="ev-dato-valor">{etiquetaTipo}</span>
+        </div>
+
+        {
+          accion && (
+            /*
+              🔴 `rel="noopener"` porque el destino es de un tercero —una
+              boletera— y sin él esa página puede tocar `window.opener`.
+            */
+            <a
+              href={accion.enlace}
+              class="beat-label ev-accion"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {accion.etiqueta}
+              <Icono nombre="arrow-up-right" tamano={16} />
+            </a>
+          )
+        }
+      </aside>
+    </div>
+
+    <div class="ev-franja-anuncio">
+      <Anuncio formato="leaderboard" nombre="evento-leader" />
+    </div>
+
+    {
+      otros.length > 0 && (
+        <>
+          <div class="ev-corte" data-barrido>
+            <span class="beat-display ev-corte-titulo">LO QUE SIGUE</span>
+            <a href="/eventos" class="beat-label ev-corte-todo">
+              VER LA AGENDA
+            </a>
+          </div>
+          <div class="ev-otros">
+            <Agenda eventos={otros} contexto="seccion" />
+          </div>
+        </>
+      )
+    }
+  </article>
+</Base>
+
+<style>
+  .ev {
+    max-width: var(--grid-max);
+    margin: 0 auto;
+  }
+  .ev-columnas {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 32px;
+    align-items: start;
+    padding: 30px 24px 0;
+  }
+  .ev-foto {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: var(--grad-noche);
+    overflow: hidden;
+    /* Pieza SUELTA sobre el fondo, no de retícula: lleva radio. movimiento.md §6. */
+    border-radius: var(--r-media);
+  }
+  .ev-foto img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .ev-trama {
+    position: absolute;
+    inset: 0;
+  }
+  .ev-estela {
+    left: 10%;
+    right: 30%;
+    top: 32%;
+  }
+  .ev-descripcion {
+    font: var(--type-body-lg);
+    color: var(--text-body);
+    margin: 24px 0 0;
+    max-width: 62ch;
+    text-wrap: pretty;
+  }
+
+  .ev-ficha {
+    position: sticky;
+    top: calc(var(--chrome-h) + 16px);
+    background: var(--surface-card);
+    box-shadow: inset 0 0 0 1px var(--border-hairline);
+    padding: 22px;
+  }
+  .ev-dato {
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border-hairline);
+  }
+  .ev-dato-rotulo {
+    display: block;
+    color: var(--text-faint);
+    font-size: 8.5px;
+  }
+  .ev-dato-valor {
+    display: block;
+    margin-top: 8px;
+    font: 600 15px / 1.32 var(--font-text);
+    color: var(--mist-1);
+    text-wrap: pretty;
+  }
+  .ev-dato-extra {
+    display: block;
+    margin-top: 5px;
+    font: 400 13px / 1.3 var(--font-text);
+    color: var(--text-muted);
+  }
+  .ev-accion {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 20px;
+    border-radius: 999px;
+    background: var(--mist-0);
+    color: var(--noche-0);
+    font-size: 9.5px;
+    white-space: nowrap;
+  }
+  .ev-accion:hover {
+    background: var(--mist-1);
+  }
+
+  .ev-corte {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 14px;
+    margin: 12px 24px 0;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-quiet);
+  }
+  .ev-corte-titulo {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--mist-2);
+  }
+  .ev-corte-todo {
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .ev-corte-todo:hover {
+    color: var(--mist-0);
+  }
+  .ev-otros {
+    padding: 26px 24px 44px;
+  }
+  .ev-franja-anuncio {
+    padding: 44px 24px 32px;
+  }
+
+  @media (max-width: 1099px) {
+    .ev-columnas {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+    .ev-ficha {
+      position: static;
+    }
+  }
+  @media (max-width: 899px) {
+    .ev-columnas {
+      padding: 22px 16px 0;
+    }
+    .ev-descripcion {
+      font: var(--type-body);
+      max-width: none;
+    }
+    .ev-corte {
+      margin: 8px 16px 0;
+    }
+    .ev-corte-titulo {
+      font-size: 19px;
+    }
+    .ev-otros {
+      padding: 20px 16px 32px;
+    }
+    .ev-franja-anuncio {
+      padding: 32px 16px 24px;
+    }
+  }
+</style>

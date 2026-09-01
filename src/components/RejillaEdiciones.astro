@@ -1,0 +1,134 @@
+---
+/**
+ * Las ediciones anteriores de una lista. La usan el índice del tipo y la página
+ * de una edición.
+ *
+ * Es la misma pieza visual que el archivo del Fenómeno —retícula de portadas con
+ * un dato encima— porque son el mismo gesto: «lo que ya salió». Que dos secciones
+ * distintas lo resuelvan igual es el punto, no un descuido.
+ */
+import { urlMedia } from '@/lib/cms/client';
+import { fechaCorta } from '@/lib/nota';
+import { rutaLista } from '@/config/site';
+import type { Lista } from '@/types/payload';
+
+interface Props {
+  tipoSlug: string;
+  ediciones: Lista[];
+  /** La que se está viendo, si estamos dentro de una. */
+  excluir?: number | null;
+}
+
+const { tipoSlug, ediciones, excluir = null } = Astro.props;
+
+const otras = ediciones.filter((e) => e.id !== excluir);
+
+/** Cuántas canciones trae. Es el dato que distingue una edición de otra. */
+const cuantas = (e: Lista) => e.canciones?.length ?? 0;
+---
+
+{
+  otras.length > 0 && (
+    <div class="re">
+      {otras.map((e) => {
+        const portada = urlMedia(e.portada, 'card');
+        const fecha = fechaCorta(e.fecha);
+        const n = cuantas(e);
+        return (
+          <a href={rutaLista(tipoSlug, e.slug ?? '')} class="re-edicion" data-luz>
+            <div class="re-foto">
+              {portada && <img src={portada} alt="" loading="lazy" decoding="async" />}
+              <div class="beat-grid re-trama" />
+              {fecha && <span class="beat-label re-fecha">{fecha}</span>}
+            </div>
+            <div class="re-titulo">{e.titulo}</div>
+            {n > 0 && (
+              <span class="beat-label re-nota">
+                {n} TRACK{n === 1 ? '' : 'S'}
+              </span>
+            )}
+          </a>
+        );
+      })}
+    </div>
+  )
+}
+
+<style>
+  /* La línea entre piezas ES el fondo asomando. Por eso cada una necesita fondo
+     opaco propio: si fuera transparente se vería la retícula completa. */
+  .re {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2px;
+    background: var(--border-hairline);
+    padding: 2px;
+    margin: 24px 24px 0;
+  }
+  .re-edicion {
+    display: block;
+    background: var(--noche-1);
+    padding-bottom: 16px;
+    color: inherit;
+    text-decoration: none;
+    transition: background var(--dur-2) var(--ease-out);
+  }
+  .re-edicion:hover {
+    background: var(--noche-2);
+  }
+  .re-edicion:hover .re-titulo {
+    color: var(--mist-0);
+  }
+  .re-foto {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    background: var(--grad-noche);
+    overflow: hidden;
+    /* Pieza de RETÍCULA: sin radio. Ver movimiento.md §6. */
+  }
+  .re-foto img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .re-trama {
+    position: absolute;
+    inset: 0;
+  }
+  .re-fecha {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    padding: 7px 11px;
+    background: rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(14px);
+    color: var(--mist-0);
+    font-size: 9px;
+    white-space: nowrap;
+  }
+  .re-titulo {
+    font: 600 15px / 1.25 var(--font-text);
+    color: var(--mist-2);
+    padding: 14px 16px 0;
+    text-wrap: pretty;
+  }
+  .re-nota {
+    display: block;
+    padding: 8px 16px 0;
+    font-size: 9px;
+    color: var(--text-faint);
+  }
+
+  @media (max-width: 899px) {
+    .re {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      margin: 18px 0 0;
+    }
+    .re-titulo {
+      font-size: 14px;
+      padding: 12px 14px 0;
+    }
+  }
+</style>

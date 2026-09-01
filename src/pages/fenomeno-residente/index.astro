@@ -1,0 +1,136 @@
+---
+/**
+ * El Fenómeno Residente — §3 del mapa de sitio.
+ *
+ * 🔴 Es DELIBERADAMENTE la misma maqueta que el bloque del Inicio, no una
+ * pantalla nueva. Es lo que pidió Carlos («puede ser muy similar a lo que tenemos
+ * en el home»), y coincide con lo correcto: el tema de la semana es el mismo
+ * objeto en los dos sitios, y mantener dos maquetas para un solo dato es cómo se
+ * llega a que una tenga la playlist y la otra no.
+ *
+ * Lo que cambia respecto al Inicio son dos cosas, las dos por contexto:
+ *   · sin la barra «EL FENÓMENO RESIDENTE · VER EL ARCHIVO» — ya estás dentro;
+ *   · el archivo va COMPLETO y sin el box al costado, porque aquí no es un
+ *     adelanto: es la mitad de la razón de existir de la página.
+ */
+import Base from '@/layouts/Base.astro';
+import CabezaSeccion from '@/components/CabezaSeccion.astro';
+import Fenomeno from '@/components/inicio/Fenomeno.astro';
+import ArchivoTemas from '@/components/inicio/ArchivoTemas.astro';
+import Anuncio from '@/components/Anuncio.astro';
+import { obtenerEspecialVigente, obtenerEspeciales } from '@/lib/cms/especiales';
+import { SERIE_FENOMENO } from '@/config/site';
+
+/*
+  Las dos en paralelo: el vigente con sus piezas (`depth: 2`) y la lista de todos
+  para el archivo (`depth: 1`, que basta para la portada y el número). Son dos
+  consultas y no una porque piden profundidades distintas, y traerse 24 especiales
+  con sus piezas pobladas para pintar 24 miniaturas sería pagar el `depth` 24 veces.
+*/
+const [vigente, todos] = await Promise.all([
+  obtenerEspecialVigente(SERIE_FENOMENO),
+  obtenerEspeciales(SERIE_FENOMENO, 24),
+]);
+
+/*
+  El rótulo es un DATO —cuántos temas hay—, no una descripción de la sección. Ver
+  `CabezaSeccion.astro`: las bajadas de relleno se retiraron.
+*/
+const cuantos = todos.length;
+const rotulo = cuantos > 0 ? `${cuantos} TEMA${cuantos === 1 ? '' : 'S'}` : null;
+
+/* El archivo excluye el vigente solo si el vigente se está pintando arriba. */
+const anteriores = vigente ? todos.filter((t) => t.id !== vigente.id) : todos;
+---
+
+<Base
+  titulo="El Fenómeno Residente — Beat 100.9"
+  descripcion="El tema de la semana, sus cápsulas, el especial del sábado y la playlist. Y el archivo completo de los temas anteriores."
+>
+  <div class="fr-pagina">
+    <CabezaSeccion
+      titulo="EL FENÓMENO RESIDENTE"
+      activa="/fenomeno-residente"
+      rotulo={rotulo}
+    />
+
+    <Fenomeno especial={vigente} contexto="seccion" />
+
+    {
+      anteriores.length > 0 && (
+        <>
+          <div class="fr-corte" data-barrido>
+            <span class="beat-display fr-corte-titulo">EL ARCHIVO</span>
+          </div>
+          <ArchivoTemas temas={anteriores} limite={null} riel={false} />
+        </>
+      )
+    }
+
+    {
+      /*
+        Degrada en vez de tronar, como el resto del sitio. Y el mensaje dice qué
+        falta EN EL CMS, no un «no hay nada» que deje a quien lo lea sin saber si
+        el sitio está roto o la sección está vacía.
+      */
+      !vigente && anteriores.length === 0 && (
+        <p class="fr-vacio">
+          Todavía no hay ningún tema publicado. Los temas son documentos de
+          «especiales» con la serie «{SERIE_FENOMENO}», y sus cápsulas son las
+          piezas de cada uno.
+        </p>
+      )
+    }
+
+    <div class="fr-franja-anuncio">
+      <Anuncio formato="leaderboard" nombre="fenomeno-leader" />
+    </div>
+  </div>
+</Base>
+
+<style>
+  .fr-pagina {
+    max-width: var(--grid-max);
+    margin: 0 auto;
+  }
+  .fr-corte {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin: 44px 24px 0;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-quiet);
+  }
+  .fr-corte-titulo {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--mist-2);
+  }
+  .fr-vacio {
+    font: var(--type-body);
+    color: var(--text-muted);
+    max-width: 62ch;
+    padding: 40px 24px 0;
+    text-wrap: pretty;
+  }
+  .fr-franja-anuncio {
+    padding: 44px 24px;
+  }
+
+  @media (max-width: 899px) {
+    .fr-corte {
+      margin: 32px 16px 0;
+    }
+    .fr-corte-titulo {
+      font-size: 19px;
+    }
+    .fr-vacio {
+      padding: 28px 16px 0;
+      font: var(--type-body-sm);
+    }
+    .fr-franja-anuncio {
+      padding: 32px 16px;
+    }
+  }
+</style>

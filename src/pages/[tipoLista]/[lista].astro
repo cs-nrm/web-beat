@@ -1,0 +1,161 @@
+---
+/**
+ * Una edición de una lista — `/bonus-beat/<slug>`.
+ *
+ * Misma razón que el índice para ser dinámica en los DOS segmentos: el primero es
+ * el slug del tipo (dato editorial) y el segundo el de la edición.
+ */
+import Base from '@/layouts/Base.astro';
+import CabezaSeccion from '@/components/CabezaSeccion.astro';
+import BonusBeat from '@/components/inicio/BonusBeat.astro';
+import RejillaEdiciones from '@/components/RejillaEdiciones.astro';
+import Anuncio from '@/components/Anuncio.astro';
+import { obtenerTipoDeLista, obtenerListas, obtenerLista } from '@/lib/cms/listas';
+import { fechaCorta } from '@/lib/nota';
+import { SEGMENTOS_RESERVADOS } from '@/config/site';
+
+const { tipoLista: tipoSlug, lista: slug } = Astro.params;
+
+if (!tipoSlug || !slug || (SEGMENTOS_RESERVADOS as readonly string[]).includes(tipoSlug)) {
+  return Astro.rewrite('/404');
+}
+
+const tipo = await obtenerTipoDeLista(tipoSlug);
+if (!tipo) return Astro.rewrite('/404');
+
+let lista = null;
+try {
+  lista = await obtenerLista(tipoSlug, slug);
+} catch {
+  /*
+    El CMS no contesta: no se puede saber si la edición existe. Un 404 aquí sería
+    una mentira cacheable. Mismo reparto que en la nota y en el especial.
+  */
+  return new Response('El CMS no responde. Vuelve a intentarlo en un momento.', {
+    status: 503,
+    headers: { 'cache-control': 'no-store', 'retry-after': '30' },
+  });
+}
+
+if (!lista) return Astro.rewrite('/404');
+
+const otras = await obtenerListas(tipoSlug, 7);
+
+const fecha = fechaCorta(lista.fecha);
+const cuantas = lista.canciones?.length ?? 0;
+
+/*
+  El rótulo lleva el nombre del tipo —que es de dónde vienes— y los datos de la
+  edición. La tira de secciones de arriba ya marca cuál está activa, así que esto
+  no repite navegación: informa.
+*/
+const rotulo = [
+  tipo.nombre.toUpperCase(),
+  fecha,
+  cuantas ? `${cuantas} TRACK${cuantas === 1 ? '' : 'S'}` : null,
+]
+  .filter(Boolean)
+  .join(' · ');
+---
+
+<Base
+  titulo={`${lista.titulo} — ${tipo.nombre} — Beat 100.9`}
+  descripcion={lista.descripcion ?? `${lista.titulo}: ${tipo.nombre} de Beat 100.9.`}
+>
+  <div class="ed-pagina">
+    <CabezaSeccion titulo={lista.titulo} activa={`/${tipoSlug}`} rotulo={rotulo} />
+
+    {lista.descripcion && <p class="ed-descripcion">{lista.descripcion}</p>}
+
+    <div class="ed-canciones">
+      <BonusBeat lista={lista} tipo={tipo} contexto="edicion" />
+    </div>
+
+    <div class="ed-franja-anuncio">
+      <Anuncio formato="leaderboard" nombre="edicion-leader" />
+    </div>
+
+    {
+      otras.filter((e) => e.id !== lista.id).length > 0 && (
+        <>
+          <div class="ed-corte" data-barrido>
+            <span class="beat-display ed-corte-titulo">OTRAS EDICIONES</span>
+            <a href={`/${tipoSlug}`} class="beat-label ed-corte-todo">
+              VER TODAS
+            </a>
+          </div>
+          <RejillaEdiciones tipoSlug={tipoSlug} ediciones={otras} excluir={lista.id} />
+        </>
+      )
+    }
+  </div>
+</Base>
+
+<style>
+  .ed-pagina {
+    max-width: var(--grid-max);
+    margin: 0 auto;
+  }
+  /*
+    La descripción de la EDICIÓN sí se pinta, al contrario que las bajadas de
+    sección que se retiraron. La diferencia no es de forma: esto lo escribe la
+    redacción sobre ESTA edición —«por qué estas tres esta semana»— y es
+    contenido. Aquellas eran una frase fija describiendo la sección al lector que
+    acababa de entrar en ella.
+  */
+  .ed-descripcion {
+    font: var(--type-body-lg);
+    color: var(--text-muted);
+    max-width: 62ch;
+    margin: 20px 0 0;
+    padding: 0 24px;
+    text-wrap: pretty;
+  }
+  .ed-canciones {
+    padding: 26px 24px 0;
+  }
+  .ed-corte {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 14px;
+    margin: 12px 24px 0;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-quiet);
+  }
+  .ed-corte-titulo {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--mist-2);
+  }
+  .ed-corte-todo {
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .ed-corte-todo:hover {
+    color: var(--mist-0);
+  }
+  .ed-franja-anuncio {
+    padding: 44px 24px 32px;
+  }
+
+  @media (max-width: 899px) {
+    .ed-descripcion {
+      font: var(--type-body);
+      padding: 0 16px;
+    }
+    .ed-canciones {
+      padding: 20px 16px 0;
+    }
+    .ed-corte {
+      margin: 8px 16px 0;
+    }
+    .ed-corte-titulo {
+      font-size: 19px;
+    }
+    .ed-franja-anuncio {
+      padding: 32px 16px 24px;
+    }
+  }
+</style>

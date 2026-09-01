@@ -1,6 +1,6 @@
 ---
 /**
- * «BONUS BEAT» en el Inicio — `TRES TRACKS CADA VIERNES` de 13a.
+ * «BONUS BEAT» en el Inicio — el bloque de listas de 13a.
  *
  * Sale de `listas`, no de una colección propia: cada edición es una `lista` del
  * tipo «Bonus Beat», y su `canciones[].comentario` es la VIÑETA que el mapa de
@@ -17,10 +17,21 @@ import type { Lista, TiposDeLista } from '@/types/payload';
 interface Props {
   lista: Lista | null;
   tipo: TiposDeLista | null;
+  /**
+   * Dónde se pinta.
+   *
+   *   `inicio`  — con su barra de sección («BONUS BEAT · <fecha>») y el remate a
+   *               todas las ediciones. Es un bloque entre otros.
+   *   `edicion` — dentro de la sección: solo las canciones. El nombre y la fecha
+   *               los lleva ya el encabezado de la página, y repetirlos dejaba el
+   *               mismo rótulo dos veces con dos tipografías distintas.
+   */
+  contexto?: 'inicio' | 'edicion';
 }
 
-const { lista, tipo } = Astro.props;
+const { lista, tipo, contexto = 'inicio' } = Astro.props;
 
+const enInicio = contexto === 'inicio';
 const rutaTipo = tipo?.slug ? `/${tipo.slug}` : null;
 const fecha = fechaCorta(lista?.fecha);
 
@@ -48,14 +59,27 @@ function plataformasDe(c: unknown): Array<[string, string]> {
 
 {
   lista && (
-    <section class="bb">
+    <section class:list={['bb', `es-${contexto}`]}>
+      {enInicio && (
       <div class="bb-cabeza">
         <h2 class="beat-display bb-seccion">{(tipo?.nombre ?? lista.titulo).toUpperCase()}</h2>
-        <span class="beat-label bb-nota">
-          {tipo?.descripcion ?? 'TRES TRACKS CADA VIERNES'}
-          {fecha && ` · ${fecha}`}
-        </span>
+        {/*
+          Solo la FECHA de la edición.
+
+          ⚠️ Aquí decía «TRES TRACKS CADA VIERNES», que salía del lienzo. Se
+          retiró por decisión de Carlos (2026-09-01): nadie ha comprometido esa
+          periodicidad, y un rótulo fijo que promete un día de la semana se
+          convierte en un desmentido el primer viernes que no haya edición. La
+          fecha, en cambio, es un dato: dice cuándo es ESTA, sin prometer la
+          siguiente.
+
+          Si algún día la estación quiere anunciar una cadencia, el sitio para
+          decirlo es `tipos-de-lista.descripcion` en el CMS —dato editorial— y no
+          una cadena en este archivo.
+        */}
+        {fecha && <span class="beat-label bb-nota">{fecha}</span>}
       </div>
+      )}
 
       {lista.canciones?.length ? (
         lista.canciones.map((c, i) => {
@@ -106,7 +130,7 @@ function plataformasDe(c: unknown): Array<[string, string]> {
         </p>
       )}
 
-      {rutaTipo && (
+      {enInicio && rutaTipo && (
         <div class="bb-pie">
           <a href={rutaTipo} class="beat-label bb-mas">
             VER TODAS LAS EDICIONES
@@ -120,6 +144,15 @@ function plataformasDe(c: unknown): Array<[string, string]> {
 <style>
   .bb {
     padding: 44px 24px 0;
+  }
+  /*
+    En la sección propia el bloque no pone NADA de margen: ni arriba (el
+    encabezado ya está ahí) ni a los lados (la página tiene el suyo). Con el
+    padding puesto se sumaban los dos y las canciones quedaban 48px adentro
+    mientras el titular empezaba a 24 — un escalón que no dice nada.
+  */
+  .bb.es-edicion {
+    padding: 0;
   }
   .bb-cabeza {
     display: flex;
@@ -230,6 +263,9 @@ function plataformasDe(c: unknown): Array<[string, string]> {
   @media (max-width: 899px) {
     .bb {
       padding: 32px 16px 0;
+    }
+    .bb.es-edicion {
+      padding: 0;
     }
     .bb-cabeza {
       flex-direction: column;

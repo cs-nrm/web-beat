@@ -1,0 +1,141 @@
+---
+/**
+ * Un tema del Fenómeno Residente (o cualquier otro especial).
+ *
+ * La ruta es por COLECCIÓN y no por sección (`/especiales/<slug>`, decisión 10
+ * del plan): un especial puede pertenecer a otra serie el día de mañana sin que
+ * su URL cambie.
+ *
+ * La maqueta del tema es LA MISMA que la del Inicio y la de la sección — el
+ * mismo componente, en su tercer contexto. Lo que aporta esta página es el marco:
+ * el titular como `h1`, la migaja hacia la serie y los temas vecinos al pie.
+ */
+import Base from '@/layouts/Base.astro';
+import CabezaSeccion from '@/components/CabezaSeccion.astro';
+import Fenomeno from '@/components/inicio/Fenomeno.astro';
+import ArchivoTemas from '@/components/inicio/ArchivoTemas.astro';
+import Anuncio from '@/components/Anuncio.astro';
+import { obtenerEspecial, obtenerEspeciales } from '@/lib/cms/especiales';
+import { fechaCorta } from '@/lib/nota';
+import { SERIE_FENOMENO } from '@/config/site';
+
+const { slug } = Astro.params;
+
+let especial = null;
+try {
+  especial = slug ? await obtenerEspecial(slug) : null;
+} catch {
+  /*
+    Si el CMS no responde no se puede saber si el especial existe. Un 404 sería
+    una mentira CACHEABLE —se queda pegado en el borde y en el índice—; un 503 es
+    la verdad y no se indexa. Mismo reparto que en la nota.
+  */
+  return new Response('El CMS no responde. Vuelve a intentarlo en un momento.', {
+    status: 503,
+    headers: { 'cache-control': 'no-store', 'retry-after': '30' },
+  });
+}
+
+if (!especial) return Astro.rewrite('/404');
+
+/*
+  La serie a la que pertenece, para saber a dónde vuelve la migaja. Si no es la del
+  Fenómeno, la tira marca Fenómeno igual —no hay otra sección donde vivan los
+  especiales— pero el archivo de abajo se pide de SU serie, no de otra.
+*/
+const serieSlug =
+  especial.serie && typeof especial.serie === 'object' ? (especial.serie.slug ?? null) : null;
+
+const vecinos = await obtenerEspeciales(serieSlug ?? SERIE_FENOMENO, 8);
+const otros = vecinos.filter((t) => t.id !== especial.id);
+
+/*
+  El rótulo, con el dato que haya: el número del tema y su rango de fechas. Si el
+  especial no trae ninguno de los dos no se pinta nada — antes que inventar un
+  «TEMA 01» que no está capturado.
+*/
+const partes = [
+  especial.numero != null ? `TEMA ${String(especial.numero).padStart(2, '0')}` : null,
+  especial.inicio && especial.fin
+    ? `${fechaCorta(especial.inicio)} — ${fechaCorta(especial.fin)}`
+    : fechaCorta(especial.inicio),
+].filter(Boolean);
+const rotulo = partes.length ? partes.join(' · ') : null;
+---
+
+<Base
+  titulo={`${especial.titulo} — El Fenómeno Residente — Beat 100.9`}
+  descripcion={especial.descripcion ?? especial.etiquetaPublica ?? undefined}
+>
+  <div class="es-pagina">
+    <CabezaSeccion
+      titulo={especial.titulo}
+      activa="/fenomeno-residente"
+      rotulo={rotulo}
+    />
+
+    <Fenomeno especial={especial} contexto="tema" />
+
+    <div class="es-franja-anuncio">
+      <Anuncio formato="leaderboard" nombre="especial-leader" />
+    </div>
+
+    {
+      otros.length > 0 && (
+        <>
+          <div class="es-corte" data-barrido>
+            <span class="beat-display es-corte-titulo">OTROS TEMAS</span>
+            <a href="/fenomeno-residente" class="beat-label es-corte-todo">
+              VER EL ARCHIVO
+            </a>
+          </div>
+          <ArchivoTemas temas={otros} limite={6} riel={false} />
+        </>
+      )
+    }
+  </div>
+</Base>
+
+<style>
+  .es-pagina {
+    max-width: var(--grid-max);
+    margin: 0 auto;
+  }
+  .es-corte {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 14px;
+    margin: 12px 24px 0;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-quiet);
+  }
+  .es-corte-titulo {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--mist-2);
+  }
+  .es-corte-todo {
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .es-corte-todo:hover {
+    color: var(--mist-0);
+  }
+  .es-franja-anuncio {
+    padding: 44px 24px 32px;
+  }
+
+  @media (max-width: 899px) {
+    .es-corte {
+      margin: 8px 16px 0;
+    }
+    .es-corte-titulo {
+      font-size: 19px;
+    }
+    .es-franja-anuncio {
+      padding: 32px 16px 24px;
+    }
+  }
+</style>

@@ -5,7 +5,15 @@
  * Cuatro columnas —secciones, radio en vivo, redes, apps—, el bloque legal y la
  * tira de marcas de NRM.
  */
-import { SECCIONES, SECCIONES_PIE, PLATAFORMAS_RADIO, APPS, LEGALES, MARCAS_NRM } from '@/config/navegacion';
+import {
+  SECCIONES,
+  SECCIONES_FUTURAS,
+  SECCIONES_PIE,
+  PLATAFORMAS_RADIO,
+  APPS,
+  LEGALES,
+  MARCAS_NRM,
+} from '@/config/navegacion';
 import type { Estacion } from '@/lib/cms/estacion';
 
 interface Props {
@@ -16,7 +24,13 @@ interface Props {
 
 const { estacion, redes } = Astro.props;
 const anio = new Date().getFullYear();
-const todasLasSecciones = [...SECCIONES, ...SECCIONES_PIE];
+/*
+  El pie es el MAPA COMPLETO, y la nav de arriba solo las cinco vivas.
+  Las tres futuras (Comunidad, Tienda, Marcas) se pintan apagadas aquí: quien
+  busca «Comunidad» merece ver que existe y que aún no está, en vez de no
+  encontrarla en ningún sitio.
+*/
+const todasLasSecciones = [...SECCIONES, ...SECCIONES_FUTURAS, ...SECCIONES_PIE];
 ---
 
 <footer class="mt-13 border-t-hairline border-borde-hairline bg-surface-base">

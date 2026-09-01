@@ -21,18 +21,38 @@ export interface EntradaNav {
 }
 
 /**
- * Las 8 secciones del `Mapa de sitio Beat 2026.pdf` §4.2. El Inicio no va en la
- * nav: es el logo.
+ * La navegación de arriba: CINCO secciones, en este orden.
  *
- * ⚠️ «Beat Scanner» sustituye a las noticias — sale del lienzo v14, no del PDF, y
+ * 🔴 Son cinco y no ocho, y es decisión de Carlos (2026-09-01):
+ * `EN VIVO · FENÓMENO RESIDENTE · BONUS BEAT · BEAT SCANNER · AGENDA`.
+ * Las tres que faltan del mapa de sitio —Comunidad, Tienda y Marcas— no
+ * desaparecen: bajan a `SECCIONES_FUTURAS`, que el PIE sí pinta. Un menú de ocho
+ * con tres apagadas enseña al lector que la mitad de este sitio no lleva a
+ * ninguna parte; el pie es donde un mapa completo sí tiene sentido.
+ *
+ * ⚠️ El rótulo es el nombre COMPLETO —«Fenómeno Residente», no «Fenómeno»—
+ * porque con cinco entradas cabe, y porque abreviar el nombre de la sección
+ * estrella para ahorrar 60px era una economía sin destinatario.
+ *
+ * «Beat Scanner» sustituye a las noticias: sale del lienzo v14, no del PDF, y
  * donde los dos no coinciden gana el lienzo, que es posterior.
  */
 export const SECCIONES: EntradaNav[] = [
   { corto: 'En vivo', largo: 'Escuchar en vivo', href: '/en-vivo' },
-  { corto: 'Fenómeno', largo: 'El Fenómeno Residente', href: '/fenomeno-residente' },
-  { corto: 'Bonus Beat', largo: 'Bonus Beat', href: '/bonus-beat', pendiente: true },
-  { corto: 'Scanner', largo: 'Beat Scanner', href: '/scanner' },
-  { corto: 'Agenda', largo: 'Agenda', href: '/eventos', pendiente: true },
+  { corto: 'Fenómeno Residente', largo: 'El Fenómeno Residente', href: '/fenomeno-residente' },
+  { corto: 'Bonus Beat', largo: 'Bonus Beat', href: '/bonus-beat' },
+  { corto: 'Beat Scanner', largo: 'Beat Scanner', href: '/scanner' },
+  { corto: 'Agenda', largo: 'Agenda', href: '/eventos' },
+];
+
+/**
+ * Las tres del mapa de sitio que todavía no se construyen.
+ *
+ * Viven en el PIE, apagadas. Están aquí y no borradas porque el mapa de sitio las
+ * declara y Comunidad es el objetivo estratégico #1: borrarlas de la config sería
+ * perder la única lista escrita de lo que falta.
+ */
+export const SECCIONES_FUTURAS: EntradaNav[] = [
   { corto: 'Comunidad', largo: 'Comunidad', href: '/comunidad', pendiente: true },
   { corto: 'Tienda', largo: 'Tienda', href: '/tienda', pendiente: true },
   { corto: 'Marcas', largo: 'Beat para marcas', href: '/marcas', pendiente: true },

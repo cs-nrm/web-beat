@@ -16,7 +16,7 @@ if (!cat) return Astro.rewrite('/404');
 
 <Base
   titulo={`${cat.nombre} — Beat Scanner — Beat 100.9`}
-  descripcion={`Notas, entrevistas y reportajes de ${cat.nombre} en Beat 100.9.`}
+  descripcion={cat.descripcion ?? `${cat.nombre} en Beat 100.9.`}
 >
   <IndiceScanner
     filtro={{ tipo: 'categoria', id: cat.id, nombre: cat.nombre ?? '', slug: cat.slug ?? '' }}

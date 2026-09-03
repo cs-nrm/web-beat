@@ -103,8 +103,8 @@ export default defineConfig({
      * Un host que no esté aquí no se rechaza: simplemente vuelve a "localhost",
      * que es el lado seguro.
      *
-     * ⚠️ Si algún día se levanta un staging real, su hostname TIENE que entrar
-     * en esta lista o el sitio real podría salir `noindex`.
+     * ⚠️ Todo staging o preproducción TIENE que entrar en esta lista. Ya pasó:
+     * `v2.beatdigital.mx` se levantó en sep 2026 y se agregó abajo.
      */
     allowedDomains: [
       { hostname: 'beatdigital.mx' },
@@ -117,6 +117,13 @@ export default defineConfig({
          respaldo, y conviene que este proceso sepa reconocerlo. */
       { hostname: 'beatdigital.com.mx' },
       { hostname: 'beta.beatdigital.mx' },
+      /* Preproducción del relanzamiento (sep 2026). Entra por las DOS razones de
+         arriba: sin ella `Astro.url` cae a "localhost", y entonces `checkOrigin`
+         compararía "localhost" contra el dominio real y **todo POST daría 403** —
+         o sea el login y el registro de oyentes, el día que existan. El `noindex`
+         no depende de esta lista (sale igual, porque "localhost" tampoco es el
+         host canónico), pero el 403 sí. */
+      { hostname: 'v2.beatdigital.mx' },
     ],
   },
   devToolbar: {

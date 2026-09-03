@@ -22,11 +22,9 @@
 import Icono from './Icono.astro';
 import { SECCIONES } from '@/config/navegacion';
 import type { Estacion } from '@/lib/cms/estacion';
-import type { EntradaBitacora } from '@/lib/cms/aire';
 
 interface Props {
   estacion: Estacion;
-  alAire: EntradaBitacora | null;
   /**
    * Nace con la barra oscura recogida. Lo pone `Base.astro` en los interiores.
    *
@@ -39,16 +37,22 @@ interface Props {
   compacta?: boolean;
 }
 
-const { estacion, alAire, compacta = false } = Astro.props;
+const { estacion, compacta = false } = Astro.props;
 const ruta = Astro.url.pathname;
 
 /**
- * El fallback es el del sitio viejo, y es correcto: durante un corte comercial la
- * bitácora no trae canción, y anunciar la marca es mejor que un hueco.
+ * El texto de partida, antes de que exista una conexión.
+ *
+ * 🔴 Ya NO sale del CMS. Lo que suena lo manda el SDK de Triton por el canal de
+ * cue points, dentro del propio stream, así que llega alineado con lo que el
+ * oyente escucha — la bitácora es la hora del playout y va 5 s por delante
+ * (medido). Y consultarla costaba una petición al CMS en cada página del sitio,
+ * para un dato que solo es cierto si alguien está escuchando.
+ *
+ * Así que hasta el primer cue point la barra dice la marca. No es un hueco: es lo
+ * único verdadero que se puede decir antes de que el oyente pulse play.
  */
-const sonando = alAire
-  ? [alAire.titulo, alAire.artista].filter(Boolean).join(' · ')
-  : estacion.nombre;
+const sonando = estacion.nombre;
 
 /**
  * Las barras de la onda: 72 en escritorio, 18 en móvil.
@@ -148,13 +152,24 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     <button
       type="button"
       data-accion="directo"
+      aria-label="Volver a la transmisión en vivo"
       class="solo-pista player-volver flex-none items-center gap-2"
     >
       <span
         class="h-[7px] w-[7px] flex-none rounded-pill bg-[var(--rojo-aire)] motion-safe:animate-pulse"
       ></span>
+      {/*
+        ⚠️ Dice «EN VIVO», no «volver al directo». «Directo» es español de España;
+        acá se dice en vivo, y es además la palabra que ya usa la sección
+        `/en-vivo` y la que dice la propia barra cuando está al aire. Decisión de
+        Carlos, 2026-09-03.
+
+        El `aria-label` del botón sí lleva la frase completa: el texto visible
+        puede ser corto porque el punto rojo y el contexto lo explican, pero quien
+        lo oye sin verlo necesita la acción entera.
+      */}
       <span class="t-label whitespace-nowrap text-[8px] md:text-[9px]">
-        Volver al directo
+        En vivo
       </span>
     </button>
 
@@ -189,9 +204,15 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
       </span>
     </button>
 
+    {/*
+      🔴 En ROJO, el mismo `--rojo-aire` del punto que parpadea. Decisión de
+      Carlos (2026-09-03) y es coherente: el punto y este texto dicen lo mismo —
+      esto es lo que está sonando AHORA— así que comparten color. Es la única
+      excepción al blanco y negro y no se abre una segunda; ver movimiento.md §8.
+    */}
     <span
       data-campo="sonando"
-      class="solo-directo min-w-0 flex-1 truncate font-text text-[12px] font-semibold leading-tight md:flex-none md:text-[13px]"
+      class="solo-directo player-sonando min-w-0 flex-1 truncate font-text text-[12px] font-semibold leading-tight md:flex-none md:text-[13px]"
     >{sonando}</span>
 
     {/*
@@ -260,11 +281,19 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
       />
     </span>
 
+    {/*
+      ⚠️ En MÓVIL no se pinta, y es un intercambio medido: a 375px la barra no da
+      para los dos, y de los dos este es el que hoy no hace nada —el
+      comportamiento del player ampliado está pendiente— mientras que la
+      hamburguesa es la ÚNICA forma de abrir el menú en un interior, donde la
+      barra oscura va recogida. Antes de esto, en un teléfono no había manera de
+      navegar el sitio salvo por el pie.
+    */}
     <button
       type="button"
       data-accion="expandir"
       aria-label="Ampliar el reproductor"
-      class="grid h-7 w-7 flex-none place-items-center shadow-[inset_0_0_0_1px_var(--onair-ring)] md:h-8 md:w-8"
+      class="hidden h-7 w-7 flex-none place-items-center shadow-[inset_0_0_0_1px_var(--onair-ring)] md:grid md:h-8 md:w-8"
     >
       <Icono nombre="chevron-down" tamano={14} />
     </button>
@@ -275,10 +304,17 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
       aria-label="Abrir el menú"
       aria-expanded="false"
       aria-controls="beat-menu"
-      class="cabecera-menu-claro hidden h-8 w-8 flex-none place-items-center bg-noche-0 text-mist-0 md:grid"
+      class="cabecera-menu-claro beat-hamburguesa grid h-8 w-8 flex-none place-items-center bg-noche-0 text-mist-0"
       tabindex={compacta ? undefined : '-1'}
     >
-      <Icono nombre="menu" tamano={16} />
+      {/*
+        🔴 Tres barras y no un icono, para que se CONVIERTA en X en vez de
+        cambiarse por otro dibujo. El demo que trajo Carlos lo hace así y tiene
+        razón: el cambio de estado se lee como un solo objeto que se transforma,
+        no como dos iconos que se turnan. La forma la decide el CSS mirando
+        `aria-expanded`, que es el estado que ya hay que mantener de todos modos.
+      */}
+      <span class="hb" aria-hidden="true"><i></i><i></i><i></i></span>
     </button>
   </div>
 
@@ -364,9 +400,9 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
       aria-label="Abrir el menú"
       aria-expanded="false"
       aria-controls="beat-menu"
-      class="ml-auto grid h-11 w-11 flex-none place-items-center bg-mist-0 text-noche-0 md:hidden"
+      class="beat-hamburguesa ml-auto grid h-11 w-11 flex-none place-items-center bg-mist-0 text-noche-0 md:hidden"
     >
-      <Icono nombre="menu" tamano={20} />
+      <span class="hb es-grande" aria-hidden="true"><i></i><i></i><i></i></span>
     </button>
   </header>
 
@@ -399,6 +435,74 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
 </script>
 
 <style>
+  /*
+    ── La hamburguesa que se convierte en X ──
+
+    Tres barras absolutas dentro de una caja: la de en medio se desvanece y las
+    otras dos se juntan en el centro y giran. Todo el estado sale de
+    `aria-expanded`, que es el atributo que de todas formas hay que mantener
+    correcto — así no hay una clase que pueda desincronizarse de la accesibilidad.
+  */
+  .hb {
+    position: relative;
+    display: block;
+    width: 16px;
+    height: 12px;
+  }
+  .hb.es-grande {
+    width: 20px;
+    height: 14px;
+  }
+  .hb i {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: currentColor;
+    transition:
+      translate var(--dur-2) var(--ease-out),
+      rotate var(--dur-2) var(--ease-out),
+      opacity var(--dur-1, 120ms) var(--ease-out);
+  }
+  .hb i:nth-child(1) { top: 0; }
+  .hb i:nth-child(2) { top: calc(50% - 1px); }
+  .hb i:nth-child(3) { bottom: 0; }
+
+  /*
+    🔴 Las barras se mueven con `translate` y `rotate` INDEPENDIENTES, no con un
+    `transform` compuesto. Es la regla de movimiento.md §1: dos gestos sobre el
+    mismo elemento van en propiedades distintas, así ninguno pisa al otro y cada
+    uno puede animarse por su cuenta.
+  */
+  [aria-expanded='true'] .hb i:nth-child(1) {
+    translate: 0 calc(50% + 4px);
+    rotate: 45deg;
+  }
+  [aria-expanded='true'] .hb.es-grande i:nth-child(1) {
+    translate: 0 calc(50% + 5px);
+  }
+  [aria-expanded='true'] .hb i:nth-child(2) {
+    opacity: 0;
+  }
+  [aria-expanded='true'] .hb i:nth-child(3) {
+    translate: 0 calc(-50% - 4px);
+    rotate: -45deg;
+  }
+  [aria-expanded='true'] .hb.es-grande i:nth-child(3) {
+    translate: 0 calc(-50% - 5px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hb i {
+      transition: none;
+    }
+  }
+
+  /* El texto de lo que suena: el rojo de «al aire». */
+  .player-sonando {
+    color: var(--rojo-aire);
+  }
+
   /*
     ── Los dos modos de la barra ──
 

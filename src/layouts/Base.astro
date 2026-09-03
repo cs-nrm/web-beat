@@ -10,9 +10,9 @@ import '@/styles/base.css';
 import { IDIOMA, NOINDEX_SITIO, SITE_URL, noIndexarHost } from '@/config/site';
 import { ClientRouter } from 'astro:transitions';
 import Cabecera from '@/components/Cabecera.astro';
+import MenuLleno from '@/components/MenuLleno.astro';
 import Pie from '@/components/Pie.astro';
 import { obtenerEstacion, redesEstacion } from '@/lib/cms/estacion';
-import { queSuena } from '@/lib/cms/aire';
 
 interface Props {
   titulo: string;
@@ -44,17 +44,30 @@ const vista = Astro.props.vista ?? (Astro.url.pathname === '/' ? 'inicio' : 'int
 
 /**
  * El chrome se resuelve UNA vez aquí y baja por props, en vez de que cada
- * componente pida lo suyo. Los tres van en paralelo, y las tres consultas están
+ * componente pida lo suyo. Las dos van en paralelo, y las dos consultas están
  * memorizadas o cacheadas en el cliente del CMS, así que no cuestan por página.
+ *
+ * 🔴 Aquí había una TERCERA consulta —`queSuena()`, la bitácora— y se retiró
+ * (decisión de Carlos, 2026-09-03): **lo que suena lo dice el SDK de Triton, no
+ * el CMS**. Los cue points vienen DENTRO del stream, así que llegan alineados con
+ * lo que el oyente está escuchando; la bitácora es la hora del playout y va
+ * desfasada (medido: 5 s). Y esta consulta corría en CADA página del sitio.
+ *
+ * ⚠️ El efecto visible: hasta que alguien pulsa play, la barra dice el nombre de
+ * la estación en vez de una canción. Eso es MÁS honesto, no menos: antes
+ * afirmaba saber qué sonaba para un oyente que no estaba oyendo nada.
+ *
+ * ⚠️ Lo que NO se puede mover al SDK es el HISTORIAL —«LO QUE SONÓ» del Inicio y
+ * de `/en-vivo`—: los cue points solo cuentan el presente, y solo mientras haya
+ * una conexión abierta. Eso sigue saliendo de `bitacora`.
  *
  * Si el CMS no responde, el sitio se sirve igual: la estación cae a un objeto
  * mínimo y el player anuncia la marca. Degradar es la regla — `web-enfoque`
  * responde 200 con cero notas cuando su CMS no está, y eso es lo correcto.
  */
-const [estacion, redes, alAire] = await Promise.all([
+const [estacion, redes] = await Promise.all([
   obtenerEstacion().catch(() => null),
   redesEstacion().catch(() => []),
-  queSuena().catch(() => null),
 ]);
 
 const marca = estacion ?? {
@@ -179,7 +192,14 @@ const canonical = new URL(Astro.url.pathname, SITE_URL).href;
       pegado al navegar a una nota sería un error de facturación, no de maquetado.
     */}
     <slot name="sobre-cabecera" />
-    <Cabecera estacion={marca} alAire={alAire} compacta={vista === 'interior'} />
+    <Cabecera estacion={marca} compacta={vista === 'interior'} />
+    {/*
+      El menú a pantalla completa. Va FUERA de la cabecera a propósito: la
+      cabecera es persistente y el menú no debe serlo — así una navegación lo
+      cierra sola, que es justo lo que tiene que pasar al pulsar uno de sus
+      enlaces. Ver `MenuLleno.astro`.
+    */}
+    <MenuLleno />
     <main id="contenido">
       <slot />
     </main>
@@ -196,6 +216,7 @@ const canonical = new URL(Astro.url.pathname, SITE_URL).href;
       import { prepararIntro } from '@/scripts/intro';
       import { prepararCabecera } from '@/scripts/cabecera';
       import { prepararPista } from '@/scripts/pista';
+      import { prepararMenu } from '@/scripts/menu';
       prepararAnuncios();
       prepararEscritura();
       prepararRevelado();
@@ -205,6 +226,7 @@ const canonical = new URL(Astro.url.pathname, SITE_URL).href;
       prepararIntro();
       prepararCabecera();
       prepararPista();
+      prepararMenu();
       // Solo CABLEA los visores; Plyr (110 KB) no se baja hasta que alguien
       // pide un video.
       prepararVideo();

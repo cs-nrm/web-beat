@@ -1,0 +1,254 @@
+---
+/**
+ * El menú a pantalla completa que abre la hamburguesa.
+ *
+ * Del demo que pasó Carlos (2026-09-03): overlay a pantalla completa con las
+ * secciones CENTRADAS, entrada escalonada, y la hamburguesa que se convierte en X.
+ * Lo que se toma de ahí es el COMPORTAMIENTO; el demo es jQuery y una barra
+ * lateral de portafolio, así que nada de su marcado sirve.
+ *
+ * 🔴 Va DEBAJO del chrome en z, no encima, y es deliberado: la barra del player
+ * sigue visible y usable con el menú abierto. Este sitio afirma ser una radio en
+ * vivo (§4.1 del mapa de sitio) — que abrir el menú te quite los controles de lo
+ * que estás escuchando contradice esa afirmación. De paso, la hamburguesa
+ * convertida en X queda siempre a la vista para cerrarlo.
+ *
+ * ⚠️ Se pinta POR PÁGINA y NO dentro del bloque persistente, al revés que la
+ * cabecera. Así una navegación lo cierra sola: pulsar un enlace del menú tiene que
+ * dejarte en la página nueva sin el menú encima, y con un nodo persistido habría
+ * que acordarse de cerrarlo a mano. El estado vive en este elemento; el script solo
+ * sincroniza el `aria-expanded` de las hamburguesas, que sí son persistentes.
+ */
+import { SECCIONES, SECCIONES_PIE } from '@/config/navegacion';
+
+const ruta = Astro.url.pathname;
+const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
+---
+
+<div id="beat-menu" class="menu" data-menu>
+  {/*
+    `aria-hidden` lo mueve el script junto con el estado. El `nav` no lleva
+    `inert` de partida porque el script lo pone: si viviera en el marcado y el JS
+    fallara, el menú quedaría inalcanzable para siempre — la regla de
+    movimiento.md §3 aplicada a la navegación.
+  */}
+  <nav class="menu-caja" aria-label="Menú principal">
+    <ul class="menu-lista">
+      {
+        SECCIONES.map((s, i) => (
+          <li class="menu-item" style={`--i:${i}`}>
+            <a
+              href={s.href}
+              aria-current={activo(s.href) ? 'page' : undefined}
+              class:list={['menu-enlace', { 'es-activo': activo(s.href) }]}
+            >
+              <span class="beat-label menu-n">{String(i + 1).padStart(2, '0')}</span>
+              <span class="menu-texto">{s.corto}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    {/*
+      La segunda fila, en voz baja. Programación no es una de las cinco —vive en
+      el pie— pero en un menú a pantalla completa hay sitio, y quien abre el menú
+      está buscando a dónde ir.
+    */}
+    <ul class="menu-menores">
+      {
+        SECCIONES_PIE.map((s, i) => (
+          <li style={`--i:${SECCIONES.length + i}`}>
+            <a href={s.href} class="beat-label menu-menor">{s.largo}</a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</div>
+
+<style>
+  /*
+    🔴 Justo por DEBAJO del chrome. No hay token para «debajo de la cabecera», así
+    que se calcula desde el suyo en vez de escribir un 199 suelto que nadie
+    entendería dentro de seis meses.
+  */
+  .menu {
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--z-header) - 1);
+    display: grid;
+    place-items: center;
+    padding: var(--chrome-h) 24px 24px;
+    background: var(--noche-0);
+
+    /*
+      Cerrado: invisible, intocable y fuera del árbol de accesibilidad.
+
+      ⚠️ `visibility` además de `opacity`. Con solo opacidad, el overlay seguiría
+      capturando los clics de toda la página. Y su transición va con RETARDO al
+      cerrar —espera a que los ítems terminen de salir— y sin retardo al abrir.
+      Es el truco del demo y es lo que evita que el menú desaparezca de golpe
+      dejando la animación a medias.
+    */
+    visibility: hidden;
+    opacity: 0;
+    transition:
+      opacity var(--dur-3) var(--ease-out),
+      visibility 0ms linear var(--dur-3);
+  }
+  .menu[data-abierto] {
+    visibility: visible;
+    opacity: 1;
+    transition:
+      opacity var(--dur-2) var(--ease-out),
+      visibility 0ms linear 0ms;
+  }
+
+  .menu-caja {
+    width: 100%;
+    max-width: var(--grid-max);
+    text-align: center;
+  }
+
+  .menu-lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /*
+    La entrada escalonada. 70 ms entre ítems, que es el valor que movimiento.md
+    §1 ya fijó para la cascada: el menú no inventa un ritmo propio.
+
+    Salen hacia ABAJO y entran desde abajo, no de lado como el demo: aquí la
+    lista es vertical y centrada, y un desplazamiento lateral la leería como un
+    cajón que se abre de canto.
+  */
+  .menu-item {
+    opacity: 0;
+    translate: 0 18px;
+    transition:
+      opacity var(--dur-2) var(--ease-out),
+      translate var(--dur-2) var(--ease-out);
+  }
+  .menu[data-abierto] .menu-item {
+    opacity: 1;
+    translate: 0 0;
+    transition-delay: calc(var(--i) * 70ms);
+  }
+
+  .menu-enlace {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 18px;
+    padding: 6px 0;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color var(--dur-2) var(--ease-out);
+  }
+  .menu-n {
+    font-size: 11px;
+    color: var(--text-faint);
+    transition: color var(--dur-2) var(--ease-out);
+  }
+  .menu-texto {
+    font: var(--type-display-2);
+    font-family: var(--font-display);
+    font-size: clamp(30px, 7.5vw, 62px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.06;
+    text-transform: uppercase;
+  }
+  .menu-enlace:hover,
+  .menu-enlace:focus-visible {
+    color: var(--mist-0);
+    text-shadow: var(--resplandor);
+  }
+  /*
+    El anillo de foco propio. Sin esto sale el del navegador, que en Chrome es
+    NARANJA — y este sitio no tiene naranja desde hace tres commits. Un anillo del
+    sistema es aceptable en cualquier sitio menos en uno cuya única regla de color
+    es que no hay color.
+  */
+  .menu-enlace:focus-visible,
+  .menu-menor:focus-visible {
+    outline: 2px solid var(--mist-0);
+    outline-offset: 6px;
+    border-radius: 2px;
+  }
+  .menu-enlace:hover .menu-n,
+  .menu-enlace:focus-visible .menu-n {
+    color: var(--mist-0);
+  }
+  /*
+    La sección en curso, igual que en la barra: BLANCA y con luz. El portador no
+    es el color sino que sea la única encendida — ver movimiento.md §8.
+  */
+  .menu-enlace.es-activo {
+    color: var(--mist-0);
+    text-shadow: var(--resplandor);
+  }
+  .menu-enlace.es-activo .menu-n {
+    color: var(--mist-0);
+  }
+
+  .menu-menores {
+    list-style: none;
+    margin: 34px 0 0;
+    padding: 26px 0 0;
+    border-top: 1px solid var(--border-hairline);
+  }
+  .menu-menores li {
+    opacity: 0;
+    translate: 0 18px;
+    transition:
+      opacity var(--dur-2) var(--ease-out),
+      translate var(--dur-2) var(--ease-out);
+  }
+  .menu[data-abierto] .menu-menores li {
+    opacity: 1;
+    translate: 0 0;
+    transition-delay: calc(var(--i) * 70ms);
+  }
+  .menu-menor {
+    color: var(--text-muted);
+    font-size: 10px;
+    transition: color var(--dur-2) var(--ease-out);
+  }
+  .menu-menor:hover {
+    color: var(--mist-0);
+  }
+
+  /*
+    🔴 Menos movimiento: se apaga, no se acelera. Un overlay que se abre de golpe
+    es correcto; lo que la preferencia quita es el desplazamiento y el escalonado,
+    no el menú. movimiento.md §5.
+  */
+  @media (prefers-reduced-motion: reduce) {
+    .menu,
+    .menu-item,
+    .menu-menores li {
+      transition: none;
+    }
+    .menu-item,
+    .menu-menores li {
+      translate: none;
+    }
+  }
+
+  @media (max-width: 899px) {
+    .menu {
+      padding: calc(var(--chrome-h) + 8px) 16px 24px;
+      place-items: center stretch;
+    }
+    .menu-enlace {
+      gap: 14px;
+    }
+    .menu-menores {
+      margin-top: 26px;
+      padding-top: 20px;
+    }
+  }
+</style>

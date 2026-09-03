@@ -83,8 +83,17 @@ const { titulo, activa = null, rotulo = null } = Astro.props;
     .cs-rotulo {
       font-size: 8.5px;
     }
+    /*
+      🔴 Fluido, no fijo. «PROGRAMACIÓN» es una sola palabra que no puede partirse:
+      a 38px medía 406px dentro de una caja de 343 y se salía por la derecha.
+      Medido en un teléfono de 375px.
+
+      `clamp` con vw resuelve el caso general —el titular más largo que exista
+      cabrá siempre— en vez de bajar el tamaño a ojo hasta que quepa la palabra de
+      hoy y volver a romperse con la de mañana.
+    */
     .cs-titulo {
-      font-size: 38px;
+      font-size: clamp(24px, 8.2vw, 38px);
     }
   }
 </style>

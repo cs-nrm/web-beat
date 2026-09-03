@@ -706,6 +706,24 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     opacity: 0;
   }
 
+  /*
+    🔴 Y en MÓVIL, plegada SIEMPRE — decisión de Carlos (2026-09-03): ahí el sitio
+    enseña una sola barra, la clara del player con su hamburguesa.
+
+    Va en CSS y no solo en el script porque el servidor no puede saber el ancho de
+    la pantalla: el marcado de la portada llega con la barra desplegada, y sin esta
+    regla se vería un fotograma de barra oscura antes de que el JavaScript la
+    recogiera. El script sigue haciendo su parte —`inert` y el orden de foco—, que
+    el CSS no puede.
+  */
+  @media (max-width: 899px) {
+    #beat-cabecera header {
+      height: 0;
+      opacity: 0;
+      transition: none;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     #beat-cabecera header {
       transition: none;

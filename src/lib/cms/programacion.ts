@@ -135,3 +135,22 @@ export async function obtenerProgramas(): Promise<Programa[]> {
     return [];
   }
 }
+
+/**
+ * Un programa por slug — su ficha en `/programas/<slug>`.
+ *
+ * ⚠️ Sin `catch`, como `obtenerNota` y `obtenerEspecial`: quien llama tiene que
+ * poder distinguir «no existe» de «el CMS no contesta». Un 404 cacheable sobre un
+ * programa que sí existe se queda pegado en el borde y en el índice de Google.
+ *
+ * `depth: 1` para que `imagen` y `locutores` bajen como documentos; con 0 serían
+ * ids y la ficha saldría sin foto y sin quién conduce.
+ */
+export async function obtenerPrograma(slug: string): Promise<Programa | null> {
+  const r = await cmsFetchEstacion<RespuestaLista<Programa>>('programas', {
+    'where[slug][equals]': slug,
+    depth: 1,
+    limit: 1,
+  });
+  return r.docs[0] ?? null;
+}

@@ -171,29 +171,48 @@ const fotoProximo = urlMedia(proximo?.portada, 'large');
     color: var(--mist-0);
   }
 
+  /*
+    La columna del banner baja de 420 a 340: al pasar a cuadrado, 420px de ancho
+    son 420 de ALTO, y eso convertía el bloque en una pared que empujaba el texto
+    y la acción fuera del pliegue. `align-items: center` porque un cuadrado y un
+    bloque de texto de distinta altura se leen mejor alineados por el medio que
+    colgando del borde superior.
+  */
   .ag-destacado {
     display: grid;
-    grid-template-columns: 420px minmax(0, 1fr);
+    grid-template-columns: 340px minmax(0, 1fr);
     gap: 28px;
-    align-items: start;
+    align-items: center;
     margin-top: 24px;
   }
   .ag-destacado:first-child {
     margin-top: 0;
   }
+  /*
+    🔴 CUADRADO. Los eventos de la Agenda no traen una foto de cobertura: traen un
+    BANNER diseñado, y viene cuadrado (Carlos, 2026-09-03).
+  */
   .ag-foto {
     position: relative;
     display: block;
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 1 / 1;
     background: var(--grad-noche);
     overflow: hidden;
   }
+  /*
+    🔴 `contain`, no `cover`, y por la misma razón que la creatividad de un
+    anuncio: un banner es arte con texto dentro, y recortarlo se come justo el
+    nombre del evento o la fecha. Si el archivo llega cuadrado —que es lo
+    acordado— las dos se comportan igual; la diferencia solo aparece el día que
+    alguien suba uno apaisado, y ahí `contain` lo enseña entero con bandas en vez
+    de decapitarlo.
+  */
   .ag-foto img {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
   }
   .ag-trama {
     position: absolute;

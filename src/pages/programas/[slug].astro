@@ -1,0 +1,354 @@
+---
+/**
+ * La página de un programa.
+ *
+ * Se construye junto con `/programacion` a propósito: esa lista enlaza aquí, y
+ * dejar la ficha sin hacer habría movido el 404 un clic más adentro en vez de
+ * cerrarlo. La ruta ya estaba en el contrato de URLs (`rutaPrograma()` en
+ * `config/site.ts`), así que esto no la inventa: la cumple.
+ */
+import Base from '@/layouts/Base.astro';
+import CabezaSeccion from '@/components/CabezaSeccion.astro';
+import Anuncio from '@/components/Anuncio.astro';
+import Icono from '@/components/Icono.astro';
+import { obtenerPrograma, obtenerProgramas } from '@/lib/cms/programacion';
+import { urlMedia } from '@/lib/cms/client';
+
+const { slug } = Astro.params;
+
+let programa = null;
+try {
+  programa = slug ? await obtenerPrograma(slug) : null;
+} catch {
+  /*
+    El CMS no contesta: no se puede saber si el programa existe. Un 404 aquí sería
+    una mentira cacheable. Mismo reparto que la nota, el especial y la edición.
+  */
+  return new Response('El CMS no responde. Vuelve a intentarlo en un momento.', {
+    status: 503,
+    headers: { 'cache-control': 'no-store', 'retry-after': '30' },
+  });
+}
+
+if (!programa) return Astro.rewrite('/404');
+
+const otros = (await obtenerProgramas()).filter((p) => p.id !== programa.id).slice(0, 6);
+
+const DIAS: Record<string, string> = {
+  lun: 'LUN', mar: 'MAR', mie: 'MIÉ', jue: 'JUE', vie: 'VIE', sab: 'SÁB', dom: 'DOM',
+};
+
+const horarios = (programa.horarios ?? []).map((h) => ({
+  dias: (h.dias ?? []).map((d) => DIAS[d] ?? d.toUpperCase()).join(' · '),
+  rango: `${h.horaInicio}–${h.horaFin}`,
+  repeticion: h.tipo === 'repeticion',
+}));
+
+/**
+ * Los locutores, solo los que llegaron poblados.
+ *
+ * Con `depth: 1` la relación baja como documento; si el CMS devolviera ids, aquí
+ * se descartan en vez de pintar un nombre vacío.
+ */
+const locutores = (programa.locutores ?? []).filter(
+  (l): l is Exclude<typeof l, number> => typeof l === 'object' && l !== null,
+);
+
+const foto = urlMedia(programa.imagen, 'large');
+
+/** Los contactos que el programa declare. Los que no, no se inventan. */
+const contactos = (
+  [
+    ['WhatsApp', programa.whatsapp, `https://wa.me/${(programa.whatsapp ?? '').replace(/\D/g, '')}`],
+    ['Teléfono', programa.telefono, `tel:${(programa.telefono ?? '').replace(/\s/g, '')}`],
+  ] as Array<[string, string | null | undefined, string]>
+).filter((c): c is [string, string, string] => Boolean(c[1]));
+
+const rotulo = horarios.length ? horarios[0].dias + ' · ' + horarios[0].rango : null;
+---
+
+<Base
+  titulo={`${programa.nombre} — Programación — Beat 100.9`}
+  descripcion={programa.descripcionCorta ?? programa.descripcion ?? undefined}
+>
+  <article class="pg">
+    <CabezaSeccion titulo={programa.nombre} activa="/programacion" rotulo={rotulo} />
+
+    <div class="pg-columnas">
+      <div class="pg-principal">
+        {
+          foto && (
+            <div class="pg-foto">
+              <img src={foto} alt="" fetchpriority="high" decoding="async" />
+              <div class="beat-grid pg-trama" />
+              <div class="beat-streak pg-estela" />
+            </div>
+          )
+        }
+        {
+          (programa.descripcion || programa.descripcionCorta) && (
+            <p class="pg-descripcion">{programa.descripcion ?? programa.descripcionCorta}</p>
+          )
+        }
+      </div>
+
+      <aside class="pg-ficha">
+        {
+          horarios.length > 0 && (
+            <div class="pg-dato">
+              <span class="beat-label pg-dato-rotulo">CUÁNDO</span>
+              {horarios.map((h) => (
+                <span class="pg-dato-valor">
+                  {h.dias} · {h.rango}
+                  {h.repeticion && <span class="pg-repeticion"> · repetición</span>}
+                </span>
+              ))}
+            </div>
+          )
+        }
+
+        {
+          locutores.length > 0 && (
+            <div class="pg-dato">
+              <span class="beat-label pg-dato-rotulo">
+                {locutores.length === 1 ? 'CONDUCE' : 'CONDUCEN'}
+              </span>
+              <span class="pg-dato-valor">{locutores.map((l) => l.nombre).join(' · ')}</span>
+            </div>
+          )
+        }
+
+        {
+          programa.hashtag && (
+            <div class="pg-dato">
+              <span class="beat-label pg-dato-rotulo">EN REDES</span>
+              <span class="pg-dato-valor">
+                {programa.hashtag.startsWith('#') ? programa.hashtag : `#${programa.hashtag}`}
+              </span>
+            </div>
+          )
+        }
+
+        {
+          contactos.map(([etiqueta, valor, href]) => (
+            /*
+              🔴 `rel="noopener"` en el de WhatsApp: sale a un tercero. El de
+              teléfono es un `tel:` y no abre pestaña, pero comparten marcado y
+              ponerlo en los dos cuesta menos que acordarse de la diferencia.
+            */
+            <a href={href} class="beat-label pg-contacto" target="_blank" rel="noopener noreferrer">
+              {etiqueta} · {valor}
+              <Icono nombre="arrow-up-right" tamano={14} />
+            </a>
+          ))
+        }
+      </aside>
+    </div>
+
+    <div class="pg-franja-anuncio">
+      <Anuncio formato="leaderboard" nombre="programa-leader" />
+    </div>
+
+    {
+      otros.length > 0 && (
+        <>
+          <div class="pg-corte" data-barrido>
+            <span class="beat-display pg-corte-titulo">MÁS EN LA PARRILLA</span>
+            <a href="/programacion" class="beat-label pg-corte-todo">VER TODA</a>
+          </div>
+          <div class="pg-otros">
+            {otros.map((o) => (
+              <a href={`/programas/${o.slug}`} class="pg-otro" data-luz>
+                <span class="pg-otro-nombre">{o.nombre}</span>
+                {o.horarios?.[0] && (
+                  <span class="beat-label pg-otro-hora">
+                    {o.horarios[0].horaInicio}–{o.horarios[0].horaFin}
+                  </span>
+                )}
+              </a>
+            ))}
+          </div>
+        </>
+      )
+    }
+  </article>
+</Base>
+
+<style>
+  .pg {
+    max-width: var(--grid-max);
+    margin: 0 auto;
+  }
+  .pg-columnas {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 32px;
+    align-items: start;
+    padding: 30px 24px 0;
+  }
+  .pg-foto {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: var(--grad-noche);
+    overflow: hidden;
+    /* Pieza suelta sobre el fondo: lleva radio. movimiento.md §6. */
+    border-radius: var(--r-media);
+  }
+  .pg-foto img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .pg-trama {
+    position: absolute;
+    inset: 0;
+  }
+  .pg-estela {
+    left: 12%;
+    right: 28%;
+    top: 34%;
+  }
+  .pg-descripcion {
+    font: var(--type-body-lg);
+    color: var(--text-body);
+    margin: 24px 0 0;
+    max-width: 62ch;
+    text-wrap: pretty;
+  }
+
+  .pg-ficha {
+    position: sticky;
+    top: calc(var(--chrome-h) + 16px);
+    background: var(--surface-card);
+    box-shadow: inset 0 0 0 1px var(--border-hairline);
+    padding: 22px;
+  }
+  .pg-dato {
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border-hairline);
+  }
+  .pg-dato-rotulo {
+    display: block;
+    color: var(--text-faint);
+    font-size: 8.5px;
+  }
+  .pg-dato-valor {
+    display: block;
+    margin-top: 8px;
+    font: 600 15px / 1.32 var(--font-text);
+    color: var(--mist-1);
+    text-wrap: pretty;
+  }
+  .pg-repeticion {
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+  .pg-contacto {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 12px 16px;
+    box-shadow: inset 0 0 0 1px var(--border-strong);
+    color: var(--mist-2);
+    font-size: 9px;
+  }
+  .pg-contacto:hover {
+    background: var(--mist-0);
+    color: var(--noche-0);
+  }
+
+  .pg-corte {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 14px;
+    margin: 12px 24px 0;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-quiet);
+  }
+  .pg-corte-titulo {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--mist-2);
+  }
+  .pg-corte-todo {
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .pg-corte-todo:hover {
+    color: var(--mist-0);
+  }
+  .pg-otros {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2px;
+    background: var(--border-hairline);
+    padding: 2px;
+    margin: 22px 24px 44px;
+  }
+  .pg-otro {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px;
+    background: var(--noche-1);
+    color: inherit;
+    text-decoration: none;
+    transition: background var(--dur-2) var(--ease-out);
+  }
+  .pg-otro:hover {
+    background: var(--noche-2);
+  }
+  .pg-otro-nombre {
+    font: 600 15px / 1.25 var(--font-text);
+    color: var(--mist-2);
+    text-wrap: pretty;
+  }
+  .pg-otro-hora {
+    color: var(--text-faint);
+    font-size: 8.5px;
+    white-space: nowrap;
+  }
+  .pg-franja-anuncio {
+    padding: 44px 24px 32px;
+  }
+
+  @media (max-width: 1099px) {
+    .pg-columnas {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+    .pg-ficha {
+      position: static;
+    }
+  }
+  @media (max-width: 899px) {
+    .pg-columnas {
+      padding: 22px 16px 0;
+    }
+    .pg-descripcion {
+      font: var(--type-body);
+      max-width: none;
+    }
+    .pg-corte {
+      margin: 8px 16px 0;
+    }
+    .pg-corte-titulo {
+      font-size: 19px;
+    }
+    .pg-otros {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      margin: 18px 0 32px;
+    }
+    .pg-franja-anuncio {
+      padding: 32px 16px 24px;
+    }
+  }
+</style>

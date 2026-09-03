@@ -170,7 +170,17 @@ const todasLasSecciones = [...SECCIONES, ...SECCIONES_FUTURAS, ...SECCIONES_PIE]
   {/* ÚLTIMA LÍNEA */}
   <div class="border-t-hairline border-borde-hairline">
     <div class="flex flex-wrap items-center gap-x-8 gap-y-4 px-pie py-6">
-      <a href="/marcas" class="t-label text-text-muted transition-colors duration-2 ease-out hover:text-text-primary">Ventas</a>
+      {/*
+        🔴 Aquí había un `<a href="/marcas">Ventas</a>` escrito a mano, y era un
+        bug doble: `/marcas` no existe todavía —está en `SECCIONES_FUTURAS` con
+        `pendiente: true`, precisamente para que nadie la enlace— y además
+        `LEGALES` YA trae «Ventas», apuntando al contacto de NRM. O sea que el pie
+        pintaba la palabra dos veces: una a un 404 y otra al sitio correcto.
+
+        ⚠️ La lección no es el enlace, es el atajo: la config marca lo que no
+        existe y el bucle de abajo lo respeta, pero un `<a>` a mano se salta el
+        mecanismo entero. Lo que va al pie sale de `navegacion.ts` o no va.
+      */}
       {LEGALES.map((l) =>
         l.pendiente ? (
           <span class="t-label text-state-disabled-text">{l.largo}</span>

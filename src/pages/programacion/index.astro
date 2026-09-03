@@ -1,0 +1,263 @@
+---
+/**
+ * La parrilla — el índice de programas.
+ *
+ * 🔴 Existía todo menos la página: la capa de datos (`obtenerProgramas`), el
+ * enlace del pie, el del menú a pantalla completa y el remate «LA PARRILLA» del
+ * panel de la señal. Cuatro sitios apuntando a un 404, y la sección declarada como
+ * VIVA en `SECCIONES_PIE` —sin `pendiente`— así que nada la pintaba apagada.
+ * Detectado al verificar la preproducción ruta por ruta.
+ *
+ * ⚠️ Hoy `programas` tiene CERO documentos para Beat, así que lo que se ve es el
+ * estado vacío. Es a propósito y es la regla de la casa: la página existe, dice
+ * qué falta y dónde se captura, y se llena sola en cuanto la estación cargue la
+ * parrilla. Un 404 no se arregla capturando contenido; esto sí.
+ */
+import Base from '@/layouts/Base.astro';
+import CabezaSeccion from '@/components/CabezaSeccion.astro';
+import Anuncio from '@/components/Anuncio.astro';
+import { obtenerProgramas, obtenerParrillaDeHoy } from '@/lib/cms/programacion';
+import { urlMedia } from '@/lib/cms/client';
+
+/*
+  Las dos en paralelo: el catálogo de programas y la parrilla de HOY, que es la
+  que sabe cuál está al aire ahora mismo. Son consultas distintas porque responden
+  preguntas distintas —«qué programas hay» y «qué suena a esta hora»— y las dos
+  degradan a vacío por su cuenta.
+*/
+const [programas, parrilla] = await Promise.all([
+  obtenerProgramas(),
+  obtenerParrillaDeHoy(),
+]);
+
+const DIAS: Record<string, string> = {
+  lun: 'LUN', mar: 'MAR', mie: 'MIÉ', jue: 'JUE', vie: 'VIE', sab: 'SÁB', dom: 'DOM',
+};
+
+/**
+ * Los horarios de un programa, en una línea por bloque.
+ *
+ * El CMS modela «lunes a viernes 06:00–10:00» como UN bloque con cinco días
+ * marcados, así que aquí no se agrupa nada: se lee tal cual viene, que es como lo
+ * capturó la estación.
+ */
+function horariosDe(p: (typeof programas)[number]) {
+  return (p.horarios ?? []).map((h) => ({
+    dias: (h.dias ?? []).map((d) => DIAS[d] ?? d.toUpperCase()).join(' · '),
+    rango: `${h.horaInicio}–${h.horaFin}`,
+    // Una repetición NO se anuncia como en vivo: el CMS lo marca justo para esto.
+    repeticion: h.tipo === 'repeticion',
+  }));
+}
+
+const alAireAhora = parrilla.alAire;
+const rotulo = programas.length
+  ? `${programas.length} PROGRAMA${programas.length === 1 ? '' : 'S'}`
+  : null;
+---
+
+<Base
+  titulo="Programación — Beat 100.9"
+  descripcion="La parrilla de Beat 100.9: qué suena a cada hora, de lunes a domingo."
+>
+  <div class="pr-pagina">
+    <CabezaSeccion titulo="PROGRAMACIÓN" activa="/programacion" rotulo={rotulo} />
+
+    {
+      alAireAhora && (
+        <div class="pr-ahora">
+          <span class="beat-label pr-ahora-rotulo">AL AIRE AHORA</span>
+          <span class="pr-ahora-nombre">{alAireAhora.programa}</span>
+          <span class="beat-label pr-ahora-hora">
+            {alAireAhora.horaInicio}–{alAireAhora.horaFin}
+          </span>
+        </div>
+      )
+    }
+
+    {
+      programas.length > 0 ? (
+        <div class="pr-lista">
+          {programas.map((p) => {
+            const foto = urlMedia(p.imagen, 'card');
+            const bloques = horariosDe(p);
+            return (
+              <a href={`/programas/${p.slug}`} class="pr-programa" data-luz>
+                <div class="pr-foto">
+                  {foto && <img src={foto} alt="" loading="lazy" decoding="async" />}
+                  <div class="beat-grid pr-trama" />
+                </div>
+                <div class="pr-texto">
+                  <h2 class="pr-nombre">{p.nombre}</h2>
+                  {p.descripcionCorta && <p class="pr-bajada">{p.descripcionCorta}</p>}
+                  {bloques.length > 0 && (
+                    <div class="pr-horarios">
+                      {bloques.map((b) => (
+                        <span class="beat-label pr-horario">
+                          {b.dias} {b.rango}
+                          {b.repeticion && <span class="pr-repeticion"> · REPETICIÓN</span>}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      ) : (
+        <p class="pr-vacio">
+          Todavía no hay programas cargados. Cada uno es un documento de «programas»
+          con sus bloques de horario; en cuanto la estación capture la parrilla,
+          aparece aquí y también en el panel de la señal del Inicio.
+        </p>
+      )
+    }
+
+    <div class="pr-franja-anuncio">
+      <Anuncio formato="leaderboard" nombre="programacion-leader" />
+    </div>
+  </div>
+</Base>
+
+<style>
+  .pr-pagina {
+    max-width: var(--grid-max);
+    margin: 0 auto;
+  }
+
+  .pr-ahora {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin: 28px 24px 0;
+    padding: 16px 18px;
+    background: var(--surface-card);
+    box-shadow: inset 0 0 0 1px var(--border-hairline);
+  }
+  .pr-ahora-rotulo {
+    color: var(--rojo-aire);
+  }
+  .pr-ahora-nombre {
+    font: 600 18px / 1.2 var(--font-text);
+    color: var(--mist-1);
+  }
+  .pr-ahora-hora {
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  /* La línea entre programas ES el fondo asomando. Ver movimiento.md §6. */
+  .pr-lista {
+    display: grid;
+    gap: 2px;
+    background: var(--border-hairline);
+    padding: 2px;
+    margin: 30px 24px 0;
+  }
+  .pr-programa {
+    display: grid;
+    grid-template-columns: 132px minmax(0, 1fr);
+    gap: 20px;
+    align-items: center;
+    padding: 16px;
+    background: var(--noche-1);
+    color: inherit;
+    text-decoration: none;
+    transition: background var(--dur-2) var(--ease-out);
+  }
+  .pr-programa:hover {
+    background: var(--noche-2);
+  }
+  .pr-programa:hover .pr-nombre {
+    color: var(--mist-0);
+  }
+  .pr-foto {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    background: var(--grad-noche);
+    overflow: hidden;
+  }
+  .pr-foto img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .pr-trama {
+    position: absolute;
+    inset: 0;
+  }
+  .pr-texto {
+    min-width: 0;
+  }
+  .pr-nombre {
+    font: 700 20px / 1.2 var(--font-text);
+    letter-spacing: -0.014em;
+    color: var(--mist-2);
+    margin: 0;
+    text-wrap: pretty;
+  }
+  .pr-bajada {
+    font: var(--type-body-sm);
+    color: var(--text-muted);
+    margin: 8px 0 0;
+    max-width: 62ch;
+    text-wrap: pretty;
+  }
+  .pr-horarios {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .pr-horario {
+    padding: 7px 11px;
+    background: var(--surface-card);
+    box-shadow: inset 0 0 0 1px var(--border-hairline);
+    color: var(--text-body);
+    font-size: 8.5px;
+    white-space: nowrap;
+  }
+  .pr-repeticion {
+    color: var(--text-faint);
+  }
+
+  .pr-vacio {
+    font: var(--type-body);
+    color: var(--text-muted);
+    max-width: 62ch;
+    padding: 40px 24px 0;
+    text-wrap: pretty;
+  }
+  .pr-franja-anuncio {
+    padding: 44px 24px;
+  }
+
+  @media (max-width: 899px) {
+    .pr-ahora {
+      margin: 20px 16px 0;
+      gap: 10px;
+    }
+    .pr-lista {
+      margin: 22px 0 0;
+    }
+    .pr-programa {
+      grid-template-columns: 96px minmax(0, 1fr);
+      gap: 14px;
+      padding: 12px;
+    }
+    .pr-nombre {
+      font-size: 17px;
+    }
+    .pr-vacio {
+      padding: 28px 16px 0;
+      font: var(--type-body-sm);
+    }
+    .pr-franja-anuncio {
+      padding: 32px 16px;
+    }
+  }
+</style>

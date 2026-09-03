@@ -274,8 +274,15 @@
   --player-h: 48px;
   --header-h: 68px;
   --header-h-movil: 56px;
-  /* Lo que tapa el chrome pegajoso, para anclas y para `scroll-padding`. */
-  --chrome-h: calc(var(--player-h) + var(--header-h-movil));
+  /*
+    Lo que tapa el chrome pegajoso, para anclas y para `scroll-padding`.
+
+    🔴 En MÓVIL es solo la barra del player: la oscura no se muestra nunca ahí
+    (decisión de Carlos, 2026-09-03). Contar sus 56px dejaría todo lo pegajoso
+    —los rieles, el menú, los anclajes— desplazado hacia abajo por un espacio que
+    no existe.
+  */
+  --chrome-h: var(--player-h);
 }
 @media (min-width: 900px) {
   :root {
@@ -1790,6 +1797,24 @@ html[data-cursor] body::after {
   pointer-events: auto;
 }
 
+/*
+  🔴 En MÓVIL van encendidos SIEMPRE, con o sin el atributo.
+
+  Ahí solo existe una barra —la clara— así que el logo y la hamburguesa no son un
+  estado al que se llega haciendo scroll: son el chrome. Y va en CSS además de en
+  el script porque el servidor no sabe el ancho de la pantalla: sin esto, la
+  portada en un teléfono pintaría la barra oscura durante un fotograma antes de
+  que el JavaScript la recogiera. Un parpadeo es exactamente lo que el ojo caza.
+*/
+@media (max-width: 899px) {
+  .cabecera-logo-claro,
+  .cabecera-menu-claro {
+    opacity: 1;
+    translate: 0 0;
+    pointer-events: auto;
+  }
+}
+
 /* 🔴 El ancho se reserva SIEMPRE, esté visible o no. Si el logo apareciera con su
    ancho al hacer scroll, empujaría todo lo demás de la barra y el título saltaría
    de sitio en el momento justo en que el lector está leyendo.
@@ -1829,6 +1854,26 @@ html[data-cursor] body::after {
 @media (min-width: 900px) {
   #beat-cabecera[data-compacta] .cabecera-logo-claro {
     width: 96px;
+  }
+}
+
+/*
+  🔴 En móvil, el ancho va puesto SIN depender del atributo — y esta regla tiene
+  que ir DESPUÉS de `.cabecera-logo-claro { width: 0 }`, no antes.
+
+  Estaba arriba, junto a la opacidad, y ahí no servía: misma especificidad, y en
+  CSS a igualdad gana la última. O sea que el logo medía 0 hasta que el JavaScript
+  ponía `data-compacta`, que es exactamente el parpadeo que este bloque existe
+  para evitar. Lo cazó una medición en el navegador que daba 0px con el logo
+  visible en pantalla.
+
+  ⚠️ Una media query NO añade especificidad. Es de las cosas que uno cree recordar
+  al revés justo cuando importa.
+*/
+@media (max-width: 899px) {
+  .cabecera-logo-claro {
+    width: 72px;
+    margin-right: 0;
   }
 }
 /* El logotipo no se encoge con su caja: la caja lo recorta. Si se escalara, se

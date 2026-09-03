@@ -33,6 +33,26 @@ function esInterior(): boolean {
 }
 
 /**
+ * 🔴 En MÓVIL la barra oscura no se despliega nunca, ni en la portada: el sitio
+ * enseña una sola barra ahí (decisión de Carlos, 2026-09-03).
+ *
+ * El CSS ya la esconde —y tiene que hacerlo, porque el servidor no sabe el ancho
+ * de pantalla y si no habría un parpadeo—, pero eso solo resuelve lo que se ve. Lo
+ * que el CSS no puede es sacar sus ocho enlaces del orden de foco: una barra de
+ * 0px de alto sigue siendo navegable con el tabulador. De eso se encarga `inert`,
+ * y para ponerlo hay que saberlo aquí también.
+ *
+ * `matchMedia` y no `innerWidth`: así el cambio al girar el teléfono llega como un
+ * evento en vez de tener que vigilar cada `resize`.
+ */
+const consultaMovil =
+  typeof matchMedia === 'function' ? matchMedia('(max-width: 899px)') : null;
+
+function esMovil(): boolean {
+  return consultaMovil?.matches ?? false;
+}
+
+/**
  * Aplica el estado al DOM.
  *
  * Son TRES cosas y las tres hacen falta, porque una barra plegada mide 0px pero
@@ -71,7 +91,7 @@ function pintar(): void {
   if (!cabecera) return;
 
   const y = window.scrollY;
-  const quiere = esInterior() || (compacta ? y > SUBIR : y > BAJAR);
+  const quiere = esMovil() || esInterior() || (compacta ? y > SUBIR : y > BAJAR);
   if (quiere === compacta) return;
 
   compacta = quiere;
@@ -173,4 +193,11 @@ export function prepararCabecera(): void {
    */
   pintar();
   document.addEventListener('astro:after-swap', reconciliar);
+
+  /*
+    Y al cruzar el corte de móvil —girar el teléfono, redimensionar la ventana— se
+    reevalúa. Sin esto, pasar de escritorio a móvil con la barra desplegada la
+    dejaría escondida por CSS pero todavía enfocable.
+  */
+  consultaMovil?.addEventListener('change', reconciliar);
 }

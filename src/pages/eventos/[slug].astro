@@ -182,20 +182,29 @@ const rotulo = [etiquetaTipo, inicio?.largo].filter(Boolean).join(' · ');
     align-items: start;
     padding: 30px 24px 0;
   }
+  /*
+    🔴 Cuadrado, como en la Agenda: el evento trae un banner diseñado, no una foto.
+    Con un tope de ancho para que en una pantalla grande no ocupe media página —un
+    cuadrado a 900px de ancho son 900 de alto— y centrado en su columna.
+  */
   .ev-foto {
     position: relative;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    max-width: 520px;
+    margin-inline: auto;
     background: var(--grad-noche);
     overflow: hidden;
     /* Pieza SUELTA sobre el fondo, no de retícula: lleva radio. movimiento.md §6. */
     border-radius: var(--r-media);
   }
+  /* `contain` y no `cover`: ver la nota de `Agenda.astro`. Un banner no se recorta. */
   .ev-foto img {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
   }
   .ev-trama {
     position: absolute;

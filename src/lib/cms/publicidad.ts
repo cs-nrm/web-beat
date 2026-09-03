@@ -13,19 +13,20 @@
  * `nativo`— y cada sitio lo coloca. En Beat, `portada` es la franja de arriba del
  * Inicio, encima del player y del menú.
  *
- * ⚠️ Falta el CONTEO. La colección lleva `impresiones` y `clics`, y el CMS expone
- * `POST /api/publicidad/<id>/registrar` con `PUBLICIDAD_TOKEN` para sumarlos —
- * llamada de servidor a servidor, nunca del navegador. Este módulo solo LEE:
- * mientras no se cablee el conteo, los dos contadores del panel se quedan en cero
- * y la campaña no se puede reportar.
+ * El CONTEO vive aquí abajo (`registrarEvento`). Es una llamada de servidor a
+ * servidor con `PUBLICIDAD_TOKEN`: el navegador NUNCA la hace, porque el token no
+ * puede salir de aquí.
  */
 import {
+  cmsFetch,
   cmsFetchEstacion,
   SIN_PAGINACION,
   type DocMedia,
   type ParamsCms,
   type RespuestaLista,
 } from './client';
+import { CMS_URL } from '@/config/site';
+import { envServidor } from '@/lib/env';
 
 /** Los dos que existen. El CMS no tiene más y no se inventan aquí. */
 export type TipoBanner = 'portada' | 'nativo';
@@ -37,6 +38,15 @@ export type TipoBanner = 'portada' | 'nativo';
  */
 export interface Banner {
   id: number;
+  /**
+   * A qué estación pertenece. Llega como id con `depth: 0`.
+   *
+   * 🔴 Hace falta declararlo aunque las consultas por lista ya filtren por
+   * estación en el transporte: el proxy del CLIC lee por id, y el id es único en
+   * todo el CMS, que sirve a cuatro marcas. Sin comprobarlo, el dominio de Beat
+   * redirigiría el banner de otra estación y le sumaría el clic a su campaña.
+   */
+  estacion?: number | { id: number } | null;
   /** Nombre interno de la campaña. NO se muestra: es para identificarla en el CMS. */
   titulo: string;
   anunciante: string;
@@ -145,4 +155,95 @@ export async function obtenerBanners(tipo: TipoBanner, cuantos = 6): Promise<Ban
   } catch {
     return [];
   }
+}
+
+// ============================================================
+// El conteo
+// ============================================================
+
+/**
+ * Un banner por id, sin filtro de vigencia.
+ *
+ * 🔴 Sin filtrar por vigencia A PROPÓSITO, y es la diferencia con `obtenerBanners`.
+ * Esto lo usa el proxy del clic, y quien pulsa puede estar mirando una página
+ * servida de caché con una campaña que venció hace un minuto. Ese clic **tiene que
+ * llegar a su destino**: el lector no tiene la culpa de nuestro TTL. Lo que no
+ * ocurre es que se cuente — de eso se encarga el CMS respondiendo 409.
+ *
+ * ⚠️ Va por `cmsFetch` y no por `cmsFetchEstacion` porque es una lectura por id, y
+ * el id ya es único. Aun así se comprueba la estación al usarlo (ver el proxy): un
+ * id de otra estación no debe redirigir desde este dominio.
+ */
+export async function obtenerBannerPorId(id: number): Promise<Banner | null> {
+  try {
+    const b = await cmsFetch<Banner>(`publicidad/${id}`, { depth: 0 }, 3000);
+    const enlace = enlaceSeguro(b?.enlace);
+    return enlace ? { ...b, enlace } : null;
+  } catch {
+    return null;
+  }
+}
+
+export type EventoPublicidad = 'impresion' | 'clic';
+
+/**
+ * Suma una impresión o un clic en el CMS.
+ *
+ * 🔴 **Nunca lanza.** Un contador roto no puede tumbar una página ni impedir que
+ * un clic llegue a su destino: lo que se pierde es un número, y lo que se perdería
+ * si lanzara es la visita. Por eso devuelve un booleano y se traga todo.
+ *
+ * ⚠️ **El `409` no es un error y no se reintenta.** Significa que el banner está
+ * pausado o fuera de vigencia. Reintentarlo acumularía números sobre una campaña
+ * que ya no corre, y eso se le factura a alguien.
+ *
+ * ⚠️ Un `503` significa que a la VM del CMS le falta `PUBLICIDAD_TOKEN`. Es una
+ * pendiente de infraestructura conocida, así que se avisa UNA vez por proceso y no
+ * en cada render: un log por impresión llenaría el disco antes que la bandeja.
+ */
+let avisadoSinToken = false;
+
+export async function registrarEvento(id: number, evento: EventoPublicidad): Promise<boolean> {
+  const token = envServidor('PUBLICIDAD_TOKEN');
+  if (!token || !CMS_URL || !Number.isInteger(id) || id < 1) return false;
+
+  const control = new AbortController();
+  const temporizador = setTimeout(() => control.abort(), 2500);
+  try {
+    const r = await fetch(`${CMS_URL}/api/publicidad/${id}/registrar`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ evento }),
+      signal: control.signal,
+    });
+
+    if (r.status === 503 && !avisadoSinToken) {
+      avisadoSinToken = true;
+      console.error(
+        '\n🔴 El CMS no puede contar publicidad: le falta PUBLICIDAD_TOKEN en su VM.\n' +
+          '   Las campañas vendidas van a quedarse en cero impresiones y cero clics,\n' +
+          '   así que no se le van a poder reportar al anunciante.\n',
+      );
+    }
+    return r.ok;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(temporizador);
+  }
+}
+
+/**
+ * Cuenta una impresión sin hacer esperar al render.
+ *
+ * 🔴 No se espera a propósito: el contador va detrás del contenido, no delante. Y
+ * el `.catch` no es decorativo — una promesa rechazada sin capturar es un
+ * `unhandledRejection`, y en Node eso puede tumbar el proceso entero. Sería el
+ * colmo: el sitio caído por contar un anuncio.
+ */
+export function contarImpresion(id: number): void {
+  void registrarEvento(id, 'impresion').catch(() => {});
 }

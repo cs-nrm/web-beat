@@ -34,8 +34,8 @@
  * Y quedan sin usar tres formatos del v1: 300×600, 600×800 y 400×311.
  */
 import { urlMedia } from '@/lib/cms/client';
-import type { Banner } from '@/lib/cms/publicidad';
-import { HOST_CANONICO } from '@/config/site';
+import { contarImpresion, type Banner } from '@/lib/cms/publicidad';
+import { HOST_CANONICO, NOINDEX_SITIO, noIndexarHost } from '@/config/site';
 
 interface Props {
   /** Los tres formatos del lienzo. */
@@ -165,17 +165,73 @@ const creatividad = (() => {
     externo = false;
   }
 
-  return { enlace: banner.enlace, escritorio, movil, alt, externo };
+  return { id: banner.id, enlace: banner.enlace, escritorio, movil, alt, externo };
 })();
+
+/**
+ * La impresión se cuenta AQUÍ, en el render del servidor.
+ *
+ * 🔴 Y no en el navegador, que es como lo hace medio mundo, porque un contador en
+ * el cliente exige que el navegador hable con el CMS —línea roja de la casa— o un
+ * proxy más por impresión. Contar donde ya estamos es gratis.
+ *
+ * ⚠️ **Esto SUBCUENTA, y conviene saber cuánto y por qué antes de que alguien lo
+ * compare contra Ad Manager y lo tome por un bug.** Lo que se cuenta son RENDERS
+ * DE SERVIDOR, no páginas vistas: una respuesta servida desde la caché de borde no
+ * llega hasta aquí y no suma.
+ *
+ * La brecha es exactamente la tasa de acierto de esa caché:
+ *
+ *   · **Hoy es ~0.** El middleware manda `s-maxage=60`, pero Cloudflare **no
+ *     cachea HTML por defecto**: hace falta una Cache Rule que todavía no está
+ *     encendida (y no se enciende mientras el CMS no tenga webhook de purga). Así
+ *     que ahora mismo cada visita es un render y las impresiones ≈ páginas vistas.
+ *   · **El día que se encienda Cache Everything, la cuenta se desploma** —podría
+ *     quedarse en una fracción de lo real— sin que nadie toque este archivo. Ese es
+ *     el día de revisarlo, no antes.
+ *
+ * Se subcuenta a propósito: el error cae del lado de no cobrarle de más a nadie.
+ *
+ * ⚠️ Un sesgo que NO está resuelto y queda anotado: un rastreador que pide la
+ * portada suma una impresión igual que una persona. No se filtra por `User-Agent`
+ * porque un filtro mal calibrado subcuenta en silencio, que es peor que un sesgo
+ * conocido. Si el reporte al anunciante llega a importar de verdad, esto se
+ * resuelve con la lista de bots de Cloudflare antes que aquí.
+ */
+if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
+  /*
+    🔴 En una beta NO se cuenta. Las impresiones de un despliegue de prueba se le
+    facturarían a un anunciante real, y con `v2.beatdigital.mx` sirviendo la misma
+    imagen y el mismo CMS, sin esta guarda cada vez que alguien revisa la
+    preproducción le sube los números a Stellantis.
+  */
+  contarImpresion(creatividad.id);
+}
 ---
 
 <div class:list={['anuncio', `es-${formato}`, creatividad && 'tiene-creatividad', clase]}>
   <span class="beat-label anuncio-rotulo">PUBLICIDAD</span>
+  {/*
+    🔴 El `href` de la creatividad va a NUESTRO proxy, no al anunciante. Es lo que
+    permite contar el clic de servidor a servidor: `PUBLICIDAD_TOKEN` no puede
+    salir de este proceso, así que el navegador no puede avisar al CMS por su
+    cuenta. El destino real lo resuelve `src/pages/api/anuncio/[id].ts` leyendo el
+    documento, nunca un parámetro de la petición.
+
+    `target` y `rel` se siguen decidiendo por el destino DE VERDAD y no por el
+    proxy: si la campaña lleva fuera del sitio, se abre en pestaña nueva aunque el
+    enlace visible sea interno.
+
+    ⚠️ El comentario va AQUÍ y no dentro del ternario: un comentario de expresión
+    seguido de un elemento dentro de `cond ? ( … )` son dos expresiones hermanas
+    sin envoltorio, y eso no compila. El error que sale es «div sin etiqueta de
+    cierre» 45 líneas más abajo, que no señala a ningún sitio útil.
+  */}
   {
     creatividad ? (
       <a
         class="anuncio-creatividad"
-        href={creatividad.enlace}
+        href={`/api/anuncio/${creatividad.id}`}
         target={creatividad.externo ? '_blank' : undefined}
         rel={creatividad.externo ? 'sponsored noopener' : 'sponsored'}
       >

@@ -41,9 +41,13 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
       una fila más chica solo le pide que averigüe por qué.
 
       ⚠️ `data-escribir` va en `.menu-texto` y NO en el `<a>`. `partir()` se niega
-      a actuar sobre un elemento con hijos —partir en letras vaciaría el enlace y
-      se llevaría por delante el número—, así que el efecto tiene que caer sobre
-      un nodo de texto plano.
+      a actuar sobre un elemento con hijos, así que el efecto tiene que caer sobre
+      un nodo de texto plano — y por eso el rótulo conserva su propio `span`
+      aunque ya no lo acompañe nada.
+
+      ⚠️ Los números `01`–`06` se retiraron (Carlos, 2026-09-03). Ordenaban una
+      lista que ya venía ordenada, y dejaban el borde izquierdo dentado porque
+      cada línea se centra por su cuenta.
     */}
     <ul class="menu-lista">
       {
@@ -54,7 +58,6 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
               aria-current={activo(s.href) ? 'page' : undefined}
               class:list={['menu-enlace', { 'es-activo': activo(s.href) }]}
             >
-              <span class="beat-label menu-n">{String(i + 1).padStart(2, '0')}</span>
               <span class="menu-texto" data-escribir>{s.corto}</span>
             </a>
           </li>
@@ -171,17 +174,10 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     apagar más estos enlaces, este es el suelo.
   */
   .menu-enlace {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 18px;
+    display: inline-block;
     padding: 6px 0;
     color: var(--text-body);
     text-decoration: none;
-    transition: color var(--dur-2) var(--ease-out);
-  }
-  .menu-n {
-    font-size: 11px;
-    color: var(--text-faint);
     transition: color var(--dur-2) var(--ease-out);
   }
   .menu-texto {
@@ -209,10 +205,6 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     outline-offset: 6px;
     border-radius: 2px;
   }
-  .menu-enlace:hover .menu-n,
-  .menu-enlace:focus-visible .menu-n {
-    color: var(--mist-0);
-  }
   /*
     La sección en curso, igual que en la barra: BLANCA y con luz. El portador no
     es el color sino que sea la única encendida — ver movimiento.md §8.
@@ -220,9 +212,6 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
   .menu-enlace.es-activo {
     color: var(--mist-0);
     text-shadow: var(--resplandor);
-  }
-  .menu-enlace.es-activo .menu-n {
-    color: var(--mist-0);
   }
 
   /*
@@ -250,9 +239,6 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     .menu {
       padding: calc(var(--chrome-h) + 8px) 16px 24px;
       place-items: center stretch;
-    }
-    .menu-enlace {
-      gap: 14px;
     }
   }
 </style>

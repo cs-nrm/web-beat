@@ -73,6 +73,8 @@ let arranquePendiente = false;
 /** El texto que renderizó el servidor, para restaurarlo tras un corte comercial
  *  o un "Conectando…". Se lee una sola vez, antes de pisarlo. */
 let textoOriginal: string | null = null;
+/** La hora de inicio de lo que suena, o `null` si no se sabe. */
+let horaOriginal: string | null = null;
 /**
  * Tope de la conexión. Sin esto, si Triton no llega nunca a LIVE_PLAYING —red
  * mala, mount caído, un VAST que se cuelga sin emitir evento— el oyente se queda
@@ -191,12 +193,27 @@ function pintarSonando(texto: string): void {
   if (!campo) return;
   if (textoOriginal === null) textoOriginal = campo.textContent;
   campo.textContent = texto;
+  // Un aviso —«Conectando…», «PAUSA COMERCIAL»— no tiene hora de inicio.
+  pintarHora(null);
 }
 
 /** Vuelve al texto que puso el servidor (la canción, o el nombre de la estación). */
 function restaurarSonando(): void {
   const campo = el('[data-campo="sonando"]');
   if (campo && textoOriginal !== null) campo.textContent = textoOriginal;
+  pintarHora(horaOriginal);
+}
+
+/**
+ * La hora bajo el título.
+ *
+ * Se vacía cuando no hay dato en vez de dejar la anterior: una hora vieja debajo
+ * de una canción nueva es peor que ninguna hora, porque nadie sospecharía de ella.
+ */
+function pintarHora(valor: string | null): void {
+  const campo = el('[data-campo="hora"]');
+  if (!campo) return;
+  campo.textContent = valor ?? '';
 }
 
 function alCambiarEstado(e: { data?: { code?: string } }): void {
@@ -607,14 +624,34 @@ export function iniciarPlayer(): void {
    */
   const leerCue = (
     data: unknown,
-  ): { titulo?: string; artista?: string; esCancion: boolean } => {
-    const d = data as {
+  ): { titulo?: string; artista?: string; hora?: string; esCancion: boolean } => {
+    type Sobre = {
+      data?: Sobre;
       cuePoint?: Record<string, unknown>;
       name?: string;
       parameters?: Record<string, unknown>;
     };
-    // El SDK envuelve en `cuePoint`; el canal SBM crudo trae `parameters`. Se
-    // aceptan las dos por si el SDK cambia de forma entre versiones.
+    const bruto = data as Sobre;
+
+    /**
+     * 🔴 TODO evento del SDK llega envuelto en `.data`. Esto faltaba, y era el
+     * primero de los dos motivos por los que la barra nunca decía la canción.
+     *
+     * Leído del bundle 2.9, el emisor común de todos los módulos:
+     *
+     *   emit: function (eventName, data, targetNode) {
+     *     … on.emit(this.target, eventName, { data: data, bubbles: true, … })
+     *   }
+     *
+     * O sea que el oyente recibe `{ data: <lo que el módulo emitió> }`. Para
+     * `track-cue-point` el módulo emite `{ cuePoint: … }`, así que lo nuestro está
+     * en `e.data.cuePoint` — y aquí se leía `e.cuePoint`, que es `undefined`.
+     *
+     * ⚠️ El resto del archivo ya lo sabía: `alCambiarEstado` lee `e.data?.code` y
+     * por eso la máquina de estados SÍ funcionaba. El error estaba solo aquí, y la
+     * pista llevaba todo el tiempo veinte líneas más arriba.
+     */
+    const d = bruto?.data ?? bruto;
     const cp = (d?.cuePoint ?? d?.parameters ?? {}) as Record<string, unknown>;
     /*
       Se busca en el cuePoint Y en su `parameters`: el SDK deja los dos, el
@@ -660,7 +697,7 @@ export function iniciarPlayer(): void {
      * alguna vez se lee el SBM sin pasar por el SDK.
      */
     const nombre = String(
-      cp.type ?? d?.name ?? (cp.parameters as Record<string, unknown>)?.name ?? '',
+      cp.type ?? d?.name ?? bruto?.name ?? (cp.parameters as Record<string, unknown>)?.name ?? '',
     );
 
     const tomar = (...claves: string[]): string | undefined => {
@@ -672,7 +709,35 @@ export function iniciarPlayer(): void {
       }
       return undefined;
     };
+    /**
+     * La hora a la que empezó a sonar, en hora de MÉXICO.
+     *
+     * `cue_time_start` es epoch en MILISEGUNDOS —medido en la captura del canal,
+     * no supuesto— y llega como texto. Se valida antes de formatear: un número
+     * absurdo pintaría una hora absurda en la barra, y más vale no pintar nada.
+     *
+     * ⚠️ La zona va fija a `America/Mexico_City` y no al reloj del visitante: es
+     * la hora a la que la estación lo puso al aire. Para quien escuche desde
+     * Madrid, «03:12» de su reloj no significa nada.
+     */
+    const hora = (() => {
+      const crudo = tomar('cueTimeStart', 'cue_time_start');
+      const ms = Number(crudo);
+      if (!Number.isFinite(ms) || ms < 1e12) return undefined;
+      try {
+        return new Intl.DateTimeFormat('es-MX', {
+          timeZone: 'America/Mexico_City',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+        }).format(new Date(ms));
+      } catch {
+        return undefined;
+      }
+    })();
+
     return {
+      hora,
       /*
         Los dos juegos de nombres, VERIFICADOS contra el `cuePointMap` del bundle
         y no adivinados: el SDK copia cada parámetro crudo a un alias amistoso
@@ -711,7 +776,7 @@ export function iniciarPlayer(): void {
       const cp = (e as { cuePoint?: Record<string, unknown> })?.cuePoint;
       console.info('[player] track-cue-point · type =', cp?.type, e);
     }
-    const { titulo, artista, esCancion } = leerCue(e);
+    const { titulo, artista, hora, esCancion } = leerCue(e);
     if (!titulo) return; // sin título no se pisa lo que ya está
     /**
      * 🔴 Las cortinillas NO se muestran. La señal de Beat manda cue points de
@@ -722,6 +787,7 @@ export function iniciarPlayer(): void {
      */
     if (!esCancion) return;
     textoOriginal = [titulo, artista].filter(Boolean).join(' · ');
+    horaOriginal = hora ?? null;
     // Durante un corte no se pisa el aviso; al terminar se restaura este valor.
     if (contenedor()?.dataset.status !== 'anuncio') restaurarSonando();
   });

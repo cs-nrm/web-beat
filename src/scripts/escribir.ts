@@ -535,8 +535,36 @@ export function descifrarAhora(el: HTMLElement): void {
     textos.splice(previo, 1);
   }
 
+  /**
+   * 🔴 Se DESHACE el reparto anterior antes de volver a partir, y sin esto la
+   * función no hacía absolutamente nada.
+   *
+   * `partir()` se niega a actuar sobre un elemento con hijos —es su guarda contra
+   * destrozar enlaces y negritas— y después de la primera pasada el elemento está
+   * lleno de `span.escribir-letra`. O sea que la segunda llamada, y todas las
+   * siguientes, devolvían lista vacía y salían por la puerta de atrás.
+   *
+   * Es el mismo caso que `iniciar()` ya contemplaba con su rama de «si ya estaba
+   * partido»; aquí faltaba. El texto real se recupera del `aria-label`, que es
+   * donde `partir()` lo guarda precisamente para esto.
+   */
+  if ('escribiendo' in el.dataset) {
+    const real = el.getAttribute('aria-label');
+    if (real) el.textContent = real;
+    delete el.dataset.escribiendo;
+    el.removeAttribute('aria-label');
+  }
+
   const letras = partir(el);
   if (!letras.length) return;
+
+  /*
+    🔴 `partir()` NO pone esta marca: la pone quien la usa. Y de ella cuelga TODO
+    el CSS del efecto —`[data-escribiendo] .escribir-letra { opacity: .4 }`— así
+    que sin esta línea el texto se parte, se revuelve y se resuelve sin que se vea
+    nada: las letras cambian a opacidad 1 y el ojo solo percibe un parpadeo.
+  */
+  el.dataset.escribiendo = '';
   congelarAnchos(letras);
 
   const t: Texto = {

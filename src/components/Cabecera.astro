@@ -210,10 +210,18 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
       esto es lo que está sonando AHORA— así que comparten color. Es la única
       excepción al blanco y negro y no se abre una segunda; ver movimiento.md §8.
     */}
-    <span
-      data-campo="sonando"
-      class="solo-directo player-sonando min-w-0 flex-1 truncate font-text text-[12px] font-semibold leading-tight md:flex-none md:text-[13px]"
-    >{sonando}</span>
+    <span class="solo-directo player-info min-w-0 flex-1 md:flex-none">
+      <span
+        data-campo="sonando"
+        class="player-sonando block truncate font-text text-[12px] font-semibold leading-tight md:text-[13px]"
+      >{sonando}</span>
+      {/*
+        La hora a la que empezó a sonar, del propio cue point. Nace vacía: hasta
+        que el SDK manda el primero no hay nada que decir, y un hueco reservado es
+        preferible a inventar una hora.
+      */}
+      <span data-campo="hora" class="player-hora block truncate"></span>
+    </span>
 
     {/*
       🔴 El título de la pista va en SU PROPIO elemento, no reutilizando el de
@@ -508,8 +516,29 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
   }
 
   /* El texto de lo que suena: el rojo de «al aire». */
+  .player-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.15;
+  }
   .player-sonando {
     color: var(--rojo-aire);
+  }
+  /*
+    La hora, muy chica y en gris: es un dato de apoyo, no la afirmación. Va en el
+    gris oscuro de la barra clara —no en el rojo— para que el ojo lea primero la
+    canción, que es lo que se vino a saber.
+  */
+  .player-hora {
+    margin-top: 2px;
+    font: var(--type-label);
+    font-size: 8px;
+    letter-spacing: var(--track-label);
+    color: var(--graphite-2);
+  }
+  .player-hora:empty {
+    display: none;
   }
 
   /*

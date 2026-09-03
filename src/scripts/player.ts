@@ -119,6 +119,66 @@ function ctxAnalitica(): { station: string; dist: string } {
   };
 }
 
+/**
+ * ── Diagnóstico del player ──
+ *
+ * 🔴 Existe porque el «qué suena» falla EN SILENCIO: si el cue point no llega, o
+ * llega y se descarta, la barra simplemente se queda con el nombre de la estación
+ * y no hay forma de distinguir las dos cosas mirando la pantalla. Ya nos costó dos
+ * arreglos a ciegas.
+ *
+ * Se enciende de tres maneras, y ninguna molesta al oyente normal:
+ *   · en desarrollo, siempre;
+ *   · con `?depurar=player` en la URL — y se queda encendido al navegar;
+ *   · o `sessionStorage.beatDepurar = '1'` desde la consola.
+ * Se apaga con `?depurar=no`.
+ *
+ * ⚠️ NO va detrás de `import.meta.env.DEV` a secas, que es lo que había: el sitio
+ * que se mira es el compilado, y ahí ese log no existe. Un diagnóstico que solo
+ * funciona donde no está el problema no sirve de nada.
+ */
+const DEPURA = ((): boolean => {
+  try {
+    const q = new URLSearchParams(location.search).get('depurar');
+    if (q === 'no') sessionStorage.removeItem('beatDepurar');
+    else if (q === 'player' || q === '1') sessionStorage.setItem('beatDepurar', '1');
+    return import.meta.env.DEV || sessionStorage.getItem('beatDepurar') === '1';
+  } catch {
+    return import.meta.env.DEV;
+  }
+})();
+
+function traza(...args: unknown[]): void {
+  if (DEPURA) console.info('%c[beat:player]', 'color:#d91e18;font-weight:700', ...args);
+}
+
+/**
+ * Cuántos cue points han llegado desde que empezó a sonar.
+ *
+ * Sirve para el aviso de abajo: cero es un diagnóstico distinto de «llegan y se
+ * descartan», y desde la barra los dos se ven igual.
+ */
+let cuesRecibidos = 0;
+let vigilanteCues: number | null = null;
+
+/** A los 45 s sonando sin un solo cue point, se dice en voz alta. */
+function vigilarCues(): void {
+  if (!DEPURA || vigilanteCues !== null) return;
+  vigilanteCues = window.setTimeout(() => {
+    vigilanteCues = null;
+    if (cuesRecibidos === 0) {
+      console.warn(
+        '%c[beat:player] 45 s sonando y CERO cue points.',
+        'color:#d91e18;font-weight:700',
+        '\nNo es el parser: el evento no está llegando. Mira hacia el canal SBM ' +
+          '(el mount `_SBM`), no hacia este código.',
+      );
+    } else {
+      traza(`${cuesRecibidos} cue point(s) en los primeros 45 s.`);
+    }
+  }, 45000);
+}
+
 function fallo(mensaje: string): void {
   if (topeConexion !== null) window.clearTimeout(topeConexion);
   topeConexion = null;
@@ -218,7 +278,9 @@ function pintarHora(valor: string | null): void {
 
 function alCambiarEstado(e: { data?: { code?: string } }): void {
   const estado = e.data?.code as EstadoTriton | undefined;
+  traza('stream-status →', estado ?? '(sin código)', e);
   if (!estado) return;
+  if (estado === 'LIVE_PLAYING') vigilarCues();
 
   // Mapeo a GA4. `resume` se distingue de `play` mirando el estado anterior:
   // sin eso, reanudar tras una pausa se contaría como una reproducción nueva y
@@ -377,6 +439,11 @@ function precargarEnIntencion(): void {
 export function prepararPlayer(): void {
   const p = contenedor();
   if (!p) return;
+
+  traza(
+    'diagnóstico ENCENDIDO. Dale play y mira aquí: verás el estado del stream y ' +
+      'cada cue point con su decisión. Para apagarlo, ?depurar=no',
+  );
 
   const boton = el<HTMLButtonElement>('[data-accion="play"]');
   /**
@@ -771,12 +838,27 @@ export function iniciarPlayer(): void {
   };
 
   sdk.addEventListener('track-cue-point', (e) => {
-    if (import.meta.env.DEV) {
-      // `type` es el campo que decide si se pinta; verlo primero ahorra el paseo.
-      const cp = (e as { cuePoint?: Record<string, unknown> })?.cuePoint;
-      console.info('[player] track-cue-point · type =', cp?.type, e);
-    }
+    cuesRecibidos++;
     const { titulo, artista, hora, esCancion } = leerCue(e);
+
+    /*
+      🔴 Se traza ANTES de los filtros y con el motivo del descarte. Trazar
+      después solo enseña los que ya pasaron, que son justo los que no dan
+      problema — y era el error del log anterior.
+    */
+    traza('cue point', {
+      titulo,
+      artista,
+      hora,
+      esCancion,
+      decision: !titulo
+        ? '❌ descartado: sin título'
+        : !esCancion
+          ? '❌ descartado: no es `track` (mira `cuePoint.type`)'
+          : '✅ a pantalla',
+      crudo: e,
+    });
+
     if (!titulo) return; // sin título no se pisa lo que ya está
     /**
      * 🔴 Las cortinillas NO se muestran. La señal de Beat manda cue points de
@@ -791,6 +873,21 @@ export function iniciarPlayer(): void {
     // Durante un corte no se pisa el aviso; al terminar se restaura este valor.
     if (contenedor()?.dataset.status !== 'anuncio') restaurarSonando();
   });
+
+  /*
+    🔴 Los OTROS canales de metadata, solo para el diagnóstico.
+    Si `track-cue-point` no llega pero estos sí, el problema no es la conexión al
+    canal sino cómo está configurada la estación en Triton — y eso se resuelve en
+    otro sitio, no en este archivo. No cambian ningún comportamiento.
+  */
+  if (DEPURA) {
+    for (const ev of ['speech-cue-point', 'custom-cue-point', 'cue-point'] as const) {
+      sdk.addEventListener(ev, (e) => {
+        cuesRecibidos++;
+        traza(`otro canal · ${ev}`, e);
+      });
+    }
+  }
 
   /**
    * Marcadores de corte comercial, en banda. Sustituyen a la heurística de

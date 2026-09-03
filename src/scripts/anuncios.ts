@@ -26,7 +26,6 @@ interface EventoRender {
 }
 interface PubAds {
   refresh(slots?: Slot[]): void;
-  enableSingleRequest(): void;
   disableInitialLoad(): void;
   addEventListener(evento: 'slotRenderEnded', cb: (e: EventoRender) => void): void;
 }
@@ -228,7 +227,17 @@ export function iniciarAnuncios(): void {
       marcar(id, e.isEmpty);
     });
 
-    gt.pubads().enableSingleRequest();
+    /*
+      ⚠️ `setConfig({ singleRequest })` y NO `pubads().enableSingleRequest()`.
+
+      GPT avisa en consola que ese método está **deprecado**, con el mismo tono con
+      el que avisó de `collapseEmptyDivs` — que ya migramos por eso mismo, dos
+      líneas más arriba. Lo cazó la consola mientras se probaba otra cosa, así que
+      no llegó a producción; pero es el tipo de aviso que se ignora hasta que un
+      día el método desaparece y las peticiones vuelven a salir de una en una, sin
+      que nadie toque nada.
+    */
+    gt.setConfig({ singleRequest: true });
     gt.enableServices();
 
     for (const slot of definidos) gt.display(slot.getSlotElementId());

@@ -10,7 +10,8 @@
  * 🔴 La ruta se construye desde el SLUG del tipo, que es dato editorial. Este
  * componente no sabe que se llama «Bonus Beat»: recibe el tipo y lo usa.
  */
-import { urlMedia } from '@/lib/cms/client';
+import Icono from '@/components/Icono.astro';
+import { urlMedia, urlArchivo } from '@/lib/cms/client';
 import { fechaCorta } from '@/lib/nota';
 import type { Lista, TiposDeLista } from '@/types/payload';
 
@@ -42,6 +43,26 @@ const fecha = fechaCorta(lista?.fecha);
  * según el `depth`, y el parámetro suelto evita un cast dentro de la plantilla —
  * que Astro no parsea cuando el cast lleva una unión.
  */
+/**
+ * El mp3 de la canción, si lo tiene.
+ *
+ * ⚠️ Recibe `unknown` y lee el campo a mano porque `canciones.audio` **todavía no
+ * existe en el CMS**: es la pieza que falta para que Bonus Beat suene (una
+ * relación a `media`, que ya acepta audio sin tocarlo — `Media.ts` no restringe
+ * tipos y Sharp solo procesa imágenes).
+ *
+ * 🔴 Escrito así a propósito, y no esperando a que el campo exista: mientras no
+ * esté, esto devuelve `null` y la fila se pinta EXACTAMENTE como hoy, con sus
+ * enlaces a plataformas. El día que se capture el primer mp3 aparece el botón de
+ * reproducir, sin desplegar nada. Lo contrario —dar por hecho el campo— dejaría la
+ * página en blanco hasta que el CMS se moviera.
+ */
+function audioDe(c: unknown): string | null {
+  if (!c || typeof c !== 'object') return null;
+  const doc = c as Record<string, unknown>;
+  return urlArchivo(doc.audio as Parameters<typeof urlArchivo>[0]);
+}
+
 function plataformasDe(c: unknown): Array<[string, string]> {
   if (!c || typeof c !== 'object') return [];
   const campos: Array<[string, string]> = [
@@ -59,7 +80,7 @@ function plataformasDe(c: unknown): Array<[string, string]> {
 
 {
   lista && (
-    <section class:list={['bb', `es-${contexto}`]}>
+    <section class:list={['bb', `es-${contexto}`]} data-pistas>
       {enInicio && (
       <div class="bb-cabeza">
         <h2 class="beat-display bb-seccion">{(tipo?.nombre ?? lista.titulo).toUpperCase()}</h2>
@@ -86,13 +107,46 @@ function plataformasDe(c: unknown): Array<[string, string]> {
           const cancion = typeof c.cancion === 'object' ? c.cancion : null;
           const portada = urlMedia(cancion?.portada, 'thumbnail');
           const plataformas = plataformasDe(cancion);
+          const pista = audioDe(cancion);
           return (
             <div class="bb-fila">
               <span class="beat-display bb-n">{String(i + 1).padStart(2, '0')}</span>
-              <div class="bb-portada">
-                {portada && <img src={portada} alt="" loading="lazy" decoding="async" />}
-                <div class="beat-grid bb-trama" />
-              </div>
+              {/*
+                Con mp3, la portada ES el botón: es dónde se pulsa para escuchar
+                una canción en cualquier sitio donde haya una portada, así que no
+                hace falta enseñar un control aparte. Sin mp3 se queda como estaba
+                —una imagen— en vez de un botón que no reproduce nada.
+
+                🔴 `data-pista-*` es todo lo que `pista.ts` necesita: no hay una
+                lista de canciones duplicada en el JavaScript, la página la declara.
+              */}
+              {pista ? (
+                <button
+                  type="button"
+                  class="bb-portada bb-portada-btn"
+                  data-pista-src={pista}
+                  data-pista-titulo={cancion?.titulo ?? ''}
+                  data-pista-artista={cancion?.artista ?? ''}
+                  aria-pressed="false"
+                  aria-label={`Reproducir ${cancion?.titulo ?? 'la pista'}`}
+                >
+                  {portada && <img src={portada} alt="" loading="lazy" decoding="async" />}
+                  <div class="beat-grid bb-trama" />
+                  <span class="bb-play">
+                    <span class="bb-play-icono" data-icono="play">
+                      <Icono nombre="play" tamano={16} />
+                    </span>
+                    <span class="bb-play-icono bb-play-pausa" data-icono="pause">
+                      <Icono nombre="pause" tamano={16} />
+                    </span>
+                  </span>
+                </button>
+              ) : (
+                <div class="bb-portada">
+                  {portada && <img src={portada} alt="" loading="lazy" decoding="async" />}
+                  <div class="beat-grid bb-trama" />
+                </div>
+              )}
               <div class="bb-texto">
                 <span class="bb-titulo">{cancion?.titulo ?? '—'}</span>
                 <span class="bb-linea">
@@ -202,6 +256,60 @@ function plataformasDe(c: unknown): Array<[string, string]> {
   .bb-trama {
     position: absolute;
     inset: 0;
+  }
+  .bb-portada-btn {
+    padding: 0;
+    border: 0;
+    cursor: pointer;
+    color: inherit;
+  }
+  /*
+    El play aparece al apuntar, y se queda puesto en la que suena.
+
+    En reposo NO se ve: tres iconos de reproducir en fila son ruido, no
+    información — la misma razón por la que las cápsulas del Fenómeno esconden el
+    suyo. Lo que sí está siempre es el cursor de mano y el nombre accesible.
+  */
+  .bb-play {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: rgb(5 7 6 / 0.45);
+    opacity: 0;
+    transition: opacity var(--dur-2) var(--ease-out);
+  }
+  .bb-portada-btn:hover .bb-play,
+  .bb-portada-btn:focus-visible .bb-play,
+  .bb-portada-btn[data-sonando] .bb-play {
+    opacity: 1;
+  }
+  .bb-play-icono {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--r-pill);
+    background: var(--mist-0);
+    color: var(--noche-0);
+  }
+  /* Los dos iconos viven en el marcado y se alterna cuál se ve, como en la barra:
+     no se reconstruye SVG en cada cambio de estado. */
+  .bb-play-pausa {
+    display: none;
+  }
+  .bb-portada-btn[data-sonando] .bb-play-icono[data-icono='play'] {
+    display: none;
+  }
+  .bb-portada-btn[data-sonando] .bb-play-pausa {
+    display: grid;
+  }
+  .bb-portada-btn[data-sonando] ~ .bb-texto .bb-titulo {
+    color: var(--mist-0);
+  }
+  .bb-portada-btn:focus-visible {
+    outline: 2px solid var(--mist-0);
+    outline-offset: 2px;
   }
   .bb-texto {
     min-width: 0;

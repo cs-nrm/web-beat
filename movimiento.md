@@ -62,6 +62,18 @@ por la que no la hay.
   párrafo que se mueve mientras se lee es un estorbo, no un efecto.
 - **La interfaz funcional del player.** Los controles contestan (hover, foco), pero
   no se animan solos: son mandos, no decoración.
+
+  🔴 Y la barra tiene DOS modos —directo y pista a demanda— que comparten la misma
+  geometría: al cambiar de uno a otro no se mueve nada de sitio, cambia lo que
+  dice. El indicador «AL AIRE» pasa a ser el botón de **volver al directo**, el
+  título de la señal pasa a ser el de la pista, y la onda decorativa pasa a ser la
+  barra de avance. Esa puerta de vuelta no es un adorno: mientras suena una pista,
+  el oyente está FUERA de la señal, y este sitio afirma ser una radio en vivo
+  (§4.1 del mapa de sitio). Sacar a alguien del directo sin salida visible sería
+  una trampa.
+
+  ⚠️ Al acabar la última pista de una tanda, **no arranca el radio solo**. Que
+  empiece a sonar algo que nadie pidió es peor que el silencio.
 - **Cualquier cosa por debajo del umbral de texto grande** si el efecto baja la
   opacidad. Ver §4.
 

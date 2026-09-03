@@ -96,6 +96,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
   <div
     id="player"
     data-status="init"
+    data-modo="directo"
     data-mount={estacion.tritonMount}
     class="flex h-player items-center gap-3 bg-mist-0 px-4 text-noche-0 md:gap-4 md:px-6"
   >
@@ -118,7 +119,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
       <img src="/img/beat-blanco.svg" alt={estacion.nombre} width="155" height="36" />
     </a>
 
-    <span class="flex flex-none items-center gap-2">
+    <span class="solo-directo flex flex-none items-center gap-2">
       {/*
         🔴 ROJO, y es el único color de la interfaz. Es la luz de tally de un
         estudio: la convención dice «estamos emitiendo», que es exactamente lo que
@@ -135,7 +136,29 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
       </span>
     </span>
 
-    <span class="hidden h-[18px] w-px flex-none bg-[var(--onair-rule)] md:block"></span>
+    {/*
+      🔴 La puerta de vuelta, y no es un adorno: mientras suena una pista a
+      demanda, el oyente está FUERA de la señal. Este sitio afirma ser una radio en
+      vivo —§4.1 del mapa de sitio— así que sacar a alguien del directo sin una
+      salida visible sería una trampa, no una función.
+
+      Ocupa el mismo sitio que el indicador de aire, así que la barra no cambia de
+      geometría al pasar de un modo a otro: cambia lo que dice.
+    */}
+    <button
+      type="button"
+      data-accion="directo"
+      class="solo-pista player-volver flex-none items-center gap-2"
+    >
+      <span
+        class="h-[7px] w-[7px] flex-none rounded-pill bg-[var(--rojo-aire)] motion-safe:animate-pulse"
+      ></span>
+      <span class="t-label whitespace-nowrap text-[8px] md:text-[9px]">
+        Volver al directo
+      </span>
+    </button>
+
+    <span class="solo-directo hidden h-[18px] w-px flex-none bg-[var(--onair-rule)] md:block"></span>
 
     <button
       type="button"
@@ -168,8 +191,21 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
 
     <span
       data-campo="sonando"
-      class="min-w-0 flex-1 truncate font-text text-[12px] font-semibold leading-tight md:flex-none md:text-[13px]"
+      class="solo-directo min-w-0 flex-1 truncate font-text text-[12px] font-semibold leading-tight md:flex-none md:text-[13px]"
     >{sonando}</span>
+
+    {/*
+      🔴 El título de la pista va en SU PROPIO elemento, no reutilizando el de
+      arriba. `player.ts` guarda el texto original de `[data-campo="sonando"]` para
+      poder restaurarlo tras un corte comercial; si la pista escribiera ahí, ese
+      «original» pasaría a ser el nombre de una canción de Bonus Beat y el radio
+      volvería del anuncio anunciando la pista. Dos modos, dos elementos, cero
+      estado compartido.
+    */}
+    <span
+      data-campo="pista"
+      class="solo-pista min-w-0 flex-1 truncate font-text text-[12px] font-semibold leading-tight md:flex-none md:text-[13px]"
+    ></span>
 
     {/*
       Waveform. Decorativa: el dato real es el texto de al lado.
@@ -180,7 +216,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
       decir qué suena, y lo que sobrevivía era el adorno. La onda vuelve a partir
       de 900px, donde sí sobra sitio.
     */}
-    <span class="hidden h-4 flex-none items-center gap-[1.5px] md:flex md:h-5 md:w-auto md:flex-1" aria-hidden="true">
+    <span class="solo-directo hidden h-4 flex-none items-center gap-[1.5px] md:flex md:h-5 md:w-auto md:flex-1" aria-hidden="true">
       {barras(72).map((b) => (
         <span
           class="onda-barra hidden h-full flex-1 bg-[var(--onair-wave)] md:block"
@@ -188,6 +224,26 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
         ></span>
       ))}
     </span>
+
+    {/*
+      El avance de la pista, en el hueco que deja la onda.
+
+      Es un `range` y no una barra pintada: así se puede BUSCAR, y además con el
+      teclado, que es lo que un `div` con un ancho no da. Solo escritorio, igual
+      que la onda: a 375px la barra no tiene sitio y lo que importa ahí es el
+      título y el play.
+    */}
+    <label class="solo-pista sr-only" for="beat-progreso">Avance de la pista</label>
+    <input
+      id="beat-progreso"
+      data-accion="progreso"
+      type="range"
+      min="0"
+      max="0"
+      value="0"
+      disabled
+      class="solo-pista player-progreso hidden md:flex-1"
+    />
 
     {/* Volumen: solo escritorio. En móvil lo controla el sistema. */}
     <span class="hidden flex-none items-center gap-2 md:flex">
@@ -343,6 +399,89 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
 </script>
 
 <style>
+  /*
+    ── Los dos modos de la barra ──
+
+    🔴 Vive AQUÍ y no en `beat.css` por la misma razón que el plegado: los anchos
+    y los `display` de esta barra los ponen utilidades de Tailwind, que van en una
+    capa POSTERIOR a `proyecto`. Desde allí un `display: none` no gana ni con toda
+    la especificidad del mundo. Los estilos de un componente Astro no llevan capa,
+    así que ganan a todas.
+
+    Es lo que permite apagar la onda (`hidden md:flex`) en modo pista sin recurrir
+    a `!important`.
+  */
+  #player[data-modo='pista'] .solo-directo,
+  #player:not([data-modo='pista']) .solo-pista {
+    display: none;
+  }
+  #player[data-modo='pista'] .solo-pista.player-volver {
+    display: flex;
+  }
+  #player[data-modo='pista'] .player-progreso {
+    display: none;
+  }
+  @media (min-width: 900px) {
+    #player[data-modo='pista'] .player-progreso {
+      display: block;
+    }
+  }
+
+  .player-volver {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+    transition: opacity var(--dur-2) var(--ease-out);
+  }
+  .player-volver:hover {
+    opacity: 0.65;
+  }
+  .player-volver:focus-visible {
+    outline: 2px solid var(--noche-0);
+    outline-offset: 3px;
+  }
+
+  /*
+    El avance. Comparte la piel del volumen —misma barra, mismo tirador— porque son
+    el mismo control para el ojo; lo que cambia es que este pinta lo YA reproducido,
+    con un degradado duro sobre `--avance` que actualiza el script.
+  */
+  .player-progreso {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 3px;
+    cursor: pointer;
+    background:
+      linear-gradient(var(--noche-0), var(--noche-0)) 0 / var(--avance, 0%) 100% no-repeat,
+      var(--onair-track);
+  }
+  .player-progreso:disabled {
+    cursor: default;
+    opacity: 0.45;
+  }
+  .player-progreso::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 10px;
+    height: 10px;
+    border: 0;
+    border-radius: var(--r-pill);
+    background: var(--noche-0);
+  }
+  .player-progreso::-moz-range-thumb {
+    width: 10px;
+    height: 10px;
+    border: 0;
+    border-radius: var(--r-pill);
+    background: var(--noche-0);
+  }
+  .player-progreso:focus-visible {
+    outline: 2px solid var(--noche-0);
+    outline-offset: 3px;
+  }
+
   /*
     ── El plegado de la barra de navegación ──
 

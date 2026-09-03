@@ -89,6 +89,22 @@ const MS_TOPE_CONEXION = 20000;
 const el = <T extends HTMLElement>(sel: string): T | null =>
   document.querySelector<T>(sel);
 
+/**
+ * 🔴 ¿Manda otro modo en la barra?
+ *
+ * El botón de play lo comparten el directo y las pistas a demanda de Bonus Beat
+ * (`pista.ts`). Los dos módulos escuchan el MISMO nodo —la barra es persistente—,
+ * así que cada uno tiene que ignorar los clics que no son suyos. Sin esto, pulsar
+ * pausa sobre una pista arrancaría además el radio: dos audios a la vez y el
+ * árbitro cortando uno de los dos según quién llegara antes.
+ *
+ * Se lee del DOM y no de una variable de módulo a propósito: el estado vive en un
+ * solo sitio y los dos módulos lo consultan igual.
+ */
+function mandaLaPista(): boolean {
+  return contenedor()?.dataset.modo === 'pista';
+}
+
 function contenedor(): HTMLElement | null {
   return el('#player');
 }
@@ -358,6 +374,7 @@ export function prepararPlayer(): void {
   boton?.addEventListener(
     'click',
     () => {
+      if (mandaLaPista()) return; // el clic es de la pista, no del directo
       if (iniciado) return; // ya hay SDK: el handler de iniciarPlayer se encarga
       /**
        * 🔴 Se pinta `cargando` AQUÍ, no al recibir el primer `stream-status`.
@@ -381,6 +398,13 @@ export function prepararPlayer(): void {
        * se calla ya, no cuando el stream tenga a bien conectar.
        */
       reclamarAudio(FUENTES.radio);
+      /*
+        Y la barra vuelve al DIRECTO. `reclamarAudio` calla la pista, pero el modo
+        es cosa de la interfaz: sin esto la barra se quedaría enseñando el título
+        de una canción de Bonus Beat mientras suena la señal.
+      */
+      const p2 = contenedor();
+      if (p2) p2.dataset.modo = 'directo';
       pintarEstado('cargando');
       arranquePendiente = true;
       void cargarSdk()
@@ -722,6 +746,7 @@ export function iniciarPlayer(): void {
 
   // ---- Controles ----
   el<HTMLButtonElement>('[data-accion="play"]')?.addEventListener('click', () => {
+    if (mandaLaPista()) return; // el clic es de la pista, no del directo
     const estado = contenedor()?.dataset.status;
     if (estado === 'sonando' || estado === 'cargando' || estado === 'anuncio') {
       sdk?.stop();
@@ -729,6 +754,8 @@ export function iniciarPlayer(): void {
     } else {
       // Respuesta inmediata al clic: Triton tarda en emitir su primer estado.
       reclamarAudio(FUENTES.radio);
+      const p3 = contenedor();
+      if (p3) p3.dataset.modo = 'directo';
       pintarEstado('cargando');
       arrancar();
     }

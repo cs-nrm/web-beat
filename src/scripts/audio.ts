@@ -66,4 +66,6 @@ export const FUENTES = {
   radio: 'radio',
   video: 'video-nota',
   podcast: 'podcast',
+  /** Una pista a demanda sonando en la barra: Bonus Beat y lo que venga después. */
+  pista: 'pista',
 } as const;

@@ -370,6 +370,24 @@ export interface DocMedia {
 }
 
 /**
+ * URL del archivo TAL CUAL, sin pasar por las variantes de imagen.
+ *
+ * 🔴 Para lo que no es una foto: el mp3 de una canción, un PDF. `Media` no
+ * restringe tipos y Sharp solo toca imágenes, así que un audio se guarda intacto
+ * y **no tiene `sizes`**.
+ *
+ * Existe aparte de `urlMedia` aunque hoy las dos devolverían lo mismo —`urlMedia`
+ * cae al original cuando no hay variantes—, y la razón es que esa caída es un
+ * ACCIDENTE afortunado, no un contrato: el día que alguien añada un tamaño más o
+ * cambie el orden de preferencia, pedir el audio de una canción podría devolver un
+ * WebP. Un nombre que dice qué pide no se puede romper así.
+ */
+export function urlArchivo(media: DocMedia | number | null | undefined): string | null {
+  if (!media || typeof media !== 'object') return null;
+  return urlMediaAbsoluta(media.url);
+}
+
+/**
  * URL de la variante pedida, con degradación hacia abajo y hacia el original.
  *
  * ⚠️ Las tres variantes se generan con `withoutEnlargement: true`, así que un

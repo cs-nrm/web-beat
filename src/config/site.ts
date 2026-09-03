@@ -68,6 +68,27 @@ export const NOINDEX_SITIO = ((): boolean => {
  * ⚠️ Depende de `security.allowedDomains` en `astro.config.mjs`: sin esa lista,
  * `context.url.hostname` es SIEMPRE `localhost` en producción y esta función
  * marcaría el sitio real como despliegue de prueba.
+ *
+ * 🔴 Y depende de UNA SEGUNDA COSA que no vive en este repo: **`ProxyPreserveHost On`
+ * en el vhost de Apache**. Por omisión Apache reescribe el `Host` hacia el backend,
+ * así que Node recibiría `Host: localhost:<puerto>` y esta función perdería la
+ * única señal con la que trabaja.
+ *
+ * Cómo falla si alguien la apaga: NO se abre el sitio —«localhost» tampoco es el
+ * canónico, así que la indexación sigue cerrada— pero `Astro.url` deja de decir la
+ * verdad, y con ella `checkOrigin` compara `localhost` contra el dominio real y
+ * **responde 403 a todo POST**. O sea, el login de oyentes el día que exista. Falla
+ * silenciosa por el lado de la indexación y ruidosa por el del formulario, que es
+ * la peor combinación para diagnosticarla.
+ *
+ * ✨ La otra mitad de la garantía la da el propio Apache y conviene saberla: con
+ * vhosts por nombre, el `Host` **es** lo que elige el vhost, así que una petición
+ * con `Host: beatdigital.mx` no puede llegar al proceso de preproducción — la
+ * reclama el vhost del sitio vivo. Eso es lo que hace que la MISMA imagen sirva
+ * v2 protegida y producción indexable sin reconstruir, y por eso el corte es
+ * mover un puerto. ⚠️ Meter un proxy intermedio que reescriba el `Host` rompe las
+ * dos mitades a la vez.
+ * (Confirmado con la sesión que monta la preproducción, 2026-09-03.)
  */
 export function noIndexarHost(hostname: string): boolean {
   const forzado = forzadoNoIndex();

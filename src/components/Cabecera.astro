@@ -119,8 +119,17 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     </a>
 
     <span class="flex flex-none items-center gap-2">
-      {/* `beat-pulse` es del DS y respeta prefers-reduced-motion. */}
-      <span class="h-[7px] w-[7px] rounded-pill bg-noche-0 motion-safe:animate-pulse"></span>
+      {/*
+        🔴 ROJO, y es el único color de la interfaz. Es la luz de tally de un
+        estudio: la convención dice «estamos emitiendo», que es exactamente lo que
+        esta barra afirma. Ver el token `--rojo-aire` en `beat.css`.
+
+        `motion-safe:` porque el parpadeo perpetuo es de lo primero que
+        `prefers-reduced-motion` existe para quitar.
+      */}
+      <span
+        class="h-[7px] w-[7px] flex-none rounded-pill bg-[var(--rojo-aire)] motion-safe:animate-pulse"
+      ></span>
       <span class="t-label whitespace-nowrap text-[8px] md:text-[9px]">
         Al aire
       </span>

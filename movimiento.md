@@ -203,6 +203,17 @@ enterarse de que hubo una decisión — que es como debe funcionar un token.
 de marca, donde el umbral es 3:1 y el naranja es identidad, no texto. Lo que cambia
 es a qué apunta el TEXTO.
 
+🔴 **Y hay UNA excepción, exactamente una: el punto de «al aire» va en rojo**
+(`--rojo-aire`, decisión de Carlos del 2026-09-03). Se sostiene porque no es
+decoración: el rojo de «al aire» es la luz de tally de un estudio, una convención
+que significa algo concreto. Un punto blanco parpadeando no dice «estamos
+emitiendo»; dice que algo parpadea.
+
+Que sea el ÚNICO color de la interfaz es lo que lo hace funcionar: donde nada más
+tiene tono, el ojo va ahí solo. En cuanto haya un segundo color, este deja de
+significar. **Si alguna vez hace falta otro acento, la pregunta no es «¿cuál?»
+sino «¿a costa de qué?».**
+
 ⚠️ Y el enlace pierde el color pero **conserva el subrayado**, que ya tenía. Sin él
 esto rompería WCAG 1.4.1: el color no puede ser lo único que distingue un enlace.
 

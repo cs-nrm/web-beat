@@ -19,7 +19,8 @@
     "sync:types:check": "node scripts/sync-payload-types.mjs --check",
     "fuentes": "node scripts/fuentes.mjs",
     "guardas": "node scripts/guardas.mjs && node scripts/guarda-cascada.mjs",
-    "preview:cms": "CMS_URL=https://admin.nrm.com.mx astro preview"
+    "preview:cms": "CMS_URL=https://admin.nrm.com.mx astro preview",
+    "favicon": "node scripts/favicon.mjs"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.2.4",
@@ -31,6 +32,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "sharp": "^0.35.4",
     "typescript": "^5.9.3"
   }
 }

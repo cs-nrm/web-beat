@@ -42,6 +42,30 @@
   --text-link-hover: #ffffff;
 }
 
+/*
+   🔴 LA ÚNICA EXCEPCIÓN AL BLANCO Y NEGRO: el punto de «al aire».
+   ------------------------------------------------------------
+   Decisión de Carlos, 2026-09-03. Es el único color de toda la interfaz, y se
+   sostiene porque no es decoración: el rojo de «al aire» es una convención de
+   radio y televisión —la luz de tally de un estudio— y no significa lo mismo que
+   cualquier otro rojo. Un punto blanco parpadeando no dice «estamos emitiendo»;
+   dice que algo parpadea.
+
+   Que sea el ÚNICO color es lo que lo hace funcionar. En una interfaz donde nada
+   más tiene tono, el ojo va ahí solo.
+
+   ⚠️ 4.88:1 sobre la barra clara (`--mist-0`), medido. El umbral de WCAG 1.4.11
+   para un elemento gráfico portador de información es 3:1, así que sobra — y de
+   todas formas el color NO es el único portador: al lado dice «Al aire» con
+   letras.
+
+   ⚠️ NO se llama `--luz-*` ni cuelga de esa gama: los `--luz-*` son la paleta
+   cálida del DS, que Beat no usa. Este rojo es un semáforo, no una marca.
+*/
+:root {
+  --rojo-aire: #d91e18;
+}
+
 /**
  * Tema claro `neblina` — FUERA DEL ALCANCE (decisión de Carlos, 2026-08-20:
  * "solo haremos versión negra").

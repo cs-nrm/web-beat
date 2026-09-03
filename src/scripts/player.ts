@@ -76,6 +76,16 @@ let textoOriginal: string | null = null;
 /** La hora de inicio de lo que suena, o `null` si no se sabe. */
 let horaOriginal: string | null = null;
 /**
+ * El nombre de la estación, capturado UNA vez del marcado del servidor.
+ *
+ * Es el sitio al que se vuelve cuando no hay nada que anunciar: al pausar, y
+ * cuando una canción caduca. No se puede usar `textoOriginal` para esto porque ese
+ * ya guarda la última canción — que es justo lo que hay que dejar de decir.
+ */
+let textoEstacion: string | null = null;
+/** Caduca la canción cuando pasa su propia duración sin noticias. Ver abajo. */
+let caducidad: number | null = null;
+/**
  * Tope de la conexión. Sin esto, si Triton no llega nunca a LIVE_PLAYING —red
  * mala, mount caído, un VAST que se cuelga sin emitir evento— el oyente se queda
  * mirando «Conectando…» indefinidamente, que es un cuelgue silencioso: parece que
@@ -210,6 +220,17 @@ function pintarEstado(estado: EstadoUI): void {
     );
   }
 
+  /*
+    🔴 Al PARAR se deja de anunciar la canción. Si el oyente pausó, la barra no
+    puede seguir diciendo qué suena: para él no suena nada, y la señal sigue
+    corriendo sin él, así que al reanudar ya será otra.
+
+    Va aquí y no en el manejador del botón porque `init` es el estado de parada
+    venga de donde venga — del botón, de un fallo de red o del árbitro de audio
+    cuando otra fuente reclama el canal.
+  */
+  if (estado === 'init' && textoEstacion !== null) volverALaFrecuencia();
+
   const boton = el<HTMLButtonElement>('[data-accion="play"]');
   if (boton) {
     const cargando = estado === 'cargando';
@@ -255,6 +276,67 @@ function pintarSonando(texto: string): void {
   campo.textContent = texto;
   // Un aviso —«Conectando…», «PAUSA COMERCIAL»— no tiene hora de inicio.
   pintarHora(null);
+  medirMarquesina();
+}
+
+/**
+ * Deja de anunciar una canción y vuelve a la frecuencia.
+ *
+ * 🔴 Se usa en DOS momentos, y los dos son casos de «ya no sé qué suena»:
+ *
+ *   · al PAUSAR — decisión de Carlos, 2026-09-03. Si el oyente paró, la barra no
+ *     puede seguir afirmando qué está sonando: para él no suena nada. Y la señal
+ *     sigue corriendo sin él, así que al reanudar ya será otra canción.
+ *   · al CADUCAR — ver `programarCaducidad()`.
+ */
+function volverALaFrecuencia(): void {
+  if (caducidad !== null) {
+    clearTimeout(caducidad);
+    caducidad = null;
+  }
+  textoOriginal = textoEstacion;
+  horaOriginal = null;
+  restaurarSonando();
+}
+
+/**
+ * 🔴 Una canción deja de anunciarse cuando termina, aunque no llegue nada nuevo.
+ *
+ * Esto resuelve algo que se ve en la señal real: **cuando los locutores hablan en
+ * vivo, Triton no manda NADA**. Medido en una captura de 2h44 del canal SBM — los
+ * únicos tipos que existen son `track` y `ad`, no hay `speech` ni `custom`. Así
+ * que sin esto la barra se queda enseñando la última canción mientras alguien
+ * habla encima, que es exactamente lo que Carlos reportó.
+ *
+ * La duración sale del propio cue point, así que no se inventa nada: cuando pasa
+ * el tiempo que la canción dice durar y nadie ha anunciado otra, se vuelve a la
+ * frecuencia. Si llega un cue point nuevo antes, este temporizador se cancela y
+ * empieza el suyo.
+ *
+ * ⚠️ `cue_time_duration` viene en DÉCIMAS de segundo (`'2790'` = 4:39), medido en
+ * la captura. NO en milisegundos — leerlo como ms daría 46 minutos para una
+ * canción de cuatro. (Los eventos VAST sí lo mandan en ms, pero esos llegan por
+ * `ad-break-cue-point` y no por aquí.)
+ *
+ * Se añaden 25 s de tolerancia: el cue point llega ~5 s por delante del audio del
+ * oyente, y más vale quedarse corto en el aviso que borrar una canción que todavía
+ * suena.
+ */
+function programarCaducidad(decimas: string | undefined): void {
+  if (caducidad !== null) {
+    clearTimeout(caducidad);
+    caducidad = null;
+  }
+  const n = Number(decimas);
+  if (!Number.isFinite(n)) return;
+  const segundos = n / 10;
+  // Cordura: menos de 30 s o más de 20 min no es una canción, es un dato raro.
+  if (segundos < 30 || segundos > 1200) return;
+  caducidad = window.setTimeout(() => {
+    caducidad = null;
+    volverALaFrecuencia();
+    traza('la canción caducó sin noticias — probablemente hay locución en vivo');
+  }, (segundos + 25) * 1000);
 }
 
 /** Vuelve al texto que puso el servidor (la canción, o el nombre de la estación). */
@@ -262,6 +344,41 @@ function restaurarSonando(): void {
   const campo = el('[data-campo="sonando"]');
   if (campo && textoOriginal !== null) campo.textContent = textoOriginal;
   pintarHora(horaOriginal);
+  medirMarquesina();
+}
+
+/**
+ * Decide si el título tiene que desplazarse, midiendo si cabe.
+ *
+ * 🔴 Se mide, no se adivina por número de caracteres: una `W` y una `i` no ocupan
+ * lo mismo, y el ancho disponible cambia entre móvil y escritorio. Se compara el
+ * ancho real del texto contra el de su ventana.
+ *
+ * La velocidad es CONSTANTE —unos 45 px/s— así que la duración sale del recorrido.
+ * Con una duración fija, un título largo pasaría corriendo y uno corto se
+ * arrastraría: dos velocidades distintas para la misma cosa.
+ */
+function medirMarquesina(): void {
+  const campo = el('[data-campo="sonando"]');
+  const ventana = campo?.parentElement;
+  if (!campo || !ventana) return;
+
+  campo.removeAttribute('data-corre');
+  campo.style.removeProperty('--marq-recorrido');
+  campo.style.removeProperty('--marq-dur');
+
+  const sobra = campo.scrollWidth - ventana.clientWidth;
+  // Menos de 8px de sobra no se mueve: sería un temblor, no un desplazamiento.
+  if (sobra <= 8) return;
+
+  campo.style.setProperty('--marq-recorrido', `-${sobra}px`);
+  /*
+    El recorrido se hace dos veces (ida y vuelta) y ocupa el 64% del ciclo; el
+    resto son las dos pausas. De ahí sale el total para que la ida sea a 45 px/s.
+  */
+  const segundos = Math.min(30, Math.max(6, (sobra / 45) * 2 * (1 / 0.64)));
+  campo.style.setProperty('--marq-dur', `${segundos.toFixed(1)}s`);
+  campo.setAttribute('data-corre', '');
 }
 
 /**
@@ -444,6 +561,16 @@ export function prepararPlayer(): void {
     'diagnóstico ENCENDIDO. Dale play y mira aquí: verás el estado del stream y ' +
       'cada cue point con su decisión. Para apagarlo, ?depurar=no',
   );
+
+  /*
+    El nombre de la estación, tal cual lo puso el servidor. Es el sitio al que se
+    vuelve cuando no hay canción que anunciar, así que se guarda ANTES de que nada
+    lo pise.
+  */
+  if (textoEstacion === null) {
+    textoEstacion = el('[data-campo="sonando"]')?.textContent ?? null;
+  }
+  medirMarquesina();
 
   const boton = el<HTMLButtonElement>('[data-accion="play"]');
   /**
@@ -691,7 +818,13 @@ export function iniciarPlayer(): void {
    */
   const leerCue = (
     data: unknown,
-  ): { titulo?: string; artista?: string; hora?: string; esCancion: boolean } => {
+  ): {
+    titulo?: string;
+    artista?: string;
+    hora?: string;
+    duracion?: string;
+    esCancion: boolean;
+  } => {
     type Sobre = {
       data?: Sobre;
       cuePoint?: Record<string, unknown>;
@@ -805,6 +938,8 @@ export function iniciarPlayer(): void {
 
     return {
       hora,
+      // Crudo, en décimas de segundo. Lo interpreta `programarCaducidad()`.
+      duracion: tomar('cueTimeDuration', 'cue_time_duration'),
       /*
         Los dos juegos de nombres, VERIFICADOS contra el `cuePointMap` del bundle
         y no adivinados: el SDK copia cada parámetro crudo a un alias amistoso
@@ -839,7 +974,7 @@ export function iniciarPlayer(): void {
 
   sdk.addEventListener('track-cue-point', (e) => {
     cuesRecibidos++;
-    const { titulo, artista, hora, esCancion } = leerCue(e);
+    const { titulo, artista, hora, duracion, esCancion } = leerCue(e);
 
     /*
       🔴 Se traza ANTES de los filtros y con el motivo del descarte. Trazar
@@ -850,6 +985,7 @@ export function iniciarPlayer(): void {
       titulo,
       artista,
       hora,
+      duracionSegundos: Number(duracion) / 10 || undefined,
       esCancion,
       decision: !titulo
         ? '❌ descartado: sin título'
@@ -870,6 +1006,7 @@ export function iniciarPlayer(): void {
     if (!esCancion) return;
     textoOriginal = [titulo, artista].filter(Boolean).join(' · ');
     horaOriginal = hora ?? null;
+    programarCaducidad(duracion);
     // Durante un corte no se pisa el aviso; al terminar se restaura este valor.
     if (contenedor()?.dataset.status !== 'anuncio') restaurarSonando();
   });

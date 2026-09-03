@@ -1777,6 +1777,8 @@ html[data-cursor] body::after {
   opacity: 0;
   translate: 0 6px;
   pointer-events: none;
+}
+.cabecera-menu-claro {
   transition:
     opacity var(--dur-3) var(--ease-out),
     translate var(--dur-3) var(--ease-out);
@@ -1796,12 +1798,47 @@ html[data-cursor] body::after {
    96px de una barra de 343 no es lo mismo que de una de 1280: allí se los quitaba
    al título de lo que suena, que es el contenido. A 72px el logo sigue leyéndose y
    la reserva sigue evitando el salto. */
+/*
+   🔴 CORREGIDO (Carlos, 2026-09-03). Antes el ancho se reservaba SIEMPRE, visible
+   o no, para que el título no saltara al aparecer el logo. El precio se pagaba
+   siempre y el beneficio se cobraba solo en el instante del scroll: con las dos
+   barras a la vista quedaba un hueco vacío a la izquierda del player que se veía
+   raro, y con razón.
+
+   Ahora mide CERO cuando está apagado y crece hasta su ancho al recogerse la barra
+   oscura. O sea que el logo EMPUJA el contenido al entrar, en vez de tener su sitio
+   apartado. Ya no es un salto: es el mismo gesto de traspaso que el resto de la
+   transición, y ahora el «AL AIRE» arranca pegado a la izquierda como debe.
+
+   El margen negativo se come el `gap` del contenedor mientras está cerrado; sin él
+   quedarían 12px de aire fantasma. */
 .cabecera-logo-claro {
+  width: 0;
+  margin-right: -12px;
+  overflow: hidden;
+  transition:
+    opacity var(--dur-3) var(--ease-out),
+    translate var(--dur-3) var(--ease-out),
+    width var(--dur-3) var(--ease-out),
+    margin-right var(--dur-3) var(--ease-out);
+}
+#beat-cabecera[data-compacta] .cabecera-logo-claro {
   width: 72px;
+  margin-right: 0;
 }
 @media (min-width: 900px) {
-  .cabecera-logo-claro {
+  #beat-cabecera[data-compacta] .cabecera-logo-claro {
     width: 96px;
+  }
+}
+/* El logotipo no se encoge con su caja: la caja lo recorta. Si se escalara, se
+   vería deformarse durante la transición en vez de asomar. */
+.cabecera-logo-claro img {
+  min-width: 72px;
+}
+@media (min-width: 900px) {
+  .cabecera-logo-claro img {
+    min-width: 96px;
   }
 }
 .cabecera-logo-claro img {

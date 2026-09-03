@@ -210,11 +210,22 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
       esto es lo que está sonando AHORA— así que comparten color. Es la única
       excepción al blanco y negro y no se abre una segunda; ver movimiento.md §8.
     */}
-    <span class="solo-directo player-info min-w-0 flex-1 md:flex-none">
-      <span
-        data-campo="sonando"
-        class="player-sonando block truncate font-text text-[12px] font-semibold leading-tight md:text-[13px]"
-      >{sonando}</span>
+    {/*
+      🔴 Ancho FIJO, y es lo que estabiliza la barra entera. Antes este bloque
+      crecía con el largo del título, así que la onda y el volumen cambiaban de
+      sitio en cada canción — la barra se reacomodaba sola cada tres minutos.
+
+      Y el título que no cabe se DESPLAZA en vez de cortarse: en una barra de
+      radio, «GOOD GIRL (EXTENDED MIX) · CLOONEE & PROSPA & TRIS…» esconde justo
+      la parte que distingue una versión de otra.
+    */}
+    <span class="solo-directo player-info min-w-0 flex-1 md:w-[320px] md:flex-none">
+      <span class="player-titulo">
+        <span
+          data-campo="sonando"
+          class="player-sonando font-text text-[12px] font-semibold leading-tight md:text-[13px]"
+        >{sonando}</span>
+      </span>
       {/*
         La hora a la que empezó a sonar, del propio cue point. Nace vacía: hasta
         que el SDK manda el primero no hay nada que decir, y un hueco reservado es
@@ -522,8 +533,58 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     justify-content: center;
     line-height: 1.15;
   }
+  /* La ventana por la que asoma el título. Lo que sobra, se desplaza. */
+  .player-titulo {
+    display: block;
+    overflow: hidden;
+  }
   .player-sonando {
+    display: inline-block;
+    white-space: nowrap;
     color: var(--rojo-aire);
+  }
+
+  /*
+    La marquesina.
+
+    🔴 Solo corre cuando el texto NO CABE — lo marca `player.ts` tras medir— y
+    lleva una pausa de dos segundos en cada extremo: un texto en movimiento
+    perpetuo es imposible de leer y es exactamente lo que WCAG 2.2.2 pide poder
+    detener. Con las pausas, el título está quieto y legible la mayor parte del
+    ciclo, y la duración es proporcional al recorrido para que la velocidad sea
+    siempre la misma pase lo que pase con el largo del título.
+  */
+  .player-sonando[data-corre] {
+    animation: player-marquesina var(--marq-dur, 8s) var(--ease-in-out, ease-in-out) infinite;
+  }
+  @keyframes player-marquesina {
+    0%,
+    18% {
+      transform: translateX(0);
+    }
+    50%,
+    68% {
+      transform: translateX(var(--marq-recorrido, 0));
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
+
+  /*
+    🔴 Menos movimiento: no hay marquesina, hay puntos suspensivos. Se pierde el
+    final del título, que es peor — pero un texto que se mueve solo, sin forma de
+    pararlo, es justo lo que esa preferencia existe para quitar.
+  */
+  @media (prefers-reduced-motion: reduce) {
+    .player-sonando[data-corre] {
+      animation: none;
+    }
+    .player-sonando {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
   /*
     La hora, muy chica y en gris: es un dato de apoyo, no la afirmación. Va en el

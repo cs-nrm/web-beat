@@ -615,19 +615,73 @@ export function iniciarPlayer(): void {
     };
     // El SDK envuelve en `cuePoint`; el canal SBM crudo trae `parameters`. Se
     // aceptan las dos por si el SDK cambia de forma entre versiones.
-    const cp = d?.cuePoint ?? d?.parameters ?? {};
-    const nombre = String(d?.name ?? (cp as Record<string, unknown>).name ?? '');
+    const cp = (d?.cuePoint ?? d?.parameters ?? {}) as Record<string, unknown>;
+    /*
+      Se busca en el cuePoint Y en su `parameters`: el SDK deja los dos, el
+      primero con nombres amistosos y el segundo con los crudos del canal.
+    */
+    const bolsas: Array<Record<string, unknown>> = [
+      cp,
+      (cp.parameters as Record<string, unknown>) ?? {},
+    ];
+
+    /**
+     * 🔴 EL TIPO DEL CUE POINT SE LLAMA `type`, NO `name`.
+     *
+     * Aquí decía `d?.name ?? cp.name`, y NINGUNO DE LOS DOS EXISTE. Leído del
+     * propio bundle del SDK 2.9 (`sdk.listenlive.co/web/2.9/td-sdk.min.js`), que
+     * es donde se construye el objeto:
+     *
+     *   __onCuePoint: function (data) {
+     *     var cuePoint = {
+     *       parameters: data.parameters,
+     *       timestamp:  data.timestamp,
+     *       type:       data.name        // ← el `name` del canal se guarda aquí
+     *     };
+     *     …
+     *   }
+     *   …
+     *   this._onTrackCuePoint({ cuePoint: cuePoint })
+     *
+     * O sea: el canal SBM manda `name: "track"`, el SDK lo renombra a `type`, y
+     * nosotros preguntábamos por `name`. `nombre` salía SIEMPRE cadena vacía, la
+     * lista blanca lo tomaba por «no es canción» y **se descartaban el 100% de los
+     * cue points**. La barra se quedaba en «Beat 100.9» para siempre.
+     *
+     * ⚠️ Y lo que lo destapó del todo: este agujero lo ABRIÓ un endurecimiento
+     * anterior. Antes la condición era `nombre === '' || nombre === 'track'`, y ese
+     * `''` —que se quitó por ser un riesgo real, y con razón— era lo único que
+     * dejaba pasar los cue points. O sea que la lista blanca estaba bien y el campo
+     * mal: al cerrar el hueco, lo que funcionaba por accidente dejó de funcionar.
+     * Cerrar un agujero sin comprobar qué pasaba por él es cómo se rompe algo
+     * arreglándolo.
+     *
+     * Se conserva `name` como alternativa para la forma CRUDA del canal, por si
+     * alguna vez se lee el SBM sin pasar por el SDK.
+     */
+    const nombre = String(
+      cp.type ?? d?.name ?? (cp.parameters as Record<string, unknown>)?.name ?? '',
+    );
+
     const tomar = (...claves: string[]): string | undefined => {
       for (const k of claves) {
-        const v = (cp as Record<string, unknown>)[k];
-        if (typeof v === 'string' && v.trim()) return v.trim();
+        for (const bolsa of bolsas) {
+          const v = bolsa[k];
+          if (typeof v === 'string' && v.trim()) return v.trim();
+        }
       }
       return undefined;
     };
     return {
-      // snake_case es lo que manda el canal; camelCase por si el SDK lo normaliza.
-      titulo: tomar('cue_title', 'cueTitle', 'title'),
-      artista: tomar('track_artist_name', 'artistName', 'artist', 'trackArtist'),
+      /*
+        Los dos juegos de nombres, VERIFICADOS contra el `cuePointMap` del bundle
+        y no adivinados: el SDK copia cada parámetro crudo a un alias amistoso
+        —`cue_title` → `cueTitle`, `track_artist_name` → `artistName`— y conserva
+        los crudos dentro de `parameters`. Se prueban los dos porque el alias solo
+        existe si la clave está en ese mapa.
+      */
+      titulo: tomar('cueTitle', 'cue_title', 'title'),
+      artista: tomar('artistName', 'track_artist_name', 'artist', 'trackArtist'),
       /**
        * 🔴 LISTA BLANCA ESTRICTA: solo `track` se pinta. Nada más.
        *
@@ -652,7 +706,11 @@ export function iniciarPlayer(): void {
   };
 
   sdk.addEventListener('track-cue-point', (e) => {
-    if (import.meta.env.DEV) console.info('[player] track-cue-point', e);
+    if (import.meta.env.DEV) {
+      // `type` es el campo que decide si se pinta; verlo primero ahorra el paseo.
+      const cp = (e as { cuePoint?: Record<string, unknown> })?.cuePoint;
+      console.info('[player] track-cue-point · type =', cp?.type, e);
+    }
     const { titulo, artista, esCancion } = leerCue(e);
     if (!titulo) return; // sin título no se pisa lo que ya está
     /**

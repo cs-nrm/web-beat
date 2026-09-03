@@ -33,9 +33,21 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     movimiento.md §3 aplicada a la navegación.
   */}
   <nav class="menu-caja" aria-label="Menú principal">
+    {/*
+      🔴 Programación va en la MISMA lista y con la misma pinta que las cinco
+      (decisión de Carlos, 2026-09-03). Estaba abajo en voz baja porque en el pie
+      es una utilidad de consulta, no una sección editorial — pero en el menú esa
+      distinción no le sirve a nadie: quien lo abre está eligiendo a dónde ir, y
+      una fila más chica solo le pide que averigüe por qué.
+
+      ⚠️ `data-escribir` va en `.menu-texto` y NO en el `<a>`. `partir()` se niega
+      a actuar sobre un elemento con hijos —partir en letras vaciaría el enlace y
+      se llevaría por delante el número—, así que el efecto tiene que caer sobre
+      un nodo de texto plano.
+    */}
     <ul class="menu-lista">
       {
-        SECCIONES.map((s, i) => (
+        [...SECCIONES, ...SECCIONES_PIE].map((s, i) => (
           <li class="menu-item" style={`--i:${i}`}>
             <a
               href={s.href}
@@ -43,23 +55,8 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
               class:list={['menu-enlace', { 'es-activo': activo(s.href) }]}
             >
               <span class="beat-label menu-n">{String(i + 1).padStart(2, '0')}</span>
-              <span class="menu-texto">{s.corto}</span>
+              <span class="menu-texto" data-escribir>{s.corto}</span>
             </a>
-          </li>
-        ))
-      }
-    </ul>
-
-    {/*
-      La segunda fila, en voz baja. Programación no es una de las cinco —vive en
-      el pie— pero en un menú a pantalla completa hay sitio, y quien abre el menú
-      está buscando a dónde ir.
-    */}
-    <ul class="menu-menores">
-      {
-        SECCIONES_PIE.map((s, i) => (
-          <li style={`--i:${SECCIONES.length + i}`}>
-            <a href={s.href} class="beat-label menu-menor">{s.largo}</a>
           </li>
         ))
       }
@@ -93,15 +90,36 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     */
     visibility: hidden;
     opacity: 0;
+
+    /*
+      🔴 Se abre como un CÍRCULO que crece DESDE LA PROPIA HAMBURGUESA hasta
+      llenar la pantalla, y se cierra volviendo a ella.
+
+      Aparecer sin más se leía como un corte de plano: el menú estaba y de pronto
+      ya no. Con el círculo, el gesto tiene origen y causa — sale del botón que lo
+      pidió, que es la lectura correcta de lo que acaba de pasar.
+
+      `--ox`/`--oy` los pone `menu.ts` con la posición real del botón que se pulsó,
+      que no es la misma en escritorio y en móvil. Los valores por omisión apuntan
+      a la esquina superior derecha, que es donde vive en los dos casos: si el
+      script no llegara a medir, el gesto sigue naciendo del sitio correcto.
+    */
+    --ox: 92%;
+    --oy: 24px;
+    clip-path: circle(0% at var(--ox) var(--oy));
     transition:
       opacity var(--dur-3) var(--ease-out),
+      clip-path var(--dur-3) var(--ease-out),
       visibility 0ms linear var(--dur-3);
   }
   .menu[data-abierto] {
     visibility: visible;
     opacity: 1;
+    /* 150% para que el círculo cubra también la esquina más lejana. */
+    clip-path: circle(150% at var(--ox) var(--oy));
     transition:
       opacity var(--dur-2) var(--ease-out),
+      clip-path var(--dur-3) var(--ease-out),
       visibility 0ms linear 0ms;
   }
 
@@ -138,12 +156,26 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     transition-delay: calc(var(--i) * 70ms);
   }
 
+  /*
+    🔴 En reposo va en `--text-body`, no en `--text-muted`, y NO es preferencia
+    estética: es lo que hace legal el descifrado.
+
+    Las letras sin resolver se pintan al 40% de opacidad. Medido sobre el fondo
+    del menú: `--text-muted` al 40% da **2.38:1** —por debajo del 3:1 que WCAG
+    1.4.3 pide para texto grande— y `--text-body` da **3.28:1**. O sea que con el
+    gris de antes, el efecto habría dejado el menú ilegible durante un segundo
+    entero, justo cuando el lector está eligiendo a dónde ir.
+
+    ⚠️ El guarda de `partir()` comprueba el TAMAÑO, no el color, así que esto no
+    lo habría detenido nadie. Queda escrito aquí porque el día que alguien quiera
+    apagar más estos enlaces, este es el suelo.
+  */
   .menu-enlace {
     display: inline-flex;
     align-items: baseline;
     gap: 18px;
     padding: 6px 0;
-    color: var(--text-muted);
+    color: var(--text-body);
     text-decoration: none;
     transition: color var(--dur-2) var(--ease-out);
   }
@@ -172,8 +204,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     sistema es aceptable en cualquier sitio menos en uno cuya única regla de color
     es que no hay color.
   */
-  .menu-enlace:focus-visible,
-  .menu-menor:focus-visible {
+  .menu-enlace:focus-visible {
     outline: 2px solid var(--mist-0);
     outline-offset: 6px;
     border-radius: 2px;
@@ -194,33 +225,6 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     color: var(--mist-0);
   }
 
-  .menu-menores {
-    list-style: none;
-    margin: 34px 0 0;
-    padding: 26px 0 0;
-    border-top: 1px solid var(--border-hairline);
-  }
-  .menu-menores li {
-    opacity: 0;
-    translate: 0 18px;
-    transition:
-      opacity var(--dur-2) var(--ease-out),
-      translate var(--dur-2) var(--ease-out);
-  }
-  .menu[data-abierto] .menu-menores li {
-    opacity: 1;
-    translate: 0 0;
-    transition-delay: calc(var(--i) * 70ms);
-  }
-  .menu-menor {
-    color: var(--text-muted);
-    font-size: 10px;
-    transition: color var(--dur-2) var(--ease-out);
-  }
-  .menu-menor:hover {
-    color: var(--mist-0);
-  }
-
   /*
     🔴 Menos movimiento: se apaga, no se acelera. Un overlay que se abre de golpe
     es correcto; lo que la preferencia quita es el desplazamiento y el escalonado,
@@ -228,13 +232,17 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
   */
   @media (prefers-reduced-motion: reduce) {
     .menu,
-    .menu-item,
-    .menu-menores li {
+    .menu-item {
       transition: none;
     }
-    .menu-item,
-    .menu-menores li {
+    .menu-item {
       translate: none;
+    }
+    /* Sin recorte: el menú aparece entero, que es lo correcto. Lo que la
+       preferencia quita es el gesto, no el menú. */
+    .menu,
+    .menu[data-abierto] {
+      clip-path: none;
     }
   }
 
@@ -245,10 +253,6 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     }
     .menu-enlace {
       gap: 14px;
-    }
-    .menu-menores {
-      margin-top: 26px;
-      padding-top: 20px;
     }
   }
 </style>

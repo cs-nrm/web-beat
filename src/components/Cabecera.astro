@@ -443,6 +443,15 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     `aria-expanded`, que es el atributo que de todas formas hay que mantener
     correcto — así no hay una clase que pueda desincronizarse de la accesibilidad.
   */
+  /*
+    ⚠️ `cursor: pointer` a mano. Tailwind 4 ya NO lo pone en los `<button>` —lo
+    quitó de su preflight en la v4— así que un botón se comporta como texto: el
+    puntero no cambia y el control no se anuncia como pulsable. Vale para las dos
+    hamburguesas y para cualquier botón del chrome que se añada después.
+  */
+  .beat-hamburguesa {
+    cursor: pointer;
+  }
   .hb {
     position: relative;
     display: block;

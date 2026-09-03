@@ -504,3 +504,49 @@ export function prepararEscritura(): void {
     for (const t of textos) if (!t.listo) rematar(t);
   });
 }
+
+
+/**
+ * Descifra un bloque AHORA, sin esperar al observador.
+ *
+ * 🔴 Existe para el menú a pantalla completa, y el observador no le sirve: sus
+ * enlaces están en el DOM desde el principio con geometría normal —el overlay se
+ * oculta con `visibility`, que no cambia la caja— así que el observador los da por
+ * vistos en la primera tanda y los resuelve antes de que nadie abra el menú. Para
+ * cuando se abre, el efecto ya se gastó.
+ *
+ * Y hace falta que se pueda repetir: el menú se abre muchas veces por visita. Por
+ * eso REHACE el bloque en vez de reanudarlo — se remata el anterior (dejando su
+ * texto real, nunca revuelto) y se parte de cero.
+ *
+ * Respeta las mismas guardas que el camino normal: menos movimiento, pestaña
+ * oculta, y las de `partir()` —contenido enriquecido y tamaño mínimo—, que son las
+ * que garantizan el contraste. Si alguna cierra, no pasa nada: el texto ya está
+ * puesto y legible.
+ */
+export function descifrarAhora(el: HTMLElement): void {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (document.visibilityState === 'hidden') return;
+
+  const previo = textos.findIndex((t) => t.el === el);
+  if (previo !== -1) {
+    // Deja el texto real en su sitio antes de soltar la referencia.
+    rematar(textos[previo]);
+    textos.splice(previo, 1);
+  }
+
+  const letras = partir(el);
+  if (!letras.length) return;
+  congelarAnchos(letras);
+
+  const t: Texto = {
+    el,
+    letras,
+    duracion: Math.min(DURACION_BASE + letras.length * DURACION_POR_LETRA, DURACION_TOPE),
+    arranque: null,
+    listo: false,
+    rescate: null,
+  };
+  textos.push(t);
+  arrancar(t);
+}

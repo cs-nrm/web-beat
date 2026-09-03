@@ -11,6 +11,8 @@
  * manejador delegado atiende a las dos sin saber cuál es cuál.
  */
 
+import { descifrarAhora } from './escribir';
+
 const ANIMACION_MS = 320;
 
 let temporizador: ReturnType<typeof setTimeout> | undefined;
@@ -94,6 +96,27 @@ function abrirMenu(desde: HTMLElement | null): void {
     sin haber navegado.
   */
   document.documentElement.style.overflow = 'hidden';
+
+  /*
+    El círculo de apertura nace en el BOTÓN que se pulsó, no en una esquina fija:
+    en escritorio y en móvil la hamburguesa está en sitios distintos, y un gesto
+    que sale de donde no se tocó se lee como un fallo, no como una animación.
+  */
+  if (desde) {
+    const r = desde.getBoundingClientRect();
+    o.style.setProperty('--ox', `${Math.round(r.left + r.width / 2)}px`);
+    o.style.setProperty('--oy', `${Math.round(r.top + r.height / 2)}px`);
+  }
+
+  /*
+    Y los rótulos se descifran, como los titulares del Inicio.
+
+    🔴 Hace falta pedirlo a mano: el observador que dirige ese efecto ya dio por
+    vistos estos enlaces en la carga —el overlay se oculta con `visibility`, que
+    no cambia su geometría— así que para cuando alguien abre el menú el efecto ya
+    se había gastado sin que nadie lo viera.
+  */
+  for (const t of o.querySelectorAll<HTMLElement>('[data-escribir]')) descifrarAhora(t);
 
   // El foco entra al menú, que es lo que un lector de pantalla debe anunciar.
   o.querySelector<HTMLElement>('a')?.focus();

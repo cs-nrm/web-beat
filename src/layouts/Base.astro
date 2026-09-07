@@ -7,7 +7,7 @@
  * design system y las dos reglas de indexación.
  */
 import '@/styles/base.css';
-import { IDIOMA, NOINDEX_SITIO, SITE_URL, noIndexarHost } from '@/config/site';
+import { IDIOMA, LOCALE_OG, NOINDEX_SITIO, SITE_URL, noIndexarHost } from '@/config/site';
 import { ClientRouter } from 'astro:transitions';
 import Cabecera from '@/components/Cabecera.astro';
 import MenuLleno from '@/components/MenuLleno.astro';
@@ -18,13 +18,25 @@ interface Props {
   titulo: string;
   descripcion?: string;
   /**
+   * La imagen con la que se ve esta página al compartirla. Una nota pasa la suya;
+   * el resto no pasa nada y cae a la tarjeta de marca.
+   *
+   * Puede ser absoluta —lo que devuelve `urlMedia`, que ya trae el host del CMS— o
+   * una ruta de `public/`, que se vuelve absoluta aquí.
+   */
+  imagen?: string | null;
+  /** `article` en una nota; `website` en todo lo demás. */
+  tipo?: 'website' | 'article';
+  /** La fecha de publicación en ISO. Solo tiene sentido con `tipo="article"`. */
+  publicado?: string | null;
+  /**
    * `inicio` deja la cabecera completa; `interior` nace con la barra oscura ya
    * recogida. Se calcula solo a partir de la ruta y casi nunca hay que pasarlo.
    */
   vista?: 'inicio' | 'interior';
 }
 
-const { titulo, descripcion } = Astro.props;
+const { titulo, descripcion, imagen = null, tipo = 'website', publicado = null } = Astro.props;
 
 /**
  * 🔴 En los INTERIORES la barra oscura de navegación no se muestra: la página
@@ -83,6 +95,31 @@ const marca = estacion ?? {
 // middleware (protege TODA respuesta); el `<meta>` es la segunda capa.
 const noIndexar = NOINDEX_SITIO || noIndexarHost(Astro.url.hostname);
 const canonical = new URL(Astro.url.pathname, SITE_URL).href;
+
+/**
+ * 🔴 La imagen de compartir, SIEMPRE absoluta y siempre presente.
+ *
+ * Facebook y X descartan una `og:image` relativa sin decir nada: la publicación
+ * sale sin imagen y desde el sitio no se nota. Por eso se resuelve aquí una sola
+ * vez y no en cada página.
+ *
+ * ⚠️ Se resuelve contra `SITE_URL` —el dominio CANÓNICO— y no contra el host que
+ * sirve. Es deliberado y es lo mismo que ya hacen `canonical` y los enlaces de
+ * compartir de la nota: lo que se publica tiene que apuntar al sitio real, no a la
+ * preproducción. Efecto secundario conocido: compartir desde v2 enseña la ficha del
+ * sitio en producción.
+ *
+ * El respaldo lo genera `pnpm favicon` desde el mismo SVG del logo, así que no
+ * puede quedarse en una marca anterior. Ver `scripts/favicon.mjs`.
+ */
+const imagenCompartir = imagen
+  ? new URL(imagen, SITE_URL).href
+  : new URL('/img/og-beat.png', SITE_URL).href;
+
+/** La descripción de respaldo: una página sin bajada no debe compartirse muda. */
+const RESUMEN_CASA =
+  'Beat 100.9, la estación de música electrónica de NRM: qué suena ahora, el Fenómeno Residente, Beat Scanner, Editorial y la agenda.';
+const resumen = descripcion ?? RESUMEN_CASA;
 ---
 
 <!doctype html>
@@ -98,8 +135,41 @@ const canonical = new URL(Astro.url.pathname, SITE_URL).href;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{titulo}</title>
-    {descripcion && <meta name="description" content={descripcion} />}
+    <meta name="description" content={resumen} />
     <link rel="canonical" href={canonical} />
+
+    {/*
+      🔴 Open Graph y Twitter Card. Faltaban ENTERAS (agregadas el 2026-09-07).
+
+      Los tres botones de compartir de la nota funcionaban —Carlos dudaba de ellos y
+      no era eso—, pero lo que llegaba a Facebook o a X era un enlace pelado: sin
+      imagen, sin titular y sin bajada, porque no había nada que leer. Un titular
+      trabajado y una foto de portada no sirven de nada si lo que se publica es una
+      línea de texto gris.
+
+      ⚠️ `og:image` va ABSOLUTA o no cuenta, y el fallo es silencioso. Ver
+      `imagenCompartir`.
+
+      ⚠️ `og:type` es `article` solo en una nota. No es cosmético: con `article`,
+      las plataformas esperan `article:published_time` y presentan la ficha como
+      pieza fechada.
+
+      ⚠️ `twitter:card` es lo único que X necesita de su propio espacio de nombres —
+      el resto lo lee de Open Graph—. Duplicar `twitter:title` y compañía sería
+      mantener dos veces lo mismo para que digan lo mismo.
+    */}
+    <meta property="og:site_name" content="Beat 100.9" />
+    <meta property="og:locale" content={LOCALE_OG} />
+    <meta property="og:type" content={tipo} />
+    <meta property="og:title" content={titulo} />
+    <meta property="og:description" content={resumen} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={imagenCompartir} />
+    {tipo === 'article' && publicado && (
+      <meta property="article:published_time" content={publicado} />
+    )}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@BEATOFICIAL" />
     {/*
       🔴 El juego entero, no solo el `.ico`. Lo genera `pnpm favicon` desde
       `public/img/beat-blanco.svg`, que es el MISMO archivo del que sale el logo

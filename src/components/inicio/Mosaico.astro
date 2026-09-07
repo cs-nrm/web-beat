@@ -2,9 +2,10 @@
 /**
  * El mosaico de portada — `300px | 1fr | 300px` en 13a.
  *
- * La columna del centro es el retrato principal en 4:3.4, con las tres estelas del
- * DS encima; a los lados dos notas por columna en 1:1. En móvil (14a) se convierte
- * en portada a lo ancho + rejilla de 2, que es lo que ya hace `TarjetaNota`.
+ * La columna del centro es el retrato principal en 3:2, con las tres estelas del
+ * DS encima; a los lados dos notas por columna, que se estiran al alto de la
+ * columna. En móvil (14a) se convierte en portada a lo ancho + rejilla de 2, que es
+ * lo que ya hace `TarjetaNota`.
  *
  * 🔴 Igual que en Scanner: el `gap: 2px` con el fondo en `--border-hairline` es la
  * línea que separa las piezas, así que cada pieza necesita fondo OPACO propio.
@@ -140,7 +141,13 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
   }
   .mosaico-foto {
     position: relative;
-    aspect-ratio: 4 / 3.4;
+    /*
+      3:2, como el resto del sitio (ver `TarjetaNota.astro`). Era `4 / 3.4`, más
+      alta que ancha, para que la columna del centro pesara más que las de los
+      lados. Ese peso ahora lo da el ANCHO de la columna, que no cambió: la portada
+      sigue siendo la pieza grande, pero deja de recortar la foto por los costados.
+    */
+    aspect-ratio: 3 / 2;
     background: var(--grad-noche);
     overflow: hidden;
   }
@@ -223,7 +230,7 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
       padding-bottom: 20px;
     }
     .mosaico-foto {
-      aspect-ratio: 4 / 3.2;
+      aspect-ratio: 3 / 2;
     }
     .mosaico-meta {
       padding: 16px 16px 0;
@@ -268,7 +275,6 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
     }
     .mosaico-lado :global(.tarjeta-foto) {
       flex: none;
-      aspect-ratio: 4 / 3;
     }
     .mosaico-lado:last-child {
       grid-column: auto;

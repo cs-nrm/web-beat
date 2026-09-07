@@ -81,7 +81,8 @@ const cuantas = (e: Lista) => e.canciones?.length ?? 0;
   }
   .re-foto {
     position: relative;
-    aspect-ratio: 16 / 10;
+    /* 3:2, como el resto del sitio. Ver `TarjetaNota.astro`. */
+    aspect-ratio: 3 / 2;
     background: var(--grad-noche);
     overflow: hidden;
     /* Pieza de RETÍCULA: sin radio. Ver movimiento.md §6. */

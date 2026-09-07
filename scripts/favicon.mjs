@@ -23,6 +23,8 @@ import sharp from 'sharp';
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const ORIGEN = resolve(raiz, 'public/img/beat-blanco.svg');
 const DESTINO = resolve(raiz, 'public/favicon');
+/** La tarjeta de compartir no es un icono: va donde el resto de las imágenes. */
+const DESTINO_OG = resolve(raiz, 'public/img/og-beat.png');
 
 /** El fondo del icono: el negro del sitio, no negro puro. */
 const FONDO = { r: 5, g: 7, b: 6, alpha: 1 };
@@ -127,6 +129,39 @@ function mascaraSafari() {
   );
 }
 
+/**
+ * 🔴 La tarjeta de RESPALDO para compartir: 1200×630, el wordmark sobre el negro
+ * del sitio.
+ *
+ * Se usa cuando la página que se comparte no tiene foto propia —la portada, una
+ * sección, los legales—. Una nota sí la tiene y usa la suya.
+ *
+ * Se genera aquí y no se sube a mano por lo mismo que los iconos: sale del MISMO
+ * `beat-blanco.svg`, así que no puede quedarse en una marca anterior sin que nadie
+ * lo note. Es exactamente lo que había pasado con el favicon.
+ *
+ * ⚠️ 1200×630 es la medida que piden Facebook y X para la tarjeta grande, y es
+ * 1.91:1 — no cuadrada. Reutilizar el logo de 1024×768 que ya estaba en `public/`
+ * habría hecho que las dos lo recortaran por su cuenta, cada una a su manera.
+ *
+ * ⚠️ Y es PNG, no SVG: ninguna de las dos plataformas acepta SVG en `og:image`.
+ */
+async function tarjetaCompartir() {
+  const svg = readFileSync(ORIGEN, 'utf8');
+  // El wordmark completo, a poco más de un tercio del ancho de la tarjeta.
+  const marca = await sharp(Buffer.from(svg), { density: 600 })
+    .resize({ width: 460 })
+    .png()
+    .toBuffer();
+
+  return sharp({
+    create: { width: 1200, height: 630, channels: 4, background: FONDO },
+  })
+    .composite([{ input: marca, gravity: 'centre' }])
+    .png()
+    .toBuffer();
+}
+
 const MEDIDAS = [
   ['favicon-16x16.png', 16],
   ['favicon-32x32.png', 32],
@@ -189,7 +224,11 @@ async function main() {
       `    </tile>\n  </msapplication>\n</browserconfig>\n`,
   );
   console.log('  safari-pinned-tab.svg · site.webmanifest · browserconfig.xml');
-  console.log('\n✓ iconos regenerados desde public/img/beat-blanco.svg');
+
+  writeFileSync(DESTINO_OG, await tarjetaCompartir());
+  console.log(`  ${'img/og-beat.png'.padEnd(30)} 1200×630  (respaldo para compartir)`);
+
+  console.log('\n✓ iconos y tarjeta de compartir regenerados desde public/img/beat-blanco.svg');
 }
 
 main().catch((e) => {

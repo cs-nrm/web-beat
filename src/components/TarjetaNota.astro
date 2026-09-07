@@ -154,10 +154,20 @@ const foto = urlMedia(nota.imagen, variante === 'fila' ? 'card' : 'card');
     white-space: nowrap;
   }
 
-  /* ── rejilla (14b: 3 col · 14e: 2 col) ── */
-  .es-rejilla .tarjeta-foto {
-    aspect-ratio: 16 / 10;
+  /*
+    🔴 3:2 en TODAS las fotos del sitio (Carlos, 2026-09-07).
+
+    Es la proporción nativa de casi cualquier cámara, así que una foto capturada tal
+    cual entra ENTERA en su caja: `object-fit: cover` no tiene nada que recortar.
+    Antes cada superficie tenía la suya —16/10 aquí, 16/7 en la nota, 4/3 en móvil—
+    y eso significaba que la misma foto se recortaba distinto en cada sitio donde
+    aparecía: en la tarjeta salía una cara y en la nota salía media.
+  */
+  .tarjeta-foto {
+    aspect-ratio: 3 / 2;
   }
+
+  /* ── rejilla (14b: 3 col · 14e: 2 col) ── */
   .es-rejilla .tarjeta-meta {
     justify-content: space-between;
     gap: 12px;
@@ -188,9 +198,6 @@ const foto = urlMedia(nota.imagen, variante === 'fila' ? 'card' : 'card');
   .es-fila:hover {
     background: var(--surface-card-hover);
   }
-  .es-fila .tarjeta-foto {
-    aspect-ratio: 16 / 10;
-  }
   .es-fila .tarjeta-cuerpo {
     min-width: 0;
   }
@@ -219,9 +226,6 @@ const foto = urlMedia(nota.imagen, variante === 'fila' ? 'card' : 'card');
   }
 
   /* ── relacionada (14c, pie de la nota) ── */
-  .es-relacionada .tarjeta-foto {
-    aspect-ratio: 16 / 10;
-  }
   .es-relacionada .tarjeta-meta {
     gap: 10px;
     padding: 14px 0 0;
@@ -249,9 +253,6 @@ const foto = urlMedia(nota.imagen, variante === 'fila' ? 'card' : 'card');
   }
 
   @media (max-width: 899px) {
-    .es-rejilla .tarjeta-foto {
-      aspect-ratio: 4 / 3;
-    }
     .es-rejilla .tarjeta-meta {
       justify-content: flex-start;
       gap: 8px;

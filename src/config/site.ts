@@ -224,6 +224,18 @@ export const SEGMENTOS_RESERVADOS = [
   */
   'scanner',
   'etiqueta',
+  /*
+    Documentos: legales y la guía de la skill. Son páginas estáticas de
+    `src/pages/`, y van reservadas como el resto — si no, las resolvería
+    `[tipoLista]` y cada visita dispararía una consulta al CMS.
+
+    ⚠️ El día que estos textos se muevan a la colección `paginas` del CMS (A1),
+    estos tres segmentos son los que hay que SACAR de aquí: pasarían a resolverse
+    como slug de contenido, que es justo lo que esta lista bloquea.
+  */
+  'aviso-de-privacidad',
+  'terminos-y-condiciones',
+  'alexa',
   'programacion',
   'comunidad',
   'marcas',

@@ -128,9 +128,17 @@ export const SECCIONES_OCULTAS: EntradaNav[] = [
 /**
  * Las tres del mapa de sitio que todavía no se construyen.
  *
- * Viven en el PIE, apagadas. Están aquí y no borradas porque el mapa de sitio las
- * declara y Comunidad es el objetivo estratégico #1: borrarlas de la config sería
- * perder la única lista escrita de lo que falta.
+ * 🔴 YA NO SE PINTAN EN NINGÚN SITIO (Carlos, 2026-09-07): «en el footer hay links
+ * desactivados en el nav del footer, quitémoslos, ese nav debe ser acorde al main
+ * nav». Vivían en el pie en gris, y la idea era que quien buscara «Comunidad»
+ * viera que existe y que aún no está. En la práctica el pie enseñaba tres palabras
+ * que no llevan a ninguna parte, y el mapa completo que justificaba eso ya no
+ * coincidía con la navegación real del sitio.
+ *
+ * ⚠️ La constante NO se borra, y es a propósito: el mapa de sitio las declara y
+ * Comunidad es el objetivo estratégico #1, así que esta es la única lista escrita
+ * de lo que falta. Se queda exportada, sin nadie que la pinte, hasta que alguna se
+ * construya — y entonces pasa a `SECCIONES` como una entrada normal.
  */
 export const SECCIONES_FUTURAS: EntradaNav[] = [
   { corto: 'Comunidad', largo: 'Comunidad', href: '/comunidad', pendiente: true },
@@ -149,10 +157,27 @@ export const SECCIONES_PIE: EntradaNav[] = [
   { corto: 'Programación', largo: 'Programación', href: '/programacion' },
 ];
 
-/** Donde también se puede escuchar la señal. Agregadores de terceros. */
+/**
+ * Donde también se puede escuchar la señal. Agregadores de terceros.
+ *
+ * 🔴 Son las fichas de LA ESTACIÓN, no las portadas de cada plataforma
+ * (2026-09-07). Antes apuntaban a `iheart.com` y `tunein.com` a secas, y por eso
+ * «no iban»: llevaban al buscador de un servicio, donde el oyente tiene que volver
+ * a encontrar Beat por su cuenta. Un enlace que te deja a medio camino es peor que
+ * no tenerlo, porque parece que funciona.
+ *
+ * Verificadas las dos antes de escribirlas (200):
+ *   · iHeart sale del pie del v1, que ya tenía la ficha real con su id (`11329`).
+ *   · TuneIn se buscó en su API: la estación existe como «BEAT 100.9 · Total
+ *     Music», `guideId: s87618`. El v1 no la enlazaba.
+ *
+ * ⚠️ El id numérico es parte de la URL en las dos, y no se puede adivinar: si
+ * alguna deja de responder, se vuelve a buscar la ficha — no se recorta la URL a la
+ * portada, que es de donde venimos.
+ */
 export const PLATAFORMAS_RADIO = [
-  { nombre: 'iHeartRadio', url: 'https://www.iheart.com/' },
-  { nombre: 'TuneIn', url: 'https://tunein.com/' },
+  { nombre: 'iHeartRadio', url: 'https://www.iheart.com/live/beat-1009-11329/' },
+  { nombre: 'TuneIn', url: 'https://tunein.com/radio/BEAT-1009-s87618/' },
 ] as const;
 
 /**
@@ -170,49 +195,46 @@ export const PLATAFORMAS_RADIO = [
  * no de la nada: son las fichas REALES en tiendas, con el id de la app publicada.
  * Inventarlas habría mandado gente a una ficha que no existe.
  *
- * ⚠️ `Alexa` apuntaba a `/alexa`, una página del v1 que en v2 no existe todavía.
- * Se deja en `null` —el pie la pinta apagada— en vez de enlazar a un 404: mejor
- * decir «esto aún no» que romper la promesa del enlace. Ver C1/D3 del plan: la
- * skill de Alexa es de las cosas que hay que inventariar antes del corte.
+ * ⚠️ `Alexa` estuvo en `null` —apagada en el pie— porque apuntaba a `/alexa`, una
+ * página del v1 que en v2 no existía. Ya existe (2026-09-07), con las mismas
+ * instrucciones de la skill que el v1, así que vuelve a ser un enlace.
+ *
+ * 🔴 Y con eso el pie se queda SIN un solo enlace apagado, que era el punto de
+ * Carlos: «en el footer hay links desactivados, quitémoslos».
  */
 export const APPS: Array<{ tienda: string; url: string | null }> = [
   { tienda: 'App Store', url: 'https://apps.apple.com/mx/app/beat-100-9/id444090239' },
   { tienda: 'Google Play', url: 'https://play.google.com/store/apps/details?id=com.sferea.beat' },
-  { tienda: 'Alexa', url: null },
+  { tienda: 'Alexa', url: '/alexa' },
 ];
 
 /**
  * Legales y corporativos.
  *
- * 🔴 Los tres apuntan al CORPORATIVO, y los dos primeros dejaron de estar
- * apagados (decisión de Carlos, 2026-09-07).
+ * 🔴 Los dos primeros son PÁGINAS DE ESTE SITIO desde el 2026-09-07, y es decisión
+ * de Carlos: «tenemos que hacer páginas aquí, no redirigir a NRM».
  *
- * Estaban reservados como `paginas` del CMS (A1) esperando que alguien capturara
- * el texto, y el pie los pintaba en gris. Pero un aviso de privacidad apagado es
- * peor que uno de más: es el único enlace del sitio que la ley da por supuesto, y
- * en gris se lee como «este sitio no tiene». `paginas` sigue con CERO documentos
- * —comprobado—, así que la espera no tenía fecha.
+ * Y tiene razón sobre lo que había: apuntaban a `nrm.com.mx`, que es la razón
+ * social del grupo, cuando el aviso que gobierna este sitio es el de **TELEVIDEO,
+ * S.A. DE C.V.** —«BEAT 100.9»—, con su propio domicilio y su propio correo de
+ * datos personales (`privacidad@nrm.com.mx`). Mandar al del corporativo era mandar
+ * al aviso de otra persona moral.
  *
- * Y no hacía falta: el texto que gobierna este sitio es el de NRM, no uno de la
- * estación, y ya está publicado. Verificado antes de escribirlo (200 los dos):
- *   · https://nrm.com.mx/aviso-de-privacidad/
- *   · https://nrm.com.mx/terminos-y-condiciones/
+ * El texto sale del sitio actual (`beatdigital.mx/avisodeprivacidad/` y
+ * `/terminosycondiciones/`), no se reescribe: es texto legal vigente y no es
+ * nuestro para redactarlo. Ver `src/pages/aviso-de-privacidad.astro`.
  *
- * ⚠️ NO se enlaza a `beatdigital.mx/avisodeprivacidad/`, que es donde vive hoy:
- * esa página es del WordPress v1 y muere el día del corte, así que el pie del sitio
- * nuevo apuntaría a un 404 de su propio dominio.
+ * ⚠️ Y por eso mismo NO se enlaza a esas URLs del v1: mueren el día del corte. Lo
+ * que se conserva es el contenido, en una ruta nuestra.
  *
- * El día que la estación quiera su propio aviso, se captura en `paginas` y estos
- * dos `href` vuelven a ser rutas internas. Mientras, el enlace lleva a un texto
- * que existe.
- *
- * ⚠️ `Ventas` es del CORPORATIVO, no de la estación: sale del pie del v1 y del de
- * los repos hermanos, y apunta al contacto de NRM. Es el enlace por el que entra el
- * dinero, así que es el que menos conviene perder en un relanzamiento.
+ * ⚠️ `Ventas` sí es del CORPORATIVO y se queda apuntando allá: sale del pie del v1
+ * y del de los repos hermanos, y es el contacto comercial de NRM, no de la
+ * estación. Es el enlace por el que entra el dinero, así que es el que menos
+ * conviene perder en un relanzamiento.
  */
 export const LEGALES: EntradaNav[] = [
-  { corto: 'Aviso de privacidad', largo: 'Aviso de privacidad', href: 'https://nrm.com.mx/aviso-de-privacidad/' },
-  { corto: 'Términos y condiciones', largo: 'Términos y condiciones', href: 'https://nrm.com.mx/terminos-y-condiciones/' },
+  { corto: 'Aviso de privacidad', largo: 'Aviso de privacidad', href: '/aviso-de-privacidad' },
+  { corto: 'Términos y condiciones', largo: 'Términos y condiciones', href: '/terminos-y-condiciones' },
   { corto: 'Ventas', largo: 'Ventas', href: 'https://nrm.com.mx/contacto/' },
 ];
 

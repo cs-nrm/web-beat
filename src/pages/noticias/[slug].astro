@@ -75,7 +75,18 @@ const etiquetas = (nota.etiquetas ?? []).filter(
 );
 ---
 
-<Base titulo={`${nota.titulo} — Beat 100.9`} descripcion={nota.resumen ?? undefined}>
+{/*
+  La nota es lo ÚNICO que se comparte de verdad, así que es la que pasa su propia
+  ficha: su foto, su fecha y `article`. `hero` ya viene absoluta —`urlMedia` le
+  pone el host público del CMS—, que es lo que Facebook exige.
+*/}
+<Base
+  titulo={`${nota.titulo} — Beat 100.9`}
+  descripcion={nota.resumen ?? undefined}
+  imagen={hero}
+  tipo="article"
+  publicado={publicadaIso}
+>
   <article class="nt">
     {/* ── Migaja: sección · tipo ── */}
     <div class="nt-cabeza">
@@ -401,7 +412,13 @@ const etiquetas = (nota.etiquetas ?? []).filter(
   }
   .nt-hero {
     position: relative;
-    aspect-ratio: 16 / 7;
+    /*
+      🔴 3:2, y era `16 / 7` (Carlos, 2026-09-07). Una caja de 2.29 sobre una foto
+      de 1.5 se come un tercio del alto: en los retratos de artista que publica la
+      estación, eso es cortar la cabeza o los pies. 3:2 es lo que sale de la cámara,
+      así que la foto entra entera y `cover` no recorta nada.
+    */
+    aspect-ratio: 3 / 2;
     background: var(--grad-noche);
     overflow: hidden;
     /* Flota sobre el fondo, así que lleva radio de media. Ver movimiento.md §6. */
@@ -580,9 +597,6 @@ const etiquetas = (nota.etiquetas ?? []).filter(
 
     .nt-hero-caja {
       margin: 20px 0 0;
-    }
-    .nt-hero {
-      aspect-ratio: 4 / 3;
     }
     .nt-pie {
       padding: 8px 16px 0;

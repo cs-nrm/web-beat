@@ -118,15 +118,14 @@ const enLaPila = notas.slice(0, 4).map((n) => ({
         <div class="pila-remanso" aria-hidden="true" />
       </div>
 
-      <div class="pila-pie">
-        {/*
-          Sí, es el SEGUNDO enlace al mismo sitio: arriba está el remate «TODAS LAS
-          NOTAS». Se quedan los dos por decisión de Carlos (2026-09-07) — la pila se
-          recorre entera, y quien llega al final no tiene por qué volver a subir
-          para encontrar la salida.
-        */}
-        <a href={seccion.href} class="beat-label pila-mas">VER {seccion.rotulo}</a>
-      </div>
+      {/*
+        🔴 Aquí estaba un segundo enlace a la sección —«VER EDITORIAL»— y se retira
+        (Carlos, 2026-09-07). Arriba, junto al titular, ya está el remate «TODAS LAS
+        NOTAS» apuntando al mismo sitio; dos salidas idénticas en un bloque de
+        cuatro tarjetas no dan más opciones, solo hacen dudar de si llevan a lo
+        mismo. Y es el patrón del resto del Inicio: cada sección lleva SU remate
+        arriba y ninguna repite abajo.
+      */}
     </section>
   )
 }
@@ -249,7 +248,8 @@ const enLaPila = notas.slice(0, 4).map((n) => ({
 
   .pila-carta-foto {
     position: relative;
-    aspect-ratio: 16 / 10;
+    /* 3:2, como el resto del sitio. Ver `TarjetaNota.astro`. */
+    aspect-ratio: 3 / 2;
     background: var(--grad-noche);
     border-radius: var(--r-media);
     overflow: hidden;
@@ -328,24 +328,6 @@ const enLaPila = notas.slice(0, 4).map((n) => ({
     color: var(--mist-0);
   }
 
-
-  .pila-pie {
-    display: flex;
-    justify-content: center;
-    padding: 34px 0 0;
-  }
-  .pila-mas {
-    padding: 13px 20px;
-    border-radius: 999px;
-    box-shadow: inset 0 0 0 1px var(--border-strong);
-    color: var(--mist-2);
-    font-size: 9px;
-    white-space: nowrap;
-  }
-  .pila-mas:hover {
-    background: var(--mist-0);
-    color: var(--noche-0);
-  }
 
   @media (max-width: 899px) {
     .pila {

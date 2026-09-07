@@ -7,7 +7,6 @@
  */
 import {
   SECCIONES,
-  SECCIONES_FUTURAS,
   SECCIONES_PIE,
   PLATAFORMAS_RADIO,
   APPS,
@@ -25,12 +24,16 @@ interface Props {
 const { estacion, redes } = Astro.props;
 const anio = new Date().getFullYear();
 /*
-  El pie es el MAPA COMPLETO, y la nav de arriba solo las cinco vivas.
-  Las tres futuras (Comunidad, Tienda, Marcas) se pintan apagadas aquí: quien
-  busca «Comunidad» merece ver que existe y que aún no está, en vez de no
-  encontrarla en ningún sitio.
+  🔴 El nav del pie es EL MISMO que el del sitio (Carlos, 2026-09-07). Exactamente
+  lo que pinta el menú a pantalla completa: las secciones vivas más Programación.
+
+  Antes era el «mapa completo» y añadía Comunidad, Tienda y Marcas en gris. La idea
+  era que quien las buscara viera que existen y que aún no están; el resultado eran
+  tres palabras que no llevan a ninguna parte en el sitio donde el lector va
+  precisamente a buscar a dónde ir. Y hacía que el pie y el menú dijeran cosas
+  distintas, que es justo lo que este archivo existe para evitar.
 */
-const todasLasSecciones = [...SECCIONES, ...SECCIONES_FUTURAS, ...SECCIONES_PIE];
+const todasLasSecciones = [...SECCIONES, ...SECCIONES_PIE];
 ---
 
 <footer class="mt-13 border-t-hairline border-borde-hairline bg-surface-base">

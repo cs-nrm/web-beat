@@ -1,0 +1,99 @@
+---
+/**
+ * El cascarón de una página de TEXTO: legales, instrucciones, cualquier cosa que
+ * sea un documento y no una sección editorial.
+ *
+ * 🔴 Existe por la misma razón que `CabezaSeccion`: para que no vuelva a haber una
+ * maqueta por página. Las tres que lo usan —aviso de privacidad, términos y
+ * Alexa— son documentos con la misma forma: un titular, una columna de lectura y
+ * nada más. Sin esto, la tercera se habría escrito a ojo y con otra medida.
+ *
+ * ⚠️ Reusa `CabezaSeccion` con `activa={null}`: no encienden ninguna pastilla
+ * —no son secciones— pero SÍ llevan la tira. Es la única navegación visible de un
+ * interior, y una página legal es justamente donde un lector entra por un enlace
+ * suelto y necesita una salida hacia el sitio.
+ *
+ * ⚠️ La medida del cuerpo es la MISMA que la de una nota: `min(100%, 680px)` y
+ * 17/1.72. Un aviso de privacidad no es más fácil de leer que un reportaje.
+ */
+import CabezaSeccion from '@/components/CabezaSeccion.astro';
+
+interface Props {
+  /** El titular grande. Va en mayúsculas tal cual llega. */
+  titulo: string;
+  /** Una línea de contexto bajo el titular. Opcional y corta. */
+  entrada?: string | null;
+}
+
+const { titulo, entrada = null } = Astro.props;
+---
+
+<div class="pt">
+  <CabezaSeccion titulo={titulo} activa={null} />
+
+  <div class="pt-cuerpo">
+    {entrada && <p class="pt-entrada">{entrada}</p>}
+    <slot />
+  </div>
+</div>
+
+<style>
+  .pt {
+    max-width: var(--grid-max);
+    margin: 0 auto;
+  }
+  .pt-cuerpo {
+    /*
+      `width` explícito y no solo `max-width`, por lo mismo que documenta la nota:
+      con márgenes automáticos, una caja se encoge a su contenido y la medida de la
+      columna acaba dependiendo del largo del texto.
+    */
+    width: min(100%, 680px);
+    margin: 0 auto;
+    padding: 34px 24px 56px;
+  }
+  .pt-entrada {
+    font: 500 20px / 1.62 var(--font-text);
+    color: var(--mist-2);
+    margin: 0;
+    text-wrap: pretty;
+  }
+  /* El cuerpo del documento. `:global` porque el texto lo pone quien nos usa: son
+     sus nodos, no los de este archivo, así que el ámbito de Astro no los alcanza. */
+  .pt-cuerpo :global(p) {
+    font: 400 17px / 1.72 var(--font-text);
+    color: var(--text-body);
+    margin: 22px 0 0;
+    text-wrap: pretty;
+  }
+  .pt-cuerpo :global(h2) {
+    font: 700 21px / 1.2 var(--font-text);
+    letter-spacing: -0.014em;
+    color: var(--mist-1);
+    margin: 38px 0 0;
+    text-wrap: balance;
+  }
+  .pt-cuerpo :global(a) {
+    color: var(--text-link);
+    text-decoration: underline;
+    text-decoration-color: var(--border-quiet);
+    text-underline-offset: 4px;
+    transition: color var(--dur-2) var(--ease-out);
+  }
+  .pt-cuerpo :global(a:hover) {
+    color: var(--text-link-hover);
+  }
+
+  @media (max-width: 899px) {
+    .pt-cuerpo {
+      padding: 24px 16px 40px;
+    }
+    .pt-entrada {
+      font: 500 17px / 1.6 var(--font-text);
+    }
+    .pt-cuerpo :global(p) {
+      font-size: 16px;
+      margin-top: 18px;
+    }
+  }
+</style>

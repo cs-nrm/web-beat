@@ -160,24 +160,33 @@ export const SECCIONES_PIE: EntradaNav[] = [
 /**
  * Donde también se puede escuchar la señal. Agregadores de terceros.
  *
- * 🔴 Son las fichas de LA ESTACIÓN, no las portadas de cada plataforma
- * (2026-09-07). Antes apuntaban a `iheart.com` y `tunein.com` a secas, y por eso
- * «no iban»: llevaban al buscador de un servicio, donde el oyente tiene que volver
- * a encontrar Beat por su cuenta. Un enlace que te deja a medio camino es peor que
- * no tenerlo, porque parece que funciona.
+ * 🔴 Es la ficha de LA ESTACIÓN, no la portada de la plataforma (2026-09-07).
+ * Antes apuntaba a `iheart.com` a secas, y por eso «no iba»: llevaba al buscador de
+ * un servicio, donde el oyente tiene que volver a encontrar Beat por su cuenta. Un
+ * enlace que te deja a medio camino es peor que no tenerlo, porque parece que
+ * funciona.
  *
- * Verificadas las dos antes de escribirlas (200):
- *   · iHeart sale del pie del v1, que ya tenía la ficha real con su id (`11329`).
- *   · TuneIn se buscó en su API: la estación existe como «BEAT 100.9 · Total
- *     Music», `guideId: s87618`. El v1 no la enlazaba.
+ * La URL sale del pie del v1, que ya traía la ficha real con su id (`11329`), y
+ * responde 200 sin redirecciones. ⚠️ Ese id es parte de la URL y no se puede
+ * adivinar: si algún día deja de responder, se vuelve a buscar la ficha — NO se
+ * recorta la URL a la portada, que es de donde venimos.
  *
- * ⚠️ El id numérico es parte de la URL en las dos, y no se puede adivinar: si
- * alguna deja de responder, se vuelve a buscar la ficha — no se recorta la URL a la
- * portada, que es de donde venimos.
+ * 🔴 **TuneIn NO va aquí, y es decisión comercial, no técnica** (Carlos,
+ * 2026-09-07): es competencia, no un aliado de distribución.
+ *
+ * ⚠️ Se anota porque el dato existe y la tentación de «arreglarlo» va a volver: la
+ * estación SÍ está en TuneIn —«BEAT 100.9 · Total Music», `guideId: s87618`— y su
+ * ficha responde 200. O sea que quien vaya a buscar por qué falta va a encontrar
+ * que funciona perfectamente, y ese es justo el motivo de que esto esté escrito.
+ * De hecho estuvo enlazada unas horas, hasta que Carlos lo vio.
+ *
+ * ⚠️ Con una sola entrada, la columna «Escucha en» del pie sigue teniendo sentido:
+ * el bloque recorre la lista, así que ni sobra ni hay que tocar el marcado. Y si
+ * algún día no queda ninguna, el `<ul>` se pinta vacío — es el único caso que
+ * habría que mirar antes de borrar la última.
  */
 export const PLATAFORMAS_RADIO = [
   { nombre: 'iHeartRadio', url: 'https://www.iheart.com/live/beat-1009-11329/' },
-  { nombre: 'TuneIn', url: 'https://tunein.com/radio/BEAT-1009-s87618/' },
 ] as const;
 
 /**

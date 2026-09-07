@@ -16,7 +16,6 @@ import Fenomeno from '@/components/inicio/Fenomeno.astro';
 import ArchivoTemas from '@/components/inicio/ArchivoTemas.astro';
 import Anuncio from '@/components/Anuncio.astro';
 import { obtenerEspecial, obtenerEspeciales } from '@/lib/cms/especiales';
-import { fechaCorta } from '@/lib/nota';
 import { SERIE_FENOMENO } from '@/config/site';
 
 const { slug } = Astro.params;
@@ -50,17 +49,10 @@ const vecinos = await obtenerEspeciales(serieSlug ?? SERIE_FENOMENO, 8);
 const otros = vecinos.filter((t) => t.id !== especial.id);
 
 /*
-  El rótulo, con el dato que haya: el número del tema y su rango de fechas. Si el
-  especial no trae ninguno de los dos no se pinta nada — antes que inventar un
-  «TEMA 01» que no está capturado.
+  ⚠️ Aquí se armaba el rótulo del encabezado —«TEMA 03 · 1 SEP 2026 — 7 SEP 2026»—
+  y se retiró con el rótulo (2026-09-07). El número y el rango del tema siguen
+  visibles donde importan: los pinta `Fenomeno.astro` en el bloque del tema.
 */
-const partes = [
-  especial.numero != null ? `TEMA ${String(especial.numero).padStart(2, '0')}` : null,
-  especial.inicio && especial.fin
-    ? `${fechaCorta(especial.inicio)} — ${fechaCorta(especial.fin)}`
-    : fechaCorta(especial.inicio),
-].filter(Boolean);
-const rotulo = partes.length ? partes.join(' · ') : null;
 ---
 
 <Base
@@ -68,11 +60,7 @@ const rotulo = partes.length ? partes.join(' · ') : null;
   descripcion={especial.descripcion ?? especial.etiquetaPublica ?? undefined}
 >
   <div class="es-pagina">
-    <CabezaSeccion
-      titulo={especial.titulo}
-      activa="/fenomeno-residente"
-      rotulo={rotulo}
-    />
+    <CabezaSeccion titulo={especial.titulo} activa="/fenomeno-residente" />
 
     <Fenomeno especial={especial} contexto="tema" />
 

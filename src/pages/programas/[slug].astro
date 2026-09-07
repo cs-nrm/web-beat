@@ -64,7 +64,6 @@ const contactos = (
   ] as Array<[string, string | null | undefined, string]>
 ).filter((c): c is [string, string, string] => Boolean(c[1]));
 
-const rotulo = horarios.length ? horarios[0].dias + ' · ' + horarios[0].rango : null;
 ---
 
 <Base
@@ -72,7 +71,7 @@ const rotulo = horarios.length ? horarios[0].dias + ' · ' + horarios[0].rango :
   descripcion={programa.descripcionCorta ?? programa.descripcion ?? undefined}
 >
   <article class="pg">
-    <CabezaSeccion titulo={programa.nombre} activa="/programacion" rotulo={rotulo} />
+    <CabezaSeccion titulo={programa.nombre} activa="/programacion" />
 
     <div class="pg-columnas">
       <div class="pg-principal">

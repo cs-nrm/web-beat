@@ -62,13 +62,18 @@ export const SECCIONES_EDITORIALES = {
 } as const satisfies Record<string, SeccionEditorial>;
 
 /**
- * La navegación de arriba: SEIS secciones, en este orden.
+ * La navegación de arriba: CINCO secciones, en este orden.
  *
- * 🔴 Eran cinco (decisión de Carlos, 2026-09-01) y son seis desde el 2026-09-07,
- * cuando Beat Scanner y Editorial se separaron en dos secciones con interior
- * propio: `EN VIVO · FENÓMENO RESIDENTE · BONUS BEAT · BEAT SCANNER · EDITORIAL ·
- * AGENDA`. Las dos tienen entrada porque las dos tienen página — anunciar una y
- * esconder la otra dejaría la sección «elaborada» como la menos visible del sitio.
+ * `FENÓMENO RESIDENTE · BONUS BEAT · BEAT SCANNER · EDITORIAL · AGENDA`.
+ *
+ * 🔴 Beat Scanner y Editorial son DOS entradas desde el 2026-09-07, cuando se
+ * separaron en secciones con interior propio. Las dos tienen entrada porque las dos
+ * tienen página — anunciar una y esconder la otra dejaría la sección «elaborada»
+ * como la menos visible del sitio.
+ *
+ * 🔴 Y «En vivo» ya no está: se oculta hasta que su página esté bien (Carlos, el
+ * mismo día). Vive en `SECCIONES_OCULTAS`, justo debajo, con lo que hay que hacer
+ * para devolverla.
  *
  * Las tres que faltan del mapa de sitio —Comunidad, Tienda y Marcas— no
  * desaparecen: bajan a `SECCIONES_FUTURAS`, que el PIE sí pinta. Un menú de ocho
@@ -76,25 +81,48 @@ export const SECCIONES_EDITORIALES = {
  * ninguna parte; el pie es donde un mapa completo sí tiene sentido.
  *
  * ⚠️ El rótulo es el nombre COMPLETO —«Fenómeno Residente», no «Fenómeno»—
- * porque con seis entradas todavía cabe, y porque abreviar el nombre de la sección
- * estrella para ahorrar 60px era una economía sin destinatario.
+ * porque cabe, y porque abreviar el nombre de la sección estrella para ahorrar
+ * 60px era una economía sin destinatario.
  *
- * ⚠️ La tira de `NavSecciones` pinta estas seis y se ENVUELVE: a 375px salen en
- * dos filas de 64px de alto en total, sin desbordar (medido). No se convierte en
- * carrusel — una sección que hay que descubrir arrastrando es una sección que no
- * existe.
+ * ⚠️ La tira de `NavSecciones` las pinta todas y se ENVUELVE: a 375px salen en dos
+ * filas, sin desbordar (medido). No se convierte en carrusel — una sección que hay
+ * que descubrir arrastrando es una sección que no existe.
  *
  * ⚠️ Los `href` editoriales salen de `SECCIONES_EDITORIALES`, no escritos a mano:
  * son los mismos que usan las dos páginas y la migaja de cada nota, y tenerlos en
  * dos sitios es cómo el menú y el pie dejan de coincidir.
  */
 export const SECCIONES: EntradaNav[] = [
-  { corto: 'En vivo', largo: 'Escuchar en vivo', href: '/en-vivo' },
   { corto: 'Fenómeno Residente', largo: 'El Fenómeno Residente', href: '/fenomeno-residente' },
   { corto: 'Bonus Beat', largo: 'Bonus Beat', href: '/bonus-beat' },
   { corto: 'Beat Scanner', largo: 'Beat Scanner', href: SECCIONES_EDITORIALES.scanner.href },
   { corto: 'Editorial', largo: 'Editorial', href: SECCIONES_EDITORIALES.editorial.href },
   { corto: 'Agenda', largo: 'Agenda', href: '/eventos' },
+];
+
+/**
+ * 🔴 «En vivo» está OCULTA a propósito (Carlos, 2026-09-07): «hasta que hagamos
+ * bien la página».
+ *
+ * No está en `SECCIONES`, así que no aparece en la nav de la cabecera, ni en el
+ * menú a pantalla completa, ni en la tira de los interiores, ni en la lista de
+ * secciones del pie. **Para restituirla, se mueve esta entrada de vuelta a
+ * `SECCIONES`, en el primer puesto** — y no hay que tocar nada más.
+ *
+ * ⚠️ Y NO va en `SECCIONES_FUTURAS`, que es otra cosa: esas se pintan APAGADAS
+ * porque no existen. Esta existe y funciona; lo que no está es a la altura del
+ * resto, y anunciar en el menú algo que no sostiene la comparación es peor que no
+ * anunciarlo. Apagada tampoco sirve: diría que la radio en vivo no está
+ * disponible, que es exactamente lo contrario de lo que este sitio afirma.
+ *
+ * ⚠️ La RUTA sigue viva y responde 200: `/en-vivo` está en `SEGMENTOS_RESERVADOS`,
+ * la página existe y **el pie la sigue enlazando en su párrafo de «Radio en vivo»**
+ * («Escucha nuestra señal aquí»). Eso se queda a propósito: lo que se oculta es la
+ * sección del menú, no el acceso a la señal — y el player de la cabecera, que es
+ * como escucha de verdad la gente, no se toca.
+ */
+export const SECCIONES_OCULTAS: EntradaNav[] = [
+  { corto: 'En vivo', largo: 'Escuchar en vivo', href: '/en-vivo' },
 ];
 
 /**

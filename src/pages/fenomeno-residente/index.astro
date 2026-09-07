@@ -32,13 +32,6 @@ const [vigente, todos] = await Promise.all([
   obtenerEspeciales(SERIE_FENOMENO, 24),
 ]);
 
-/*
-  El rótulo es un DATO —cuántos temas hay—, no una descripción de la sección. Ver
-  `CabezaSeccion.astro`: las bajadas de relleno se retiraron.
-*/
-const cuantos = todos.length;
-const rotulo = cuantos > 0 ? `${cuantos} TEMA${cuantos === 1 ? '' : 'S'}` : null;
-
 /* El archivo excluye el vigente solo si el vigente se está pintando arriba. */
 const anteriores = vigente ? todos.filter((t) => t.id !== vigente.id) : todos;
 ---
@@ -48,11 +41,20 @@ const anteriores = vigente ? todos.filter((t) => t.id !== vigente.id) : todos;
   descripcion="El tema de la semana, sus cápsulas, el especial del sábado y la playlist. Y el archivo completo de los temas anteriores."
 >
   <div class="fr-pagina">
-    <CabezaSeccion
-      titulo="EL FENÓMENO RESIDENTE"
-      activa="/fenomeno-residente"
-      rotulo={rotulo}
-    />
+{/*
+      🔴 Sin rótulo encima del titular (Carlos, 2026-09-07).
+
+      Eran datos ciertos —«1 TEMA», «2 EDICIONES», «ACTUALIZADO 7 SEP»— y ahí está
+      el problema: contaban el inventario de la página que ya tienes delante. El
+      lector no entra a una sección a saber cuántas cosas hay, y una cifra encima
+      del titular se lee como una etiqueta de estado, no como información. En las
+      páginas de detalle era peor: repetían lo que el propio cuerpo ya dice mejor
+      —el «CUÁNDO» del evento, los horarios del programa, la fecha de la edición—.
+
+      Es el mismo criterio con el que ya se habían retirado las BAJADAS de sección:
+      ver `CabezaSeccion.astro`.
+    */}
+    <CabezaSeccion titulo="EL FENÓMENO RESIDENTE" activa="/fenomeno-residente" />
 
     <Fenomeno especial={vigente} contexto="seccion" />
 

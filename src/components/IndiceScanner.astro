@@ -66,18 +66,14 @@ const enRejilla = rejilla.slice(0, 6);
 const enLista = rejilla.slice(6, 10);
 
 /**
- * La fecha de la destacada, que hace DOS trabajos con un solo dato.
+ * La fecha de la nota principal — el sello que sustituyó a sus minutos de lectura
+ * (ver `TarjetaNota.astro`).
  *
- * El diseño rotula «ACTUALIZADO <fecha>» arriba, y sale de la nota más reciente
- * porque es el dato honesto: es cuándo se actualizó la sección de verdad. Y desde
- * 2026-09-07 es también el sello de la nota principal, que antes decía los minutos
- * de lectura (ver `TarjetaNota.astro`).
- *
- * Es la misma fecha en los dos sitios porque es la misma nota — no dos consultas
- * que se puedan desfasar.
+ * ⚠️ Con este dato se rotulaba también «ACTUALIZADO <fecha>» encima del titular,
+ * y ese rótulo se retiró el 2026-09-07: contaba el estado de la página que el
+ * lector ya tiene delante. Ver `CabezaSeccion.astro`.
  */
 const fechaDestacada = fechaCorta(destacada?.fecha ?? destacada?.createdAt);
-const actualizado = fechaDestacada;
 
 const catDestacada = destacada ? nombreCategoria(destacada) : null;
 const fotoDestacada = urlMedia(destacada?.imagen, 'large');
@@ -97,11 +93,7 @@ const nombreAqui = filtro ? filtro.nombre : (seccion?.rotulo ?? 'esta sección')
 ---
 
   <div class="sc-envoltura">
-    <CabezaSeccion
-      titulo={titulo}
-      activa={seccion?.href ?? null}
-      rotulo={actualizado ? `ACTUALIZADO ${actualizado}` : null}
-    />
+    <CabezaSeccion titulo={titulo} activa={seccion?.href ?? null} />
 
     {
       destacada ? (

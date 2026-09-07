@@ -14,8 +14,17 @@
  * que es lo que lee un buscador—, no en pantalla repitiéndole al lector dónde
  * acaba de entrar.
  *
- * ⚠️ El `rotulo` sí se queda cuando es un DATO —«ACTUALIZADO 28 AGO», «7
- * TEMAS»—: eso no describe, informa.
+ * 🔴 Y desde el 2026-09-07 tampoco lleva RÓTULO. Existía para lo que sí era un
+ * dato —«ACTUALIZADO 28 AGO», «7 TEMAS», «2 EDICIONES»— y la distinción parecía
+ * sólida, pero Carlos la tumbó con el caso concreto: «1 TEMA» encima de «EL
+ * FENÓMENO RESIDENTE» no informa de nada, cuenta el inventario de la página que ya
+ * estás viendo. Y en las páginas de detalle repetía lo que el cuerpo dice mejor: el
+ * «CUÁNDO» de un evento, los horarios de un programa, la fecha de una edición.
+ *
+ * ⚠️ Los datos NO se perdieron, salvo uno: la fecha de actualización de las dos
+ * secciones editoriales, que solo vivía ahí. Todo lo demás sigue en el cuerpo de su
+ * página. Si algún día hace falta volver a poner algo encima del titular, que sea
+ * porque el lector no lo puede saber de otra forma.
  */
 import NavSecciones from '@/components/NavSecciones.astro';
 
@@ -24,17 +33,14 @@ interface Props {
   titulo: string;
   /** El `href` de la sección en curso, para marcarla en la tira. */
   activa?: string | null;
-  /** Un dato corto encima del titular. Nunca una descripción. */
-  rotulo?: string | null;
 }
 
-const { titulo, activa = null, rotulo = null } = Astro.props;
+const { titulo, activa = null } = Astro.props;
 ---
 
 <header class="cs">
   <NavSecciones activa={activa} class="cs-nav" />
   <div class="cs-titular">
-    {rotulo && <span class="beat-label cs-rotulo">{rotulo}</span>}
     <h1 class="beat-display beat-resplandor es-fuerte cs-titulo" data-escribir>{titulo}</h1>
   </div>
   <slot />
@@ -50,16 +56,16 @@ const { titulo, activa = null, rotulo = null } = Astro.props;
     Es la única navegación visible del interior —la barra oscura va recogida— así
     que ocupa el sitio donde el lector busca un menú. Debajo del titular se leería
     como un filtro de esta sección, que es justo lo que dejó de ser.
+
+    🔴 Su aire y su filete NO se declaran aquí. Estaban, en un `.cs-nav`, y no
+    aplicaban nunca: una clase pasada como prop aterriza en la raíz del componente
+    hijo, que solo lleva el cid del hijo, así que la regla quedaba sin dueño y el
+    titular salía pegado a la tira en las ocho secciones. Ahora la medida vive en
+    `NavSecciones.astro`, donde sí alcanza al elemento. La explicación completa
+    está en la cabecera de ese archivo.
   */
-  .cs-nav {
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--border-quiet);
-  }
   .cs-titular {
     padding-top: 26px;
-  }
-  .cs-rotulo {
-    color: var(--mist-0);
   }
   .cs-titulo {
     margin: 12px 0 0;
@@ -74,14 +80,8 @@ const { titulo, activa = null, rotulo = null } = Astro.props;
     .cs {
       padding: 18px 16px 0;
     }
-    .cs-nav {
-      padding-bottom: 18px;
-    }
     .cs-titular {
       padding-top: 20px;
-    }
-    .cs-rotulo {
-      font-size: 8.5px;
     }
     /*
       🔴 Fluido, no fijo. «PROGRAMACIÓN» es una sola palabra que no puede partirse:

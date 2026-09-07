@@ -62,19 +62,6 @@ const [ediciones, reciente] = await Promise.all([
   obtenerListaReciente(slug),
 ]);
 
-/*
-  El rótulo es un DATO: cuántas ediciones hay y de cuándo es la última. No una
-  descripción de la sección ni una promesa de periodicidad — ver `BonusBeat.astro`.
-*/
-const cuantas = ediciones.length;
-const rotulo = cuantas
-  ? [
-      `${cuantas} EDICI${cuantas === 1 ? 'ÓN' : 'ONES'}`,
-      fechaCorta(reciente?.fecha),
-    ]
-      .filter(Boolean)
-      .join(' · ')
-  : null;
 ---
 
 <Base
@@ -82,11 +69,7 @@ const rotulo = cuantas
   descripcion={tipo.descripcion ?? `${tipo.nombre} en Beat 100.9.`}
 >
   <div class="tl-pagina">
-    <CabezaSeccion
-      titulo={tipo.nombre.toUpperCase()}
-      activa={`/${slug}`}
-      rotulo={rotulo}
-    />
+    <CabezaSeccion titulo={tipo.nombre.toUpperCase()} activa={`/${slug}`} />
 
     {
       reciente ? (

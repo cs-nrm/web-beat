@@ -30,9 +30,6 @@ const tipo = TIPOS_EVENTO.find((t) => t.valor === solicitado)?.valor ?? null;
 
 const eventos = await obtenerAgenda(40, tipo);
 
-const cuantos = eventos.length;
-const rotulo = cuantos ? `${cuantos} EVENTO${cuantos === 1 ? '' : 'S'} POR VENIR` : null;
-
 const activo = TIPOS_EVENTO.find((t) => t.valor === tipo) ?? null;
 const titulo = 'AGENDA';
 ---
@@ -42,7 +39,7 @@ const titulo = 'AGENDA';
   descripcion="Coberturas, activaciones propias y presencia en festivales. Lo que viene, del más cercano al más lejano."
 >
   <div class="ag-pagina">
-    <CabezaSeccion titulo={titulo} activa="/eventos" rotulo={rotulo} />
+    <CabezaSeccion titulo={titulo} activa="/eventos" />
 
     {/*
       El filtro por TIPO, y a propósito NO se parece a la tira de secciones de

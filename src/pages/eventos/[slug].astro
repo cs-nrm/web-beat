@@ -67,8 +67,6 @@ const accion =
 const foto = urlMedia(evento.portada, 'large');
 const lugar = [evento.lugar, evento.ciudad].filter(Boolean).join(' · ');
 
-/* El rótulo del encabezado: el dato que ubica el evento, sin adjetivos. */
-const rotulo = [etiquetaTipo, inicio?.largo].filter(Boolean).join(' · ');
 ---
 
 <Base
@@ -76,7 +74,7 @@ const rotulo = [etiquetaTipo, inicio?.largo].filter(Boolean).join(' · ');
   descripcion={evento.descripcion ?? undefined}
 >
   <article class="ev">
-    <CabezaSeccion titulo={evento.titulo} activa="/eventos" rotulo={rotulo} />
+    <CabezaSeccion titulo={evento.titulo} activa="/eventos" />
 
     <div class="ev-columnas">
       <div class="ev-principal">

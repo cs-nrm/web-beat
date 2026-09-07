@@ -16,6 +16,28 @@
  * recogida a propósito (`Base.astro`), así que esta tira carga con el trabajo que
  * hacía el menú. Por eso se envuelve, en vez de irse a un carrusel horizontal:
  * una sección que hay que descubrir arrastrando es una sección que no existe.
+ *
+ * 🔴 El AIRE Y EL FILETE de abajo viven aquí, y no en quien la usa. Es la
+ * corrección de un fallo que llevaba puesto en las ocho secciones (2026-09-07,
+ * lo reportó Carlos como «abajo del en vivo hay un texto encimado»).
+ *
+ * La causa es una trampa de Astro que conviene tener escrita: `CabezaSeccion`
+ * hacía `<NavSecciones class="cs-nav" />` y definía `.cs-nav { padding-bottom;
+ * border-bottom }` en SU bloque `<style>`. Eso **no aplica nunca**. Los estilos de
+ * un componente se compilan con su propio `data-astro-cid-*`, y una clase que se
+ * pasa como prop aterriza en la raíz de ESTE componente, que solo lleva el cid de
+ * ESTE archivo. La regla quedaba en `.cs-nav[data-astro-cid-cabeza]` y no
+ * encontraba a nadie.
+ *
+ * Cómo se veía: `padding-bottom` medido en `0px`, sin borde, y el titular pegado a
+ * la tira —separación de 0 px, verificado en `/fenomeno-residente`—. Y con la tira
+ * recién puesta en la nota, ahí la migaja arrancaba exactamente donde terminaba la
+ * tira.
+ *
+ * ⚠️ Puesto aquí, la medida vive en UN sitio y no puede volver a perderse por el
+ * camino. Si algún día una tira necesita ir sin filete, es una prop de este
+ * archivo — no una regla en el `<style>` de quien la llama, que es lo que ya
+ * falló.
  */
 import { SECCIONES } from '@/config/navegacion';
 
@@ -50,6 +72,10 @@ const { activa = null, class: clase } = Astro.props;
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+    /* Separa la tira de lo que venga debajo: el titular de una sección, o la
+       migaja de una nota. Ver el porqué de que esté aquí en la cabecera. */
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border-quiet);
   }
   .nav-seccion {
     padding: 9px 14px;
@@ -83,6 +109,8 @@ const { activa = null, class: clase } = Astro.props;
   @media (max-width: 899px) {
     .nav-secciones {
       gap: 7px;
+      /* El mismo 18px que ya pedía `CabezaSeccion` en móvil. */
+      padding-bottom: 18px;
     }
     .nav-seccion {
       padding: 10px 13px;

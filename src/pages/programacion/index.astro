@@ -51,9 +51,6 @@ function horariosDe(p: (typeof programas)[number]) {
 }
 
 const alAireAhora = parrilla.alAire;
-const rotulo = programas.length
-  ? `${programas.length} PROGRAMA${programas.length === 1 ? '' : 'S'}`
-  : null;
 ---
 
 <Base
@@ -61,7 +58,7 @@ const rotulo = programas.length
   descripcion="La parrilla de Beat 100.9: qué suena a cada hora, de lunes a domingo."
 >
   <div class="pr-pagina">
-    <CabezaSeccion titulo="PROGRAMACIÓN" activa="/programacion" rotulo={rotulo} />
+    <CabezaSeccion titulo="PROGRAMACIÓN" activa="/programacion" />
 
     {
       alAireAhora && (

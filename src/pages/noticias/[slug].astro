@@ -94,7 +94,7 @@ const etiquetas = (nota.etiquetas ?? []).filter(
         misma pastilla le habría dicho al lector que está en una sección en la que
         no está.
       */}
-      <NavSecciones activa={seccion.href} class="nt-nav" />
+      <NavSecciones activa={seccion.href} />
 
       <div class="nt-migaja">
         <a href={seccion.href} class="beat-label nt-seccion">{seccion.rotulo}</a>
@@ -299,17 +299,21 @@ const etiquetas = (nota.etiquetas ?? []).filter(
   .nt-cabeza {
     padding: 30px 24px 0;
   }
-  /* Mismo tratamiento que en `CabezaSeccion`: la tira arriba, separada por su
-     filete, para que las dos cabeceras del sitio se lean como una sola. */
-  .nt-nav {
-    padding-bottom: 22px;
-    margin-bottom: 22px;
-    border-bottom: 1px solid var(--border-quiet);
-  }
+  /*
+    ⚠️ El aire que separa la migaja de la tira va AQUÍ, en la migaja, y no en la
+    tira. No es capricho: una clase pasada como prop a `NavSecciones` no recibe el
+    ámbito de esta página, así que un `.nt-nav { margin-bottom }` escrito aquí no
+    aplicaría — es el mismo fallo que tenía `CabezaSeccion` y que se veía como el
+    «texto encimado». El aire de ARRIBA de la tira y su filete son suyos y los pone
+    ella; este es el de después, y lo pone quien viene después.
+
+    Es lo mismo que hace `CabezaSeccion` con `.cs-titular { padding-top }`.
+  */
   .nt-migaja {
     display: flex;
     align-items: center;
     gap: 8px;
+    padding-top: 22px;
   }
   .nt-seccion {
     color: var(--text-muted);
@@ -546,9 +550,8 @@ const etiquetas = (nota.etiquetas ?? []).filter(
     .nt-cabeza {
       padding: 22px 16px 0;
     }
-    .nt-nav {
-      padding-bottom: 16px;
-      margin-bottom: 16px;
+    .nt-migaja {
+      padding-top: 16px;
     }
     .nt-titular {
       margin-top: 18px;

@@ -301,21 +301,19 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     </span>
 
     {/*
-      ⚠️ En MÓVIL no se pinta, y es un intercambio medido: a 375px la barra no da
-      para los dos, y de los dos este es el que hoy no hace nada —el
-      comportamiento del player ampliado está pendiente— mientras que la
-      hamburguesa es la ÚNICA forma de abrir el menú en un interior, donde la
-      barra oscura va recogida. Antes de esto, en un teléfono no había manera de
-      navegar el sitio salvo por el pie.
+      🔴 Aquí estaba el botón de «ampliar el reproductor» —la flecha hacia abajo
+      después del volumen— y se retira (Carlos, 2026-09-07).
+
+      No hacía NADA: `data-accion="expandir"` no lo escuchaba ningún script, y el
+      comentario que tenía puesto ya lo admitía («el comportamiento del player
+      ampliado está pendiente»). En móvil ni se pintaba, precisamente por eso. O
+      sea que era un control que en escritorio invitaba a pulsarlo para no pasar
+      nada — la peor clase de botón.
+
+      El día que el player ampliado exista, el botón vuelve con su manejador. Se
+      quita entero en vez de dejarlo oculto porque un control muerto en el marcado
+      es alcanzable con el tabulador y se anuncia en un lector de pantalla.
     */}
-    <button
-      type="button"
-      data-accion="expandir"
-      aria-label="Ampliar el reproductor"
-      class="hidden h-7 w-7 flex-none place-items-center shadow-[inset_0_0_0_1px_var(--onair-ring)] md:grid md:h-8 md:w-8"
-    >
-      <Icono nombre="chevron-down" tamano={14} />
-    </button>
 
     <button
       type="button"

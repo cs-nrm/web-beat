@@ -1,55 +1,105 @@
 ---
 /**
- * El índice de Beat Scanner. Pantallas 14b (1280) y 14e (390).
+ * El interior de una sección editorial. Pantallas 14b (1280) y 14e (390).
  *
- * Es un COMPONENTE y no una página porque tres rutas lo usan con el mismo
- * marcado: la sección completa, una categoría y una etiqueta. Duplicarlo
- * significaría mantener 400 líneas de CSS en tres archivos, que es exactamente
- * como el sitio viejo terminó con los tokens de marca repartidos.
+ * Es un COMPONENTE y no una página porque CUATRO rutas lo usan con el mismo
+ * marcado: las dos secciones editoriales —`/scanner` y `/editorial`—, una
+ * categoría y una etiqueta. Duplicarlo significaría mantener 400 líneas de CSS en
+ * cuatro archivos, que es exactamente como el sitio viejo terminó con los tokens
+ * de marca repartidos.
+ *
+ * 🔴 Desde el 2026-09-07 recibe la SECCIÓN, y con ella filtra. Antes `/scanner`
+ * lo usaba sin nada y traía todas las notas del sitio; ahora Beat Scanner (el día
+ * a día) y Editorial (las elaboradas) son dos secciones distintas, cada una con su
+ * categoría del CMS. Ver `SECCIONES_EDITORIALES` en `config/navegacion.ts`.
  */
 import CabezaSeccion from '@/components/CabezaSeccion.astro';
 import TarjetaNota from '@/components/TarjetaNota.astro';
 import Anuncio from '@/components/Anuncio.astro';
 import Icono from '@/components/Icono.astro';
-import { obtenerScanner, minutosDeLectura } from '@/lib/cms/noticias';
+import { obtenerScanner, filtroDeCategoria, type FiltroScanner } from '@/lib/cms/noticias';
 import { nombreCategoria, fechaCorta } from '@/lib/nota';
 import { urlMedia } from '@/lib/cms/client';
+import type { SeccionEditorial } from '@/config/navegacion';
 
 interface Props {
-  /** El filtro activo, si la ruta es una categoría o una etiqueta. */
-  filtro?: { tipo: 'categoria' | 'etiqueta'; id: number; nombre: string; slug: string } | null;
+  /**
+   * La sección editorial que se está pintando. La pone `/scanner` y `/editorial`.
+   *
+   * Con `filtro` puesto encima, ya no filtra —el filtro es más estrecho— y solo
+   * sirve para marcar la tira de secciones y rotular «MÁS EN …».
+   */
+  seccion?: SeccionEditorial | null;
+  /**
+   * Un filtro MÁS ESTRECHO que la sección: una categoría (`/beat-scanner/<cat>`) o una
+   * etiqueta (`/etiqueta/<slug>`). Cuando viene, manda él.
+   */
+  filtro?: FiltroScanner | null;
 }
 
-const { filtro = null } = Astro.props;
+const { seccion = null, filtro = null } = Astro.props;
+
+/*
+  🔴 Si no hay un filtro más estrecho, filtra la SECCIÓN por su categoría.
+
+  Y si esa categoría no existe en el CMS, `filtroDeCategoria` devuelve `null` — que
+  NO se puede pasar tal cual a `obtenerScanner`, porque ahí `null` significa «sin
+  filtro» y traería el sitio entero. Se marca aparte y la página se pinta vacía con
+  su aviso: una sección que de pronto trae todas las notas se ve llena y nadie la
+  reporta, mientras que una vacía con un texto que dice qué revisar se arregla el
+  mismo día.
+*/
+const deLaSeccion = !filtro && seccion ? await filtroDeCategoria(seccion.categoria) : null;
+const categoriaPerdida = Boolean(!filtro && seccion && !deLaSeccion);
+const efectivo = filtro ?? deLaSeccion;
 
 /**
- * Se piden 11: 1 destacada + 6 de rejilla + 4 de «Más en Scanner». Es una sola
+ * Se piden 11: 1 destacada + 6 de rejilla + 4 de las filas de abajo. Es una sola
  * consulta repartida en memoria, para que las tres zonas no puedan quedar
  * desfasadas entre sí (ver el comentario de `obtenerScanner`).
  */
-const { destacada, rejilla } = await obtenerScanner(10, filtro);
+const { destacada, rejilla } = categoriaPerdida
+  ? { destacada: null, rejilla: [] }
+  : await obtenerScanner(10, efectivo);
 
 const enRejilla = rejilla.slice(0, 6);
 const enLista = rejilla.slice(6, 10);
 
-// El diseño rotula «ACTUALIZADO <fecha>». Sale de la nota más reciente, que es el
-// dato honesto: es cuándo se actualizó la sección de verdad.
-const actualizado = fechaCorta(destacada?.fecha ?? destacada?.createdAt);
+/**
+ * La fecha de la destacada, que hace DOS trabajos con un solo dato.
+ *
+ * El diseño rotula «ACTUALIZADO <fecha>» arriba, y sale de la nota más reciente
+ * porque es el dato honesto: es cuándo se actualizó la sección de verdad. Y desde
+ * 2026-09-07 es también el sello de la nota principal, que antes decía los minutos
+ * de lectura (ver `TarjetaNota.astro`).
+ *
+ * Es la misma fecha en los dos sitios porque es la misma nota — no dos consultas
+ * que se puedan desfasar.
+ */
+const fechaDestacada = fechaCorta(destacada?.fecha ?? destacada?.createdAt);
+const actualizado = fechaDestacada;
 
-const minDestacada = destacada ? minutosDeLectura(destacada.contenido) : 0;
 const catDestacada = destacada ? nombreCategoria(destacada) : null;
 const fotoDestacada = urlMedia(destacada?.imagen, 'large');
 
-// El titular cambia con el filtro: una categoría no se anuncia como si fuera la
-// sección entera. La BAJADA se retiró —era relleno; ver `CabezaSeccion.astro`— y
-// lo que describía sigue en la `<meta description>` de cada ruta.
-const titulo = filtro ? filtro.nombre.toUpperCase() : 'BEAT SCANNER';
+/*
+  El titular cambia con el filtro: una categoría no se anuncia como si fuera la
+  sección entera. La BAJADA se retiró —era relleno; ver `CabezaSeccion.astro`— y
+  lo que describía sigue en la `<meta description>` de cada ruta.
+
+  El rótulo de la sección sale de `SECCIONES_EDITORIALES` y NO del nombre de su
+  categoría en el CMS: así la redacción puede renombrar la categoría sin que cambie
+  el titular de una sección del sitio.
+*/
+const titulo = filtro ? filtro.nombre.toUpperCase() : (seccion?.rotulo ?? 'NOTAS');
+/** Cómo se llama esto en los textos de dentro: «MÁS EN …», el aviso de vacío. */
+const nombreAqui = filtro ? filtro.nombre : (seccion?.rotulo ?? 'esta sección');
 ---
 
   <div class="sc-envoltura">
     <CabezaSeccion
       titulo={titulo}
-      activa="/scanner"
+      activa={seccion?.href ?? null}
       rotulo={actualizado ? `ACTUALIZADO ${actualizado}` : null}
     />
 
@@ -80,10 +130,9 @@ const titulo = filtro ? filtro.nombre.toUpperCase() : 'BEAT SCANNER';
             <div class="sc-lead-texto">
               <div class="sc-lead-meta">
                 {catDestacada && <span class="beat-label sc-lead-cat">{catDestacada}</span>}
-                <span class="beat-label sc-lead-min">
-                  <Icono nombre="clock" tamano={16} />
-                  {minDestacada} MIN
-                </span>
+                {fechaDestacada && (
+                  <span class="beat-label sc-lead-fecha">{fechaDestacada}</span>
+                )}
               </div>
               <h2 class="sc-lead-titulo">{destacada.titulo}</h2>
               {destacada.resumen && <p class="sc-lead-bajada">{destacada.resumen}</p>}
@@ -112,7 +161,7 @@ const titulo = filtro ? filtro.nombre.toUpperCase() : 'BEAT SCANNER';
           <div class="sc-abajo">
             <div>
               <div class="sc-mas-cabeza">
-                <span class="beat-display sc-mas-titulo">MÁS EN SCANNER</span>
+                <span class="beat-display sc-mas-titulo">MÁS EN {nombreAqui.toUpperCase()}</span>
               </div>
               {enLista.length > 0 ? (
                 enLista.map((n) => <TarjetaNota nota={n} variante="fila" />)
@@ -136,9 +185,17 @@ const titulo = filtro ? filtro.nombre.toUpperCase() : 'BEAT SCANNER';
         */
         <p class="sc-vacio sc-vacio-grande">
           {
-            filtro
-              ? `Todavía no hay notas publicadas en ${filtro.nombre}.`
-              : 'Todavía no hay notas publicadas en Beat Scanner. Si el CMS está arriba y esperabas ver contenido, revisa que las notas estén en estado «publicada» y con la estación correspondiente.'
+            categoriaPerdida
+              ? /*
+                  El caso que NO es «todavía no hay notas»: la sección existe en el
+                  front pero su categoría no está en el CMS, así que no hay de dónde
+                  sacar notas. El aviso dice exactamente qué buscar, porque es un
+                  desajuste de configuración y no un hueco editorial.
+                */
+                `La sección ${nombreAqui} no encuentra su categoría en el CMS (slug «${seccion?.categoria}»). Revisa que exista en «Categorías» y con ese slug exacto.`
+              : filtro
+                ? `Todavía no hay notas publicadas en ${filtro.nombre}.`
+                : `Todavía no hay notas publicadas en ${nombreAqui}. Si el CMS está arriba y esperabas ver contenido, revisa que las notas estén en estado «publicada», con la estación correspondiente y en la categoría «${seccion?.categoria}».`
           }
         </p>
       )
@@ -200,11 +257,9 @@ const titulo = filtro ? filtro.nombre.toUpperCase() : 'BEAT SCANNER';
     color: var(--text-body);
     white-space: nowrap;
   }
-  .sc-lead-min {
-    display: flex;
-    align-items: center;
-    gap: 6px;
+  .sc-lead-fecha {
     color: var(--text-muted);
+    white-space: nowrap;
   }
   .sc-lead-titulo {
     font: var(--type-title-1);
@@ -311,12 +366,9 @@ const titulo = filtro ? filtro.nombre.toUpperCase() : 'BEAT SCANNER';
       padding: 7px 12px;
       font-size: 8.5px;
     }
-    .sc-lead-min {
+    .sc-lead-fecha {
       color: var(--text-faint);
       font-size: 8.5px;
-    }
-    .sc-lead-min :global(svg) {
-      display: none;
     }
     .sc-lead-titulo {
       font: 700 25px/1.12 var(--font-text);

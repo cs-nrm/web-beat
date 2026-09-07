@@ -1,0 +1,30 @@
+---
+/**
+ * Beat Scanner — el día a día.
+ *
+ * 🔴 Desde el 2026-09-07 esta sección trae SOLO su categoría, no todas las notas
+ * del sitio (decisión editorial de Carlos): Beat Scanner es la nota del día a día y
+ * `Editorial` —su hermana en `/editorial`— son las piezas más elaboradas. Antes las
+ * dos caían en la misma rejilla y ninguna de las dos significaba nada.
+ *
+ * 🔴 La ruta es `/beat-scanner`, y vino de `/scanner` el mismo día (Carlos:
+ * «deben ser /beat-scanner y /editorial»). Las dos secciones hermanas quedan con la
+ * URL diciendo su nombre, que es lo que un lector puede leer, teclear y reconocer
+ * en un enlace compartido.
+ *
+ * ⚠️ `/scanner` y `/scanner/<categoria>` NO se borran: responden **301** hacia acá
+ * desde `astro.config.mjs`. Es la ruta que llevan el sitemap del CMS, la migaja de
+ * las notas ya publicadas y lo que la estación haya compartido; dejarla en 404
+ * habría tirado a la basura lo que esas URLs tuvieran acumulado.
+ */
+import Base from '@/layouts/Base.astro';
+import IndiceScanner from '@/components/IndiceScanner.astro';
+import { SECCIONES_EDITORIALES } from '@/config/navegacion';
+---
+
+<Base
+  titulo="Beat Scanner — Beat 100.9"
+  descripcion="La nota del día de la escena electrónica: lanzamientos, festivales y lo que se mueve en la pista."
+>
+  <IndiceScanner seccion={SECCIONES_EDITORIALES.scanner} />
+</Base>

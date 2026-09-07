@@ -26,6 +26,53 @@ export default defineConfig({
   site: process.env.PUBLIC_SITE_URL || 'https://beatdigital.mx',
   output: 'server',
   adapter: node({ mode: 'standalone' }),
+
+  /*
+   * 🔴 Las rutas VIEJAS de Beat Scanner, con 301.
+   *
+   * La sección vivía en `/scanner` y se mudó a `/beat-scanner` el 2026-09-07, para
+   * que las dos secciones editoriales tengan la URL diciendo su nombre (Carlos:
+   * «deben ser /beat-scanner y /editorial»).
+   *
+   * ⚠️ No se borra la vieja, se redirige, y no es cortesía: `/scanner/<slug>` es la
+   * ruta que llevan la migaja de cada nota ya publicada, el sitemap que emite el
+   * CMS y cualquier enlace que la estación haya compartido. Dejarla en 404 tira lo
+   * que esas URLs tuvieran acumulado y manda a un lector real a una página de error
+   * por un cambio que solo nos importa a nosotros.
+   *
+   * ⚠️ Es 301 y no 302 a propósito: la mudanza es permanente, y un 302 le dice a
+   * Google que siga indexando la URL vieja.
+   *
+   * ⚠️ `scanner` sigue en `SEGMENTOS_RESERVADOS` (`config/site.ts`). Estas
+   * redirecciones se resuelven antes que las páginas, pero si alguien las quitara,
+   * la lista es lo que impide que `[tipoLista]` reclame el segmento y responda 404
+   * tras una consulta al CMS.
+   */
+  redirects: {
+    /*
+     * ⚠️ Estas dos van ANTES de la regla dinámica de abajo, y existen para que no
+     * haya CADENA de redirecciones.
+     *
+     * Las dos categorías que hoy SON una sección ya se redirigen desde
+     * `beat-scanner/[categoria].astro` —`/beat-scanner/editorial` → `/editorial`—,
+     * así que sin estas dos líneas `/scanner/editorial` daba dos saltos: primero a
+     * `/beat-scanner/editorial` y de ahí a `/editorial`. Las dos eran 301 y
+     * funcionaba, pero una cadena es una petición de más para cada lector que llegue
+     * por un enlace viejo, y las dos rutas SÍ estuvieron enlazadas: hasta hoy la
+     * migaja de cada nota apuntaba a `/scanner/<su categoría>`.
+     *
+     * ⚠️ Son los únicos dos slugs de categoría escritos a mano en el repo — el resto
+     * sale de `SECCIONES_EDITORIALES` en `config/navegacion.ts`, que este archivo no
+     * puede importar (es TS con alias, y la config de Astro se evalúa antes). Si algún
+     * día se renombra una de esas dos categorías, esta entrada NO se rompe: se queda
+     * como lo que ya es, la redirección de una URL histórica.
+     */
+    '/scanner/editorial': { status: 301, destination: '/editorial' },
+    '/scanner/beat-scanner': { status: 301, destination: '/beat-scanner' },
+
+    '/scanner': { status: 301, destination: '/beat-scanner' },
+    '/scanner/[categoria]': { status: 301, destination: '/beat-scanner/[categoria]' },
+  },
   vite: {
     plugins: [tailwind()],
     /*

@@ -8,13 +8,22 @@
  * viva en silencio. De paso, es el path que el CMS ya emite en sus feeds.
  */
 import Base from '@/layouts/Base.astro';
+import NavSecciones from '@/components/NavSecciones.astro';
 import Lexical from '@/components/Lexical.astro';
 import TarjetaNota from '@/components/TarjetaNota.astro';
 import Icono from '@/components/Icono.astro';
 import Anuncio from '@/components/Anuncio.astro';
-import { obtenerNota, obtenerRelacionadas, minutosDeLectura } from '@/lib/cms/noticias';
+import { obtenerNota, obtenerRelacionadas } from '@/lib/cms/noticias';
 import { urlMedia } from '@/lib/cms/client';
-import { nombreCategoria, slugCategoria, firma, fechaCorta, fechaIso, enlacesCompartir } from '@/lib/nota';
+import {
+  nombreCategoria,
+  slugCategoria,
+  seccionDeNota,
+  firma,
+  fechaCorta,
+  fechaIso,
+  enlacesCompartir,
+} from '@/lib/nota';
 import { SITE_URL } from '@/config/site';
 
 const { slug } = Astro.params;
@@ -35,9 +44,21 @@ if (!nota) return Astro.rewrite('/404');
 
 const relacionadas = await obtenerRelacionadas(nota, 3);
 
-const min = minutosDeLectura(nota.contenido);
 const cat = nombreCategoria(nota);
 const catSlug = slugCategoria(nota);
+/*
+  La sección de esta nota —Beat Scanner o Editorial— la decide su categoría. De
+  aquí salen la migaja y la pastilla encendida de la tira; antes las dos decían
+  «BEAT SCANNER» fijo, y con dos secciones eso era falso para la mitad.
+*/
+const seccion = seccionDeNota(nota);
+/*
+  ⚠️ La categoría se repite en la migaja SOLO si no es la de la sección. Si no,
+  una nota de Editorial pintaba «EDITORIAL · Editorial»: la misma palabra dos veces
+  separadas por un punto, y el segundo enlace llevando al mismo sitio que el
+  primero.
+*/
+const catEnMigaja = cat && catSlug !== seccion.categoria ? cat : null;
 const autor = firma(nota);
 const publicada = fechaCorta(nota.fecha ?? nota.createdAt);
 const publicadaIso = fechaIso(nota.fecha ?? nota.createdAt);
@@ -58,17 +79,34 @@ const etiquetas = (nota.etiquetas ?? []).filter(
   <article class="nt">
     {/* ── Migaja: sección · tipo ── */}
     <div class="nt-cabeza">
+      {/*
+        🔴 La tira de secciones también AQUÍ (decisión de Carlos, 2026-09-07).
+
+        Faltaba, y era el único interior sin ella. En un interior la barra oscura
+        va recogida a propósito (`Base.astro`), y quien carga con ese trabajo es
+        esta tira —lo dice `NavSecciones.astro`: «es la ÚNICA navegación visible de
+        un interior»—. Las cinco secciones la ponen por `CabezaSeccion`; la nota no
+        usa esa cabecera, así que se quedaba con la hamburguesa como única salida:
+        el lector que termina de leer no tiene a dónde ir sin abrir un menú.
+
+        La sección activa la decide la CATEGORÍA de la nota (`seccionDeNota`), no
+        una constante: con Beat Scanner y Editorial separadas, marcar siempre la
+        misma pastilla le habría dicho al lector que está en una sección en la que
+        no está.
+      */}
+      <NavSecciones activa={seccion.href} class="nt-nav" />
+
       <div class="nt-migaja">
-        <a href="/scanner" class="beat-label nt-seccion">BEAT SCANNER</a>
+        <a href={seccion.href} class="beat-label nt-seccion">{seccion.rotulo}</a>
         {
-          cat && (
+          catEnMigaja && (
             <>
               <span class="beat-label nt-punto">·</span>
               <a
-                href={catSlug ? `/scanner/${catSlug}` : '/scanner'}
+                href={catSlug ? `/beat-scanner/${catSlug}` : seccion.href}
                 class="beat-label nt-cat"
               >
-                {cat}
+                {catEnMigaja}
               </a>
             </>
           )
@@ -80,8 +118,18 @@ const etiquetas = (nota.etiquetas ?? []).filter(
         <h1 class="nt-h1" data-escribir>{nota.titulo}</h1>
         {nota.resumen && <p class="nt-bajada">{nota.resumen}</p>}
 
+        {/*
+          🔴 Aquí NO va el nombre del autor (decisión de Carlos, 2026-09-07).
+
+          Estaba en los dos sitios: aquí suelto, y otra vez abajo en la ficha con
+          su foto y su línea. La misma firma dos veces en una nota no añade
+          autoridad, resta — y la de abajo es la que puede llevar retrato, cargo y
+          algún día un enlace a la página del autor.
+
+          Lo que se queda arriba es lo que sí cambia por nota y se consulta de un
+          vistazo: la FECHA y compartir.
+        */}
         <div class="nt-credito">
-          {autor && <span class="nt-autor">{autor.nombre}</span>}
           {
             publicada && (
               <time class="beat-label nt-fecha" datetime={publicadaIso ?? undefined}>
@@ -89,8 +137,6 @@ const etiquetas = (nota.etiquetas ?? []).filter(
               </time>
             )
           }
-          <span class="beat-label nt-min">{min} MIN DE LECTURA</span>
-
           <span class="nt-compartir">
             {
               compartir.map((s) =>
@@ -164,10 +210,26 @@ const etiquetas = (nota.etiquetas ?? []).filter(
         {
           autor && (
             <div class="nt-ficha-autor">
-              <div class="nt-autor-foto" />
+              {/*
+                La foto de verdad cuando el CMS la trae, y el MONOGRAMA cuando no.
+                Antes esto era un círculo con degradado y nada dentro, que se leía
+                como una imagen que no cargó — y hoy es el caso de todas las notas,
+                porque la colección `autores` está vacía y la firma viene del campo
+                de texto libre. Las iniciales dicen la verdad: no hay retrato.
+              */}
+              <div class="nt-autor-foto">
+                {autor.foto ? (
+                  <img src={autor.foto} alt={autor.nombre} loading="lazy" decoding="async" />
+                ) : (
+                  <span class="beat-display nt-autor-monograma" aria-hidden="true">
+                    {autor.monograma}
+                  </span>
+                )}
+              </div>
               <div class="nt-autor-datos">
                 <span class="nt-autor-nombre">{autor.nombre}</span>
-                <span class="nt-autor-bio">Escribe para Beat 100.9.</span>
+                {/* El cargo capturado si existe; si no, la línea de la casa. */}
+                <span class="nt-autor-bio">{autor.cargo ?? 'Escribe para Beat 100.9.'}</span>
               </div>
             </div>
           )
@@ -237,6 +299,13 @@ const etiquetas = (nota.etiquetas ?? []).filter(
   .nt-cabeza {
     padding: 30px 24px 0;
   }
+  /* Mismo tratamiento que en `CabezaSeccion`: la tira arriba, separada por su
+     filete, para que las dos cabeceras del sitio se lean como una sola. */
+  .nt-nav {
+    padding-bottom: 22px;
+    margin-bottom: 22px;
+    border-bottom: 1px solid var(--border-quiet);
+  }
   .nt-migaja {
     display: flex;
     align-items: center;
@@ -286,12 +355,7 @@ const etiquetas = (nota.etiquetas ?? []).filter(
     padding-top: 20px;
     border-top: 1px solid var(--border-hairline);
   }
-  .nt-autor {
-    font: 600 13.5px/1 var(--font-text);
-    color: var(--mist-2);
-  }
-  .nt-fecha,
-  .nt-min {
+  .nt-fecha {
     color: var(--text-faint);
     font-size: 9px;
     white-space: nowrap;
@@ -416,9 +480,29 @@ const etiquetas = (nota.etiquetas ?? []).filter(
     box-shadow: inset 0 0 0 1px var(--border-hairline);
   }
   .nt-autor-foto {
+    position: relative;
+    display: grid;
+    place-items: center;
     aspect-ratio: 1 / 1;
     border-radius: 999px;
     background: var(--grad-noche);
+    /* El retrato es redondo: sin esto la foto cuadrada se sale del círculo. */
+    overflow: hidden;
+  }
+  .nt-autor-foto img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .nt-autor-monograma {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    color: var(--text-muted);
+    /* `aria-hidden`: el nombre completo está al lado, y un lector de pantalla
+       leyendo «FO» antes de «Fernanda Ortíz» solo estorba. */
   }
   .nt-autor-datos {
     min-width: 0;
@@ -461,6 +545,10 @@ const etiquetas = (nota.etiquetas ?? []).filter(
   @media (max-width: 899px) {
     .nt-cabeza {
       padding: 22px 16px 0;
+    }
+    .nt-nav {
+      padding-bottom: 16px;
+      margin-bottom: 16px;
     }
     .nt-titular {
       margin-top: 18px;

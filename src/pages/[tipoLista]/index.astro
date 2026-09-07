@@ -19,7 +19,7 @@ import CabezaSeccion from '@/components/CabezaSeccion.astro';
 import BonusBeat from '@/components/inicio/BonusBeat.astro';
 import RejillaEdiciones from '@/components/RejillaEdiciones.astro';
 import Anuncio from '@/components/Anuncio.astro';
-import { obtenerTipoDeLista, obtenerListas } from '@/lib/cms/listas';
+import { obtenerTipoDeLista, obtenerListas, obtenerListaReciente } from '@/lib/cms/listas';
 import { fechaCorta } from '@/lib/nota';
 import { SEGMENTOS_RESERVADOS } from '@/config/site';
 
@@ -37,8 +37,30 @@ if (!slug || (SEGMENTOS_RESERVADOS as readonly string[]).includes(slug)) {
 const tipo = await obtenerTipoDeLista(slug);
 if (!tipo) return Astro.rewrite('/404');
 
-const ediciones = await obtenerListas(slug, 24);
-const reciente = ediciones[0] ?? null;
+/*
+  🔴 DOS consultas, y no `ediciones[0]`, por una razón medida: las portadas de las
+  canciones no salían en esta página.
+
+  `obtenerListas` pide `depth: 1` —lo correcto para 24 ediciones—, y a esa
+  profundidad `canciones[].cancion` llega poblada pero su `portada` sigue siendo un
+  id. `urlMedia` devuelve `null` con un id, así que la última edición se pintaba con
+  los tres huecos en degradado y sin una sola imagen. Lo mismo le pasaba al `audio`,
+  o sea que el botón de reproducir tampoco podía aparecer. Comprobado contra el CMS:
+  a `depth: 1` esas portadas llegan como `20`, `19`, `17`.
+
+  ⚠️ La solución NO es subir `obtenerListas` a `depth: 2`: eso arrastraría el
+  documento de media de cada canción de las 24 ediciones para pintar una retícula
+  que solo necesita la portada de la edición —y esa sí llega con `depth: 1`—.
+
+  `obtenerListaReciente` ya existe, ya pide `depth: 2` y trae exactamente el mismo
+  documento: mismos `where`, mismo `sort: -fecha`, `limit: 1`. Y es la MISMA
+  consulta que ya hace el Inicio para este tipo, así que acierta su entrada de caché
+  y en la práctica no cuesta una consulta más.
+*/
+const [ediciones, reciente] = await Promise.all([
+  obtenerListas(slug, 24),
+  obtenerListaReciente(slug),
+]);
 
 /*
   El rótulo es un DATO: cuántas ediciones hay y de cuándo es la última. No una

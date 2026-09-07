@@ -14,8 +14,7 @@
  */
 import Icono from './Icono.astro';
 import { urlMedia } from '@/lib/cms/client';
-import { minutosDeLectura } from '@/lib/cms/noticias';
-import { nombreCategoria } from '@/lib/nota';
+import { nombreCategoria, fechaCorta } from '@/lib/nota';
 import type { Noticia } from '@/types/payload';
 
 interface Props {
@@ -28,7 +27,18 @@ interface Props {
 const { nota, variante = 'rejilla', prioridad = false } = Astro.props;
 
 const href = `/noticias/${nota.slug}`;
-const min = minutosDeLectura(nota.contenido);
+/**
+ * 🔴 La FECHA, no el tiempo de lectura (decisión de Carlos, 2026-09-07).
+ *
+ * El «3 MIN» era una estimación nuestra —200 palabras por minuto sobre el árbol
+ * Lexical— y con notas cortas todas salían iguales: cuatro tarjetas seguidas
+ * diciendo «1 MIN» no distinguen nada. La fecha sí: es un dato editorial y es lo
+ * que un lector usa para decidir si ya la vio.
+ *
+ * `fecha ?? createdAt` es el mismo reparto que usa la nota: si la redacción no
+ * capturó fecha, la de creación es lo más cercano a la verdad.
+ */
+const fecha = fechaCorta(nota.fecha ?? nota.createdAt);
 const cat = nombreCategoria(nota);
 const foto = urlMedia(nota.imagen, variante === 'fila' ? 'card' : 'card');
 ---
@@ -62,16 +72,15 @@ const foto = urlMedia(nota.imagen, variante === 'fila' ? 'card' : 'card');
       {
         variante === 'rejilla' ? (
           <>
-            <span class="beat-label tarjeta-min">
-              <Icono nombre="clock" tamano={14} />
-              {min} MIN
-            </span>
+            {/* Sin icono: un reloj junto a una fecha dice menos que la fecha sola,
+                y es el mismo criterio que la firma de la nota, que va limpia. */}
+            {fecha && <span class="beat-label tarjeta-fecha">{fecha}</span>}
             {cat && <span class="beat-label tarjeta-cat">{cat}</span>}
           </>
         ) : (
           <>
             {cat && <span class="beat-label tarjeta-cat-plana">{cat}</span>}
-            <span class="beat-label tarjeta-min-plano">{min} MIN</span>
+            {fecha && <span class="beat-label tarjeta-fecha-plana">{fecha}</span>}
           </>
         )
       }
@@ -122,15 +131,12 @@ const foto = urlMedia(nota.imagen, variante === 'fila' ? 'card' : 'card');
     align-items: center;
     min-width: 0;
   }
-  .tarjeta-min,
-  .tarjeta-min-plano {
-    display: flex;
-    align-items: center;
-    gap: 6px;
+  .tarjeta-fecha,
+  .tarjeta-fecha-plana {
     color: var(--text-muted);
     white-space: nowrap;
   }
-  .tarjeta-min-plano {
+  .tarjeta-fecha-plana {
     color: var(--text-faint);
     font-size: 9px;
   }
@@ -263,13 +269,10 @@ const foto = urlMedia(nota.imagen, variante === 'fila' ? 'card' : 'card');
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .es-rejilla .tarjeta-min {
+    .es-rejilla .tarjeta-fecha {
       order: 2;
       color: var(--text-faint);
       font-size: 8px;
-    }
-    .es-rejilla .tarjeta-min :global(svg) {
-      display: none;
     }
     .es-rejilla .tarjeta-titulo {
       font: 600 14.5px / 1.26 var(--font-text);

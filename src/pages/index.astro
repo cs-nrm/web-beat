@@ -7,8 +7,14 @@
  * decorativo:
  *
  *   1. qué suena  → el player (en la cabecera) + «HOY EN LA SEÑAL / LO QUE SONÓ»
- *   2. qué se cuenta → el mosaico de portada, el Fenómeno, la pila de Scanner
+ *   2. qué se cuenta → el mosaico de portada, el Fenómeno, la pila de Editorial
  *   3. qué viene  → Bonus Beat y la Agenda
+ *
+ * 🔴 Y desde el 2026-09-07 el «qué se cuenta» se reparte en DOS, por decisión
+ * editorial de Carlos: **arriba el día a día, abajo lo elaborado.** El mosaico de
+ * portada se llena de `Beat Scanner` —la nota del día— y la pila de `Editorial`,
+ * las piezas largas. Antes las dos salían de la misma consulta sin filtrar, así que
+ * una pieza de fondo podía caer en la portada y una nota de agenda en la pila.
  *
  * 🔴 UNA sección = UN componente, y cada uno DEGRADA SOLO: si su colección está
  * vacía no se pinta, y el Inicio se acorta en vez de mostrar un encabezado con nada
@@ -27,7 +33,7 @@ import PilaScanner from '@/components/inicio/PilaScanner.astro';
 import BonusBeat from '@/components/inicio/BonusBeat.astro';
 import Agenda from '@/components/inicio/Agenda.astro';
 
-import { obtenerScanner } from '@/lib/cms/noticias';
+import { obtenerScanner, filtroDeCategoria } from '@/lib/cms/noticias';
 import { obtenerParrillaDeHoy } from '@/lib/cms/programacion';
 import { loQueSono } from '@/lib/cms/aire';
 import { obtenerEspecialVigente, obtenerEspeciales } from '@/lib/cms/especiales';
@@ -35,6 +41,7 @@ import { obtenerTiposDeLista, obtenerListaReciente } from '@/lib/cms/listas';
 import { obtenerAgenda } from '@/lib/cms/eventos';
 import { obtenerBanners } from '@/lib/cms/publicidad';
 import { SERIE_FENOMENO, TIPO_LISTA_DESTACADA } from '@/config/site';
+import { SECCIONES_EDITORIALES } from '@/config/navegacion';
 
 /*
   Todo en PARALELO. Son nueve consultas y ninguna depende de otra salvo la lista
@@ -46,9 +53,27 @@ import { SERIE_FENOMENO, TIPO_LISTA_DESTACADA } from '@/config/site';
   página. Y todas van cacheadas con dedup en el cliente del CMS, así que la
   concurrencia real contra el CMS es una consulta por TTL, no una por visita.
 */
-const [{ destacada, rejilla }, parrilla, sono, especial, especiales, tipos, agenda, banners] =
+/*
+  🔴 Los filtros de las dos secciones editoriales se resuelven ANTES, porque las
+  consultas de notas los necesitan. Son dos consultas por slug ya cacheadas, y van
+  en paralelo entre ellas.
+
+  ⚠️ `filtroDeCategoria` devuelve `null` si la categoría no existe en el CMS, y ese
+  `null` NO se puede pasar a `obtenerScanner`: ahí significa «sin filtro» y traería
+  todas las notas del sitio. Por eso abajo se comprueba antes de consultar, y el
+  bloque degrada a vacío —que en el Inicio significa que la sección no se pinta—.
+*/
+const [filtroScanner, filtroEditorial] = await Promise.all([
+  filtroDeCategoria(SECCIONES_EDITORIALES.scanner.categoria),
+  filtroDeCategoria(SECCIONES_EDITORIALES.editorial.categoria),
+]);
+
+const VACIO = { destacada: null, rejilla: [] as Awaited<ReturnType<typeof obtenerScanner>>['rejilla'] };
+
+const [{ destacada, rejilla }, editorial, parrilla, sono, especial, especiales, tipos, agenda, banners] =
   await Promise.all([
-    obtenerScanner(12),
+    filtroScanner ? obtenerScanner(6, filtroScanner) : Promise.resolve(VACIO),
+    filtroEditorial ? obtenerScanner(4, filtroEditorial) : Promise.resolve(VACIO),
     obtenerParrillaDeHoy(),
     loQueSono(4).catch(() => []),
     obtenerEspecialVigente(SERIE_FENOMENO),
@@ -72,19 +97,35 @@ const listaDestacada = tipoDestacado?.slug ? await obtenerListaReciente(tipoDest
   sola consulta; aquí se corta:
     portada  → la destacada
     lados    → 2 + 2 en las columnas laterales
-    pila     → las 4 siguientes, para el bloque de Scanner
   Los `slice` no fallan con menos notas: devuelven lo que haya.
+
+  🔴 La PILA ya no sale de aquí: es de `Editorial` y tiene su propia consulta. Antes
+  eran `rejilla.slice(4, 8)` —las sobras del mosaico— y por eso el bloque de abajo
+  no podía significar nada distinto del de arriba: era la misma lista, más abajo.
 */
 const izquierda = rejilla.slice(0, 2);
 const derecha = rejilla.slice(2, 4);
-const paraLaPila = rejilla.slice(4, 8);
 
-const lema = 'BEAT 100.9 · TOTAL MUSIC';
+/*
+  La pila lleva la destacada de Editorial TAMBIÉN: en esa sección no hay una pieza
+  «de portada» que se pinte aparte, así que apartarla dejaría la primera nota
+  elaborada fuera del Inicio.
+*/
+const paraLaPila = [editorial.destacada, ...editorial.rejilla]
+  .filter((n): n is NonNullable<typeof n> => Boolean(n))
+  .slice(0, 4);
+
+/*
+  🔴 El cintillo lleva el LOGO, no el lema (decisión de Carlos, 2026-09-07).
+  «BEAT 100.9 · TOTAL MUSIC» sobrevivía del sitio v1 y «Total Music» sale del
+  sitio. Es el mismo archivo de la cabecera y el pie — ver `Marquee.astro`.
+*/
+const LOGO_MARQUEE = '/img/beat-blanco.svg';
 ---
 
 <Base
-  titulo="Beat 100.9 — Total Music"
-  descripcion="La estación de música electrónica de NRM. Qué suena ahora, el Fenómeno Residente, Beat Scanner y la agenda."
+  titulo="Beat 100.9"
+  descripcion="La estación de música electrónica de NRM. Qué suena ahora, el Fenómeno Residente, Beat Editorial y la agenda."
 >
   {/*
     El `h1` del Inicio va SOLO PARA LECTORES DE PANTALLA: el titular visible de
@@ -93,7 +134,7 @@ const lema = 'BEAT 100.9 · TOTAL MUSIC';
     la nota de portada a `h1` porque un `h1` describe la PÁGINA, no una de sus
     piezas; el mosaico seguiría teniendo dos notas más al mismo nivel.
   */}
-  <h1 class="solo-lectores">Beat 100.9 — Total Music</h1>
+  <h1 class="solo-lectores">Beat 100.9</h1>
 
   {/*
     El banner de portada va ENCIMA del chrome: el orden es publicidad → player →
@@ -138,12 +179,12 @@ const lema = 'BEAT 100.9 · TOTAL MUSIC';
   */}
   <Mosaico portada={destacada} izquierda={izquierda} derecha={derecha} />
 
-  <Marquee texto={lema} />
+  <Marquee logo={LOGO_MARQUEE} />
 
   <div class="inicio-contenido">
     <Fenomeno especial={especial} />
     <ArchivoTemas temas={especiales} excluir={especial?.id ?? null} />
-    <PilaScanner notas={paraLaPila} />
+    <PilaScanner notas={paraLaPila} seccion={SECCIONES_EDITORIALES.editorial} />
 
     {/* 3. qué viene */}
     <BonusBeat lista={listaDestacada} tipo={tipoDestacado} />

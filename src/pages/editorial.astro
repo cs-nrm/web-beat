@@ -1,0 +1,28 @@
+---
+/**
+ * Editorial — las notas elaboradas.
+ *
+ * 🔴 Es la hermana de `/scanner` y nace el 2026-09-07 por decisión editorial de
+ * Carlos: «Editorial son notas más elaboradas, Beat Scanner es notas del día a
+ * día». Las dos comparten el MISMO interior —`IndiceScanner`, la pantalla 14b— y
+ * lo único que las distingue es de qué categoría del CMS se llenan.
+ *
+ * ⚠️ Por eso esto es una página de cinco líneas y no una copia del índice: si el
+ * interior se duplicara, el día que cambie la maqueta habría que cambiarla dos
+ * veces, y a la segunda se olvida.
+ *
+ * ⚠️ `editorial` está en `SEGMENTOS_RESERVADOS` (`config/site.ts`). Sin eso, la
+ * ruta la resolvería `[tipoLista]` buscando un tipo de lista con ese slug, y cada
+ * visita dispararía una consulta al CMS para acabar en un 404.
+ */
+import Base from '@/layouts/Base.astro';
+import IndiceScanner from '@/components/IndiceScanner.astro';
+import { SECCIONES_EDITORIALES } from '@/config/navegacion';
+---
+
+<Base
+  titulo="Editorial — Beat 100.9"
+  descripcion="Las piezas largas de Beat 100.9: perfiles, reportajes y ensayos sobre la cultura electrónica."
+>
+  <IndiceScanner seccion={SECCIONES_EDITORIALES.editorial} />
+</Base>

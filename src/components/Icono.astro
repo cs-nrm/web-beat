@@ -27,7 +27,6 @@ interface Props {
     | 'menu'
     | 'search'
     | 'x'
-    | 'clock'
     | 'arrow-up-right'
     | 'link'
     | 'facebook'
@@ -48,8 +47,10 @@ const TRAZOS: Record<Props['nombre'], string> = {
   menu: '<path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/>',
   search: '<path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/>',
   x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
-  // El `min` de cada tarjeta y el tiempo de lectura de la nota.
-  clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  /* ⚠️ Aquí estaba `clock`, el reloj del «3 MIN». Se fue con el tiempo de lectura
+     (2026-09-07): las tarjetas, la portada y la firma llevan la fecha, y una fecha
+     no lleva reloj. Se quita del mapa en vez de dejarlo huérfano — un icono que
+     nadie pide es un icono que alguien vuelve a usar por costumbre. */
   // El remate de "Leer la nota" y el botón redondo de las filas de «Más en Scanner».
   'arrow-up-right': '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>',
   // Los tres de compartir (14c). `link` es "copiar enlace".

@@ -11,6 +11,7 @@ import {
   type ParamsCms,
   type RespuestaLista,
 } from './client';
+import { obtenerCategoria } from './categorias';
 import type { Noticia } from '@/types/payload';
 
 /**
@@ -68,7 +69,35 @@ function acotar(filtro?: FiltroScanner | null): ParamsCms {
 }
 
 /**
- * Portada de Beat Scanner: la nota principal y la rejilla.
+ * El filtro de una sección editorial, resuelto desde el SLUG de su categoría.
+ *
+ * 🔴 Existe para que las cuatro superficies que necesitan una sección editorial
+ * —`/scanner`, `/editorial`, el mosaico del Inicio y su pila— no repitan cada una
+ * el mapeo «categoría del CMS → `FiltroScanner`». Cuando se repite en cuatro
+ * sitios, el quinto se escribe distinto.
+ *
+ * Devuelve `null` si la categoría no existe en el CMS, y quien llama TIENE que
+ * distinguirlo de «sin filtro»: `obtenerScanner(n, null)` trae TODAS las notas, así
+ * que confundir los dos casos haría que una sección con la categoría mal escrita
+ * pintara el sitio entero en vez de quedarse vacía. Es la clase de fallo que nadie
+ * reporta porque la página se ve llena.
+ *
+ * ✨ El id sale de una consulta cacheada por slug, que es justo lo que
+ * `obtenerScanner` necesita para acertar su entrada de caché — ver `acotar()`.
+ */
+export async function filtroDeCategoria(slug: string): Promise<FiltroScanner | null> {
+  const cat = await obtenerCategoria(slug);
+  if (!cat) return null;
+  return {
+    tipo: 'categoria',
+    id: cat.id,
+    nombre: cat.nombre ?? '',
+    slug: cat.slug ?? slug,
+  };
+}
+
+/**
+ * Portada de una sección editorial: la nota principal y la rejilla.
  *
  * Se pide UNA sola consulta y se reparte en memoria. Es deliberado: si la
  * destacada y la rejilla fueran dos consultas, tendrían dos relojes de caché
@@ -146,25 +175,17 @@ export async function obtenerRelacionadas(nota: Noticia, cuantas = 3): Promise<N
   }
 }
 
-/**
- * Tiempo de lectura en minutos — el `min` que el diseño pinta en cada tarjeta.
- *
- * Se calcula en el front a propósito: es una función del contenido, no un dato
- * editorial, y meterlo como campo en el CMS obligaría a mantenerlo a mano cada vez
- * que se edita una nota.
- *
- * 200 palabras por minuto, mínimo 1. Recorre el árbol Lexical contando solo los
- * nodos de texto: un embed o una imagen no son palabras.
- */
-export function minutosDeLectura(contenido: unknown): number {
-  let palabras = 0;
-  const recorrer = (nodo: unknown): void => {
-    if (!nodo || typeof nodo !== 'object') return;
-    const n = nodo as { text?: unknown; children?: unknown[]; root?: unknown };
-    if (typeof n.text === 'string') palabras += n.text.trim().split(/\s+/).filter(Boolean).length;
-    if (n.root) recorrer(n.root);
-    if (Array.isArray(n.children)) n.children.forEach(recorrer);
-  };
-  recorrer(contenido);
-  return Math.max(1, Math.round(palabras / 200));
-}
+/*
+  🔴 Aquí vivía `minutosDeLectura()`, y se borró el 2026-09-07 con su último
+  llamador.
+
+  Pintaba el «3 MIN» de cada tarjeta estimando 200 palabras por minuto sobre el
+  árbol Lexical. El problema no era el cálculo, era el dato: con las notas que
+  publica la estación, TODAS salían en «1 MIN», así que cuatro tarjetas seguidas
+  decían lo mismo y el hueco no informaba nada. Ahora esas cinco superficies
+  —tarjetas, portada del mosaico, destacada de la sección, cartas de la pila y la
+  firma de la nota— llevan la FECHA, que sí distingue.
+
+  Se anota en vez de borrarse en silencio para que nadie la reinvente: si vuelve a
+  hacer falta, está en `git log` de este archivo.
+*/

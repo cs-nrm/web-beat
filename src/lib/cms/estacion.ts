@@ -13,6 +13,7 @@
  */
 import { cmsFetch, type RespuestaLista } from './client';
 import { ESTACION_CODIGO } from '@/config/site';
+import { REDES_RESPALDO } from '@/config/navegacion';
 
 export interface Estacion {
   id: number;
@@ -70,15 +71,25 @@ export function obtenerEstacion(): Promise<Estacion> {
   return promesa;
 }
 
-/** Redes sociales de la estación, ya filtradas y con su etiqueta. */
+/**
+ * Redes sociales de la estación, ya filtradas y con su etiqueta.
+ *
+ * 🔴 El CMS manda, y `REDES_RESPALDO` solo tapa el hueco RED POR RED: hoy los
+ * cinco campos de `estaciones` están en `null` y el pie pintaba «Próximamente»
+ * donde va la única forma de seguir a la estación. Con el `??`, capturar Facebook
+ * en el admin lo hace ganar de inmediato sin tocar las otras cuatro.
+ *
+ * ⚠️ Se sigue filtrando por verdad: una entrada sin URL en ninguno de los dos
+ * lados no se pinta. Un enlace vacío es peor que una red de menos.
+ */
 export async function redesEstacion(): Promise<Array<{ red: string; url: string }>> {
   const e = await obtenerEstacion();
   const pares: Array<[string, string | null | undefined]> = [
-    ['Facebook', e.facebook],
-    ['Instagram', e.instagram],
-    ['X', e.x],
-    ['YouTube', e.youtube],
-    ['TikTok', e.tiktok],
+    ['Facebook', e.facebook ?? REDES_RESPALDO.facebook],
+    ['Instagram', e.instagram ?? REDES_RESPALDO.instagram],
+    ['X', e.x ?? REDES_RESPALDO.x],
+    ['YouTube', e.youtube ?? REDES_RESPALDO.youtube],
+    ['TikTok', e.tiktok ?? REDES_RESPALDO.tiktok],
   ];
   return pares
     .filter((p): p is [string, string] => Boolean(p[1]))

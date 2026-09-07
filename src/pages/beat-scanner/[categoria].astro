@@ -1,0 +1,55 @@
+---
+/**
+ * Beat Scanner filtrado por categoría — los filtros de 14b/14e.
+ *
+ * Se resuelve por SLUG, nunca por id: el sitio viejo tiene IDs de categoría
+ * hardcodeados en 55 URLs porque su WordPress no exponía el slug.
+ *
+ * ⚠️ Vivía en `/scanner/<categoria>` y se mudó con su sección. La ruta vieja
+ * responde 301 hacia esta desde `astro.config.mjs`.
+ */
+import Base from '@/layouts/Base.astro';
+import IndiceScanner from '@/components/IndiceScanner.astro';
+import { obtenerCategoria } from '@/lib/cms/categorias';
+import { SECCIONES_EDITORIALES } from '@/config/navegacion';
+
+const { categoria: slug } = Astro.params;
+
+/*
+  🔴 Las categorías que YA SON una sección se redirigen a su sección, con 301.
+
+  Al separar Beat Scanner y Editorial (2026-09-07), sus categorías pasaron a tener
+  DOS URLs con el mismo contenido: `/editorial` y `/beat-scanner/editorial` sirven
+  la misma nota, y `/beat-scanner/beat-scanner` es `/beat-scanner`. Eso es contenido
+  duplicado —Google elige una por su cuenta y reparte la señal entre las dos— y
+  además una migaja que miente: en `/beat-scanner/editorial` la tira marcaba «Beat
+  Scanner» mientras el titular decía «EDITORIAL».
+
+  Hoy nada del sitio enlaza a esas dos rutas —la migaja de la nota se calla la
+  categoría cuando coincide con su sección—, pero son URLs alcanzables y bastó que
+  existieran una vez para que alguien las comparta o las indexe. El 301 las
+  colapsa en una sola y traspasa lo que ya tuvieran acumulado.
+*/
+const esSeccion = Object.values(SECCIONES_EDITORIALES).find((s) => s.categoria === slug);
+if (esSeccion) return Astro.redirect(esSeccion.href, 301);
+
+const cat = slug ? await obtenerCategoria(slug) : null;
+if (!cat) return Astro.rewrite('/404');
+---
+
+<Base
+  titulo={`${cat.nombre} — Beat 100.9`}
+  descripcion={cat.descripcion ?? `${cat.nombre} en Beat 100.9.`}
+>
+  {/*
+    Se pasa la sección ADEMÁS del filtro, y no en su lugar: el filtro es el que
+    manda sobre el contenido —una categoría es más estrecha que una sección— y la
+    sección solo sirve para que la tira marque dónde estás. Sin ella, entrar a una
+    categoría desde la migaja de una nota dejaba la tira sin ninguna pastilla
+    encendida.
+  */}
+  <IndiceScanner
+    seccion={SECCIONES_EDITORIALES.scanner}
+    filtro={{ tipo: 'categoria', id: cat.id, nombre: cat.nombre ?? '', slug: cat.slug ?? '' }}
+  />
+</Base>

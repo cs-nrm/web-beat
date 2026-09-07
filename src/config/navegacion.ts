@@ -21,27 +21,79 @@ export interface EntradaNav {
 }
 
 /**
- * La navegación de arriba: CINCO secciones, en este orden.
+ * 🔴 Las DOS secciones editoriales, y qué categoría del CMS alimenta a cada una.
  *
- * 🔴 Son cinco y no ocho, y es decisión de Carlos (2026-09-01):
- * `EN VIVO · FENÓMENO RESIDENTE · BONUS BEAT · BEAT SCANNER · AGENDA`.
+ * Esto es nuevo del 2026-09-07 y es una decisión editorial de Carlos, no un
+ * refactor: **son dos cosas distintas y hasta hoy el sitio las trataba como una.**
+ *
+ *   `Beat Scanner` → el día a día. Va en la parte principal del Inicio.
+ *   `Editorial`    → las notas más elaboradas. Va en la pila, más abajo.
+ *
+ * Las dos usan el MISMO interior (`IndiceScanner`) porque la pantalla es la misma;
+ * lo que cambia es de qué categoría se llena. Antes `/scanner` traía TODAS las
+ * notas sin filtrar, así que las elaboradas y las del día se mezclaban en la misma
+ * rejilla y ninguna de las dos secciones significaba nada.
+ *
+ * 🔴 `categoria` es el `slug` de un documento de `categorias` del CMS, y es el
+ * único punto de contacto: si la redacción renombra la categoría, el rótulo del
+ * front NO cambia —lo manda `rotulo`— pero el slug sí tiene que seguir existiendo.
+ * ⚠️ Si el slug deja de existir, la sección se pinta VACÍA con su aviso, no con
+ * todas las notas: ver `IndiceScanner.astro`. Un índice que de pronto trae todo es
+ * peor que uno que dice que está vacío, porque nadie lo nota.
+ */
+export interface SeccionEditorial {
+  /** El rótulo tal como se pinta en el titular: ya en mayúsculas. */
+  rotulo: string;
+  href: string;
+  /** `slug` de la categoría del CMS que la llena. */
+  categoria: string;
+}
+
+/*
+  ⚠️ `href` y `categoria` se parecen pero NO son lo mismo, y conviene no fundirlos:
+  el `href` es nuestro contrato de URL y la `categoria` es un slug que la redacción
+  puede renombrar en el admin. Que hoy coincidan en `beat-scanner` es una
+  coincidencia cómoda, no una regla — `editorial` ya podría dejar de coincidir
+  mañana sin que la URL se mueva.
+*/
+export const SECCIONES_EDITORIALES = {
+  scanner: { rotulo: 'BEAT SCANNER', href: '/beat-scanner', categoria: 'beat-scanner' },
+  editorial: { rotulo: 'EDITORIAL', href: '/editorial', categoria: 'editorial' },
+} as const satisfies Record<string, SeccionEditorial>;
+
+/**
+ * La navegación de arriba: SEIS secciones, en este orden.
+ *
+ * 🔴 Eran cinco (decisión de Carlos, 2026-09-01) y son seis desde el 2026-09-07,
+ * cuando Beat Scanner y Editorial se separaron en dos secciones con interior
+ * propio: `EN VIVO · FENÓMENO RESIDENTE · BONUS BEAT · BEAT SCANNER · EDITORIAL ·
+ * AGENDA`. Las dos tienen entrada porque las dos tienen página — anunciar una y
+ * esconder la otra dejaría la sección «elaborada» como la menos visible del sitio.
+ *
  * Las tres que faltan del mapa de sitio —Comunidad, Tienda y Marcas— no
  * desaparecen: bajan a `SECCIONES_FUTURAS`, que el PIE sí pinta. Un menú de ocho
  * con tres apagadas enseña al lector que la mitad de este sitio no lleva a
  * ninguna parte; el pie es donde un mapa completo sí tiene sentido.
  *
  * ⚠️ El rótulo es el nombre COMPLETO —«Fenómeno Residente», no «Fenómeno»—
- * porque con cinco entradas cabe, y porque abreviar el nombre de la sección
+ * porque con seis entradas todavía cabe, y porque abreviar el nombre de la sección
  * estrella para ahorrar 60px era una economía sin destinatario.
  *
- * «Beat Scanner» sustituye a las noticias: sale del lienzo v14, no del PDF, y
- * donde los dos no coinciden gana el lienzo, que es posterior.
+ * ⚠️ La tira de `NavSecciones` pinta estas seis y se ENVUELVE: a 375px salen en
+ * dos filas de 64px de alto en total, sin desbordar (medido). No se convierte en
+ * carrusel — una sección que hay que descubrir arrastrando es una sección que no
+ * existe.
+ *
+ * ⚠️ Los `href` editoriales salen de `SECCIONES_EDITORIALES`, no escritos a mano:
+ * son los mismos que usan las dos páginas y la migaja de cada nota, y tenerlos en
+ * dos sitios es cómo el menú y el pie dejan de coincidir.
  */
 export const SECCIONES: EntradaNav[] = [
   { corto: 'En vivo', largo: 'Escuchar en vivo', href: '/en-vivo' },
   { corto: 'Fenómeno Residente', largo: 'El Fenómeno Residente', href: '/fenomeno-residente' },
   { corto: 'Bonus Beat', largo: 'Bonus Beat', href: '/bonus-beat' },
-  { corto: 'Beat Scanner', largo: 'Beat Scanner', href: '/scanner' },
+  { corto: 'Beat Scanner', largo: 'Beat Scanner', href: SECCIONES_EDITORIALES.scanner.href },
+  { corto: 'Editorial', largo: 'Editorial', href: SECCIONES_EDITORIALES.editorial.href },
   { corto: 'Agenda', largo: 'Agenda', href: '/eventos' },
 ];
 
@@ -104,18 +156,63 @@ export const APPS: Array<{ tienda: string; url: string | null }> = [
 /**
  * Legales y corporativos.
  *
- * Los dos primeros son `paginas` en el CMS (pendiente, A1); por ahora la ruta se
- * reserva y el pie los pinta apagados.
+ * 🔴 Los tres apuntan al CORPORATIVO, y los dos primeros dejaron de estar
+ * apagados (decisión de Carlos, 2026-09-07).
+ *
+ * Estaban reservados como `paginas` del CMS (A1) esperando que alguien capturara
+ * el texto, y el pie los pintaba en gris. Pero un aviso de privacidad apagado es
+ * peor que uno de más: es el único enlace del sitio que la ley da por supuesto, y
+ * en gris se lee como «este sitio no tiene». `paginas` sigue con CERO documentos
+ * —comprobado—, así que la espera no tenía fecha.
+ *
+ * Y no hacía falta: el texto que gobierna este sitio es el de NRM, no uno de la
+ * estación, y ya está publicado. Verificado antes de escribirlo (200 los dos):
+ *   · https://nrm.com.mx/aviso-de-privacidad/
+ *   · https://nrm.com.mx/terminos-y-condiciones/
+ *
+ * ⚠️ NO se enlaza a `beatdigital.mx/avisodeprivacidad/`, que es donde vive hoy:
+ * esa página es del WordPress v1 y muere el día del corte, así que el pie del sitio
+ * nuevo apuntaría a un 404 de su propio dominio.
+ *
+ * El día que la estación quiera su propio aviso, se captura en `paginas` y estos
+ * dos `href` vuelven a ser rutas internas. Mientras, el enlace lleva a un texto
+ * que existe.
  *
  * ⚠️ `Ventas` es del CORPORATIVO, no de la estación: sale del pie del v1 y del de
  * los repos hermanos, y apunta al contacto de NRM. Es el enlace por el que entra el
  * dinero, así que es el que menos conviene perder en un relanzamiento.
  */
 export const LEGALES: EntradaNav[] = [
-  { corto: 'Aviso de privacidad', largo: 'Aviso de privacidad', href: '/aviso-de-privacidad', pendiente: true },
-  { corto: 'Términos y condiciones', largo: 'Términos y condiciones', href: '/terminos-y-condiciones', pendiente: true },
+  { corto: 'Aviso de privacidad', largo: 'Aviso de privacidad', href: 'https://nrm.com.mx/aviso-de-privacidad/' },
+  { corto: 'Términos y condiciones', largo: 'Términos y condiciones', href: 'https://nrm.com.mx/terminos-y-condiciones/' },
   { corto: 'Ventas', largo: 'Ventas', href: 'https://nrm.com.mx/contacto/' },
 ];
+
+/**
+ * 🔴 Las redes de la estación, de RESPALDO.
+ *
+ * El CMS es la fuente —`estaciones.facebook`, `.instagram`, `.x`, `.youtube`,
+ * `.tiktok`— y sigue siendo el que gana. El problema es que hoy los cinco campos
+ * están en `null` (comprobado contra `admin.nrm.com.mx`), así que el pie pintaba
+ * «Próximamente» donde va la única forma que tiene un oyente de seguir a la
+ * estación. Beat tiene esas cuentas desde años; lo que faltaba era capturarlas.
+ *
+ * Salen del pie del v1 (`git show main:src/components/Footer.astro`), igual que
+ * `APPS`: son los perfiles REALES, no inventados, y los cinco responden 200
+ * —verificado antes de escribirlos—.
+ *
+ * ⚠️ Es un respaldo POR RED y no una lista alterna: en cuanto el CMS traiga
+ * `facebook`, ese valor gana y este se ignora. Así capturar una sola red en el
+ * admin no obliga a capturar las cinco, y corregir una cuenta no exige un
+ * despliegue. Ver `redesEstacion()` en `lib/cms/estacion.ts`.
+ */
+export const REDES_RESPALDO = {
+  facebook: 'https://www.facebook.com/beat1009fm',
+  instagram: 'https://www.instagram.com/beat1009fm/',
+  x: 'https://x.com/BEATOFICIAL',
+  youtube: 'https://www.youtube.com/c/BEAT1009FMOFICIAL',
+  tiktok: 'https://www.tiktok.com/@beat1009fm',
+} as const;
 
 /**
  * La tira de marcas de NRM del pie.

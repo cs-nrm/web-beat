@@ -6,6 +6,8 @@
  * categoría y la fecha larga son decisiones de front, y varias tienen que resolver
  * inconsistencias del contenido capturado.
  */
+import { urlMedia } from '@/lib/cms/client';
+import { SECCIONES_EDITORIALES, type SeccionEditorial } from '@/config/navegacion';
 import type { Noticia } from '@/types/payload';
 
 /**
@@ -22,11 +24,80 @@ export function nombreCategoria(nota: Noticia): string | null {
   return primera.nombre ?? null;
 }
 
+/**
+ * 🔴 A QUÉ SECCIÓN pertenece una nota: Beat Scanner o Editorial.
+ *
+ * Lo decide la categoría, porque desde el 2026-09-07 eso es lo que separa las dos
+ * secciones editoriales (ver `SECCIONES_EDITORIALES`). De aquí salen la migaja de
+ * la nota y la pastilla encendida de su tira: antes las dos decían «BEAT SCANNER»
+ * fijo, y con dos secciones eso convertía a la mitad de las notas en una mentira.
+ *
+ * ⚠️ Se recorren las categorías EN EL ORDEN DE LA NOTA y gana la primera que sea
+ * una sección — el mismo criterio que `nombreCategoria`. Es coherente y es lo menos
+ * sorprendente: quien captura decide cuál va primero, y reordenar el array cambia
+ * una etiqueta, no una URL.
+ *
+ * ⚠️ Cae a Beat Scanner cuando la nota no está en ninguna de las dos —una cápsula
+ * del Fenómeno Residente, por ejemplo—. No es exacto, pero es lo que el sitio ya
+ * hacía para TODAS las notas, y la alternativa —una migaja sin sección— dejaría a
+ * esas notas sin salida hacia arriba.
+ */
+export function seccionDeNota(nota: Noticia): SeccionEditorial {
+  const secciones = Object.values(SECCIONES_EDITORIALES);
+  for (const c of nota.categorias ?? []) {
+    if (typeof c === 'number' || !c?.slug) continue;
+    const hallada = secciones.find((s) => s.categoria === c.slug);
+    if (hallada) return hallada;
+  }
+  return SECCIONES_EDITORIALES.scanner;
+}
+
 /** El slug de la primera categoría — para enlazar el rótulo al filtro. */
 export function slugCategoria(nota: Noticia): string | null {
   const primera = (nota.categorias ?? [])[0];
   if (!primera || typeof primera === 'number') return null;
   return primera.slug ?? null;
+}
+
+/** La firma de una nota, ya resuelta para pintarse. */
+export interface Firma {
+  nombre: string;
+  slug: string | null;
+  /**
+   * La foto del autor, si la relación existe y la trae. Con el texto libre es
+   * `null` siempre: una cadena no tiene foto.
+   */
+  foto: string | null;
+  /** Las iniciales, para el hueco de la foto cuando no hay foto. */
+  monograma: string;
+  /** Una línea sobre quién firma. `null` cae al texto de la casa. */
+  cargo: string | null;
+}
+
+/**
+ * 🔴 Las INICIALES con las que se rellena el hueco de la foto.
+ *
+ * Antes ese hueco era un círculo con degradado y nada dentro, y a simple vista se
+ * leía como una imagen que no cargó. Un monograma dice «no hay retrato de esta
+ * persona», que es la verdad.
+ *
+ * ⚠️ El caso raro está medido, no imaginado: el contenido capturado usa el texto
+ * libre y ahí la misma persona aparece como «FO», «Fernanda Ortíz» y «Fernanda
+ * Ortiz». Una firma que YA son iniciales —una sola palabra, en mayúsculas, corta—
+ * se deja tal cual; partirla daría «F».
+ */
+function monogramaDe(nombre: string): string {
+  const palabras = nombre.trim().split(/\s+/).filter(Boolean);
+  if (palabras.length === 1) {
+    const sola = palabras[0];
+    if (sola.length <= 3 && sola === sola.toUpperCase()) return sola;
+    return sola.slice(0, 1).toUpperCase();
+  }
+  return palabras
+    .slice(0, 2)
+    .map((p) => p.slice(0, 1))
+    .join('')
+    .toUpperCase();
 }
 
 /**
@@ -36,15 +107,34 @@ export function slugCategoria(nota: Noticia): string | null {
  * `autores` y `autor` es texto libre. El contenido capturado usa solo el texto
  * libre, y ahí ya aparece la misma persona escrita de tres formas —«FO»,
  * «Fernanda Ortíz», «Fernanda Ortiz»—. Se prefiere la relación cuando existe,
- * porque es la única que puede dar una firma estable y una página de autor.
+ * porque es la única que puede dar una firma estable, una foto y una página de
+ * autor.
+ *
+ * ⚠️ La foto solo llega si quien consulta pidió `depth: 2`: con 1 el autor viene
+ * poblado pero su `foto` sigue siendo un id. `obtenerNota` ya lo hace, y es la
+ * única que necesita la ficha. Si llegara como id, `urlMedia` devuelve `null` y se
+ * pinta el monograma — degrada, no truena.
+ *
+ * ✨ `cargo` antes que `bio`: este hueco es de UNA línea («Conductora», «Editor
+ * digital»), que es exactamente para lo que el CMS tiene `cargo`. La `bio` es un
+ * párrafo y aquí se leería apretada.
  */
-export function firma(nota: Noticia): { nombre: string; slug: string | null } | null {
+export function firma(nota: Noticia): Firma | null {
   const rel = (nota.autores ?? []).find((a) => typeof a === 'object' && a !== null);
   if (rel && typeof rel === 'object') {
-    return { nombre: rel.nombre ?? '', slug: rel.slug ?? null };
+    const nombre = rel.nombre ?? '';
+    return {
+      nombre,
+      slug: rel.slug ?? null,
+      foto: urlMedia(rel.foto, 'thumbnail'),
+      monograma: monogramaDe(nombre),
+      cargo: (rel.cargo ?? rel.bio ?? '').trim() || null,
+    };
   }
   const libre = (nota.autor ?? '').trim();
-  return libre ? { nombre: libre, slug: null } : null;
+  return libre
+    ? { nombre: libre, slug: null, foto: null, monograma: monogramaDe(libre), cargo: null }
+    : null;
 }
 
 const MESES = [

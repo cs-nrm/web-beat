@@ -310,11 +310,23 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     <span class="hidden flex-none items-center gap-2 md:flex">
       <Icono nombre="volume-2" tamano={16} />
       <label class="sr-only" for="beat-volumen">Volumen</label>
+      {/*
+        🔴 El mínimo es 1 y no 0 (Carlos, 2026-09-08). Reportado por él: al llegar
+        a 0 la transmisión se DETIENE, y no es un volumen bajo del que se pueda
+        volver subiendo el deslizador. O sea que el extremo izquierdo del control
+        era una trampa: parecía «sin volumen» y era «se acabó». No está medido de
+        este lado —hace falta el SDK de Triton en vivo—, así que el arreglo es
+        quitar el extremo, no confiar en interpretar por qué lo hace.
+
+        ⚠️ Con 1 el volumen efectivo es 0.01, inaudible en la práctica, y la
+        conexión sigue viva. Quien quiera silencio de verdad lo tiene en el botón de
+        pausa, que es donde debe estar.
+      */}
       <input
         id="beat-volumen"
         data-accion="volumen"
         type="range"
-        min="0"
+        min="1"
         max="100"
         value="62"
         class="player-volumen w-[72px]"

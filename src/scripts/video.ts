@@ -25,6 +25,16 @@ interface PlyrFuente {
 }
 interface PlyrInstancia {
   source: PlyrFuente;
+  /*
+    🔴 Se le pregunta A PLYR si está sonando, en vez de fiarse del atributo que
+    este módulo pinta en el panel. El atributo es un ESPEJO —lo escriben los
+    eventos— y un espejo puede quedarse atrás: medido, entre el clic y el evento
+    `playing` hay una ventana de buffering de varios segundos en la que el panel
+    todavía dice `listo` y el vídeo ya está reproduciendo. Un interruptor que
+    consultara el espejo en esa ventana haría lo contrario de lo pedido.
+  */
+  readonly playing: boolean;
+  readonly paused: boolean;
   play(): Promise<void> | void;
   pause(): void;
   destroy(): void;
@@ -73,9 +83,18 @@ interface Visor {
   observador?: IntersectionObserver;
   reproductor: PlyrInstancia | null;
   id: string;
+  /**
+   * El botón de la cápsula que está CARGADA en el visor.
+   *
+   * 🔴 Sin esto no se podía distinguir «pulsó la que ya está puesta» de «pulsó
+   * otra», y las dos hacían lo mismo: recargar la fuente. Medido en el navegador,
+   * volver a pulsar la cápsula en curso la devolvía de 23.8s a 0 — o sea que el
+   * gesto natural para retomar después de que el directo robara el canal te
+   * costaba el sitio donde ibas.
+   */
+  activo: HTMLElement | null;
   /** Los escuchas vigentes, para poder quitarlos antes de volver a ponerlos. */
-  alSonar?: () => void;
-  alPausar?: () => void;
+  escuchas: Array<[string, () => void]>;
 }
 
 const visores = new Map<string, Visor>();
@@ -113,29 +132,99 @@ function vigilarViewport(visor: Visor): void {
 }
 
 /**
- * Refleja en el panel lo que el reproductor está haciendo, para que el CSS pueda
- * pintar el indicador de carga y el estado de la cápsula activa.
+ * Pinta en el BOTÓN de la cápsula si esa cápsula está sonando.
+ *
+ * Los dos iconos viven en el marcado y aquí solo se alterna cuál se ve — el mismo
+ * patrón que el botón del directo en `player.ts`, para que no haya dos formas de
+ * hacer lo mismo en el sitio. Reconstruir SVG en cada cambio de estado sería la
+ * otra, y es peor.
+ *
+ * ⚠️ `aria-pressed` acompaña al icono. Un botón que cambia de función según el
+ * estado tiene que decirlo, o para quien navega con lector de pantalla sigue
+ * siendo «reproducir» cuando ya reproduce.
+ */
+function pintarBoton(boton: HTMLElement | null, sonando: boolean): void {
+  if (!boton) return;
+  boton.querySelector('[data-icono="play"]')?.classList.toggle('hidden', sonando);
+  boton.querySelector('[data-icono="pause"]')?.classList.toggle('hidden', !sonando);
+  boton.setAttribute('aria-pressed', sonando ? 'true' : 'false');
+}
+
+/**
+ * Refleja en el panel y en la cápsula lo que el reproductor está haciendo, para
+ * que el CSS pueda pintar el indicador de carga y el icono correcto.
  */
 function enlazarEventos(visor: Visor): void {
   const p = visor.reproductor;
   if (!p) return;
-  const sonando = () => {
-    visor.panel.dataset.estado = 'sonando';
-    // Misma clave que la registrada; ver el comentario de `reproducirEn`.
-    reclamarAudio(visor.id);
-  };
-  const pausa = () => {
+
+  const detenido = () => {
     visor.panel.dataset.estado = 'pausa';
+    pintarBoton(visor.activo, false);
     // Al pausar deja de flotar: perseguir al lector con un video detenido no
     // aporta nada.
     flotar(visor, false);
   };
-  p.off('playing', visor.alSonar ?? sonando);
-  p.off('pause', visor.alPausar ?? pausa);
-  visor.alSonar = sonando;
-  visor.alPausar = pausa;
-  p.on('playing', sonando);
-  p.on('pause', pausa);
+
+  /*
+    🔴 Los escuchas se guardan en una LISTA y no en un campo por evento.
+
+    Antes eran dos campos (`alSonar`, `alPausar`) y añadir el tercero —`ended`—
+    habría sido un tercer campo y una tercera pareja de `off`/`on` a mano. Con la
+    lista, quitar los vigentes es un recorrido y no hay forma de olvidarse de uno:
+    sin el `off`, `on()` ACUMULA, y tras once cápsulas habría once manejadores del
+    mismo evento.
+
+    ⚠️ `ended` es nuevo y tapaba un hueco real: al terminar el vídeo, Plyr no emite
+    `pause`, así que el panel se quedaba en `sonando` y —ahora que el botón tiene
+    dos caras— la cápsula habría quedado con el icono de pausa sobre algo que ya
+    no suena.
+  */
+  visor.escuchas.forEach(([ev, fn]) => p.off(ev, fn));
+  visor.escuchas = [
+    [
+      'playing',
+      () => {
+        visor.panel.dataset.estado = 'sonando';
+        pintarBoton(visor.activo, true);
+        // Misma clave que la registrada; ver el comentario de `reproducirEn`.
+        reclamarAudio(visor.id);
+      },
+    ],
+    ['pause', detenido],
+    ['ended', detenido],
+  ];
+  visor.escuchas.forEach(([ev, fn]) => p.on(ev, fn));
+}
+
+/**
+ * El interruptor de la cápsula que YA está cargada: pausa o retoma, sin tocar la
+ * fuente.
+ *
+ * 🔴 Esto es lo que arregla el gesto que no funcionaba. El camino de antes trataba
+ * cualquier clic como «carga esta cápsula», así que pulsar la que ya estaba puesta
+ * le reasignaba la misma fuente: Plyr reconstruye el elemento de medios, y el vídeo
+ * volvía al segundo 0. Y como el icono no cambiaba nunca, desde fuera se leía como
+ * que el botón no respondía.
+ *
+ * ⚠️ Retomar RECLAMA el canal, igual que un arranque: si el directo está sonando
+ * —el caso normal, porque es justo lo que acaba de pausar este vídeo— hay que
+ * callarlo, o se oirían los dos.
+ */
+function alternar(visor: Visor): void {
+  const p = visor.reproductor;
+  if (!p) return;
+  if (p.playing) {
+    p.pause();
+    return;
+  }
+  reclamarAudio(visor.id);
+  try {
+    const r = p.play();
+    if (r && typeof r.catch === 'function') r.catch(() => {});
+  } catch {
+    /* el navegador puede rechazar el arranque; el control de Plyr queda visible */
+  }
 }
 
 /**
@@ -161,16 +250,50 @@ async function reproducirEn(visor: Visor, boton: HTMLElement): Promise<void> {
   reclamarAudio(visor.id);
   visor.panel.dataset.estado = 'cargando';
 
+  /*
+    🔴 La cápsula se marca ANTES de bajar Plyr, no al final.
+
+    Son 110 KB en el camino frío: hasta que llegaran, la lista no señalaba nada y
+    el clic no tenía acuse de recibo. Y hace falta además para el interruptor —el
+    siguiente clic en la misma cápsula tiene que reconocerse como «esta ya es la
+    puesta»— incluso mientras carga.
+  */
+  visor.activo = boton;
+  const lista = boton.closest('[data-capsulas]');
+  lista?.querySelectorAll<HTMLElement>('[data-fuente]').forEach((b) => {
+    delete b.dataset.activa;
+    // Y su icono vuelve a «reproducir»: la que se queda atrás no puede seguir
+    // mostrando pausa.
+    pintarBoton(b, false);
+  });
+  boton.dataset.activa = 'sí';
+
   try {
     await cargarPlyr();
   } catch {
     visor.panel.dataset.estado = 'error';
+    /*
+      ⚠️ Se suelta la marca de activo. Si se quedara puesta sin reproductor
+      detrás, el clic siguiente en esa misma cápsula se leería como «la que ya
+      está cargada», iría al interruptor, encontraría `reproductor` en null y no
+      haría NADA: un fallo de red dejaría la cápsula muerta para siempre.
+    */
+    visor.activo = null;
     return;
   }
   if (!Plyr) return;
 
   if (!visor.reproductor) {
-    visor.reproductor = new Plyr(visor.montaje, {
+    /*
+      ⚠️ Se vuelve a buscar el elemento de montaje en vez de usar el de la
+      construcción. Medido: al cambiar de fuente, Plyr REEMPLAZA el `<video>` por
+      uno nuevo —`data-visor-montaje` desaparece del DOM mientras el reproductor
+      vive—, así que la referencia guardada puede apuntar a un nodo desprendido.
+      Con `??` se conserva el comportamiento de antes cuando el atributo sí está.
+    */
+    const montaje =
+      visor.panel.querySelector<HTMLVideoElement>('[data-visor-montaje]') ?? visor.montaje;
+    visor.reproductor = new Plyr(montaje, {
       // `youtube.noCookie` usa youtube-nocookie.com: no siembra cookies de
       // perfilado hasta que el lector le da play.
       youtube: { noCookie: true, rel: 0, modestbranding: 1 },
@@ -212,11 +335,6 @@ async function reproducirEn(visor: Visor, boton: HTMLElement): Promise<void> {
     con clic sintético, que no otorga activación de usuario.
   */
   visor.panel.dataset.estado = 'listo';
-
-  // Marcar cuál cápsula está sonando, para que la lista lo refleje.
-  const lista = boton.closest('[data-capsulas]');
-  lista?.querySelectorAll('[data-fuente]').forEach((b) => delete (b as HTMLElement).dataset.activa);
-  boton.dataset.activa = 'sí';
 
   /*
     🔴 `play()` va DESPUÉS del evento `ready`, no inmediatamente.
@@ -276,7 +394,26 @@ export function iniciarVisores(): void {
 
     const marco = panel.querySelector<HTMLElement>('[data-visor-marco]') ?? panel;
     const id = `${FUENTES.video}:${panel.id || i}`;
-    const visor: Visor = { panel, marco, montaje, portada, reproductor: null, id };
+    const visor: Visor = {
+      panel,
+      marco,
+      montaje,
+      portada,
+      reproductor: null,
+      id,
+      /*
+        🔴 Arranca en `null` y NO en la cápsula que el marcado trae con
+        `data-activa`.
+
+        Ese atributo lo pinta el servidor sobre la cápsula DESTACADA del especial:
+        significa «esta es la que encabeza», no «esta está cargada en el visor».
+        Sembrar `activo` con ella habría mandado su primer clic al interruptor, que
+        con `reproductor` en null no hace nada — o sea que la cápsula destacada, la
+        más pulsada de la lista, no habría arrancado nunca al primer intento.
+      */
+      activo: null,
+      escuchas: [],
+    };
     visores.set(id, visor);
 
     // Delegación en el contenedor: la lista de cápsulas puede ser larga y así no
@@ -291,11 +428,29 @@ export function iniciarVisores(): void {
         visor.reproductor?.pause();
         flotar(visor, false);
         return;
+
       }
 
       const boton = objetivo?.closest<HTMLElement>('[data-fuente]');
       if (!boton) return;
       ev.preventDefault();
+
+      /*
+        🔴 Dos gestos distintos con el mismo botón, y la diferencia es si esa
+        cápsula ya está en el visor.
+
+        La misma → interruptor: pausa o retoma donde iba. Otra → se carga y suena.
+
+        ⚠️ El `if` de dentro es la guarda del camino frío: mientras Plyr baja,
+        `activo` ya apunta a la cápsula pulsada pero todavía no hay reproductor.
+        Un segundo clic ahí NO debe reentrar en la carga —dispararía una segunda
+        reconstrucción sobre la primera a medio hacer, que es como se llega a un
+        visor con la fuente puesta y detenido—; se ignora y ya arrancará.
+      */
+      if (boton === visor.activo) {
+        if (visor.reproductor) alternar(visor);
+        return;
+      }
       void reproducirEn(visor, boton);
     });
   });

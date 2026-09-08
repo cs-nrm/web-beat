@@ -2,76 +2,70 @@
 /**
  * El cintillo de la marca.
  *
- * 🔴 Lleva el LOGO, no un lema (decisión de Carlos, 2026-09-07). Antes decía
- * «BEAT 100.9 · TOTAL MUSIC», que sobrevivía del sitio v1; «Total Music» sale del
- * sitio y lo que corre ahora es el wordmark. El cintillo se queda porque no
- * estorba a nadie y es la única franja de marca de la página.
+ * 🔴 Lleva el LEMA en texto, y vuelve a llevarlo (Carlos, 2026-09-08). El
+ * recorrido de este archivo importa para no deshacerlo por tercera vez: decía
+ * «BEAT 100.9 · TOTAL MUSIC» heredado del v1, el 2026-09-07 se cambió por el
+ * wordmark porque «Total Music» sale del sitio, y ahora regresa a texto con el
+ * lema nuevo. Lo que se retiró era la MARCA VIEJA, no la idea de un lema.
  *
- * ⚠️ Es el MISMO archivo del que salen la cabecera, el pie y el favicon
- * (`public/img/beat-blanco.svg`). No se copia ni se recorta una versión propia:
- * así el día que cambie el logo, cambia aquí también — que es justo lo que NO pasó
- * con el favicon, y por eso la pestaña siguió con la abeja de 2025 durante meses.
+ * ⚠️ El texto lo pasa la página y no se escribe aquí: es el mismo del `<title>`
+ * del Inicio, y tenerlo en dos sitios es como se llega a que la pestaña diga una
+ * cosa y el cintillo otra.
  *
  * 🔴 Se repite en dos GRUPOS iguales y la animación recorre exactamente la mitad:
  * el segundo grupo entra por donde sale el primero y el bucle no tiene costura.
  *
  * ⚠️ Lo que hace falta y antes faltaba: **un grupo tiene que ser más ancho que la
- * pantalla**. La versión anterior repetía su contenido solo dos veces —un ejemplar
+ * pantalla**. La versión más vieja repetía su contenido solo dos veces —un ejemplar
  * por grupo— y medía 998px de pista en una ventana de 1440. O sea que tras recorrer
  * sus 499px quedaban 941px de VACÍO a la derecha, y el bucle reiniciaba a la
  * vista: avanzaba un poco, aparecía el hueco y saltaba. La técnica de las dos
  * copias es correcta; le faltaba esta condición.
- *
- * Con 8 ejemplares por grupo —el logo mide ~126px más 56 de aire— el grupo pasa de
- * 1450px en escritorio, que cubre cualquier pantalla real. ⚠️ Si aparece hueco en
- * una ultrapanorámica, se sube `COPIAS`: la velocidad se ajusta sola.
  */
 interface Props {
-  /** Ruta del logo, desde `public/`. */
-  logo: string;
+  /** El lema que corre. Lo pasa el Inicio, que es de donde sale el `<title>`. */
+  texto: string;
 }
 
-const { logo } = Astro.props;
+const { texto } = Astro.props;
 
 /**
  * Ejemplares por grupo.
  *
- * 🔴 Son 28 y no 8, y el número cambió CON el contenido. Con el lema en 28px cada
- * ejemplar medía ~499px, así que 8 daban un grupo de ~4000px. El logo a 30px de
- * alto mide 88 —su `viewBox` es 502.93×170.93, o sea 2.94 de proporción— y con el
- * aire son 144px por ejemplar: los mismos 8 habrían dado 1150px de grupo, menos
- * que cualquier pantalla de escritorio, y el bucle habría reiniciado A LA VISTA.
- * Es exactamente el fallo que este archivo ya documentaba arriba, y volver a
- * caer en él por cambiar el contenido sin recalcular es lo fácil.
+ * 🔴 Este número se RECALCULA cada vez que cambia el contenido, y no es opcional:
+ * de él depende que el grupo sea más ancho que la pantalla. El historial del
+ * archivo es la prueba —con el lema viejo eran 8 ejemplares de ~499px, con el
+ * wordmark hubo que subirlos a 28 porque cada uno medía 144—.
  *
- * 28 × 144 = ~4030px, que es donde estaba antes.
+ * El lema nuevo es más largo que el viejo: MEDIDO en el navegador, el texto a 28px
+ * ocupa 697px y con su aire el ejemplar son 741. 8 × 741 = 5924px de grupo —medido
+ * sobre el build a 1440—, que cubre incluso una pantalla 5K y queda muy por encima
+ * de los ~4030px del wordmark.
  *
- * ⚠️ Sube este número si aparece hueco en pantallas más anchas — la velocidad se
+ * ⚠️ Medirlo importó: a ojo lo puse en 623px y sobreestimé por 118. La estimación
+ * habría dejado la velocidad un 16% baja, que es de las cosas que no se ven mal —
+ * solo se ven lentas.
+ *
+ * ⚠️ Sube este número si aparece hueco en una ultrapanorámica — la velocidad se
  * ajusta sola, ver `--marquee-dur`.
  */
-const COPIAS = 28;
+const COPIAS = 8;
 const ejemplares = Array.from({ length: COPIAS });
 ---
 
 <div class="marquee" role="presentation" aria-hidden="true">
   <div class="marquee-pista" style={`--copias: ${COPIAS}`}>
     {/*
-      Los dos grupos son idénticos, y cada ejemplar lleva el mismo `src`: son 16
-      etiquetas pero UNA sola descarga —el navegador cachea el SVG— y 3 KB.
-
-      `alt` vacío y con medidas: la franja entera ya va `aria-hidden`, así que 16
-      «Beat 100.9» seguidos en un lector de pantalla serían ruido; y sin
-      `width`/`height` cada ejemplar provocaría un salto de maquetado al llegar.
+      Los dos grupos son idénticos. `aria-hidden` va en la franja entera, así que
+      ocho «Beat 100.9 — Aquí la música se elige» seguidos no llegan a un lector de
+      pantalla: el lema ya lo dice el `<title>`, y repetirlo dieciséis veces sería
+      ruido.
     */}
     <div class="marquee-grupo">
-      {ejemplares.map(() => (
-        <img class="marquee-logo" src={logo} alt="" width="503" height="171" decoding="async" />
-      ))}
+      {ejemplares.map(() => <span class="beat-display marquee-texto">{texto}</span>)}
     </div>
     <div class="marquee-grupo">
-      {ejemplares.map(() => (
-        <img class="marquee-logo" src={logo} alt="" width="503" height="171" decoding="async" />
-      ))}
+      {ejemplares.map(() => <span class="beat-display marquee-texto">{texto}</span>)}
     </div>
   </div>
 </div>
@@ -92,37 +86,35 @@ const ejemplares = Array.from({ length: COPIAS });
     /*
       🔴 La duración cuelga del NÚMERO DE COPIAS, no es un número suelto.
 
-      Antes eran 22s fijos para recorrer un ejemplar de 499px: 23 px/s, o sea casi
-      parado. Y con un número fijo, cambiar la cantidad de copias cambiaría la
-      velocidad en silencio — más copias, misma duración, más rápido.
+      Lo que se mantiene constante son los ~75 px/s; el segundo por ejemplar sale
+      de dividir su ancho entre esa velocidad. Con un número fijo, cambiar la
+      cantidad de copias cambiaría la velocidad en silencio — más copias, misma
+      duración, más rápido.
 
-      🔴 El segundo por ejemplar bajó de 6.6s a 1.9s al cambiar el lema por el
-      logo, y NO es un ajuste de gusto: lo que se mantiene constante son los
-      ~75 px/s, y el ejemplar pasó de 499px a 144. Con los 6.6s de antes, el
-      cintillo habría quedado a 22 px/s — casi parado, que es el defecto que este
-      mismo comentario dice haber arreglado.
+      🔴 10s por ejemplar = 741px / 75 px/s. El historial del archivo es la
+      advertencia: con el lema viejo eran 6.6s para 499px, y al pasar al wordmark
+      hubo que bajarlos a 1.9s porque el ejemplar cayó a 144px. Copiar el número
+      sin recalcular deja el cintillo casi parado o disparado.
     */
-    --marquee-dur: calc(var(--copias, 2) * 1.9s);
+    --marquee-dur: calc(var(--copias, 2) * 10s);
     animation: beat-marquee var(--marquee-dur) linear infinite;
   }
   .marquee-grupo {
     display: flex;
     flex: none;
   }
-  .marquee-logo {
+  .marquee-texto {
     flex: none;
-    display: block;
-    width: auto;
-    height: 30px;
-    margin-right: 56px;
+    padding-right: 44px;
+    font-size: 28px;
+    font-weight: 800;
+    white-space: nowrap;
     /*
-      🔴 No va a blanco puro. El arte es #FFFFFF y el texto que estaba aquí antes
-      iba en `--mist-2` (#E7EBE9): con 16 ejemplares seguidos, la diferencia deja
-      de ser un matiz y la franja se convierte en lo más brillante del Inicio,
-      compitiéndole al mosaico que está justo arriba. Al 0.9 sobre `--noche-2` cae
-      donde estaba el texto.
+      🔴 No va a blanco puro, va en `--mist-2` como iba el lema original. Con ocho
+      ejemplares seguidos la diferencia deja de ser un matiz: la franja se
+      convertiría en lo más brillante del Inicio y le competiría al mosaico que
+      está justo arriba.
     */
-    opacity: 0.9;
   }
 
   /* Se detiene con `prefers-reduced-motion`: un texto en movimiento perpetuo es
@@ -138,9 +130,24 @@ const ejemplares = Array.from({ length: COPIAS });
     .marquee {
       padding: 12px 0;
     }
-    .marquee-logo {
-      height: 22px;
-      margin-right: 38px;
+    .marquee-texto {
+      padding-right: 32px;
+      font-size: 20px;
+    }
+    /*
+      🔴 La duración también baja, y esto es NUEVO respecto a la versión anterior.
+
+      Lo que este archivo declara constante son los ~75 px/s, pero la duración
+      vivía solo en el bloque de escritorio: con el ejemplar de móvil a 536px
+      —705 × 20/28 más 32 de aire— los 10s daban 54 px/s, o sea un cintillo un
+      tercio más lento en el teléfono que en el escritorio. Venía así desde el lema
+      original y desde el wordmark; nadie lo pidió, pero es la regla del propio
+      archivo sin aplicar.
+
+      536 / 75 = 7.15s.
+    */
+    .marquee-pista {
+      --marquee-dur: calc(var(--copias, 2) * 7.15s);
     }
   }
 </style>

@@ -1963,7 +1963,19 @@ html[data-cursor] body::after {
    ============================================================ */
 .progreso {
   position: fixed;
-  inset: 0 0 auto;
+  /*
+    🔴 Cuelga del BORDE INFERIOR de la barra del player, no del alto del cromo
+    (Carlos, 2026-09-08: «ponla debajo del player»). Antes iba en `top: 0`, o sea
+    ENCIMA de la barra clara, tapándole el primer par de píxeles.
+
+    ⚠️ Y es `--player-h` a propósito, no `--chrome-h`. En escritorio `--chrome-h`
+    suma la barra oscura, que se PLIEGA a cero al hacer scroll: anclada a esa suma,
+    la línea habría quedado flotando en medio del contenido justo en el estado en
+    que se navega —con la página ya bajada—. La barra clara nunca se pliega, así
+    que es el único borde estable. En móvil las dos medidas coinciden, porque ahí
+    la oscura no se pinta nunca.
+  */
+  inset: var(--player-h) 0 auto;
   /* Por encima de TODO el cromo: del banner de portada, del player y del menú a
      pantalla completa. Es lo único que puede tapar al menú abierto, y debe. */
   z-index: calc(var(--z-header) + 2);
@@ -1990,8 +2002,23 @@ html[data-cursor] body::after {
      no provoca maquetado, justo cuando el hilo principal está ocupado trayendo la
      página. */
   transform-origin: 0 50%;
-  /* La estela del propio motivo de marca: la barra no es un rectángulo plano. */
-  box-shadow: 0 0 8px rgb(250 251 250 / 0.45);
+  /*
+    🔴 La LUZ, en tres capas y no en una (Carlos, 2026-09-08: «con más luz»).
+
+    Una sola sombra de 8px daba un halo tan corto que sobre el fondo oscuro se leía
+    como un borde gris, no como algo encendido. Las tres capas hacen el degradado
+    que hace un objeto luminoso de verdad: un núcleo intenso y pegado, un cuerpo
+    medio, y un derrame amplio y tenue que es el que se percibe como brillo.
+
+    ⚠️ La tercera va desplazada 1px hacia ABAJO y no centrada: la línea vive contra
+    el borde inferior de la barra clara, así que el derrame tiene que caer sobre el
+    contenido oscuro —donde se ve— y no hacia arriba contra la barra, donde se
+    perdería.
+  */
+  box-shadow:
+    0 0 5px rgb(250 251 250 / 0.85),
+    0 0 14px rgb(250 251 250 / 0.5),
+    0 1px 28px rgb(250 251 250 / 0.3);
 }
 /*
   🔴 El reptado vive AQUÍ y no en el JavaScript.

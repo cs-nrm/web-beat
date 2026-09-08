@@ -240,11 +240,20 @@ const tiendas = (
                   data-fuente={c.fuente.src}
                   data-titulo={c.doc.titulo}
                   data-activa={c.n === encabeza?.n ? 'sí' : undefined}
+                  aria-pressed="false"
                 >
                   <span class="beat-label fr-capsula-n">{String(c.n).padStart(2, '0')}</span>
                   <span class="fr-capsula-titulo">{c.doc.titulo}</span>
+                  {/*
+                    Los DOS iconos van en el marcado y `video.ts` alterna cuál se
+                    ve — el mismo patrón que el botón del directo en la cabecera.
+                    Así el cambio de estado no reconstruye SVG.
+                  */}
                   <span class="fr-capsula-icono">
-                    <Icono nombre="play" tamano={14} />
+                    <span data-icono="play" class="contents"><Icono nombre="play" tamano={14} /></span>
+                    <span data-icono="pause" class="contents hidden">
+                      <Icono nombre="pause" tamano={14} />
+                    </span>
                   </span>
                   {c.fuente.duracion && (
                     <span class="beat-label fr-capsula-dur">{c.fuente.duracion}</span>

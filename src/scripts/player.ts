@@ -731,7 +731,23 @@ export function iniciarPlayer(): void {
         // otro nivel, el control debe reflejarlo y no mentir.
         const volumen = el<HTMLInputElement>('[data-accion="volumen"]');
         const actual = sdk?.getVolume?.();
-        if (volumen && typeof actual === 'number') volumen.value = String(Math.round(actual * 100));
+        if (volumen && typeof actual === 'number') {
+          /*
+            🔴 El piso del control se respeta EN LOS DOS SENTIDOS.
+
+            El `min="1"` del marcado impide llegar a 0 arrastrando, pero no impide
+            que el SDK llegue con un 0 recordado de otra sesión. Y asignar `"0"` a
+            un `range` con `min="1"` no falla: el navegador lo clampea en silencio,
+            así que el deslizador se pintaría en 1 con el SDK en 0 — el control
+            mintiendo sobre una transmisión cortada, que es justo lo que el piso
+            existe para evitar.
+          */
+          const piso = Number(volumen.min) || 0;
+          const leido = Math.round(actual * 100);
+          const nivel = Math.max(piso, leido);
+          volumen.value = String(nivel);
+          if (nivel !== leido) sdk?.setVolume?.(nivel / 100);
+        }
 
         // La intención que quedó pendiente mientras el SDK cargaba. Es lo que hace
         // que el PRIMER clic de la sesión reproduzca.

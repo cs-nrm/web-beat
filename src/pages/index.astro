@@ -116,11 +116,16 @@ const paraLaPila = [editorial.destacada, ...editorial.rejilla]
   .slice(0, 4);
 
 /*
-  🔴 El cintillo lleva el LOGO, no el lema (decisión de Carlos, 2026-09-07).
-  «BEAT 100.9 · TOTAL MUSIC» sobrevivía del sitio v1 y «Total Music» sale del
-  sitio. Es el mismo archivo de la cabecera y el pie — ver `Marquee.astro`.
+  🔴 UN solo lugar para el lema: el cintillo y el `<title>` leen esta constante.
+
+  Vuelve a ser texto y no el wordmark (Carlos, 2026-09-08); lo que se retiró el
+  2026-09-07 era «TOTAL MUSIC», la marca vieja del v1, no la idea de un lema.
+
+  ⚠️ Y va junto porque tenerlo en dos sitios es como se llega a que la pestaña diga
+  una cosa y la franja otra. El cintillo lo pinta en `beat-display`, que fuerza
+  mayúsculas — el `<title>` conserva esta caja, que es la que Carlos escribió.
 */
-const LOGO_MARQUEE = '/img/beat-blanco.svg';
+const LEMA = 'Beat 100.9 — Aquí la música se elige';
 ---
 
 {/*
@@ -144,7 +149,7 @@ const LOGO_MARQUEE = '/img/beat-blanco.svg';
   100.9»). Carlos lo escribió corto: se normaliza la puntuación, no el texto.
 */}
 <Base
-  titulo="Beat 100.9 — Be"
+  titulo={LEMA}
   descripcion="La estación de música electrónica de la Ciudad de México. Escucha el 100.9 FM en vivo y sigue lo que suena, se lanza y se mueve en la pista."
 >
   {/*
@@ -199,7 +204,7 @@ const LOGO_MARQUEE = '/img/beat-blanco.svg';
   */}
   <Mosaico portada={destacada} izquierda={izquierda} derecha={derecha} />
 
-  <Marquee logo={LOGO_MARQUEE} />
+  <Marquee texto={LEMA} />
 
   {/*
     🔴 El LEADERBOARD va DEBAJO del cintillo, y eso se aparta del lienzo a

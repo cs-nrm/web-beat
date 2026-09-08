@@ -6,6 +6,14 @@
  *   `rejilla`  14b/14e — la cuadrícula (3 columnas en escritorio, 2 en móvil)
  *   `fila`     14b/14e — «Más en Scanner»: foto de 160px, texto, botón redondo
  *   `relacionada` 14c/14f — las tres del pie de la nota
+ *   `mosaico`  13a/14a — las laterales del mosaico: rejilla en escritorio y FILA
+ *              en móvil, porque ahí la comparación con la portada es el problema
+ *
+ * 🔴 `mosaico` existe como variante de ESTE archivo y no como unas reglas
+ * `:global()` dentro de `Mosaico.astro`, y es justo la razón por la que este
+ * componente existe: la medida de una tarjeta vive en UN sitio. Escribir la fila
+ * allá habría partido las medidas de la tarjeta en dos archivos, que es lo que la
+ * cabecera de arriba dice que no debe pasar.
  *
  * 🔴 La cuadrícula NO lleva `gap` de color: el diseño pone `gap:2px` con el fondo
  * en `--border-hairline` y `padding:2px`, así que la línea que separa las tarjetas
@@ -19,7 +27,7 @@ import type { Noticia } from '@/types/payload';
 
 interface Props {
   nota: Noticia;
-  variante?: 'rejilla' | 'fila' | 'relacionada';
+  variante?: 'rejilla' | 'fila' | 'relacionada' | 'mosaico';
   /** `eager` solo para lo que está sobre el pliegue. El resto, `lazy`. */
   prioridad?: boolean;
 }
@@ -168,19 +176,24 @@ const foto = urlMedia(nota.imagen, variante === 'fila' ? 'card' : 'card');
   }
 
   /* ── rejilla (14b: 3 col · 14e: 2 col) ── */
-  .es-rejilla .tarjeta-meta {
+  /* `es-mosaico` es una rejilla EN ESCRITORIO: comparte todo con ella y solo se
+     separa en móvil, más abajo. */
+  .es-rejilla .tarjeta-meta,
+  .es-mosaico .tarjeta-meta {
     justify-content: space-between;
     gap: 12px;
     padding: 16px 18px 0;
   }
-  .es-rejilla .tarjeta-titulo {
+  .es-rejilla .tarjeta-titulo,
+  .es-mosaico .tarjeta-titulo {
     display: block;
     font: 700 19px / 1.22 var(--font-text);
     color: var(--mist-2);
     padding: 14px 18px 0;
     text-wrap: pretty;
   }
-  .es-rejilla {
+  .es-rejilla,
+  .es-mosaico {
     padding-bottom: 18px;
   }
 
@@ -292,6 +305,62 @@ const foto = urlMedia(nota.imagen, variante === 'fila' ? 'card' : 'card');
     .es-fila .tarjeta-titulo {
       font-size: 15.5px;
       margin-top: 8px;
+    }
+
+    /*
+      🔴 En MÓVIL la lateral del mosaico deja de ser tarjeta y pasa a FILA
+      (Carlos, 2026-09-08).
+
+      El problema medido no era que la portada fuese grande, era que era 2.08×
+      más alta que estas —4.18× en superficie— y esa es justo la tierra de nadie:
+      por debajo de 3:1 no se lee como otra categoría, y por encima de 2:1 no se
+      lee como una igual. Se veía como «la misma tarjeta, inflada».
+
+      Se resuelve cambiando el TIPO, no el tamaño: contra una fila con miniatura
+      no hay comparación posible, porque no son dos medidas de lo mismo. De paso
+      rompe la rejilla de cuatro tarjetas idénticas, que es el otro defecto que
+      tenía esta pantalla.
+
+      ⚠️ Reusa la medida de `es-fila` —miniatura de 108px, hueco de 14— para que el
+      móvil no invente una tercera fila con otras proporciones. La única diferencia
+      es que aquí SÍ lleva su filete abajo: en el mosaico las dos columnas laterales
+      son dos contenedores distintos, así que la línea no puede venir del `gap` del
+      padre como en escritorio.
+    */
+    .es-mosaico {
+      display: grid;
+      grid-template-columns: 108px minmax(0, 1fr);
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      background: var(--noche-1);
+      box-shadow: inset 0 -1px 0 var(--border-hairline);
+    }
+    .es-mosaico .tarjeta-cuerpo {
+      min-width: 0;
+    }
+    .es-mosaico .tarjeta-meta {
+      gap: 8px;
+      padding: 0;
+    }
+    .es-mosaico .tarjeta-fecha {
+      order: 2;
+      color: var(--text-faint);
+      font-size: 8px;
+    }
+    .es-mosaico .tarjeta-cat {
+      padding: 0;
+      background: none;
+      box-shadow: none;
+      color: var(--mist-0);
+      font-size: 8px;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .es-mosaico .tarjeta-titulo {
+      font: 600 15.5px / 1.26 var(--font-text);
+      padding: 6px 0 0;
     }
     .tarjeta-flecha {
       display: none;

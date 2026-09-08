@@ -35,7 +35,7 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
     <div class="mosaico">
       <div class="mosaico-lado">
         {izquierda.map((n) => (
-          <TarjetaNota nota={n} variante="rejilla" />
+          <TarjetaNota nota={n} variante="mosaico" />
         ))}
       </div>
 
@@ -60,7 +60,7 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
 
       <div class="mosaico-lado">
         {derecha.map((n) => (
-          <TarjetaNota nota={n} variante="rejilla" />
+          <TarjetaNota nota={n} variante="mosaico" />
         ))}
       </div>
     </div>
@@ -88,42 +88,55 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
     background: var(--border-hairline);
     padding: 2px 0;
   }
-  .mosaico-lado {
-    display: flex;
-    flex-direction: column;
-    /*
-      🔴 Fondo OSCURO, y la línea como borde explícito.
-
-      Antes esta columna usaba el truco de `gap` + fondo `--border-hairline`. El
-      truco funciona cuando el gris solo asoma en 2px, pero una columna de rejilla
-      se estira al alto de la fila: en cuanto el centro es más alto que las dos
-      tarjetas de al lado, TODO el sobrante se pinta de gris. Medido a 1920: la
-      columna medía 1263px y sus tarjetas ~800.
-    */
-    background: var(--noche-1);
-  }
-  .mosaico-lado > * + * {
-    border-top: 2px solid var(--border-hairline);
-  }
   /*
-    Las dos tarjetas se REPARTEN el alto de la columna en vez de dejar sobrante.
+    🔴 TODO lo de la columna lateral vive dentro de `min-width: 900px`, y no fuera
+    con un `@media` que lo deshaga después.
 
-    Una rejilla estira sus columnas al alto de la más alta, y el centro casi
-    siempre gana: antes quedaban entre 100 y 650px muertos al pie de cada lateral
-    según el ancho. Con `flex: 1` en la tarjeta y en su foto, la imagen absorbe la
-    diferencia recortando —ya lleva `object-fit: cover`— y el bloque se ve
-    deliberado a cualquier ancho, no con un hueco al final.
+    Estaba al revés y costó una tarde: estas reglas llevan dos clases, así que le
+    GANAN por especificidad a las de `TarjetaNota`. Con ellas en la base, la fila
+    de móvil no se pintaba —salía una miniatura de 375×250 en vez de 108×72— y
+    deshacerlas desde el bloque de móvil no funciona: `display: revert` vuelve al
+    valor del NAVEGADOR, no a la regla anterior del autor, así que también mata el
+    `display: grid` de la variante. Acotarlas es la única forma limpia.
   */
-  .mosaico-lado > :global(.tarjeta) {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-  }
-  .mosaico-lado :global(.tarjeta-foto) {
-    flex: 1;
-    min-height: 120px;
-    aspect-ratio: auto;
+  @media (min-width: 900px) {
+    .mosaico-lado {
+      display: flex;
+      flex-direction: column;
+      /*
+        🔴 Fondo OSCURO, y la línea como borde explícito.
+
+        Antes esta columna usaba el truco de `gap` + fondo `--border-hairline`. El
+        truco funciona cuando el gris solo asoma en 2px, pero una columna de
+        rejilla se estira al alto de la fila: en cuanto el centro es más alto que
+        las dos tarjetas de al lado, TODO el sobrante se pinta de gris. Medido a
+        1920: la columna medía 1263px y sus tarjetas ~800.
+      */
+      background: var(--noche-1);
+    }
+    .mosaico-lado > * + * {
+      border-top: 2px solid var(--border-hairline);
+    }
+    /*
+      Las dos tarjetas se REPARTEN el alto de la columna en vez de dejar sobrante.
+
+      Una rejilla estira sus columnas al alto de la más alta, y el centro casi
+      siempre gana: antes quedaban entre 100 y 650px muertos al pie de cada
+      lateral según el ancho. Con `flex: 1` en la tarjeta y en su foto, la imagen
+      absorbe la diferencia recortando —ya lleva `object-fit: cover`— y el bloque
+      se ve deliberado a cualquier ancho, no con un hueco al final.
+    */
+    .mosaico-lado > :global(.tarjeta) {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .mosaico-lado :global(.tarjeta-foto) {
+      flex: 1;
+      min-height: 120px;
+      aspect-ratio: auto;
+    }
   }
   .mosaico-centro {
     display: block;
@@ -273,36 +286,26 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
       padding: 0 16px;
       max-width: none;
     }
-    /* Los dos lados se juntan en UNA rejilla de dos columnas, con la línea del
-       hairline asomando igual que en el escritorio. */
-    /*
-      En móvil la columna vuelve al truco del `gap`: aquí son dos tarjetas a lo
-      ancho y de alto parecido, así que el gris solo asoma en los 2px para los que
-      está pensado. El problema de la superficie gris es exclusivo del escritorio,
-      donde la columna se estira al alto del centro.
+/*
+      🔴 UNA columna, no dos (Carlos, 2026-09-08). Las laterales pasan a FILAS
+      —miniatura y titular al lado— y una fila ocupa el ancho entero: partirlas en
+      dos columnas de 187px dejaría una miniatura de 108 con 65px para el titular.
+
+      La razón de fondo está en `TarjetaNota.astro`, en la regla `es-mosaico` de
+      móvil: contra la portada, dos tarjetas del mismo tipo a 4.18× de superficie
+      se leen como la misma pieza inflada, y el arreglo es cambiar el tipo.
+
+      ⚠️ Se va también el truco del `gap` con fondo gris: con filas apiladas la
+      línea la pone cada fila (su `box-shadow` inferior), porque las laterales son
+      DOS contenedores y una línea de `gap` no cruzaría de uno al otro.
     */
     .mosaico-lado {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      gap: 2px;
-      padding: 2px 0;
-      background: var(--border-hairline);
-    }
-    /* El borde y el reparto de alto son del apilado vertical de escritorio; aquí
-       son dos tarjetas a lo ancho y cada una vale por su proporción. */
-    .mosaico-lado > * + * {
-      border-top: 0;
-    }
-    .mosaico-lado > :global(.tarjeta) {
       display: block;
-      flex: none;
+      background: none;
+      padding: 0;
+      gap: 0;
     }
-    .mosaico-lado :global(.tarjeta-foto) {
-      flex: none;
-    }
-    .mosaico-lado:last-child {
-      grid-column: auto;
-      flex-direction: unset;
-    }
+    /* ⚠️ Nada que deshacer aquí: lo de la columna lateral está acotado a
+       `min-width: 900px` a propósito. Ver el comentario de arriba. */
   }
 </style>

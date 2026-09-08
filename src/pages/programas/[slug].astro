@@ -91,56 +91,70 @@ const contactos = (
         }
       </div>
 
-      <aside class="pg-ficha">
-        {
-          horarios.length > 0 && (
-            <div class="pg-dato">
-              <span class="beat-label pg-dato-rotulo">CUÁNDO</span>
-              {horarios.map((h) => (
-                <span class="pg-dato-valor">
-                  {h.dias} · {h.rango}
-                  {h.repeticion && <span class="pg-repeticion"> · repetición</span>}
+      {/*
+        La columna de datos, y bajo ella el box. Es la misma decisión que en la
+        nota: el riel es la columna estrecha, y aquí ya existía para la ficha.
+        Aprobado por Carlos el 2026-09-08.
+      */}
+      <aside class="pg-riel">
+        <div class="pg-ficha">
+          {
+            horarios.length > 0 && (
+              <div class="pg-dato">
+                <span class="beat-label pg-dato-rotulo">CUÁNDO</span>
+                {horarios.map((h) => (
+                  <span class="pg-dato-valor">
+                    {h.dias} · {h.rango}
+                    {h.repeticion && <span class="pg-repeticion"> · repetición</span>}
+                  </span>
+                ))}
+              </div>
+            )
+          }
+
+          {
+            locutores.length > 0 && (
+              <div class="pg-dato">
+                <span class="beat-label pg-dato-rotulo">
+                  {locutores.length === 1 ? 'CONDUCE' : 'CONDUCEN'}
                 </span>
-              ))}
-            </div>
-          )
-        }
+                <span class="pg-dato-valor">{locutores.map((l) => l.nombre).join(' · ')}</span>
+              </div>
+            )
+          }
 
-        {
-          locutores.length > 0 && (
-            <div class="pg-dato">
-              <span class="beat-label pg-dato-rotulo">
-                {locutores.length === 1 ? 'CONDUCE' : 'CONDUCEN'}
-              </span>
-              <span class="pg-dato-valor">{locutores.map((l) => l.nombre).join(' · ')}</span>
-            </div>
-          )
-        }
+          {
+            programa.hashtag && (
+              <div class="pg-dato">
+                <span class="beat-label pg-dato-rotulo">EN REDES</span>
+                <span class="pg-dato-valor">
+                  {programa.hashtag.startsWith('#') ? programa.hashtag : `#${programa.hashtag}`}
+                </span>
+              </div>
+            )
+          }
 
-        {
-          programa.hashtag && (
-            <div class="pg-dato">
-              <span class="beat-label pg-dato-rotulo">EN REDES</span>
-              <span class="pg-dato-valor">
-                {programa.hashtag.startsWith('#') ? programa.hashtag : `#${programa.hashtag}`}
-              </span>
-            </div>
-          )
-        }
+          {
+            contactos.map(([etiqueta, valor, href]) => (
+              /*
+                🔴 `rel="noopener"` en el de WhatsApp: sale a un tercero. El de
+                teléfono es un `tel:` y no abre pestaña, pero comparten marcado y
+                ponerlo en los dos cuesta menos que acordarse de la diferencia.
+              */
+              <a
+                href={href}
+                class="beat-label pg-contacto"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {etiqueta} · {valor}
+                <Icono nombre="arrow-up-right" tamano={14} />
+              </a>
+            ))
+          }
+        </div>
 
-        {
-          contactos.map(([etiqueta, valor, href]) => (
-            /*
-              🔴 `rel="noopener"` en el de WhatsApp: sale a un tercero. El de
-              teléfono es un `tel:` y no abre pestaña, pero comparten marcado y
-              ponerlo en los dos cuesta menos que acordarse de la diferencia.
-            */
-            <a href={href} class="beat-label pg-contacto" target="_blank" rel="noopener noreferrer">
-              {etiqueta} · {valor}
-              <Icono nombre="arrow-up-right" tamano={14} />
-            </a>
-          ))
-        }
+        <Anuncio formato="box" nombre="programa-box" unidad="Box" />
       </aside>
     </div>
 
@@ -217,9 +231,20 @@ const contactos = (
     text-wrap: pretty;
   }
 
-  .pg-ficha {
+  /*
+    🔴 El `sticky` pasó de la ficha a la columna: si se quedara en la ficha, el box
+    de abajo se iría con el scroll y la mitad del riel dejaría de acompañar. Cuelga
+    de `--chrome-h`, lo que mide la barra pegada de arriba — igual que `.nt-riel`
+    en `noticias/[slug].astro`.
+  */
+  .pg-riel {
     position: sticky;
     top: calc(var(--chrome-h) + 16px);
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+  .pg-ficha {
     background: var(--surface-card);
     box-shadow: inset 0 0 0 1px var(--border-hairline);
     padding: 22px;
@@ -324,8 +349,12 @@ const contactos = (
       grid-template-columns: 1fr;
       gap: 24px;
     }
-    .pg-ficha {
+    /* 🔴 Una columna: el riel deja de ser riel. Y `static`, porque un `sticky` sin
+       columna al lado se queda pegado al viewport tapando lo que se lee. El box
+       cae tras la ficha, que es donde los datos del programa terminan. */
+    .pg-riel {
       position: static;
+      gap: 26px;
     }
   }
   @media (max-width: 899px) {

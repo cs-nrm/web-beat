@@ -78,7 +78,17 @@ const otros = vecinos.filter((t) => t.id !== especial.id);
   <div class="es-pagina">
     <CabezaSeccion titulo={especial.titulo} activa="/fenomeno-residente" />
 
-    <Fenomeno especial={especial} contexto="tema" />
+    {/*
+      Mismo hueco y misma maqueta que `/fenomeno-residente` —la columna de la
+      playlist— con nombre propio: son dos superficies distintas para quien compra,
+      y con un solo nombre no se podría saber cuál de las dos entregó.
+
+      ⚠️ En móvil esta columna baja y el box queda 32px por encima del leaderboard
+      de esta página. Les pasa a las cuatro páginas de detalle con riel y está
+      anotado en `agents/ads.md`: la salida sería mover el leaderboard debajo de
+      «OTROS TEMAS», y mover un hueco que ya se vendió no es decisión de aquí.
+    */}
+    <Fenomeno especial={especial} contexto="tema" anuncio="especial-box" />
 
     <div class="es-franja-anuncio">
       <Anuncio formato="leaderboard" nombre="especial-leader" />

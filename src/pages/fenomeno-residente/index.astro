@@ -12,6 +12,11 @@
  *   · sin la barra «EL FENÓMENO RESIDENTE · VER EL ARCHIVO» — ya estás dentro;
  *   · el archivo va COMPLETO y sin el box al costado, porque aquí no es un
  *     adelanto: es la mitad de la razón de existir de la página.
+ *
+ * ⚠️ Que el archivo vaya sin box no significa que la página no lleve: el box de
+ * esta superficie es `fenomeno-box` y vive en la tercera columna del bloque del
+ * tema, bajo la playlist. Ahí no le quita ancho a la rejilla del archivo, que es
+ * la razón por la que se le había quitado el riel a `ArchivoTemas`.
  */
 import Base from '@/layouts/Base.astro';
 import CabezaSeccion from '@/components/CabezaSeccion.astro';
@@ -70,7 +75,12 @@ const anteriores = vigente ? todos.filter((t) => t.id !== vigente.id) : todos;
     */}
     <CabezaSeccion titulo="EL FENÓMENO RESIDENTE" activa="/fenomeno-residente" />
 
-    <Fenomeno especial={vigente} contexto="seccion" />
+    {/*
+      El box va en la tercera columna, bajo el panel de la playlist: el riel ya
+      existe en esta maqueta y hoy termina en aire, así que el hueco no le quita
+      sitio a nada. Aprobado por Carlos el 2026-09-08.
+    */}
+    <Fenomeno especial={vigente} contexto="seccion" anuncio="fenomeno-box" />
 
     {
       anteriores.length > 0 && (

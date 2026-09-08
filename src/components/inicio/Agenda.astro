@@ -8,6 +8,7 @@
  * genérico «Ver más».
  */
 import Remate from '@/components/Remate.astro';
+import Anuncio from '@/components/Anuncio.astro';
 import { urlMedia } from '@/lib/cms/client';
 import type { Evento } from '@/types/payload';
 
@@ -18,13 +19,41 @@ interface Props {
    * porque el encabezado de la página ya lo dice.
    */
   contexto?: 'inicio' | 'seccion';
+  /**
+   * El nombre BASE del box que se intercala en las filas, o nada si esta
+   * superficie no lleva anuncio.
+   *
+   * Solo lo pasa `/eventos`, que es la única que pinta la agenda larga. En el
+   * Inicio son cuatro eventos y su publicidad la manda el lienzo; en el bloque «LO
+   * QUE SIGUE» del detalle son tres, y ahí el hueco ya está en la ficha.
+   *
+   * ⚠️ Es una BASE y no el id final: en una agenda larga se intercala más de uno y
+   * dos huecos con el mismo id hacen que GPT pinte solo el primero. Los siguientes
+   * se numeran (`agenda-box`, `agenda-box-2`, …), así que en el reporte de GAM se
+   * puede ver qué posición de la lista rinde.
+   */
+  anuncio?: string | null;
 }
 
-const { eventos, contexto = 'inicio' } = Astro.props;
+const { eventos, contexto = 'inicio', anuncio = null } = Astro.props;
 
 const enInicio = contexto === 'inicio';
 
 const [proximo, ...siguientes] = eventos;
+
+/**
+ * Cada cuántas filas se intercala un box.
+ *
+ * 🔴 Seis, y con lista POR DEBAJO. Las dos mitades importan: cada seis para que
+ * sea una pausa en una lista larga y no un anuncio por evento, y con algo debajo
+ * para que nunca sea la cola. Un box después de las dos últimas filas de una
+ * agenda corta se lee como el final de la página, y encima quedaría a un paso del
+ * leaderboard del pie: más anuncio que contenido (Carlos, 2026-09-08).
+ *
+ * ⚠️ Con los datos de hoy —un evento capturado, o sea CERO filas— esto no pinta
+ * nada. Es lo esperado y no un hueco que no se llena.
+ */
+const CADA = 6;
 
 /** Las partes de la fecha, en hora de México y ya separadas para pintarlas. */
 function partes(iso: string | null | undefined) {
@@ -124,22 +153,41 @@ const fotoProximo = urlMedia(proximo?.portada, 'large');
 
       {siguientes.length > 0 && (
         <div class="ag-filas">
-          {siguientes.map((e) => {
+          {siguientes.map((e, i) => {
             const q = partes(e.inicio);
+            /*
+              Las filas ya pintadas contando esta. El box va cuando se cumple una
+              tanda de seis Y todavía quedan filas: ver `CADA`.
+            */
+            const pintadas = i + 1;
+            const nombreBox =
+              anuncio && pintadas % CADA === 0 && pintadas < siguientes.length
+                ? pintadas === CADA
+                  ? anuncio
+                  : `${anuncio}-${pintadas / CADA}`
+                : null;
             return (
-              <a href={`/eventos/${e.slug}`} class="ag-fila">
-                <span class="ag-fecha">
-                  <span class="beat-display ag-fecha-dia">{q?.dia ?? '—'}</span>
-                  <span class="beat-label ag-fecha-mes">{q?.mes ?? ''}</span>
-                </span>
-                <span class="ag-fila-titulo">{e.titulo}</span>
-                <span class="beat-label ag-fila-lugar">
-                  {[e.lugar, e.ciudad].filter(Boolean).join(' · ')}
-                </span>
-                <span class="beat-label ag-fila-accion">
-                  {e.accion && e.accion !== 'ninguna' ? (ETIQUETA_ACCION[e.accion] ?? '') : ''}
-                </span>
-              </a>
+              <>
+                <a href={`/eventos/${e.slug}`} class="ag-fila">
+                  <span class="ag-fecha">
+                    <span class="beat-display ag-fecha-dia">{q?.dia ?? '—'}</span>
+                    <span class="beat-label ag-fecha-mes">{q?.mes ?? ''}</span>
+                  </span>
+                  <span class="ag-fila-titulo">{e.titulo}</span>
+                  <span class="beat-label ag-fila-lugar">
+                    {[e.lugar, e.ciudad].filter(Boolean).join(' · ')}
+                  </span>
+                  <span class="beat-label ag-fila-accion">
+                    {e.accion && e.accion !== 'ninguna' ? (ETIQUETA_ACCION[e.accion] ?? '') : ''}
+                  </span>
+                </a>
+
+                {nombreBox && (
+                  <div class="ag-franja-box">
+                    <Anuncio formato="box" nombre={nombreBox} unidad="Box" />
+                  </div>
+                )}
+              </>
             );
           })}
         </div>
@@ -345,6 +393,15 @@ const fotoProximo = urlMedia(proximo?.portada, 'large');
     font-size: 9px;
     white-space: nowrap;
   }
+  /*
+    El box intercalado. Lleva la MISMA línea de abajo que una fila para que la
+    lista siga leyéndose como una lista: sin ella, el anuncio abre un vacío de
+    300px en medio y las filas de después parecen otra lista distinta.
+  */
+  .ag-franja-box {
+    padding: 30px 0;
+    border-bottom: 1px solid var(--border-hairline);
+  }
 
   @media (max-width: 899px) {
     .ag {
@@ -388,6 +445,12 @@ const fotoProximo = urlMedia(proximo?.portada, 'large');
     }
     .ag-fecha-dia {
       font-size: 18px;
+    }
+    /* Un punto menos de aire que en escritorio, en proporción a las filas —que
+       aquí bajan de 15px a 13px de alto—. Con los 30px de escritorio el box ocupaba
+       casi la pantalla entera con el hueco incluido, y la lista se cortaba en dos. */
+    .ag-franja-box {
+      padding: 26px 0 24px;
     }
   }
 </style>

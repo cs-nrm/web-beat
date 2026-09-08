@@ -83,6 +83,25 @@ const alAireAhora = parrilla.alAire;
     }
 
     {
+      /*
+        El box entre «AL AIRE AHORA» y la parrilla: es el único corte que tiene
+        esta página, que por debajo es una sola lista larga (aprobado por Carlos el
+        2026-09-08).
+
+        🔴 Cuelga de `alAireAhora` y no se pinta suelto. Sin ese panel encima, el
+        box sería lo PRIMERO bajo el titular de la sección —un anuncio antes de
+        cualquier contenido— y en el estado vacío quedaría a un párrafo del
+        leaderboard del pie. Hoy es el caso: `programas` tiene cero documentos, así
+        que no hay parrilla, no hay nada al aire y no hay box.
+      */
+      alAireAhora && (
+        <div class="pr-franja-box">
+          <Anuncio formato="box" nombre="programacion-box" unidad="Box" />
+        </div>
+      )
+    }
+
+    {
       programas.length > 0 ? (
         <div class="pr-lista">
           {programas.map((p) => {
@@ -243,6 +262,11 @@ const alAireAhora = parrilla.alAire;
   .pr-franja-anuncio {
     padding: 44px 24px;
   }
+  /* Solo aire por arriba: la parrilla que viene debajo trae sus propios 30px de
+     margen, y sumarlos dejaría el box flotando entre dos vacíos iguales. */
+  .pr-franja-box {
+    padding: 30px 24px 0;
+  }
 
   @media (max-width: 899px) {
     .pr-ahora {
@@ -266,6 +290,9 @@ const alAireAhora = parrilla.alAire;
     }
     .pr-franja-anuncio {
       padding: 32px 16px;
+    }
+    .pr-franja-box {
+      padding: 26px 16px 0;
     }
   }
 </style>

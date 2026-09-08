@@ -90,65 +90,73 @@ const lugar = [evento.lugar, evento.ciudad].filter(Boolean).join(' · ');
       </div>
 
       {/*
-        La ficha con los datos duros. Es lo que alguien copia, apunta o comprueba
-        antes de salir de casa, así que va junta y no repartida por la página.
+        La columna de datos: la ficha, y bajo ella el box.
+
+        La ficha es lo que alguien copia, apunta o comprueba antes de salir de casa,
+        así que va junta y no repartida por la página. El box va DESPUÉS de ella
+        —nunca entre «CUÁNDO» y «DÓNDE»— y ocupa el hueco que dejó la fila «QUÉ ES»
+        al retirarse. Aprobado por Carlos el 2026-09-08.
       */}
-      <aside class="ev-ficha">
-        <div class="ev-dato">
-          <span class="beat-label ev-dato-rotulo">CUÁNDO</span>
+      <aside class="ev-riel">
+        <div class="ev-ficha">
+          <div class="ev-dato">
+            <span class="beat-label ev-dato-rotulo">CUÁNDO</span>
+            {
+              inicio ? (
+                <span class="ev-dato-valor">
+                  <time datetime={inicio.iso}>
+                    {inicio.largo} · {inicio.hora}
+                  </time>
+                  {fin && <span class="ev-dato-extra">hasta {fin.largo} · {fin.hora}</span>}
+                </span>
+              ) : (
+                <span class="ev-dato-valor">Por confirmar</span>
+              )
+            }
+          </div>
+
           {
-            inicio ? (
-              <span class="ev-dato-valor">
-                <time datetime={inicio.iso}>
-                  {inicio.largo} · {inicio.hora}
-                </time>
-                {fin && <span class="ev-dato-extra">hasta {fin.largo} · {fin.hora}</span>}
-              </span>
-            ) : (
-              <span class="ev-dato-valor">Por confirmar</span>
+            lugar && (
+              <div class="ev-dato">
+                <span class="beat-label ev-dato-rotulo">DÓNDE</span>
+                <span class="ev-dato-valor">{lugar}</span>
+              </div>
+            )
+          }
+
+          {/*
+            🔴 Aquí estaba la fila «QUÉ ES» con el tipo del evento, y se retiró
+            (Carlos, 2026-09-08): «eso de propio suena raro/feo».
+
+            Decía «QUÉ ES · PROPIOS» —en PLURAL para un solo evento, porque reusaba
+            la etiqueta del filtro— y aun bien escrito no informaba: `propio`,
+            `cobertura` y `festival` describen el evento desde el punto de vista de
+            la estación, no del que lo va a leer. Lo que sí le sirve es cuándo y
+            dónde, que son las dos filas que quedan.
+
+            La taxonomía sigue en el CMS para uso de la redacción.
+          */}
+
+          {
+            accion && (
+              /*
+                🔴 `rel="noopener"` porque el destino es de un tercero —una
+                boletera— y sin él esa página puede tocar `window.opener`.
+              */
+              <a
+                href={accion.enlace}
+                class="beat-label ev-accion"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {accion.etiqueta}
+                <Icono nombre="arrow-up-right" tamano={16} />
+              </a>
             )
           }
         </div>
 
-        {
-          lugar && (
-            <div class="ev-dato">
-              <span class="beat-label ev-dato-rotulo">DÓNDE</span>
-              <span class="ev-dato-valor">{lugar}</span>
-            </div>
-          )
-        }
-
-        {/*
-          🔴 Aquí estaba la fila «QUÉ ES» con el tipo del evento, y se retiró
-          (Carlos, 2026-09-08): «eso de propio suena raro/feo».
-
-          Decía «QUÉ ES · PROPIOS» —en PLURAL para un solo evento, porque reusaba la
-          etiqueta del filtro— y aun bien escrito no informaba: `propio`,
-          `cobertura` y `festival` describen el evento desde el punto de vista de la
-          estación, no del que lo va a leer. Lo que sí le sirve es cuándo y dónde,
-          que son las dos filas que quedan.
-
-          La taxonomía sigue en el CMS para uso de la redacción.
-        */}
-
-        {
-          accion && (
-            /*
-              🔴 `rel="noopener"` porque el destino es de un tercero —una
-              boletera— y sin él esa página puede tocar `window.opener`.
-            */
-            <a
-              href={accion.enlace}
-              class="beat-label ev-accion"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {accion.etiqueta}
-              <Icono nombre="arrow-up-right" tamano={16} />
-            </a>
-          )
-        }
+        <Anuncio formato="box" nombre="evento-box" unidad="Box" />
       </aside>
     </div>
 
@@ -227,9 +235,20 @@ const lugar = [evento.lugar, evento.ciudad].filter(Boolean).join(' · ');
     text-wrap: pretty;
   }
 
-  .ev-ficha {
+  /*
+    🔴 El `sticky` es de la COLUMNA, no de la ficha. Si se quedara en la ficha, el
+    box se iría con el scroll y el riel acompañaría a medias. Cuelga de
+    `--chrome-h`, lo que mide la barra pegada de arriba — igual que `.nt-riel` en
+    `noticias/[slug].astro`.
+  */
+  .ev-riel {
     position: sticky;
     top: calc(var(--chrome-h) + 16px);
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+  .ev-ficha {
     background: var(--surface-card);
     box-shadow: inset 0 0 0 1px var(--border-hairline);
     padding: 22px;
@@ -307,8 +326,12 @@ const lugar = [evento.lugar, evento.ciudad].filter(Boolean).join(' · ');
       grid-template-columns: 1fr;
       gap: 24px;
     }
-    .ev-ficha {
+    /* 🔴 Una columna: el riel deja de ser riel. `static`, porque un `sticky` sin
+       columna al lado se queda pegado al viewport tapando lo que se lee; y el box
+       cae tras la ficha, cuando ya se sabe cuándo y dónde es. */
+    .ev-riel {
       position: static;
+      gap: 26px;
     }
   }
   @media (max-width: 899px) {

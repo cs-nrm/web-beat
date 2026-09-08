@@ -135,6 +135,21 @@ const tarjeta = TARJETAS_POR_TIPO[slug] ?? null;
 
           {ediciones.length > 1 && (
             <>
+              {/*
+                El box marca el CORTE entre la edición de esta semana y el archivo,
+                que es el único que tiene la página (aprobado por Carlos el
+                2026-09-08).
+
+                🔴 Y va DENTRO de esta condición justamente porque es un corte: si
+                no hay ediciones anteriores no hay nada que cortar, y el box
+                acabaría pegado al leaderboard del pie con solo aire entre los dos
+                —una página que termina en dos anuncios seguidos—. Hoy es el caso
+                real: `bonus-beat` tiene una sola edición capturada.
+              */}
+              <div class="tl-franja-box">
+                <Anuncio formato="box" nombre="lista-box" unidad="Box" />
+              </div>
+
               <div class="tl-corte tl-corte-archivo" data-barrido>
                 <span class="beat-display tl-corte-titulo">EDICIONES ANTERIORES</span>
               </div>
@@ -200,6 +215,11 @@ const tarjeta = TARJETAS_POR_TIPO[slug] ?? null;
   .tl-franja-anuncio {
     padding: 44px 24px;
   }
+  /* Menos aire por abajo que por arriba: el rótulo «EDICIONES ANTERIORES» trae su
+     propio margen de 44px, y sumar los dos abría un vacío del alto del box. */
+  .tl-franja-box {
+    padding: 40px 24px 0;
+  }
 
   @media (max-width: 899px) {
     .tl-ultima {
@@ -220,6 +240,9 @@ const tarjeta = TARJETAS_POR_TIPO[slug] ?? null;
     }
     .tl-franja-anuncio {
       padding: 32px 16px;
+    }
+    .tl-franja-box {
+      padding: 30px 16px 0;
     }
   }
 </style>

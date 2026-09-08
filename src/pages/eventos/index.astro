@@ -66,7 +66,17 @@ const titulo = 'AGENDA';
     <div class="ag-lista">
       {
         eventos.length > 0 ? (
-          <Agenda eventos={eventos} contexto="seccion" />
+          /*
+            🔴 El box va INTERCALADO en la lista, cada seis eventos, y no en una
+            franja al final: esta página es una lista larga sin un solo corte
+            —hasta 40 eventos, uno tras otro— y el hueco que rinde ahí es el que
+            aparece mientras se recorre, no el que espera al pie. Aprobado por
+            Carlos el 2026-09-08.
+
+            El nombre es la BASE: si la lista da para varios, se numeran solos. La
+            regla completa —seis, y nunca de cola— está en `CADA`, en `Agenda.astro`.
+          */
+          <Agenda eventos={eventos} contexto="seccion" anuncio="agenda-box" />
         ) : (
           <p class="ag-vacio">
             Todavía no hay eventos publicados. En cuanto la estación cargue el

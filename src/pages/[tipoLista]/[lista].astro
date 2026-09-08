@@ -58,8 +58,17 @@ const otras = await obtenerListas(tipoSlug, 7);
 
     {lista.descripcion && <p class="ed-descripcion">{lista.descripcion}</p>}
 
+    {/*
+      La misma forma que la nota: columna de lectura y riel al costado. Aquí lo que
+      se lee son las canciones con su viñeta, que es texto corrido de arriba abajo,
+      así que el hueco cabe al lado sin partir nada. Aprobado el 2026-09-08.
+    */}
     <div class="ed-canciones">
       <BonusBeat lista={lista} tipo={tipo} contexto="edicion" />
+
+      <aside class="ed-riel">
+        <Anuncio formato="box" nombre="edicion-box" unidad="Box" />
+      </aside>
     </div>
 
     <div class="ed-franja-anuncio">
@@ -103,7 +112,20 @@ const otras = await obtenerListas(tipoSlug, 7);
     text-wrap: pretty;
   }
   .ed-canciones {
+    display: grid;
+    /* 🔴 `minmax(0, 1fr)` y no `1fr`: las filas de canciones llevan títulos largos
+       con `nowrap` en la duración, y con `1fr` —que es `minmax(auto, 1fr)`— la fila
+       más ancha manda y el riel se estrecha por debajo de sus 300px. */
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 44px;
+    align-items: start;
     padding: 26px 24px 0;
+  }
+  /* El mismo riel de la nota: cuelga de `--chrome-h`, que es lo alto que mide la
+     barra pegada de arriba. Ver `.nt-riel` en `noticias/[slug].astro`. */
+  .ed-riel {
+    position: sticky;
+    top: calc(var(--chrome-h) + 16px);
   }
   .ed-corte {
     display: flex;
@@ -136,8 +158,16 @@ const otras = await obtenerListas(tipoSlug, 7);
       font: var(--type-body);
       padding: 0 16px;
     }
+    /* 🔴 Aquí el riel deja de ser riel: una columna, y el box cae DESPUÉS de la
+       última canción, que es donde la lista termina de verdad. Y `static`, porque
+       un `sticky` en una sola columna se pega al viewport en medio del scroll. */
     .ed-canciones {
+      grid-template-columns: 1fr;
+      gap: 30px;
       padding: 20px 16px 0;
+    }
+    .ed-riel {
+      position: static;
     }
     .ed-corte {
       margin: 8px 16px 0;

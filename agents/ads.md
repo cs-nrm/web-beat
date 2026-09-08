@@ -102,26 +102,100 @@ nada.
 ⚠️ El lienzo describe SOLO el Inicio. Para cualquier otra página, la colocación es
 una decisión de Carlos, no una traducción del diseño: no la inventes.
 
+### Las ocho colocaciones de box, aprobadas el 2026-09-08
+
+Están DECIDIDAS, con su razón. No se re-proponen ni se mueven sin Carlos:
+
+| Página | Dónde | Por qué |
+|---|---|---|
+| `/fenomeno-residente` | Tercera columna, bajo la playlist | El riel ya existe y terminaba en aire |
+| `/bonus-beat` | Tras la última edición, antes de «EDICIONES ANTERIORES» | El corte natural de la página |
+| `/bonus-beat/*` | Riel a la derecha de las canciones | Igual que la nota: columna de lectura + riel |
+| `/programacion` | Tras «AL AIRE AHORA», antes de la parrilla | El único punto de corte que tiene |
+| `/programas/*` | Riel junto a los datos del programa | Ahí ya había una columna estrecha |
+| `/eventos` | Intercalado cada 6 eventos | Lista larga sin corte; el intercalado es lo que rinde |
+| `/eventos/*` | Riel bajo «CUÁNDO / DÓNDE» | La columna de datos ya estaba, y le sobraba un hueco |
+| `/especiales/*` | Columna de la playlist del tema | Misma estructura que `/fenomeno-residente` |
+
+🔴 Dos de ellas viven en un COMPONENTE y no en la página, porque la columna es
+del componente: `Fenomeno.astro` (las dos del tema) y `Agenda.astro` (el
+intercalado). En los dos casos el NOMBRE del hueco lo pasa la página por una prop
+—`anuncio`— y no se deduce del contexto: el nombre es la llave con la que GAM
+factura, así que se escribe donde se decidió la colocación. Y por eso el Inicio,
+que usa los mismos componentes, no hereda ningún box.
+
 ### Estado al 2026-09-08
+
+✅ = declarado y se pinta con los datos de hoy. ⚠️ = declarado, y hoy no se pinta
+porque le falta el CONTENIDO del que cuelga (no porque el hueco esté mal).
 
 | Superficie | portada | leaderboard | box |
 |---|---|---|---|
 | Inicio | ✅ `inicio-portada` | ✅ `inicio-leader` | ⚠️ `inicio-box` |
 | `/scanner`, `/editorial`, `/etiqueta/*` (`IndiceScanner`) | — | ✅ `scanner-leader` | ✅ `scanner-box` |
 | `/noticias/*` | — | — | ✅ `nota-box` |
-| `/fenomeno-residente` | — | ✅ | ✗ |
-| `/bonus-beat` y `/bonus-beat/*` | — | ✅ | ✗ |
-| `/programacion` y `/programas/*` | — | ✅ | ✗ |
-| `/eventos` y `/eventos/*` | — | ✅ | ✗ |
-| `/especiales/*` | — | ✅ | ✗ |
+| `/fenomeno-residente` | — | ✅ `fenomeno-leader` | ✅ `fenomeno-box` |
+| `/bonus-beat` | — | ✅ `lista-leader` | ⚠️ `lista-box` |
+| `/bonus-beat/*` | — | ✅ `edicion-leader` | ✅ `edicion-box` |
+| `/programacion` | — | ✅ `programacion-leader` | ⚠️ `programacion-box` |
+| `/programas/*` | — | ✅ `programa-leader` | ⚠️ `programa-box` |
+| `/eventos` | — | ✅ `agenda-leader` | ⚠️ `agenda-box` (+ `-2`, `-3`…) |
+| `/eventos/*` | — | ✅ `evento-leader` | ✅ `evento-box` |
+| `/especiales/*` | — | ✅ `especial-leader` | ✅ `especial-box` |
 | `/en-vivo`, `/alexa`, legales | — | ✗ | ✗ |
 
-⚠️ **`inicio-box` está en el código y hoy no se pinta.** Vive en
-`ArchivoTemas.astro` —donde el lienzo lo pone, «de riel junto al archivo»— y ese
-bloque no se renderiza cuando el archivo está vacío: hoy hay un solo especial del
-Fenómeno y es el vigente, así que se excluye. Se llena solo en cuanto capturen un
-segundo tema. **No moverlo**: moverlo sería contradecir el lienzo para tapar un
-hueco de contenido.
+🔴 **`/en-vivo` no lleva box, y es una decisión tomada** (Carlos, 2026-09-08): es
+la página a la que alguien va a ESCUCHAR, y un anuncio al lado de la señal hace
+que un sitio de radio se sienta barato. No se propone otra vez.
+
+#### Los cuatro ⚠️, y de qué contenido cuelga cada uno
+
+Ninguno es un hueco roto: los cuatro esperan un dato del CMS. Comprobados uno por
+uno forzando datos en la capa `src/lib/cms/*` (ver «Cómo se verifica»).
+
+- **`inicio-box`** — vive en `ArchivoTemas.astro`, donde el lienzo lo pone («de
+  riel junto al archivo»), y ese bloque no se pinta con el archivo vacío: hoy hay
+  un solo especial del Fenómeno y es el vigente, así que se excluye. **No
+  moverlo**: sería contradecir el lienzo para tapar un hueco de contenido.
+- **`lista-box`** — marca el corte entre la última edición y «EDICIONES
+  ANTERIORES», así que cuelga de que HAYA ediciones anteriores. `bonus-beat` tiene
+  una sola capturada. Sin esa condición, el box quedaría a 40px del leaderboard
+  del pie: una página que termina en dos anuncios seguidos.
+- **`programacion-box`** — va tras «AL AIRE AHORA», que sale de la parrilla, que
+  sale de `programas`: cero documentos. Sin ese panel encima, el box sería lo
+  primero bajo el titular de la sección.
+- **`agenda-box`** — se intercala cada SEIS eventos de la lista y nunca de cola
+  (ver abajo). Hoy hay un evento capturado, o sea cero filas.
+
+⚠️ **`programa-box` está en `/programas/*`, que no se puede probar con datos**:
+`programas` tiene cero documentos y la ruta responde 404 para cualquier slug.
+Comprobado con un programa fabricado en `obtenerPrograma`.
+
+#### El intercalado de `/eventos`
+
+Vive en `Agenda.astro` (`CADA = 6`) y la regla tiene DOS mitades: cada seis filas,
+**y solo si debajo quedan filas**. La segunda es la que evita que el box sea la
+cola de una agenda corta — «un box solo después de dos eventos es más anuncio que
+contenido» (Carlos)— y de paso que caiga junto al leaderboard del pie.
+
+Medido: 6 eventos → ningún box; 7 (6 filas) → ninguno; 8 → uno; 13 → uno; 14 →
+dos; 40 (el tope de `obtenerAgenda`) → seis.
+
+⚠️ Los ids se NUMERAN (`agenda-box`, `agenda-box-2`, …) porque en una agenda larga
+hay más de uno y **dos huecos con el mismo id hacen que GPT pinte solo el
+primero**. En el reporte de GAM eso además dice qué posición de la lista rinde.
+
+#### ⚠️ El riel en móvil queda encima del leaderboard
+
+Por debajo de 900px todas las páginas de detalle colapsan a una columna, y el box
+del riel cae al final del contenido: a **32px** del leaderboard que esas páginas ya
+tenían. Pasa en `/especiales/*`, `/bonus-beat/*`, `/eventos/*`, `/programas/*` y
+—mientras el archivo esté vacío— en `/fenomeno-residente`.
+
+No se tocó, y por eso: la salida sería mover el leaderboard debajo del bloque de
+«otros/lo que sigue» de cada página, y mover un hueco que ya está vendido es
+decisión de Carlos. Con los dos huecos vacíos —que es el estado de hoy— no se ve
+nada: el marco se cierra solo. Se nota el día que los dos se llenen a la vez.
 
 ---
 
@@ -213,6 +287,26 @@ curl -s https://v2.beatdigital.mx/ | grep -o 'class="anuncio es-[a-z]*'
 # Que el marco se haya cerrado solo cuando no hay relleno.
 curl -s https://v2.beatdigital.mx/ | grep -o 'data-vacio'
 ```
+
+🔴 Y hay un tercer caso que el `curl` NO distingue: un hueco que **no se pinta
+porque le falta el contenido del que cuelga** (los cuatro ⚠️ de la tabla). Ahí no
+sirve mirar la ruta: hay que FORZAR los datos. El camino es meter un retorno
+temporal al principio de la función de `src/lib/cms/*` que alimenta la página
+—`obtenerAgenda`, `obtenerListas`, `obtenerParrillaDeHoy`, `obtenerPrograma`—,
+levantar `astro dev`, comprobar por `curl`, y revertir con `git checkout --`. Así
+se comprobaron las cuatro y la matriz del intercalado de `/eventos`.
+
+⚠️ Y en el navegador el marco vacío **desaparece a los 3.5s** (`PLAZO_VACIO`), y
+además GPT le pone `display:none` al div del slot, así que una captura tardía no
+enseña nada. Para medir el marco reservado —que es el peor caso del maquetado— hay
+que quitarle el `data-vacio` al `.anuncio` **y** el `display` en línea al
+`.anuncio-hueco`.
+
+⚠️ Al forzar la parrilla salió a la luz un desborde que **no es de publicidad**:
+`.pr-horario` lleva `white-space: nowrap`, y un programa de lunes a domingo
+—«LUN · MAR · MIÉ · JUE · VIE · SÁB · DOM 00:00–23:59»— saca la página 120px a lo
+ancho a 390px. Es de `/programacion`, no del hueco; queda anotado aquí porque se
+descubrió aquí.
 
 ⚠️ En preproducción `PUBLICIDAD_TOKEN` va VACÍO a propósito: con token, cada visita
 de revisión sumaría impresiones y clics a campañas que se le facturan a un

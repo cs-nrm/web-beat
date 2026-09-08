@@ -361,6 +361,29 @@ const foto = urlMedia(nota.imagen, variante === 'fila' ? 'card' : 'card');
     .es-mosaico .tarjeta-titulo {
       font: 600 15.5px / 1.26 var(--font-text);
       padding: 6px 0 0;
+      /*
+        🔴 TRES líneas y lo que sobre se corta (Carlos, 2026-09-08).
+
+        Con la miniatura en 108px, al titular le quedan 221px de ancho — y los
+        titulares de esta redacción son largos: «Sub Focus convierte sus próximos
+        conciertos en una forma de apoyar a la música independiente» ocupaba cinco
+        líneas y hacía crecer la fila hasta desarmar la retícula que la fila viene
+        a crear.
+
+        ⚠️ Tres y no dos: en 221px, tres líneas son ~40 palabras, suficiente para
+        que un titular recortado siga diciendo de qué es la nota. A dos se perdía
+        el sujeto en los titulares que empiezan con el nombre del artista.
+
+        ⚠️ `-webkit-box` es obligatorio para que `line-clamp` actúe, y no rompe el
+        `grid` de la fila porque esto es el HIJO, no el contenedor. Se declara la
+        propiedad estándar además de la prefijada: la prefijada la entienden todos
+        los navegadores hoy, y la estándar es la que va a quedar.
+      */
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      overflow: hidden;
     }
     .tarjeta-flecha {
       display: none;

@@ -42,9 +42,16 @@ const otras = await obtenerListas(tipoSlug, 7);
 
 ---
 
+{/*
+  ⚠️ El respaldo decía «<título>: <tipo> de Beat 100.9», y con los datos reales eso
+  salía como «Temas de la semana: Bonus Beat de Beat 100.9.» — dos «de» seguidos y
+  el nombre del tipo pareciendo un apellido. Es el texto que se lee HOY: ninguna
+  edición capturada trae `descripcion`. La palabra «edición» es la que faltaba: dice
+  que esta página es UNA de una serie.
+*/}
 <Base
   titulo={`${lista.titulo} — ${tipo.nombre} — Beat 100.9`}
-  descripcion={lista.descripcion ?? `${lista.titulo}: ${tipo.nombre} de Beat 100.9.`}
+  descripcion={lista.descripcion ?? `${lista.titulo}, edición de ${tipo.nombre} en Beat 100.9.`}
 >
   <div class="ed-pagina">
     <CabezaSeccion titulo={lista.titulo} activa={`/${tipoSlug}`} />

@@ -37,8 +37,17 @@ const cat = slug ? await obtenerCategoria(slug) : null;
 if (!cat) return Astro.rewrite('/404');
 ---
 
+{/*
+  🔴 El título lleva «Beat Scanner» en medio, como el resto de los interiores
+  anidados —`— Programación —`, `— Agenda —`, `— El Fenómeno Residente —`—, y no
+  es cosmético: sin ese segmento, `/beat-scanner/bonus-beat` y `/bonus-beat` se
+  llamaban IGUAL, «Bonus Beat — Beat 100.9». Dos URLs con el mismo título es lo que
+  hace que Google elija una por su cuenta y reparta la señal entre las dos, y una
+  categoría puede llamarse como un tipo de lista o como una etiqueta sin que nadie
+  lo note.
+*/}
 <Base
-  titulo={`${cat.nombre} — Beat 100.9`}
+  titulo={`${cat.nombre} — Beat Scanner — Beat 100.9`}
   descripcion={cat.descripcion ?? `${cat.nombre} en Beat 100.9.`}
 >
   {/*

@@ -55,9 +55,25 @@ const otros = vecinos.filter((t) => t.id !== especial.id);
 */
 ---
 
+{/*
+  🔴 El respaldo de la descripción YA NO es `etiquetaPublica`.
+
+  Ese campo es un RÓTULO, no una frase: en el único tema capturado vale
+  «Kraftwerk», nueve caracteres, y eso era la `<meta description>` y la bajada de
+  la tarjeta de compartir de la página entera. Una descripción de una palabra no
+  dice qué es la página, y al compartirse se lee como un error.
+
+  Lo que va en su lugar se COMPONE con el título del tema, igual que ya hacen
+  `/etiqueta/<slug>` y el índice de un tipo de lista. Y dice qué ES la página sin
+  prometer qué trae: las cápsulas, el especial y la playlist se pintan solo si
+  existen, así que enumerarlos aquí sería una lista que a veces miente.
+*/}
 <Base
   titulo={`${especial.titulo} — El Fenómeno Residente — Beat 100.9`}
-  descripcion={especial.descripcion ?? especial.etiquetaPublica ?? undefined}
+  descripcion={
+    especial.descripcion ??
+    `${especial.titulo}, el tema de la semana de El Fenómeno Residente en Beat 100.9.`
+  }
 >
   <div class="es-pagina">
     <CabezaSeccion titulo={especial.titulo} activa="/fenomeno-residente" />

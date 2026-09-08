@@ -160,6 +160,26 @@ export const IDIOMA = 'es';
 export const IDIOMA_REGION = 'es-MX';
 export const LOCALE_OG = 'es_MX';
 
+/**
+ * La tarjeta de respaldo para compartir, CON sus medidas.
+ *
+ * 🔴 Las medidas van aquí y no escritas en el `<head>` porque las lee más de uno
+ * —`og:image:width/height` y el `image` del JSON-LD del Inicio— y porque el
+ * archivo lo GENERA `scripts/favicon.mjs` a exactamente 1200×630 (1.91:1, la
+ * medida que piden Facebook y X para la tarjeta grande). Son un dato del archivo,
+ * no una preferencia: si un día se genera a otra medida, se cambia aquí y en el
+ * script, y las dos etiquetas siguen diciendo la verdad.
+ *
+ * ⚠️ Unas medidas que no correspondan al archivo son peores que ninguna: las
+ * plataformas reservan el hueco con ellas antes de bajar la imagen, así que el
+ * error se ve como un recorte raro en la publicación, no como un fallo.
+ */
+export const TARJETA_COMPARTIR = {
+  ruta: '/img/og-beat.png',
+  ancho: 1200,
+  alto: 630,
+} as const;
+
 // ============================================================
 // Contrato de URLs (decisión 10 del plan)
 // ============================================================

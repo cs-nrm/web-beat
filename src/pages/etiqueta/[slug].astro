@@ -16,8 +16,15 @@ const et = slug ? await obtenerEtiqueta(slug) : null;
 if (!et) return Astro.rewrite('/404');
 ---
 
+{/*
+  ⚠️ «Etiqueta» va en medio por lo mismo que «Beat Scanner» en la categoría: los
+  nombres se repiten entre colecciones —una etiqueta, una categoría y un tipo de
+  lista pueden llamarse «Bonus Beat»— y tres rutas distintas con el mismo título
+  compiten entre ellas en los resultados. De paso dice qué es esta página: un
+  archivo por etiqueta, no una sección.
+*/}
 <Base
-  titulo={`${et.nombre} — Beat 100.9`}
+  titulo={`${et.nombre} — Etiqueta — Beat 100.9`}
   descripcion={`Todo lo que hemos publicado sobre ${et.nombre} en Beat 100.9.`}
 >
   <IndiceScanner

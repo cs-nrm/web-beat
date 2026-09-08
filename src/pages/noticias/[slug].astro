@@ -14,7 +14,7 @@ import TarjetaNota from '@/components/TarjetaNota.astro';
 import Icono from '@/components/Icono.astro';
 import Anuncio from '@/components/Anuncio.astro';
 import { obtenerNota, obtenerRelacionadas } from '@/lib/cms/noticias';
-import { urlMedia } from '@/lib/cms/client';
+import { medidaMedia, urlMedia } from '@/lib/cms/client';
 import {
   nombreCategoria,
   slugCategoria,
@@ -24,7 +24,8 @@ import {
   fechaIso,
   enlacesCompartir,
 } from '@/lib/nota';
-import { SITE_URL } from '@/config/site';
+import { SITE_URL, urlAbsoluta } from '@/config/site';
+import { nodoMigaja, nodoNota, serializar } from '@/lib/jsonld';
 
 const { slug } = Astro.params;
 
@@ -69,6 +70,72 @@ const compartir = enlacesCompartir(canonica, nota.titulo ?? '');
 const pieDeFoto =
   nota.imagen && typeof nota.imagen === 'object' ? (nota.imagen.alt ?? null) : null;
 
+/*
+  Las medidas de la foto, para la tarjeta de compartir y para el JSON-LD.
+
+  🔴 Se piden POR LA URL que `urlMedia` acabó eligiendo, no por la variante que le
+  pedimos: `large` puede no existir —las variantes se generan sin ampliar— y
+  entonces `hero` es en realidad `card`. Ver `medidaMedia`. Si el CMS no trae las
+  dos medidas, `null`, y las etiquetas no se emiten: mejor sin dato que con uno
+  inventado.
+*/
+const heroMedida = medidaMedia(nota.imagen, hero);
+
+/*
+  ⚠️ `updatedAt` lo mueve el CMS en cada guardado, así que esta fecha puede ser
+  posterior a la que se ve en pantalla. No es una contradicción: la visible es
+  cuándo se publicó y esta es cuándo se tocó por última vez. Google usa las dos.
+*/
+const modificadaIso = fechaIso(nota.updatedAt);
+
+/**
+ * 🔴 Los datos estructurados de la nota: `NewsArticle` + la migaja.
+ *
+ * Van en un solo `@graph` y no en dos bloques por lo de siempre: dos bloques son
+ * dos sitios donde puede quedarse uno viejo.
+ *
+ * 🔴 Y cada valor es EL MISMO que ya pinta la página —el titular, la bajada, el
+ * ISO del `<time>` visible, la firma de la ficha, la variante de foto que carga el
+ * `<img>`, los eslabones de la migaja—. No hay ni un dato que se calcule aparte
+ * para el buscador: si la nota cambia, cambian los dos a la vez o no cambia
+ * ninguno.
+ *
+ * ⚠️ `author` se OMITE cuando no hay firma, y hoy pasa: `autores` está vacío en el
+ * CMS y la firma sale del campo de texto libre, así que hay notas sin ninguna. Un
+ * autor de relleno («Redacción Beat») sería un dato que la página no dice.
+ *
+ * ⚠️ La migaja repite los eslabones VISIBLES —sección, y la categoría solo cuando
+ * la nota la pinta— y cierra con la nota. Si la migaja de arriba cambia, esta
+ * cambia con ella; son la misma lista leída dos veces.
+ */
+const ficha = serializar(
+  [
+    nodoNota({
+      canonica,
+      titulo: nota.titulo,
+      resumen: nota.resumen,
+      imagen: hero,
+      imagenAncho: heroMedida?.ancho,
+      imagenAlto: heroMedida?.alto,
+      publicado: publicadaIso,
+      modificado: modificadaIso,
+      autor: autor?.nombre,
+    }),
+    nodoMigaja([
+      { nombre: seccion.rotulo, url: urlAbsoluta(seccion.href) },
+      ...(catEnMigaja
+        ? [
+            {
+              nombre: catEnMigaja,
+              url: urlAbsoluta(catSlug ? `/beat-scanner/${catSlug}` : seccion.href),
+            },
+          ]
+        : []),
+      { nombre: nota.titulo, url: canonica },
+    ]),
+  ].filter((n): n is NonNullable<typeof n> => n !== null),
+);
+
 // Las etiquetas del pie (14c: "etiquetas, autor y tres notas relacionadas").
 const etiquetas = (nota.etiquetas ?? []).filter(
   (e): e is Exclude<typeof e, number> => typeof e === 'object' && e !== null,
@@ -77,16 +144,33 @@ const etiquetas = (nota.etiquetas ?? []).filter(
 
 {/*
   La nota es lo ÚNICO que se comparte de verdad, así que es la que pasa su propia
-  ficha: su foto, su fecha y `article`. `hero` ya viene absoluta —`urlMedia` le
-  pone el host público del CMS—, que es lo que Facebook exige.
+  ficha: su foto —con su `alt` y sus medidas—, sus dos fechas y `article`. `hero`
+  ya viene absoluta —`urlMedia` le pone el host público del CMS—, que es lo que
+  Facebook exige.
+
+  ⚠️ `imagenAlt` es el `alt` que capturó la redacción, el mismo del pie de foto. Si
+  la foto no lo trae no se manda nada: describirla desde aquí sería inventar lo que
+  hay dentro de una imagen que este archivo no ve.
 */}
 <Base
   titulo={`${nota.titulo} — Beat 100.9`}
   descripcion={nota.resumen ?? undefined}
   imagen={hero}
+  imagenAlt={pieDeFoto}
+  imagenAncho={heroMedida?.ancho}
+  imagenAlto={heroMedida?.alto}
   tipo="article"
   publicado={publicadaIso}
+  modificado={modificadaIso}
 >
+  {/*
+    guarda-ok set:html: JSON-LD, que en Astro no tiene otra forma de emitirse. El
+    valor lo arma `serializar()` y no es HTML del CMS: es JSON con `<` escapado,
+    justamente para que un `</script>` dentro de un titular no cierre el bloque.
+    Ver `src/lib/jsonld.ts`.
+  */}
+  <script type="application/ld+json" is:inline set:html={ficha} />
+
   <article class="nt">
     {/* ── Migaja: sección · tipo ── */}
     <div class="nt-cabeza">

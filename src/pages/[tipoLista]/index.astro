@@ -64,9 +64,19 @@ const [ediciones, reciente] = await Promise.all([
 
 ---
 
+{/*
+  ⚠️ El respaldo de la descripción decía «Bonus Beat en Beat 100.9.» — el nombre de
+  la sección seguido del de la casa, que no dice qué es la página. Y es el texto que
+  se ve HOY: `tipos-de-lista.descripcion` está vacía en el CMS, así que nunca cae la
+  de la redacción. Lo que se describe ahora es lo que la página hace: el índice de
+  ediciones, con la más reciente pintada entera.
+*/}
 <Base
   titulo={`${tipo.nombre} — Beat 100.9`}
-  descripcion={tipo.descripcion ?? `${tipo.nombre} en Beat 100.9.`}
+  descripcion={
+    tipo.descripcion ??
+    `Las ediciones de ${tipo.nombre} en Beat 100.9, con la más reciente completa.`
+  }
 >
   <div class="tl-pagina">
     <CabezaSeccion titulo={tipo.nombre.toUpperCase()} activa={`/${slug}`} />

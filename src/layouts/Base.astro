@@ -7,7 +7,15 @@
  * design system y las dos reglas de indexación.
  */
 import '@/styles/base.css';
-import { IDIOMA, LOCALE_OG, NOINDEX_SITIO, SITE_URL, noIndexarHost } from '@/config/site';
+import {
+  IDIOMA,
+  LOCALE_OG,
+  NOINDEX_SITIO,
+  SITE_URL,
+  TARJETA_COMPARTIR,
+  noIndexarHost,
+} from '@/config/site';
+import { nodoEstacion, serializar } from '@/lib/jsonld';
 import { ClientRouter } from 'astro:transitions';
 import Cabecera from '@/components/Cabecera.astro';
 import MenuLleno from '@/components/MenuLleno.astro';
@@ -25,10 +33,37 @@ interface Props {
    * una ruta de `public/`, que se vuelve absoluta aquí.
    */
   imagen?: string | null;
+  /**
+   * Qué se ve en esa imagen, para quien no la ve. En una nota es el `alt` de su
+   * foto, tal como lo capturó la redacción.
+   *
+   * ⚠️ Si no viene, la etiqueta NO se emite. Un `alt` inventado desde el layout
+   * describiría una foto que este archivo no ha visto.
+   */
+  imagenAlt?: string | null;
+  /**
+   * Las medidas REALES de esa imagen, cuando se conocen.
+   *
+   * 🔴 Solo se pasan si el dato existe: las trae el documento de media del CMS
+   * (`sizes.<variante>.width/height`, ver `medidaMedia`). Las plataformas reservan
+   * el hueco de la tarjeta con estos números antes de bajar el archivo, así que
+   * unas medidas falsas se ven como un recorte raro en la publicación — y desde el
+   * sitio no se nota nada.
+   */
+  imagenAncho?: number | null;
+  imagenAlto?: number | null;
   /** `article` en una nota; `website` en todo lo demás. */
   tipo?: 'website' | 'article';
   /** La fecha de publicación en ISO. Solo tiene sentido con `tipo="article"`. */
   publicado?: string | null;
+  /**
+   * La última modificación en ISO. Solo con `tipo="article"`.
+   *
+   * Va en pareja con `publicado`: `article:published_time` sin
+   * `article:modified_time` deja una nota corregida pareciendo la de su día de
+   * estreno.
+   */
+  modificado?: string | null;
   /**
    * `inicio` deja la cabecera completa; `interior` nace con la barra oscura ya
    * recogida. Se calcula solo a partir de la ruta y casi nunca hay que pasarlo.
@@ -36,7 +71,20 @@ interface Props {
   vista?: 'inicio' | 'interior';
 }
 
-const { titulo, descripcion, imagen = null, tipo = 'website', publicado = null } = Astro.props;
+const {
+  titulo,
+  descripcion,
+  imagen = null,
+  imagenAlt = null,
+  imagenAncho = null,
+  imagenAlto = null,
+  tipo = 'website',
+  publicado = null,
+  modificado = null,
+} = Astro.props;
+
+/** El Inicio se distingue por la RUTA, no por lo que declare la página. */
+const esInicio = Astro.url.pathname === '/';
 
 /**
  * 🔴 En los INTERIORES la barra oscura de navegación no se muestra: la página
@@ -52,7 +100,7 @@ const { titulo, descripcion, imagen = null, tipo = 'website', publicado = null }
  * que hay que acordarse de poner en cada archivo nuevo es lo que un día se
  * olvida.
  */
-const vista = Astro.props.vista ?? (Astro.url.pathname === '/' ? 'inicio' : 'interior');
+const vista = Astro.props.vista ?? (esInicio ? 'inicio' : 'interior');
 
 /**
  * El chrome se resuelve UNA vez aquí y baja por props, en vez de que cada
@@ -114,12 +162,97 @@ const canonical = new URL(Astro.url.pathname, SITE_URL).href;
  */
 const imagenCompartir = imagen
   ? new URL(imagen, SITE_URL).href
-  : new URL('/img/og-beat.png', SITE_URL).href;
+  : new URL(TARJETA_COMPARTIR.ruta, SITE_URL).href;
 
-/** La descripción de respaldo: una página sin bajada no debe compartirse muda. */
+/**
+ * Lo que se sabe de esa imagen: qué se ve en ella y cuánto mide.
+ *
+ * 🔴 Los tres datos se eligen JUNTOS y del mismo lado. Si la página trae foto
+ * propia, las medidas son las suyas o no hay medidas; jamás las de la tarjeta de
+ * marca. Mezclarlos —la foto de una nota con el 1200×630 del respaldo— es
+ * exactamente el fallo silencioso que las etiquetas de medida vienen a evitar.
+ *
+ * ⚠️ El `alt` del respaldo describe lo que `pnpm favicon` genera: el wordmark
+ * blanco centrado sobre el negro del sitio. Si algún día la tarjeta se dibuja de
+ * otra forma, este texto se cambia con ella (`scripts/favicon.mjs`).
+ */
+const tarjeta = imagen
+  ? { alt: imagenAlt, ancho: imagenAncho, alto: imagenAlto }
+  : {
+      alt: 'El wordmark de Beat 100.9 en blanco sobre fondo negro.',
+      ancho: TARJETA_COMPARTIR.ancho,
+      alto: TARJETA_COMPARTIR.alto,
+    };
+
+/**
+ * La descripción de respaldo: una página sin bajada no debe compartirse muda.
+ *
+ * 🔴 Tiene que decir LO MISMO que la `descripcion` del Inicio
+ * (`src/pages/index.astro`). Son dos textos que se desincronizan solos —ya pasó:
+ * este hablaba de «Beat Scanner, Editorial y la agenda» mientras el Inicio decía
+ * «Beat Editorial», un nombre de sección que ya no existe— y el efecto es que la
+ * misma casa se presenta de dos maneras según por dónde entres.
+ *
+ * ⚠️ Y dice qué ES la estación antes que qué tiene. La versión anterior enumeraba
+ * secciones, que no le sirve ni a quien no ha entrado nunca —no sabe qué es el
+ * Fenómeno Residente— ni a quien ya conoce el sitio, que no lee la descripción.
+ * Desde que hay Open Graph esta frase es además lo que se lee en WhatsApp.
+ */
 const RESUMEN_CASA =
-  'Beat 100.9, la estación de música electrónica de NRM: qué suena ahora, el Fenómeno Residente, Beat Scanner, Editorial y la agenda.';
-const resumen = descripcion ?? RESUMEN_CASA;
+  'La estación de música electrónica de la Ciudad de México. Escucha el 100.9 FM en vivo y sigue lo que suena, se lanza y se mueve en la pista.';
+
+/**
+ * 🔴 La descripción se recorta a 160 caracteres, y el recorte vive AQUÍ.
+ *
+ * Google corta ahí, así que el tope no es una preferencia de estilo. Lo que no se
+ * puede es confiar en que el texto llegue ya corto: la mitad de las rutas pasan un
+ * campo del CMS —`resumen` de una nota, `descripcion` de un evento— y ahí escribe
+ * la redacción, sin un contador delante. Hoy el `resumen` más largo mide 150 (11
+ * notas, medido contra `admin.nrm.com.mx`), o sea que el problema no ha llegado
+ * pero no hay nada que lo detenga.
+ *
+ * ⚠️ Se corta en el ESPACIO anterior y se cierra con «…», no a mitad de palabra.
+ * El corte de Google es tipográfico y el lector no lo ve venir; este es un corte
+ * declarado, y en una tarjeta de WhatsApp —donde esta frase también se lee— es la
+ * diferencia entre una frase que termina y una que se traga la última sílaba.
+ *
+ * También colapsa los espacios: un campo de texto largo del CMS trae saltos de
+ * línea, y en un atributo se ven como huecos dobles.
+ */
+const TOPE_RESUMEN = 160;
+
+function recortar(texto: string): string {
+  const limpio = texto.replace(/\s+/g, ' ').trim();
+  if (limpio.length <= TOPE_RESUMEN) return limpio;
+  const corte = limpio.slice(0, TOPE_RESUMEN - 1);
+  const espacio = corte.lastIndexOf(' ');
+  const base = espacio > TOPE_RESUMEN / 2 ? corte.slice(0, espacio) : corte;
+  return `${base.replace(/[\s.,;:—–-]+$/, '')}…`;
+}
+
+const resumen = recortar(descripcion ?? RESUMEN_CASA);
+
+/**
+ * 🔴 La ficha de la ESTACIÓN en JSON-LD, y va solo en el Inicio.
+ *
+ * Vive en el layout y no en `src/pages/index.astro` por una razón concreta: los
+ * dos datos que la sostienen —el nombre público de la estación y sus redes— ya
+ * están resueltos aquí arriba, y son LOS MISMOS que pintan la cabecera y el pie.
+ * Resolverlos otra vez en el Inicio abriría la puerta a que el `sameAs` enlace a
+ * una cuenta distinta de la que el lector ve en el pie, que es la clase de
+ * discrepancia que Google lee como marcado engañoso.
+ *
+ * ⚠️ Solo en el Inicio: es la ficha de la casa, no de cada página. Repetirla en
+ * el resto de las rutas no le dice nada nuevo a nadie.
+ */
+const fichaEstacion = esInicio
+  ? serializar([
+      nodoEstacion({
+        nombrePublico: marca.nombrePublicacion,
+        redes: redes.map((r) => r.url),
+      }),
+    ])
+  : null;
 ---
 
 <!doctype html>
@@ -156,7 +289,19 @@ const resumen = descripcion ?? RESUMEN_CASA;
 
       ⚠️ `twitter:card` es lo único que X necesita de su propio espacio de nombres —
       el resto lo lee de Open Graph—. Duplicar `twitter:title` y compañía sería
-      mantener dos veces lo mismo para que digan lo mismo.
+      mantener dos veces lo mismo para que digan lo mismo. Por eso tampoco hay
+      `twitter:image:alt`: X lee el `og:image:alt` de abajo.
+
+      🔴 Las tres etiquetas de la IMAGEN se completaron el 2026-09-07 y no son
+      adorno:
+        · `og:image:alt` es lo que se lee en lugar de la foto — en el lector de
+          pantalla de Facebook y en la vista previa que no acaba de cargar.
+        · `og:image:width/height` le dan a la plataforma el hueco exacto ANTES de
+          bajar el archivo. Sin ellas, la primera vez que se comparte un enlace la
+          tarjeta se pinta encogida o recortada, y solo se acomoda cuando el
+          rastreador vuelve.
+      ⚠️ Las tres son condicionales a propósito: se emiten si el dato existe. Ver
+      `tarjeta`.
     */}
     <meta property="og:site_name" content="Beat 100.9" />
     <meta property="og:locale" content={LOCALE_OG} />
@@ -165,8 +310,20 @@ const resumen = descripcion ?? RESUMEN_CASA;
     <meta property="og:description" content={resumen} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={imagenCompartir} />
+    {tarjeta.alt && <meta property="og:image:alt" content={tarjeta.alt} />}
+    {
+      tarjeta.ancho && tarjeta.alto && (
+        <>
+          <meta property="og:image:width" content={String(tarjeta.ancho)} />
+          <meta property="og:image:height" content={String(tarjeta.alto)} />
+        </>
+      )
+    }
     {tipo === 'article' && publicado && (
       <meta property="article:published_time" content={publicado} />
+    )}
+    {tipo === 'article' && modificado && (
+      <meta property="article:modified_time" content={modificado} />
     )}
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@BEATOFICIAL" />
@@ -195,6 +352,20 @@ const resumen = descripcion ?? RESUMEN_CASA;
     */}
     <meta name="theme-color" content="#050706" />
     <meta name="robots" content={noIndexar ? 'noindex, nofollow' : 'index, follow'} />
+
+    {/*
+      Los datos estructurados de la ESTACIÓN. Solo en el Inicio; ver
+      `fichaEstacion` arriba.
+
+      guarda-ok set:html: es el único modo de emitir JSON-LD en Astro, y el valor
+      no es HTML del CMS sino JSON que arma `serializar()`, que además escapa `<`
+      —el vector real aquí es un `</script>` dentro de un titular, no una etiqueta
+      suelta—. Ver `src/lib/jsonld.ts`.
+
+      ⚠️ `is:inline` es obligatorio: sin él Astro trata el bloque como un script
+      del sitio y se lo lleva al bundle, donde ningún rastreador lo va a leer.
+    */}
+    {fichaEstacion && <script type="application/ld+json" is:inline set:html={fichaEstacion} />}
 
     {/*
       🔴 SIN ESTO el `transition:persist` de la cabecera NO HACE NADA.

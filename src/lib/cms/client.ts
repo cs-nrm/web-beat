@@ -407,3 +407,37 @@ export function urlMedia(
   }
   return urlMediaAbsoluta(media.url);
 }
+
+/**
+ * Las medidas de la variante que se está sirviendo — para `og:image:width/height`
+ * y para el `image` del JSON-LD.
+ *
+ * 🔴 Se busca POR URL, no repitiendo el orden de preferencia de `urlMedia`. Es la
+ * diferencia entre un dato y una suposición: `urlMedia` degrada hacia abajo
+ * —`large` puede no existir, porque las variantes se generan con
+ * `withoutEnlargement`— así que reproducir aquí su orden acabaría devolviendo las
+ * medidas de `large` para una imagen que en realidad se sirvió en `card`. Partiendo
+ * de la URL que ya devolvió, no hay dos criterios que se puedan desincronizar.
+ *
+ * ⚠️ Devuelve `null` si el CMS no trae las dos medidas. Es a propósito y quien la
+ * llama NO debe rellenarlas: las plataformas reservan el hueco de la tarjeta con
+ * esos números antes de bajar la imagen, así que un valor inventado se ve como un
+ * recorte en la publicación y desde el sitio no se nota.
+ */
+export function medidaMedia(
+  media: DocMedia | number | null | undefined,
+  url: string | null | undefined,
+): { ancho: number; alto: number } | null {
+  if (!media || typeof media !== 'object' || !url) return null;
+  const variantes: VarianteMedia[] = [
+    ...Object.values(media.sizes ?? {}).filter((v): v is VarianteMedia => Boolean(v)),
+    { url: media.url, width: media.width, height: media.height },
+  ];
+  for (const v of variantes) {
+    if (urlMediaAbsoluta(v.url) !== url) continue;
+    if (typeof v.width === 'number' && typeof v.height === 'number' && v.width > 0 && v.height > 0) {
+      return { ancho: v.width, alto: v.height };
+    }
+  }
+  return null;
+}

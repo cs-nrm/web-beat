@@ -123,9 +123,29 @@ const paraLaPila = [editorial.destacada, ...editorial.rejilla]
 const LOGO_MARQUEE = '/img/beat-blanco.svg';
 ---
 
+{/*
+  🔴 La descripción del Inicio y `RESUMEN_CASA` en `Base.astro` son EL MISMO texto,
+  y tienen que seguir siéndolo: `RESUMEN_CASA` es el respaldo de cualquier página
+  sin bajada propia, así que si se desincronizan, la casa se presenta de dos
+  maneras según por dónde entre el lector. Ya había pasado: aquí se leía «Beat
+  Editorial» —un nombre intermedio que ya no existe; hoy las secciones son «Beat
+  Scanner» y «Editorial»— y allá una enumeración distinta.
+
+  ⚠️ Y dice qué ES la estación, no qué secciones tiene. Enumerarlas no le sirve a
+  quien nunca ha entrado (no sabe qué es el Fenómeno Residente) ni a quien ya
+  conoce el sitio (no lee la descripción). Desde que hay Open Graph esta frase es
+  además lo que se lee al compartir la portada en WhatsApp.
+
+  ⚠️ Y el título: «Be» es decisión de Carlos (2026-09-07) y va TAL CUAL. Se le
+  preguntó expresamente pensando que la respuesta se había cortado, y lo confirmó;
+  él mismo lo dio por provisional. No se completa ni se interpreta.
+
+  El guion es LARGO, como en las otras 18 rutas del sitio («Beat Scanner — Beat
+  100.9»). Carlos lo escribió corto: se normaliza la puntuación, no el texto.
+*/}
 <Base
-  titulo="Beat 100.9"
-  descripcion="La estación de música electrónica de NRM. Qué suena ahora, el Fenómeno Residente, Beat Editorial y la agenda."
+  titulo="Beat 100.9 — Be"
+  descripcion="La estación de música electrónica de la Ciudad de México. Escucha el 100.9 FM en vivo y sigue lo que suena, se lanza y se mueve en la pista."
 >
   {/*
     El `h1` del Inicio va SOLO PARA LECTORES DE PANTALLA: el titular visible de

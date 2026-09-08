@@ -32,11 +32,17 @@ export type Pieza =
  * `depth: 2` para que las piezas lleguen con su documento poblado y con la imagen
  * de cada una; con `depth: 1` las piezas serían ids y habría que pedirlas aparte.
  *
- * ⚠️ Se ordena por `-numero` y se toma el primero, en vez de filtrar por
+ * ⚠️ Se ordena por `-inicio` y se toma el primero, en vez de filtrar por
  * `inicio <= hoy <= fin`. Es deliberado: un rango con la fecha de hoy en el `where`
  * daría una clave de caché distinta en cada petición —la regla de oro de este
  * cliente— y además dejaría la sección VACÍA en cuanto un especial venciera y el
- * siguiente no estuviera capturado. Con `-numero` siempre hay algo que mostrar.
+ * siguiente no estuviera capturado. Con `-inicio` siempre hay algo que mostrar.
+ *
+ * 📖 Ordenaba por `-numero` hasta el 2026-09-08, y ese campo ya no existe: el CMS
+ * lo quitó el 2026-08-21. Payload no protesta por un `sort` a un campo inexistente
+ * —devuelve 200 y lo ignora—, así que con un solo especial capturado nada se veía
+ * mal y el orden estaba a merced del que Postgres devolviera. `inicio` es el criterio
+ * que el propio CMS dejó como bueno.
  */
 export async function obtenerEspecialVigente(serieSlug?: string): Promise<Especiale | null> {
   try {
@@ -44,7 +50,7 @@ export async function obtenerEspecialVigente(serieSlug?: string): Promise<Especi
       'where[estado][equals]': 'activo',
       ...(serieSlug ? { 'where[serie.slug][equals]': serieSlug } : {}),
       depth: 2,
-      sort: '-numero',
+      sort: '-inicio',
       limit: 1,
     });
     return r.docs[0] ?? null;
@@ -80,12 +86,36 @@ export function capsulasDe(especial: Especiale | null) {
 }
 
 /**
- * Las listas del especial — de ahí sale la playlist del tema en 13a.
- * Se resuelve desde `piezas` y no con una consulta aparte, porque el especial ya
- * las trae pobladas y una consulta más sería gratis solo en apariencia.
+ * Las listas que vengan como PIEZA. Sigue existiendo porque `piezas` admite
+ * `listas` en su polimórfica, así que una lista puesta ahí es válida; pero no es
+ * de donde sale la playlist del tema. Para eso está `listaDe`.
  */
 export function listasDe(especial: Especiale | null): Pieza[] {
   return piezasDe(especial).filter((p) => p.tipo === 'listas');
+}
+
+/**
+ * La playlist del tema (§13a).
+ *
+ * 🔴 Sale de `especial.lista`, el campo DEDICADO del CMS («Lista de canciones»),
+ * y esto corrige un hueco que tenía el panel callado: se leía solo `piezas`
+ * buscando una de tipo `listas`, así que una lista capturada en su campo propio
+ * —el único que la interfaz del CMS ofrece para esto— no pintaba nada y el panel
+ * decía «Sin playlist todavía» teniéndola puesta. Verificado contra el CMS: el
+ * especial «Kraftwerk» trae `lista: 2` y cero piezas de tipo `listas`.
+ *
+ * ⚠️ Se conserva `piezas` como respaldo y en ese orden: el campo dedicado gana,
+ * porque es el que el formulario presenta y el que el editor cree estar llenando.
+ *
+ * ⚠️ Devuelve `null` si llegó como id: a `depth: 1` —el de `obtenerEspeciales`—
+ * `lista` es un número y no hay canciones que pintar. Solo la página del tema
+ * (`depth: 2`) la trae poblada, y es la única que muestra el panel.
+ */
+export function listaDe(especial: Especiale | null): Lista | null {
+  const directa = especial?.lista;
+  if (directa && typeof directa === 'object') return directa;
+  const pieza = listasDe(especial)[0]?.doc;
+  return pieza && typeof pieza === 'object' ? (pieza as Lista) : null;
 }
 
 /** Todos los especiales de una serie — el índice de `/fenomeno-residente`. */
@@ -95,7 +125,7 @@ export async function obtenerEspeciales(serieSlug?: string, cuantos = 24): Promi
       ...(serieSlug ? { 'where[serie.slug][equals]': serieSlug } : {}),
       ...SIN_PAGINACION,
       depth: 1,
-      sort: '-numero',
+      sort: '-inicio',
       limit: cuantos,
     });
     return r.docs;

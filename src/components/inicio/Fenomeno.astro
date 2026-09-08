@@ -10,10 +10,10 @@ import Icono from '@/components/Icono.astro';
 import Remate from '@/components/Remate.astro';
 import Anuncio from '@/components/Anuncio.astro';
 import { urlMedia } from '@/lib/cms/client';
-import { capsulasDe, listasDe } from '@/lib/cms/especiales';
+import { capsulasDe, listaDe } from '@/lib/cms/especiales';
 import { fuenteDeVideo } from '@/lib/video';
 import { fechaCorta } from '@/lib/nota';
-import type { Especiale, Lista } from '@/types/payload';
+import type { Especiale } from '@/types/payload';
 
 interface Props {
   especial: Especiale | null;
@@ -57,8 +57,7 @@ const conCabeza = contexto === 'inicio';
 const conTitular = contexto !== 'tema';
 
 const capsulas = capsulasDe(especial);
-const listas = listasDe(especial);
-const playlist = (listas[0]?.doc ?? null) as Lista | null;
+const playlist = listaDe(especial);
 
 /**
  * La cápsula que encabeza: la marcada como destacada si la hay, y si no la última
@@ -116,9 +115,6 @@ const tiendas = (
 
       {conTitular && (
         <div class="fr-tema">
-          {especial.numero != null && (
-            <span class="beat-display fr-numero">{String(especial.numero).padStart(2, '0')}</span>
-          )}
           <div class="fr-tema-texto">
             <span class="beat-label fr-rango">
               TEMA DE LA SEMANA{rango && ` · ${rango}`}
@@ -325,7 +321,7 @@ const tiendas = (
               </>
             ) : (
               <p class="fr-vacio">
-                Sin playlist todavía. Se agrega al especial como una pieza de tipo lista.
+                Sin playlist todavía. Se agrega al especial en «Lista de canciones».
               </p>
             )}
           </div>
@@ -391,13 +387,6 @@ const tiendas = (
      decir lo mismo. */
   .fr-tema:first-child {
     margin-top: 0;
-  }
-  .fr-numero {
-    font-size: 44px;
-    font-weight: 800;
-    line-height: 0.9;
-    color: var(--mist-0);
-    flex: none;
   }
   .fr-tema-texto {
     min-width: 0;
@@ -838,9 +827,6 @@ const tiendas = (
     .fr-tema {
       gap: 12px;
       margin-top: 20px;
-    }
-    .fr-numero {
-      font-size: 34px;
     }
     .fr-rango {
       font-size: 8.5px;

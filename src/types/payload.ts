@@ -1,5 +1,5 @@
 /* ⚠️ GENERADO — NO EDITAR A MANO.
- * Vendorizado desde cms-estaciones:src/payload-types.ts en el ref f27f53e01cf51a665a01615d68e25cc3378ad343.
+ * Vendorizado desde cms-estaciones:src/payload-types.ts en el ref eb0ad49.
  * Regenerar con: pnpm sync:types  (el pin vive en payload-types.lock.json).
  * Nota: se quita la augmentation `declare module 'payload'` del upstream
  *       (el front no instala el paquete payload; solo usa las interfaces).
@@ -85,11 +85,14 @@ export interface Config {
     'tipos-de-lista': TiposDeLista;
     eventos: Evento;
     transmisiones: Transmisione;
+    publicidad: Publicidad;
+    promociones: Promocione;
     autores: Autore;
     bitacora: Bitacora;
     canciones: Cancione;
     'estado-muestras': EstadoMuestra;
     avisos: Aviso;
+    paginas: Pagina;
     estaciones: Estacione;
     search: Search;
     redirects: Redirect;
@@ -121,11 +124,14 @@ export interface Config {
     'tipos-de-lista': TiposDeListaSelect<false> | TiposDeListaSelect<true>;
     eventos: EventosSelect<false> | EventosSelect<true>;
     transmisiones: TransmisionesSelect<false> | TransmisionesSelect<true>;
+    publicidad: PublicidadSelect<false> | PublicidadSelect<true>;
+    promociones: PromocionesSelect<false> | PromocionesSelect<true>;
     autores: AutoresSelect<false> | AutoresSelect<true>;
     bitacora: BitacoraSelect<false> | BitacoraSelect<true>;
     canciones: CancionesSelect<false> | CancionesSelect<true>;
     'estado-muestras': EstadoMuestrasSelect<false> | EstadoMuestrasSelect<true>;
     avisos: AvisosSelect<false> | AvisosSelect<true>;
+    paginas: PaginasSelect<false> | PaginasSelect<true>;
     estaciones: EstacionesSelect<false> | EstacionesSelect<true>;
     search: SearchSelect<false> | SearchSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
@@ -411,6 +417,7 @@ export interface Noticia {
    * Ordena TODOS los listados públicos. Se llena sola con la hora de creación; cámbiala solo si la nota es de otro día.
    */
   fecha: string;
+  fechaManual?: boolean | null;
   categorias?: (number | Categoria)[] | null;
   etiquetas?: (number | Etiqueta)[] | null;
   /**
@@ -587,10 +594,6 @@ export interface Especiale {
    */
   etiquetaPublica?: string | null;
   /**
-   * Su lugar en la serie: 1, 2, 3…
-   */
-  numero?: number | null;
-  /**
    * Desde cuándo está al aire.
    */
   inicio?: string | null;
@@ -619,6 +622,10 @@ export interface Especiale {
      */
     logo?: (number | null) | Media;
   };
+  /**
+   * Opcional. La lista asociada a este especial (un top ten, la selección del tema). Sale de «Listas».
+   */
+  lista?: (number | null) | Lista;
   /**
    * Lo que compone la lista, en el orden en que se muestra: arrastra para reordenar. Admite tipos distintos —una nota de video, un podcast, una transmisión— porque justo eso es lo que la hace una lista y no una categoría.
    */
@@ -729,6 +736,138 @@ export interface Programa {
    * Archivar lo saca de la parrilla sin borrar su página ni sus episodios.
    */
   estado?: ('activo' | 'archivado') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Las listas de canciones del sitio. Cada edición es su propio documento: para la de esta semana, duplica la anterior y cámbiale las canciones —la fecha y la URL se ponen solas. Qué listas existen se define en «Tipos de lista».
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "listas".
+ */
+export interface Lista {
+  id: number;
+  estacion?: (number | null) | Estacione;
+  titulo: string;
+  /**
+   * Qué lista es. Se elige de las que tenga definidas esta estación (colección «Tipos de lista»). Es parte de la URL.
+   */
+  tipo: number | TiposDeLista;
+  fecha: string;
+  /**
+   * Opcional. Si esta lista es de un programa en particular, elígelo aquí.
+   */
+  programa?: (number | null) | Programa;
+  /**
+   * Opcional. Un par de líneas para la página de la lista.
+   */
+  descripcion?: string | null;
+  /**
+   * El orden de la lista es el orden de aquí: arrastra para reordenar. Las canciones salen del catálogo, que se llena solo con lo que suena al aire.
+   */
+  canciones?:
+    | {
+        cancion: number | Cancione;
+        /**
+         * Opcional. La viñeta que acompaña a la canción en el sitio: por qué está aquí, qué contar de ella.
+         */
+        comentario?: string | null;
+        /**
+         * Los escribe el sitio público; aquí solo se ven.
+         */
+        votos?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  playlistSpotify?: string | null;
+  playlistAppleMusic?: string | null;
+  /**
+   * La imagen de la lista: con la que aparece listada en otras páginas y con la que se comparte.
+   */
+  portada?: (number | null) | Media;
+  /**
+   * URL pública. Se arma sola con el tipo y la fecha; cambia la fecha y cambia esto.
+   */
+  slug?: string | null;
+  /**
+   * Nace despublicada: publícala cuando la lista esté completa.
+   */
+  estado?: ('publicada' | 'despublicada') | null;
+  /**
+   * Mientras esté encendida, el sitio puede sumar votos a las canciones de esta lista. Apagarla cierra la votación sin borrar los conteos.
+   */
+  votacionAbierta?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Las listas que existen en el sitio de esta estación (Top Ten, Bonus Beat, Lanzamientos). Cada estación define las suyas; al capturar una lista se elige de aquí.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tipos-de-lista".
+ */
+export interface TiposDeLista {
+  id: number;
+  estacion?: (number | null) | Estacione;
+  /**
+   * Como lo llama la estación: «Top Ten», «Bonus Beat», «Hot Parade».
+   */
+  nombre: string;
+  /**
+   * Opcional. Qué es esta lista, para la página de su archivo histórico en el sitio.
+   */
+  descripcion?: string | null;
+  /**
+   * Con esto el sitio pide esta lista, y con esto empieza la URL de cada edición. Si queda vacío se genera del nombre. Cambiarlo después le cambia la URL a las ediciones.
+   */
+  slug?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Se llena sola con lo que suena al aire en Dalet. Enriquécela con portada, reproductor y enlaces a plataformas.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "canciones".
+ */
+export interface Cancione {
+  id: number;
+  estacion?: (number | null) | Estacione;
+  titulo: string;
+  artista?: string | null;
+  /**
+   * La rellena la ingesta con lo que manda Dalet, la primera vez que la canción suena. Es la que se muestra en la playlist de una lista.
+   */
+  duracion?: string | null;
+  /**
+   * Opcional. Dalet no la manda; se sube a mano.
+   */
+  portada?: (number | null) | Media;
+  /**
+   * Pega la URL del video o del audio, o el código <iframe> completo que da la plataforma: se limpia solo. Aceptadas: OmnyStudio, SoundCloud, Mixcloud, Spotify, Apple Podcasts, Amazon Music, Deezer, Spreaker, Audioboom, Podbean, Buzzsprout, Simplecast, Libsyn, Megaphone, iono.fm, iVoox, Anchor, YouTube, Vimeo.
+   */
+  embedUrl?: string | null;
+  /**
+   * Opcional. El mp3 que se reproduce en el sitio. Solo material del que la estación tenga derechos de reproducción a demanda: no es lo mismo que emitirlo al aire.
+   */
+  audio?: (number | null) | Media;
+  spotify?: string | null;
+  appleMusic?: string | null;
+  youtube?: string | null;
+  deezer?: string | null;
+  /**
+   * Quién creó la ficha. «Dalet» = la creó sola la ingesta la primera vez que la canción sonó al aire.
+   */
+  origen?: ('dalet' | 'manual') | null;
+  /**
+   * Id de biblioteca de Dalet. Lo escribe la ingesta y no se edita: es la llave que evita duplicados y permite cruzar con lo que salió Al Aire.
+   */
+  selector?: string | null;
+  /**
+   * Como la reporta Dalet (ej. MUSICA-HOUSE). Informativa.
+   */
+  categoriaPlayout?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -855,134 +994,6 @@ export interface Transmisione {
   createdAt: string;
 }
 /**
- * Las listas de canciones del sitio. Cada edición es su propio documento: para la de esta semana, duplica la anterior y cámbiale las canciones —la fecha y la URL se ponen solas. Qué listas existen se define en «Tipos de lista».
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "listas".
- */
-export interface Lista {
-  id: number;
-  estacion?: (number | null) | Estacione;
-  titulo: string;
-  /**
-   * Qué lista es. Se elige de las que tenga definidas esta estación (colección «Tipos de lista»). Es parte de la URL.
-   */
-  tipo: number | TiposDeLista;
-  fecha: string;
-  /**
-   * Opcional. Si esta lista es de un programa en particular, elígelo aquí.
-   */
-  programa?: (number | null) | Programa;
-  /**
-   * Opcional. Un par de líneas para la página de la lista.
-   */
-  descripcion?: string | null;
-  /**
-   * El orden de la lista es el orden de aquí: arrastra para reordenar. Las canciones salen del catálogo, que se llena solo con lo que suena al aire.
-   */
-  canciones?:
-    | {
-        cancion: number | Cancione;
-        /**
-         * Opcional. La viñeta que acompaña a la canción en el sitio: por qué está aquí, qué contar de ella.
-         */
-        comentario?: string | null;
-        /**
-         * Los escribe el sitio público; aquí solo se ven.
-         */
-        votos?: number | null;
-        id?: string | null;
-      }[]
-    | null;
-  playlistSpotify?: string | null;
-  playlistAppleMusic?: string | null;
-  /**
-   * La imagen de la lista: con la que aparece listada en otras páginas y con la que se comparte.
-   */
-  portada?: (number | null) | Media;
-  /**
-   * URL pública. Se arma sola con el tipo y la fecha; cambia la fecha y cambia esto.
-   */
-  slug?: string | null;
-  /**
-   * Nace despublicada: publícala cuando la lista esté completa.
-   */
-  estado?: ('publicada' | 'despublicada') | null;
-  /**
-   * Mientras esté encendida, el sitio puede sumar votos a las canciones de esta lista. Apagarla cierra la votación sin borrar los conteos.
-   */
-  votacionAbierta?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * Las listas que existen en el sitio de esta estación (Top Ten, Bonus Beat, Lanzamientos). Cada estación define las suyas; al capturar una lista se elige de aquí.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tipos-de-lista".
- */
-export interface TiposDeLista {
-  id: number;
-  estacion?: (number | null) | Estacione;
-  /**
-   * Como lo llama la estación: «Top Ten», «Bonus Beat», «Hot Parade».
-   */
-  nombre: string;
-  /**
-   * Opcional. Qué es esta lista, para la página de su archivo histórico en el sitio.
-   */
-  descripcion?: string | null;
-  /**
-   * Con esto el sitio pide esta lista, y con esto empieza la URL de cada edición. Si queda vacío se genera del nombre. Cambiarlo después le cambia la URL a las ediciones.
-   */
-  slug?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Se llena sola con lo que suena al aire en Dalet. Enriquécela con portada, reproductor y enlaces a plataformas.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "canciones".
- */
-export interface Cancione {
-  id: number;
-  estacion?: (number | null) | Estacione;
-  titulo: string;
-  artista?: string | null;
-  /**
-   * La rellena la ingesta con lo que manda Dalet, la primera vez que la canción suena. Es la que se muestra en la playlist de una lista.
-   */
-  duracion?: string | null;
-  /**
-   * Opcional. Dalet no la manda; se sube a mano.
-   */
-  portada?: (number | null) | Media;
-  /**
-   * Pega la URL del video o del audio, o el código <iframe> completo que da la plataforma: se limpia solo. Aceptadas: OmnyStudio, SoundCloud, Mixcloud, Spotify, Apple Podcasts, Amazon Music, Deezer, Spreaker, Audioboom, Podbean, Buzzsprout, Simplecast, Libsyn, Megaphone, iono.fm, iVoox, Anchor, YouTube, Vimeo.
-   */
-  embedUrl?: string | null;
-  spotify?: string | null;
-  appleMusic?: string | null;
-  youtube?: string | null;
-  deezer?: string | null;
-  /**
-   * Quién creó la ficha. «Dalet» = la creó sola la ingesta la primera vez que la canción sonó al aire.
-   */
-  origen?: ('dalet' | 'manual') | null;
-  /**
-   * Id de biblioteca de Dalet. Lo escribe la ingesta y no se edita: es la llave que evita duplicados y permite cruzar con lo que salió Al Aire.
-   */
-  selector?: string | null;
-  /**
-   * Como la reporta Dalet (ej. MUSICA-HOUSE). Informativa.
-   */
-  categoriaPlayout?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
  * Lo que la estación organiza, cubre o donde tiene presencia. Las fechas llevan hora, y el evento dice por sí mismo si lleva RSVP o venta de boletos.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1032,210 +1043,134 @@ export interface Evento {
   _status?: ('draft' | 'published') | null;
 }
 /**
- * La escribe Dalet automáticamente. Se conservan los últimos 7 días.
+ * Los banners del sitio: portada y banner nativo. Cada uno con su anunciante, su vigencia y su enlace. Fuera de vigencia deja de mostrarse solo.
  *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "bitacora".
+ * via the `definition` "publicidad".
  */
-export interface Bitacora {
+export interface Publicidad {
   id: number;
   estacion?: (number | null) | Estacione;
-  sonoEn: string;
-  titulo: string;
-  artista?: string | null;
   /**
-   * La ficha del catálogo. El título y el artista se guardan TAMBIÉN aquí, planos, a propósito: si la ficha se edita o se borra, la bitácora sigue diciendo qué sonó de verdad ese día.
-   */
-  cancion?: (number | null) | Cancione;
-  /**
-   * Id de biblioteca de Dalet.
-   */
-  selector?: string | null;
-  categoriaPlayout?: string | null;
-  /**
-   * Como la manda Dalet (HH:MM:SS). Texto, no se interpreta.
-   */
-  duracion?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "estado-muestras".
- */
-export interface EstadoMuestra {
-  id: number;
-  momento: string;
-  /**
-   * Mapa id de sonda → nivel (ok, advertencia, falla, desconocido).
-   */
-  niveles?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Se muestran en /admin/estado y como banner en todo el panel hasta que se marcan como resueltos.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "avisos".
- */
-export interface Aviso {
-  id: number;
-  /**
-   * Corto y en lenguaje de redacción: "Las imágenes tardan en subir".
+   * Para identificarla aquí dentro. No se muestra en el sitio.
    */
   titulo: string;
   /**
-   * Decide el color del banner.
+   * De quién es la campaña. Es lo que agrupa los números al reportar.
    */
-  severidad: 'informativo' | 'degradado' | 'interrupcion';
+  anunciante: string;
   /**
-   * Al marcarlo "Resuelto" desaparece el banner.
+   * Cada sitio ya sabe dónde va cada tipo.
    */
-  estado: 'investigando' | 'identificado' | 'monitoreando' | 'resuelto';
+  tipo: 'portada' | 'nativo';
   /**
-   * Qué pasa, a quién afecta y qué hacer mientras tanto. Se lee completo en /admin/estado.
+   * Antes de esta fecha el sitio no lo muestra.
    */
-  mensaje: string;
-  componentes?: ('editor' | 'imagenes' | 'programacion' | 'busqueda' | 'bitacora' | 'sitio' | 'correo')[] | null;
-  /**
-   * Déjalo VACÍO si afecta a todas (por ejemplo, algo de infraestructura). Si eliges una o varias, el banner solo le sale a quien trabaja en ellas.
-   */
-  estaciones?: (number | Estacione)[] | null;
   inicio: string;
-  resueltoEn?: string | null;
+  /**
+   * Vacío = sigue corriendo hasta que la pauses.
+   */
+  fin?: string | null;
+  /**
+   * La creatividad como la manda el anunciante.
+   */
+  imagen: number | Media;
+  /**
+   * Opcional. La versión vertical o cuadrada. Si se deja vacía, el sitio usa la de arriba.
+   */
+  imagenMovil?: (number | null) | Media;
+  /**
+   * La liga del anunciante. Puede ser externa o una página del propio sitio.
+   */
+  enlace: string;
+  /**
+   * Opcional. Cuando hay varias campañas corriendo al mismo tiempo en el mismo lugar, el sitio empieza por el número más bajo.
+   */
+  orden?: number | null;
+  /**
+   * Despublicarlo lo saca del sitio sin borrarlo ni perder sus números.
+   */
+  estado?: ('publicada' | 'despublicada') | null;
+  impresiones?: number | null;
+  clics?: number | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
- * This is a collection of automatically created search results. These results are used by the global site search and will be updated automatically as documents in the CMS are created or updated.
+ * Los concursos y promociones de la estación. Se puede participar con un formulario de aquí, con un concurso de otro sitio embebido, o fuera de línea (WhatsApp, cabina, redes).
  *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "search".
+ * via the `definition` "promociones".
  */
-export interface Search {
+export interface Promocione {
   id: number;
-  title?: string | null;
-  priority?: number | null;
-  doc:
-    | {
-        relationTo: 'noticias';
-        value: number | Noticia;
-      }
-    | {
-        relationTo: 'podcasts';
-        value: number | Podcast;
-      };
   estacion?: (number | null) | Estacione;
-  categorias?: (number | Categoria)[] | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "redirects".
- */
-export interface Redirect {
-  id: number;
-  from: string;
-  to?: {
-    type?: ('reference' | 'custom') | null;
-    reference?:
-      | ({
-          relationTo: 'noticias';
-          value: number | Noticia;
-        } | null)
-      | ({
-          relationTo: 'podcasts';
-          value: number | Podcast;
-        } | null);
-    url?: string | null;
-  };
-  type: '301' | '302';
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "exports".
- */
-export interface Export {
-  id: number;
-  name?: string | null;
-  format: 'csv' | 'json';
-  limit?: number | null;
-  page?: number | null;
-  sort?: string | null;
-  sortOrder?: ('asc' | 'desc') | null;
-  drafts?: ('yes' | 'no') | null;
-  selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
-  fields?: string[] | null;
-  collectionSlug: string;
-  where?:
-    | {
+  titulo: string;
+  /**
+   * Qué se gana, en una línea. Es lo que va en la tarjeta del listado.
+   */
+  premio?: string | null;
+  /**
+   * Día y hora en que abre la participación.
+   */
+  inicio: string;
+  /**
+   * Cuándo cierra. Vacío = sin fecha de término.
+   */
+  fin?: string | null;
+  /**
+   * De qué va el concurso y sus bases: quién puede participar, cómo se elige al ganador, qué incluye el premio.
+   */
+  descripcion?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
         [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Define qué muestra el sitio: un formulario, un concurso de otro lado, o solo las instrucciones.
+   */
+  participacion: 'formulario' | 'externo' | 'fuera-de-linea';
+  /**
+   * Se arma en «Formularios». Lo que contesten los oyentes aparece en «Respuestas de formularios», que solo ven los admin.
+   */
+  formulario?: (number | null) | Form;
+  /**
+   * Solo la dirección, no el código del iframe. El sitio lo arma con ella.
+   */
+  urlExterna?: string | null;
+  /**
+   * Lo que tiene que hacer el oyente. Ej.: «Manda un WhatsApp al 55 1234 5678 con la palabra BEAT».
+   */
+  instrucciones?: string | null;
+  /**
+   * Se llena cuando el concurso cierra. Vacío, el sitio no muestra nada — no hace falta despublicar la promoción para que no salga.
+   */
+  ganadores?: string | null;
+  /**
+   * La imagen con la que la promoción aparece en el listado y al compartirla.
+   */
+  portada?: (number | null) | Media;
+  /**
+   * URL pública. Si queda vacío, se genera del título.
+   */
+  slug?: string | null;
+  /**
+   * Despublicar la saca del sitio sin borrarla. Un concurso ya cerrado puede seguir publicado para mostrar a los ganadores.
+   */
+  estado?: ('publicada' | 'despublicada') | null;
   updatedAt: string;
   createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "imports".
- */
-export interface Import {
-  id: number;
-  collectionSlug: string;
-  importMode?: ('create' | 'update' | 'upsert') | null;
-  matchField?: string | null;
-  status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
-  summary?: {
-    imported?: number | null;
-    updated?: number | null;
-    total?: number | null;
-    issues?: number | null;
-    issueDetails?:
-      | {
-          [k: string]: unknown;
-        }
-      | unknown[]
-      | string
-      | number
-      | boolean
-      | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1410,6 +1345,252 @@ export interface Form {
     | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * La escribe Dalet automáticamente. Se conservan los últimos 7 días.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bitacora".
+ */
+export interface Bitacora {
+  id: number;
+  estacion?: (number | null) | Estacione;
+  sonoEn: string;
+  titulo: string;
+  artista?: string | null;
+  /**
+   * La ficha del catálogo. El título y el artista se guardan TAMBIÉN aquí, planos, a propósito: si la ficha se edita o se borra, la bitácora sigue diciendo qué sonó de verdad ese día.
+   */
+  cancion?: (number | null) | Cancione;
+  /**
+   * Id de biblioteca de Dalet.
+   */
+  selector?: string | null;
+  categoriaPlayout?: string | null;
+  /**
+   * Como la manda Dalet (HH:MM:SS). Texto, no se interpreta.
+   */
+  duracion?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "estado-muestras".
+ */
+export interface EstadoMuestra {
+  id: number;
+  momento: string;
+  /**
+   * Mapa id de sonda → nivel (ok, advertencia, falla, desconocido).
+   */
+  niveles?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Se muestran en /admin/estado y como banner en todo el panel hasta que se marcan como resueltos.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "avisos".
+ */
+export interface Aviso {
+  id: number;
+  /**
+   * Corto y en lenguaje de redacción: "Las imágenes tardan en subir".
+   */
+  titulo: string;
+  /**
+   * Decide el color del banner.
+   */
+  severidad: 'informativo' | 'degradado' | 'interrupcion';
+  /**
+   * Al marcarlo "Resuelto" desaparece el banner.
+   */
+  estado: 'investigando' | 'identificado' | 'monitoreando' | 'resuelto';
+  /**
+   * Qué pasa, a quién afecta y qué hacer mientras tanto. Se lee completo en /admin/estado.
+   */
+  mensaje: string;
+  componentes?: ('editor' | 'imagenes' | 'programacion' | 'busqueda' | 'bitacora' | 'sitio' | 'correo')[] | null;
+  /**
+   * Déjalo VACÍO si afecta a todas (por ejemplo, algo de infraestructura). Si eliges una o varias, el banner solo le sale a quien trabaja en ellas.
+   */
+  estaciones?: (number | Estacione)[] | null;
+  inicio: string;
+  resueltoEn?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Las páginas de texto fijo del sitio: aviso de privacidad, términos y condiciones, Alexa. Cada estación tiene las suyas.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "paginas".
+ */
+export interface Pagina {
+  id: number;
+  estacion?: (number | null) | Estacione;
+  titulo: string;
+  /**
+   * El texto completo de la página. Acepta títulos, listas y enlaces.
+   */
+  contenido: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * URL pública (ej. aviso-de-privacidad). Si queda vacío se genera del título. Cambiarlo rompe los enlaces que ya apuntan aquí.
+   */
+  slug?: string | null;
+  /**
+   * Despublicar la saca del sitio sin borrarla.
+   */
+  estado?: ('publicada' | 'despublicada') | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This is a collection of automatically created search results. These results are used by the global site search and will be updated automatically as documents in the CMS are created or updated.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search".
+ */
+export interface Search {
+  id: number;
+  title?: string | null;
+  priority?: number | null;
+  doc:
+    | {
+        relationTo: 'noticias';
+        value: number | Noticia;
+      }
+    | {
+        relationTo: 'podcasts';
+        value: number | Podcast;
+      };
+  estacion?: (number | null) | Estacione;
+  categorias?: (number | Categoria)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "redirects".
+ */
+export interface Redirect {
+  id: number;
+  from: string;
+  to?: {
+    type?: ('reference' | 'custom') | null;
+    reference?:
+      | ({
+          relationTo: 'noticias';
+          value: number | Noticia;
+        } | null)
+      | ({
+          relationTo: 'podcasts';
+          value: number | Podcast;
+        } | null);
+    url?: string | null;
+  };
+  type: '301' | '302';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "exports".
+ */
+export interface Export {
+  id: number;
+  name?: string | null;
+  format: 'csv' | 'json';
+  limit?: number | null;
+  page?: number | null;
+  sort?: string | null;
+  sortOrder?: ('asc' | 'desc') | null;
+  drafts?: ('yes' | 'no') | null;
+  selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
+  fields?: string[] | null;
+  collectionSlug: string;
+  where?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "imports".
+ */
+export interface Import {
+  id: number;
+  collectionSlug: string;
+  importMode?: ('create' | 'update' | 'upsert') | null;
+  matchField?: string | null;
+  status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
+  summary?: {
+    imported?: number | null;
+    updated?: number | null;
+    total?: number | null;
+    issues?: number | null;
+    issueDetails?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1605,6 +1786,14 @@ export interface PayloadLockedDocument {
         value: number | Transmisione;
       } | null)
     | ({
+        relationTo: 'publicidad';
+        value: number | Publicidad;
+      } | null)
+    | ({
+        relationTo: 'promociones';
+        value: number | Promocione;
+      } | null)
+    | ({
         relationTo: 'autores';
         value: number | Autore;
       } | null)
@@ -1623,6 +1812,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'avisos';
         value: number | Aviso;
+      } | null)
+    | ({
+        relationTo: 'paginas';
+        value: number | Pagina;
       } | null)
     | ({
         relationTo: 'estaciones';
@@ -1807,6 +2000,7 @@ export interface NoticiasSelect<T extends boolean = true> {
   imagen?: T;
   contenido?: T;
   fecha?: T;
+  fechaManual?: T;
   categorias?: T;
   etiquetas?: T;
   especial?: T;
@@ -1953,7 +2147,6 @@ export interface EspecialesSelect<T extends boolean = true> {
   programa?: T;
   serie?: T;
   etiquetaPublica?: T;
-  numero?: T;
   inicio?: T;
   fin?: T;
   portada?: T;
@@ -1967,6 +2160,7 @@ export interface EspecialesSelect<T extends boolean = true> {
         direccion?: T;
         logo?: T;
       };
+  lista?: T;
   piezas?: T;
   piezaDestacada?: T;
   patrocinador?:
@@ -2068,6 +2262,50 @@ export interface TransmisionesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publicidad_select".
+ */
+export interface PublicidadSelect<T extends boolean = true> {
+  estacion?: T;
+  titulo?: T;
+  anunciante?: T;
+  tipo?: T;
+  inicio?: T;
+  fin?: T;
+  imagen?: T;
+  imagenMovil?: T;
+  enlace?: T;
+  orden?: T;
+  estado?: T;
+  impresiones?: T;
+  clics?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "promociones_select".
+ */
+export interface PromocionesSelect<T extends boolean = true> {
+  estacion?: T;
+  titulo?: T;
+  premio?: T;
+  inicio?: T;
+  fin?: T;
+  descripcion?: T;
+  participacion?: T;
+  formulario?: T;
+  urlExterna?: T;
+  instrucciones?: T;
+  ganadores?: T;
+  portada?: T;
+  slug?: T;
+  estado?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "autores_select".
  */
 export interface AutoresSelect<T extends boolean = true> {
@@ -2112,6 +2350,7 @@ export interface CancionesSelect<T extends boolean = true> {
   duracion?: T;
   portada?: T;
   embedUrl?: T;
+  audio?: T;
   spotify?: T;
   appleMusic?: T;
   youtube?: T;
@@ -2147,6 +2386,20 @@ export interface AvisosSelect<T extends boolean = true> {
   resueltoEn?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "paginas_select".
+ */
+export interface PaginasSelect<T extends boolean = true> {
+  estacion?: T;
+  titulo?: T;
+  contenido?: T;
+  slug?: T;
+  estado?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2544,11 +2797,14 @@ export interface TaskCreateCollectionExport {
       | 'tipos-de-lista'
       | 'eventos'
       | 'transmisiones'
+      | 'publicidad'
+      | 'promociones'
       | 'autores'
       | 'bitacora'
       | 'canciones'
       | 'estado-muestras'
       | 'avisos'
+      | 'paginas'
       | 'estaciones'
       | 'search'
       | 'redirects'

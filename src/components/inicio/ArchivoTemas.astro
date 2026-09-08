@@ -46,12 +46,9 @@ const anteriores = limite == null ? filtrados : filtrados.slice(0, limite);
           const portada = urlMedia(t.portada, 'card');
           return (
             <a href={`/especiales/${t.slug}`} class="at-tema" data-luz>
-              <div class="at-numero-caja">
+              <div class="at-caja">
                 {portada && <img src={portada} alt="" loading="lazy" decoding="async" />}
                 <div class="beat-grid at-trama" />
-                {t.numero != null && (
-                  <span class="beat-display at-numero">{String(t.numero).padStart(2, '0')}</span>
-                )}
                 {t.estado === 'archivado' && (
                   <span class="beat-label at-estado">CERRADO</span>
                 )}
@@ -102,7 +99,7 @@ const anteriores = limite == null ? filtrados : filtrados.slice(0, limite);
   .at-tema:hover .at-titulo {
     color: var(--mist-0);
   }
-  .at-numero-caja {
+  .at-caja {
     position: relative;
     aspect-ratio: 1 / 1;
     background: var(--grad-noche);
@@ -110,25 +107,21 @@ const anteriores = limite == null ? filtrados : filtrados.slice(0, limite);
     display: grid;
     place-items: center;
   }
-  .at-numero-caja img {
+  .at-caja img {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* La foto va atenuada porque el protagonista es el NÚMERO: es el archivo, y
-       lo que se busca ahí es «el tema 07», no una imagen. */
-    opacity: 0.42;
+    /* 📖 Aquí la foto iba a `opacity: .42`, atenuada porque el protagonista era el
+       NÚMERO del tema sobrepuesto —«el tema 07»— y la imagen solo lo ambientaba.
+       El CMS quitó `especiales.numero` el 2026-08-21 (el número vive en el título
+       y el orden lo dan `inicio` y el sort), así que sin nada encima una foto al
+       42% era una caja oscura sin motivo. Va entera: ahora ella es el tema. */
   }
   .at-trama {
     position: absolute;
     inset: 0;
-  }
-  .at-numero {
-    position: relative;
-    font-size: 52px;
-    font-weight: 800;
-    color: var(--mist-1);
   }
   .at-estado {
     position: absolute;
@@ -175,9 +168,6 @@ const anteriores = limite == null ? filtrados : filtrados.slice(0, limite);
     }
     .at-rejilla {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    }
-    .at-numero {
-      font-size: 34px;
     }
     .at-titulo {
       font-size: 14px;

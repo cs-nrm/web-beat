@@ -1,68 +1,93 @@
-# Astro Starter Kit: Blog
+# web-beat — front público de Beat 100.9
 
-```sh
-npm create astro@latest -- --template blog
+Astro SSR sobre `cms-estaciones`, el Payload multi-estación de NRM. Este repo sirve
+`beatdigital.mx` y es el modelo del que salen los de OYE, Sabrosita y Stereo Cien:
+nada de la estación está escrito a mano, todo se resuelve por `ESTACION_CODIGO`.
+
+> ⚠️ El README anterior era el del starter «Astro Starter Kit: Blog», sin tocar:
+> documentaba `src/content/`, `getCollection()`, MDX, RSS y sitemap — cuatro cosas
+> que este proyecto no usa. Si algo de lo que sigue no coincide con el código, gana
+> el código y esto es un bug.
+
+## Arrancar
+
+```bash
+pnpm install
+pnpm dev
 ```
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/blog)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/blog)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/blog/devcontainer.json)
+🔴 **`CMS_URL` es la variable que hace o rompe el arranque.** Va SIN prefijo
+`PUBLIC_`, así que se lee en EJECUCIÓN y Vite no la hornea en el bundle. Si falta,
+el sitio responde **200 con cero contenido**: cabecera, pie y menú perfectos, y ni
+una noticia. No hay error en pantalla y el monitoreo ve un 200 — es el peor modo de
+falla que existe, y ya costó un despliegue en `web-enfoque`.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+`pnpm dev` sí carga `.env`. `pnpm preview` y el contenedor **no**:
 
-![blog](https://github.com/withastro/astro/assets/2244813/ff10799f-a816-4703-b967-c78997e8323d)
-
-Features:
-
-- ✅ Minimal styling (make it your own!)
-- ✅ 100/100 Lighthouse performance
-- ✅ SEO-friendly with canonical URLs and OpenGraph data
-- ✅ Sitemap support
-- ✅ RSS Feed support
-- ✅ Markdown & MDX support
-
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-├── public/
-├── src/
-│   ├── components/
-│   ├── content/
-│   ├── layouts/
-│   └── pages/
-├── astro.config.mjs
-├── README.md
-├── package.json
-└── tsconfig.json
+```bash
+CMS_URL=https://admin.nrm.com.mx pnpm preview
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## Los comandos que importan
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+| Comando | Qué hace |
+|---|---|
+| `pnpm dev` | Servidor de desarrollo |
+| `pnpm check` | `astro check` + las guardas del repo |
+| `pnpm build` | `check` + guardas + build + guarda de cascada |
+| `pnpm favicon` | Regenera el juego de iconos **y** las tarjetas de compartir desde `public/img/beat-blanco.svg` |
+| `pnpm fuentes` | Regenera las fuentes auto-hospedadas en `public/fuentes/` |
+| `pnpm sync:types` | Trae los tipos de Payload a `src/types/payload.ts` |
 
-The `src/content/` directory contains "collections" of related Markdown and MDX documents. Use `getCollection()` to retrieve posts from `src/content/blog/`, and type-check your frontmatter using an optional schema. See [Astro's Content Collections docs](https://docs.astro.build/en/guides/content-collections/) to learn more.
+⚠️ **`pnpm check` NO basta como puerta.** Da 0 errores en cosas que el compilador
+del build sí rechaza — por ejemplo un comentario de llaves dentro de la lista de
+atributos de una etiqueta de Astro. Antes de dar algo por bueno, `pnpm build`.
 
-Any static assets, like images, can be placed in the `public/` directory.
+## Cómo está armado
 
-## 🧞 Commands
+```
+src/
+  pages/        23 rutas SSR. Una ruta por COLECCIÓN, no por sección
+  components/   piezas de UI; `Anuncio.astro` es el único hueco publicitario
+  layouts/      Base.astro — el <head>, el chrome y las reglas de indexación
+  lib/cms/      10 módulos, uno por colección de Payload. SOLO server-side
+  lib/          nota.ts (presentación), jsonld.ts, video.ts, feeds.ts
+  scripts/      el runtime de cliente, uno por comportamiento
+  styles/       base.css declara el @layer del que cuelga todo lo demás
+  config/       site.ts (URLs e indexación) y navegacion.ts (menú, pie, secciones)
+```
 
-All commands are run from the root of the project, from a terminal:
+⚠️ **`src/js/` NO es código vivo.** Son los archivos del v1 que quedan como
+material de port —el núcleo de Triton de `player.js` sigue siendo la referencia— y
+ningún archivo de `src/` los importa. Ver `src/js/README.md`.
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+## Antes de tocar algo
 
-## 👀 Want to learn more?
+Este repo lleva el porqué escrito en el propio código: comentarios con 🔴 para lo
+que no se debe romper y ⚠️ para las trampas medidas. **Léelos antes de cambiar la
+línea que comentan** — casi todos existen porque algo ya falló ahí.
 
-Check out [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+Y hay seis agentes con su alcance delimitado, en `agents/*.md`:
 
-## Credit
+| Agente | Qué le toca |
+|---|---|
+| `ads` | El inventario publicitario: huecos, medidas, GAM y venta directa |
+| `analytics` | La medición. 🔴 Hoy hay emisor y NO hay receptor: leer su acta |
+| `content` | Las colecciones del CMS y cómo se leen |
+| `frontend` | Maquetado, design system y la política de caché |
+| `metadata` | Títulos, canónicas, Open Graph, indexación y sitemaps |
+| `streaming` | El player, la señal de Triton y los cue points |
 
-This theme is based off of the lovely [Bear Blog](https://github.com/HermanMartinus/bearblog/).
+## Documentos que sí valen
+
+| Archivo | Qué es |
+|---|---|
+| `movimiento.md` | El contrato de movimiento y de color. Vigente, y se cita desde el código |
+| `docs/despliegue-v2.md` | Cómo está montado v2, cómo se actualiza y qué falta para el corte de dominio |
+| `docs/lo-que-el-front-necesita-del-cms.md` | Traspaso con el CMS |
+| `src/js/README.md` | Qué falta portar del v1 y las reglas que el port debe respetar |
+
+⚠️ Se borraron tres documentos del v1 que describían un código que ya no existe y
+que ya habían provocado errores reales: `ROADMAP.md`, `dynamicAds.md` y
+`showheroes-videonota.md`. Lo que seguía pendiente de ellos —la implementación de
+ShowHeroes— está recogido en `agents/ads.md`. Están en el historial de git.

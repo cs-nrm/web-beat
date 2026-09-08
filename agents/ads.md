@@ -64,6 +64,30 @@ bloqueador de anuncios o un `gpt.js` que no bajó son el modo de falla más com�
 sin ese camino la banda se queda abierta para siempre — el patrón de «estado muerto
 sin salida» que movimiento.md §3 prohíbe.
 
+### 🔴 La regla de GPT que no se negocia
+
+**`destroySlots()` y TODO lo que dependa de `googletag` va DENTRO de
+`googletag.cmd.push()`. Nunca fuera.**
+
+El snippet del `<head>` crea `window.googletag = { cmd: [] }` de inmediato, pero la
+librería real baja `async`. Si algo toca `googletag.destroySlots` antes de que
+`gpt.js` termine —frecuente en móvil o con red lenta— está tocando el stub, que no
+tiene ese método: **TypeError, y la inicialización entera se cancela**. Se ve como
+«los anuncios no salen hoy», sin error visible en la página.
+
+Está implementada y documentada en `src/scripts/anuncios.ts`; se anota aquí porque
+es la lección que sobrevive a cualquier reescritura del motor.
+
+⚠️ Y la segunda: **View Transitions hace un swap completo del DOM.** Los `div` de
+los slots anteriores desaparecen y GPT se queda con referencias a nodos huérfanos,
+así que en cada navegación hay que destruir y volver a definir. `anuncios.ts` lo
+hace registrando el oyente UNA vez; si se registrara por navegación, la enésima
+ejecutaría la inicialización n veces.
+
+⚠️ Tercera, de las que cuestan una tarde: `sizeMapping().addSize()` necesita **dos**
+argumentos —viewport y tamaños—. `addSize([970, 250])` a secas compila y no mapea
+nada.
+
 ---
 
 ## Dónde va cada hueco, y por qué
@@ -118,7 +142,31 @@ ese caso:
 3. Si la red exige su propio script, va en `Base.astro` junto al de GPT, y se
    documenta aquí por qué no pudo entrar por GAM.
 
-### ⚠️ ShowHeroes: el documento que hay está MAL
+### ShowHeroes: pendiente, y lo que de verdad pide
+
+🔴 **Esto SIGUE en pie** (Carlos, 2026-09-08): el documento que lo describía se
+borró por equivocado, no por cancelado. Lo que el proyecto quiere es un **video
+flotante en los interiores de contenido**, servido por ShowHeroes **a través de Ad
+Manager** — no con un script de la red.
+
+Lo que hace falta cuando se retome, ya traducido a v2:
+
+1. Un formato nuevo en `MEDIDAS` (`Anuncio.astro`): **400 × 311**, que es uno de los
+   tres del v1 que hoy no se usan.
+2. Un `<Anuncio formato="videonota" nombre="nota-video" />` en
+   `src/pages/noticias/[slug].astro`, **después del cuerpo de la nota** — en los
+   interiores donde se lee, no en listados ni en el Inicio.
+3. En Ad Manager: el line item de ShowHeroes apuntando a ese placement, con el ad
+   unit de **Beat** (`PUBLIC_GAM_AD_UNIT=Beat`), y la medida 400×311 dada de alta.
+4. Nada de `src/js/ads.js` ni de scripts inline: el motor lo descubre por los
+   `data-*` del componente.
+
+⚠️ **`public/ads.txt` todavía declara `viralize.com, 7587, DIRECT`** (línea 283).
+Viralize era la red ANTERIOR de este mismo hueco y su script ya no está en el
+sitio, así que ese seller autoriza a alguien que ya no vende. Es una decisión de
+AdOps, no de código: no se toca sin confirmarlo, pero hay que confirmarlo.
+
+### ⚠️ Y por qué el documento que había estaba MAL
 
 `showheroes-videonota.md` es del v1 y seguirlo hoy rompe cosas:
 

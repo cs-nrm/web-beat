@@ -264,7 +264,18 @@
  *
  * El DS declara `--header-h: 64px` y `--player-h: 76px`, pero `Cabecera-Beat`
  * dibuja el header a 68px en escritorio y 56 en móvil, y la barra del player a
- * 48px en ambos. Gana el artboard, que es posterior y es lo que se aprobó.
+ * 48px. Gana el artboard, que es posterior y es lo que se aprobó.
+ *
+ * 🔴 …salvo en MÓVIL, donde la barra sube a 60px (Carlos, 2026-09-08): «la barra
+ * se ve muy chiquita». Y no era una impresión — medido a 375px, el problema no es
+ * que sea chica, es que está LLENA: dentro hay un botón táctil de 44px, así que
+ * los 48 dejaban 2px de aire arriba y 2 abajo. Encima el banner de publicidad mide
+ * 110px, más del doble que la barra, así que la marca no competía con la foto de
+ * portada sino con el anuncio que tiene sobre la cabeza.
+ *
+ * ⚠️ A 60px el botón de 44 respira 8px por lado y el logo puede crecer sin apretar
+ * nada. En ESCRITORIO se queda en 48: ahí la barra clara convive con la oscura de
+ * 68 y el conjunto ya pesa 116px.
  *
  * Importan más allá de la estética: el player es `sticky`, así que cualquier
  * `scroll-margin-top` de un ancla tiene que descontar la suma de los dos, o el
@@ -283,6 +294,18 @@
     no existe.
   */
   --chrome-h: var(--player-h);
+}
+/*
+  🔴 En móvil la barra del player sube a 60px, y se hace tocando `--player-h` y no
+  una altura suelta en la cabecera: de este token cuelgan `--chrome-h` y con él los
+  rieles pegajosos, el `scroll-padding` de las anclas y el relleno del menú a
+  pantalla completa. Cambiarlo aquí los mueve a todos a la vez, que es para lo que
+  el token existe.
+*/
+@media (max-width: 899px) {
+  :root {
+    --player-h: 60px;
+  }
 }
 @media (min-width: 900px) {
   :root {
@@ -1870,16 +1893,26 @@ html[data-cursor] body::after {
   ⚠️ Una media query NO añade especificidad. Es de las cosas que uno cree recordar
   al revés justo cuando importa.
 */
+/*
+  ⚠️ Y con la barra a 60px, el logo crece: 72 → 100px de ancho, que a la proporción
+  del wordmark (2.943) son 34px de alto en vez de 24. Lo pidió Carlos con la barra
+  («el logo debe crecer también, al menos el de la estación») y es lo que evita que
+  subir la barra solo añada hueco: si el logo se quedaba igual, la marca se veía
+  MÁS pequeña dentro de una barra más grande.
+
+  🔴 Se toca el ANCHO y no el alto porque esta caja es un recorte, no una escala:
+  el `<a>` revela el logo asomándolo. Ver el comentario de abajo.
+*/
 @media (max-width: 899px) {
   .cabecera-logo-claro {
-    width: 72px;
+    width: 100px;
     margin-right: 0;
   }
 }
 /* El logotipo no se encoge con su caja: la caja lo recorta. Si se escalara, se
    vería deformarse durante la transición en vez de asomar. */
 .cabecera-logo-claro img {
-  min-width: 72px;
+  min-width: 100px;
 }
 @media (min-width: 900px) {
   .cabecera-logo-claro img {

@@ -285,6 +285,40 @@ const fichaEstacion = esInicio
       }),
     ])
   : null;
+
+/**
+ * 🔴 LOS CUATRO CONTENEDORES DE MEDICIÓN, y la regla que los gobierna: **sin
+ * valor en el env, el snippet NO se emite.**
+ *
+ * No es prolijidad. Preproducción y producción son la MISMA imagen de Docker
+ * (`docs/despliegue-v2.md`), así que un id horneado le suma cada visita de
+ * revisión a la propiedad real. El caro es comScore: es la medición que NRM le
+ * reporta a los anunciantes para justificar CPMs, o sea que ensuciarlo no deja un
+ * dato feo — infla una cifra de audiencia CERTIFICADA con tráfico que no es
+ * audiencia.
+ *
+ * ⚠️ Son `PUBLIC_*`, y Vite las hornea AL COMPILAR: llenar el `.env` no enciende
+ * nada hasta que se RECONSTRUYE. Reiniciar el servicio no sirve de nada. Es el
+ * paso 2 del día del corte, y hasta hoy no tenía qué encender — el port del v1 se
+ * trajo el emisor (`src/scripts/analitica.ts`) y dejó los receptores en el
+ * `BaseHead.astro` que este layout reemplazó, así que `ga4()` buscaba
+ * `window.gtag` y `window.dataLayer`, no encontraba ninguno, y su `try/catch` se
+ * comía en silencio cada evento del player, de los anuncios y de las pistas.
+ *
+ * ⚠️ `PUBLIC_GA_ID` no está en esta lista a propósito: **GA4 entra por GTM y
+ * nunca directo.** Con las dos vías las páginas vistas salen al DOBLE, y el
+ * síntoma se parece tanto a un buen mes que puede tardar semanas en levantar
+ * sospechas. Esa variable la lee únicamente el SDK de Triton (`player.ts`).
+ *
+ * El `.trim()` hace que un `PUBLIC_HOTJAR_ID=" "` mal pegado cuente como ausente
+ * en vez de cargar un contenedor con un id en blanco.
+ */
+const contenedor = (valor?: string): string | null => valor?.trim() || null;
+
+const GTM_ID = contenedor(import.meta.env.PUBLIC_GTM_ID);
+const COMSCORE_C2 = contenedor(import.meta.env.PUBLIC_COMSCORE_C2);
+const HOTJAR_ID = contenedor(import.meta.env.PUBLIC_HOTJAR_ID);
+const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
 ---
 
 <!doctype html>
@@ -430,6 +464,163 @@ const fichaEstacion = esInicio
     </script>
 
     {/*
+      LA MEDICIÓN. Los cuatro contenedores, cada uno tras su propia guarda; la
+      regla y el por qué están arriba, con las constantes.
+
+      🔴 Ninguno bloquea el render, con el mismo criterio que `gpt.js`: lo que
+      pesa —la librería de cada contenedor— se inyecta con `async`. Lo que corre
+      en línea es solo la cola y la etiqueta que la va a buscar.
+
+      ⚠️ Y ninguno se vuelve a ejecutar al navegar, sin que haga falta guarda
+      nuestra: el `ClientRouter` recuerda cada script en línea que ya corrió —por
+      su TEXTO— y lo marca `data-astro-exec` antes de reinsertarlo en el `head`
+      nuevo (`astro/dist/transitions/swap-functions.js`). Comprobado yendo del
+      Inicio a una nota y volviendo: un solo `gtm.start` en la cola y una sola
+      copia de cada snippet. 🔴 Por eso mismo, aquí NUNCA va `data-astro-rerun`:
+      bajaría un contenedor nuevo por navegación y contaría todo dos veces.
+
+      ⚠️ Lo que el `ClientRouter` sí hace es BORRAR del `head` los scripts que
+      estos contenedores inyectaron (`gtm.js`, `beacon.js`, el de Hotjar) al
+      reemplazarlo. No importa: el código ya se ejecutó y vive en memoria, y el
+      nodo `<script>` no es el que mide. Es la misma situación en la que ya está
+      GPT.
+    */}
+    {
+      GTM_ID && (
+        <>
+          {/*
+            La cola ANTES del contenedor, por la misma razón que el stub de
+            `googletag` de aquí arriba: `analitica.ts` empuja eventos en cuanto el
+            player arranca, y eso puede pasar antes de que `gtm.js` termine de
+            bajar. Sin la cola creada, el primer `play` —que es el que interesa—
+            se pierde en el `try/catch` del emisor.
+
+            🔴 Va DENTRO de la guarda de GTM y no fuera. Crear `dataLayer` sin
+            contenedor que la vacíe dejaría los eventos apilándose en un array que
+            nadie lee, y encima rompería el único diagnóstico que hay:
+            `Array.isArray(window.dataLayer)` es lo que dice si hay receptor (ver
+            `agents/analytics.md`).
+          */}
+          <script is:inline>window.dataLayer = window.dataLayer || [];</script>
+          {/*
+            El contenedor central. GA4 y todo lo demás se activan DENTRO de GTM,
+            no aquí: este es el único punto de control, y el día que NRM quiera un
+            banner de consentimiento es también el único sitio donde hay que
+            tocarlo.
+
+            Del snippet canónico de Google se cae una sola cosa, el parámetro `l`
+            que sirve para renombrar la cola: aquí no puede cambiar de nombre
+            —`analitica.ts` empuja a `window.dataLayer` por ese nombre exacto—, así
+            que su rama muerta sobraba.
+          */}
+          <script is:inline define:vars={{ idGtm: GTM_ID }}>
+            window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
+            (function (d) {
+              var primero = d.getElementsByTagName('script')[0];
+              var etiqueta = d.createElement('script');
+              etiqueta.async = true;
+              etiqueta.src = 'https://www.googletagmanager.com/gtm.js?id=' + idGtm;
+              primero.parentNode.insertBefore(etiqueta, primero);
+            })(document);
+          </script>
+        </>
+      )
+    }
+    {/*
+      comScore. El snippet más pequeño y el que más pesa: es lo que NRM le reporta
+      a los anunciantes, así que esta cifra es la que sostiene los CPMs. Cualquier
+      cambio se coordina con adops y no se prueba en producción.
+
+      `c1: '2'` es la constante de comScore para «página web», no un dato nuestro;
+      lo único de la cuenta es `c2`.
+
+      ⚠️ Las dos `options` vienen tal cual del v1, que es como adops lo tiene
+      configurado hoy: cookie de primera parte y sin esperar consentimiento. En el
+      sitio no hay CMP (México, LFPDPPP) — si algún día entra uno, el
+      `bypassUserConsentRequirement…` es la primera línea que hay que revisar,
+      porque es exactamente la que se lo salta.
+    */}
+    {
+      COMSCORE_C2 && (
+        <script is:inline define:vars={{ c2Comscore: COMSCORE_C2 }}>
+          window._comscore = window._comscore || [];
+          window._comscore.push({
+            c1: '2',
+            c2: c2Comscore,
+            options: {
+              enableFirstPartyCookie: true,
+              bypassUserConsentRequirementFor1PCookie: true,
+            },
+          });
+          (function (d) {
+            var primero = d.getElementsByTagName('script')[0];
+            var etiqueta = d.createElement('script');
+            etiqueta.async = true;
+            etiqueta.src = 'https://sb.scorecardresearch.com/cs/' + c2Comscore + '/beacon.js';
+            primero.parentNode.insertBefore(etiqueta, primero);
+          })(document);
+        </script>
+      )
+    }
+    {/*
+      Hotjar. `hj` se define como cola antes de que baje la librería —la misma idea
+      que `dataLayer` y que `googletag.cmd`— para que una llamada temprana no se
+      pierda.
+
+      `hjsv` es la versión del SNIPPET (la 6, la que publica Hotjar), no una
+      versión nuestra; y el `Number()` está porque Hotjar arma la URL y compara con
+      un número, mientras del env el id llega siempre como cadena.
+    */}
+    {
+      HOTJAR_ID && (
+        <script is:inline define:vars={{ idHotjar: HOTJAR_ID }}>
+          window.hj =
+            window.hj ||
+            function () {
+              (window.hj.q = window.hj.q || []).push(arguments);
+            };
+          window._hjSettings = { hjid: Number(idHotjar), hjsv: 6 };
+          (function (d) {
+            var etiqueta = d.createElement('script');
+            etiqueta.async = true;
+            etiqueta.src =
+              'https://static.hotjar.com/c/hotjar-' +
+              window._hjSettings.hjid +
+              '.js?sv=' +
+              window._hjSettings.hjsv;
+            d.head.appendChild(etiqueta);
+          })(document);
+        </script>
+      )
+    }
+    {/*
+      🔴 Metricool queda CABLEADO Y APAGADO: `PUBLIC_METRICOOL_HASH` va vacía
+      porque el hash no lo tenemos, así que hoy este bloque no se emite nunca. Se
+      escribe igual para que encenderlo sea llenar una variable y reconstruir, que
+      es lo que el resto de este archivo promete.
+
+      Dos diferencias con el v1, las dos por lo mismo: el `loadScript` de allá
+      colgaba el callback de `onload` **y** de `onreadystatechange` —eso es de IE8
+      y sobra—, y llamaba a `beTracker` sin comprobar que existiera, así que un
+      `be.js` que no bajaba dejaba un TypeError en la consola de cada página.
+    */}
+    {
+      METRICOOL_HASH && (
+        <script is:inline define:vars={{ hashMetricool: METRICOOL_HASH }}>
+          (function (d) {
+            var etiqueta = d.createElement('script');
+            etiqueta.async = true;
+            etiqueta.src = 'https://tracker.metricool.com/resources/be.js';
+            etiqueta.onload = function () {
+              if (window.beTracker) window.beTracker.t({ hash: hashMetricool });
+            };
+            d.head.appendChild(etiqueta);
+          })(document);
+        </script>
+      )
+    }
+
+    {/*
       Las fuentes son AUTO-HOSPEDADAS (`public/fuentes/`, generadas con
       `pnpm fuentes`). Antes iban por `<link>` a Google, y antes de eso por un
       `@import` dentro del CSS del DS. Ya no hay ninguna de las dos: los `.woff2`
@@ -491,6 +682,59 @@ const fichaEstacion = esInicio
     <div class="progreso" data-progreso aria-hidden="true" transition:persist="progreso">
       <div class="progreso-barra"></div>
     </div>
+
+    {/*
+      Los dos `<noscript>` de la medición: el iframe de GTM y el pixel de comScore.
+      Cada uno tras la misma guarda que su script, o sea que sin variable tampoco
+      salen.
+
+      🔴 Van en el `<body>` y NO junto a sus scripts en el `<head>`, aunque el v1
+      los tuviera arriba. El `<head>` solo admite metadatos: un `<img>` o un
+      `<iframe>` ahí le dice al parser que el head terminó, y con el JavaScript
+      apagado —que es justo el caso que estas dos etiquetas atienden— lo que
+      quedaba del head se acaba pintando dentro del body.
+
+      ⚠️ No son la primerísima línea del `body` porque ese sitio es de la barra de
+      progreso, y por una razón de pintado (ver arriba). Da igual: con JS un
+      `<noscript>` no existe, y sin JS estas dos etiquetas van ocultas y no ocupan
+      lugar, así que no hay nada que se les ponga delante.
+
+      ⚠️ Y solo viven en la carga INICIAL del documento: el `ClientRouter` borra
+      todos los `<noscript>` del documento que trae al navegar
+      (`astro/dist/transitions/router.js`, justo después del `parseFromString`).
+      Comprobado, y no es un problema: sin JavaScript no hay navegación de router
+      —cada clic es un documento completo, que llega con las dos etiquetas—, y con
+      JavaScript estas dos no tienen nada que hacer.
+
+      ⚠️ El pixel del v1 va ROTO y el error no se hereda: lleva `cv=cv=4.4.0` y un
+      salto de línea que parte `cj=1` a mitad de la URL.
+    */}
+    {
+      GTM_ID && (
+        <noscript>
+          <iframe
+            src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+            title="Google Tag Manager"
+            height="0"
+            width="0"
+            style="display:none;visibility:hidden"
+          />
+        </noscript>
+      )
+    }
+    {
+      COMSCORE_C2 && (
+        <noscript>
+          <img
+            src={`https://sb.scorecardresearch.com/p?c1=2&c2=${COMSCORE_C2}&cv=4.4.0&cj=1`}
+            alt=""
+            height="1"
+            width="1"
+            style="display:none"
+          />
+        </noscript>
+      )
+    }
 
     <slot name="sobre-cabecera" />
     <Cabecera estacion={marca} compacta={vista === 'interior'} />

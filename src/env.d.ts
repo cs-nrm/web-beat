@@ -25,8 +25,18 @@ interface ImportMetaEnv {
   /** Google Ad Manager. 🔴 Nunca hardcodear el ad unit — ver src/config/ads.ts. */
   readonly PUBLIC_GAM_NETWORK_ID?: string;
   readonly PUBLIC_GAM_AD_UNIT?: string;
-  /** Analítica. Sin valor = no se carga (así ningún preview ensucia la propiedad real). */
+  /**
+   * ⚠️ Esta NO carga GA4. GA4 entra POR GTM —nunca por las dos vías, que duplican
+   * las páginas vistas—, así que el front no baja `gtag/js` en ningún caso. Lo
+   * único que la lee es el `trackingId` del SDK de Triton (`src/scripts/player.ts`).
+   */
   readonly PUBLIC_GA_ID?: string;
+  /**
+   * Los cuatro contenedores de medición. Sin valor no se emite el snippet, y la
+   * guarda vive en `src/layouts/Base.astro`: así ningún preview ensucia la
+   * propiedad real —y comScore, que es lo que NRM reporta a anunciantes, no infla
+   * una cifra certificada con tráfico de revisión.
+   */
   readonly PUBLIC_GTM_ID?: string;
   readonly PUBLIC_COMSCORE_C2?: string;
   readonly PUBLIC_HOTJAR_ID?: string;

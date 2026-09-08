@@ -464,6 +464,34 @@ const fichaEstacion = esInicio
       entra ahí sobrevive a la navegación, y un banner de portada que se quedara
       pegado al navegar a una nota sería un error de facturación, no de maquetado.
     */}
+    {/*
+      🔴 La barra de progreso de navegación. Va PRIMERO en el `body` y con
+      `transition:persist`.
+
+      Lo primero, porque es `position: fixed` en la coronilla de la pantalla y
+      tiene que quedar por encima de todo lo demás del cromo, incluido el banner
+      de portada.
+
+      Lo segundo es lo que la hace funcionar: sin `transition:persist`, el
+      intercambio de vistas reemplaza este nodo por el de la página nueva a mitad
+      de la animación, y la barra desaparecería justo cuando el lector la está
+      mirando. Es lo mismo que hace la cabecera con el player.
+
+      🔴 Y el nombre va EXPLÍCITO —`="progreso"`—, como el `="cabecera"` de la
+      cabecera. Sin nombre, Astro genera uno por POSICIÓN y no coincide entre
+      páginas: medido, el Inicio emitía `astro-gyrtbwwo-3` y una nota
+      `astro-gyrtbwwo-5`, porque la nota tiene más elementos con directiva de
+      transición delante. Con nombres distintos no hay nada que emparejar y el nodo
+      se reemplaza en silencio — la barra se moría a mitad de la navegación y desde
+      el código se veía correcta.
+
+      ⚠️ `aria-hidden`: el `ClientRouter` ya anuncia el cambio de ruta por su
+      cuenta. Ver `src/scripts/progreso.ts`.
+    */}
+    <div class="progreso" data-progreso aria-hidden="true" transition:persist="progreso">
+      <div class="progreso-barra"></div>
+    </div>
+
     <slot name="sobre-cabecera" />
     <Cabecera estacion={marca} compacta={vista === 'interior'} />
     {/*
@@ -490,6 +518,7 @@ const fichaEstacion = esInicio
       import { prepararCabecera } from '@/scripts/cabecera';
       import { prepararPista } from '@/scripts/pista';
       import { prepararMenu } from '@/scripts/menu';
+      import { prepararProgreso } from '@/scripts/progreso';
       prepararAnuncios();
       prepararEscritura();
       prepararRevelado();
@@ -500,6 +529,7 @@ const fichaEstacion = esInicio
       prepararCabecera();
       prepararPista();
       prepararMenu();
+      prepararProgreso();
       // Solo CABLEA los visores; Plyr (110 KB) no se baja hasta que alguien
       // pide un video.
       prepararVideo();

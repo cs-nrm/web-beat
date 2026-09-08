@@ -1870,8 +1870,24 @@ html[data-cursor] body::after {
     width var(--dur-3) var(--ease-out),
     margin-right var(--dur-3) var(--ease-out);
 }
+/*
+  🔴 100px, y este es el valor que MANDA en móvil. Era 72 y con él el logo se
+  recortaba: se leía «BEA / 100» en vez de «BEAT / 100.9».
+
+  El fallo es de cascada y vale escribirlo. Al subir la barra a 60px se creció el
+  logo desde `@media (max-width: 899px) { .cabecera-logo-claro { width: 100px } }`
+  —una clase— y también el `min-width` de la imagen. Pero esta regla lleva
+  **id + atributo + clase**, así que gana sin importar el orden ni la media query:
+  la CAJA se quedaba en 72 mientras la imagen medía 100, y como la caja es
+  `overflow: hidden` —es un recorte, no una escala— cortaba el 28% del logotipo.
+
+  ⚠️ Y no lo cacé en local porque **en `astro dev` medía 100 y en el build 72**.
+  `beat.css` entra en `layer(proyecto)`, y lo que sirve el navegador es la hoja
+  compilada. Para cualquier cosa de cascada en este archivo, la prueba válida es
+  `astro preview` sobre un build, no el servidor de desarrollo.
+*/
 #beat-cabecera[data-compacta] .cabecera-logo-claro {
-  width: 72px;
+  width: 100px;
   margin-right: 0;
 }
 @media (min-width: 900px) {
@@ -1931,6 +1947,95 @@ html[data-cursor] body::after {
   #beat-cabecera header,
   .cabecera-logo-claro,
   .cabecera-menu-claro {
+    transition: none;
+  }
+}
+
+/* ============================================================
+   Barra de progreso de navegación
+   ------------------------------------------------------------
+   Responde al toque durante la espera ciega del `ClientRouter`. El porqué, el
+   retardo y el tope están en `src/scripts/progreso.ts`; aquí solo está la pintura.
+
+   🔴 Nace INVISIBLE y sin ocupar sitio, y solo el script la enciende. Es la regla
+   de oro de `revelar.ts` aplicada aquí: si el JavaScript no corre, esto no se ve
+   nunca en vez de quedarse una franja muerta cruzando la coronilla del sitio.
+   ============================================================ */
+.progreso {
+  position: fixed;
+  inset: 0 0 auto;
+  /* Por encima de TODO el cromo: del banner de portada, del player y del menú a
+     pantalla completa. Es lo único que puede tapar al menú abierto, y debe. */
+  z-index: calc(var(--z-header) + 2);
+  height: 2px;
+  pointer-events: none;
+  opacity: 0;
+}
+.progreso[data-activa] {
+  opacity: 1;
+}
+/* Al completarse se desvanece; el retardo deja ver el 100% un instante antes de
+   irse, que es lo que cierra el gesto. ⚠️ Los 260ms tienen que coincidir con
+   `SALIDA_MS` del script. */
+.progreso[data-listo] {
+  opacity: 0;
+  transition: opacity 260ms var(--ease-out) 90ms;
+}
+.progreso-barra {
+  height: 100%;
+  width: 100%;
+  background: var(--mist-0);
+  transform: scaleX(0);
+  /* Se escala en X y no se anima `width`: `transform` lo resuelve el compositor y
+     no provoca maquetado, justo cuando el hilo principal está ocupado trayendo la
+     página. */
+  transform-origin: 0 50%;
+  /* La estela del propio motivo de marca: la barra no es un rectángulo plano. */
+  box-shadow: 0 0 8px rgb(250 251 250 / 0.45);
+}
+/*
+  🔴 El reptado vive AQUÍ y no en el JavaScript.
+
+  Avanza mucho al principio y se va frenando —eso lo da el `--ease-out` sobre una
+  duración larga— y nunca llega al 100% sola: se detiene en 0.9. Llegar al final y
+  seguir esperando es la única forma de que un indicador mienta de verdad.
+
+  ⚠️ Los 8s no son «lo que tarda»: son la rampa. Una navegación normal se completa
+  en el primer tercio y `[data-listo]` la corta; los 8s solo existen para que una
+  espera anormalmente larga siga pareciendo que avanza.
+*/
+.progreso[data-activa] .progreso-barra {
+  animation: progreso-repta 8s var(--ease-out) forwards;
+}
+@keyframes progreso-repta {
+  from {
+    transform: scaleX(0.02);
+  }
+  to {
+    transform: scaleX(0.9);
+  }
+}
+/* La página ya está: se corta la animación y la barra cierra en 100%. */
+.progreso[data-listo] .progreso-barra {
+  animation: none;
+  transform: scaleX(1);
+  transition: transform 160ms var(--ease-out);
+}
+/*
+  ⚠️ Con `prefers-reduced-motion` la barra sigue existiendo, pero no repta: aparece
+  entera y quieta mientras se espera. El aviso es INFORMACIÓN —el lector necesita
+  saber que su toque registró— y lo que esa preferencia pide quitar es el
+  movimiento, no el aviso.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .progreso[data-activa] .progreso-barra {
+    animation: none;
+    transform: scaleX(1);
+  }
+  .progreso[data-listo] .progreso-barra {
+    transition: none;
+  }
+  .progreso[data-listo] {
     transition: none;
   }
 }

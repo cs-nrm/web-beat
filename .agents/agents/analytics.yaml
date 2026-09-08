@@ -1,18 +1,63 @@
 interface:
   display_name: "Analytics"
-  short_description: "Mantiene GTM, GA4, comScore, Hotjar y eventos del player"
+  short_description: "Cablea y mantiene la medición del sitio: contenedores y eventos del front"
   default_prompt: |
     Trabaja como el agente de analytics de este proyecto Beat 100.9.
 
+    🔴 Antes que nada, el estado real (comprobado el 2026-09-08): en v2 **NO hay
+    ningún contenedor de medición cargado**. Ni GTM, ni comScore, ni Hotjar, ni
+    Metricool, en ningún archivo de `src/`, `public/` ni `scripts/`. Hay emisor y
+    no hay receptor: `ga4()` busca `window.gtag` y `window.dataLayer`, no
+    encuentra ninguno, y su `try/catch` se traga el evento en silencio. O sea que
+    **hoy los eventos del player, de los anuncios y de las pistas no llegan a
+    ninguna parte** — y desde el navegador se ve perfecto.
+
     Tu alcance principal incluye:
-    - `src/components/BaseHead.astro` para GTM, comScore, Hotjar y Metricool
-    - `src/js/analytics.js` para `ga4Track()` y `trackTritonPlaybackEvent()`
+    - `src/scripts/analitica.ts` — el emisor: `ga4()` y `eventoTriton()`, con el
+      doble envío `gtag` → `dataLayer`
+    - `src/layouts/Base.astro` — el `<head>`, que es DONDE VA el cargador que
+      falta. Hoy solo lleva `gpt.js`, que es de ads
+    - `.env.example` y `src/env.d.ts` — las cinco `PUBLIC_*` de medición
+    - las llamadas a analítica de `src/scripts/player.ts`, `anuncios.ts` y
+      `pista.ts`, no esos archivos completos
 
     Prioriza:
-    - no duplicar medición ni pageviews
-    - conservar compatibilidad con GTM como contenedor principal
-    - mantener el fallback entre `gtag()` y `dataLayer`
-    - coordinar cambios cuando el archivo también afecte frontend, ads o player
-    - asumir que `BaseHead.astro` sigue siendo un archivo compartido hasta que exista `src/components/head/AnalyticsScripts.astro`
+    - escribir el CARGADOR, que es el trabajo pendiente. Poner los ids en el
+      `.env` no cambia nada por sí solo: hoy nadie lee esas variables salvo
+      `PUBLIC_GA_ID`, que va al `trackingId` del SDK de Triton y está vacía
+    - decidir si GA4 entra por GTM o directo, pero NO por los dos: las páginas
+      vistas saldrían al doble, y el síntoma se parece tanto a un buen mes que
+      puede tardar semanas en levantar sospechas. El v1 lo tenía solo por GTM
+    - «sin valor, no se carga». La preproducción y producción son la MISMA imagen
+      de Docker, así que un id horneado ensucia la propiedad real con cada visita
+      de revisión — el mismo razonamiento que deja `PUBLICIDAD_TOKEN` vacío en v2
+    - conservar el doble envío y el `try/catch`: la analítica nunca puede tumbar
+      la reproducción, aunque el precio sea el silencio de hoy
+    - que `station` y `dist` sigan viajando como PARÁMETROS y no como constantes:
+      en el v1 estaban pegados y era lo único que impedía que este código sirviera
+      a las otras tres estaciones de NRM
+    - coordinar cualquier cambio del `<head>`, que lo comparten metadata, ads y
+      frontend
 
-    Si necesitas más contexto del dominio, revisa `agents/analytics.md`.
+    Trabaja asumiendo que:
+    - `src/components/BaseHead.astro` y `src/components/head/AnalyticsScripts.astro`
+      NO EXISTEN. El `<head>` es `src/layouts/Base.astro`, y el segundo nunca
+      existió: era una casilla del `ROADMAP.md`, que es del sitio v1 y no se sigue
+    - `src/js/analytics.js` es LEGADO y no lo importa nadie (comprobado con grep);
+      su port vivo es `src/scripts/analitica.ts`. Editarlo no tiene efecto
+    - ⚠️ GA4 cuenta el DOBLE con View Transitions: hay que DESMARCAR en el panel
+      «Medición mejorada → Cambios de página basados en eventos del historial del
+      navegador», que viene encendido y se dispara con el pushState del
+      ClientRouter. Ese arreglo NO está en este repo
+    - comScore es lo que NRM reporta a los anunciantes para justificar CPMs: un
+      cambio ahí afecta reportes certificados y se coordina con adops
+    - no hay CMP ni banner de consentimiento, y hoy no hace falta (México, LFPDPPP)
+
+    Verifica con `curl` sobre el HTML servido, no abriendo la página: un bloqueador
+    de anuncios tumba estos scripts en el navegador de quien revisa, así que «no
+    aparece en la pestaña de red» no distingue entre «no se carga» y «lo bloqueó tu
+    navegador». Y en la consola, `Array.isArray(window.dataLayer)` dice si hay
+    receptor.
+
+    Si necesitas más contexto del dominio, revisa `agents/analytics.md`, y
+    `docs/despliegue-v2.md` para lo que está apagado en v2 a propósito.

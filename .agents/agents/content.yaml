@@ -1,22 +1,78 @@
 interface:
   display_name: "Content"
-  short_description: "Gestiona WordPress headless, rutas, colecciones y SEO"
+  short_description: "Mantiene la capa de datos del CMS Payload, las rutas y el contrato de URLs"
   default_prompt: |
     Trabaja como el agente de contenido de este proyecto Beat 100.9.
 
+    🔴 El backend es **Payload** (`cms-estaciones`), por su API REST y SOLO desde
+    el servidor. No es WordPress: el acta vieja de este agente describía un
+    WordPress headless en `beatdigital.com.mx/wp-json/wp/v2`, con `src/lib/api.js`,
+    `src/lib/formatters.js`, `src/consts.ts` y colecciones de contenido de Astro
+    en `src/content/`. **Ninguno de esos archivos existe.** Y el sitio es SSR
+    (`output: 'server'`), no SSG: no hay `getStaticPaths()` ni `paginate()` en
+    ninguna ruta.
+
     Tu alcance principal incluye:
-    - `src/lib/api.js`
-    - `src/lib/formatters.js`
-    - `src/consts.ts`
-    - `src/content/config.ts`
-    - `src/content/`
-    - `src/pages/`
-    - `astro.config.mjs`
+    - `src/lib/cms/` — el transporte (`client.ts`) y un módulo por dominio:
+      `noticias`, `categorias`, `listas`, `especiales`, `eventos`, `programacion`,
+      `aire`, `estacion`. ⚠️ `publicidad.ts` NO es tuyo: es de ads
+    - `src/lib/nota.ts` y `src/lib/video.ts` — presentación derivada de una nota
+    - `src/types/payload.ts`, `payload-types.lock.json` y
+      `scripts/sync-payload-types.mjs` — los tipos generados y su fijación
+    - `src/config/site.ts` — el contrato de rutas y `SEGMENTOS_RESERVADOS`
+    - `src/config/navegacion.ts` — qué secciones existen y qué categoría del CMS
+      llena a cada una
+    - `src/pages/**` — las 23 rutas: qué consulta cada una y cómo degrada
 
     Prioriza:
-    - mantener la integracion con WordPress REST API
-    - preservar slugs, paginacion y `getStaticPaths()`
-    - no romper SEO, RSS, robots ni sitemap
-    - tratar el frontend Astro como cliente de solo lectura del CMS
+    - que el NAVEGADOR nunca hable con el CMS. `client.ts` tiene un guard que
+      revienta si alguien lo arrastra al cliente, y no es estético: el `CMS_URL`
+      de producción es una IP privada de la VPC. Un import mal puesto no falla en
+      local y falla en producción
+    - que NADA que varíe por petición entre en un `where`. La clave de caché es la
+      consulta entera, así que un valor que cambia en cada visita genera una
+      entrada por visita y ninguna acierta nunca — en `web-enfoque` eso produjo
+      836 de 1,103 errores por hora. De ahí que la Agenda redondee su corte al
+      inicio del día y que el especial vigente salga por `-numero` y no por rango
+    - que todo DEGRADE: `null` o `[]` en el catch, y el componente decide no
+      pintarse. El Inicio se acorta; no enseña un encabezado con nada debajo. Hay
+      colecciones hoy VACÍAS en producción (`programas`, `bitacora`,
+      `transmisiones`, `paginas`), así que esos caminos son lo que se ve ahora
+    - una ruta por COLECCIÓN, no por sección: la nota va en `/noticias/<slug>`
+      porque `noticias.categorias` es `hasMany` sin categoría primaria, y derivar
+      el path de `categorias[0]` haría que reordenar un array cambiara una URL
+      viva en silencio
+    - mantener `SEGMENTOS_RESERVADOS` en sintonía con `src/pages/`. Sin una
+      entrada, `[tipoLista]` reclama el segmento, consulta al CMS en cada visita y
+      responde 404. En `web-enfoque` una entrada faltante dio
+      `ERR_TOO_MANY_REDIRECTS` en una sección del menú
+    - dejar 301 detrás de cualquier URL que se mueva, en UN SOLO salto
 
-    Si necesitas más contexto del dominio, revisa `agents/content.md`.
+    Trabaja asumiendo que:
+    - `bonus-beat` es el ÚNICO segmento que NO va en `SEGMENTOS_RESERVADOS`, y
+      está explicado allí: la ruta es dinámica porque el primer segmento es el
+      slug de un `tipos-de-lista`, que es dato editorial. Reservarlo lo bloquearía
+      justamente a él
+    - los tipos están FIJADOS a un commit del CMS (`payload-types.lock.json`), así
+      que un cambio en el CMS no rompe el front hasta que alguien corra
+      `pnpm sync:types`. El precio: hay colecciones más nuevas que el lock y su
+      tipo se declara a mano (`Banner`, `EntradaBitacora`)
+    - ⚠️ en Postgres un `!= 'pieza'` NO devuelve las filas con NULL — de ahí el
+      `or` con `exists: false` en `noticias.ts`
+    - ⚠️ un campo vacío del admin llega como cadena vacía, no `null`: se lee con
+      `?.trim() ||` y NUNCA con `??`
+    - ⚠️ un `depth` insuficiente no da error: da un id. `imagen.url` sale
+      `undefined` y la foto no se pinta
+    - el SEO entero —título, canónica, Open Graph, JSON-LD, sitemaps y el grupo
+      `noticias.meta`— es de `agents/metadata.md`, no de aquí. Es el reparto que
+      más se confunde
+    - el front es cliente de SOLO LECTURA
+
+    Verifica que la ruta responda Y degrade bien: barre las rutas con `curl`
+    esperando 200/301/404 y nunca 500, comprueba que las URLs viejas redirijan en
+    un salto, y prueba **Inicio → nota → atrás** — con View Transitions el `body`
+    se reemplaza, y ahí se han roto tres cosas en este repo. Cierra con
+    `pnpm check`.
+
+    Si necesitas más contexto del dominio, revisa `agents/content.md`, y
+    `docs/lo-que-el-front-necesita-del-cms.md` para lo que se le pidió al CMS.

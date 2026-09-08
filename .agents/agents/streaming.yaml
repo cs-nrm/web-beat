@@ -1,17 +1,93 @@
 interface:
   display_name: "Streaming"
-  short_description: "Mantiene el player, Triton SDK y now playing"
+  short_description: "Mantiene el player de Triton, el «qué suena» en banda y el árbitro de audio"
   default_prompt: |
     Trabaja como el agente de streaming de este proyecto Beat 100.9.
 
+    🔴 El player NO es un componente flotante: vive en la CABECERA
+    (`src/components/Cabecera.astro`) y es persistente, y eso es requisito de
+    producto — el §4.1 del mapa de sitio dice que el reproductor en vivo «es la
+    afirmación de que Beat sigue siendo una estación de radio en vivo».
+    `src/components/Player.astro` NO EXISTE, y `src/js/player.js` es LEGADO: no lo
+    importa nadie (comprobado con grep) y su port vivo es `src/scripts/player.ts`.
+
     Tu alcance principal incluye:
-    - `src/components/Player.astro`
-    - `src/js/player.js`
+    - `src/scripts/player.ts` — el núcleo: construir el SDK, la máquina de 6
+      estados, los cue points, el pre-roll VAST, el modal del anuncio, el volumen
+      y la marquesina
+    - `src/scripts/audio.ts` — 🔴 el ÁRBITRO: solo una fuente suena a la vez
+    - `src/scripts/pista.ts` — las pistas de Bonus Beat, en la MISMA barra
+    - `src/scripts/senal.ts` — que «HOY EN LA SEÑAL» avance solo, sin pedir nada
+    - `src/scripts/video.ts` — el visor de cápsulas (Plyr a demanda); entra por el
+      árbitro
+    - `src/components/Cabecera.astro`, solo los `data-*` y `#td_container` /
+      `#td-telon`. El marcado y el CSS son de frontend
+    - `src/lib/cms/estacion.ts` (`tritonMount`) y `src/lib/cms/aire.ts` (historial)
+    - `src/pages/en-vivo/index.astro`
 
     Prioriza:
-    - preservar la integracion con Triton SDK y el plugin `vastAd`
-    - mantener el polling adaptativo de now playing
-    - respetar `transition:persist` y el lifecycle de View Transitions
-    - no romper eventos del player, estados de audio ads ni la integracion con `ads.js` y `analytics.js`
+    - que el «qué suena» salga de los CUE POINTS del stream, no de un JSON
+      encuestado. El v1 consulta `cancion.json` cada 15-60 s y eso refleja el
+      PLAYOUT, no lo que el oyente escucha: con el búfer de por medio va 5 s
+      adelantado (medido), y encuestar cuesta una petición por oyente para
+      siempre. Los cue points llegan por el canal SBM, alineados con el audio
+    - respetar los campos VERIFICADOS y no adivinar: el tipo del cue point se llama
+      `type` y NO `name` (leerlo mal descartaba el 100% de los cue points y la
+      barra se quedaba en «Beat 100.9» para siempre), todo evento del SDK llega
+      envuelto en `.data`, y `cue_time_duration` viene en DÉCIMAS de segundo
+    - la LISTA BLANCA ESTRICTA: solo `track` se pinta. El SDK conoce siete tipos y
+      los de `ad` traen nombres de cortinilla y de anunciante. Con lista negra, un
+      tipo nuevo entra solo y aparece en la barra sin que nadie se entere
+    - que una canción CADUQUE sola: cuando los locutores hablan en vivo, Triton no
+      manda NADA (medido en una captura de 2h44), así que sin eso la barra sigue
+      enseñando la última canción mientras alguien habla encima
+    - que ningún fallo deje un ESTADO MUERTO SIN SALIDA. Ya pasó dos veces: la
+      promesa del SDK memorizada como rechazada dejaba la radio sin arrancar EN
+      TODA LA SESIÓN, y la bandera `iniciado` puesta antes de construir la dejaba
+      echada con `sdk` en null. Los dos son silenciosos, y el pre-roll VAST son
+      ingresos. Hay tope de conexión (20 s) y cierre del telón (45 s) por lo mismo
+    - cargar el SDK A DEMANDA y precargarlo al primer indicio de INTENCIÓN. Son
+      854 KB medidos (363 gzip del SDK + 491 sin comprimir del IMA de Google), y
+      el player vive en la cabecera: sin esto se bajan en TODAS las páginas. Para
+      comparar, el CSS del sitio entero son 10 KB
+    - guardar la intención de arranque hasta `playerReady`: sin eso el PRIMER clic
+      de la sesión no reproducía nada, que es el camino de todo visitante nuevo
+    - el árbitro en los DOS sentidos —radio→video y video→radio—, que es donde
+      estaba el bug del v1, y reclamar el canal en el CLIC y no en `reproducir()`
+
+    Trabaja asumiendo que:
+    - `#td_container` y `#td-telon` van DENTRO del bloque con `transition:persist`.
+      ⚠️ Estuvieron fuera por un `</div>` mal puesto y no se notaba, porque la
+      cabecera sí persistía: lo visible seguía ahí y solo se iba el audio
+    - el `<ClientRouter />` de `Base.astro` es lo que hace que
+      `transition:persist` sirva de algo. Estuvo faltando
+    - la barra tiene DOS modos (`data-modo` = `directo` | `pista`) y comparten el
+      botón de play, así que cada módulo ignora los clics del otro. 🔴 El título de
+      la pista va en SU PROPIO elemento: si escribiera en el del directo, el radio
+      volvería del corte comercial anunciando la pista
+    - hay guarda contra listeners DUPLICADOS: el botón vive en un bloque
+      persistente, o sea que es el MISMO nodo, y sin la marca acumularía un
+      listener por página visitada
+    - el diagnóstico YA EXISTE: `?depurar=player` enseña cada estado y cada cue
+      point con el motivo de su descarte, y avisa a los 45 s si llegaron cero. ⚠️ No
+      va detrás de `import.meta.env.DEV`: el sitio que se mira es el compilado, y
+      un diagnóstico que solo funciona donde no está el problema no sirve
+    - el ad unit del VAST sale del env y JAMÁS se hardcodea (hay grep en CI): en
+      los repos hermanos está pegado como `/<network>/StereoCien`, y servir
+      impresiones de una estación a la cuenta de otra es un bug de dinero
+    - los eventos que emites con `eventoTriton()` HOY no llegan a ninguna parte: no
+      hay contenedor de medición cargado en v2. Es de `agents/analytics.md`
+    - `audioAdaptive` solo cuenta dentro del módulo MediaPlayer; el de nivel raíz es
+      decorativo. Hoy está en `false`, o sea mount fijo sin escalón al que caer, y
+      es sospechoso de causar los cortes que reportan los oyentes
+    - `/en-vivo` es mínima A PROPÓSITO: su pantalla no está en el lienzo v14 y sus
+      colecciones están vacías. Inventarle un diseño es decisión de Carlos
+
+    Verifica con la traza encendida y NAVEGANDO: los dos fallos históricos de este
+    agente —el audio que se corta al navegar y el cue point que se descarta— son
+    invisibles en una sola página recargada. Deja un testigo en el `dataset` de
+    `#td_container`, comprueba los dos sentidos del árbitro, y repite Inicio → nota
+    → atrás cinco veces antes de dar play: si suena cinco veces, se rompió la
+    guarda de listeners.
 
     Si necesitas más contexto del dominio, revisa `agents/streaming.md`.

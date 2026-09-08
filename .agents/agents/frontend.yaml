@@ -1,22 +1,83 @@
 interface:
   display_name: "Frontend"
-  short_description: "Cuida UI, componentes Astro, layouts y estilos"
+  short_description: "Cuida el design system, los componentes, el cromo y el movimiento"
   default_prompt: |
     Trabaja como el agente de frontend de este proyecto Beat 100.9.
 
+    🔴 El acta vieja de este agente describía el sitio v1 y casi ningún archivo que
+    reclamaba existe: de sus 17 componentes, CERO; de sus 28 layouts (los
+    `CardsHome*`, los `Slider*`, `Layout.astro`, `BlogPost.astro`), CERO. Tampoco
+    `public/fonts/`. Y el stack es otro: **Tailwind 4** por el plugin de Vite (no
+    `@astrojs/tailwind`, que se quedó en Tailwind 3), `md:` es **900px** y no 768,
+    las fuentes son **tres familias variables auto-hospedadas** en `public/fuentes/`,
+    y no hay Flickity, jQuery ni ninguna dependencia de CDN para maqueta.
+
     Tu alcance principal incluye:
-    - `src/components/` excepto donde otro agente tenga ownership especifico
-    - `src/layouts/`
-    - `src/styles/`
-    - `tailwind.config.js`
-    - `public/fonts/`
-    - `public/favicon/`
-    - `public/img/`
+    - `src/layouts/Base.astro` — el cascarón: el orden del `body`, `data-vista`, el
+      slot `sobre-cabecera`, la barra de progreso y el cableado de `src/scripts/`
+    - `src/components/Cabecera.astro`, `MenuLleno.astro`, `Pie.astro`,
+      `NavSecciones.astro`, `Intro.astro` — el cromo
+    - `src/components/inicio/` y el resto de `src/components/` — los bloques
+    - `src/styles/` — 🔴 `base.css` es el archivo más importante de este agente
+    - `tailwind.config.js`, `scripts/fuentes.mjs`, `scripts/guarda-cascada.mjs`
+    - `src/scripts/cabecera.ts`, `menu.ts`, `revelar.ts`, `escribir.ts`,
+      `cursor.ts`, `rejilla.ts`, `intro.ts`, `progreso.ts` — el movimiento
+    - `src/middleware.ts`, SOLO la política de caché del HTML
+    - `movimiento.md` — el contrato de movimiento e interacción
 
     Prioriza:
-    - conservar el lenguaje visual actual del sitio
-    - respetar Tailwind y los patrones Astro existentes
-    - cuidar responsive y View Transitions
-    - evitar importar variantes experimentales con prefijo `_` por error
+    - respetar EL ORDEN DE CAPAS de `base.css`
+      (`@layer theme, base, ds, proyecto, components, utilities`). Sin él el design
+      system le gana a TODA utilidad de Tailwind en silencio: medido, `hidden` no
+      ocultaba `img`/`svg`/`video`, y `.beat-label` pisaba el `text-[9.5px]` de la
+      nav — el tamaño escrito en el marcado no era el que se pintaba
+    - y su corolario: lo que puso una utilidad de Tailwind NO se puede cambiar
+      desde `beat.css`, ni con toda la especificidad del mundo, porque las capas
+      mandan sobre la especificidad. Va en el `<style>` del componente `.astro`,
+      que no lleva capa. Por eso el plegado de la cabecera vive ahí. `!important`
+      casi nunca es la respuesta: el síntoma de «no me hace caso» suele ser una capa
+    - NO editar `src/styles/ds/`: es una copia del lienzo, para poder
+      re-sincronizarla. Tiene dos parches que hay que volver a aplicar en cada
+      sincronización, anotados en `ds/styles.css` — los `@import` van CON COMILLAS
+      (con `url()` Tailwind los trata como externos, no los inlinea, y desaparecen
+      TODAS las variables de marca: el sitio no truena, se degrada en silencio a
+      fondo transparente) y el `@import` de Google Fonts está neutralizado
+    - el sitio en BLANCO Y NEGRO (Carlos, 2026-08-27), redefiniendo TOKENS y no
+      usos. La única excepción es `--rojo-aire` en la barra del player, y no se
+      abre una segunda (movimiento.md §8). Y el sitio es SOLO oscuro: sin
+      `data-theme` ni conmutador
+    - un solo corte de breakpoint: 900px, en el CSS y en el design system
+    - retirar un control que no hace nada en vez de dejarlo inerte: es alcanzable
+      con el tabulador, se anuncia en un lector de pantalla, y enseña al lector a
+      desconfiar de los demás
 
-    Si necesitas más contexto del dominio, revisa `agents/frontend.md`.
+    Trabaja asumiendo que:
+    - ⚠️ Astro NO admite comentarios de llaves dentro de la lista de atributos: los
+      parsea como atributos sueltos y rompe el build con errores que no lo
+      mencionan. Van CINCO tropiezos iguales en este repo, y dos quedaron
+      commiteados. El comentario va antes de la etiqueta
+    - ⚠️ `astro check` no basta como puerta: uno de esos casos daba 0 errores y solo
+      tronó el compilador del build. La puerta es `pnpm build`
+    - ⚠️ un atributo booleano se pasa como booleano (`inert={compacta}`): con
+      `''` no se emite nunca, y la barra plegada seguía siendo navegable con el
+      tabulador
+    - ⚠️ Tailwind 4 quitó `cursor: pointer` de su preflight; hay que ponerlo a mano
+    - ⚠️ `transition:persist` necesita NOMBRE explícito: sin él Astro genera uno por
+      POSICIÓN y no coincide entre páginas, así que el nodo se reemplaza en silencio
+    - `scripts/favicon.mjs`, los `og-*.png` y todo el `<head>` de etiquetas son de
+      `agents/metadata.md`; `Anuncio.astro` es de `agents/ads.md`; el
+      comportamiento del player es de `agents/streaming.md` —el marcado de la barra
+      es tuyo y los `data-*` son la frontera—; qué dato baja a cada componente es
+      de `agents/content.md`
+    - el lienzo cubre el Inicio (13a/14a), Scanner (14b/14e) y la nota (14c/14f).
+      Para una pantalla que no describe, la maqueta se PROPONE y la aprueba Carlos
+
+    Verifica con Inicio → nota → atrás, siempre: con View Transitions el `body` se
+    reemplaza y solo sobrevive lo que lleva `transition:persist`, así que un
+    componente perfecto al recargar puede estar muerto al navegar. ⚠️ Y el panel del
+    navegador MIENTE sobre las animaciones — una que ya terminó se ve igual que una
+    que nunca arrancó; deja un testigo en `dataset`. Cierra con `pnpm check` y
+    `pnpm build`, y comprueba móvil a 375px de verdad, no encogiendo la ventana.
+
+    Si necesitas más contexto del dominio, revisa `agents/frontend.md` y
+    `movimiento.md`.

@@ -18,6 +18,7 @@ import CabezaSeccion from '@/components/CabezaSeccion.astro';
 import Anuncio from '@/components/Anuncio.astro';
 import { obtenerProgramas, obtenerParrillaDeHoy } from '@/lib/cms/programacion';
 import { urlMedia } from '@/lib/cms/client';
+import { MEDIDA_TARJETA } from '@/config/site';
 
 /*
   Las dos en paralelo: el catálogo de programas y la parrilla de HOY, que es la
@@ -53,9 +54,18 @@ function horariosDe(p: (typeof programas)[number]) {
 const alAireAhora = parrilla.alAire;
 ---
 
+{/*
+  Su propia tarjeta, no la de marca: la genera `pnpm favicon` con el nombre de la
+  sección encima. El `alt` describe el texto que el script horneó en el PNG, así que
+  se cambia con él. El por qué completo, en `scripts/favicon.mjs`.
+*/}
 <Base
   titulo="Programación — Beat 100.9"
   descripcion="La parrilla de Beat 100.9: qué suena a cada hora, de lunes a domingo."
+  imagen="/img/og-programacion.png"
+  imagenAlt="El wordmark de Beat 100.9 y el rótulo PROGRAMACIÓN, en blanco sobre el negro de la marca."
+  imagenAncho={MEDIDA_TARJETA.ancho}
+  imagenAlto={MEDIDA_TARJETA.alto}
 >
   <div class="pr-pagina">
     <CabezaSeccion titulo="PROGRAMACIÓN" activa="/programacion" />

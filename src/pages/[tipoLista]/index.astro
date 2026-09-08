@@ -21,7 +21,7 @@ import RejillaEdiciones from '@/components/RejillaEdiciones.astro';
 import Anuncio from '@/components/Anuncio.astro';
 import { obtenerTipoDeLista, obtenerListas, obtenerListaReciente } from '@/lib/cms/listas';
 import { fechaCorta } from '@/lib/nota';
-import { SEGMENTOS_RESERVADOS } from '@/config/site';
+import { MEDIDA_TARJETA, SEGMENTOS_RESERVADOS } from '@/config/site';
 
 const { tipoLista: slug } = Astro.params;
 
@@ -62,6 +62,31 @@ const [ediciones, reciente] = await Promise.all([
   obtenerListaReciente(slug),
 ]);
 
+/**
+ * 🔴 La tarjeta de compartir de esta sección, por SLUG.
+ *
+ * Es la única de las seis que no puede escribir su imagen en el `<Base>`: la ruta
+ * es dinámica, así que el archivo depende de qué tipo de lista se esté sirviendo.
+ * Se declara igual —escrito, no detectado en disco— y quien no esté en la lista
+ * cae al respaldo de marca, que es lo que tenían todas hasta ahora. Un tipo nuevo
+ * en el CMS no rompe nada; solo comparte sin su nombre hasta que alguien le genere
+ * la tarjeta (`scripts/favicon.mjs`) y la agregue aquí.
+ *
+ * 🔴 El `alt` viaja EN la lista y no se arma con `tipo.nombre`. Parece lo mismo y
+ * no lo es: el texto está horneado en el PNG el día que se generó, así que si la
+ * estación renombra el tipo en el admin, `tipo.nombre` cambiaría y la imagen no —y
+ * el `alt` acabaría describiendo unas letras que no están en la foto. Un `alt` que
+ * miente es peor que ninguno, porque solo lo lee quien no puede verificarlo.
+ */
+const TARJETAS_POR_TIPO: Record<string, { ruta: string; alt: string }> = {
+  'bonus-beat': {
+    ruta: '/img/og-bonus-beat.png',
+    alt: 'El wordmark de Beat 100.9 y el rótulo BONUS BEAT, en blanco sobre el negro de la marca.',
+  },
+};
+
+const tarjeta = TARJETAS_POR_TIPO[slug] ?? null;
+
 ---
 
 {/*
@@ -70,6 +95,11 @@ const [ediciones, reciente] = await Promise.all([
   se ve HOY: `tipos-de-lista.descripcion` está vacía en el CMS, así que nunca cae la
   de la redacción. Lo que se describe ahora es lo que la página hace: el índice de
   ediciones, con la más reciente pintada entera.
+
+  ⚠️ Las tres etiquetas de la imagen van JUNTAS o no van: sin tarjeta propia se
+  pasa `null` en las tres y el layout pone el respaldo con SUS medidas y su `alt`.
+  Mezclarlas —la imagen de marca con el `alt` de una sección— es el fallo que estas
+  etiquetas vienen a evitar. Ver `tarjeta` en el frontmatter.
 */}
 <Base
   titulo={`${tipo.nombre} — Beat 100.9`}
@@ -77,6 +107,10 @@ const [ediciones, reciente] = await Promise.all([
     tipo.descripcion ??
     `Las ediciones de ${tipo.nombre} en Beat 100.9, con la más reciente completa.`
   }
+  imagen={tarjeta?.ruta ?? null}
+  imagenAlt={tarjeta?.alt ?? null}
+  imagenAncho={tarjeta ? MEDIDA_TARJETA.ancho : null}
+  imagenAlto={tarjeta ? MEDIDA_TARJETA.alto : null}
 >
   <div class="tl-pagina">
     <CabezaSeccion titulo={tipo.nombre.toUpperCase()} activa={`/${slug}`} />

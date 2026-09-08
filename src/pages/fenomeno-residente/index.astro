@@ -19,7 +19,7 @@ import Fenomeno from '@/components/inicio/Fenomeno.astro';
 import ArchivoTemas from '@/components/inicio/ArchivoTemas.astro';
 import Anuncio from '@/components/Anuncio.astro';
 import { obtenerEspecialVigente, obtenerEspeciales } from '@/lib/cms/especiales';
-import { SERIE_FENOMENO } from '@/config/site';
+import { MEDIDA_TARJETA, SERIE_FENOMENO } from '@/config/site';
 
 /*
   Las dos en paralelo: el vigente con sus piezas (`depth: 2`) y la lista de todos
@@ -36,9 +36,23 @@ const [vigente, todos] = await Promise.all([
 const anteriores = vigente ? todos.filter((t) => t.id !== vigente.id) : todos;
 ---
 
+{/*
+  Su propia tarjeta, no la de marca: la genera `pnpm favicon` con el nombre de la
+  sección encima. El `alt` describe el texto que el script horneó en el PNG, así que
+  se cambia con él. El por qué completo, en `scripts/favicon.mjs`.
+
+  ⚠️ Es el nombre más largo del sitio y el único que la tarjeta parte en DOS líneas
+  —«EL FENÓMENO / RESIDENTE»—. El reparto lo calcula el script midiendo el texto, no
+  está escrito a mano; el `alt` lo dice en una sola frase porque quien lo oye no ve
+  dónde corta la línea.
+*/}
 <Base
   titulo="El Fenómeno Residente — Beat 100.9"
   descripcion="El tema de la semana, sus cápsulas, el especial del sábado y la playlist. Y el archivo completo de los temas anteriores."
+  imagen="/img/og-fenomeno-residente.png"
+  imagenAlt="El wordmark de Beat 100.9 y el rótulo EL FENÓMENO RESIDENTE, en blanco sobre el negro de la marca."
+  imagenAncho={MEDIDA_TARJETA.ancho}
+  imagenAlto={MEDIDA_TARJETA.alto}
 >
   <div class="fr-pagina">
 {/*

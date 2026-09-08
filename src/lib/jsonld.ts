@@ -165,6 +165,16 @@ export function nodoEstacion(datos: {
  *   · `author` → `firma(nota)`, la de la ficha del pie
  *   · `image` → la misma variante que carga el `<img>` del hero
  *
+ * 🔴 Y por eso `headline` NO recibe `meta.title` del CMS, ni `image` la
+ * `meta.image`, aunque el `<title>` y la `og:image` de la misma nota sí los usen
+ * (decisión de Carlos, 2026-09-07 — ver `src/pages/noticias/[slug].astro`). No es
+ * una inconsistencia, es la línea entre dos cosas distintas: el `<title>` y la
+ * tarjeta de compartir son PROMOCIÓN —pueden decirlo más corto o con otra foto, y
+ * para eso existe ese grupo del CMS—, mientras que el JSON-LD es una AFIRMACIÓN
+ * sobre lo que hay en la página. Un `headline` que no sea el `h1` visible es
+ * exactamente el marcado que Google lee como engañoso, y ahí no se pierde la
+ * propiedad: se pierde la ficha entera.
+ *
  * ⚠️ `dateModified` es la única que no está en pantalla, y sale de `updatedAt` del
  * CMS. Es un dato verdadero y Google lo usa para saber si vale la pena volver;
  * omitirlo haría que una nota corregida siguiera pareciendo la de ayer.
@@ -207,12 +217,20 @@ export function nodoNota(datos: {
 }
 
 /**
- * La migaja, tal cual está en pantalla.
+ * La migaja, con los mismos eslabones que la de pantalla.
  *
- * ⚠️ Los `nombre` son el TEXTO DEL DOM, no una versión arreglada: el rótulo de la
- * sección está en mayúsculas en el marcado y así entra. Lo que un rastreador lee
- * es el DOM, y una migaja que no coincida con la visible es justo el marcado que
- * Google penaliza. El aspecto lo decide el CSS y no es asunto de este archivo.
+ * 🔴 Los `nombre` van en la forma NORMAL del nombre —«Editorial», «Beat
+ * Scanner»—, no en mayúsculas (Carlos, 2026-09-07). Antes esta migaja copiaba el
+ * `rotulo` de la sección y salía «EDITORIAL», que es lo que Google enseña
+ * literalmente al lector encima del resultado. Es la misma palabra: la mayúscula
+ * es el `text-transform: uppercase` de la pastilla, una decisión de CSS, y no
+ * tenía por qué acabar dentro de un resultado de búsqueda.
+ *
+ * ⚠️ Y no es una «versión arreglada» de lo que dice el DOM: el marcado visible
+ * también escribe el nombre en su forma normal y deja el aspecto al CSS, así que
+ * los dos siguen diciendo lo mismo. Eso es lo que importa — una migaja que no
+ * coincida con la visible es justo el marcado que Google penaliza. Ver
+ * `SeccionEditorial` en `config/navegacion.ts`.
  *
  * Devuelve `null` con menos de dos pasos: una migaja de un solo eslabón no dice
  * nada que la canónica no diga ya.

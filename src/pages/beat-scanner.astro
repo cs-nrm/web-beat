@@ -20,11 +20,26 @@
 import Base from '@/layouts/Base.astro';
 import IndiceScanner from '@/components/IndiceScanner.astro';
 import { SECCIONES_EDITORIALES } from '@/config/navegacion';
+import { MEDIDA_TARJETA } from '@/config/site';
 ---
 
+{/*
+  Su propia tarjeta, no la de marca: la genera `pnpm favicon` con el nombre de la
+  sección encima. El `alt` describe el texto que el script horneó en el PNG, así que
+  se cambia con él. El por qué completo está en `scripts/favicon.mjs` y en
+  `src/pages/editorial.astro`, su hermana.
+
+  ⚠️ Esta es la única de las seis donde el wordmark y el nombre de la sección
+  repiten la palabra «BEAT». Se queda: es lo que la propia cabecera de la página
+  hace, y sin el wordmark la tarjeta no diría de quién es.
+*/}
 <Base
   titulo="Beat Scanner — Beat 100.9"
   descripcion="La nota del día de la escena electrónica: lanzamientos, festivales y lo que se mueve en la pista."
+  imagen="/img/og-beat-scanner.png"
+  imagenAlt="El wordmark de Beat 100.9 y el rótulo BEAT SCANNER, en blanco sobre el negro de la marca."
+  imagenAncho={MEDIDA_TARJETA.ancho}
+  imagenAlto={MEDIDA_TARJETA.alto}
 >
   <IndiceScanner seccion={SECCIONES_EDITORIALES.scanner} />
 </Base>

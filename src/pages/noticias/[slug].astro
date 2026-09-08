@@ -89,6 +89,103 @@ const heroMedida = medidaMedia(nota.imagen, hero);
 const modificadaIso = fechaIso(nota.updatedAt);
 
 /**
+ * 🔴 EL GRUPO `meta` DEL CMS. Estaba poblado y el front lo ignoraba entero
+ * (decisiones de Carlos, 2026-09-07).
+ *
+ * Es la ficha que la redacción captura para los buscadores y para lo que se
+ * comparte, y existe justamente para poder decir las cosas de otra manera ahí. Al
+ * ignorarlo, el trabajo de captura no llegaba a ninguna parte: medido contra
+ * `admin.nrm.com.mx`, había un titular de 94 caracteres acortado a mano a 82 que
+ * nadie estaba usando.
+ *
+ * ⚠️ Cada campo se toma solo si trae algo —`?.trim() ||`, no `??`—: un campo del
+ * admin que se abrió y se dejó en blanco llega como cadena vacía, y con `??` eso
+ * ganaría y la nota se compartiría sin titular.
+ *
+ * 🔴 Lo que NO cambia es el `h1` ni la bajada de la página. Para eso existe el
+ * grupo: el titular del buscador puede ser más corto que el que lee quien ya
+ * entró. Y por la misma razón tampoco cambia el JSON-LD — ver más abajo.
+ */
+const meta = nota.meta ?? {};
+
+/** Gana `meta.title` en el `<title>` y en `og:title`. */
+const tituloMeta = meta.title?.trim() || nota.titulo;
+
+/**
+ * Y gana `meta.description` en la `<meta description>` y en `og:description`.
+ *
+ * ⚠️ Es el mismo grupo y el mismo propósito que `meta.title`, así que honrar uno
+ * e ignorar el otro dejaría media ficha capturada sin efecto. Hoy solo una nota de
+ * las 11 los tiene distintos.
+ */
+const resumenMeta = meta.description?.trim() || nota.resumen;
+
+/**
+ * 🔴 `meta.canonicalUrl` se IGNORA. No es un olvido.
+ *
+ * Sirve para contenido SINDICADO —una nota que se publicó primero en otro sitio y
+ * cuya autoridad le pertenece a ese otro—, y aquí choca de frente con la doctrina
+ * de rutas de este repo: toda URL se arma contra `SITE_URL` y nunca contra otra
+ * cosa (ver `canonica` arriba, `og:url` y el JSON-LD). Honrarlo sería darle a un
+ * campo de texto del admin la capacidad de sacar una nota del índice de este
+ * dominio sin que se note en ninguna pantalla — el fallo silencioso más caro de
+ * los que este archivo puede producir.
+ *
+ * ⚠️ Hoy está vacío en las 11 notas, así que no hay nada que se esté perdiendo. El
+ * día que la estación empiece a republicar contenido de terceros, esto es una
+ * decisión que hay que tomar de nuevo, no un pendiente que se arregla.
+ */
+
+/**
+ * La foto con la que se COMPARTE la nota: `meta.image` si existe, y si no el hero.
+ *
+ * 🔴 El hero sigue siendo lo que se ve EN la página; lo único que cambia aquí es
+ * lo que se publica. Son dos trabajos distintos y la redacción los captura por
+ * separado: en la nota de Amelie Lens el hero es un 3:2 recortado para la página y
+ * `meta.image` es la foto de prensa del artista, que es la que funciona dentro de
+ * una tarjeta de Facebook.
+ *
+ * ⚠️ El `alt` y las medidas viajan CON la foto que se eligió, nunca mezclados. Son
+ * documentos de media distintos, con su propio `alt` escrito por la redacción y su
+ * propio juego de variantes; usar el `alt` del hero para la foto de prensa
+ * describiría una imagen que nadie miró. Ver `medidaMedia`: la medida se busca por
+ * la URL que `urlMedia` acabó eligiendo, así que vale para las dos igual.
+ */
+const social = urlMedia(meta.image, 'large');
+const socialAlt =
+  meta.image && typeof meta.image === 'object' ? (meta.image.alt ?? null) : null;
+const compartida = social ?? hero;
+const compartidaAlt = social ? socialAlt : pieDeFoto;
+const compartidaMedida = social ? medidaMedia(meta.image, social) : heroMedida;
+
+/**
+ * 🔴 `meta.noIndex` se HONRA, y en las DOS capas que pueden saberlo.
+ *
+ * Aquí va la cabecera; el `<meta robots>` lo pone `Base.astro` con la prop
+ * `noIndex`. No es redundancia, son dos alcances distintos:
+ *
+ *   · el `<meta>` solo existe dentro del HTML, y es la capa que Google lee
+ *     mientras rastrea la página;
+ *   · la CABECERA viaja en la respuesta, así que la ve cualquier cosa que pida
+ *     esta URL sin analizar el documento — y es la única de las dos que sirve si
+ *     algún día esta ruta responde algo que no sea HTML.
+ *
+ * 🔴 Y por eso NO lo puede hacer el middleware, que es donde vive el resto de la
+ * política: cuando el middleware corre no sabe qué documento se va a servir, ni si
+ * existe. Es la única regla de indexación del sitio que depende del CONTENIDO, y
+ * el único sitio donde el contenido ya se conoce es este.
+ *
+ * ⚠️ `Astro.response.headers` se escribe en el frontmatter de la PÁGINA, antes de
+ * que empiece a salir HTML. Desde el layout no serviría: cuando su frontmatter
+ * corre, la respuesta ya está en camino y las cabeceras están decididas.
+ *
+ * ⚠️ Sin datos que lo prueben — está en `false` en las 11 notas del CMS—, así que
+ * se comprobó forzando el valor en local.
+ */
+const noIndex = meta.noIndex === true;
+if (noIndex) Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+
+/**
  * 🔴 Los datos estructurados de la nota: `NewsArticle` + la migaja.
  *
  * Van en un solo `@graph` y no en dos bloques por lo de siempre: dos bloques son
@@ -99,6 +196,20 @@ const modificadaIso = fechaIso(nota.updatedAt);
  * `<img>`, los eslabones de la migaja—. No hay ni un dato que se calcule aparte
  * para el buscador: si la nota cambia, cambian los dos a la vez o no cambia
  * ninguno.
+ *
+ * 🔴 AQUÍ NO ENTRA EL GRUPO `meta`, y es la regla que decide el caso: `headline`
+ * lleva `nota.titulo` —el `h1` visible— aunque el `<title>` de arriba use
+ * `meta.title`, y `image` lleva el hero aunque `og:image` use `meta.image`.
+ *
+ * Un `<title>` puede diferir legítimamente del titular: es la promesa que se hace
+ * en una lista de resultados, y acortarla es trabajo editorial. Un `headline` no:
+ * es una afirmación sobre lo que hay dentro de la página, y si no coincide con lo
+ * que la página pinta, Google no descarta la propiedad, descarta la ficha. La nota
+ * `fenomeno-residente-capsula-1-2` es el caso vivo — su `meta.title` es «Fenómeno
+ * Residente Cápsula 1» y su `h1` dice «Kraftwerk Parte 1».
+ *
+ * ⚠️ Lo mismo con `description`: va el `resumen`, que es la bajada que se lee bajo
+ * el titular, no `meta.description`.
  *
  * ⚠️ `author` se OMITE cuando no hay firma, y hoy pasa: `autores` está vacío en el
  * CMS y la firma sale del campo de texto libre, así que hay notas sin ninguna. Un
@@ -122,7 +233,7 @@ const ficha = serializar(
       autor: autor?.nombre,
     }),
     nodoMigaja([
-      { nombre: seccion.rotulo, url: urlAbsoluta(seccion.href) },
+      { nombre: seccion.nombre, url: urlAbsoluta(seccion.href) },
       ...(catEnMigaja
         ? [
             {
@@ -144,21 +255,27 @@ const etiquetas = (nota.etiquetas ?? []).filter(
 
 {/*
   La nota es lo ÚNICO que se comparte de verdad, así que es la que pasa su propia
-  ficha: su foto —con su `alt` y sus medidas—, sus dos fechas y `article`. `hero`
-  ya viene absoluta —`urlMedia` le pone el host público del CMS—, que es lo que
-  Facebook exige.
+  ficha: su foto —con su `alt` y sus medidas—, sus dos fechas y `article`. Las URLs
+  de media ya vienen absolutas —`urlMedia` les pone el host público del CMS—, que
+  es lo que Facebook exige.
 
-  ⚠️ `imagenAlt` es el `alt` que capturó la redacción, el mismo del pie de foto. Si
+  🔴 Los cuatro primeros valores salen del grupo `meta` del CMS cuando la redacción
+  lo capturó, y del contenido visible cuando no. Ver el bloque del frontmatter: el
+  titular y la bajada de la PÁGINA no se tocan, y tampoco el JSON-LD.
+
+  ⚠️ `imagenAlt` es el `alt` que capturó la redacción para ESA foto —el del pie
+  cuando se comparte el hero, el suyo propio cuando se comparte `meta.image`—. Si
   la foto no lo trae no se manda nada: describirla desde aquí sería inventar lo que
   hay dentro de una imagen que este archivo no ve.
 */}
 <Base
-  titulo={`${nota.titulo} — Beat 100.9`}
-  descripcion={nota.resumen ?? undefined}
-  imagen={hero}
-  imagenAlt={pieDeFoto}
-  imagenAncho={heroMedida?.ancho}
-  imagenAlto={heroMedida?.alto}
+  titulo={`${tituloMeta} — Beat 100.9`}
+  descripcion={resumenMeta ?? undefined}
+  imagen={compartida}
+  imagenAlt={compartidaAlt}
+  imagenAncho={compartidaMedida?.ancho}
+  imagenAlto={compartidaMedida?.alto}
+  noIndex={noIndex}
   tipo="article"
   publicado={publicadaIso}
   modificado={modificadaIso}

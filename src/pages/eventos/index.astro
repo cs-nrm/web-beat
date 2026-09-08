@@ -11,6 +11,7 @@ import CabezaSeccion from '@/components/CabezaSeccion.astro';
 import Agenda from '@/components/inicio/Agenda.astro';
 import Anuncio from '@/components/Anuncio.astro';
 import { obtenerAgenda, TIPOS_EVENTO } from '@/lib/cms/eventos';
+import { MEDIDA_TARJETA } from '@/config/site';
 
 /*
   🔴 El `tipo` viene de la URL, o sea de cualquiera. Se valida contra la lista
@@ -34,9 +35,26 @@ const activo = TIPOS_EVENTO.find((t) => t.valor === tipo) ?? null;
 const titulo = 'AGENDA';
 ---
 
+{/*
+  Su propia tarjeta, no la de marca: la genera `pnpm favicon` con el nombre de la
+  sección encima. El `alt` describe el texto que el script horneó en el PNG, así que
+  se cambia con él. El por qué completo, en `scripts/favicon.mjs`.
+
+  ⚠️ El archivo se llama por la RUTA (`og-eventos`) y la imagen dice «AGENDA», que
+  es lo que dice el titular de esta página. No es un descuido: la ruta es `/eventos`
+  y el rótulo es Agenda desde siempre.
+
+  ⚠️ La tarjeta es de la SECCIÓN, así que es la misma con filtro y sin él. El
+  `<title>` sí cambia —`?tipo=` es una vista con su propio enlace—, pero una imagen
+  por filtro serían tres archivos diciendo lo mismo.
+*/}
 <Base
   titulo={activo ? `Agenda · ${activo.etiqueta} — Beat 100.9` : 'Agenda — Beat 100.9'}
   descripcion="Coberturas, activaciones propias y presencia en festivales. Lo que viene, del más cercano al más lejano."
+  imagen="/img/og-eventos.png"
+  imagenAlt="El wordmark de Beat 100.9 y el rótulo AGENDA, en blanco sobre el negro de la marca."
+  imagenAncho={MEDIDA_TARJETA.ancho}
+  imagenAlto={MEDIDA_TARJETA.alto}
 >
   <div class="ag-pagina">
     <CabezaSeccion titulo={titulo} activa="/eventos" />

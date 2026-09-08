@@ -42,7 +42,28 @@ export interface EntradaNav {
  * peor que uno que dice que está vacío, porque nadie lo nota.
  */
 export interface SeccionEditorial {
-  /** El rótulo tal como se pinta en el titular: ya en mayúsculas. */
+  /**
+   * El NOMBRE de la sección, en su forma normal.
+   *
+   * 🔴 Es el que va a cualquier sitio que lea una máquina y presente a un lector:
+   * la migaja del JSON-LD, la nav, el pie. Google enseña la migaja tal como se la
+   * damos, y «EDITORIAL» en mayúsculas ahí no es la sección, es una decisión de
+   * CSS de la pastilla escapándose a un resultado de búsqueda (Carlos,
+   * 2026-09-07).
+   *
+   * ⚠️ Es la MISMA palabra que `rotulo`, no otro dato. Existen las dos porque una
+   * es el nombre y la otra es cómo se pinta; el día que alguien quiera renombrar
+   * la sección, se cambian las dos.
+   */
+  nombre: string;
+  /**
+   * El rótulo tal como se pinta en un titular de display: ya en mayúsculas.
+   *
+   * ⚠️ `.beat-display` y `.beat-label` ya llevan `text-transform: uppercase`, así
+   * que donde el rótulo entra con una de esas clases da igual cuál de los dos se
+   * pase — se ve idéntico. Lo que NO da igual es qué queda escrito en el DOM, que
+   * es lo que lee un rastreador: ahí va `nombre`.
+   */
   rotulo: string;
   href: string;
   /** `slug` de la categoría del CMS que la llena. */
@@ -57,8 +78,18 @@ export interface SeccionEditorial {
   mañana sin que la URL se mueva.
 */
 export const SECCIONES_EDITORIALES = {
-  scanner: { rotulo: 'BEAT SCANNER', href: '/beat-scanner', categoria: 'beat-scanner' },
-  editorial: { rotulo: 'EDITORIAL', href: '/editorial', categoria: 'editorial' },
+  scanner: {
+    nombre: 'Beat Scanner',
+    rotulo: 'BEAT SCANNER',
+    href: '/beat-scanner',
+    categoria: 'beat-scanner',
+  },
+  editorial: {
+    nombre: 'Editorial',
+    rotulo: 'EDITORIAL',
+    href: '/editorial',
+    categoria: 'editorial',
+  },
 } as const satisfies Record<string, SeccionEditorial>;
 
 /**
@@ -90,13 +121,23 @@ export const SECCIONES_EDITORIALES = {
  *
  * ⚠️ Los `href` editoriales salen de `SECCIONES_EDITORIALES`, no escritos a mano:
  * son los mismos que usan las dos páginas y la migaja de cada nota, y tenerlos en
- * dos sitios es cómo el menú y el pie dejan de coincidir.
+ * dos sitios es cómo el menú y el pie dejan de coincidir. Y desde el 2026-09-07,
+ * también el NOMBRE: era la misma palabra escrita dos veces, y el día que la
+ * sección se renombre solo se va a cambiar una.
  */
 export const SECCIONES: EntradaNav[] = [
   { corto: 'Fenómeno Residente', largo: 'El Fenómeno Residente', href: '/fenomeno-residente' },
   { corto: 'Bonus Beat', largo: 'Bonus Beat', href: '/bonus-beat' },
-  { corto: 'Beat Scanner', largo: 'Beat Scanner', href: SECCIONES_EDITORIALES.scanner.href },
-  { corto: 'Editorial', largo: 'Editorial', href: SECCIONES_EDITORIALES.editorial.href },
+  {
+    corto: SECCIONES_EDITORIALES.scanner.nombre,
+    largo: SECCIONES_EDITORIALES.scanner.nombre,
+    href: SECCIONES_EDITORIALES.scanner.href,
+  },
+  {
+    corto: SECCIONES_EDITORIALES.editorial.nombre,
+    largo: SECCIONES_EDITORIALES.editorial.nombre,
+    href: SECCIONES_EDITORIALES.editorial.href,
+  },
   { corto: 'Agenda', largo: 'Agenda', href: '/eventos' },
 ];
 

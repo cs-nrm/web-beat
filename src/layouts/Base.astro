@@ -65,6 +65,24 @@ interface Props {
    */
   modificado?: string | null;
   /**
+   * 🔴 Este DOCUMENTO no se indexa, lo diga el host lo que diga.
+   *
+   * Es la cuarta entrada a la política de indexación y la única que depende del
+   * contenido: `noticias.meta.noIndex` en el CMS, que la redacción marca en una
+   * nota concreta. Las otras tres —`robots.txt`, la cabecera del middleware y el
+   * `<meta>` de aquí abajo— hablan del DESPLIEGUE entero y no pueden saber esto:
+   * cuando se evalúan, nadie ha decidido todavía qué documento se va a servir.
+   *
+   * ⚠️ Solo SUMA restricción, nunca la quita: se combina con un `||`, así que un
+   * `false` del CMS no puede abrir a Google la preproducción. Es la misma regla
+   * que gobierna las otras tres —basta con que una cierre— y es la que hace que
+   * equivocarse aquí no tenga consecuencias.
+   *
+   * ⚠️ La otra mitad la pone la PÁGINA, con la cabecera `X-Robots-Tag` en su
+   * propia respuesta. Aquí no se puede: ver `src/pages/noticias/[slug].astro`.
+   */
+  noIndex?: boolean;
+  /**
    * `inicio` deja la cabecera completa; `interior` nace con la barra oscura ya
    * recogida. Se calcula solo a partir de la ruta y casi nunca hay que pasarlo.
    */
@@ -81,6 +99,7 @@ const {
   tipo = 'website',
   publicado = null,
   modificado = null,
+  noIndex = false,
 } = Astro.props;
 
 /** El Inicio se distingue por la RUTA, no por lo que declare la página. */
@@ -139,9 +158,22 @@ const marca = estacion ?? {
   tritonMount: 'XHSONFM',
 };
 
-// Las dos reglas de indexación, igual que en el middleware. La cabecera la pone el
-// middleware (protege TODA respuesta); el `<meta>` es la segunda capa.
-const noIndexar = NOINDEX_SITIO || noIndexarHost(Astro.url.hostname);
+/*
+  Las reglas de indexación, igual que en el middleware, MÁS la del documento.
+
+  Las dos primeras hablan del despliegue —el dominio con el que se compiló y el
+  `Host` de esta petición— y las pone también el middleware por cabecera, que
+  protege TODA respuesta; este `<meta>` es su segunda capa.
+
+  🔴 La tercera es `noIndex`, y es de otra naturaleza: la trae el documento del
+  CMS y la pasa la página. El middleware NO puede evaluarla —cuando corre, todavía
+  no se sabe qué documento se va a servir—, así que la nota se encarga de su propia
+  cabecera. Ver la prop `noIndex` arriba.
+
+  ⚠️ Se combinan con `||` a propósito: cada una solo puede CERRAR. Ninguna abre lo
+  que otra cerró.
+*/
+const noIndexar = NOINDEX_SITIO || noIndexarHost(Astro.url.hostname) || noIndex;
 const canonical = new URL(Astro.url.pathname, SITE_URL).href;
 
 /**

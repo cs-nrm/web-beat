@@ -1,5 +1,6 @@
 /**
- * Genera el juego de iconos del sitio a partir del logotipo de marca.
+ * Genera el juego de iconos del sitio —y las tarjetas de compartir— a partir del
+ * logotipo de marca.
  *
  * 🔴 Existe porque los que había eran de la marca ANTERIOR: una abeja amarilla
  * fechada en marzo de 2025, que seguía saliendo en la pestaña de un sitio que
@@ -8,6 +9,11 @@
  * mismo archivo que el resto del sitio usa como logo.
  *
  *   pnpm favicon
+ *
+ * ⚠️ Se corre A MANO y lo que produce se COMMITEA. `sharp` es `devDependency`, así
+ * que nada de este archivo existe en producción: lo que se sirve son PNG estáticos
+ * de `public/`, igual que el favicon. Compilar no los regenera — si el logotipo o
+ * el nombre de una sección cambian, hay que acordarse de correr esto.
  *
  * ⚠️ La marca del icono es la **B** del logotipo, no el logotipo entero. A 16px
  * un wordmark de cinco letras y un «100.9» es una mancha gris: lo que sobrevive
@@ -23,13 +29,23 @@ import sharp from 'sharp';
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const ORIGEN = resolve(raiz, 'public/img/beat-blanco.svg');
 const DESTINO = resolve(raiz, 'public/favicon');
-/** La tarjeta de compartir no es un icono: va donde el resto de las imágenes. */
-const DESTINO_OG = resolve(raiz, 'public/img/og-beat.png');
+/** Las tarjetas de compartir no son iconos: van donde el resto de las imágenes. */
+const DESTINO_IMG = resolve(raiz, 'public/img');
+const DESTINO_OG = resolve(DESTINO_IMG, 'og-beat.png');
 
 /** El fondo del icono: el negro del sitio, no negro puro. */
 const FONDO = { r: 5, g: 7, b: 6, alpha: 1 };
 /** Aire alrededor de la letra, en proporción del lado. */
 const MARGEN = 0.17;
+/**
+ * La medida de TODAS las tarjetas de compartir, la de respaldo y las de sección.
+ *
+ * ⚠️ Es la misma que `TARJETA_COMPARTIR` en `src/config/site.ts`, de donde las
+ * páginas sacan el `og:image:width/height`. Si cambia aquí, cambia allá: unas
+ * medidas que no correspondan al archivo se ven como un recorte raro en la
+ * publicación y no se notan desde el sitio.
+ */
+const TARJETA = { ancho: 1200, alto: 630 };
 
 /**
  * La **B** sola, sobre lienzo transparente.
@@ -133,8 +149,9 @@ function mascaraSafari() {
  * 🔴 La tarjeta de RESPALDO para compartir: 1200×630, el wordmark sobre el negro
  * del sitio.
  *
- * Se usa cuando la página que se comparte no tiene foto propia —la portada, una
- * sección, los legales—. Una nota sí la tiene y usa la suya.
+ * Se usa cuando la página que se comparte no tiene imagen propia: el Inicio, los
+ * legales, y cualquier ruta que no sea una nota ni una sección. Una nota usa su
+ * foto y una sección la tarjeta con su nombre — ver más abajo.
  *
  * Se genera aquí y no se sube a mano por lo mismo que los iconos: sale del MISMO
  * `beat-blanco.svg`, así que no puede quedarse en una marca anterior sin que nadie
@@ -155,9 +172,200 @@ async function tarjetaCompartir() {
     .toBuffer();
 
   return sharp({
-    create: { width: 1200, height: 630, channels: 4, background: FONDO },
+    create: { width: TARJETA.ancho, height: TARJETA.alto, channels: 4, background: FONDO },
   })
     .composite([{ input: marca, gravity: 'centre' }])
+    .png()
+    .toBuffer();
+}
+
+/**
+ * 🔴 UNA TARJETA POR SECCIÓN: el nombre de la sección sobre el negro de la marca.
+ *
+ * Hasta ahora las seis secciones compartían `og-beat.png` con el Inicio y los
+ * legales, así que compartir `/editorial` y compartir `/programacion` llegaba a
+ * WhatsApp con la MISMA imagen: la tarjeta no añadía nada a lo que el enlace ya
+ * decía, y en un feed la imagen se ve antes que el texto. El Inicio y los legales
+ * sí se quedan con el respaldo — son las páginas que se comparten como «la casa».
+ *
+ * 🔴 El wordmark SE QUEDA, junto al nombre y más chico que él. Una tarjeta que
+ * solo dijera «EDITORIAL» sobre negro no identifica a nadie —el dominio va en gris
+ * pequeño y en WhatsApp puede no verse—, y el nombre de la sección no lo sostiene
+ * solo: «Agenda» o «Editorial» son palabras de cualquier medio. Además el wordmark
+ * es la única parte de la tarjeta que es arte de marca de verdad —sale del vector—
+ * mientras que el nombre se compone con la tipografía que preste el sistema. En el
+ * respaldo el wordmark ES el asunto y va a 460px; aquí es la firma y va a 300.
+ *
+ * ⚠️ El nombre NO va en Archivo, la tipografía de display del sitio, y no hay
+ * forma limpia de que vaya: librsvg compone el texto con las tipografías del
+ * SISTEMA, y las del front son `.woff2` de `public/fuentes/`, un formato que
+ * fontconfig no indexa. Se pide una pila grotesca y en la Mac donde esto se corre
+ * resuelve a Helvetica Neue Bold. Consecuencia asumida: la letra de la tarjeta no
+ * es exactamente la del titular de la página, y regenerar en otra máquina puede
+ * dar otra letra. Se acepta porque el PNG se COMMITEA —no se genera en el
+ * despliegue— y porque lo que dice de quién es la tarjeta es el wordmark.
+ */
+const PILA_TEXTO = 'Helvetica Neue, Helvetica, Arial, sans-serif';
+/** La caja que puede ocupar el nombre: 80% del ancho de la tarjeta. */
+const CAJA_NOMBRE = { ancho: 960, alto: 300 };
+/** Tope del cuerpo, para que «AGENDA» no salga al doble que «PROGRAMACIÓN». */
+const CUERPO_MAX = 170;
+/** Por debajo de esto se reparte en dos líneas en vez de encoger. */
+const CUERPO_MIN = 118;
+const MARCA_ANCHO = 300;
+/** Aire entre el wordmark y el nombre. */
+const AIRE = 52;
+/** Lienzo de composición del texto, holgado a propósito: ver `mideNombre`. */
+const LIENZO = 6000;
+
+/**
+ * ⚠️ La lista vive AQUÍ, escrita a mano, y hay que mantenerla en sintonía con
+ * `SECCIONES` de `src/config/navegacion.ts` —y con `tipos-de-lista` del CMS, de
+ * donde sale `/bonus-beat`—. Este script es `.mjs` y no puede importar el `.ts` del
+ * front, así que no hay forma de derivarla. Lo que sí es inofensivo es olvidarse:
+ * una sección sin tarjeta cae a `og-beat.png`, que es lo que tenían todas.
+ *
+ * 🔴 El texto es el del `h1` de cada sección, no el del `<title>` ni el de la nav:
+ * la tarjeta es la puerta de esa página y tiene que decir lo que la página dice al
+ * abrirla. Por eso «EL FENÓMENO RESIDENTE» con su artículo y «AGENDA» y no
+ * «EVENTOS» (ver `CabezaSeccion` en cada `index.astro`).
+ *
+ * ⚠️ El ARCHIVO se nombra por la ruta y el TEXTO por el rótulo, que en `/eventos`
+ * no coinciden. Por la ruta porque es lo que la página escribe al lado de su
+ * `imagen=`, y es lo que se busca cuando algo no cuadra.
+ *
+ * ⚠️ Y aquí las mayúsculas SÍ van dentro del dato, al contrario que en la migaja
+ * del JSON-LD (ver `SeccionEditorial` en `config/navegacion.ts`): esto es un
+ * dibujo, no texto que una máquina vaya a citar. Lo que un rastreador lee de esta
+ * imagen es el `og:image:alt`, y ese lo escribe la página.
+ */
+const TARJETAS_SECCION = [
+  ['og-editorial.png', 'EDITORIAL'],
+  ['og-beat-scanner.png', 'BEAT SCANNER'],
+  ['og-eventos.png', 'AGENDA'],
+  ['og-fenomeno-residente.png', 'EL FENÓMENO RESIDENTE'],
+  ['og-bonus-beat.png', 'BONUS BEAT'],
+  ['og-programacion.png', 'PROGRAMACIÓN'],
+];
+
+/**
+ * El nombre compuesto, en una o dos líneas, sobre lienzo transparente.
+ *
+ * Mayúsculas, peso 800 y tracking negativo: es el `.cs-titulo` de
+ * `CabezaSeccion.astro`, para que la tarjeta se vea como la cabecera de la página
+ * que abre y no como una pieza de otro sitio.
+ */
+function svgNombre(lineas, cuerpo) {
+  const escapar = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  const filas = lineas
+    .map(
+      (l, i) =>
+        `<tspan x="${LIENZO / 2}" dy="${i === 0 ? 0 : (cuerpo * 0.94).toFixed(1)}">` +
+        `${escapar(l)}</tspan>`,
+    )
+    .join('');
+  return Buffer.from(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${LIENZO}" ` +
+      `height="${Math.round(cuerpo * (0.94 * (lineas.length - 1) + 1.8))}">` +
+      `<text x="${LIENZO / 2}" y="${Math.round(cuerpo * 1.1)}" text-anchor="middle" ` +
+      `font-family="${PILA_TEXTO}" font-size="${cuerpo}" font-weight="800" ` +
+      `letter-spacing="${(-0.03 * cuerpo).toFixed(2)}" fill="#FAFBFA">${filas}</text></svg>`,
+  );
+}
+
+/**
+ * Cuánto MIDE de verdad ese nombre compuesto, acentos incluidos.
+ *
+ * Es el mismo truco que `letra()`: se compone y `trim()` encuentra la caja real,
+ * en vez de estimarla a partir del cuerpo y del número de letras. Aquí no queda
+ * otra —el ancho de cada glifo lo decide una tipografía que este archivo no
+ * elige—, y es lo que permite garantizar que nada se sale.
+ *
+ * 🔴 El lienzo va holgado y se comprueba: si el texto tocara el borde, `trim()`
+ * devolvería una caja recortada, el cálculo de abajo saldría optimista y la
+ * tarjeta se generaría con el nombre cortado. Es justo el fallo que nadie ve hasta
+ * que la imagen está publicada.
+ */
+async function mideNombre(lineas, cuerpo) {
+  const { info } = await sharp(svgNombre(lineas, cuerpo))
+    .trim()
+    .png()
+    .toBuffer({ resolveWithObject: true });
+  if (info.width >= LIENZO - 40) {
+    throw new Error(`«${lineas.join(' ')}» no cabe en el lienzo de medida: sube LIENZO`);
+  }
+  return { ancho: info.width, alto: info.height };
+}
+
+/** El cuerpo más grande con el que ese bloque cabe entero en la caja. */
+function cuerpoQueCabe(medida) {
+  return Math.min(
+    CUERPO_MAX,
+    Math.floor((CAJA_NOMBRE.ancho / medida.ancho) * 100),
+    Math.floor((CAJA_NOMBRE.alto / medida.alto) * 100),
+  );
+}
+
+/**
+ * Cómo se reparte el nombre: una línea, o dos si en una sola la letra se queda
+ * chica.
+ *
+ * ⚠️ El caso que obliga a esto es real y es el más largo que hay: «EL FENÓMENO
+ * RESIDENTE» pide un cuerpo de 79px en una línea —la mitad de lo que piden los
+ * demás— y partido en «EL FENÓMENO / RESIDENTE» sube a 138. Se prueban todos los
+ * cortes por palabra y gana el que deja la letra más grande, así que la decisión
+ * no depende de dónde le parezca a nadie que se corta.
+ */
+async function reparteNombre(nombre) {
+  const medida = await mideNombre([nombre], 100);
+  let mejor = { lineas: [nombre], cuerpo: cuerpoQueCabe(medida) };
+  if (mejor.cuerpo >= CUERPO_MIN) return mejor;
+
+  const palabras = nombre.split(' ');
+  for (let i = 1; i < palabras.length; i++) {
+    const lineas = [palabras.slice(0, i).join(' '), palabras.slice(i).join(' ')];
+    const cuerpo = cuerpoQueCabe(await mideNombre(lineas, 100));
+    if (cuerpo > mejor.cuerpo) mejor = { lineas, cuerpo };
+  }
+  return mejor;
+}
+
+/**
+ * La tarjeta de una sección: wordmark arriba, nombre debajo, el bloque centrado.
+ *
+ * Se centra el BLOQUE medido, no cada pieza por su cuenta: así una sección de dos
+ * líneas y una de una sola se ven de la misma familia en vez de bailar en vertical.
+ */
+async function tarjetaSeccion(nombre) {
+  const { lineas, cuerpo } = await reparteNombre(nombre);
+  const texto = await sharp(svgNombre(lineas, cuerpo))
+    .trim()
+    .png()
+    .toBuffer({ resolveWithObject: true });
+  const marca = await sharp(readFileSync(ORIGEN), { density: 600 })
+    .resize({ width: MARCA_ANCHO })
+    .png()
+    .toBuffer({ resolveWithObject: true });
+
+  const bloque = marca.info.height + AIRE + texto.info.height;
+  const arriba = Math.round((TARJETA.alto - bloque) / 2);
+  // Guarda, por lo mismo que la de `mideNombre`: una tarjeta pisada o cortada se
+  // ve perfecta desde el sitio y solo se nota en la publicación.
+  if (texto.info.width > CAJA_NOMBRE.ancho || arriba < 40) {
+    throw new Error(`«${nombre}» no cabe en la tarjeta: ${texto.info.width}px, bloque ${bloque}px`);
+  }
+
+  return sharp({
+    create: { width: TARJETA.ancho, height: TARJETA.alto, channels: 4, background: FONDO },
+  })
+    .composite([
+      { input: marca.data, top: arriba, left: Math.round((TARJETA.ancho - marca.info.width) / 2) },
+      {
+        input: texto.data,
+        top: arriba + marca.info.height + AIRE,
+        left: Math.round((TARJETA.ancho - texto.info.width) / 2),
+      },
+    ])
     .png()
     .toBuffer();
 }
@@ -228,7 +436,12 @@ async function main() {
   writeFileSync(DESTINO_OG, await tarjetaCompartir());
   console.log(`  ${'img/og-beat.png'.padEnd(30)} 1200×630  (respaldo para compartir)`);
 
-  console.log('\n✓ iconos y tarjeta de compartir regenerados desde public/img/beat-blanco.svg');
+  for (const [archivo, nombre] of TARJETAS_SECCION) {
+    writeFileSync(resolve(DESTINO_IMG, archivo), await tarjetaSeccion(nombre));
+    console.log(`  ${`img/${archivo}`.padEnd(30)} 1200×630  «${nombre}»`);
+  }
+
+  console.log('\n✓ iconos y tarjetas de compartir regenerados desde public/img/beat-blanco.svg');
 }
 
 main().catch((e) => {

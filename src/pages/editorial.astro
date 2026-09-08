@@ -18,11 +18,32 @@
 import Base from '@/layouts/Base.astro';
 import IndiceScanner from '@/components/IndiceScanner.astro';
 import { SECCIONES_EDITORIALES } from '@/config/navegacion';
+import { MEDIDA_TARJETA } from '@/config/site';
 ---
 
+{/*
+  🔴 Su PROPIA tarjeta de compartir, no la de marca. Hasta ahora las seis secciones
+  compartían `og-beat.png`, así que compartir esta página y compartir la parrilla
+  llegaba a WhatsApp con la misma imagen. La genera `pnpm favicon` con el nombre de
+  la sección encima (`scripts/favicon.mjs`).
+
+  🔴 La declara la PÁGINA, escrita a mano y no adivinada por el nombre de la ruta:
+  así se ve con un `grep og-editorial` quién usa cada archivo, y una sección sin
+  tarjeta cae al respaldo de marca en vez de pedir un archivo que no existe.
+
+  ⚠️ El `alt` describe lo que la imagen DICE, y ese texto está horneado en el PNG
+  por el script. Si allí se renombra la sección, este `alt` se cambia con él.
+
+  ⚠️ Las medidas van con la imagen o la plataforma reserva el hueco equivocado; son
+  las de toda la familia de tarjetas, ver `MEDIDA_TARJETA`.
+*/}
 <Base
   titulo="Editorial — Beat 100.9"
   descripcion="Las piezas largas de Beat 100.9: perfiles, reportajes y ensayos sobre la cultura electrónica."
+  imagen="/img/og-editorial.png"
+  imagenAlt="El wordmark de Beat 100.9 y el rótulo EDITORIAL, en blanco sobre el negro de la marca."
+  imagenAncho={MEDIDA_TARJETA.ancho}
+  imagenAlto={MEDIDA_TARJETA.alto}
 >
   <IndiceScanner seccion={SECCIONES_EDITORIALES.editorial} />
 </Base>

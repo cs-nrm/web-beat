@@ -199,26 +199,32 @@ const LOGO_MARQUEE = '/img/beat-blanco.svg';
   */}
   <Mosaico portada={destacada} izquierda={izquierda} derecha={derecha} />
 
-  {/*
-    🔴 El LEADERBOARD, y va exactamente aquí porque lo dice el lienzo. La dirección
-    5a del artboard `publicidad` —la que este sitio implementó— lo describe con
-    esas palabras: «la portada de 970×250 abre sobre el header, **el leaderboard
-    separa el mosaico del marquee** y el box vive como riel junto al archivo».
-
-    Es el único hueco de los tres que faltaba: la portada entra por el slot
-    `sobre-cabecera` de arriba, y el box ya vive en `ArchivoTemas.astro`.
-
-    ⚠️ Va FUERA del contenedor con tope de ancho, como el mosaico y el marquee que
-    lo rodean: las tres son franjas a sangre. Metido dentro se habría quedado
-    estrecho entre dos bloques anchos, que es peor que no tenerlo — un hueco de
-    728×90 que no cabe no se vende.
-
-    ⚠️ Y si no hay campaña vendida ni Ad Manager tiene qué servir, el propio
-    componente cierra la franja y no queda hueco. Ver `Anuncio.astro`.
-  */}
-  <Anuncio formato="leaderboard" nombre="inicio-leader" />
-
   <Marquee logo={LOGO_MARQUEE} />
+
+  {/*
+    🔴 El LEADERBOARD va DEBAJO del cintillo, y eso se aparta del lienzo a
+    propósito (Carlos, 2026-09-08).
+
+    La dirección 5a del artboard `publicidad` lo pone «separando el mosaico del
+    marquee», y ahí estuvo primero. Visto en pantalla no funcionaba: quedaba
+    apretado entre dos franjas a sangre —el mosaico arriba y el cintillo abajo— y
+    los tres bloques se leían como una sola pila de bandas. Debajo del cintillo, el
+    cintillo hace de cierre del bloque editorial y el anuncio empieza algo nuevo.
+    Donde el lienzo y la pantalla no coinciden, gana la pantalla.
+
+    ⚠️ Y va ENVUELTO en su franja, que es la otra mitad del arreglo: sin envoltura
+    el hueco heredaba el borde de sus vecinos y se veía pegado —lo reportó Carlos
+    con esas palabras—. El relleno es SIMÉTRICO, como `.sc-franja-anuncio` en la
+    sección: un anuncio con más aire de un lado que del otro se lee como si se
+    hubiera colado en el bloque de al lado.
+
+    ⚠️ La franja va FUERA del contenedor con tope de ancho, igual que el mosaico y
+    el cintillo: el hueco se centra solo. Y si no hay campaña vendida ni Ad Manager
+    tiene qué servir, el componente cierra la franja entera y no queda ni el aire.
+  */}
+  <div class="inicio-franja-anuncio">
+    <Anuncio formato="leaderboard" nombre="inicio-leader" />
+  </div>
 
   <div class="inicio-contenido">
     <Fenomeno especial={especial} />
@@ -226,7 +232,22 @@ const LOGO_MARQUEE = '/img/beat-blanco.svg';
     <PilaScanner notas={paraLaPila} seccion={SECCIONES_EDITORIALES.editorial} />
 
     {/* 3. qué viene */}
-    <BonusBeat lista={listaDestacada} tipo={tipoDestacado} />
+    {/*
+      ⚠️ El nombre del hueco lo pasa esta página, no el componente: `BonusBeat` lo
+      usa también la sección `/bonus-beat`, y un hueco declarado dentro le
+      aparecería a las dos. Ver la prop `anuncio` en ese archivo.
+
+      ⚠️ Y OJO con el inventario del Inicio: `ArchivoTemas.astro` ya declara
+      `inicio-box`, que hoy no se pinta porque el archivo de temas está vacío. El
+      día que capturen un segundo tema del Fenómeno, esta página va a tener DOS
+      box. Si eso es demasiado para una sola página, el que sobra es una decisión
+      de inventario, no de código.
+    */}
+    <BonusBeat
+      lista={listaDestacada}
+      tipo={tipoDestacado}
+      anuncio="inicio-bonus-box"
+    />
     <Agenda eventos={agenda} />
   </div>
 </Base>
@@ -235,5 +256,14 @@ const LOGO_MARQUEE = '/img/beat-blanco.svg';
   .inicio-contenido {
     max-width: var(--grid-max);
     margin-inline: auto;
+  }
+  /* Mismo aire arriba que abajo. Ver el comentario del marcado. */
+  .inicio-franja-anuncio {
+    padding: 32px 24px;
+  }
+  @media (max-width: 899px) {
+    .inicio-franja-anuncio {
+      padding: 24px 16px;
+    }
   }
 </style>

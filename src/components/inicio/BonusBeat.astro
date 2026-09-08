@@ -11,13 +11,21 @@
  * componente no sabe que se llama «Bonus Beat»: recibe el tipo y lo usa.
  */
 import Icono from '@/components/Icono.astro';
+import Anuncio from '@/components/Anuncio.astro';
 import { urlMedia, urlArchivo } from '@/lib/cms/client';
-import { fechaCorta } from '@/lib/nota';
 import type { Lista, TiposDeLista } from '@/types/payload';
 
 interface Props {
   lista: Lista | null;
   tipo: TiposDeLista | null;
+  /**
+   * El nombre del hueco de publicidad que va al lado de las canciones, si lo hay.
+   *
+   * 🔴 Lo pasa la PÁGINA y no se declara aquí, por lo mismo que en `Fenomeno.astro`
+   * y `Agenda.astro`: este componente lo usan el Inicio y la sección, y un hueco
+   * escrito dentro le aparecería a las dos. Sin prop no se pinta nada.
+   */
+  anuncio?: string | null;
   /**
    * Dónde se pinta.
    *
@@ -30,11 +38,10 @@ interface Props {
   contexto?: 'inicio' | 'edicion';
 }
 
-const { lista, tipo, contexto = 'inicio' } = Astro.props;
+const { lista, tipo, contexto = 'inicio', anuncio = null } = Astro.props;
 
 const enInicio = contexto === 'inicio';
 const rutaTipo = tipo?.slug ? `/${tipo.slug}` : null;
-const fecha = fechaCorta(lista?.fecha);
 
 /**
  * Las plataformas de una canción, solo las que tienen enlace.
@@ -81,27 +88,47 @@ function plataformasDe(c: unknown): Array<[string, string]> {
 {
   lista && (
     <section class:list={['bb', `es-${contexto}`]} data-pistas>
+      {/*
+        Solo el rótulo de la sección.
+
+        ⚠️ Aquí hubo dos cosas más, y las dos se retiraron por decisión de Carlos.
+        Primero «TRES TRACKS CADA VIERNES», que salía del lienzo (2026-09-01):
+        nadie ha comprometido esa periodicidad, y un rótulo fijo que promete un día
+        de la semana se convierte en un desmentido el primer viernes que no haya
+        edición. Después la FECHA de la edición (2026-09-08): «quita la fecha de
+        ahí, para que no se vea raro».
+
+        🔴 Y tenía razón con el bloque partido en dos columnas: la fecha iba
+        alineada al extremo derecho de la cabeza, que ahora es el borde de la
+        columna del ANUNCIO. Quedaba un dato editorial rotulando un hueco de
+        publicidad.
+
+        ⚠️ La fecha no se pierde: sigue en cada edición dentro de la sección
+        —`/bonus-beat`, donde el encabezado la lleva— y en la retícula de
+        ediciones anteriores. Lo que se retira es repetirla en el Inicio.
+      */}
       {enInicio && (
       <div class="bb-cabeza">
         <h2 class="beat-display bb-seccion">{(tipo?.nombre ?? lista.titulo).toUpperCase()}</h2>
-        {/*
-          Solo la FECHA de la edición.
-
-          ⚠️ Aquí decía «TRES TRACKS CADA VIERNES», que salía del lienzo. Se
-          retiró por decisión de Carlos (2026-09-01): nadie ha comprometido esa
-          periodicidad, y un rótulo fijo que promete un día de la semana se
-          convierte en un desmentido el primer viernes que no haya edición. La
-          fecha, en cambio, es un dato: dice cuándo es ESTA, sin prometer la
-          siguiente.
-
-          Si algún día la estación quiere anunciar una cadencia, el sitio para
-          decirlo es `tipos-de-lista.descripcion` en el CMS —dato editorial— y no
-          una cadena en este archivo.
-        */}
-        {fecha && <span class="beat-label bb-nota">{fecha}</span>}
       </div>
       )}
 
+      {/*
+        🔴 Las canciones y el anuncio COMPARTEN fila (Carlos, 2026-09-08):
+        «dividamos Bonus Beat y al lado».
+
+        Antes el bloque era una sola columna a todo lo ancho, y las tres filas de
+        canciones dejaban un vacío enorme a la derecha en escritorio. Con el box al
+        lado, ese aire pasa a ser inventario y las canciones quedan a una medida de
+        lectura en vez de estirarse a 1280px.
+
+        ⚠️ En móvil la rejilla colapsa y el box baja al final, DESPUÉS del remate de
+        «ver todas las ediciones»: metido entre las canciones cortaría la lista en
+        dos, y una lista de tres tracks partida por un anuncio no se lee como una
+        lista.
+      */}
+      <div class:list={['bb-reparto', { 'con-anuncio': enInicio && anuncio }]}>
+      <div class="bb-canciones">
       {lista.canciones?.length ? (
         lista.canciones.map((c, i) => {
           const cancion = typeof c.cancion === 'object' ? c.cancion : null;
@@ -191,6 +218,14 @@ function plataformasDe(c: unknown): Array<[string, string]> {
           </a>
         </div>
       )}
+      </div>
+
+      {enInicio && anuncio && (
+        <aside class="bb-riel">
+          <Anuncio formato="box" nombre={anuncio} unidad="Box" />
+        </aside>
+      )}
+      </div>
     </section>
   )
 }
@@ -215,6 +250,29 @@ function plataformasDe(c: unknown): Array<[string, string]> {
     gap: 14px;
     padding-bottom: 14px;
     border-bottom: 1px solid var(--border-quiet);
+  }
+
+  /*
+    El reparto entre canciones y anuncio. Sin anuncio no hay rejilla: la clase
+    `con-anuncio` solo la pone la página que pasa el hueco, así que la sección
+    —que no lo pasa— sigue con las canciones a todo lo ancho, exactamente como
+    antes. Un `grid` de una sola columna cambiaría el maquetado de un sitio donde
+    no hace falta.
+  */
+  .bb-reparto.con-anuncio {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    align-items: start;
+    gap: 44px;
+  }
+  .bb-canciones {
+    min-width: 0;
+  }
+  .bb-riel {
+    /* Pegajoso bajo el chrome, como el riel de la nota. Con tres canciones no
+       llega a moverse; con una edición larga, acompaña. */
+    position: sticky;
+    top: calc(var(--chrome-h) + 16px);
   }
   .bb-seccion {
     font-size: 26px;
@@ -371,6 +429,20 @@ function plataformasDe(c: unknown): Array<[string, string]> {
   @media (max-width: 899px) {
     .bb {
       padding: 32px 16px 0;
+    }
+    /*
+      Una columna, y el box queda DEBAJO del remate por el orden del marcado. Es
+      lo que se quiere: entre las canciones cortaría la lista en dos.
+    */
+    .bb-reparto.con-anuncio {
+      grid-template-columns: 1fr;
+      gap: 30px;
+    }
+    .bb-riel {
+      position: static;
+      /* Centrado: el hueco mide 300px fijos y la columna es más ancha. */
+      display: flex;
+      justify-content: center;
     }
     .bb.es-edicion {
       padding: 0;

@@ -53,16 +53,16 @@ const rutaTipo = tipo?.slug ? `/${tipo.slug}` : null;
 /**
  * El mp3 de la canción, si lo tiene.
  *
- * ⚠️ Recibe `unknown` y lee el campo a mano porque `canciones.audio` **todavía no
- * existe en el CMS**: es la pieza que falta para que Bonus Beat suene (una
- * relación a `media`, que ya acepta audio sin tocarlo — `Media.ts` no restringe
- * tipos y Sharp solo procesa imágenes).
+ * ⚠️ Recibe `unknown` y lee el campo a mano porque `canciones.audio` ya existe en
+ * el CMS pero **está vacío en las 8 canciones capturadas**, y `media` no tiene un
+ * solo documento con mimeType `audio/*`. O sea: el campo está, el archivo no. Esto
+ * devuelve `null` en las 8 y la fila se pinta con sus enlaces a plataformas.
  *
- * 🔴 Escrito así a propósito, y no esperando a que el campo exista: mientras no
- * esté, esto devuelve `null` y la fila se pinta EXACTAMENTE como hoy, con sus
- * enlaces a plataformas. El día que se capture el primer mp3 aparece el botón de
- * reproducir, sin desplegar nada. Lo contrario —dar por hecho el campo— dejaría la
- * página en blanco hasta que el CMS se moviera.
+ * 🔴 Lo que SÍ hay es `embedUrl` —un enlace de YouTube en las 8—, y eso lo resuelve
+ * `plataformasDe`, no esta función: es un enlace de salida, no un archivo que este
+ * reproductor pueda tocar. `pista.ts` espera un mp3 servido por el CMS; una URL de
+ * YouTube necesitaría el camino de Plyr que ya usa el visor de Fenómeno. El día que
+ * se suba el primer mp3 aparece el botón de reproducir, sin desplegar nada.
  */
 function audioDe(c: unknown): string | null {
   if (!c || typeof c !== 'object') return null;
@@ -72,16 +72,38 @@ function audioDe(c: unknown): string | null {
 
 function plataformasDe(c: unknown): Array<[string, string]> {
   if (!c || typeof c !== 'object') return [];
-  const campos: Array<[string, string]> = [
-    ['SPOTIFY', 'spotify'],
-    ['APPLE', 'appleMusic'],
-    ['YOUTUBE', 'youtube'],
-    ['DEEZER', 'deezer'],
-  ];
   const doc = c as Record<string, unknown>;
-  return campos
-    .map(([etiqueta, campo]): [string, unknown] => [etiqueta, doc[campo]])
-    .filter((par): par is [string, string] => typeof par[1] === 'string' && par[1].length > 0);
+  const texto = (campo: string): string | null => {
+    const v = doc[campo];
+    return typeof v === 'string' && v.trim() ? v : null;
+  };
+
+  /*
+    🔴 `embedUrl` como respaldo de `youtube`, y ese respaldo es lo único que hoy
+    pinta un enlace en esta sección. Medido contra el CMS: de las 8 canciones
+    capturadas **las 8 traen `embedUrl`** y solo 3 traen `youtube` — y las 3 de la
+    lista publicada de Bonus Beat (ABU SIMBEL, LOST, TWO RIVERS) son justamente de
+    las que NO lo traen. O sea que esta sección se pintaba con cero enlaces, sin
+    forma de oír nada, teniendo el vídeo en el CMS desde el principio: `embedUrl`
+    no lo leía ni una línea del front (`grep` lo confirmaba: solo aparecía en unas
+    notas de migración).
+
+    ⚠️ Donde los dos campos existen son **idénticos byte a byte** en las 3, así que
+    el orden no cambia ningún resultado hoy; se deja `youtube` primero porque es el
+    campo que la interfaz del CMS presenta para capturar, y así una corrección hecha
+    ahí gana sobre lo que haya quedado en `embedUrl`.
+
+    ⚠️ Los 8 valores llevan `&list=RD…&start_radio=1`: abren la RADIO de YouTube de
+    esa pista, no la pista sola. Es lo capturado y se respeta tal cual; si estorba se
+    corrige en el CMS, no aquí.
+  */
+  const campos: Array<[string, string | null]> = [
+    ['SPOTIFY', texto('spotify')],
+    ['APPLE', texto('appleMusic')],
+    ['YOUTUBE', texto('youtube') ?? texto('embedUrl')],
+    ['DEEZER', texto('deezer')],
+  ];
+  return campos.filter((par): par is [string, string] => par[1] !== null);
 }
 ---
 

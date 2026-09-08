@@ -11,7 +11,7 @@ import CabezaSeccion from '@/components/CabezaSeccion.astro';
 import Agenda from '@/components/inicio/Agenda.astro';
 import Anuncio from '@/components/Anuncio.astro';
 import Icono from '@/components/Icono.astro';
-import { obtenerEvento, obtenerAgenda, TIPOS_EVENTO } from '@/lib/cms/eventos';
+import { obtenerEvento, obtenerAgenda } from '@/lib/cms/eventos';
 import { urlMedia } from '@/lib/cms/client';
 
 const { slug } = Astro.params;
@@ -56,8 +56,6 @@ const inicio = partes(evento.inicio);
 const fin = partes(evento.fin);
 
 const ETIQUETA_ACCION: Record<string, string> = { rsvp: 'RESERVAR LUGAR', boletos: 'BOLETOS' };
-const etiquetaTipo =
-  TIPOS_EVENTO.find((t) => t.valor === evento.tipo)?.etiqueta ?? evento.tipo.toUpperCase();
 
 const accion =
   evento.accion && evento.accion !== 'ninguna' && evento.enlace
@@ -121,10 +119,18 @@ const lugar = [evento.lugar, evento.ciudad].filter(Boolean).join(' · ');
           )
         }
 
-        <div class="ev-dato">
-          <span class="beat-label ev-dato-rotulo">QUÉ ES</span>
-          <span class="ev-dato-valor">{etiquetaTipo}</span>
-        </div>
+        {/*
+          🔴 Aquí estaba la fila «QUÉ ES» con el tipo del evento, y se retiró
+          (Carlos, 2026-09-08): «eso de propio suena raro/feo».
+
+          Decía «QUÉ ES · PROPIOS» —en PLURAL para un solo evento, porque reusaba la
+          etiqueta del filtro— y aun bien escrito no informaba: `propio`,
+          `cobertura` y `festival` describen el evento desde el punto de vista de la
+          estación, no del que lo va a leer. Lo que sí le sirve es cuándo y dónde,
+          que son las dos filas que quedan.
+
+          La taxonomía sigue en el CMS para uso de la redacción.
+        */}
 
         {
           accion && (

@@ -43,11 +43,21 @@ function partes(iso: string | null | undefined) {
 }
 
 const ETIQUETA_ACCION: Record<string, string> = { rsvp: 'RSVP', boletos: 'BOLETOS' };
-const ETIQUETA_TIPO: Record<string, string> = {
-  propio: 'PROPIO',
-  cobertura: 'COBERTURA',
-  festival: 'FESTIVAL',
-};
+
+/*
+  🔴 El TIPO de evento no se pinta en ninguna parte (Carlos, 2026-09-08): «eso de
+  propio suena raro/feo, quitémosle eso».
+
+  Y tenía razón de fondo, no solo de gusto: `propio | cobertura | festival` describe
+  el evento **desde el punto de vista de la estación** —¿lo organizamos nosotros, lo
+  cubrimos, o vamos a un festival de otro?— y eso no le dice nada a quien lo lee.
+  Al lector le importa qué es, cuándo y dónde. La taxonomía sigue existiendo en el
+  CMS, donde sirve para que la redacción organice su trabajo; lo que se retira es
+  enseñarla en pantalla.
+
+  ⚠️ De paso se cierra un bug: el detalle rotulaba «QUÉ ES · PROPIOS», en PLURAL
+  para un solo evento, porque reusaba la etiqueta del filtro.
+*/
 
 const p = partes(proximo?.inicio);
 const fotoProximo = urlMedia(proximo?.portada, 'large');
@@ -75,7 +85,6 @@ const fotoProximo = urlMedia(proximo?.portada, 'large');
         <a href={`/eventos/${proximo.slug}`} class="ag-foto">
           {fotoProximo && <img src={fotoProximo} alt="" loading="lazy" decoding="async" />}
           <div class="beat-grid ag-trama" />
-          <span class="beat-label ag-insignia">{ETIQUETA_TIPO[proximo.tipo] ?? proximo.tipo}</span>
         </a>
 
         <div class="ag-texto">
@@ -127,7 +136,6 @@ const fotoProximo = urlMedia(proximo?.portada, 'large');
                 <span class="beat-label ag-fila-lugar">
                   {[e.lugar, e.ciudad].filter(Boolean).join(' · ')}
                 </span>
-                <span class="beat-label ag-fila-tipo">{ETIQUETA_TIPO[e.tipo] ?? e.tipo}</span>
                 <span class="beat-label ag-fila-accion">
                   {e.accion && e.accion !== 'ninguna' ? (ETIQUETA_ACCION[e.accion] ?? '') : ''}
                 </span>

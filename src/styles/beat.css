@@ -2039,3 +2039,35 @@ html[data-cursor] body::after {
     transition: none;
   }
 }
+
+/*
+  El acuse del toque: el enlace que se acaba de pulsar mientras la página nueva
+  viene en camino. El porqué está en `src/scripts/progreso.ts`.
+
+  🔴 Se APAGA en vez de encenderse, y va contra el idioma del resto del sitio
+  —donde lo que importa se ilumina— a propósito: esta tarjeta ya no es lo que
+  importa, es lo que estás dejando atrás. Apagarla lee como «tomado, en camino»;
+  encenderla leería como «aquí sigues».
+*/
+[data-navegando] {
+  opacity: 0.5;
+  /*
+    🔴 Y deja de aceptar clics, que es la otra mitad del problema. El lector que no
+    ve respuesta vuelve a tocar —es lo que Carlos describió— y ese segundo toque
+    encola otra navegación al mismo sitio. Aquí el primer toque cierra la puerta.
+  */
+  pointer-events: none;
+  transition: opacity 120ms var(--ease-out);
+}
+/* Lo que estaba encendido por el cursor se apaga también: si no, la tarjeta
+   pulsada se quedaba a medio camino entre iluminada y atenuada. */
+[data-navegando] .tarjeta-titulo,
+[data-navegando] .pila-carta-titulo,
+[data-navegando] .mosaico-titulo {
+  color: var(--mist-2);
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-navegando] {
+    transition: none;
+  }
+}

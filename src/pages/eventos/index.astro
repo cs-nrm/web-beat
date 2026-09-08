@@ -10,28 +10,33 @@ import Base from '@/layouts/Base.astro';
 import CabezaSeccion from '@/components/CabezaSeccion.astro';
 import Agenda from '@/components/inicio/Agenda.astro';
 import Anuncio from '@/components/Anuncio.astro';
-import { obtenerAgenda, TIPOS_EVENTO } from '@/lib/cms/eventos';
+import { obtenerAgenda } from '@/lib/cms/eventos';
 import { MEDIDA_TARJETA } from '@/config/site';
 
 /*
-  🔴 El `tipo` viene de la URL, o sea de cualquiera. Se valida contra la lista
-  cerrada ANTES de acercarlo al CMS, y por dos razones:
+  🔴 Aquí vivía el filtro por TIPO —`?tipo=propio|cobertura|festival`— y se retiró
+  entero (Carlos, 2026-09-08): «eso de propio suena raro/feo».
 
-    · un valor arbitrario entraría en el `where` y, como la clave de caché del
-      cliente es la URL de la consulta, `?tipo=<lo que sea>` generaría una entrada
-      de caché por visita. Es la regla de oro del cliente del CMS, y es el bug que
-      en `web-enfoque` produjo 836 de 1,103 errores por hora;
-    · y de paso se acaba cualquier intento de inyectar operadores en la consulta.
+  El motivo va más allá de la palabra: esa taxonomía describe el evento **desde el
+  punto de vista de la estación** —¿lo organizamos, lo cubrimos, o vamos al
+  festival de otro?— y a quien lee la agenda no le dice nada. Filtrar por algo que
+  el lector no entiende no es navegación, es ruido. La agenda queda como lo que es:
+  una lista cronológica de lo que viene.
 
-  Lo que no está en la lista se trata como «sin filtro», no como error: una URL
-  vieja o mal copiada debe enseñar la agenda completa, no un 404.
+  ⚠️ La taxonomía SIGUE en el CMS, donde sirve para que la redacción organice su
+  trabajo, y `obtenerAgenda` sigue aceptando un tipo. Lo que se retiró es la
+  interfaz, no el dato.
+
+  ⚠️ Con el filtro se va también la validación del parámetro contra la lista
+  cerrada, y conviene saber POR QUÉ existía: la clave de caché del cliente del CMS
+  es la URL de la consulta, así que un `?tipo=<lo que sea>` sin validar generaba una
+  entrada de caché por visita — el bug que en `web-enfoque` produjo 836 de los
+  1,103 errores por hora. Ya no aplica porque el parámetro no se lee, pero si
+  alguien vuelve a leer algo de la URL para pasarlo al CMS, tiene que validarlo
+  contra una lista cerrada. La regla es del cliente, no de esta página.
 */
-const solicitado = Astro.url.searchParams.get('tipo');
-const tipo = TIPOS_EVENTO.find((t) => t.valor === solicitado)?.valor ?? null;
+const eventos = await obtenerAgenda(40);
 
-const eventos = await obtenerAgenda(40, tipo);
-
-const activo = TIPOS_EVENTO.find((t) => t.valor === tipo) ?? null;
 const titulo = 'AGENDA';
 ---
 
@@ -44,13 +49,12 @@ const titulo = 'AGENDA';
   es lo que dice el titular de esta página. No es un descuido: la ruta es `/eventos`
   y el rótulo es Agenda desde siempre.
 
-  ⚠️ La tarjeta es de la SECCIÓN, así que es la misma con filtro y sin él. El
-  `<title>` sí cambia —`?tipo=` es una vista con su propio enlace—, pero una imagen
-  por filtro serían tres archivos diciendo lo mismo.
+  ⚠️ Una sola tarjeta y un solo título: al retirarse el filtro por tipo, esta
+  sección dejó de tener vistas con enlace propio.
 */}
 <Base
-  titulo={activo ? `Agenda · ${activo.etiqueta} — Beat 100.9` : 'Agenda — Beat 100.9'}
-  descripcion="Coberturas, activaciones propias y presencia en festivales. Lo que viene, del más cercano al más lejano."
+  titulo="Agenda — Beat 100.9"
+  descripcion="Lo que viene en Beat 100.9: conciertos, festivales y fiestas, del más cercano al más lejano."
   imagen="/img/og-eventos.png"
   imagenAlt="El wordmark de Beat 100.9 y el rótulo AGENDA, en blanco sobre el negro de la marca."
   imagenAncho={MEDIDA_TARJETA.ancho}
@@ -59,45 +63,14 @@ const titulo = 'AGENDA';
   <div class="ag-pagina">
     <CabezaSeccion titulo={titulo} activa="/eventos" />
 
-    {/*
-      El filtro por TIPO, y a propósito NO se parece a la tira de secciones de
-      arriba: es texto subrayado, no píldoras.
-
-      🔴 Dos controles con la misma pinta y distinto alcance —uno cambia de
-      sección, el otro filtra esta lista— es exactamente lo que hacía que la tira
-      de categorías del Scanner se leyera como el menú del sitio. Si dos cosas
-      hacen cosas distintas, tienen que verse distintas.
-    */}
-    <nav class="ag-tipos" aria-label="Filtrar la agenda por tipo">
-      <a
-        href="/eventos"
-        aria-current={!tipo ? 'true' : undefined}
-        class:list={['beat-label ag-tipo', { 'es-activo': !tipo }]}
-      >
-        TODOS
-      </a>
-      {
-        TIPOS_EVENTO.map((t) => (
-          <a
-            href={`/eventos?tipo=${t.valor}`}
-            aria-current={tipo === t.valor ? 'true' : undefined}
-            class:list={['beat-label ag-tipo', { 'es-activo': tipo === t.valor }]}
-          >
-            {t.etiqueta}
-          </a>
-        ))
-      }
-    </nav>
-
     <div class="ag-lista">
       {
         eventos.length > 0 ? (
           <Agenda eventos={eventos} contexto="seccion" />
         ) : (
           <p class="ag-vacio">
-            {activo
-              ? `No hay eventos de tipo ${activo.etiqueta.toLowerCase()} por venir. Prueba con la agenda completa.`
-              : 'Todavía no hay eventos publicados. En cuanto la estación cargue el calendario, aparecen aquí.'}
+            Todavía no hay eventos publicados. En cuanto la estación cargue el
+            calendario, aparecen aquí.
           </p>
         )
       }
@@ -114,36 +87,10 @@ const titulo = 'AGENDA';
     max-width: var(--grid-max);
     margin: 0 auto;
   }
-  .ag-tipos {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    margin: 26px 24px 0;
-    padding-bottom: 14px;
-    border-bottom: 1px solid var(--border-quiet);
-  }
-  .ag-tipo {
-    color: var(--text-muted);
-    font-size: 9.5px;
-    white-space: nowrap;
-    padding-bottom: 3px;
-    /* El subrayado se dibuja transparente desde el principio: así el activo no
-       empuja a sus vecinos un pixel al aparecer. */
-    border-bottom: 2px solid transparent;
-    transition: color var(--dur-2) var(--ease-out);
-  }
-  .ag-tipo:hover {
-    color: var(--mist-0);
-  }
-  /* 🔴 Subrayado ADEMÁS del color, no en su lugar: WCAG 1.4.1 — el color no puede
-     ser lo único que dice cuál está activo. */
-  .ag-tipo.es-activo {
-    color: var(--mist-0);
-    font-weight: 700;
-    border-bottom-color: var(--mist-0);
-  }
   .ag-lista {
-    padding: 30px 24px 0;
+    /* Sin el filtro encima, la lista sube: antes heredaba el aire que dejaba la
+       tira de tipos. */
+    padding: 26px 24px 0;
   }
   .ag-vacio {
     font: var(--type-body);

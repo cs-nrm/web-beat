@@ -43,6 +43,38 @@ let barra: HTMLElement | null = null;
 let temporizador: number | null = null;
 let salida: number | null = null;
 
+/**
+ * El enlace que se acaba de pulsar, marcado para que se vea que registró.
+ *
+ * 🔴 Esto es la mitad que faltaba, y es la que el lector pide de verdad. La barra
+ * de arriba dice «está pasando algo»; esto dice «pasó por LO QUE TOCASTE». Son
+ * 2px en la coronilla de la pantalla contra una tarjeta a media página: en
+ * escritorio, a 1440px de ancho, el aviso de arriba queda fuera de donde el ojo
+ * está mirando. Carlos lo pidió dos veces —«para que el usuario sepa que ya le
+ * picó a algo… también en desk»— y la primera vez respondí solo con la barra.
+ *
+ * ⚠️ Y va SIN retardo, al contrario que la barra: el acuse de un toque tiene que
+ * ser inmediato o no es un acuse. Los 140ms de la barra existen para que una
+ * navegación instantánea no parpadee; aquí un parpadeo es justamente la
+ * confirmación.
+ */
+let pulsado: HTMLElement | null = null;
+
+const soltar = (): void => {
+  pulsado?.removeAttribute('data-navegando');
+  pulsado = null;
+};
+
+/**
+ * Solo los temporizadores de la BARRA.
+ *
+ * 🔴 No suelta la marca del enlace pulsado, y es la corrección de un error que
+ * costó encontrar: la soltaba, y como `arrancar()` empieza llamando aquí, el acuse
+ * se borraba **en el instante en que arranca la navegación** — o sea justo cuando
+ * tiene que estar puesto. La marca dura desde el clic hasta que la página nueva
+ * está en pantalla; la barra y ella tienen ciclos de vida distintos y no se
+ * limpian juntas.
+ */
 const cancelar = (): void => {
   if (temporizador !== null) clearTimeout(temporizador);
   if (salida !== null) clearTimeout(salida);
@@ -117,6 +149,45 @@ export function prepararProgreso(): void {
     layout, así que no se acumulan por navegación. Es la misma razón por la que el
     «copiar enlace» de la nota usa delegación.
   */
+  /*
+    🔴 El acuse se marca en el CLIC, no en `before-preparation`.
+
+    Tiene que ser así por dos razones. La primera es de tiempo: el clic es el
+    instante en que el lector espera respuesta, y `before-preparation` llega
+    después. La segunda es que ese evento **no sabe qué se pulsó** — cubre también
+    el botón de atrás del navegador, donde no hay nada que marcar.
+
+    ⚠️ Se descarta lo que no va a navegar por aquí: enlaces externos, los que abren
+    en otra pestaña, descargas, anclas de la misma página, y el clic con
+    modificador o con el botón de en medio —que abre en pestaña nueva y dejaría la
+    tarjeta marcada en una página en la que el lector se queda—.
+  */
+  document.addEventListener('click', (ev) => {
+    const e = ev as MouseEvent;
+    /*
+      🔴 NO se comprueba `defaultPrevented`, y es contraintuitivo: parecía la
+      guarda obvia para «ya lo atendió alguien».
+
+      Es justo al revés. El `ClientRouter` de Astro intercepta el clic y llama
+      `preventDefault()` para hacer él la navegación, y se carga en el `<head>`
+      mientras este módulo va al final del `<body>` — así que cuando llega aquí,
+      `defaultPrevented` ya es `true` **en exactamente los clics que nos importan**.
+      Con esa guarda puesta, el acuse no se pintaba nunca. Medido: todas las demás
+      condiciones pasaban y la marca no aparecía.
+    */
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const a = (e.target as HTMLElement | null)?.closest?.('a[href]');
+    if (!(a instanceof HTMLAnchorElement)) return;
+    if (a.target === '_blank' || a.hasAttribute('download')) return;
+    if (a.origin !== location.origin) return;
+    // Un ancla de la misma página no navega: no hay nada que esperar.
+    if (a.pathname === location.pathname && a.hash) return;
+
+    soltar();
+    pulsado = a;
+    a.setAttribute('data-navegando', '');
+  });
+
   document.addEventListener('astro:before-preparation', () => {
     localizar();
     arrancar();
@@ -130,10 +201,20 @@ export function prepararProgreso(): void {
   document.addEventListener('astro:after-swap', () => {
     localizar();
     terminar();
+    /*
+      ⚠️ Y se suelta la marca. El intercambio reemplaza el `body`, así que el nodo
+      marcado se va con él — pero la referencia se queda apuntando a un nodo
+      huérfano, y sin esto la siguiente navegación intentaría desmarcar ese en vez
+      del nuevo.
+    */
+    soltar();
   });
   /*
     ⚠️ Y un cierre de seguridad: si la petición falla o el lector cancela, no llega
     ningún `after-swap` y la barra se quedaría reptando para siempre.
   */
-  window.addEventListener('pagehide', cancelar);
+  window.addEventListener('pagehide', () => {
+    cancelar();
+    soltar();
+  });
 }

@@ -9,6 +9,7 @@ Mapeo actual:
 - `analytics.yaml` -> `agents/analytics.md`
 - `content.yaml` -> `agents/content.md`
 - `frontend.yaml` -> `agents/frontend.md`
+- `metadata.yaml` -> `agents/metadata.md`
 - `streaming.yaml` -> `agents/streaming.md`
 
 Los archivos en `agents/` se conservan como contexto detallado del negocio y ownership tecnico.

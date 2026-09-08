@@ -96,13 +96,34 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
   {/*
     BARRA DEL PLAYER — clara sobre un sitio oscuro. Es la única inversión de la
     paleta en todo el sitio, y es deliberada: lo que está al aire es lo que brilla.
+
+    ⚠️ El relleno IZQUIERDO es menor que el derecho a propósito (Carlos,
+    2026-09-08): «el logo de la barra podemos echarlo tantito más a la izquierda,
+    que quede pegado casi». El logotipo lleva su propio aire dentro del SVG, así
+    que con los 16px de `px-4` se veía flotando lejos del borde mientras la
+    hamburguesa de la derecha sí lo tocaba. A 8px el bloque de marca arranca donde
+    arranca la pantalla.
+
+    🔴 Y solo a la izquierda: el lado derecho conserva su relleno porque ahí vive
+    un botón táctil, y un control pegado al canto de un teléfono se pulsa mal —y en
+    un iPhone compite con el gesto de volver.
+
+    🔴 Y el comentario va AQUÍ, antes de la etiqueta. Astro NO admite un comentario
+    de llaves dentro de la lista de atributos: los parsea como atributos sueltos y
+    rompe el build con errores que no lo mencionan. Van cinco tropiezos iguales en
+    este repo, dos en la misma sesión.
+
+    ⚠️ Y al escribir ESTE aviso caí en el de al lado: no se puede citar la sintaxis
+    del comentario dentro de un comentario, porque el cierre lo cierra antes de
+    tiempo. Lo peor es que `astro check` daba 0 errores y solo tronó el compilador
+    del build — o sea que `pnpm check` no basta como puerta.
   */}
   <div
     id="player"
     data-status="init"
     data-modo="directo"
     data-mount={estacion.tritonMount}
-    class="flex h-player items-center gap-3 bg-mist-0 px-4 text-noche-0 md:gap-4 md:px-6"
+    class="flex h-player items-center gap-3 bg-mist-0 pl-2 pr-4 text-noche-0 md:gap-4 md:pl-3 md:pr-6"
   >
     {/*
       El wordmark en la barra CLARA. Aparece solo cuando la barra oscura se recoge,

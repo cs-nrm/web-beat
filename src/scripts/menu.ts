@@ -118,8 +118,23 @@ function abrirMenu(desde: HTMLElement | null): void {
   */
   for (const t of o.querySelectorAll<HTMLElement>('[data-escribir]')) descifrarAhora(t);
 
-  // El foco entra al menú, que es lo que un lector de pantalla debe anunciar.
-  o.querySelector<HTMLElement>('a')?.focus();
+  /*
+    🔴 El foco entra al CONTENEDOR, no al primer enlace.
+
+    Estaba en `querySelector('a').focus()` y eso pintaba el anillo de foco sobre
+    «Fenómeno Residente» cada vez que se abría el menú, en cualquier sección — lo
+    reportó Carlos (2026-09-08) preguntando por qué esa entrada salía marcada.
+    Y la lectura era exactamente la equivocada: el menú SÍ marca la sección en
+    curso, con `aria-current` y `.es-activo`, así que dos entradas resaltadas a la
+    vez —una por estar activa y otra por tener el foco— se contradicen.
+
+    ⚠️ Enfocar el contenedor sigue cumpliendo lo que hacía falta: un lector de
+    pantalla anuncia que entró al menú. Y quien navegue con teclado tabula desde
+    ahí al primer enlace, que entonces sí muestra su anillo — porque ese foco lo
+    pidió él. Es el patrón estándar de un diálogo: se enfoca el contenedor, no su
+    primer control.
+  */
+  o.querySelector<HTMLElement>('.menu-caja')?.focus();
 }
 
 export function prepararMenu(): void {

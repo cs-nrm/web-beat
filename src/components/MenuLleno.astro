@@ -32,7 +32,11 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     fallara, el menú quedaría inalcanzable para siempre — la regla de
     movimiento.md §3 aplicada a la navegación.
   */}
-  <nav class="menu-caja" aria-label="Menú principal">
+  {/*
+    ⚠️ `tabindex="-1"` para que `menu.ts` pueda darle el foco al abrir. No entra en
+    el orden de tabulación —el -1 lo impide—, solo se puede enfocar por script.
+  */}
+  <nav class="menu-caja" aria-label="Menú principal" tabindex="-1">
     {/*
       🔴 Programación va en la MISMA lista y con la misma pinta que las cinco
       (decisión de Carlos, 2026-09-03). Estaba abajo en voz baja porque en el pie
@@ -130,6 +134,15 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     width: 100%;
     max-width: var(--grid-max);
     text-align: center;
+  }
+  /*
+    ⚠️ Sin anillo, y aquí sí es correcto quitarlo: este `<nav>` no es un control, es
+    solo el destino del foco al abrir el menú. Su anillo no diría nada útil —no hay
+    nada que activar en él— y encima competiría con la entrada que sí está marcada
+    como sección en curso. Los enlaces de dentro conservan el suyo intacto.
+  */
+  .menu-caja:focus {
+    outline: none;
   }
 
   .menu-lista {

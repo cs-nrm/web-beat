@@ -199,6 +199,25 @@ const LOGO_MARQUEE = '/img/beat-blanco.svg';
   */}
   <Mosaico portada={destacada} izquierda={izquierda} derecha={derecha} />
 
+  {/*
+    🔴 El LEADERBOARD, y va exactamente aquí porque lo dice el lienzo. La dirección
+    5a del artboard `publicidad` —la que este sitio implementó— lo describe con
+    esas palabras: «la portada de 970×250 abre sobre el header, **el leaderboard
+    separa el mosaico del marquee** y el box vive como riel junto al archivo».
+
+    Es el único hueco de los tres que faltaba: la portada entra por el slot
+    `sobre-cabecera` de arriba, y el box ya vive en `ArchivoTemas.astro`.
+
+    ⚠️ Va FUERA del contenedor con tope de ancho, como el mosaico y el marquee que
+    lo rodean: las tres son franjas a sangre. Metido dentro se habría quedado
+    estrecho entre dos bloques anchos, que es peor que no tenerlo — un hueco de
+    728×90 que no cabe no se vende.
+
+    ⚠️ Y si no hay campaña vendida ni Ad Manager tiene qué servir, el propio
+    componente cierra la franja y no queda hueco. Ver `Anuncio.astro`.
+  */}
+  <Anuncio formato="leaderboard" nombre="inicio-leader" />
+
   <Marquee logo={LOGO_MARQUEE} />
 
   <div class="inicio-contenido">

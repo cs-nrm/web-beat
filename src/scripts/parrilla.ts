@@ -1,5 +1,11 @@
 /**
- * El botón «Escuchar en vivo» del hero de `/programacion`.
+ * El botón «Escuchar en vivo» del hero de `/en-vivo`.
+ *
+ * ⚠️ El nombre del archivo se quedó viejo: el hero vivía en `/programacion` hasta
+ * que se partió en dos el 2026-09-09 y el panel se mudó a `/en-vivo`. No se
+ * renombró porque `senal.ts` —que es quien de verdad mueve la parrilla— sigue
+ * apuntando aquí desde media docena de comentarios, y el archivo se carga en
+ * `Base.astro` para todo el sitio, no para una ruta.
  *
  * 🔴 NO es un segundo reproductor. Reenvía la pulsación al botón del player de la
  * cabecera —el único que habla con Triton— y copia su estado, para que no diga
@@ -8,9 +14,13 @@
  * entrada sería una segunda copia de todo eso.
  *
  * 🔴 Si esto no corre, la página se queda entera y correcta: el hero sale
- * renderizado con lo que está al aire, la rejilla completa, y el botón enseña
- * «Escuchar en vivo» —que es el estado de una página recién cargada—. Es la
- * condición 1 de §3 de `movimiento.md`.
+ * renderizado con lo que está al aire y el botón enseña «Escuchar en vivo» —que es
+ * el estado de una página recién cargada—. Es la condición 1 de §3 de
+ * `movimiento.md`.
+ *
+ * ⚠️ Al lado del botón vivía «Ver el show», un enlace a la ficha del programa. Se
+ * retiró el 2026-09-09 (Carlos: «quitar el botón ver show») y no dejó rastro aquí:
+ * era un `<a>`, nunca pasó por este archivo.
  *
  * ⚠️ Aquí vivían además las tres casillas que resaltaban un tipo de show en la
  * parrilla. Se fueron con la clasificación el 2026-09-09 (decisión de Carlos: «el
@@ -65,6 +75,9 @@ function copiarEstado(): void {
     programa termina— así que en cuanto este botón llevó `data-estado`, `senal.ts`
     lo adoptó como su marcador y le borró los tres rótulos y los dos iconos de
     dentro. El botón se quedó siendo un contador de minutos.
+
+    ⚠️ Y el hero se mudó de página sin que esto cambiara, que es justo la gracia
+    de que el contrato sea un atributo: la trampa viaja con el marcado.
 
     Es exactamente el choque que §1 de `movimiento.md` prohíbe —dos scripts
     escribiendo lo mismo sobre el mismo elemento— y el empate lo resolvía quién

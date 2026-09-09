@@ -2,76 +2,697 @@
 /**
  * §2 del mapa de sitio — «Escuchar en vivo».
  *
- * ⏳ MÍNIMA por ahora: el diseño de esta pantalla no está en v14 (que trajo Inicio
- * móvil, Scanner y nota), y las colecciones que la alimentan —`transmisiones` para
- * el video en vivo y `bitacora` para el "qué sonó"— están vacías en producción.
+ * 🔴 REHECHA el 2026-09-09. Era una página mínima —un titular, una frase sobre el
+ * player y dos listas— y ahora encabeza con **AL AIRE AHORA**, que se trajo entero
+ * desde `/programacion` (Carlos, 2026-09-09): «la primera, que dice Al aire ahora,
+ * que se convierta en lo que lleva en-vivo».
  *
- * Existe ya porque cumple dos funciones inmediatas: es la segunda ruta del sitio,
- * y sin dos rutas no había forma de verificar que el player sobrevive la
- * navegación —que es requisito de producto, no detalle técnico—.
+ * Y es donde tenía que estar. El panel contesta «¿qué estoy oyendo?», que es la
+ * pregunta con la que alguien entra a la página de la señal; en `/programacion` la
+ * pregunta es otra —«¿qué suena el sábado a las nueve?»— y esa la contesta la
+ * rejilla, que se quedó allá. Cada página con una sola pregunta.
  *
- * Su función estratégica declarada en el mapa: "el sitio nunca compite con la
- * señal: la sostiene".
+ * Cuatro piezas, en este orden:
+ *   1. AL AIRE AHORA + LO QUE SIGUE HOY   — la señal
+ *   2. ESCUCHA EN                         — los agregadores de terceros
+ *   3. LO QUE HA SONADO                   — la bitácora del playout
+ *
+ * ⚠️ NO lleva publicidad, y es una decisión tomada (Carlos, 2026-09-08): es la
+ * página a la que alguien viene a ESCUCHAR, y un anuncio al lado de la señal hace
+ * que un sitio de radio se sienta barato. Ver `agents/ads.md`. Por eso el box que
+ * acompañaba a este panel en `/programacion` no se mudó con él.
+ *
+ * ⚠️ El `<h1>` va para lectores de pantalla y no a la vista, y es el mismo
+ * razonamiento que apartó a `/programacion` de `CabezaSeccion`: un display de 64px
+ * que repita «EN VIVO» encima de un panel que ya dice «AL AIRE AHORA · CLAPTONE»
+ * empuja la señal abajo del pliegue en la única página donde la señal ES el
+ * contenido. El otro candidato —el nombre del programa— cambia cada hora, o sea un
+ * `<h1>` distinto en cada visita y ninguno describiendo la página.
+ *
+ * ⚠️ La entrada de menú sigue OCULTA (`SECCIONES_OCULTAS` en `config/navegacion.ts`,
+ * «hasta que hagamos bien la página»). Restituirla es mover esa entrada a
+ * `SECCIONES`, y es decisión de Carlos: aquí no se toca sola.
  */
 import Base from '@/layouts/Base.astro';
+import NavSecciones from '@/components/NavSecciones.astro';
+import Icono from '@/components/Icono.astro';
+import Remate from '@/components/Remate.astro';
 import { loQueSono } from '@/lib/cms/aire';
+import { obtenerProgramacion } from '@/lib/cms/programacion';
+import { urlMedia, puntoFocal } from '@/lib/cms/client';
 import { PLATAFORMAS_RADIO } from '@/config/navegacion';
 
+const { ahora, hoy, alAire } = await obtenerProgramacion();
 const sono = await loQueSono(20);
+
 const hora = (iso: string) =>
   new Date(iso).toLocaleTimeString('es-MX', {
     hour: '2-digit',
     minute: '2-digit',
     timeZone: 'America/Mexico_City',
   });
+
+/**
+ * «LO QUE SIGUE HOY»: los tres bloques después del que está al aire.
+ *
+ * Si no hay nada al aire —una franja sin programa asignado— se muestran los tres
+ * próximos, que es lo útil a esa hora. Son tres y no cuatro porque la columna es
+ * estrecha.
+ */
+const desdeIndice = alAire
+  ? hoy.indexOf(alAire) + 1
+  : Math.max(0, hoy.findIndex((b) => b.desde > ahora.minuto));
+const siguientes = hoy.slice(desdeIndice, desdeIndice + 3);
+
+const fotoHero = alAire ? urlMedia(alAire.programa.imagen, 'large') : null;
+/*
+  🔴 El recorte del hero se guía por el punto focal que capturó la estación.
+
+  El CMS **no recorta**: sus tres variantes son de ancho y conservan la proporción
+  del original (confirmado por la sesión del CMS el 2026-09-09). El hero es una
+  franja apaisada, así que `object-fit: cover` tiene que tirar mucho de una foto
+  vertical — y sin esto recorta por el centro, que en una foto de un DJ es el
+  pecho. `media` lleva `focalPoint`, o sea que el dato ya venía y no se usaba.
+*/
+const focoHero = alAire ? puntoFocal(alAire.programa.imagen) : null;
+const altHero =
+  alAire && alAire.programa.imagen && typeof alAire.programa.imagen === 'object'
+    ? (alAire.programa.imagen.alt ?? '')
+    : '';
 ---
 
 <Base
   titulo="Escuchar en vivo — Beat 100.9"
-  descripcion="La señal de Beat 100.9 en vivo, y lo que ha sonado."
+  descripcion="La señal de Beat 100.9 en vivo: qué está al aire ahora, qué sigue y qué ha sonado."
 >
-  <div class="mx-auto max-w-grid px-contenedor py-13">
-    <p class="t-label mb-4 font-bold text-text-primary">Escuchar en vivo</p>
-    <h1 class="t-display-3 mb-6 text-text-primary">La señal, siempre</h1>
-    <p class="mb-12 max-w-[62ch] text-body-lg text-text-muted">
-      El reproductor de arriba no se detiene mientras navegas el sitio.
-    </p>
+  <div class="vivo">
+    <NavSecciones activa={null} />
 
-    <section class="mb-12">
-      <h2 class="t-label mb-6 font-bold text-text-primary">Escucha en</h2>
-      <ul class="flex flex-wrap gap-4">
-        {PLATAFORMAS_RADIO.map((p) => (
-          <li>
-            <a
-              href={p.url}
-              rel="noopener noreferrer"
-              target="_blank"
-              class="t-label inline-block rounded-control border-hairline border-borde-quiet px-6 py-3 text-text-muted transition-colors duration-2 ease-out hover:border-borde-strong hover:text-text-primary"
-            >{p.nombre}</a>
-          </li>
-        ))}
+    <h1 class="solo-lectores">Escuchar en vivo</h1>
+
+    {/* ═══ 1. AL AIRE AHORA ═══ */}
+    {
+      alAire && (
+        <section
+          class="vivo-hero es-aire"
+          aria-label="Al aire ahora"
+          data-bloque
+          data-desde={alAire.desde}
+          data-hasta={alAire.hasta}
+          data-vivo={alAire.esVivo ? '1' : '0'}
+          data-cruza={alAire.cruzaMedianoche ? '1' : '0'}
+        >
+          {/*
+            La foto es el FONDO del hero, con su velo encima. No lleva hover ni
+            entrada: no es un enlace, así que no debe insinuar que lleva a algún
+            sitio (movimiento.md §7), y la media no tiene animación de aparición
+            (§1). Si el programa no trae foto, queda el degradado y la trama de la
+            marca — sin rótulo ni marco vacío.
+          */}
+          <div class="vivo-hero-fondo" aria-hidden="true">
+            {fotoHero && (
+              <img
+                src={fotoHero}
+                alt={altHero}
+                fetchpriority="high"
+                decoding="async"
+                style={focoHero ? `object-position:${focoHero}` : undefined}
+              />
+            )}
+            <div class="beat-grid vivo-hero-trama" />
+            <div class="vivo-hero-velo" />
+          </div>
+
+          <div class="vivo-hero-texto">
+            <p class="beat-label vivo-hero-rotulo">
+              {/*
+                🔴 El único color de la interfaz, y significa algo: es la luz de
+                tally de un estudio (movimiento.md §8). Cuando el bloque termina,
+                `senal.ts` retira `es-aire` y el punto se apaga solo — el hero deja
+                de afirmar «ahora» en vez de quedarse mintiendo.
+              */}
+              <span class="vivo-punto" aria-hidden="true" />
+              {/*
+                Los DOS rótulos van en el marcado y los reparte el CSS con la
+                clase `es-aire`, que es la que conmuta `senal.ts`. Así el texto del
+                hero no puede quedarse mintiendo cuando el bloque termina, y no hay
+                una sola cadena escrita en JavaScript que pueda divergir de esta.
+              */}
+              <span class="vivo-rotulo-aire">AL AIRE AHORA</span>
+              <span class="vivo-rotulo-fin">TERMINÓ</span>
+              <span class="vivo-hero-rango">
+                {' · '}
+                {alAire.horaInicio} — {alAire.horaFin}
+              </span>
+            </p>
+
+            <p class="beat-display beat-resplandor es-fuerte vivo-hero-nombre" data-escribir>
+              {alAire.programa.nombre}
+            </p>
+
+            {alAire.programa.descripcionCorta && (
+              <p class="vivo-hero-bajada">{alAire.programa.descripcionCorta}</p>
+            )}
+
+            {/*
+              🔴 UN solo botón. Al lado vivía «Ver el show», que llevaba a la ficha
+              del programa, y se retiró (Carlos, 2026-09-09): «quitar el botón ver
+              show». Dos botones del mismo tamaño repartían la atención entre
+              escuchar la señal —lo único que se viene a hacer aquí— y leer sobre
+              ella. La ficha del programa se sigue alcanzando desde la rejilla de
+              `/programacion`, donde cada celda es su enlace.
+            */}
+            <div class="vivo-hero-acciones">
+              {/*
+                🔴 NO es un segundo reproductor: reenvía la pulsación al botón del
+                player de la cabecera, que es el único que habla con Triton. Lo
+                cablea `parrilla.ts`, que además copia su estado aquí para que este
+                botón no diga «Escuchar en vivo» mientras la radio ya suena.
+
+                ⚠️ Los tres rótulos van en el marcado y los reparte el CSS. Sin
+                JavaScript se ve el primero, que es el estado correcto de una
+                página recién cargada.
+              */}
+              <button type="button" class="vivo-boton es-plena" data-aire>
+                <span class="vivo-boton-icono" data-icono="play" aria-hidden="true">
+                  <Icono nombre="play" tamano={15} />
+                </span>
+                <span class="vivo-boton-icono" data-icono="pause" aria-hidden="true">
+                  <Icono nombre="pause" tamano={15} />
+                </span>
+                <span data-rotulo="reposo">Escuchar en vivo</span>
+                <span data-rotulo="cargando">Conectando</span>
+                <span data-rotulo="sonando">Pausar</span>
+              </button>
+            </div>
+
+            {/*
+              Solo aparece cuando el bloque del hero ya terminó, y la pone
+              `senal.ts`. Un enlace a ESTA MISMA ruta: el enrutador de Astro la
+              cambia del lado del cliente, así que el panel llega al día SIN
+              recargar — y sin recargar es lo que importa, porque una recarga
+              completa corta la señal que el oyente tiene puesta.
+
+              ⚠️ Apuntaba a `/programacion` cuando el panel vivía allá. Al mudarse
+              tuvo que mudarse el destino: un enlace a la otra página refresca la
+              otra página y deja este hero exactamente igual de caduco.
+            */}
+            <p class="vivo-hero-caduco">
+              <Remate href="/en-vivo" texto="VER QUÉ SUENA AHORA" />
+            </p>
+          </div>
+
+          {siguientes.length > 0 && (
+            <aside class="vivo-sigue">
+              <h2 class="beat-label vivo-sigue-titulo">LO QUE SIGUE HOY</h2>
+              {siguientes.map((b) => (
+                <div
+                  class="vivo-sigue-fila"
+                  data-bloque
+                  data-desde={b.desde}
+                  data-hasta={b.hasta}
+                  data-vivo={b.esVivo ? '1' : '0'}
+                  data-cruza={b.cruzaMedianoche ? '1' : '0'}
+                >
+                  <span class="beat-label vivo-sigue-hora">
+                    {b.horaInicio}
+                    {b.cruzaMedianoche && (
+                      <span class="vivo-sigue-cruce" title="Termina al día siguiente">
+                        +1
+                      </span>
+                    )}
+                  </span>
+                  <span class="vivo-sigue-nombre">{b.programa.nombre}</span>
+                </div>
+              ))}
+            </aside>
+          )}
+        </section>
+      )
+    }
+
+    {/* ═══ 2. ESCUCHA EN ═══ */}
+    <section class="vivo-bloque">
+      <h2 class="beat-label vivo-titulo">ESCUCHA EN</h2>
+      <ul class="vivo-plataformas">
+        {
+          PLATAFORMAS_RADIO.map((p) => (
+            <li>
+              <a
+                href={p.url}
+                class="beat-label vivo-plataforma"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                {p.nombre}
+              </a>
+            </li>
+          ))
+        }
       </ul>
     </section>
 
-    <section>
-      <h2 class="t-label mb-6 font-bold text-text-primary">Lo que ha sonado</h2>
-      {sono.length ? (
-        <ul class="divide-y divide-borde-hairline">
-          {sono.map((e) => (
-            <li class="flex items-baseline gap-6 py-5">
-              <span class="t-mono w-14 shrink-0 text-text-faint">{hora(e.sonoEn)}</span>
-              <span class="font-medium text-text-primary">{e.titulo}</span>
-              {e.artista && <span class="text-body-sm text-text-muted">{e.artista}</span>}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p class="max-w-[62ch] text-body-sm text-text-muted">
-          Todavía no hay registro. La bitácora se llena desde el playout, y para eso hace falta
-          cargar la lista blanca <code class="t-mono mx-1">categoriasMusicales</code> de la estación
-          en el CMS — la ingesta falla cerrado y hoy descarta todo.
-        </p>
-      )}
-    </section>
+    {/* ═══ 3. LO QUE HA SONADO ═══ */}
+    {
+      /*
+        🔴 Sin bitácora no hay sección, ni rótulo, ni explicación.
+
+        Aquí había un párrafo que le contaba al oyente que la ingesta «falla
+        cerrado» y que falta cargar `categoriasMusicales` en el CMS. Eso es una
+        nota para nosotros escrita en la página pública: quien entra a escuchar
+        radio no sabe qué es una lista blanca, y lo único que lee es que algo del
+        sitio no funciona. Una zona sin contenido se deja vacía y sin rótulo.
+
+        ⚠️ El estado de la ingesta no se pierde: sigue documentado en
+        `lib/cms/aire.ts`, que es donde lo busca quien lo tenga que arreglar.
+      */
+      sono.length > 0 && (
+        <section class="vivo-bloque">
+          <h2 class="beat-label vivo-titulo">LO QUE HA SONADO</h2>
+          <ul class="vivo-sono">
+            {sono.map((e) => (
+              <li class="vivo-sono-fila">
+                <span class="beat-label vivo-sono-hora">{hora(e.sonoEn)}</span>
+                <span class="vivo-sono-titulo">{e.titulo}</span>
+                {e.artista && <span class="vivo-sono-artista">{e.artista}</span>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
   </div>
 </Base>
+
+<style>
+  /* ============================================================
+     La página
+     ============================================================ */
+  .vivo {
+    max-width: var(--grid-max);
+    margin: 0 auto;
+    padding: 28px 24px 60px;
+  }
+
+  /* ============================================================
+     1. AL AIRE AHORA
+     ============================================================ */
+  .vivo-hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 268px;
+    gap: 40px;
+    align-items: end;
+    margin-top: 30px;
+    padding: 40px 32px 34px;
+    overflow: hidden;
+    /*
+      Pieza que FLOTA sobre el fondo del sitio, no trozo de una retícula: lleva su
+      propio radio (movimiento.md §6). Es el mismo criterio que el hero de la nota.
+    */
+    border-radius: var(--r-media);
+    background: var(--noche-1);
+  }
+
+  .vivo-hero-fondo {
+    position: absolute;
+    inset: 0;
+    background: var(--grad-noche);
+  }
+  .vivo-hero-fondo img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .vivo-hero-trama {
+    position: absolute;
+    inset: 0;
+  }
+  /*
+    El velo es lo que hace legible el titular encima de una foto que no elegimos.
+    Va de negro casi pleno abajo-izquierda —donde vive el texto— a transparente
+    arriba-derecha, así que la cara del DJ se sigue viendo.
+  */
+  /*
+    🔴 EL VELO TIENE UN SUELO PLANO, y esto salió de medirlo, no de mirarlo.
+
+    La foto la elige la estación y puede ser cualquier cosa, incluida una foto
+    clara. Con el velo que había —un degradado que se abría hasta 0.15 arriba y
+    0.1 a la derecha— el peor caso es texto claro sobre foto BLANCA. Medido:
+
+        rótulo «AL AIRE AHORA» (--mist-0, velo 0.15) ... 1.36:1  ❌
+        hora de «LO QUE SIGUE HOY» (faint, velo 0.62) .. 1.99:1  ❌
+        bajada del hero (--mist-3, velo 0.55) ......... 3.48:1  ❌
+
+    WCAG 1.4.3 pide 4.5:1. Y no se habría visto en desarrollo, porque la única
+    foto capturada hoy es oscura: el fallo llegaba con la primera foto clara que
+    subiera la estación, en la primera pantalla de la página.
+
+    Así que el velo lleva un SUELO plano al 0.72 que cubre todo —el peor caso deja
+    de depender de la foto— más dos degradados que solo pueden SUMAR oscuridad
+    donde vive el texto. El alfa acumulado va de 0.72 arriba a la derecha a 0.947
+    abajo a la izquierda, que es donde está el titular. Medido sobre foto blanca:
+
+        rótulo (--mist-0, suelo 0.72) .................. 8.96:1  ✅
+        bajada (--mist-2, suelo 0.72) .................. 7.72:1  ✅
+
+    ⚠️ Lo que el suelo NO rescata es `--text-faint`: 2.98:1 incluso con él. Por eso
+    «LO QUE SIGUE HOY» —cuyas horas van en ese token— se bajó de la foto y tiene su
+    propia superficie opaca. Ver `.vivo-sigue`.
+
+    ⚠️ El suelo va como ÚLTIMA capa del `background` y por tanto aterriza en
+    `background-color`, no en `background-image` —el computado dice `..., none` y
+    parece un error—. Es lo que se quiere: el color de fondo se pinta DEBAJO de los
+    degradados de este mismo elemento y ENCIMA de la foto, que está en otro. Si
+    algún día alguien lo "arregla" moviéndolo a un degradado plano, funciona igual;
+    lo que no puede es dejar de estar.
+  */
+  .vivo-hero-velo {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to top, rgb(0 0 0 / 0.62) 0%, rgb(0 0 0 / 0.2) 55%, rgb(0 0 0 / 0) 100%),
+      linear-gradient(to right, rgb(0 0 0 / 0.5) 0%, rgb(0 0 0 / 0) 58%),
+      rgb(0 0 0 / 0.72);
+  }
+
+  .vivo-hero-texto {
+    position: relative;
+    min-width: 0;
+  }
+  .vivo-hero-rotulo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    color: var(--mist-0);
+  }
+  .vivo-hero-rango {
+    color: var(--mist-3);
+    white-space: nowrap;
+  }
+
+  /* El punto de tally. Late mientras el bloque está al aire, y solo entonces. */
+  .vivo-punto {
+    width: 7px;
+    height: 7px;
+    flex: none;
+    border-radius: 999px;
+    background: var(--rojo-aire);
+  }
+  .vivo-hero.es-aire .vivo-punto {
+    animation: vivo-latido 2s var(--ease-in-out) infinite;
+  }
+  @keyframes vivo-latido {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+  /* Terminó el bloque: el punto se apaga y deja de ser un semáforo encendido. */
+  .vivo-hero:not(.es-aire) .vivo-punto {
+    background: var(--text-faint);
+  }
+
+  /*
+    El hero se pinta en el servidor con `es-aire` puesto, así que sin JavaScript se
+    ve el estado de una página recién cargada —que es el correcto— y el remate de
+    «ver qué suena ahora» no estorba. Quien quita la clase es `senal.ts`, media
+    hora después, en la pestaña que se quedó abierta.
+  */
+  .vivo-hero.es-aire .vivo-rotulo-fin,
+  .vivo-hero.es-aire .vivo-hero-caduco,
+  .vivo-hero:not(.es-aire) .vivo-rotulo-aire {
+    display: none;
+  }
+
+  .vivo-hero-nombre {
+    margin: 14px 0 0;
+    color: var(--mist-1);
+    font-size: var(--size-display-2);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 0.94;
+    text-wrap: balance;
+  }
+  .vivo-hero-bajada {
+    margin: 16px 0 0;
+    max-width: 46ch;
+    font: var(--type-body);
+    /* `--mist-2` y no `--mist-3`: este texto va sobre la foto, y en el peor caso
+       —foto blanca bajo el suelo del velo— la diferencia es 7.4:1 contra 6.7:1.
+       Los dos pasan, pero el margen se lo lleva el que está encima de una imagen
+       que no controlamos. */
+    color: var(--mist-2);
+    text-wrap: pretty;
+  }
+
+  .vivo-hero-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 26px;
+  }
+  .vivo-boton {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 13px 20px;
+    border-radius: var(--r-control);
+    box-shadow: inset 0 0 0 1px var(--border-strong);
+    background: transparent;
+    color: var(--mist-1);
+    font: var(--type-label);
+    letter-spacing: var(--track-label);
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background var(--dur-2) var(--ease-out),
+      color var(--dur-2) var(--ease-out);
+  }
+  .vivo-boton:hover {
+    background: var(--surface-card-hover);
+    color: var(--mist-0);
+  }
+  /* La acción principal se INVIERTE. Es el mismo gesto que la sección activa de
+     la nav: blanco pleno, nunca un color. */
+  .vivo-boton.es-plena {
+    background: var(--mist-0);
+    box-shadow: none;
+    color: var(--noche-0);
+  }
+  .vivo-boton.es-plena:hover {
+    background: var(--mist-2);
+    color: var(--noche-0);
+  }
+  .vivo-boton-icono {
+    display: grid;
+    place-items: center;
+  }
+
+  /*
+    Los rótulos y los iconos del botón de la señal: uno visible por estado. Sin el
+    atributo —o sin JavaScript— se ve el de reposo, que es el correcto en una
+    página recién cargada.
+  */
+  .vivo-boton [data-rotulo='cargando'],
+  .vivo-boton [data-rotulo='sonando'],
+  .vivo-boton [data-icono='pause'] {
+    display: none;
+  }
+  .vivo-boton[data-senal='cargando'] [data-rotulo='reposo'],
+  .vivo-boton[data-senal='sonando'] [data-rotulo='reposo'],
+  .vivo-boton[data-senal='sonando'] [data-icono='play'] {
+    display: none;
+  }
+  .vivo-boton[data-senal='cargando'] [data-rotulo='cargando'],
+  .vivo-boton[data-senal='sonando'] [data-rotulo='sonando'] {
+    display: inline;
+  }
+  .vivo-boton[data-senal='sonando'] [data-icono='pause'] {
+    display: grid;
+  }
+  .vivo-boton[data-senal='cargando'] [data-icono='play'] {
+    opacity: 0.6;
+  }
+
+  .vivo-hero-caduco {
+    margin: 20px 0 0;
+  }
+
+  /* ── LO QUE SIGUE HOY ── */
+  /*
+    🔴 Superficie PROPIA y opaca, y no es decoración: sus horas van en
+    `--text-faint`, que sobre una foto clara da 2.9:1 incluso con el suelo del
+    velo puesto. Sobre `--noche-1` da 6.23:1, medido. Un panel opaco es la única
+    forma de que el número de la hora no dependa de qué foto subió la estación.
+  */
+  .vivo-sigue {
+    position: relative;
+    min-width: 0;
+    padding: 16px 18px 6px;
+    background: var(--noche-1);
+    box-shadow: inset 0 0 0 1px var(--border-hairline);
+  }
+  .vivo-sigue-titulo {
+    margin: 0 0 6px;
+    color: var(--mist-3);
+  }
+  .vivo-sigue-fila {
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr);
+    align-items: baseline;
+    gap: 12px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border-hairline);
+  }
+  .vivo-sigue-fila:last-child {
+    border-bottom: 0;
+  }
+  .vivo-sigue-hora {
+    color: var(--text-faint);
+    white-space: nowrap;
+  }
+  .vivo-sigue-cruce {
+    margin-left: 2px;
+    font-size: 7px;
+    vertical-align: super;
+  }
+  .vivo-sigue-nombre {
+    font: 500 14px / 1.26 var(--font-text);
+    color: var(--mist-2);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* Cuando le llega su turno, la fila se enciende: la pone `senal.ts` sin pedir
+     nada al servidor. Blanco y negrita, nunca color. */
+  .vivo-sigue-fila.es-aire .vivo-sigue-hora,
+  .vivo-sigue-fila.es-aire .vivo-sigue-nombre {
+    color: var(--mist-0);
+    font-weight: 700;
+  }
+
+  /* ============================================================
+     2 y 3. Las dos listas
+     ============================================================ */
+  .vivo-bloque {
+    margin-top: 52px;
+  }
+  .vivo-titulo {
+    margin: 0 0 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-quiet);
+    color: var(--mist-3);
+  }
+
+  .vivo-plataformas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .vivo-plataforma {
+    display: inline-block;
+    padding: 12px 22px;
+    border-radius: var(--r-control);
+    box-shadow: inset 0 0 0 1px var(--border-quiet);
+    color: var(--text-muted);
+    transition:
+      box-shadow var(--dur-2) var(--ease-out),
+      color var(--dur-2) var(--ease-out);
+  }
+  .vivo-plataforma:hover {
+    box-shadow: inset 0 0 0 1px var(--border-strong);
+    color: var(--mist-0);
+  }
+
+  .vivo-sono {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .vivo-sono-fila {
+    display: flex;
+    align-items: baseline;
+    gap: 18px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border-hairline);
+  }
+  .vivo-sono-fila:last-child {
+    border-bottom: 0;
+  }
+  .vivo-sono-hora {
+    flex: none;
+    width: 46px;
+    color: var(--text-faint);
+  }
+  .vivo-sono-titulo {
+    font: 500 15px / 1.3 var(--font-text);
+    color: var(--mist-2);
+    text-wrap: pretty;
+  }
+  .vivo-sono-artista {
+    font: 400 13px / 1.3 var(--font-text);
+    color: var(--text-muted);
+  }
+
+  /* ============================================================
+     Móvil
+     ============================================================ */
+  @media (max-width: 899px) {
+    .vivo {
+      padding: 18px 16px 44px;
+    }
+
+    /* El hero pierde la columna: «lo que sigue» pasa debajo. */
+    .vivo-hero {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 28px;
+      margin-top: 22px;
+      padding: 28px 20px 24px;
+    }
+    /*
+      🔴 Fluido, no fijo — es la misma trampa que ya midió `CabezaSeccion`: un
+      nombre de programa de una sola palabra no puede partirse, y a 38px se sale
+      de una caja de 343px.
+    */
+    .vivo-hero-nombre {
+      font-size: clamp(26px, 8.6vw, 40px);
+    }
+
+    .vivo-hero-acciones {
+      margin-top: 22px;
+    }
+    .vivo-boton {
+      flex: 1 1 auto;
+      justify-content: center;
+    }
+
+    .vivo-bloque {
+      margin-top: 40px;
+    }
+    /* La fila se parte en dos: título y artista no caben en una línea de 343px. */
+    .vivo-sono-fila {
+      flex-wrap: wrap;
+      gap: 4px 14px;
+    }
+    .vivo-sono-hora {
+      width: 40px;
+    }
+    .vivo-sono-artista {
+      flex-basis: 100%;
+      padding-left: 54px;
+    }
+  }
+
+  /* Menos movimiento: se apaga, no se acelera (movimiento.md §5). */
+  @media (prefers-reduced-motion: reduce) {
+    .vivo-hero.es-aire .vivo-punto {
+      animation: none;
+    }
+  }
+</style>

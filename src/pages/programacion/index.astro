@@ -1,88 +1,53 @@
 ---
 /**
- * La parrilla — §9 del mapa de sitio, y el lienzo nuevo de Claude Design.
+ * La parrilla — §9 del mapa de sitio.
  *
- * 🔴 REHECHA el 2026-09-09 sobre el diseño nuevo. Lo que había era una LISTA de
- * programas con sus horarios en pastillas: correcta, pero no contestaba la
- * pregunta con la que alguien entra aquí —«¿qué suena el sábado a las nueve?»—.
- * El diseño la contesta con una rejilla de la semana completa, y encabeza con lo
- * que está al aire, que es lo que este sitio afirma ser.
+ * 🔴 PARTIDA EN DOS el 2026-09-09 (Carlos): «vamos a aprovechar para sacar dos
+ * páginas de ahí». Esta página encabezaba con **AL AIRE AHORA** y seguía con la
+ * rejilla de la semana; el panel se mudó entero a `/en-vivo`, que es donde alguien
+ * pregunta «¿qué estoy oyendo?». Aquí queda la rejilla, que contesta la otra
+ * pregunta —«¿qué suena el sábado a las nueve?»— y es la que trae a esta página.
  *
- * Tres piezas, en este orden:
- *   1. AL AIRE AHORA + LO QUE SIGUE HOY   — la señal, arriba de todo
- *   2. el box                             — colocación aprobada, ver `agents/ads.md`
- *   3. LA SEMANA COMPLETA                 — la rejilla de 7 días × 24 horas
+ * ⚠️ Con el panel se fue el `programacion-box`, y NO se reubicó. Colgaba de él
+ * («tras AL AIRE AHORA, antes de la parrilla — el único punto de corte que
+ * tiene», `agents/ads.md`) y sin ese corte los dos sitios que quedan son peores:
+ * arriba sería un anuncio antes de cualquier contenido, y abajo quedaría pegado
+ * al leaderboard. Decisión pendiente de Carlos; no se rellena por rellenar.
  *
- * ⚠️ El lienzo tiene una CUARTA —tres casillas de filtro sobre la parrilla y una
- * rejilla «SHOWS INTERNACIONALES» con su conteo— y no está, por decisión de Carlos
+ * ⚠️ El lienzo trae además tres casillas de filtro sobre la parrilla y una rejilla
+ * «SHOWS INTERNACIONALES» con su conteo, y no están, por decisión de Carlos
  * (2026-09-09): «no lo necesitamos, el diseño se lo inventó». Internacional /
  * sindicado / propio no es una distinción que la estación lleve en la operación.
  * Se construyeron, se acordó el campo con el CMS y se retiraron sin desplegarlo.
  * El porqué completo y qué haría falta para que vuelvan, en `lib/cms/programacion.ts`.
  *
- * ⚠️ Eso deja la página terminando en la rejilla y su leaderboard. Si el hueco se
- * ve raro, la decisión de qué poner ahí es de Carlos — no se rellena con un dato
- * del CMS que no existe.
+ * ⚠️ NO lleva `CabezaSeccion`, y sigue siendo la única página del sitio que se
+ * aparta de ella. Lo que sí conserva es lo que hacía falta de verdad: la TIRA de
+ * secciones, que es la única navegación visible de un interior (movimiento.md §9).
+ * Se pinta aquí directa, y por eso este archivo no puede reusar el componente.
  *
- * ⚠️ NO lleva `CabezaSeccion`, y es la única página del sitio que se aparta de
- * ella. El diseño abre con el hero de la señal, no con un titular «PROGRAMACIÓN»:
- * un display de 64px que repite el nombre de la sección encima de un panel que ya
- * dice «AL AIRE AHORA · CLAPTONE» empujaría la señal abajo del pliegue en la
- * única página donde la señal es el contenido. Lo que sí se conserva de
- * `CabezaSeccion` es lo que hacía falta de verdad: la TIRA de secciones, que es
- * la única navegación visible de un interior (movimiento.md §9). Se pinta aquí
- * directa, y por eso este archivo no puede reusar el componente.
- *
- * ⚠️ El `<h1>` es «LA SEMANA COMPLETA» y no «PROGRAMACIÓN». Va donde el diseño
- * pone el titular de display, y es la única alternativa honesta: el otro
- * candidato era el nombre del programa al aire, que cambia cada hora — un `<h1>`
- * distinto en cada visita, y ninguno describiendo la página. Quien busca
- * «programación beat» sigue encontrándola por el `<title>` y la descripción, que
- * es donde lo lee un buscador.
- *
+ * ⚠️ El `<h1>` es «LA SEMANA COMPLETA» y el kicker de encima dice «PROGRAMACIÓN»
+ * —decía «PARRILLA» hasta el 2026-09-09—. Es el nombre con el que la sección se
+ * enlaza en el pie y con el que se busca; «parrilla» es como le decimos en la
+ * casa. El titular no se toca: describe lo que hay debajo, que es la semana entera
+ * y no el día.
  */
 import Base from '@/layouts/Base.astro';
 import NavSecciones from '@/components/NavSecciones.astro';
 import Anuncio from '@/components/Anuncio.astro';
-import Icono from '@/components/Icono.astro';
-import Remate from '@/components/Remate.astro';
 import { obtenerProgramacion } from '@/lib/cms/programacion';
-import { urlMedia, puntoFocal } from '@/lib/cms/client';
 import { comoHora, ROTULO_DIA } from '@/lib/parrilla';
 import { MEDIDA_TARJETA } from '@/config/site';
 
-const { ahora, semana, hoy, alAire } = await obtenerProgramacion();
-
-/**
- * «LO QUE SIGUE HOY»: los tres bloques después del que está al aire.
- *
- * Si no hay nada al aire —una franja sin programa asignado— se muestran los tres
- * próximos, que es lo útil a esa hora. El reparto viene del panel «HOY EN LA
- * SEÑAL» que el Inicio tuvo hasta el 2026-09-09, donde eran cuatro; aquí son tres
- * porque la columna es más estrecha.
- */
-const desdeIndice = alAire
-  ? hoy.indexOf(alAire) + 1
-  : Math.max(0, hoy.findIndex((b) => b.desde > ahora.minuto));
-const siguientes = hoy.slice(desdeIndice, desdeIndice + 3);
+/*
+  Solo `semana`. `obtenerProgramacion()` sigue devolviendo el reloj, el día y el
+  bloque al aire porque de eso vive `/en-vivo`, y las dos páginas comparten la
+  misma consulta y por tanto la misma entrada de caché.
+*/
+const { semana } = await obtenerProgramacion();
 
 const HORAS = Array.from({ length: 24 }, (_, h) => comoHora(h * 60));
 
-const fotoHero = alAire ? urlMedia(alAire.programa.imagen, 'large') : null;
-/*
-  🔴 El recorte del hero se guía por el punto focal que capturó la estación.
-
-  El CMS **no recorta**: sus tres variantes son de ancho y conservan la proporción
-  del original (confirmado por la sesión del CMS el 2026-09-09). El hero es una
-  franja apaisada, así que `object-fit: cover` tiene que tirar mucho de una foto
-  vertical — y sin esto recorta por el centro, que en una foto de un DJ es el
-  pecho. `media` lleva `focalPoint`, o sea que el dato ya venía y no se usaba.
-*/
-const focoHero = alAire ? puntoFocal(alAire.programa.imagen) : null;
-const altHero =
-  alAire && alAire.programa.imagen && typeof alAire.programa.imagen === 'object'
-    ? (alAire.programa.imagen.alt ?? '')
-    : '';
 ---
 
 {/*
@@ -101,171 +66,23 @@ const altHero =
   <div class="pr">
     <NavSecciones activa={null} />
 
-    {/* ═══ 1. AL AIRE AHORA ═══ */}
-    {
-      alAire && (
-        <section
-          class="pr-hero es-aire"
-          aria-label="Al aire ahora"
-          data-hero
-          data-bloque
-          data-desde={alAire.desde}
-          data-hasta={alAire.hasta}
-          data-vivo={alAire.esVivo ? '1' : '0'}
-          data-cruza={alAire.cruzaMedianoche ? '1' : '0'}
-        >
-          {/*
-            La foto es el FONDO del hero, con su velo encima. No lleva hover ni
-            entrada: no es un enlace, así que no debe insinuar que lleva a algún
-            sitio (movimiento.md §7), y la media no tiene animación de aparición
-            (§1). Si el programa no trae foto, queda el degradado y la trama de la
-            marca — sin rótulo ni marco vacío.
-          */}
-          <div class="pr-hero-fondo" aria-hidden="true">
-            {fotoHero && (
-              <img
-                src={fotoHero}
-                alt={altHero}
-                fetchpriority="high"
-                decoding="async"
-                style={focoHero ? `object-position:${focoHero}` : undefined}
-              />
-            )}
-            <div class="beat-grid pr-hero-trama" />
-            <div class="pr-hero-velo" />
-          </div>
-
-          <div class="pr-hero-texto">
-            <p class="beat-label pr-hero-rotulo">
-              {/*
-                🔴 El único color de la interfaz, y significa algo: es la luz de
-                tally de un estudio (movimiento.md §8). Cuando el bloque termina,
-                `senal.ts` retira `es-aire` y el punto se apaga solo — el hero deja
-                de afirmar «ahora» en vez de quedarse mintiendo.
-              */}
-              <span class="pr-punto" aria-hidden="true" />
-              {/*
-                Los DOS rótulos van en el marcado y los reparte el CSS con la
-                clase `es-aire`, que es la que conmuta `senal.ts`. Así el texto del
-                hero no puede quedarse mintiendo cuando el bloque termina, y no hay
-                una sola cadena escrita en JavaScript que pueda divergir de esta.
-              */}
-              <span class="pr-rotulo-aire">AL AIRE AHORA</span>
-              <span class="pr-rotulo-fin">TERMINÓ</span>
-              <span class="pr-hero-rango">
-                {' · '}
-                {alAire.horaInicio} — {alAire.horaFin}
-              </span>
-            </p>
-
-            <p class="beat-display beat-resplandor es-fuerte pr-hero-nombre" data-escribir>
-              {alAire.programa.nombre}
-            </p>
-
-            {alAire.programa.descripcionCorta && (
-              <p class="pr-hero-bajada">{alAire.programa.descripcionCorta}</p>
-            )}
-
-            <div class="pr-hero-acciones">
-              {/*
-                🔴 NO es un segundo reproductor: reenvía la pulsación al botón del
-                player de la cabecera, que es el único que habla con Triton. Lo
-                cablea `parrilla.ts`, que además copia su estado aquí para que este
-                botón no diga «Escuchar en vivo» mientras la radio ya suena.
-
-                ⚠️ Los tres rótulos van en el marcado y los reparte el CSS. Sin
-                JavaScript se ve el primero, que es el estado correcto de una
-                página recién cargada.
-              */}
-              <button type="button" class="pr-boton es-plena" data-aire>
-                <span class="pr-boton-icono" data-icono="play" aria-hidden="true">
-                  <Icono nombre="play" tamano={15} />
-                </span>
-                <span class="pr-boton-icono" data-icono="pause" aria-hidden="true">
-                  <Icono nombre="pause" tamano={15} />
-                </span>
-                <span data-rotulo="reposo">Escuchar en vivo</span>
-                <span data-rotulo="cargando">Conectando</span>
-                <span data-rotulo="sonando">Pausar</span>
-              </button>
-
-              {alAire.programa.slug && (
-                <a href={`/programas/${alAire.programa.slug}`} class="beat-label pr-boton">
-                  Ver el show
-                </a>
-              )}
-            </div>
-
-            {/*
-              Solo aparece cuando el bloque del hero ya terminó, y la pone
-              `parrilla.ts`. Un enlace a esta misma ruta: el enrutador de Astro la
-              cambia del lado del cliente, así que la parrilla llega al día SIN
-              recargar — y sin recargar es lo que importa, porque una recarga
-              completa corta la señal que el oyente tiene puesta.
-            */}
-            <p class="pr-hero-caduco">
-              <Remate href="/programacion" texto="VER LA PARRILLA AL DÍA" />
-            </p>
-          </div>
-
-          {siguientes.length > 0 && (
-            <aside class="pr-sigue">
-              <h2 class="beat-label pr-sigue-titulo">LO QUE SIGUE HOY</h2>
-              {siguientes.map((b) => (
-                <div
-                  class="pr-sigue-fila"
-                  data-bloque
-                  data-desde={b.desde}
-                  data-hasta={b.hasta}
-                  data-vivo={b.esVivo ? '1' : '0'}
-                  data-cruza={b.cruzaMedianoche ? '1' : '0'}
-                >
-                  <span class="beat-label pr-sigue-hora">
-                    {b.horaInicio}
-                    {b.cruzaMedianoche && (
-                      <span class="pr-sigue-cruce" title="Termina al día siguiente">
-                        +1
-                      </span>
-                    )}
-                  </span>
-                  <span class="pr-sigue-nombre">{b.programa.nombre}</span>
-                </div>
-              ))}
-            </aside>
-          )}
-        </section>
-      )
-    }
-
-    {
-      /*
-        🔴 El box va TRAS «AL AIRE AHORA» y antes de la parrilla: es la colocación
-        aprobada el 2026-09-08 y está en la tabla de `agents/ads.md` («el único
-        punto de corte que tiene»). No se mueve sin Carlos.
-
-        Y cuelga de `alAire` a propósito: sin el panel encima, el box sería lo
-        PRIMERO de la página — un anuncio antes de cualquier contenido.
-      */
-      alAire && (
-        <div class="pr-franja-box">
-          <Anuncio formato="box" nombre="programacion-box" unidad="Box" />
-        </div>
-      )
-    }
-
-    {/* ═══ 2. LA SEMANA COMPLETA ═══ */}
+    {/* ═══ 1. LA SEMANA COMPLETA ═══ */}
     {
       semana.some((d) => d.segmentos.length > 0) && (
         <section class="pr-semana">
           {/*
-            ⚠️ El lienzo dice «PARRILLA 2026» y el año se queda fuera: el 1 de
-            enero sería falso, y mientras es verdad no informa de nada.
+            🔴 «PROGRAMACIÓN», no «PARRILLA» (Carlos, 2026-09-09). El lienzo dice
+            «PARRILLA 2026» y ninguna de las dos palabras sobrevivió entera: el año
+            se queda fuera —el 1 de enero sería falso, y mientras es verdad no
+            informa de nada— y el rótulo pasa a ser el nombre con el que la sección
+            se enlaza en el pie y con el que la gente la busca. «Parrilla» es como
+            le decimos en la casa.
 
             ⚠️ Y aquí había un `.pr-cabeza` en flex con los filtros a la derecha.
             Sin filtros era un contenedor de un solo hijo, así que se fue con
             ellos: el kicker y el titular van directos.
           */}
-          <p class="beat-label pr-kicker">PARRILLA</p>
+          <p class="beat-label pr-kicker">PROGRAMACIÓN</p>
           <h1 class="beat-display beat-resplandor es-fuerte pr-titulo" data-escribir>
             LA SEMANA COMPLETA
           </h1>
@@ -338,7 +155,23 @@ const altHero =
                         data-corto={corto ? '' : undefined}
                         title={`${s.programa.nombre} · ${ROTULO_DIA[s.dia]} ${rango}`}
                       >
-                        <span class="pa-nombre">{s.programa.nombre}</span>
+                        {/*
+                          🔴 El punto de tally, el mismo de `/en-vivo` y el único
+                          color de la interfaz (movimiento.md §8). Va en el marcado
+                          de TODAS las celdas y lo enciende el CSS con `es-aire`,
+                          que es la clase que conmuta `senal.ts`: así la celda que
+                          se enciende a las 21:00 en una pestaña abierta desde las
+                          20:00 no necesita que el servidor vuelva a pintar nada.
+
+                          ⚠️ Elemento propio y no un `::before` de `.pa-nombre`: ahí
+                          ya vive la flecha de `es-continua`, y un bloque que empezó
+                          ayer y sigue al aire es las dos cosas a la vez. Dos reglas
+                          peleándose el mismo pseudo-elemento las gana una sola, y
+                          el empate lo decide el orden del archivo.
+                        */}
+                        <span class="pa-nombre"
+                          ><span class="pa-punto" aria-hidden="true" />{s.programa.nombre}</span
+                        >
                         <span class="beat-label pa-rango">{rango}</span>
                         {!s.esVivo && <span class="beat-label pa-repeticion">REPETICIÓN</span>}
                       </Celda>
@@ -352,7 +185,7 @@ const altHero =
       )
     }
 
-    {/* ═══ 3. El leaderboard ═══ */}
+    {/* ═══ 2. El leaderboard ═══ */}
     <div class="pr-franja-anuncio">
       <Anuncio formato="leaderboard" nombre="programacion-leader" />
     </div>
@@ -370,289 +203,16 @@ const altHero =
     padding: 28px 24px 0;
   }
 
-  /* ============================================================
-     1. AL AIRE AHORA
-     ============================================================ */
-  .pr-hero {
-    position: relative;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 268px;
-    gap: 40px;
-    align-items: end;
-    margin-top: 30px;
-    padding: 40px 32px 34px;
-    overflow: hidden;
-    /*
-      Pieza que FLOTA sobre el fondo del sitio, no trozo de una retícula: lleva su
-      propio radio (movimiento.md §6). Es el mismo criterio que el hero de la nota.
-    */
-    border-radius: var(--r-media);
-    background: var(--noche-1);
-  }
-
-  .pr-hero-fondo {
-    position: absolute;
-    inset: 0;
-    background: var(--grad-noche);
-  }
-  .pr-hero-fondo img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .pr-hero-trama {
-    position: absolute;
-    inset: 0;
-  }
   /*
-    El velo es lo que hace legible el titular encima de una foto que no elegimos.
-    Va de negro casi pleno abajo-izquierda —donde vive el texto— a transparente
-    arriba-derecha, así que la cara del DJ se sigue viendo.
+    El aire que antes ponía el hero. Con el panel fuera, el kicker quedaba pegado a
+    la tira de secciones y las dos cosas se leían como un solo bloque de rótulos.
   */
-  /*
-    🔴 EL VELO TIENE UN SUELO PLANO, y esto salió de medirlo, no de mirarlo.
-
-    La foto la elige la estación y puede ser cualquier cosa, incluida una foto
-    clara. Con el velo que había —un degradado que se abría hasta 0.15 arriba y
-    0.1 a la derecha— el peor caso es texto claro sobre foto BLANCA. Medido:
-
-        rótulo «AL AIRE AHORA» (--mist-0, velo 0.15) ... 1.36:1  ❌
-        hora de «LO QUE SIGUE HOY» (faint, velo 0.62) .. 1.99:1  ❌
-        bajada del hero (--mist-3, velo 0.55) ......... 3.48:1  ❌
-
-    WCAG 1.4.3 pide 4.5:1. Y no se habría visto en desarrollo, porque la única
-    foto capturada hoy es oscura: el fallo llegaba con la primera foto clara que
-    subiera la estación, en la primera pantalla de la página.
-
-    Así que el velo lleva un SUELO plano al 0.72 que cubre todo —el peor caso deja
-    de depender de la foto— más dos degradados que solo pueden SUMAR oscuridad
-    donde vive el texto. El alfa acumulado va de 0.72 arriba a la derecha a 0.947
-    abajo a la izquierda, que es donde está el titular. Medido sobre foto blanca:
-
-        rótulo (--mist-0, suelo 0.72) .................. 8.96:1  ✅
-        bajada (--mist-2, suelo 0.72) .................. 7.72:1  ✅
-
-    ⚠️ Lo que el suelo NO rescata es `--text-faint`: 2.98:1 incluso con él. Por eso
-    «LO QUE SIGUE HOY» —cuyas horas van en ese token— se bajó de la foto y tiene su
-    propia superficie opaca. Ver `.pr-sigue`.
-
-    ⚠️ El suelo va como ÚLTIMA capa del `background` y por tanto aterriza en
-    `background-color`, no en `background-image` —el computado dice `..., none` y
-    parece un error—. Es lo que se quiere: el color de fondo se pinta DEBAJO de los
-    degradados de este mismo elemento y ENCIMA de la foto, que está en otro. Si
-    algún día alguien lo "arregla" moviéndolo a un degradado plano, funciona igual;
-    lo que no puede es dejar de estar.
-  */
-  .pr-hero-velo {
-    position: absolute;
-    inset: 0;
-    background:
-      linear-gradient(to top, rgb(0 0 0 / 0.62) 0%, rgb(0 0 0 / 0.2) 55%, rgb(0 0 0 / 0) 100%),
-      linear-gradient(to right, rgb(0 0 0 / 0.5) 0%, rgb(0 0 0 / 0) 58%),
-      rgb(0 0 0 / 0.72);
+  .pr-semana {
+    margin-top: 34px;
   }
-
-  .pr-hero-texto {
-    position: relative;
-    min-width: 0;
-  }
-  .pr-hero-rotulo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 0;
-    color: var(--mist-0);
-  }
-  .pr-hero-rango {
-    color: var(--mist-3);
-    white-space: nowrap;
-  }
-
-  /* El punto de tally. Late mientras el bloque está al aire, y solo entonces. */
-  .pr-punto {
-    width: 7px;
-    height: 7px;
-    flex: none;
-    border-radius: 999px;
-    background: var(--rojo-aire);
-  }
-  .pr-hero.es-aire .pr-punto {
-    animation: pr-latido 2s var(--ease-in-out) infinite;
-  }
-  @keyframes pr-latido {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.35; }
-  }
-  /* Terminó el bloque: el punto se apaga y deja de ser un semáforo encendido. */
-  .pr-hero:not(.es-aire) .pr-punto {
-    background: var(--text-faint);
-  }
-
-  /*
-    El hero se pinta en el servidor con `es-aire` puesto, así que sin JavaScript se
-    ve el estado de una página recién cargada —que es el correcto— y el remate de
-    «ver la parrilla al día» no estorba. Quien quita la clase es `senal.ts`, media
-    hora después, en la pestaña que se quedó abierta.
-  */
-  .pr-hero.es-aire .pr-rotulo-fin,
-  .pr-hero.es-aire .pr-hero-caduco,
-  .pr-hero:not(.es-aire) .pr-rotulo-aire {
-    display: none;
-  }
-
-  .pr-hero-nombre {
-    margin: 14px 0 0;
-    color: var(--mist-1);
-    font-size: var(--size-display-2);
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 0.94;
-    text-wrap: balance;
-  }
-  .pr-hero-bajada {
-    margin: 16px 0 0;
-    max-width: 46ch;
-    font: var(--type-body);
-    /* `--mist-2` y no `--mist-3`: este texto va sobre la foto, y en el peor caso
-       —foto blanca bajo el suelo del velo— la diferencia es 7.4:1 contra 6.7:1.
-       Los dos pasan, pero el margen se lo lleva el que está encima de una imagen
-       que no controlamos. */
-    color: var(--mist-2);
-    text-wrap: pretty;
-  }
-
-  .pr-hero-acciones {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 26px;
-  }
-  .pr-boton {
-    display: inline-flex;
-    align-items: center;
-    gap: 9px;
-    padding: 13px 20px;
-    border-radius: var(--r-control);
-    box-shadow: inset 0 0 0 1px var(--border-strong);
-    background: transparent;
-    color: var(--mist-1);
-    font: var(--type-label);
-    letter-spacing: var(--track-label);
-    text-transform: uppercase;
-    text-decoration: none;
-    cursor: pointer;
-    transition:
-      background var(--dur-2) var(--ease-out),
-      color var(--dur-2) var(--ease-out);
-  }
-  .pr-boton:hover {
-    background: var(--surface-card-hover);
-    color: var(--mist-0);
-  }
-  /* La acción principal se INVIERTE. Es el mismo gesto que la sección activa de
-     la nav: blanco pleno, nunca un color. */
-  .pr-boton.es-plena {
-    background: var(--mist-0);
-    box-shadow: none;
-    color: var(--noche-0);
-  }
-  .pr-boton.es-plena:hover {
-    background: var(--mist-2);
-    color: var(--noche-0);
-  }
-  .pr-boton-icono {
-    display: grid;
-    place-items: center;
-  }
-
-  /*
-    Los rótulos y los iconos del botón de la señal: uno visible por estado. Sin el
-    atributo —o sin JavaScript— se ve el de reposo, que es el correcto en una
-    página recién cargada.
-  */
-  .pr-boton [data-rotulo='cargando'],
-  .pr-boton [data-rotulo='sonando'],
-  .pr-boton [data-icono='pause'] {
-    display: none;
-  }
-  .pr-boton[data-senal='cargando'] [data-rotulo='reposo'],
-  .pr-boton[data-senal='sonando'] [data-rotulo='reposo'],
-  .pr-boton[data-senal='sonando'] [data-icono='play'] {
-    display: none;
-  }
-  .pr-boton[data-senal='cargando'] [data-rotulo='cargando'],
-  .pr-boton[data-senal='sonando'] [data-rotulo='sonando'] {
-    display: inline;
-  }
-  .pr-boton[data-senal='sonando'] [data-icono='pause'] {
-    display: grid;
-  }
-  .pr-boton[data-senal='cargando'] [data-icono='play'] {
-    opacity: 0.6;
-  }
-
-  .pr-hero-caduco {
-    margin: 20px 0 0;
-  }
-
-  /* ── LO QUE SIGUE HOY ── */
-  /*
-    🔴 Superficie PROPIA y opaca, y no es decoración: sus horas van en
-    `--text-faint`, que sobre una foto clara da 2.9:1 incluso con el suelo del
-    velo puesto. Sobre `--noche-1` da 6.23:1, medido. Un panel opaco es la única
-    forma de que el número de la hora no dependa de qué foto subió la estación.
-  */
-  .pr-sigue {
-    position: relative;
-    min-width: 0;
-    padding: 16px 18px 6px;
-    background: var(--noche-1);
-    box-shadow: inset 0 0 0 1px var(--border-hairline);
-  }
-  .pr-sigue-titulo {
-    margin: 0 0 6px;
-    color: var(--mist-3);
-  }
-  .pr-sigue-fila {
-    display: grid;
-    grid-template-columns: 58px minmax(0, 1fr);
-    align-items: baseline;
-    gap: 12px;
-    padding: 11px 0;
-    border-bottom: 1px solid var(--border-hairline);
-  }
-  .pr-sigue-fila:last-child {
-    border-bottom: 0;
-  }
-  .pr-sigue-hora {
-    color: var(--text-faint);
-    white-space: nowrap;
-  }
-  .pr-sigue-cruce {
-    margin-left: 2px;
-    font-size: 7px;
-    vertical-align: super;
-  }
-  .pr-sigue-nombre {
-    font: 500 14px / 1.26 var(--font-text);
-    color: var(--mist-2);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  /* Cuando le llega su turno, la fila se enciende: la pone `senal.ts` sin pedir
-     nada al servidor. Blanco y negrita, nunca color. */
-  .pr-sigue-fila.es-aire .pr-sigue-hora,
-  .pr-sigue-fila.es-aire .pr-sigue-nombre {
-    color: var(--mist-0);
-    font-weight: 700;
-  }
-
 
   /* ============================================================
-     3. LA REJILLA
+     1. LA REJILLA
      ------------------------------------------------------------
      `--fila` es la altura de UNA hora y es el único número del que cuelga toda la
      geometría: la altura de la columna es 24 filas, y cada celda sale de su hora
@@ -802,16 +362,39 @@ const altHero =
   .pa-celda.es-aire .pa-rango {
     color: var(--mist-3);
   }
+  /*
+    El punto está en todas las celdas y solo se ve en la que está al aire — el
+    mismo reparto que los rótulos del hero de `/en-vivo`: el marcado lo trae y la
+    clase lo enciende, así que ninguna cadena de estado vive en JavaScript.
+
+    ⚠️ `inline-block` y no `absolute` en la esquina: la celda de una hora mide 32px
+    de alto y el nombre le ocupa dos líneas, así que un punto flotando arriba a la
+    derecha se le monta encima al texto. Delante del nombre nunca lo tapa, y en
+    móvil —donde la celda es una fila de lista— cae en el mismo sitio sin una sola
+    regla más.
+  */
+  .pa-punto {
+    display: none;
+    width: 6px;
+    height: 6px;
+    margin-right: 5px;
+    border-radius: 999px;
+    background: var(--rojo-aire);
+  }
+  .pa-celda.es-aire .pa-punto {
+    display: inline-block;
+    animation: pa-latido 2s var(--ease-in-out) infinite;
+  }
+  @keyframes pa-latido {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
 
   /* ============================================================
      Publicidad
      ============================================================ */
   .pr-franja-anuncio {
     padding: 48px 0;
-  }
-  /* Solo aire por arriba: la parrilla que viene debajo trae sus propios 52px. */
-  .pr-franja-box {
-    padding: 30px 0 0;
   }
 
   /* ============================================================
@@ -822,35 +405,17 @@ const altHero =
       padding: 18px 16px 0;
     }
 
-    /* El hero pierde la columna: «lo que sigue» pasa debajo. */
-    .pr-hero {
-      grid-template-columns: minmax(0, 1fr);
-      gap: 28px;
-      margin-top: 22px;
-      padding: 28px 20px 24px;
-    }
     /*
       🔴 Fluido, no fijo — es la misma trampa que ya midió `CabezaSeccion`: un
-      nombre de programa de una sola palabra no puede partirse, y a 38px se sale
-      de una caja de 343px.
+      titular de una sola palabra no puede partirse, y a 32px se sale de una caja
+      de 343px.
     */
-    .pr-hero-nombre {
-      font-size: clamp(26px, 8.6vw, 40px);
-    }
     .pr-titulo {
       font-size: clamp(22px, 7.4vw, 32px);
     }
 
-    .pr-hero-acciones {
-      margin-top: 22px;
-    }
-    .pr-boton {
-      flex: 1 1 auto;
-      justify-content: center;
-    }
-
     .pr-semana {
-      margin-top: 38px;
+      margin-top: 26px;
     }
 
     /*
@@ -944,14 +509,11 @@ const altHero =
     .pr-franja-anuncio {
       padding: 36px 0;
     }
-    .pr-franja-box {
-      padding: 26px 0 0;
-    }
   }
 
   /* Menos movimiento: se apaga, no se acelera (movimiento.md §5). */
   @media (prefers-reduced-motion: reduce) {
-    .pr-hero.es-aire .pr-punto {
+    .pa-celda.es-aire .pa-punto {
       animation: none;
     }
   }

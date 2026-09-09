@@ -125,8 +125,8 @@ lo que se ve en pantalla ahora mismo.
 | `/<tipoLista>` y `/<tipoLista>/<slug>` | `src/pages/[tipoLista]/index.astro`, `src/pages/[tipoLista]/[lista].astro` | `tipos-de-lista` + `listas` |
 | `/eventos` y `/eventos/<slug>` | `src/pages/eventos/index.astro`, `src/pages/eventos/[slug].astro` | `eventos` |
 | `/programacion` y `/programas/<slug>` | `src/pages/programacion/index.astro`, `src/pages/programas/[slug].astro` | `programas` |
-| `/en-vivo` | `src/pages/en-vivo/index.astro` | `bitacora` |
-| `/alexa`, `/aviso-de-privacidad`, `/terminos-y-condiciones` | páginas estáticas | texto escrito en el repo |
+| `/en-vivo` | `src/pages/en-vivo/index.astro` | `programas` + `bitacora` |
+| `/alexa`, `/avisodeprivacidad`, `/terminosycondiciones` | páginas estáticas | texto escrito en el repo |
 
 🔴 **Una nota va en `/noticias/<slug>` y no en `/<seccion>/<slug>`** porque
 `noticias.categorias` es `hasMany` **sin categoría primaria**: derivar el path de
@@ -231,7 +231,7 @@ varias secciones.
 ```bash
 # Las rutas públicas, de un tirón: nada debe dar 500, y lo que no exista debe dar 404.
 for u in / /beat-scanner /editorial /eventos /fenomeno-residente /bonus-beat \
-         /programacion /en-vivo /alexa /aviso-de-privacidad /terminos-y-condiciones \
+         /programacion /en-vivo /alexa /avisodeprivacidad /terminosycondiciones \
          /sitemap.xml /news-sitemap.xml /robots.txt; do
   printf '%-28s %s\n' "$u" "$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:4321$u")"
 done

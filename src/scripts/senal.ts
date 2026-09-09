@@ -11,9 +11,10 @@
  * oyente.
  *
  * ⚠️ Nació para el panel «HOY EN LA SEÑAL» del Inicio, que se retiró el
- * 2026-09-09 («en el home nada», Carlos). Hoy sirve a `/programacion`: el hero de
- * «AL AIRE AHORA» —de donde cuelga que el punto de tally se apague al terminar el
- * bloque—, las filas de «LO QUE SIGUE HOY» y las celdas de la rejilla semanal.
+ * 2026-09-09 («en el home nada», Carlos). Hoy sirve a DOS páginas: en `/en-vivo`,
+ * el hero de «AL AIRE AHORA» —de donde cuelga que el punto de tally se apague al
+ * terminar el bloque— y las filas de «LO QUE SIGUE HOY»; en `/programacion`, las
+ * celdas de la rejilla semanal, con su propio punto de tally desde el 2026-09-09.
  *
  * ⚠️ Y sirve a CUALQUIER `[data-bloque]`, no a una pantalla concreta: por eso el
  * selector es de atributo y no de clase. Si no hay ninguno en la página, se apaga
@@ -67,9 +68,9 @@ function repasar(): void {
       🔴 `[data-estado]` es el CONTRATO de este archivo: el elemento cuyo TEXTO se
       reescribe con el estado del bloque. Quien meta ese atributo dentro de un
       `[data-bloque]` para otra cosa va a perder su contenido — le pasó al botón
-      de «Escuchar en vivo» del hero de `/programacion`, que quedó diciendo «AL
-      AIRE · 58 MIN». Si hace falta un atributo de estado para otra cosa ahí
-      dentro, cualquier nombre menos este.
+      de «Escuchar en vivo» del hero, que quedó diciendo «AL AIRE · 58 MIN». Si
+      hace falta un atributo de estado para otra cosa ahí dentro, cualquier nombre
+      menos este.
     */
     const estado = fila.querySelector<HTMLElement>('[data-estado]');
     if (!estado) continue;

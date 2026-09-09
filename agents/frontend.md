@@ -265,9 +265,10 @@ de pararlo, es justo lo que esa preferencia existe para quitar (WCAG 2.2.2).
 - **Qué DATO baja a cada componente** — es de `agents/content.md`. Este agente decide
   cómo se ve; el otro, de dónde sale.
 - **Decidir la maqueta de una pantalla que el lienzo no describe.** El lienzo cubre el
-  Inicio (13a/14a), Scanner (14b/14e) y la nota (14c/14f). ⚠️ `/en-vivo` no está en
-  v14 y por eso es mínima a propósito; inventarle un diseño es una decisión de Carlos,
-  no una traducción.
+  Inicio (13a/14a), Scanner (14b/14e) y la nota (14c/14f). ⚠️ `/en-vivo` sigue sin
+  lienzo propio: lo que tiene desde el 2026-09-09 es el panel «AL AIRE AHORA» que
+  Carlos mandó traer de `/programacion`, no un diseño inventado. Lo que le falte
+  encima de eso se le pide a él.
 
 ---
 

@@ -134,16 +134,20 @@ nada.
 ⚠️ El lienzo describe SOLO el Inicio. Para cualquier otra página, la colocación es
 una decisión de Carlos, no una traducción del diseño: no la inventes.
 
-### Las ocho colocaciones de box, aprobadas el 2026-09-08
+### Las colocaciones de box, aprobadas el 2026-09-08
 
 Están DECIDIDAS, con su razón. No se re-proponen ni se mueven sin Carlos:
+
+⚠️ Eran ocho. La de `/programacion` se retiró el 2026-09-09 al partirse la página
+en dos y queda tachada en la tabla, no borrada: fue una colocación aprobada y su
+vuelta necesita una decisión, no un `git revert`.
 
 | Página | Dónde | Por qué |
 |---|---|---|
 | `/fenomeno-residente` | Tercera columna, bajo la playlist | El riel ya existe y terminaba en aire |
 | `/bonus-beat` | Tras la última edición, antes de «EDICIONES ANTERIORES» | El corte natural de la página |
 | `/bonus-beat/*` | Riel a la derecha de las canciones | Igual que la nota: columna de lectura + riel |
-| `/programacion` | Tras «AL AIRE AHORA», antes de la parrilla | El único punto de corte que tiene |
+| ~~`/programacion`~~ | ~~Tras «AL AIRE AHORA», antes de la parrilla~~ | 🔴 **RETIRADA el 2026-09-09** — ver abajo |
 | `/programas/*` | Riel junto a los datos del programa | Ahí ya había una columna estrecha |
 | `/eventos` | Intercalado cada 6 eventos | Lista larga sin corte; el intercalado es lo que rinde |
 | `/eventos/*` | Riel bajo «CUÁNDO / DÓNDE» | La columna de datos ya estaba, y le sobraba un hueco |
@@ -169,7 +173,7 @@ porque le falta el CONTENIDO del que cuelga (no porque el hueco esté mal).
 | `/fenomeno-residente` | — | ✅ `fenomeno-leader` | ✅ `fenomeno-box` |
 | `/bonus-beat` | — | ✅ `lista-leader` | ⚠️ `lista-box` |
 | `/bonus-beat/*` | — | ✅ `edicion-leader` | ✅ `edicion-box` |
-| `/programacion` | — | ✅ `programacion-leader` | ⚠️ `programacion-box` |
+| `/programacion` | — | ✅ `programacion-leader` | 🔴 retirado (ver abajo) |
 | `/programas/*` | — | ✅ `programa-leader` | ⚠️ `programa-box` |
 | `/eventos` | — | ✅ `agenda-leader` | ⚠️ `agenda-box` (+ `-2`, `-3`…) |
 | `/eventos/*` | — | ✅ `evento-leader` | ✅ `evento-box` |
@@ -180,10 +184,13 @@ porque le falta el CONTENIDO del que cuelga (no porque el hueco esté mal).
 la página a la que alguien va a ESCUCHAR, y un anuncio al lado de la señal hace
 que un sitio de radio se sienta barato. No se propone otra vez.
 
-#### Los cuatro ⚠️, y de qué contenido cuelga cada uno
+#### Los ⚠️, y de qué contenido cuelga cada uno
 
-Ninguno es un hueco roto: los cuatro esperan un dato del CMS. Comprobados uno por
-uno forzando datos en la capa `src/lib/cms/*` (ver «Cómo se verifica»).
+Ninguno es un hueco roto: esperan un dato del CMS. Comprobados uno por uno
+forzando datos en la capa `src/lib/cms/*` (ver «Cómo se verifica»).
+
+⚠️ Eran cuatro hasta el 2026-09-09; `programacion-box` ya no es uno de ellos
+porque dejó de existir, no porque se haya llenado.
 
 - **`inicio-box`** — vive en `ArchivoTemas.astro`, donde el lienzo lo pone («de
   riel junto al archivo»), y ese bloque no se pinta con el archivo vacío: hoy hay
@@ -193,17 +200,23 @@ uno forzando datos en la capa `src/lib/cms/*` (ver «Cómo se verifica»).
   ANTERIORES», así que cuelga de que HAYA ediciones anteriores. `bonus-beat` tiene
   una sola capturada. Sin esa condición, el box quedaría a 40px del leaderboard
   del pie: una página que termina en dos anuncios seguidos.
-- **`programacion-box`** — va tras «AL AIRE AHORA», y cuelga de que HAYA algo al
-  aire. Sin ese panel encima, el box sería lo primero de la página: un anuncio
-  antes de cualquier contenido.
+- **`programacion-box`** — 🔴 **RETIRADO el 2026-09-09, y hace falta una decisión
+  de Carlos para que vuelva.**
 
-  ⚠️ **Su motivo cambió el 2026-09-09 y conviene no confundirlos.** Antes no se
-  pintaba porque `programas` tenía cero documentos; ahora la estación ya está
-  capturando la parrilla, así que el panel existe **a las horas que hay programa
-  y no a las que la parrilla tiene hueco**. O sea que este hueco pasó de «vacío
-  hasta que haya contenido» a «vacío a ratos, por diseño», y verlo vacío a las
-  14:00 ya no es señal de nada: la comprobación es entrar a una hora con
-  programa, no volver a mirar mañana.
+  Iba tras «AL AIRE AHORA» y colgaba de que hubiera algo al aire. Ese día
+  `/programacion` se partió en dos y **el panel se mudó entero a `/en-vivo`**
+  («la primera, que dice Al aire ahora, que se convierta en lo que lleva
+  en-vivo»), así que la colocación se quedó sin el corte del que dependía.
+
+  No se reubicó, y los dos sitios que quedan explican por qué: arriba del todo
+  sería un anuncio antes de cualquier contenido —justo lo que la condición
+  original evitaba— y tras la rejilla quedaría pegado al leaderboard del pie, o
+  sea una página que termina en dos anuncios seguidos, que es el mismo error que
+  `lista-box` tiene prohibido cometer.
+
+  👉 Y **no se mueve a `/en-vivo` siguiendo al panel**: esa página no lleva box
+  por decisión tomada (ver arriba). Si `/programacion` tiene que volver a
+  monetizarse con un box, la colocación se acuerda desde cero.
 - **`agenda-box`** — se intercala cada SEIS eventos de la lista y nunca de cola
   (ver abajo). Hoy hay un evento capturado, o sea cero filas.
 

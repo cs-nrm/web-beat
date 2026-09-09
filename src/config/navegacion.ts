@@ -93,23 +93,42 @@ export const SECCIONES_EDITORIALES = {
 } as const satisfies Record<string, SeccionEditorial>;
 
 /**
- * La navegación de arriba: CINCO secciones, en este orden.
+ * La navegación de arriba: SIETE secciones, en este orden.
  *
- * `FENÓMENO RESIDENTE · BONUS BEAT · BEAT SCANNER · EDITORIAL · AGENDA`.
+ * `EN VIVO · PROGRAMACIÓN · FENÓMENO RESIDENTE · BONUS BEAT · BEAT SCANNER ·
+ * EDITORIAL · AGENDA`.
+ *
+ * 🔴 «En vivo» y «Programación» entraron el 2026-09-09 (Carlos): «hay que agregar
+ * a los menús, todos, la de en vivo y programación; antes las teníamos ocultas».
+ * Cada una estaba escondida por su motivo y los dos caducaron el mismo día:
+ *
+ *   · «En vivo» estaba fuera desde el 2026-09-07 «hasta que hagamos bien la
+ *     página», y era una página mínima a la espera de un lienzo. Ese día se le
+ *     mudó encima el panel «AL AIRE AHORA» de `/programacion`, así que ya no
+ *     desmerece al lado del resto.
+ *   · «Programación» vivía solo en el PIE, por ser una utilidad de consulta y no
+ *     una sección editorial. Sigue siendo verdad y ya no manda: es de las pocas
+ *     páginas que alguien viene a buscar a propósito.
+ *
+ * 🔴 Van las dos DELANTE de lo editorial, y en este orden: qué suena ahora, qué
+ * va a sonar, y luego lo que hay que leer. Es el orden en que se usa una radio.
+ *
+ * ⚠️ **Son SIETE en una fila que el lienzo dibujó con CINCO.** Medido tras el
+ * cambio, no supuesto: la cabecera no desborda ni a 1280 ni a 390 —a partir de
+ * 900px la fila de la cabecera se esconde y la navegación pasa a la hamburguesa—
+ * y la tira de `NavSecciones` sigue envolviéndose en dos filas. Si un día entra
+ * una octava, se vuelve a medir: es el sitio exacto donde ya se coló un desborde
+ * de 510px en una caja de 390.
  *
  * 🔴 Beat Scanner y Editorial son DOS entradas desde el 2026-09-07, cuando se
  * separaron en secciones con interior propio. Las dos tienen entrada porque las dos
  * tienen página — anunciar una y esconder la otra dejaría la sección «elaborada»
  * como la menos visible del sitio.
  *
- * 🔴 Y «En vivo» ya no está: se oculta hasta que su página esté bien (Carlos, el
- * mismo día). Vive en `SECCIONES_OCULTAS`, justo debajo, con lo que hay que hacer
- * para devolverla.
- *
  * Las tres que faltan del mapa de sitio —Comunidad, Tienda y Marcas— no
- * desaparecen: bajan a `SECCIONES_FUTURAS`, que el PIE sí pinta. Un menú de ocho
- * con tres apagadas enseña al lector que la mitad de este sitio no lleva a
- * ninguna parte; el pie es donde un mapa completo sí tiene sentido.
+ * desaparecen: bajan a `SECCIONES_FUTURAS`, que hoy no pinta nadie. Un menú con
+ * tres entradas apagadas enseña al lector que parte de este sitio no lleva a
+ * ninguna parte.
  *
  * ⚠️ El rótulo es el nombre COMPLETO —«Fenómeno Residente», no «Fenómeno»—
  * porque cabe, y porque abreviar el nombre de la sección estrella para ahorrar
@@ -126,6 +145,8 @@ export const SECCIONES_EDITORIALES = {
  * sección se renombre solo se va a cambiar una.
  */
 export const SECCIONES: EntradaNav[] = [
+  { corto: 'En vivo', largo: 'Escuchar en vivo', href: '/en-vivo' },
+  { corto: 'Programación', largo: 'Programación', href: '/programacion' },
   { corto: 'Fenómeno Residente', largo: 'El Fenómeno Residente', href: '/fenomeno-residente' },
   { corto: 'Bonus Beat', largo: 'Bonus Beat', href: '/bonus-beat' },
   {
@@ -141,30 +162,18 @@ export const SECCIONES: EntradaNav[] = [
   { corto: 'Agenda', largo: 'Agenda', href: '/eventos' },
 ];
 
-/**
- * 🔴 «En vivo» está OCULTA a propósito (Carlos, 2026-09-07): «hasta que hagamos
- * bien la página».
- *
- * No está en `SECCIONES`, así que no aparece en la nav de la cabecera, ni en el
- * menú a pantalla completa, ni en la tira de los interiores, ni en la lista de
- * secciones del pie. **Para restituirla, se mueve esta entrada de vuelta a
- * `SECCIONES`, en el primer puesto** — y no hay que tocar nada más.
- *
- * ⚠️ Y NO va en `SECCIONES_FUTURAS`, que es otra cosa: esas se pintan APAGADAS
- * porque no existen. Esta existe y funciona; lo que no está es a la altura del
- * resto, y anunciar en el menú algo que no sostiene la comparación es peor que no
- * anunciarlo. Apagada tampoco sirve: diría que la radio en vivo no está
- * disponible, que es exactamente lo contrario de lo que este sitio afirma.
- *
- * ⚠️ La RUTA sigue viva y responde 200: `/en-vivo` está en `SEGMENTOS_RESERVADOS`,
- * la página existe y **el pie la sigue enlazando en su párrafo de «Radio en vivo»**
- * («Escucha nuestra señal aquí»). Eso se queda a propósito: lo que se oculta es la
- * sección del menú, no el acceso a la señal — y el player de la cabecera, que es
- * como escucha de verdad la gente, no se toca.
- */
-export const SECCIONES_OCULTAS: EntradaNav[] = [
-  { corto: 'En vivo', largo: 'Escuchar en vivo', href: '/en-vivo' },
-];
+/*
+  🔴 Aquí vivía `SECCIONES_OCULTAS`, con «En vivo» dentro y las instrucciones para
+  devolverla. Se ejecutaron el 2026-09-09 y la constante se fue con ella: una lista
+  de ocultas vacía, exportada y sin nadie que la lea, es una invitación a esconder
+  la siguiente sección en vez de arreglarla.
+
+  Lo que decía y conviene no perder: se ocultó el 2026-09-07 «hasta que hagamos
+  bien la página», NO como `pendiente`. Esa distinción sigue valiendo para la
+  próxima vez — una sección apagada dice «esto no existe todavía», y decir eso de
+  la radio en vivo es exactamente lo contrario de lo que este sitio afirma. La
+  ruta nunca dejó de responder 200 ni el pie de enlazarla.
+*/
 
 /**
  * Las tres del mapa de sitio que todavía no se construyen.
@@ -187,16 +196,17 @@ export const SECCIONES_FUTURAS: EntradaNav[] = [
   { corto: 'Marcas', largo: 'Beat para marcas', href: '/marcas', pendiente: true },
 ];
 
-/**
- * Programación va en el pie y no en la nav de arriba.
- *
- * No está entre las 8 del mapa de sitio, pero Carlos confirmó que sí va
- * (2026-08-19), y la nav del lienzo tiene exactamente 8 huecos. El pie es su lugar
- * natural: es una utilidad de consulta, no una sección editorial.
- */
-export const SECCIONES_PIE: EntradaNav[] = [
-  { corto: 'Programación', largo: 'Programación', href: '/programacion' },
-];
+/*
+  🔴 Y aquí vivía `SECCIONES_PIE`, con «Programación» dentro: iba en el pie y no
+  arriba «porque es una utilidad de consulta, no una sección editorial, y la nav
+  del lienzo tiene exactamente 8 huecos». Desde el 2026-09-09 va en `SECCIONES`
+  como una más, así que la constante sobra.
+
+  ⚠️ La spread que la metía en el pie y en el menú lleno (`[...SECCIONES,
+  ...SECCIONES_PIE]`) se retiró de `Pie.astro` y de `MenuLleno.astro`. Dejarla
+  como un array vacío habría funcionado igual y habría sido peor: dos componentes
+  concatenando una lista que nunca tiene nada se leen como un cable suelto.
+*/
 
 /**
  * Donde también se puede escuchar la señal. Agregadores de terceros.

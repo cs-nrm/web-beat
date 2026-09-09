@@ -29,9 +29,10 @@
  * contenido. El otro candidato —el nombre del programa— cambia cada hora, o sea un
  * `<h1>` distinto en cada visita y ninguno describiendo la página.
  *
- * ⚠️ La entrada de menú sigue OCULTA (`SECCIONES_OCULTAS` en `config/navegacion.ts`,
- * «hasta que hagamos bien la página»). Restituirla es mover esa entrada a
- * `SECCIONES`, y es decisión de Carlos: aquí no se toca sola.
+ * ⚠️ Su entrada de menú VOLVIÓ el 2026-09-09, el mismo día y por esto mismo: estaba
+ * oculta «hasta que hagamos bien la página» y con el panel encima dejó de
+ * desmerecer. Va la primera de `SECCIONES` en `config/navegacion.ts`, o sea en la
+ * cabecera, el menú lleno, la tira de los interiores y el pie.
  */
 import Base from '@/layouts/Base.astro';
 import NavSecciones from '@/components/NavSecciones.astro';
@@ -86,7 +87,12 @@ const altHero =
   descripcion="La señal de Beat 100.9 en vivo: qué está al aire ahora, qué sigue y qué ha sonado."
 >
   <div class="vivo">
-    <NavSecciones activa={null} />
+    {/*
+      `activa` señala la pastilla: se puede desde el 2026-09-09, cuando «En vivo»
+      entró en `SECCIONES`. Antes iba `null` porque la sección no existía en la
+      tira y marcar un `href` que no está ahí no enciende nada.
+    */}
+    <NavSecciones activa="/en-vivo" />
 
     <h1 class="solo-lectores">Escuchar en vivo</h1>
 

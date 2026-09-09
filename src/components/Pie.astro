@@ -7,7 +7,6 @@
  */
 import {
   SECCIONES,
-  SECCIONES_PIE,
   PLATAFORMAS_RADIO,
   APPS,
   LEGALES,
@@ -33,7 +32,13 @@ const anio = new Date().getFullYear();
   precisamente a buscar a dónde ir. Y hacía que el pie y el menú dijeran cosas
   distintas, que es justo lo que este archivo existe para evitar.
 */
-const todasLasSecciones = [...SECCIONES, ...SECCIONES_PIE];
+/*
+  ⚠️ Antes era `[...SECCIONES, ...SECCIONES_PIE]`, para colar «Programación» que
+  solo vivía en el pie. Desde el 2026-09-09 está en `SECCIONES` con «En vivo», así
+  que la lista de arriba y la del pie vuelven a ser LA MISMA — que es lo que este
+  archivo existe para garantizar.
+*/
+const todasLasSecciones = SECCIONES;
 ---
 
 <footer class="mt-13 border-t-hairline border-borde-hairline bg-surface-base">

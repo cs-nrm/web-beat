@@ -19,7 +19,7 @@
  * que acordarse de cerrarlo a mano. El estado vive en este elemento; el script solo
  * sincroniza el `aria-expanded` de las hamburguesas, que sí son persistentes.
  */
-import { SECCIONES, SECCIONES_PIE } from '@/config/navegacion';
+import { SECCIONES } from '@/config/navegacion';
 
 const ruta = Astro.url.pathname;
 const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
@@ -55,7 +55,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     */}
     <ul class="menu-lista">
       {
-        [...SECCIONES, ...SECCIONES_PIE].map((s, i) => (
+        SECCIONES.map((s, i) => (
           <li class="menu-item" style={`--i:${i}`}>
             <a
               href={s.href}

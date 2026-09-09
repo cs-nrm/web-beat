@@ -12,6 +12,7 @@ import Agenda from '@/components/inicio/Agenda.astro';
 import Anuncio from '@/components/Anuncio.astro';
 import Icono from '@/components/Icono.astro';
 import { obtenerEvento, obtenerAgenda } from '@/lib/cms/eventos';
+import { donde, mismoDiaEnMexico } from '@/lib/evento';
 import { urlMedia } from '@/lib/cms/client';
 
 const { slug } = Astro.params;
@@ -49,11 +50,38 @@ function partes(iso: string | null | undefined) {
     largo: f({ weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase(),
     hora: f({ hour: '2-digit', minute: '2-digit', hour12: false }),
     iso: d.toISOString(),
+    fecha: d,
   };
 }
 
 const inicio = partes(evento.inicio);
 const fin = partes(evento.fin);
+
+/**
+ * 🔴 UNA sola fecha cuando el evento empieza y termina el mismo día.
+ *
+ * La ficha decía «SÁBADO, 14 DE NOVIEMBRE · 00:00 / hasta SÁBADO, 14 DE NOVIEMBRE
+ * · 23:30» — la misma fecha dos veces, y con el peso tipográfico de un dato nuevo
+ * (Carlos, 2026-09-09): «generalmente va una fecha, se ve mal que se vean dos».
+ * Casi todo lo que captura la estación cabe en un día, así que ese era el caso
+ * NORMAL, no el raro.
+ *
+ * Lo que se quita es la repetición, no el dato: la hora de cierre sí es
+ * información distinta y se queda como rango en la misma línea. La segunda línea
+ * solo sobrevive cuando el evento cruza de día —un festival de tres— que es donde
+ * la fecha de cierre dice algo que la de apertura no.
+ *
+ * ⚠️ Y si las dos horas coinciden no hay rango que pintar: hay eventos capturados
+ * con `fin` igual al `inicio`, y «00:00 — 00:00» es peor que no decir nada.
+ */
+const cierraOtroDia = !!(inicio && fin && !mismoDiaEnMexico(inicio.fecha, fin.fecha));
+const cierraElMismoDia = !!(inicio && fin && !cierraOtroDia && fin.hora !== inicio.hora);
+
+/*
+  🔴 El lugar y la ciudad, sin repetir: llegaban los dos con «Próximamente» y la
+  ficha decía `PRÓXIMAMENTE · PRÓXIMAMENTE`. Ver `lib/evento.ts`.
+*/
+const lugar = donde(evento);
 
 const ETIQUETA_ACCION: Record<string, string> = { rsvp: 'RESERVAR LUGAR', boletos: 'BOLETOS' };
 
@@ -63,7 +91,6 @@ const accion =
     : null;
 
 const foto = urlMedia(evento.portada, 'large');
-const lugar = [evento.lugar, evento.ciudad].filter(Boolean).join(' · ');
 
 ---
 
@@ -104,10 +131,26 @@ const lugar = [evento.lugar, evento.ciudad].filter(Boolean).join(' · ');
             {
               inicio ? (
                 <span class="ev-dato-valor">
+                  {/*
+                    ⚠️ El `<time>` envuelve SOLO el inicio: el atributo `datetime`
+                    declara un instante, y meter «— 23:30» dentro haría que el
+                    marcado dijera una cosa y el texto otra. La hora de cierre
+                    lleva su propio `<time>`.
+                  */}
                   <time datetime={inicio.iso}>
                     {inicio.largo} · {inicio.hora}
                   </time>
-                  {fin && <span class="ev-dato-extra">hasta {fin.largo} · {fin.hora}</span>}
+                  {cierraElMismoDia && fin && (
+                    <>
+                      {' — '}
+                      <time datetime={fin.iso}>{fin.hora}</time>
+                    </>
+                  )}
+                  {cierraOtroDia && fin && (
+                    <span class="ev-dato-extra">
+                      hasta {fin.largo} · {fin.hora}
+                    </span>
+                  )}
                 </span>
               ) : (
                 <span class="ev-dato-valor">Por confirmar</span>

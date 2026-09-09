@@ -10,6 +10,7 @@
 import Remate from '@/components/Remate.astro';
 import Anuncio from '@/components/Anuncio.astro';
 import { urlMedia } from '@/lib/cms/client';
+import { donde } from '@/lib/evento';
 import type { Evento } from '@/types/payload';
 
 interface Props {
@@ -90,6 +91,13 @@ const ETIQUETA_ACCION: Record<string, string> = { rsvp: 'RSVP', boletos: 'BOLETO
 
 const p = partes(proximo?.inicio);
 const fotoProximo = urlMedia(proximo?.portada, 'large');
+/*
+  🔴 `donde()` y no `[lugar, ciudad].join(' · ')`: los dos campos llegan con el
+  mismo texto más veces de las que parece —«Aniversario Beat» traía «Próximamente»
+  en ambos— y así el pie del destacado decía `PRÓXIMAMENTE · PRÓXIMAMENTE`
+  (Carlos, 2026-09-09). El porqué completo, en `lib/evento.ts`.
+*/
+const lugarProximo = proximo ? donde(proximo) : '';
 ---
 
 {
@@ -132,11 +140,7 @@ const fotoProximo = urlMedia(proximo?.portada, 'large');
           </h3>
           {proximo.descripcion && <p class="ag-bajada">{proximo.descripcion}</p>}
           <div class="ag-pie">
-            {(proximo.lugar || proximo.ciudad) && (
-              <span class="beat-label ag-lugar">
-                {[proximo.lugar, proximo.ciudad].filter(Boolean).join(' · ')}
-              </span>
-            )}
+            {lugarProximo && <span class="beat-label ag-lugar">{lugarProximo}</span>}
             {proximo.accion && proximo.accion !== 'ninguna' && proximo.enlace && (
               <a
                 href={proximo.enlace}
@@ -174,9 +178,7 @@ const fotoProximo = urlMedia(proximo?.portada, 'large');
                     <span class="beat-label ag-fecha-mes">{q?.mes ?? ''}</span>
                   </span>
                   <span class="ag-fila-titulo">{e.titulo}</span>
-                  <span class="beat-label ag-fila-lugar">
-                    {[e.lugar, e.ciudad].filter(Boolean).join(' · ')}
-                  </span>
+                  <span class="beat-label ag-fila-lugar">{donde(e)}</span>
                   <span class="beat-label ag-fila-accion">
                     {e.accion && e.accion !== 'ninguna' ? (ETIQUETA_ACCION[e.accion] ?? '') : ''}
                   </span>

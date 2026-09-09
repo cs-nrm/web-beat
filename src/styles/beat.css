@@ -1487,20 +1487,57 @@ body {
    ✨ Aditivo, como todo lo del cursor: si el script no corre, el atributo
    `data-cursor` no aparece nunca y la capa no se pinta. Cero riesgo de tapar nada.
    ============================================================ */
-body::after {
-  content: '';
+/*
+  🔴 Una CAJA que se mueve, y no un degradado a pantalla completa que se recentra.
+
+  La primera versión era `body::after` con `inset: 0` y el centro del degradado en
+  `var(--cursor-x)`, que `cursor.ts` escribía en `<html>`. Dos costes por cada
+  movimiento del ratón, en todas las páginas del sitio:
+
+  · una variable en la RAÍZ invalida el estilo calculado de todo lo que la hereda,
+    o sea del documento entero — 3.35 ms medidos en el v2 desplegado, con 627
+    nodos. La quinta parte de un fotograma a 60 Hz.
+  · y el degradado se repintaba sobre TODO el viewport, además por encima del
+    contenido, así que el compositor rehacía la pantalla completa.
+
+  Con la página ocupada —vídeo, marquesina, anuncios— el hilo principal no llegaba,
+  y lo primero que se cae cuando no llega es la respuesta al puntero: el `:hover`
+  entraba tarde y el cursor no cambiaba a manita. Los botones parecían muertos.
+
+  Ahora la capa es una caja de tamaño fijo con el degradado quieto dentro, y lo que
+  cambia es su `transform`. Eso lo resuelve el compositor: 0.002 ms, sin recálculo
+  de estilo y sin repintado.
+
+  ✨ Y se ve EXACTAMENTE igual. El degradado sigue siendo un círculo de 460px con
+  las paradas en los mismos sitios; como a 68% (312.8px) ya es transparente, una
+  caja de 640 —320px de centro a borde— lo contiene entero. Fuera de ella no había
+  nada que pintar.
+*/
+.cursor-halo {
   position: fixed;
-  inset: 0;
+  left: 0;
+  top: 0;
   z-index: 40;
   pointer-events: none;
+  width: 640px;
+  height: 640px;
+  /* Nace centrada en el origen, así la traslación es la posición del cursor a
+     secas y no «la posición menos medio halo». */
+  margin: -320px 0 0 -320px;
   opacity: 0;
   transition: opacity var(--dur-4) var(--ease-out);
   background: radial-gradient(
-    460px circle at var(--cursor-x, 50vw) var(--cursor-y, 50vh),
+    460px circle at 50% 50%,
     rgb(250 251 250 / 0.05),
     rgb(250 251 250 / 0.018) 42%,
     transparent 68%
   );
+  /*
+    La capa se promueve UNA vez, al cargar. Es la excepción legítima a «no abuses
+    de `will-change`»: esto se mueve en cada fotograma en el que hay ratón, que es
+    justo el caso para el que existe la propiedad.
+  */
+  will-change: transform;
 }
 
 /*
@@ -1511,12 +1548,12 @@ body::after {
   player o de un anuncio VAST sería un problema: lo primero se vería sucio y lo
   segundo puede tener consecuencias de facturación.
 */
-html[data-cursor] body::after {
+html[data-cursor] .cursor-halo {
   opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body::after {
+  .cursor-halo {
     display: none;
   }
 }

@@ -151,19 +151,25 @@ const nombreAqui = filtro ? filtro.nombre : (seccion?.rotulo ?? 'esta sección')
 
           {/* ── Segunda tanda + riel ── */}
           <div class="sc-abajo">
-            <div>
-              <div class="sc-mas-cabeza">
-                <span class="beat-display sc-mas-titulo">MÁS EN {nombreAqui.toUpperCase()}</span>
+            {/*
+              📖 Sin segunda tanda no se pinta NADA de esta columna — ni el rótulo.
+              Hasta el 2026-09-09 aquí salía «MÁS EN …» con su línea debajo y, de
+              relleno, «Por ahora no hay más notas publicadas…». El rótulo anunciaba
+              una tanda que no existía y el aviso le contaba al lector el calendario
+              de la redacción. Con una sola nota publicada —el caso de hoy— era lo
+              único que se veía bajo el leaderboard.
+
+              El rótulo y su CSS siguen aquí —vuelven en cuanto haya una octava
+              nota—, y `.sc-vacio` también: la usa el aviso de categoría perdida.
+            */}
+            {enLista.length > 0 && (
+              <div>
+                <div class="sc-mas-cabeza">
+                  <span class="beat-display sc-mas-titulo">MÁS EN {nombreAqui.toUpperCase()}</span>
+                </div>
+                {enLista.map((n) => <TarjetaNota nota={n} variante="fila" />)}
               </div>
-              {enLista.length > 0 ? (
-                enLista.map((n) => <TarjetaNota nota={n} variante="fila" />)
-              ) : (
-                <p class="sc-vacio">
-                  Por ahora no hay más notas publicadas. En cuanto la redacción cargue más, aparecen
-                  aquí.
-                </p>
-              )}
-            </div>
+            )}
 
             <aside class="sc-riel">
               <Anuncio formato="box" nombre="scanner-box" unidad="Box" />
@@ -174,22 +180,23 @@ const nombreAqui = filtro ? filtro.nombre : (seccion?.rotulo ?? 'esta sección')
         /*
           Degrada en vez de tronar. Es la regla de la casa: `web-enfoque` responde
           200 con cero notas cuando su CMS no está, y eso es lo correcto.
+
+          📖 Y degradar es quedarse en BLANCO desde el 2026-09-09. Aquí salían dos
+          textos más —«Todavía no hay notas publicadas en …», uno para el filtro y
+          otro para la sección, este último con la lista de lo que revisar en el
+          CMS—. Se fueron: una sección sin notas se explica sola vacía, y el aviso
+          le enseñaba al lector el estado de la redacción y el nombre del campo.
+
+          Lo que SÍ se queda es este, porque no dice «no hay notas»: dice que el
+          front pide una categoría que el CMS no tiene. Eso es una avería, no un
+          hueco editorial, y sin el texto se ve idéntica a una sección vacía y nadie
+          la reporta. Ver el comentario de `categoriaPerdida` arriba.
         */
-        <p class="sc-vacio sc-vacio-grande">
-          {
-            categoriaPerdida
-              ? /*
-                  El caso que NO es «todavía no hay notas»: la sección existe en el
-                  front pero su categoría no está en el CMS, así que no hay de dónde
-                  sacar notas. El aviso dice exactamente qué buscar, porque es un
-                  desajuste de configuración y no un hueco editorial.
-                */
-                `La sección ${nombreAqui} no encuentra su categoría en el CMS (slug «${seccion?.categoria}»). Revisa que exista en «Categorías» y con ese slug exacto.`
-              : filtro
-                ? `Todavía no hay notas publicadas en ${filtro.nombre}.`
-                : `Todavía no hay notas publicadas en ${nombreAqui}. Si el CMS está arriba y esperabas ver contenido, revisa que las notas estén en estado «publicada», con la estación correspondiente y en la categoría «${seccion?.categoria}».`
-          }
-        </p>
+        categoriaPerdida && (
+          <p class="sc-vacio sc-vacio-grande">
+            {`La sección ${nombreAqui} no encuentra su categoría en el CMS (slug «${seccion?.categoria}»). Revisa que exista en «Categorías» y con ese slug exacto.`}
+          </p>
+        )
       )
     }
   </div>
@@ -326,6 +333,10 @@ const nombreAqui = filtro ? filtro.nombre : (seccion?.rotulo ?? 'esta sección')
     color: var(--mist-2);
   }
   .sc-riel {
+    /* 🔴 Fijo en SU columna: cuando no hay segunda tanda el riel es el único hijo
+       de `.sc-abajo`, y sin esto caería en la de `1fr` y estiraría el box a 700px.
+       Se reinicia en 14e, donde la retícula es de una sola columna. */
+    grid-column: 2;
     position: sticky;
     top: calc(var(--chrome-h) + 16px);
     display: flex;
@@ -404,6 +415,7 @@ const nombreAqui = filtro ? filtro.nombre : (seccion?.rotulo ?? 'esta sección')
       font-size: 19px;
     }
     .sc-riel {
+      grid-column: auto;
       position: static;
     }
   }

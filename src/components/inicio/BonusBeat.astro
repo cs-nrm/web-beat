@@ -72,28 +72,28 @@ function plataformasDe(c: unknown): Array<[string, string]> {
   };
 
   /*
-    🔴 `embedUrl` como respaldo de `youtube`, y ese respaldo es lo único que hoy
-    pinta un enlace en esta sección. Medido contra el CMS: de las 8 canciones
-    capturadas **las 8 traen `embedUrl`** y solo 3 traen `youtube` — y las 3 de la
-    lista publicada de Bonus Beat (ABU SIMBEL, LOST, TWO RIVERS) son justamente de
-    las que NO lo traen. O sea que esta sección se pintaba con cero enlaces, sin
-    forma de oír nada, teniendo el vídeo en el CMS desde el principio: `embedUrl`
-    no lo leía ni una línea del front (`grep` lo confirmaba: solo aparecía en unas
-    notas de migración).
+    📖 Aquí iba `['YOUTUBE', texto('youtube') ?? texto('embedUrl')]`, y se fue el
+    2026-09-09: la pista YA SE OYE en la página. El botón de la portada llama a
+    `fuenteDeCancion()`, que lee esos dos mismos campos, así que el chip no daba
+    una forma más de escuchar — daba una forma de IRSE a escucharlo a otro sitio.
 
-    ⚠️ Donde los dos campos existen son **idénticos byte a byte** en las 3, así que
-    el orden no cambia ningún resultado hoy; se deja `youtube` primero porque es el
-    campo que la interfaz del CMS presenta para capturar, y así una corrección hecha
-    ahí gana sobre lo que haya quedado en `embedUrl`.
+    ⚠️ Y era el único que llegaba a pintarse. Medido contra el CMS el mismo día:
+    de las 3 canciones de la lista publicada, las 3 traen `embedUrl` y NINGUNA
+    trae `spotify`, `appleMusic` ni `deezer`; las 3 filas traen su botón. O sea
+    que a partir de ahora `plataformas` sale vacío y la fila de chips no se pinta.
 
-    ⚠️ Los 8 valores llevan `&list=RD…&start_radio=1`: abren la RADIO de YouTube de
-    esa pista, no la pista sola. Es lo capturado y se respeta tal cual; si estorba se
-    corrige en el CMS, no aquí.
+    Los tres campos que quedan NO son código muerto: es la única salida a tiendas
+    que tiene la sección y vuelven solos en cuanto la redacción los capture. Por
+    eso tampoco se toca `.bb-plataforma` en la hoja de estilos.
+
+    ⚠️ Lo que sí sigue vivo es el detalle de los valores de YouTube: llevan
+    `&list=RD…&start_radio=1`, o sea la RADIO de la pista y no la pista sola. Hoy
+    eso le importa al reproductor, no a este enlace — ver `fuenteDeCancion()` en
+    `src/lib/canciones.ts`; si estorba se corrige en el CMS, no aquí.
   */
   const campos: Array<[string, string | null]> = [
     ['SPOTIFY', texto('spotify')],
     ['APPLE', texto('appleMusic')],
-    ['YOUTUBE', texto('youtube') ?? texto('embedUrl')],
     ['DEEZER', texto('deezer')],
   ];
   return campos.filter((par): par is [string, string] => par[1] !== null);
@@ -144,7 +144,12 @@ function plataformasDe(c: unknown): Array<[string, string]> {
       */}
       <div class:list={['bb-reparto', { 'con-anuncio': enInicio && anuncio }]}>
       <div class="bb-canciones">
-      {lista.canciones?.length ? (
+      {/*
+        📖 Sin canciones no se pinta nada — decisión del 2026-09-09. Aquí caía
+        «Esta edición todavía no tiene canciones cargadas», que en el Inicio dejaba
+        el módulo abierto con una disculpa dentro. Se fue con él su `.bb-vacio`.
+      */}
+      {lista.canciones && lista.canciones.length > 0 && (
         lista.canciones.map((c, i) => {
           const cancion = typeof c.cancion === 'object' ? c.cancion : null;
           const portada = urlMedia(cancion?.portada, 'thumbnail');
@@ -232,10 +237,6 @@ function plataformasDe(c: unknown): Array<[string, string]> {
             </div>
           );
         })
-      ) : (
-        <p class="bb-vacio">
-          Esta edición todavía no tiene canciones cargadas.
-        </p>
       )}
 
       {enInicio && rutaTipo && (
@@ -429,11 +430,6 @@ function plataformasDe(c: unknown): Array<[string, string]> {
   .bb-plataforma:hover {
     background: var(--mist-0);
     color: var(--noche-0);
-  }
-  .bb-vacio {
-    font: var(--type-body-sm);
-    color: var(--text-muted);
-    padding: 20px 0 0;
   }
   .bb-pie {
     display: flex;

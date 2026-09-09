@@ -226,7 +226,13 @@ const tiendas = (
               {publicadas} PUBLICADA{publicadas === 1 ? '' : 'S'}
             </span>
           </div>
-          {capsulas.length > 0 ? (
+          {/*
+            📖 Sin cápsulas la lista no se pinta — decisión del 2026-09-09. Aquí
+            salía «Las cápsulas de este tema todavía no se cargan. Se agregan al
+            especial como piezas», que le explicaba al lector cómo se captura en el
+            CMS. El contador «N PUBLICADAS» de arriba ya dice que son cero.
+          */}
+          {capsulas.length > 0 && (
             capsulasConVideo.map((c) =>
               /*
                 La que TIENE video es un botón: carga el visor de la izquierda sin
@@ -267,11 +273,6 @@ const tiendas = (
                 </a>
               ),
             )
-          ) : (
-            <p class="fr-vacio">
-              Las cápsulas de este tema todavía no se cargan. Se agregan al especial
-              como piezas.
-            </p>
           )}
 
           {patrocina && (
@@ -295,7 +296,12 @@ const tiendas = (
                 <span class="beat-label fr-playlist-nota">{playlist.canciones.length} TRACKS</span>
               )}
             </div>
-            {playlist?.canciones?.length ? (
+            {/*
+              📖 Sin playlist no se pinta la columna — decisión del 2026-09-09. Aquí
+              caía «Sin playlist todavía. Se agrega al especial en “Lista de
+              canciones”», que nombraba un campo del CMS delante del lector.
+            */}
+            {playlist?.canciones && playlist.canciones.length > 0 && (
               <>
                 {playlist.canciones.slice(0, 6).map((c, i) => {
                   const cancion = typeof c.cancion === 'object' ? c.cancion : null;
@@ -373,10 +379,6 @@ const tiendas = (
                   </div>
                 )}
               </>
-            ) : (
-              <p class="fr-vacio">
-                Sin playlist todavía. Se agrega al especial en «Lista de canciones».
-              </p>
             )}
           </div>
 
@@ -929,12 +931,6 @@ const tiendas = (
     }
   }
 
-  .fr-vacio {
-    font: var(--type-body-sm);
-    color: var(--text-muted);
-    margin: 16px 0 0;
-    text-wrap: pretty;
-  }
   .es-vacio {
     box-shadow: inset 0 0 0 1px var(--border-hairline);
   }

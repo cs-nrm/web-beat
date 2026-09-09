@@ -65,7 +65,13 @@ const titulo = 'AGENDA';
 
     <div class="ag-lista">
       {
-        eventos.length > 0 ? (
+        /*
+          📖 Sin eventos la lista no se pinta —decisión del 2026-09-09—. Aquí salía
+          «Todavía no hay eventos publicados. En cuanto la estación cargue el
+          calendario, aparecen aquí»: una promesa con fecha abierta que no es asunto
+          de quien la lee. Se fue con él su `.ag-vacio` y la copia de 14e.
+        */
+        eventos.length > 0 && (
           /*
             🔴 El box va INTERCALADO en la lista, cada seis eventos, y no en una
             franja al final: esta página es una lista larga sin un solo corte
@@ -77,11 +83,6 @@ const titulo = 'AGENDA';
             regla completa —seis, y nunca de cola— está en `CADA`, en `Agenda.astro`.
           */
           <Agenda eventos={eventos} contexto="seccion" anuncio="agenda-box" />
-        ) : (
-          <p class="ag-vacio">
-            Todavía no hay eventos publicados. En cuanto la estación cargue el
-            calendario, aparecen aquí.
-          </p>
         )
       }
     </div>
@@ -102,12 +103,6 @@ const titulo = 'AGENDA';
        tira de tipos. */
     padding: 26px 24px 0;
   }
-  .ag-vacio {
-    font: var(--type-body);
-    color: var(--text-muted);
-    max-width: 62ch;
-    text-wrap: pretty;
-  }
   .ag-franja-anuncio {
     padding: 44px 24px;
   }
@@ -122,9 +117,6 @@ const titulo = 'AGENDA';
     }
     .ag-lista {
       padding: 24px 16px 0;
-    }
-    .ag-vacio {
-      font: var(--type-body-sm);
     }
     .ag-franja-anuncio {
       padding: 32px 16px;

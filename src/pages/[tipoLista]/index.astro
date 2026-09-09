@@ -116,7 +116,14 @@ const tarjeta = TARJETAS_POR_TIPO[slug] ?? null;
     <CabezaSeccion titulo={tipo.nombre.toUpperCase()} activa={`/${slug}`} />
 
     {
-      reciente ? (
+      /*
+        📖 Sin ediciones la página se queda en su rótulo y el leaderboard —decisión
+        del 2026-09-09—. Aquí salía «Todavía no hay ediciones publicadas de …. Cada
+        edición es un documento de “listas” con este tipo y sus canciones»: media
+        instrucción de captura, delante de quien venía a oír música. Se fue con él
+        su `.tl-vacio` y la copia de 14e.
+      */
+      reciente && (
         <>
           {/*
             La última edición va ENTERA, no como una miniatura más de la retícula.
@@ -161,11 +168,6 @@ const tarjeta = TARJETAS_POR_TIPO[slug] ?? null;
             </>
           )}
         </>
-      ) : (
-        <p class="tl-vacio">
-          Todavía no hay ediciones publicadas de {tipo.nombre}. Cada edición es un
-          documento de «listas» con este tipo y sus canciones.
-        </p>
       )
     }
 
@@ -205,13 +207,6 @@ const tarjeta = TARJETAS_POR_TIPO[slug] ?? null;
     color: var(--text-muted);
     white-space: nowrap;
   }
-  .tl-vacio {
-    font: var(--type-body);
-    color: var(--text-muted);
-    max-width: 62ch;
-    padding: 40px 24px 0;
-    text-wrap: pretty;
-  }
   .tl-franja-anuncio {
     padding: 44px 24px;
   }
@@ -233,10 +228,6 @@ const tarjeta = TARJETAS_POR_TIPO[slug] ?? null;
     }
     .tl-corte-titulo {
       font-size: 19px;
-    }
-    .tl-vacio {
-      padding: 28px 16px 0;
-      font: var(--type-body-sm);
     }
     .tl-franja-anuncio {
       padding: 32px 16px;

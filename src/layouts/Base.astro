@@ -703,6 +703,29 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
     </div>
 
     {/*
+      🔴 LA CAPA DEL HALO DEL CURSOR, y va en el marcado a propósito.
+
+      Antes no existía: el halo era el `::after` del `<body>` y su centro salía de
+      una variable que `cursor.ts` escribía en `<html>` en cada movimiento del
+      ratón. Escribir en la raíz invalida el estilo de todo el documento —3.35 ms
+      medidos, con la página cargada— y el degradado se repintaba a pantalla
+      completa. Con eso encima, la respuesta al puntero llegaba tarde: el `:hover`
+      entraba con retraso y el cursor no cambiaba a manita, así que los botones de
+      las cápsulas y los de compartir se sentían deshabilitados. Ver `beat.css`.
+
+      Como elemento propio, la posición va en un `transform` sobre una capa
+      promovida y moverla no cuesta ni estilo ni pintado.
+
+      🔴 `transition:persist` por lo mismo que la barra de progreso: sin él, cada
+      navegación trae un nodo nuevo y la referencia que guarda `cursor.ts` se queda
+      apuntando a uno huérfano. El script comprueba `isConnected` de todos modos,
+      pero la red y el cinturón cuestan lo mismo aquí.
+
+      ⚠️ Vacío y `aria-hidden`: es luz, no contenido.
+    */}
+    <div class="cursor-halo" data-halo aria-hidden="true" transition:persist="halo"></div>
+
+    {/*
       🔴 EL VISOR FLOTANTE DE LAS CANCIONES.
 
       Va en el marcado y no lo construye `pista.ts`, por lo mismo que la barra: con

@@ -93,20 +93,16 @@ const anteriores = vigente ? todos.filter((t) => t.id !== vigente.id) : todos;
       )
     }
 
-    {
-      /*
-        Degrada en vez de tronar, como el resto del sitio. Y el mensaje dice qué
-        falta EN EL CMS, no un «no hay nada» que deje a quien lo lea sin saber si
-        el sitio está roto o la sección está vacía.
-      */
-      !vigente && anteriores.length === 0 && (
-        <p class="fr-vacio">
-          Todavía no hay ningún tema publicado. Los temas son documentos de
-          «especiales» con la serie «{SERIE_FENOMENO}», y sus cápsulas son las
-          piezas de cada uno.
-        </p>
-      )
-    }
+    {/*
+      📖 Sin ningún tema la página se queda en su rótulo y el leaderboard —decisión
+      del 2026-09-09—. Aquí salía «Todavía no hay ningún tema publicado. Los temas
+      son documentos de “especiales” con la serie “…”, y sus cápsulas son las piezas
+      de cada uno»: el reparto interno del CMS, a la vista de cualquiera. Se fue con
+      él su `.fr-vacio` y la copia de 14e.
+
+      Sigue degradando en vez de tronar, que es la regla de la casa; lo que cambia
+      es que ahora degrada callado.
+    */}
 
     <div class="fr-franja-anuncio">
       <Anuncio formato="leaderboard" nombre="fenomeno-leader" />
@@ -133,13 +129,6 @@ const anteriores = vigente ? todos.filter((t) => t.id !== vigente.id) : todos;
     letter-spacing: -0.01em;
     color: var(--mist-2);
   }
-  .fr-vacio {
-    font: var(--type-body);
-    color: var(--text-muted);
-    max-width: 62ch;
-    padding: 40px 24px 0;
-    text-wrap: pretty;
-  }
   .fr-franja-anuncio {
     padding: 44px 24px;
   }
@@ -150,10 +139,6 @@ const anteriores = vigente ? todos.filter((t) => t.id !== vigente.id) : todos;
     }
     .fr-corte-titulo {
       font-size: 19px;
-    }
-    .fr-vacio {
-      padding: 28px 16px 0;
-      font: var(--type-body-sm);
     }
     .fr-franja-anuncio {
       padding: 32px 16px;

@@ -102,7 +102,15 @@ const alAireAhora = parrilla.alAire;
     }
 
     {
-      programas.length > 0 ? (
+      /*
+        📖 Sin parrilla no se pinta la lista —decisión del 2026-09-09—. Aquí salía
+        «Todavía no hay programas cargados. Cada uno es un documento de “programas”
+        con sus bloques de horario; en cuanto la estación capture la parrilla,
+        aparece aquí y también en el panel de la señal del Inicio»: tres renglones
+        de manual de CMS en una página pública. Se fue con él su `.pr-vacio` y la
+        copia de 14e.
+      */
+      programas.length > 0 && (
         <div class="pr-lista">
           {programas.map((p) => {
             const foto = urlMedia(p.imagen, 'card');
@@ -131,12 +139,6 @@ const alAireAhora = parrilla.alAire;
             );
           })}
         </div>
-      ) : (
-        <p class="pr-vacio">
-          Todavía no hay programas cargados. Cada uno es un documento de «programas»
-          con sus bloques de horario; en cuanto la estación capture la parrilla,
-          aparece aquí y también en el panel de la señal del Inicio.
-        </p>
       )
     }
 
@@ -252,13 +254,6 @@ const alAireAhora = parrilla.alAire;
     color: var(--text-faint);
   }
 
-  .pr-vacio {
-    font: var(--type-body);
-    color: var(--text-muted);
-    max-width: 62ch;
-    padding: 40px 24px 0;
-    text-wrap: pretty;
-  }
   .pr-franja-anuncio {
     padding: 44px 24px;
   }
@@ -283,10 +278,6 @@ const alAireAhora = parrilla.alAire;
     }
     .pr-nombre {
       font-size: 17px;
-    }
-    .pr-vacio {
-      padding: 28px 16px 0;
-      font: var(--type-body-sm);
     }
     .pr-franja-anuncio {
       padding: 32px 16px;

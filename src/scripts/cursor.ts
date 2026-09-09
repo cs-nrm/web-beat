@@ -15,11 +15,25 @@
 
 /** Un único apuntado pendiente por fotograma, compartido por todas las tarjetas. */
 let pendiente: HTMLElement | null = null;
-let x = 0;
-let y = 0;
 /** Posición en la ventana, para el halo que acompaña al cursor por todo el sitio. */
 let vx = 0;
 let vy = 0;
+
+/**
+ * La capa del halo.
+ *
+ * 🔴 Se busca perezosamente y se vuelve a buscar si el nodo se desconectó. Lleva
+ * `transition:persist`, así que sobrevive a la navegación — pero guardar la
+ * referencia y no comprobarla nunca es cómo se acaba moviendo un nodo huérfano:
+ * el efecto muere en silencio y desde el código se ve correcto. Ya pasó con el
+ * `<video>` de montaje del visor, que Plyr reemplaza a media vida.
+ */
+let halo: HTMLElement | null = null;
+
+function capaHalo(): HTMLElement | null {
+  if (!halo?.isConnected) halo = document.querySelector<HTMLElement>('[data-halo]');
+  return halo;
+}
 
 /**
  * El fotograma pedido y todavía sin pintar, o `0` si no hay ninguno.
@@ -42,16 +56,55 @@ function pintar(): void {
   solicitud = 0;
 
   /*
-   * El halo global va sobre `<html>` y en píxeles de ventana, porque su capa es
-   * `position: fixed`: no depende de qué haya debajo ni de si el cursor está sobre
-   * algo interactivo.
+   * 🔴 El halo se MUEVE, no se vuelve a dibujar — y esta es la corrección que
+   * arregla los botones que «se sentían deshabilitados».
+   *
+   * Antes esto escribía `--cursor-x` / `--cursor-y` en `<html>` y el degradado de
+   * la capa se recentraba desde ahí. Una variable en la RAÍZ invalida el estilo
+   * calculado de todo lo que la hereda, o sea del documento entero. Medido en el
+   * v2 desplegado, con 627 nodos:
+   *
+   *     escribir las dos variables en `<html>` ....... 3.35 ms
+   *     escribir cuatro en una tarjeta ............... 0.06 ms
+   *     mover esta capa con `transform` ............. 0.002 ms
+   *
+   * 3.35 ms es la quinta parte de un fotograma a 60 Hz, y se pagaban en CADA
+   * movimiento del ratón, en TODAS las páginas — más el repintado de una capa a
+   * pantalla completa que además iba por encima del contenido. Con la página
+   * ocupada (vídeo, marquesina, anuncios) el hilo principal no llegaba, y lo
+   * primero que se pierde cuando no llega es la respuesta al puntero: el `:hover`
+   * entra tarde, el cursor no cambia a manita y el botón parece muerto. Era eso,
+   * no el estilo del botón.
+   *
+   * Con la posición en un `transform` sobre una capa promovida, mover el halo lo
+   * resuelve el compositor: cero recálculo de estilo y cero repintado.
    */
-  const raiz = document.documentElement;
-  raiz.style.setProperty('--cursor-x', `${vx}px`);
-  raiz.style.setProperty('--cursor-y', `${vy}px`);
+  const capa = capaHalo();
+  if (capa) capa.style.transform = `translate3d(${vx}px, ${vy}px, 0)`;
 
   const el = pendiente;
   if (!el) return;
+
+  /*
+   * 🔴 La CAJA de la tarjeta se mide AQUÍ, dentro del fotograma, y no en el
+   * manejador del puntero.
+   *
+   * `getBoundingClientRect()` obliga al navegador a resolver la maquetación en el
+   * acto. Suelto cuesta nada (0.001 ms medidos), pero dentro de un `pointermove`
+   * el precio no es suyo: es el de recalcular todo lo que quedara pendiente en ese
+   * momento — y en esta página siempre hay algo, entre los anuncios que llegan y
+   * se redimensionan, la marquesina y el vídeo. Pedirlo decenas de veces por
+   * segundo, cada una posiblemente detrás de una maquetación sucia, es el patrón
+   * que hace que el puntero se sienta pegajoso.
+   *
+   * En el fotograma se mide una vez, ya con la maquetación asentada, que además es
+   * la posición que de verdad se va a pintar.
+   */
+  const r = el.getBoundingClientRect();
+  if (!r.width || !r.height) return;
+  const x = ((vx - r.left) / r.width) * 100;
+  const y = ((vy - r.top) / r.height) * 100;
+
   el.style.setProperty('--mx', `${x}%`);
   el.style.setProperty('--my', `${y}%`);
 
@@ -84,19 +137,21 @@ function alMover(e: PointerEvent): void {
    * El halo se enciende en el PRIMER movimiento, no antes. Si la capa naciera
    * visible, se pintaría en la esquina superior izquierda hasta que alguien moviera
    * el ratón — una mancha de luz en un rincón, sin explicación.
+   *
+   * ⚠️ Y se escribe UNA vez, no en cada movimiento. Chrome descarta el atributo
+   * que no cambia y ahí no costaba nada (medido: 0.001 ms), pero eso es una
+   * optimización de un motor, no una garantía: la guarda hace que el precio sea
+   * cero en todos.
    */
-  document.documentElement.dataset.cursor = '';
-
-  const el = (e.target as Element | null)?.closest<HTMLElement>('[data-luz]') ?? null;
-  pendiente = el;
-
-  if (el) {
-    const r = el.getBoundingClientRect();
-    if (r.width && r.height) {
-      x = ((e.clientX - r.left) / r.width) * 100;
-      y = ((e.clientY - r.top) / r.height) * 100;
-    }
+  if (document.documentElement.dataset.cursor === undefined) {
+    document.documentElement.dataset.cursor = '';
   }
+
+  /*
+   * Aquí solo se APUNTA sobre qué tarjeta está el cursor. Medirla es trabajo del
+   * fotograma; ver el comentario de `pintar()`.
+   */
+  pendiente = (e.target as Element | null)?.closest<HTMLElement>('[data-luz]') ?? null;
 
   /*
    * Un solo fotograma pendiente para todo el documento. `pointermove` dispara

@@ -551,6 +551,19 @@ html {
   z-index: var(--z-dialog);
   overflow: hidden;
   /*
+    🔴 En reposo NO recibe el puntero, y esto es un fallo real por pequeño que sea.
+
+    La caja vive SIEMPRE en la página: 1×1 px, `position: fixed`, `margin: auto`
+    sobre `inset: 0` —o sea, clavada en el centro EXACTO del viewport— y con el
+    z-index de diálogo, que es el más alto del sitio. Sin esta línea, ese píxel
+    central está muerto en todas las páginas: lo que caiga debajo no recibe hover,
+    no recibe clic y el cursor se dibuja como flecha encima de él.
+
+    Un píxel es poco, pero es un píxel que se mueve con la ventana y que nadie
+    puede ver ni explicar cuando lo pisa. Y el coste de cerrarlo es esta línea.
+  */
+  pointer-events: none;
+  /*
     🔴 SIN transición de `width`/`height`, a propósito.
     El IMA de Google MIDE el contenedor cuando arranca el anuncio para decidir a
     qué tamaño renderizar el creativo. Si en ese instante la caja va animándose
@@ -562,6 +575,13 @@ html {
 
 /* La añade `player.ts` en `ad-playback-start` y la quita en complete/error. */
 .td-contenedor.es-anuncio {
+  /*
+    Con el anuncio dentro SÍ recibe el puntero: el creativo del VAST es clicable y
+    el IMA cuenta ese clic. La clase la pone `player.ts` en `ad-playback-start` y
+    la quita en `complete`/`error`, así que la ventana en la que esta caja captura
+    el puntero es exactamente la ventana en la que hay algo que pulsar.
+  */
+  pointer-events: auto;
   width: 600px;
   height: 360px;
   background: var(--noche-0);
@@ -1829,7 +1849,7 @@ html[data-cursor] .cursor-halo {
    en una capa POSTERIOR a `proyecto`: desde aquí el `height: 0` no puede ganar por
    mucha especificidad que se le eche, porque las capas mandan sobre la
    especificidad. Los estilos de un componente Astro no llevan capa, así que ganan a
-   todas. Medido: desde aquí la barra se quedaba en 56px.
+   todas. Medido: desde aquí la barra se quedaba en 56px. */
 
 /*
   El wordmark de la barra clara y su hamburguesa: apagados arriba del todo,

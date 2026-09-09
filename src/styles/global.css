@@ -27,6 +27,10 @@
   --gray-beat: #d4d4d8;
   --amarillo-beat: #FFAA1F;
 
+  --verde-electrico: #CDDC29;
+  --amarillo-beat: #CDDC29;
+  --gray-beat: #CDDC29;
+
 
   --border: hsl(280 10% 50% / 1);
   --card: hsl(0 0% 0%);
@@ -41,10 +45,12 @@
 
 .amarillo-beat {
   color: var(--amarillo-beat);
+  color: var(--verde-electrico) !important;
 }
 
 .gray-beat {
   color: #868583;
+  color: var(--verde-electrico) !important;
 }
 
 .aspect-not {
@@ -150,7 +156,8 @@ main {
 
 body::before {
   content: '';
-  background: url(/img/back.jpg);
+  /*background: url(/img/back.jpg);*/
+  background: url('https://storage.googleapis.com/nrm-web/beat/resources/img/back-verde-beat.jpg');
   background-size: cover;
   width: 100%;
   height: 100%;
@@ -169,6 +176,7 @@ h5,
 h6 {
   margin: 0 0 0.5rem 0;
   color: rgb(var(--gray-beat));
+  color: var(--verde-electrico) !important;
   line-height: 1.2;
 }
 

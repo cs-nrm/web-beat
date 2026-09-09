@@ -337,7 +337,7 @@ curl -s https://beatdigital.mx/noticias/<slug> | grep -E 'og:|twitter:|canonical
 
 # Que cada sección traiga SU tarjeta y el Inicio y los legales el respaldo.
 for u in / /editorial /beat-scanner /eventos /fenomeno-residente /bonus-beat \
-         /programacion /aviso-de-privacidad; do
+         /programacion /avisodeprivacidad; do
   curl -s "http://localhost:4321$u" | grep -o 'og:image" content="[^"]*"'
 done
 ```

@@ -267,8 +267,8 @@ export const SEGMENTOS_RESERVADOS = [
     estos tres segmentos son los que hay que SACAR de aquí: pasarían a resolverse
     como slug de contenido, que es justo lo que esta lista bloquea.
   */
-  'aviso-de-privacidad',
-  'terminos-y-condiciones',
+  'avisodeprivacidad',
+  'terminosycondiciones',
   'alexa',
   'programacion',
   'comunidad',

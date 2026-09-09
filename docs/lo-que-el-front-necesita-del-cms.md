@@ -62,7 +62,7 @@ el código". Si mañana quieren una lista nueva, la crean sin tocar código.
 Para «Beat para marcas» (§8: audiencia y perfil del oyente, espacios patrocinables,
 casos de éxito, contacto comercial) más el aviso de privacidad y los términos.
 `titulo`, `slug`, `contenido` (Lexical), SEO. El front ya reserva `/marcas`,
-`/aviso-de-privacidad` y `/terminos-y-condiciones`.
+`/avisodeprivacidad` y `/terminosycondiciones`.
 
 ### ❌ Ya NO hacen falta
 `charts` y `promociones` quedaron fuera del alcance del relanzamiento. Y `listas`

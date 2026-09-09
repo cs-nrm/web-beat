@@ -272,10 +272,12 @@ export const APPS: Array<{ tienda: string; url: string | null }> = [
  *
  * El texto sale del sitio actual (`beatdigital.mx/avisodeprivacidad/` y
  * `/terminosycondiciones/`), no se reescribe: es texto legal vigente y no es
- * nuestro para redactarlo. Ver `src/pages/aviso-de-privacidad.astro`.
+ * nuestro para redactarlo. Ver `src/pages/avisodeprivacidad.astro`.
  *
- * ⚠️ Y por eso mismo NO se enlaza a esas URLs del v1: mueren el día del corte. Lo
- * que se conserva es el contenido, en una ruta nuestra.
+ * ⚠️ Los `href` son RELATIVOS y apuntan a este sitio, no al dominio del v1. Que la
+ * ruta se escriba igual que la del v1 —sin guiones, decisión de Carlos
+ * (2026-09-09)— es justo lo que hace que los enlaces al aviso que ya andan por ahí
+ * sigan cayendo en su página el día del corte, sin pasar por una redirección.
  *
  * ⚠️ `Ventas` sí es del CORPORATIVO y se queda apuntando allá: sale del pie del v1
  * y del de los repos hermanos, y es el contacto comercial de NRM, no de la
@@ -283,8 +285,8 @@ export const APPS: Array<{ tienda: string; url: string | null }> = [
  * conviene perder en un relanzamiento.
  */
 export const LEGALES: EntradaNav[] = [
-  { corto: 'Aviso de privacidad', largo: 'Aviso de privacidad', href: '/aviso-de-privacidad' },
-  { corto: 'Términos y condiciones', largo: 'Términos y condiciones', href: '/terminos-y-condiciones' },
+  { corto: 'Aviso de privacidad', largo: 'Aviso de privacidad', href: '/avisodeprivacidad' },
+  { corto: 'Términos y condiciones', largo: 'Términos y condiciones', href: '/terminosycondiciones' },
   { corto: 'Ventas', largo: 'Ventas', href: 'https://nrm.com.mx/contacto/' },
 ];
 

@@ -484,11 +484,17 @@ function alTerminar(): void {
  * sitio). Para el árbitro de audio del sitio esto es solo pausar; para el producto
  * es lo contrario de una trampa.
  *
- * ⚠️ NO arranca el radio: pausar una pista y que empiece a sonar otra cosa que
- * nadie pidió es peor que el silencio. Devuelve la barra a su estado de partida y
- * el oyente pulsa play si quiere.
+ * 🔴 `arrancar` decide si además SUENA, y por defecto no.
+ *
+ * 📖 Hasta el 2026-09-09 nunca arrancaba, con este argumento: «pausar una pista y
+ * que empiece a sonar otra cosa que nadie pidió es peor que el silencio». El
+ * argumento sigue siendo bueno para la X del visor —ahí el gesto es «quita esto»—
+ * pero era **equivocado para el botón «En vivo»**: ese control no dice «para», dice
+ * a dónde quieres ir. Pulsarlo y quedarte en silencio esperando un segundo clic es
+ * pedirle al oyente que confirme lo que acaba de pedir. Corregido a pedido de
+ * Carlos, que es quien lo usó y notó el paso de más.
  */
-export function volverAlDirecto(): void {
+export function volverAlDirecto(arrancar = false): void {
   const a = w().__beatPista;
   if (a) {
     a.pause();
@@ -515,6 +521,33 @@ export function volverAlDirecto(): void {
   // El player del radio vuelve a mandar en el botón; que nazca en reposo.
   const p = barra();
   if (p) p.dataset.status = 'init';
+  if (arrancar) pedirDirecto();
+}
+
+/**
+ * Pide el directo pulsando el botón de play, de verdad.
+ *
+ * 🔴 Un clic sintético y NO una función importada de `player.ts`, y la razón no es
+ * pereza: «arrancar el directo» no es una función allí, son DOS manejadores sobre
+ * el mismo botón —el del camino frío, que baja los 854 KB del SDK y guarda la
+ * intención en `arranquePendiente`, y el del caliente, que alterna—. Cada uno vive
+ * en su clausura con su propio estado (`iniciado`, `listo`, `sdk`). Exportar «lo
+ * que hace falta» significaría reestructurar los dos, en el archivo más delicado
+ * del repo y con el audio del sitio de por medio.
+ *
+ * Pulsando el botón se recorre el camino que ya funciona, entero: SDK a demanda,
+ * intención pendiente, pre-roll VAST, estados de la barra y el árbitro.
+ *
+ * ⚠️ Los dos manejadores se protegen con `mandaLaPista()`, que lee `modo` del DOM.
+ * Por eso esto va DESPUÉS de `modo('directo')`: al revés, los dos ignorarían el
+ * clic por creer que es de la pista, y no pasaría nada.
+ *
+ * ⚠️ Y funciona porque estamos DENTRO del gesto del usuario —el clic en «En
+ * vivo»—, así que la activación sigue vigente y el navegador no bloquea el audio.
+ * Llamado desde un temporizador, esto se lo comería la política de autoplay.
+ */
+function pedirDirecto(): void {
+  el<HTMLButtonElement>('[data-accion="play"]')?.click();
 }
 
 /** Alterna la pista en curso. Lo llama el botón de play cuando el modo es pista. */
@@ -640,7 +673,8 @@ export function prepararPista(): void {
 
     if (t.closest('[data-accion="directo"]')) {
       e.preventDefault();
-      volverAlDirecto();
+      // «En vivo» arranca la señal. Ver el comentario de `volverAlDirecto`.
+      volverAlDirecto(true);
       return;
     }
 

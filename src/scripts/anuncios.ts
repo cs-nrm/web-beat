@@ -94,6 +94,62 @@ function marcar(id: string, vacio: boolean): void {
   if (!marco) return;
   if (vacio) marco.dataset.vacio = '';
   else delete marco.dataset.vacio;
+  if (!vacio) encajar(id);
+}
+
+/**
+ * Encaja un creativo que llegó más grande que el hueco.
+ *
+ * 🔴 Existe por un fallo visto en el v2 desplegado (Carlos, 2026-09-09, iPhone):
+ * el hueco del leaderboard reservaba sus **320×100** de móvil y GAM metió dentro
+ * un **728×90**, la medida de escritorio. Con `overflow: visible` el iframe se
+ * salía de lado y se pintaba ENCIMA del Fenómeno. Medido en v2: hueco 320×100,
+ * iframe 728×90, overflow visible en el hueco y en el marco.
+ *
+ * 🔴 Se ESCALA en vez de recortar, y esa es la decisión. `overflow: hidden` a secas
+ * protegería la maquetación —que es lo urgente— pero entregaría al anunciante un
+ * creativo cortado por la mitad, servido y facturado. Escalado se ve entero, cabe,
+ * y la página no se rompe.
+ *
+ * ⚠️ Solo se escala hacia ABAJO. Un creativo más pequeño que su hueco se deja como
+ * está: ampliarlo lo pixelaría, y además puede ser correcto —un 300×250 dentro de
+ * un hueco de 300×250 con aire—.
+ *
+ * ⚠️ Esto es un PARACHOQUES, no la solución. Que GAM sirva una medida que el slot
+ * no pidió se arregla en Ad Manager, restringiendo el ad unit a las medidas dadas
+ * de alta. Mientras eso no pase, esto evita que la portada se rompa.
+ */
+function encajar(id: string): void {
+  const hueco = document.getElementById(id);
+  if (!hueco) return;
+  const iframe = hueco.querySelector<HTMLIFrameElement>('iframe');
+  if (!iframe) return;
+
+  /*
+    Se mide el ANCHO DECLARADO del iframe, no su caja pintada: si una regla de CSS
+    ya lo hubiera comprimido, la caja diría que cabe y el contenido seguiría
+    saliéndose por dentro del propio iframe.
+  */
+  const anchoCreativo = Number(iframe.getAttribute('width')) || iframe.offsetWidth;
+  const anchoHueco = hueco.clientWidth;
+  if (!anchoCreativo || !anchoHueco || anchoCreativo <= anchoHueco) {
+    delete hueco.dataset.encajado;
+    iframe.style.removeProperty('transform');
+    iframe.style.removeProperty('transform-origin');
+    return;
+  }
+
+  const factor = anchoHueco / anchoCreativo;
+  iframe.style.transformOrigin = 'top left';
+  iframe.style.transform = `scale(${factor.toFixed(4)})`;
+  /*
+    El hueco se marca para que el CSS pueda dejar de reservar la proporción de la
+    medida pedida: el creativo escalado tiene OTRA altura, y mantener el
+    `aspect-ratio` original dejaría una banda vacía debajo o lo cortaría.
+  */
+  hueco.dataset.encajado = '';
+  const altoCreativo = Number(iframe.getAttribute('height')) || iframe.offsetHeight;
+  if (altoCreativo) hueco.style.height = `${Math.round(altoCreativo * factor)}px`;
 }
 
 /**

@@ -290,6 +290,24 @@ if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
     width: 100%;
     background: var(--surface-card);
     box-shadow: inset 0 0 0 1px var(--border-hairline);
+    /*
+      🔴 El hueco CONTIENE. Sin esto, un creativo más grande que la medida pedida
+      se sale y se pinta encima del contenido: visto en el v2 desplegado, un
+      728×90 de GAM dentro del hueco de 320×100 del móvil, tapando el Fenómeno.
+
+      ⚠️ Es la red de seguridad, no el arreglo. `anuncios.ts` escala el creativo
+      para que quepa ENTERO —recortar un anuncio servido y facturado es faltarle al
+      anunciante—, y esto solo garantiza que, si el escalado no llega a aplicarse,
+      lo que sobra no rompa la página.
+    */
+    overflow: hidden;
+  }
+  /*
+    Con el creativo escalado, la altura la fija el script en píxeles: la proporción
+    de la medida PEDIDA ya no describe lo que hay dentro.
+  */
+  .anuncio-hueco[data-encajado] {
+    aspect-ratio: auto;
   }
 
   /* El banner de portada va a sangre y con el rótulo ENCIMA, no arriba: es lo

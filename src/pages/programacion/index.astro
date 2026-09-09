@@ -21,19 +21,28 @@
  * Se construyeron, se acordó el campo con el CMS y se retiraron sin desplegarlo.
  * El porqué completo y qué haría falta para que vuelvan, en `lib/cms/programacion.ts`.
  *
- * ⚠️ NO lleva `CabezaSeccion`, y sigue siendo la única página del sitio que se
- * aparta de ella. Lo que sí conserva es lo que hacía falta de verdad: la TIRA de
- * secciones, que es la única navegación visible de un interior (movimiento.md §9).
- * Se pinta aquí directa, y por eso este archivo no puede reusar el componente.
+ * 🔴 Y con el panel se fue lo último que apartaba a esta página de las demás: YA
+ * LLEVA `CabezaSeccion`, como las otras siete. Era la única excepción del sitio, y
+ * su motivo era el hero —un display de 64px repitiendo el nombre de la sección
+ * encima de un panel que ya decía «AL AIRE AHORA · RUSH HOUR» empujaba la señal
+ * abajo del pliegue—. Sin hero, la excepción no tenía de qué colgar.
  *
- * ⚠️ El `<h1>` es «LA SEMANA COMPLETA» y el kicker de encima dice «PROGRAMACIÓN»
- * —decía «PARRILLA» hasta el 2026-09-09—. Es el nombre con el que la sección se
- * enlaza en el pie y con el que se busca; «parrilla» es como le decimos en la
- * casa. El titular no se toca: describe lo que hay debajo, que es la semana entera
- * y no el día.
+ * ⚠️ El titular es «PROGRAMACIÓN» a secas, en grande, sin kicker (Carlos,
+ * 2026-09-09): «quita lo de LA SEMANA COMPLETA, solo ponle PROGRAMACIÓN en grande,
+ * no en chiquito». El lienzo pone «PARRILLA 2026» chiquito sobre otro titular
+ * grande, y las tres piezas se cayeron el mismo día —el año, el kicker y «LA
+ * SEMANA COMPLETA»—. «Parrilla» es como le decimos en la casa; «Programación» es
+ * como se enlaza y como la busca la gente.
+ *
+ * ⚠️ Se pierde lo único que anunciaba que la rejilla es de SIETE días y no la de
+ * hoy. Se acepta: la propia rejilla lo enseña con sus siete columnas rotuladas,
+ * que convence más que prometerlo en un titular.
+ *
+ * ⚠️ Y la tira de secciones ahora marca `/programacion` como activa, que antes no
+ * podía: la entrada no estaba en `SECCIONES` hasta ese mismo día.
  */
 import Base from '@/layouts/Base.astro';
-import NavSecciones from '@/components/NavSecciones.astro';
+import CabezaSeccion from '@/components/CabezaSeccion.astro';
 import Anuncio from '@/components/Anuncio.astro';
 import { obtenerProgramacion } from '@/lib/cms/programacion';
 import { comoHora, ROTULO_DIA } from '@/lib/parrilla';
@@ -64,29 +73,12 @@ const HORAS = Array.from({ length: 24 }, (_, h) => comoHora(h * 60));
   imagenAlto={MEDIDA_TARJETA.alto}
 >
   <div class="pr">
-    <NavSecciones activa={null} />
+    <CabezaSeccion titulo="PROGRAMACIÓN" activa="/programacion" />
 
-    {/* ═══ 1. LA SEMANA COMPLETA ═══ */}
+    {/* ═══ 1. LA REJILLA ═══ */}
     {
       semana.some((d) => d.segmentos.length > 0) && (
         <section class="pr-semana">
-          {/*
-            🔴 «PROGRAMACIÓN», no «PARRILLA» (Carlos, 2026-09-09). El lienzo dice
-            «PARRILLA 2026» y ninguna de las dos palabras sobrevivió entera: el año
-            se queda fuera —el 1 de enero sería falso, y mientras es verdad no
-            informa de nada— y el rótulo pasa a ser el nombre con el que la sección
-            se enlaza en el pie y con el que la gente la busca. «Parrilla» es como
-            le decimos en la casa.
-
-            ⚠️ Y aquí había un `.pr-cabeza` en flex con los filtros a la derecha.
-            Sin filtros era un contenedor de un solo hijo, así que se fue con
-            ellos: el kicker y el titular van directos.
-          */}
-          <p class="beat-label pr-kicker">PROGRAMACIÓN</p>
-          <h1 class="beat-display beat-resplandor es-fuerte pr-titulo" data-escribir>
-            LA SEMANA COMPLETA
-          </h1>
-
           {/*
             🔴 La rejilla: UN solo DOM para las dos maquetaciones.
 
@@ -197,18 +189,19 @@ const HORAS = Array.from({ length: 24 }, (_, h) => comoHora(h * 60));
   /* ============================================================
      La página
      ============================================================ */
+  /*
+    🔴 SIN padding. Lo pone cada bloque, porque desde el 2026-09-09 el primero es
+    `CabezaSeccion` y ese componente trae el suyo (`28px 24px 0`): sumarle el de
+    aquí metía la tira de secciones 48px adentro. Es la misma forma que
+    `eventos/[slug].astro`, que también abre con la cabecera compartida.
+  */
   .pr {
     max-width: var(--grid-max);
     margin: 0 auto;
-    padding: 28px 24px 0;
   }
 
-  /*
-    El aire que antes ponía el hero. Con el panel fuera, el kicker quedaba pegado a
-    la tira de secciones y las dos cosas se leían como un solo bloque de rótulos.
-  */
   .pr-semana {
-    margin-top: 34px;
+    padding: 34px 24px 0;
   }
 
   /* ============================================================
@@ -394,28 +387,21 @@ const HORAS = Array.from({ length: 24 }, (_, h) => comoHora(h * 60));
      Publicidad
      ============================================================ */
   .pr-franja-anuncio {
-    padding: 48px 0;
+    padding: 48px 24px;
   }
 
   /* ============================================================
      Móvil
      ============================================================ */
   @media (max-width: 899px) {
-    .pr {
-      padding: 18px 16px 0;
-    }
-
     /*
-      🔴 Fluido, no fijo — es la misma trampa que ya midió `CabezaSeccion`: un
-      titular de una sola palabra no puede partirse, y a 32px se sale de una caja
-      de 343px.
+      ⚠️ Aquí vivía un `clamp` para el titular. Se fue con él: el de
+      `CabezaSeccion` está medido contra esta palabra exacta —«PROGRAMACIÓN» a 38px
+      medía 406px en una caja de 343— así que el caso ya estaba resuelto en el
+      componente y tenerlo dos veces era esperar a que divergieran.
     */
-    .pr-titulo {
-      font-size: clamp(22px, 7.4vw, 32px);
-    }
-
     .pr-semana {
-      margin-top: 26px;
+      padding: 26px 16px 0;
     }
 
     /*
@@ -507,7 +493,7 @@ const HORAS = Array.from({ length: 24 }, (_, h) => comoHora(h * 60));
     }
 
     .pr-franja-anuncio {
-      padding: 36px 0;
+      padding: 36px 16px;
     }
   }
 

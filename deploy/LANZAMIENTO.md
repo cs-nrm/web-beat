@@ -20,7 +20,105 @@ El script lo imprime al terminar, salga bien o mal.
 
 ---
 
-## Hoy (9 sep)
+## Los pasos, en orden
+
+Cada uno dice qué esperar. Si algo no coincide, **para** y revisa antes de seguir.
+
+### HOY
+
+**1 · Desplegar v2 con la tabla de redirecciones**
+
+```bash
+cd /var/www/web-beat-v2 && git pull --ff-only origin beat && sudo ./scripts/desplegar-v2.sh
+```
+
+→ Termina en `✓ v2 desplegado en <commit>`.
+Es el único paso que TIENE que estar hecho antes del corte.
+
+**2 · Copiar el vhost**
+
+```bash
+sudo cp /var/www/web-beat-v2/deploy/apache/020-beatdigital.conf /etc/apache2/sites-available/
+```
+
+→ Sin salida. **No libera nada**: Apache solo lee `sites-enabled`, y esto no
+recarga nada.
+
+**3 · Ensayo, validando el vhost nuevo**
+
+```bash
+sudo VHOST_NUEVO=020-beatdigital.conf VALIDAR_NUEVO=1 ./scripts/cambiar-dominio.sh
+```
+
+→ Todo en verde, salvo el aviso de `www`, que es esperado.
+→ **No recarga Apache.** `VALIDAR_NUEVO=1` enlaza el vhost un instante para que
+Apache lo analice y lo desenlaza; sin recargar, el sitio sigue en el v1.
+
+**4 · Decidir las dos que caducan hoy**
+
+- `PUBLIC_METRICOOL_HASH` es de BUILD: si no entra hoy, ponerlo después obliga a
+  reconstruir el sitio ya lanzado.
+- `PUBLICIDAD_TOKEN` es de runtime, pero sin ella las campañas vendidas no cuentan
+  impresiones ni clics.
+
+### MAÑANA, 10 SEP
+
+**5 · Repetir el ensayo (10:00)**
+
+```bash
+sudo VHOST_NUEVO=020-beatdigital.conf ./scripts/cambiar-dominio.sh
+```
+
+→ Todo en verde. Confirma que nada cambió durante la noche.
+
+**6 · El corte (10:09)**
+
+```bash
+sudo VHOST_NUEVO=020-beatdigital.conf CONFIRMAR=1 ./scripts/cambiar-dominio.sh
+```
+
+→ ~20 segundos. Tiene que terminar en:
+`✓ beatdigital.mx sirve el v2 y está indexable`
+→ 🔴 La línea que importa es `✓ INDEXABLE: <meta robots> dice index, follow`.
+
+**7 · Comprobar a mano**
+
+```bash
+curl -sI https://beatdigital.mx/news/ | head -2
+curl -s https://beatdigital.mx/ | grep -c 'href="/noticias/'
+```
+
+→ `301` hacia `/beat-scanner`, y un número ≥ 1.
+→ Y en el teléfono: que suene el directo, que una canción abra el visor y que
+«En vivo» devuelva la señal.
+
+**8 · Ampliar el certificado a www**
+
+```bash
+sudo certbot certonly --webroot -w /var/www/acme -d beatdigital.mx -d www.beatdigital.mx --expand
+```
+
+→ Ahora sí funciona: el vhost nuevo ya sirve el ápex y lleva el `Alias` del reto.
+Antes del corte falla con 404 — comprobado el 9 sep.
+
+**9 · Limpieza** *(cuando quieras, no es del lanzamiento)*
+
+```bash
+sudo rm /etc/apache2/sites-available/{oye897,oye897-le-ssl,wordpress-http,wordpress-https}.conf
+sudo apachectl configtest && sudo systemctl reload apache2
+```
+
+### SI ALGO SALE MAL, EN CUALQUIER PASO
+
+```bash
+sudo a2dissite 020-beatdigital && sudo systemctl reload apache2
+```
+
+---
+
+## Detalle de cada paso
+
+### Hoy (9 sep)
 
 ### 1. Desplegar v2 con la tabla de redirecciones
 

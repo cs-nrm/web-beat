@@ -90,8 +90,44 @@ exigir $? "el vhost nuevo lleva ProxyPreserveHost On"
 grep -qi "ServerName[[:space:]]\+$DOMINIO" "$SITIOS/$VHOST_NUEVO" 2>/dev/null
 exigir $? "el vhost nuevo declara ServerName $DOMINIO"
 
+# ⚠️ Esto valida la configuración VIGENTE, no el archivo nuevo: Apache solo analiza
+# lo que está enlazado en `sites-enabled`, y el vhost nuevo todavía no lo está. Sirve
+# para saber que no partimos de una configuración rota; no dice nada del archivo que
+# vamos a habilitar. Para eso está VALIDAR_NUEVO=1, abajo.
 $SUDO apachectl configtest >/dev/null 2>&1
-exigir $? "apachectl configtest pasa"
+exigir $? "la configuración vigente de Apache es válida"
+
+# ── Validación REAL del vhost nuevo, opcional ─────────────────────────────────
+#
+# 🔴 Es opcional por un motivo concreto y no por pereza. La única forma de que
+# Apache analice un vhost es que esté enlazado, así que esto lo enlaza, corre
+# `configtest` y lo desenlaza — **sin recargar en ningún momento**. Apache sigue
+# sirviendo la configuración vieja todo el rato, así que el sitio NO se libera.
+#
+# ⚠️ Pero abre una ventana de menos de un segundo en la que el enlace existe. Si
+# justo ahí otra cosa recargara Apache —la renovación de certbot, un logrotate—, el
+# sitio se liberaría antes de tiempo. Por eso no va por defecto la víspera de un
+# lanzamiento, y por eso el `trap` quita el enlace pase lo que pase.
+if [ "${VALIDAR_NUEVO:-}" = "1" ]; then
+  nombre="${VHOST_NUEVO%.conf}"
+  trap '$SUDO a2dissite "$nombre" >/dev/null 2>&1 || true' EXIT
+  $SUDO a2ensite "$nombre" >/dev/null 2>&1
+  if $SUDO apachectl configtest >/dev/null 2>&1; then
+    bien "el vhost NUEVO analiza sin errores (enlazado y desenlazado, sin recargar)"
+  else
+    mal "el vhost nuevo tiene un error de sintaxis:"
+    $SUDO apachectl configtest 2>&1 | sed 's/^/     /' >&2
+    fallos=$((fallos+1))
+  fi
+  $SUDO a2dissite "$nombre" >/dev/null 2>&1
+  trap - EXIT
+  # Se comprueba que quedó como estaba. Un enlace olvidado aquí es una liberación
+  # accidental en la siguiente recarga que haga cualquiera.
+  [ ! -e "$HABILITADOS/$VHOST_NUEVO" ]
+  exigir $? "el vhost nuevo volvió a quedar deshabilitado"
+else
+  nota "El vhost NUEVO no se ha analizado. Para hacerlo: VALIDAR_NUEVO=1 (lee el comentario)."
+fi
 
 # El certificado: que exista, que cubra el dominio y que no esté por caducar.
 dias="$(echo | openssl s_client -connect "$DOMINIO:443" -servername "$DOMINIO" 2>/dev/null \
@@ -144,7 +180,18 @@ trap 'printf "\n\033[33mVUELTA ATRÁS (segundos, sin DNS de por medio):\033[0m\n
 paso "Cambiando el vhost"
 [ -n "$VHOST_VIEJO" ] && $SUDO a2dissite "$VHOST_VIEJO" >/dev/null
 $SUDO a2ensite "$VHOST_NUEVO" >/dev/null
-$SUDO apachectl configtest
+
+# 🔴 `configtest` ANTES de recargar, y si falla se DESHACE el enlace.
+#
+# Sin el `a2dissite` del fallo, un error de sintaxis dejaba el enlace puesto y
+# Apache sin recargar: el sitio seguía en el v1 —bien— pero la siguiente recarga
+# que hiciera cualquiera (certbot, otro despliegue) lo habría liberado con la
+# configuración rota y sin nadie mirando.
+if ! $SUDO apachectl configtest; then
+  $SUDO a2dissite "$VHOST_NUEVO" >/dev/null
+  mal "la configuración no valida. Deshabilité el vhost nuevo; nada cambió."
+  exit 1
+fi
 $SUDO systemctl reload apache2
 sleep 3
 bien "Apache recargado"

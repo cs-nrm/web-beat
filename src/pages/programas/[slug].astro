@@ -12,6 +12,7 @@ import CabezaSeccion from '@/components/CabezaSeccion.astro';
 import Anuncio from '@/components/Anuncio.astro';
 import Icono from '@/components/Icono.astro';
 import { obtenerPrograma, obtenerProgramas } from '@/lib/cms/programacion';
+import { diasEnTexto } from '@/lib/parrilla';
 import { urlMedia } from '@/lib/cms/client';
 
 const { slug } = Astro.params;
@@ -34,12 +35,15 @@ if (!programa) return Astro.rewrite('/404');
 
 const otros = (await obtenerProgramas()).filter((p) => p.id !== programa.id).slice(0, 6);
 
-const DIAS: Record<string, string> = {
-  lun: 'LUN', mar: 'MAR', mie: 'MIÉ', jue: 'JUE', vie: 'VIE', sab: 'SÁB', dom: 'DOM',
-};
-
+/*
+  Los días los arma `diasEnTexto`, en `lib/parrilla.ts`. Esta página tenía su
+  propia copia del mapa de rótulos —la tercera del repo— y listaba los siete
+  seguidos: «LUN · MAR · MIÉ · JUE · VIE · SÁB · DOM» medía 510px en un viewport
+  de 390 y sacaba scroll horizontal a la ruta entera. Ahora se pliega a «LUN A
+  DOM», y el porqué completo está en la función.
+*/
 const horarios = (programa.horarios ?? []).map((h) => ({
-  dias: (h.dias ?? []).map((d) => DIAS[d] ?? d.toUpperCase()).join(' · '),
+  dias: diasEnTexto(h.dias),
   rango: `${h.horaInicio}–${h.horaFin}`,
   repeticion: h.tipo === 'repeticion',
 }));

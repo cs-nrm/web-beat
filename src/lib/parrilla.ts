@@ -323,3 +323,60 @@ function repartirCarriles(segmentos: Segmento[]): void {
     i = j;
   }
 }
+
+/**
+ * Los días de un bloque, en texto y ya plegados por tramos corridos.
+ *
+ * 🔴 Un tramo de tres días o más se pliega a rango: los siete se leen «LUN A DOM»
+ * y no «LUN · MAR · MIÉ · JUE · VIE · SÁB · DOM». Esa cadena sacaba la lista de
+ * programas a 510px de ancho en un viewport de 390 —scroll horizontal en toda la
+ * ruta, medido el 2026-09-08— y «lunes a domingo» es el bloque más común de una
+ * parrilla. Dos días o menos se listan: «LUN A MAR» no se lee mejor que
+ * «LUN · MAR».
+ *
+ * ⚠️ Se ordena ANTES de plegar. `dias` es un select múltiple del CMS, así que baja
+ * en el orden en que la estación marcó las casillas, no en el de la semana: sin
+ * ordenar, un bloque marcado «domingo, lunes» pintaba «DOM · LUN» y ningún tramo
+ * se reconocería.
+ *
+ * Los tramos NO dan la vuelta a la semana: «VIE · SÁB · DOM» + «LUN» son dos
+ * tramos, no uno. Plegar el sábado-domingo-lunes a «SÁB A LUN» pediría leerlo al
+ * revés, y la parrilla se lee de lunes a domingo.
+ *
+ * ⚠️ Vive AQUÍ y no en `lib/cms/programacion.ts`, donde se escribió: este archivo
+ * ya tenía `DIAS_SEMANA` y `ROTULO_DIA`, y allá la función traía su propia copia
+ * de las dos —el orden de lectura y el mapa de rótulos, otra vez—. Cuando se
+ * escribió, este módulo no existía.
+ */
+export function diasEnTexto(dias: readonly Dia[] | null | undefined): string {
+  const marcados = new Set(dias ?? []);
+  const indices = DIAS_SEMANA.reduce<number[]>(
+    (acc, d, i) => (marcados.has(d) ? [...acc, i] : acc),
+    [],
+  );
+
+  const tramos: number[][] = [];
+  for (const i of indices) {
+    const ultimo = tramos[tramos.length - 1];
+    if (ultimo && i === ultimo[ultimo.length - 1] + 1) ultimo.push(i);
+    else tramos.push([i]);
+  }
+
+  const partes = tramos.map((t) =>
+    t.length >= 3
+      ? `${ROTULO_DIA[DIAS_SEMANA[t[0]]]} A ${ROTULO_DIA[DIAS_SEMANA[t[t.length - 1]]]}`
+      : t.map((i) => ROTULO_DIA[DIAS_SEMANA[i]]).join(' · '),
+  );
+
+  /*
+    Un código que no está en la semana no se traga en silencio: se pinta crudo al
+    final, como hacía el `?? d.toUpperCase()` que las páginas tenían cada una por
+    su lado. Hoy el tipo lo impide —es un select cerrado—, pero perder un día de la
+    parrilla sin avisar es peor que pintarlo raro.
+  */
+  for (const d of dias ?? []) {
+    if (!(d in ROTULO_DIA)) partes.push(String(d).toUpperCase());
+  }
+
+  return partes.join(' · ');
+}

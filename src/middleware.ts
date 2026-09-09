@@ -1,9 +1,6 @@
 /**
- * Middleware del sitio: política de caché de borde + la cabecera de indexación.
- *
- * (Las redirecciones de las URLs viejas de WordPress NO viven aquí todavía: al ser
- * un relanzamiento sin migración de contenido no hay destino 1:1, así que el
- * tratamiento de esas URLs es una decisión aparte — ver C4 del plan.)
+ * Middleware del sitio: redirecciones del v1 + política de caché de borde + la
+ * cabecera de indexación.
  */
 import { defineMiddleware } from 'astro:middleware';
 import { NOINDEX_SITIO, noIndexarHost } from '@/config/site';
@@ -40,9 +37,102 @@ const SIN_CACHE = [/^\/api\//, /^\/mi(\/|$)/, /^\/buscar/];
 const CACHE_HTML = 'public, max-age=0, s-maxage=60, stale-while-revalidate=300';
 const CACHE_404 = 'public, max-age=0, s-maxage=60, stale-while-revalidate=600';
 
+/**
+ * 🔴 LAS URLS DEL V1.
+ *
+ * El v2 no es una migración: es otro sitio con otra estructura. De las **22
+ * secciones de primer nivel** del v1 —sacadas de su propio marcado, no de una
+ * lista de memoria— solo tres coinciden de nombre con el v2. Sin esta tabla, el
+ * día del corte de dominio cada enlace compartido, cada marcador y todo lo que
+ * Google tiene indexado cae en 404.
+ *
+ * Destinos aprobados por Carlos (2026-09-09): lo que tiene equivalente va a su
+ * equivalente, y lo que ya no existe va al Inicio.
+ *
+ * ⚠️ Son **301**, o sea permanentes y cacheadas con fuerza por el navegador. Un
+ * destino equivocado aquí se queda pegado en la máquina de quien lo visite, así
+ * que la tabla se corrige ANTES del corte, no después.
+ *
+ * ⚠️ El orden importa: se recorre de arriba abajo y gana la primera que coincide.
+ * Las tres equivalencias exactas van primero para que no se las coma una regla
+ * más ancha.
+ *
+ * ⚠️ Y lo que NO entra aquí: `/_astro/`, `/fonts/` y `/favicon/` son rutas de
+ * activos del v1. Redirigirlas al Inicio devolvería HTML donde el navegador espera
+ * un CSS o una fuente. No están en la tabla a propósito.
+ */
+const DEL_V1: Array<[RegExp, string]> = [
+  // ── Equivalencias exactas: el mismo contenido con otro slug ──
+  [/^\/avisodeprivacidad(\/|$)/, '/aviso-de-privacidad'],
+  [/^\/terminosycondiciones(\/|$)/, '/terminos-y-condiciones'],
+
+  // ── Secciones que el v2 rehizo con otro nombre ──
+  /*
+    `/news/` era la sección de notas del v1 y su equivalente es Beat Scanner: el
+    día a día. Los artículos de dentro (`/news/<slug>/`) van AL ÍNDICE y no a una
+    nota: el v2 arrancó con contenido nuevo, así que no hay destino 1:1 —el CMS
+    tiene 9 notas frente al archivo del v1— y mandar a alguien a una nota que no
+    es la que buscaba es peor que dejarlo en la sección.
+  */
+  [/^\/news(\/|$)/, '/beat-scanner'],
+  [/^\/playlist(\/|$)/, '/bonus-beat'],
+
+  // ── Programas del v1: su sitio hoy es la programación ──
+  [/^\/(que-plan|rebels|locutores)(\/|$)/, '/programacion'],
+
+  /*
+    ── Lo que ya no existe ──
+
+    Secciones editoriales y de contenido del v1 que el v2 no rehízo. Van al Inicio
+    porque es lo único honesto: no hay sección equivalente y un 404 en día de
+    lanzamiento es peor que la portada.
+
+    ⚠️ `beatzilla`, `podcast` y `promociones` tenían páginas DENTRO, así que la
+    regla cubre también sus rutas profundas — de ahí el `(\/|$)` y no un igual.
+  */
+  [
+    /^\/(beatzilla|podcast|promociones|beat-ten|beat-trends|beat-recordings|lanzamientos|purple-noise|nerdosis)(\/|$)/,
+    '/',
+  ],
+];
+
+/**
+ * El destino del v1 para esta ruta, o `null` si no es una URL del v1.
+ *
+ * ⚠️ Se comprueba que el destino NO sea la propia ruta antes de devolverlo: una
+ * regla que apuntara a algo que ella misma captura daría un bucle de redirección
+ * infinito, y eso en el navegador es `ERR_TOO_MANY_REDIRECTS` — el sitio caído
+ * para esa URL. Hoy ninguna lo hace, pero la guarda cuesta una línea y el fallo
+ * cuesta el lanzamiento.
+ */
+function destinoV1(ruta: string): string | null {
+  for (const [patron, destino] of DEL_V1) {
+    if (patron.test(ruta)) return destino === ruta ? null : destino;
+  }
+  return null;
+}
+
 export const onRequest = defineMiddleware(async (context, next) => {
   const metodo = context.request.method;
   const ruta = context.url.pathname;
+
+  /*
+    🔴 Las redirecciones del v1 van PRIMERO y devuelven sin llamar a `next()`.
+
+    Dos razones: no tiene sentido renderizar una página para tirarla, y sobre todo
+    el 404 del v2 es una página completa —con su consulta al CMS— así que dejar
+    pasar estas rutas costaría un render y una petición al CMS por cada enlace
+    viejo que llegue. El día del corte eso es tráfico de verdad.
+
+    ⚠️ La query se conserva. Una URL del v1 con `?utm_source=…` viene de una
+    campaña, y perder los parámetros al redirigir es perder la atribución de esa
+    campaña justo el día que más importa.
+  */
+  const destino = destinoV1(ruta);
+  if (destino) {
+    return context.redirect(destino + context.url.search, 301);
+  }
+
   const cacheable =
     (metodo === 'GET' || metodo === 'HEAD') && !SIN_CACHE.some((r) => r.test(ruta));
 

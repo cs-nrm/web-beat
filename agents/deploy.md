@@ -138,8 +138,48 @@ contrario.
   autoetiqueta `noindex` y Google no lo indexa. **Falla del lado seguro, pero en un
   relanzamiento eso es lo peor que puede pasar en silencio.**
 
-Si alguien pide «mándalo a producción»: enumerar los huecos, dar los pasos, y
-esperar un «va» explícito. No deducirlo.
+🔴 **VOCABULARIO, fijado por Carlos el 2026-09-09.** «Manda a producción» significa
+**v2**. El corte al dominio real se pide con otras palabras: **«vamos a cambiar de
+dominio»**. Se confundió dos veces antes de fijarlo; no volver a preguntar cuál es.
+
+## El corte de dominio
+
+**Un script:** `scripts/cambiar-dominio.sh`. Por defecto ENSAYA —enseña los vhosts
+que encuentra y lo que haría— y solo actúa con `CONFIRMAR=1`.
+
+🔴 **Basta con Apache, y esto está verificado contra lo servido:**
+
+- El build del v2 ya lleva horneado `PUBLIC_SITE_URL=https://beatdigital.mx`: su
+  canonical ya dice el dominio real. **No hay que reconstruir para el corte.**
+- El `noindex`, el `X-Robots-Tag` y el `robots.txt` se deciden POR PETICIÓN, leyendo
+  el `Host`. En cuanto Apache pase `Host: beatdigital.mx`, el sitio se abre solo.
+- v1 y v2 están en el MISMO servidor (los dos resuelven a `34.169.1.149`), así que
+  no hay DNS ni propagación. El corte y la vuelta atrás son de segundos.
+
+⚠️ **De lo que cuelga todo: `ProxyPreserveHost On` en el vhost nuevo.** Sin eso Node
+recibe `Host: localhost`, el sitio NO se abre a Google y `checkOrigin` responde 403
+a todo POST. El script lo exige antes de tocar nada.
+
+⚠️ **El sitemap da 404 en cualquier host no canónico, y es correcto** — publicarlo
+sería invitar a rastrear un duplicado. Tras el corte, el front proxea
+`/feeds/beat/sitemap.xml` del CMS, que ya emite URLs con `beatdigital.mx`.
+
+### Lo que el vhost NO arregla
+
+- **Las URLs del v1.** De sus 22 secciones de primer nivel solo tres coinciden con
+  el v2. Ya hay tabla de redirecciones 301 en `src/middleware.ts` (`DEL_V1`),
+  aprobada por Carlos: lo que tiene equivalente va a su equivalente y el resto al
+  Inicio. ⚠️ Requiere que el v2 esté desplegado CON esa tabla antes del corte.
+- **`PUBLICIDAD_TOKEN`** en el entorno del servicio, o las campañas vendidas no
+  cuentan impresiones ni clics. En preproducción va vacío a propósito.
+- **El certificado de `beatdigital.mx` no cubre `www`** (el SAN es solo el ápex).
+  Ya pasa hoy, así que el corte no lo empeora, pero `https://www.beatdigital.mx` da
+  error de seguridad y en día de lanzamiento la gente escribe www.
+- **`PUBLIC_METRICOOL_HASH`** sigue sin copiar, y es de build: entrarlo después del
+  corte exige reconstruir.
+
+Si alguien pide el corte: enumerar los huecos, dar los pasos, y esperar un «va»
+explícito. No deducirlo.
 
 ### Huecos conocidos al 2026-09-09, medidos contra el CMS
 

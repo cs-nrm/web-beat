@@ -12,7 +12,8 @@
  */
 import Icono from '@/components/Icono.astro';
 import Anuncio from '@/components/Anuncio.astro';
-import { urlMedia, urlArchivo } from '@/lib/cms/client';
+import { urlMedia } from '@/lib/cms/client';
+import { fuenteDeCancion, suena } from '@/lib/canciones';
 import type { Lista, TiposDeLista } from '@/types/payload';
 
 interface Props {
@@ -50,25 +51,17 @@ const rutaTipo = tipo?.slug ? `/${tipo.slug}` : null;
  * según el `depth`, y el parámetro suelto evita un cast dentro de la plantilla —
  * que Astro no parsea cuando el cast lleva una unión.
  */
-/**
- * El mp3 de la canción, si lo tiene.
- *
- * ⚠️ Recibe `unknown` y lee el campo a mano porque `canciones.audio` ya existe en
- * el CMS pero **está vacío en las 8 canciones capturadas**, y `media` no tiene un
- * solo documento con mimeType `audio/*`. O sea: el campo está, el archivo no. Esto
- * devuelve `null` en las 8 y la fila se pinta con sus enlaces a plataformas.
- *
- * 🔴 Lo que SÍ hay es `embedUrl` —un enlace de YouTube en las 8—, y eso lo resuelve
- * `plataformasDe`, no esta función: es un enlace de salida, no un archivo que este
- * reproductor pueda tocar. `pista.ts` espera un mp3 servido por el CMS; una URL de
- * YouTube necesitaría el camino de Plyr que ya usa el visor de Fenómeno. El día que
- * se suba el primer mp3 aparece el botón de reproducir, sin desplegar nada.
- */
-function audioDe(c: unknown): string | null {
-  if (!c || typeof c !== 'object') return null;
-  const doc = c as Record<string, unknown>;
-  return urlArchivo(doc.audio as Parameters<typeof urlArchivo>[0]);
-}
+/*
+  📖 Aquí vivía `audioDe()`, que leía `canciones.audio` a mano, y se fue el
+  2026-09-09 a `src/lib/canciones.ts` como `fuenteDeCancion()`.
+
+  El motivo no fue ordenar: la playlist del Fenómeno necesita exactamente la misma
+  resolución de fuentes, y tenerla duplicada en dos plantillas es cómo se llega a
+  que una sepa de `embedUrl` y la otra no. Ese campo —medido: 8 de 8 canciones con
+  YouTube, 0 con `audio`— se descubrió DESPUÉS de escribir esta función, y es justo
+  la clase de hallazgo que hay que poder aplicar en un solo sitio.
+*/
+
 
 function plataformasDe(c: unknown): Array<[string, string]> {
   if (!c || typeof c !== 'object') return [];
@@ -156,24 +149,36 @@ function plataformasDe(c: unknown): Array<[string, string]> {
           const cancion = typeof c.cancion === 'object' ? c.cancion : null;
           const portada = urlMedia(cancion?.portada, 'thumbnail');
           const plataformas = plataformasDe(cancion);
-          const pista = audioDe(cancion);
+          const fuente = fuenteDeCancion(cancion);
           return (
             <div class="bb-fila">
               <span class="beat-display bb-n">{String(i + 1).padStart(2, '0')}</span>
               {/*
-                Con mp3, la portada ES el botón: es dónde se pulsa para escuchar
-                una canción en cualquier sitio donde haya una portada, así que no
-                hace falta enseñar un control aparte. Sin mp3 se queda como estaba
-                —una imagen— en vez de un botón que no reproduce nada.
+                La portada ES el botón: es dónde se pulsa para escuchar una canción
+                en cualquier sitio donde haya una portada, así que no hace falta
+                enseñar un control aparte.
+
+                🔴 Y se pinta con mp3 **o** con YouTube. Antes solo con mp3, y como
+                ninguna de las 8 canciones del CMS trae `audio`, el botón no se
+                pintaba NUNCA: la carátula quedaba como un `<div>` inerte —arte que
+                parece pulsable y no lo es, sin cursor de mano y sin play—. Cero
+                `bb-portada-btn` en el HTML servido, comprobado con curl. Es justo lo
+                que Carlos reportó el 2026-09-09.
+
+                ⚠️ Sigue degradando: una canción sin ninguna de las dos fuentes se
+                queda como imagen, en vez de un botón que no reproduce nada.
 
                 🔴 `data-pista-*` es todo lo que `pista.ts` necesita: no hay una
                 lista de canciones duplicada en el JavaScript, la página la declara.
+                `data-pista-yt` lleva el id de 11 caracteres YA validado en el
+                servidor — nunca la URL cruda.
               */}
-              {pista ? (
+              {suena(fuente) ? (
                 <button
                   type="button"
                   class="bb-portada bb-portada-btn"
-                  data-pista-src={pista}
+                  data-pista-src={fuente.audio ?? undefined}
+                  data-pista-yt={fuente.youtube ?? undefined}
                   data-pista-titulo={cancion?.titulo ?? ''}
                   data-pista-artista={cancion?.artista ?? ''}
                   aria-pressed="false"

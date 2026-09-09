@@ -11,6 +11,7 @@ import Remate from '@/components/Remate.astro';
 import Anuncio from '@/components/Anuncio.astro';
 import { urlMedia } from '@/lib/cms/client';
 import { capsulasDe, listaDe } from '@/lib/cms/especiales';
+import { fuenteDeCancion, suena } from '@/lib/canciones';
 import { fuenteDeVideo } from '@/lib/video';
 import { fechaCorta } from '@/lib/nota';
 import type { Especiale } from '@/types/payload';
@@ -298,8 +299,36 @@ const tiendas = (
               <>
                 {playlist.canciones.slice(0, 6).map((c, i) => {
                   const cancion = typeof c.cancion === 'object' ? c.cancion : null;
+                  const fuente = fuenteDeCancion(cancion);
+                  /*
+                    🔴 La fila es un BOTÓN cuando hay algo que reproducir, y era un
+                    `<div>` inerte hasta el 2026-09-09: sin cursor, sin foco, sin
+                    nada que pulsar. Se leía como una lista de nombres cuando lo que
+                    hay detrás es música.
+
+                    ⚠️ Y sigue degradando a `<div>` sin fuente. Un botón que no
+                    reproduce es peor que un texto: promete y no cumple.
+
+                    ⚠️ `Etiqueta` en vez de duplicar la fila entera en las dos ramas
+                    —el contenido es idéntico y solo cambia el envoltorio—. Duplicarla
+                    sería mantener dos veces el mismo marcado.
+                  */
+                  const Etiqueta = suena(fuente) ? 'button' : 'div';
                   return (
-                    <div class="fr-track">
+                    <Etiqueta
+                      class:list={['fr-track', { 'es-pulsable': suena(fuente) }]}
+                      {...(suena(fuente)
+                        ? {
+                            type: 'button' as const,
+                            'data-pista-src': fuente.audio ?? undefined,
+                            'data-pista-yt': fuente.youtube ?? undefined,
+                            'data-pista-titulo': cancion?.titulo ?? '',
+                            'data-pista-artista': cancion?.artista ?? '',
+                            'aria-pressed': 'false',
+                            'aria-label': `Reproducir ${cancion?.titulo ?? 'la canción'}`,
+                          }
+                        : {})}
+                    >
                       <span class="beat-label fr-track-n">{String(i + 1).padStart(2, '0')}</span>
                       <span class="fr-track-texto">
                         <span class="fr-track-titulo">{cancion?.titulo ?? '—'}</span>
@@ -310,7 +339,23 @@ const tiendas = (
                       {cancion?.duracion && (
                         <span class="beat-label fr-track-dur">{cancion.duracion}</span>
                       )}
-                    </div>
+                      {suena(fuente) && (
+                        <span class="fr-track-icono">
+                          {/*
+                            El alternado play/pausa es CSS sobre `[data-sonando]`,
+                            no clases movidas por JavaScript — el mismo patrón que
+                            Bonus Beat. `pista.ts` solo pone el atributo en la fila
+                            que está al aire y el resto lo decide la hoja.
+                          */}
+                          <span class="fr-track-glifo" data-icono="play">
+                            <Icono nombre="play" tamano={12} />
+                          </span>
+                          <span class="fr-track-glifo" data-icono="pause">
+                            <Icono nombre="pause" tamano={12} />
+                          </span>
+                        </span>
+                      )}
+                    </Etiqueta>
                   );
                 })}
                 {tiendas.length > 0 && (
@@ -355,7 +400,22 @@ const tiendas = (
 <style>
   /* La piel de Plyr. Va aquí y no en la hoja base para que solo pese en las
      páginas que de verdad tienen un visor. */
-  @import 'plyr/dist/plyr.css';
+  /*
+    📖 Aquí estaba `@import 'plyr/dist/plyr.css'` y se fue a `Base.astro` el
+    2026-09-09, porque desde aquí **no alcanzaba**.
+
+    Astro ESCOPA lo que importa un `<style>` de componente: las reglas de Plyr
+    salían con el `data-astro-cid` de este archivo, así que solo vestían al visor
+    del Fenómeno. El visor flotante de las canciones vive en el layout, fuera de
+    este ámbito, y le llegaba Plyr SIN hoja: medido, los controles ocupaban 1049px
+    de alto, los iconos salían a 300×150 y el iframe a 640 de ancho desbordando un
+    marco de 360. La prueba de que estaba escopada son los `:global(.plyr …)` de
+    más abajo, que existen justo para atravesar ese ámbito.
+
+    ⚠️ El coste conocido: la piel de Plyr pasa a bajar en TODAS las páginas y no
+    solo en las que tienen visor. Es inevitable en cuanto el reproductor vive en el
+    cromo — tiene que seguir sonando al navegar—, así que se asume a la vista.
+  */
 
   .fr {
     padding: 32px 24px 0;
@@ -691,11 +751,75 @@ const tiendas = (
   }
   .fr-track {
     display: grid;
-    grid-template-columns: 22px minmax(0, 1fr) auto;
+    /*
+      ⚠️ Cuatro columnas y no tres: entró la del icono. La `auto` de la duración
+      se queda a cero cuando no hay duración capturada —que es el caso de las 8
+      canciones del CMS— y por eso el icono necesita la suya propia.
+    */
+    grid-template-columns: 22px minmax(0, 1fr) auto auto;
     align-items: center;
     gap: 12px;
     padding: 9px 0;
     border-bottom: 1px solid var(--border-hairline);
+  }
+  /*
+    🔴 Lo que la vuelve pulsable de verdad. La fila era un `<div>` y ahora puede ser
+    un `<button>`, así que hay que deshacer todo lo que el navegador le pone a un
+    botón —fondo, borde, tipografía propia, texto centrado— y darle el cursor de
+    mano. Sin esto la fila se veía como un control del sistema en medio del panel.
+  */
+  .fr-track.es-pulsable {
+    width: 100%;
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  /*
+    El icono aparece al apuntar y se queda puesto en la que suena — el mismo
+    criterio que las cápsulas y que Bonus Beat: seis iconos de play en reposo son
+    ruido, no información.
+
+    ⚠️ `[data-sonando]` lo pone `pista.ts` sobre la fila que está al aire, y es lo
+    que hace que el icono siga a la canción cuando la cola avanza sola.
+  */
+  .fr-track-icono {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    opacity: 0;
+    transition: opacity var(--dur-2) var(--ease-out);
+  }
+  .fr-track.es-pulsable:hover .fr-track-icono,
+  .fr-track.es-pulsable:focus-visible .fr-track-icono,
+  .fr-track[data-sonando] .fr-track-icono {
+    opacity: 1;
+  }
+  .fr-track-glifo {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    background: var(--mist-0);
+    color: var(--noche-0);
+  }
+  .fr-track-glifo[data-icono='pause'] {
+    display: none;
+  }
+  .fr-track[data-sonando] .fr-track-glifo[data-icono='play'] {
+    display: none;
+  }
+  .fr-track[data-sonando] .fr-track-glifo[data-icono='pause'] {
+    display: grid;
+  }
+  .fr-track.es-pulsable:focus-visible {
+    outline: 2px solid var(--mist-0);
+    outline-offset: 2px;
   }
   .fr-track-n {
     font-size: 8.5px;

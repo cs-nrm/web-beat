@@ -2098,3 +2098,82 @@ html[data-cursor] body::after {
     transition: none;
   }
 }
+
+/* ============================================================
+   EL VISOR FLOTANTE DE LAS CANCIONES
+   ------------------------------------------------------------
+   Las canciones de Bonus Beat y de la playlist del tema solo tienen su video de
+   YouTube —ninguna trae mp3, medido contra el CMS—, así que suenan desde aquí y las
+   maneja la barra de arriba: título, play/pausa y progreso.
+
+   🔴 `min-height: 202px` NO es una medida de gusto. Las políticas del reproductor
+   incrustado de YouTube piden un reproductor visible, de al menos 200×200 y sin
+   obstruir, y prohíben separar el audio del video. Bajar de ahí —o esconderlo, que
+   sería una línea— es salirse de la regla con la cuenta de la estación de por
+   medio. El ancho se calcula para que a 16/9 el alto quede por encima del mínimo.
+
+   ⚠️ Va abajo a la DERECHA, que es lo que pidió Carlos, y por debajo del cromo en
+   `z-index`: la barra del player es quien lo manda, así que no puede quedar tapada
+   por él.
+   ============================================================ */
+.pista-visor {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: calc(var(--z-header) - 1);
+  width: min(360px, calc(100vw - 24px));
+  min-height: 202px;
+  background: var(--noche-0);
+  box-shadow:
+    0 0 0 1px var(--border-hairline),
+    0 18px 48px rgb(5 7 6 / 0.55);
+  overflow: hidden;
+}
+.pista-visor video,
+.pista-visor .plyr {
+  display: block;
+  width: 100%;
+}
+/*
+  La X, encima del reproductor.
+
+  ⚠️ Por encima de los controles de Plyr en `z-index` y con su propio fondo: sobre
+  un fotograma claro, una X blanca sin respaldo desaparece.
+*/
+.pista-visor-cerrar {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(5 7 6 / 0.72);
+  color: var(--mist-0);
+  cursor: pointer;
+  transition: background-color var(--dur-2) var(--ease-out);
+}
+.pista-visor-cerrar:hover {
+  background: var(--noche-0);
+}
+@media (max-width: 899px) {
+  /*
+    En móvil se pega a los dos lados: 359×202 medidos a 375 de ancho, o sea que el
+    `min-height` es justo lo que sostiene el alto —a 16/9 esos 359 darían 202, al
+    filo—. La regla de YouTube no cambia con el ancho de la pantalla, así que el
+    mínimo tampoco.
+
+    ⚠️ El `env(safe-area-inset-bottom)` es por el indicador de inicio del iPhone,
+    no por la barra del player: esa es `sticky top-0` y vive ARRIBA en las dos
+    anchuras. Comprobado que el visor no la tapa.
+  */
+  .pista-visor {
+    right: 8px;
+    left: 8px;
+    bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    width: auto;
+  }
+}

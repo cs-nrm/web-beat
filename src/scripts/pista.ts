@@ -1,13 +1,24 @@
 /**
- * Pistas a demanda en la BARRA PRINCIPAL — los mp3 de Bonus Beat.
+ * Pistas a demanda en la BARRA PRINCIPAL — las canciones de Bonus Beat.
  *
- * 🔴 Un `<audio>` nativo, NO Plyr. Plyr existe en este proyecto por una sola
- * razón: las cápsulas del Fenómeno pueden ser YouTube **o** mp4, y un `<video>`
- * nativo no reproduce YouTube. Un mp3 servido desde nuestro propio bucket no tiene
- * ese problema, así que Plyr aquí serían 110 KB para obtener lo que
- * `new Audio()` ya hace — y, peor, una SEGUNDA interfaz de controles dentro de una
- * barra que ya tiene los suyos. Lo que se pidió es que la pista suene en el player
- * general, no que aparezca otro player.
+ * 🔴 DOS motores detrás de la misma barra, y el segundo entró el 2026-09-09:
+ *
+ *   · `nativo` — un `<audio>` para un mp3 nuestro. Es el bueno: sin iframe, sin
+ *     terceros, sin la política de nadie, y `new Audio()` hace todo lo que hace
+ *     falta sin cargar 110 KB de Plyr.
+ *   · `youtube` — Plyr sobre un iframe de YouTube, en un visor FLOTANTE abajo a la
+ *     derecha con su X para cerrarlo.
+ *
+ * 🔴 Por qué el segundo, si el primero es mejor: porque el primero no tiene nada
+ * que reproducir. Medido contra el CMS, ninguna de las 8 canciones capturadas trae
+ * `audio` y las 8 traen su URL de YouTube. La barra existía, la cola existía, el
+ * árbitro existía — y no sonaba nada porque faltaba el archivo.
+ *
+ * 🔴 Y por qué el visor VA VISIBLE, cuando lo cómodo sería esconderlo y dejar solo
+ * el audio: las políticas del reproductor incrustado de YouTube piden un
+ * reproductor visible, de al menos 200×200 y sin obstruir, y prohíben separar el
+ * audio del video. Ocultarlo es una línea de CSS y es justo la línea que no se
+ * escribe. Decisión de Carlos con el riesgo sobre la mesa (2026-09-09).
  *
  * 🔴 El elemento vive en `window`, igual que el registro del árbitro y por lo
  * mismo: la barra sobrevive a la navegación (`transition:persist`) pero este
@@ -21,14 +32,57 @@ import { registrarAudio, reclamarAudio, FUENTES } from './audio';
 import { ga4 } from './analitica';
 
 export interface Pista {
-  src: string;
+  /** El mp3 propio, o `null` si esta canción solo tiene YouTube. */
+  src: string | null;
+  /** El id de 11 caracteres del video, ya validado en el servidor. */
+  yt: string | null;
   titulo: string;
   artista: string;
+}
+
+/** Cuál de los dos motores atiende a la pista en curso. */
+type Motor = 'nativo' | 'youtube';
+
+/**
+ * Lo que la barra necesita saber de un motor, sea el que sea.
+ *
+ * 🔴 Es la pieza que evita duplicar la barra. Sin esto, pintar el progreso, mover
+ * el botón o encadenar la siguiente canción habría necesitado dos versiones de cada
+ * función —una por motor— y la que se olvidara de actualizar sería el bug. Con esto
+ * hay UNA barra que le pregunta al motor activo.
+ */
+interface Mando {
+  reproducir(): void;
+  pausar(): void;
+  readonly pausado: boolean;
+  readonly tiempo: number;
+  /** `NaN` o `Infinity` mientras no se sepa: la barra ya sabe apagarse con eso. */
+  readonly duracion: number;
+  buscar(segundos: number): void;
 }
 
 interface VentanaConPista {
   __beatPista?: HTMLAudioElement;
   __beatPistaLista?: boolean;
+  /** La instancia de Plyr del visor flotante, una por sesión. */
+  __beatPistaYt?: PlyrPista | null;
+}
+
+/** Lo que este módulo usa de Plyr. Mismo recorte que en `video.ts`. */
+interface PlyrPista {
+  source: {
+    type: 'video';
+    title?: string;
+    sources: Array<{ src: string; provider: 'youtube' }>;
+  };
+  readonly playing: boolean;
+  readonly paused: boolean;
+  currentTime: number;
+  readonly duration: number;
+  play(): Promise<void> | void;
+  pause(): void;
+  on(evento: string, cb: () => void): void;
+  once(evento: string, cb: () => void): void;
 }
 
 /** El estado que el CSS mira, en `#player[data-modo]`. */
@@ -59,6 +113,173 @@ function audio(): HTMLAudioElement {
   return ventana.__beatPista;
 }
 
+/* ────────────────────────────────────────────────────────────────────────────
+   EL VISOR FLOTANTE DE YOUTUBE
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * El marco del visor, que vive en el marcado y no se construye aquí.
+ *
+ * 🔴 Está en `Base.astro` con `transition:persist` por la misma razón que la barra:
+ * si lo creara este script, cada navegación traería un marco nuevo y el iframe
+ * anterior se quedaría sonando dentro de un nodo huérfano. Persistido, el video
+ * sigue sonando al cambiar de página — que es lo que hace la barra y lo que el
+ * oyente espera.
+ */
+const visor = () => document.querySelector<HTMLElement>('[data-pista-visor]');
+
+let Plyr: (new (el: HTMLElement, opciones?: unknown) => PlyrPista) | null = null;
+let cargandoPlyr: Promise<void> | null = null;
+
+/** Baja Plyr una sola vez. Se memoriza la PROMESA, como en `video.ts`. */
+function cargarPlyr(): Promise<void> {
+  if (!cargandoPlyr) {
+    cargandoPlyr = import('plyr')
+      .then((mod) => {
+        Plyr = (mod.default ?? mod) as never;
+      })
+      .catch((err) => {
+        // No se memoriza el fallo: el siguiente clic debe poder reintentar.
+        cargandoPlyr = null;
+        throw err;
+      });
+  }
+  return cargandoPlyr;
+}
+
+/** Muestra u oculta el marco. `hidden` y no `display`, para que sea una sola verdad. */
+function mostrarVisor(si: boolean): void {
+  const v = visor();
+  if (v) v.hidden = !si;
+}
+
+/** Cuál de los dos motores atiende a la pista en curso. */
+let motor: Motor = 'nativo';
+
+/**
+ * La instancia de Plyr del visor, creada la primera vez que hace falta.
+ *
+ * ⚠️ Devuelve `null` si el marco no está en la página. No es un caso hipotético:
+ * `Base.astro` lo pinta en todas, pero un fallo de marcado dejaría a este módulo
+ * construyendo Plyr sobre nada, y un `throw` aquí se comería el clic entero.
+ */
+async function plyr(): Promise<PlyrPista | null> {
+  const ventana = w();
+  if (ventana.__beatPistaYt) return ventana.__beatPistaYt;
+
+  const marco = visor();
+  const montaje = marco?.querySelector<HTMLElement>('[data-pista-montaje]');
+  if (!marco || !montaje) return null;
+
+  try {
+    await cargarPlyr();
+  } catch {
+    return null;
+  }
+  if (!Plyr) return null;
+
+  const p = new Plyr(montaje, {
+    // `noCookie` usa youtube-nocookie.com: sin cookies de perfilado hasta que
+    // alguien le da play. Mismo criterio que el visor del Fenómeno.
+    youtube: { noCookie: true, rel: 0, modestbranding: 1 },
+    controls: ['play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
+    i18n: { play: 'Reproducir', pause: 'Pausa', mute: 'Silenciar', unmute: 'Activar sonido' },
+  });
+
+  /*
+    🔴 Los escuchas se enlazan UNA vez, aquí, y no tras cada cambio de fuente.
+
+    Es lo contrario de `video.ts`, y la diferencia es real: allí la fuente alterna
+    entre mp4 y YouTube, y cambiar de proveedor hace que Plyr reconstruya el
+    elemento de medios y se lleve los escuchas por delante. Aquí el proveedor es
+    SIEMPRE YouTube, así que el iframe se conserva y estos escuchas viven lo que
+    viva la instancia.
+  */
+  p.on('play', () => pintarBoton(true));
+  p.on('pause', () => pintarBoton(false));
+  p.on('timeupdate', pintarProgreso);
+  p.on('loadedmetadata', pintarProgreso);
+  p.on('ended', alTerminar);
+
+  ventana.__beatPistaYt = p;
+  return p;
+}
+
+/**
+ * El motor activo, hablado por una sola interfaz.
+ *
+ * ⚠️ El de YouTube puede no existir todavía —Plyr baja a demanda— y en ese hueco
+ * se devuelve un mando inerte en vez de `null`: así quien pinta la barra no tiene
+ * que preguntar si hay motor antes de cada lectura, que es como se llega a un
+ * `undefined` en un `toFixed`.
+ */
+function mando(): Mando {
+  if (motor === 'youtube') {
+    const p = w().__beatPistaYt;
+    if (!p) return INERTE;
+    return {
+      reproducir: () => {
+        const r = p.play();
+        if (r && typeof r.catch === 'function') r.catch(() => {});
+      },
+      pausar: () => p.pause(),
+      get pausado() {
+        return p.paused;
+      },
+      get tiempo() {
+        return p.currentTime;
+      },
+      get duracion() {
+        return p.duration;
+      },
+      buscar: (sg) => {
+        p.currentTime = sg;
+      },
+    };
+  }
+  const a = audio();
+  return {
+    reproducir: () => {
+      void a.play().catch(() => pintarBoton(false));
+    },
+    pausar: () => a.pause(),
+    get pausado() {
+      return a.paused;
+    },
+    get tiempo() {
+      return a.currentTime;
+    },
+    get duracion() {
+      return a.duration;
+    },
+    buscar: (sg) => {
+      a.currentTime = sg;
+    },
+  };
+}
+
+/** El mando de «todavía no hay motor»: se deja preguntar y no hace nada. */
+const INERTE: Mando = {
+  reproducir: () => {},
+  pausar: () => {},
+  pausado: true,
+  tiempo: 0,
+  duracion: NaN,
+  buscar: () => {},
+};
+
+/**
+ * La clave con la que se reconoce una fila.
+ *
+ * 🔴 Una sola regla, usada por la cola Y por el marcado de las filas. Con dos
+ * fuentes posibles hacía falta una identidad común, y calcularla en dos sitios con
+ * dos reglas parecidas es exactamente cómo se llega a que la fila que suena no se
+ * marque.
+ */
+function clave(p: { src?: string | null; yt?: string | null }): string {
+  return p.src || (p.yt ? `yt:${p.yt}` : '');
+}
+
 function modo(valor: Modo): void {
   const p = barra();
   if (!p) return;
@@ -77,6 +298,36 @@ function pintarBoton(sonando: boolean): void {
   icono('play', !sonando);
   icono('pause', sonando);
   icono('cargando', false);
+
+  /*
+    🔴 Y la FILA al aire refleja lo mismo, que es lo que faltaba.
+
+    `data-sonando` solo se ponía al arrancar y se quitaba al terminar, así que una
+    canción PAUSADA seguía mostrando el icono de pausa: el control decía «púlsame
+    para pausar» sobre algo ya detenido. Pintándola desde aquí —que es donde llegan
+    los eventos `play` y `pause` de los dos motores— la fila y la barra no pueden
+    discrepar.
+  */
+  const actual = cola[indice];
+  marcarFila(sonando && actual ? clave(actual) : null);
+}
+
+/**
+ * El botón en «cargando», con el mismo tercer icono que usa el directo.
+ *
+ * 🔴 Hacía falta al entrar YouTube y no antes: un mp3 arranca casi al instante,
+ * pero aquí hay 110 KB de Plyr y el montaje de un iframe por delante. Sin acuse de
+ * recibo, el oyente vuelve a pulsar y se pelea con su propio clic.
+ */
+function pintarCargando(): void {
+  const boton = el<HTMLButtonElement>('[data-accion="play"]');
+  if (!boton) return;
+  boton.setAttribute('aria-busy', 'true');
+  const icono = (n: string, visible: boolean) =>
+    boton.querySelector(`[data-icono="${n}"]`)?.classList.toggle('hidden', !visible);
+  icono('play', false);
+  icono('pause', false);
+  icono('cargando', true);
 }
 
 function pintarPista(p: Pista | null): void {
@@ -91,9 +342,9 @@ function pintarPista(p: Pista | null): void {
  * lista concreta: al navegar, la fila que estaba sonando puede ya no existir, y
  * una marca huérfana es peor que ninguna.
  */
-function marcarFila(src: string | null): void {
-  for (const b of document.querySelectorAll<HTMLElement>('[data-pista-src]')) {
-    const suya = b.dataset.pistaSrc === src;
+function marcarFila(cl: string | null): void {
+  for (const b of document.querySelectorAll<HTMLElement>('[data-pista-src], [data-pista-yt]')) {
+    const suya = Boolean(cl) && clave({ src: b.dataset.pistaSrc, yt: b.dataset.pistaYt }) === cl;
     b.toggleAttribute('data-sonando', suya);
     b.setAttribute('aria-pressed', String(suya));
   }
@@ -104,7 +355,7 @@ function progreso(): HTMLInputElement | null {
 }
 
 function pintarProgreso(): void {
-  const a = audio();
+  const m = mando();
   const barraProgreso = progreso();
   if (!barraProgreso) return;
   /*
@@ -112,14 +363,14 @@ function pintarProgreso(): void {
     sin fin. En los dos casos la barra no puede decir nada, así que se apaga en
     vez de pintar una posición inventada.
   */
-  const total = a.duration;
+  const total = m.duracion;
   const utilizable = Number.isFinite(total) && total > 0;
   barraProgreso.disabled = !utilizable;
   barraProgreso.max = utilizable ? String(Math.floor(total)) : '0';
-  barraProgreso.value = String(Math.floor(a.currentTime));
+  barraProgreso.value = String(Math.floor(m.tiempo));
   barraProgreso.style.setProperty(
     '--avance',
-    utilizable ? `${(a.currentTime / total) * 100}%` : '0%',
+    utilizable ? `${(m.tiempo / total) * 100}%` : '0%',
   );
 }
 
@@ -129,28 +380,100 @@ function sonar(i: number): void {
   if (!p) return;
   indice = i;
 
-  const a = audio();
+  /*
+    🔴 El motor se elige por lo que TRAE la canción, con el mp3 por delante. Si
+    algún día se captura el archivo, esa canción pasa sola al camino nativo y deja
+    de abrir el visor — sin tocar una línea de esto.
+  */
+  motor = p.src ? 'nativo' : 'youtube';
+
   reclamarAudio(FUENTES.pista);
   modo('pista');
   pintarPista(p);
-  marcarFila(p.src);
+  marcarFila(clave(p));
 
-  if (a.src !== p.src) a.src = p.src;
+  if (motor === 'nativo') {
+    // El otro motor, si existe, se calla: son dos y solo uno manda.
+    w().__beatPistaYt?.pause();
+    mostrarVisor(false);
+    const a = audio();
+    if (p.src && a.src !== p.src) a.src = p.src;
+    /*
+      🔴 `play()` devuelve una promesa que RECHAZA si el navegador bloquea la
+      reproducción, y un rechazo sin `catch` es un error no capturado en consola. Y
+      más importante: si falla, la interfaz no puede quedarse diciendo que suena.
+    */
+    void a
+      .play()
+      .then(() => {
+        pintarBoton(true);
+        ga4('pista_play', { titulo: p.titulo, artista: p.artista, motor: 'nativo' });
+      })
+      .catch(() => {
+        pintarBoton(false);
+        marcarFila(null);
+      });
+    return;
+  }
+
+  // ── camino de YouTube ──
+  audio().pause();
   /*
-    🔴 `play()` devuelve una promesa que RECHAZA si el navegador bloquea la
-    reproducción, y un rechazo sin `catch` es un error no capturado en consola. Y
-    más importante: si falla, la interfaz no puede quedarse diciendo que suena.
+    El botón dice «cargando» desde YA. Entre el clic y el primer fotograma hay 110
+    KB de Plyr más el arranque del iframe: sin esto, el oyente pulsa y no pasa nada
+    visible durante un segundo largo.
   */
-  void a
-    .play()
-    .then(() => {
-      pintarBoton(true);
-      ga4('pista_play', { titulo: p.titulo, artista: p.artista });
-    })
-    .catch(() => {
-      pintarBoton(false);
-      marcarFila(null);
-    });
+  pintarCargando();
+  void arrancarYoutube(p);
+}
+
+/**
+ * Pone la canción en el visor flotante y la reproduce.
+ *
+ * ⚠️ `once('ready')` y no un `play()` inmediato, por la lección de `video.ts`:
+ * asignar `source` con proveedor de YouTube arranca una reconstrucción asíncrona
+ * —hay que cargar la API de YouTube y montar el iframe— y un `play()` lanzado antes
+ * de que termine se pierde en silencio, dejando el reproductor detenido con la
+ * fuente correcta cargada.
+ */
+async function arrancarYoutube(p: Pista): Promise<void> {
+  if (!p.yt) return;
+  const reproductor = await plyr();
+  if (!reproductor) {
+    // Sin visor no hay nada que enseñar; la barra no puede quedarse «cargando».
+    pintarBoton(false);
+    marcarFila(null);
+    pintarPista(null);
+    modo('directo');
+    return;
+  }
+
+  mostrarVisor(true);
+  reproductor.source = {
+    type: 'video',
+    title: [p.artista, p.titulo].filter(Boolean).join(' · '),
+    sources: [{ src: p.yt, provider: 'youtube' }],
+  };
+  reproductor.once('ready', () => {
+    const r = reproductor.play();
+    if (r && typeof r.catch === 'function') r.catch(() => pintarBoton(false));
+    ga4('pista_play', { titulo: p.titulo, artista: p.artista, motor: 'youtube' });
+  });
+}
+
+/**
+ * Lo que pasa al acabar una canción: la siguiente de la tanda.
+ *
+ * Compartido por los dos motores, que es la razón de que esté aquí arriba y no
+ * dentro del cableado de uno de ellos.
+ */
+function alTerminar(): void {
+  ga4('pista_fin', { titulo: cola[indice]?.titulo ?? '' });
+  if (indice + 1 < cola.length) sonar(indice + 1);
+  else {
+    pintarBoton(false);
+    marcarFila(null);
+  }
 }
 
 /**
@@ -171,6 +494,18 @@ export function volverAlDirecto(): void {
     a.pause();
     a.currentTime = 0;
   }
+  /*
+    🔴 Y el visor de YouTube: se PAUSA y se esconde, pero no se destruye. Destruirlo
+    obligaría a volver a bajar el iframe y a negociar con YouTube en la siguiente
+    canción; escondido, el reproductor sigue ahí y la siguiente arranca en seco.
+  */
+  const yt = w().__beatPistaYt;
+  if (yt) {
+    yt.pause();
+    yt.currentTime = 0;
+  }
+  mostrarVisor(false);
+  motor = 'nativo';
   cola = [];
   indice = -1;
   marcarFila(null);
@@ -184,14 +519,19 @@ export function volverAlDirecto(): void {
 
 /** Alterna la pista en curso. Lo llama el botón de play cuando el modo es pista. */
 function alternar(): void {
-  const a = audio();
-  if (a.paused) {
+  const m = mando();
+  if (m.pausado) {
+    // Retomar es empezar a sonar: el canal es suyo otra vez.
     reclamarAudio(FUENTES.pista);
-    void a.play().then(() => pintarBoton(true)).catch(() => pintarBoton(false));
+    m.reproducir();
   } else {
-    a.pause();
-    pintarBoton(false);
+    m.pausar();
   }
+  /*
+    ⚠️ El botón lo pintan los EVENTOS del motor (`play` / `pause`), no esta
+    función. Pintarlo aquí sería adivinar: el arranque puede ser rechazado por el
+    navegador y la barra se quedaría diciendo que suena algo detenido.
+  */
 }
 
 /**
@@ -203,22 +543,26 @@ function alternar(): void {
 function desdeFila(boton: HTMLElement): void {
   const lista = boton.closest<HTMLElement>('[data-pistas]');
   const filas = lista
-    ? Array.from(lista.querySelectorAll<HTMLElement>('[data-pista-src]'))
+    ? Array.from(lista.querySelectorAll<HTMLElement>('[data-pista-src], [data-pista-yt]'))
     : [boton];
 
   cola = filas.map((f) => ({
-    src: f.dataset.pistaSrc ?? '',
+    src: f.dataset.pistaSrc ?? null,
+    yt: f.dataset.pistaYt ?? null,
     titulo: f.dataset.pistaTitulo ?? '',
     artista: f.dataset.pistaArtista ?? '',
   }));
 
   const i = filas.indexOf(boton);
-  const a = audio();
 
-  // Pulsar la que YA está sonando es pausarla, no reiniciarla.
-  if (i === indice && !a.paused) {
-    a.pause();
-    pintarBoton(false);
+  /*
+    🔴 Pulsar la que YA está sonando es un INTERRUPTOR, no un reinicio — y ahora se
+    resuelve con `alternar`, que también sabe retomar. Antes solo pausaba: al volver
+    a pulsar caía en `sonar()`, que reasigna la fuente y devuelve la canción al
+    segundo 0. Es el mismo fallo que tenían las cápsulas del Fenómeno.
+  */
+  if (i === indice && i >= 0) {
+    alternar();
     return;
   }
   sonar(i < 0 ? 0 : i);
@@ -237,10 +581,13 @@ export function prepararPista(): void {
     oyente no ha pedido salir de la pista, solo ha empezado otra cosa.
   */
   registrarAudio(FUENTES.pista, () => {
-    if (!a.paused) {
-      a.pause();
-      pintarBoton(false);
-    }
+    /*
+      Calla LOS DOS motores. Registrar solo el nativo dejaba a YouTube sonando
+      cuando el directo reclamaba el canal — o sea el bug que el árbitro existe
+      para no tener: dos cosas sonando a la vez.
+    */
+    if (!a.paused) a.pause();
+    w().__beatPistaYt?.pause();
   });
 
   a.addEventListener('timeupdate', pintarProgreso);
@@ -252,14 +599,7 @@ export function prepararPista(): void {
     Al acabar: la siguiente de la tanda. Y si era la última, se queda en pausa con
     el botón de volver al directo a la vista — sin encender el radio por su cuenta.
   */
-  a.addEventListener('ended', () => {
-    ga4('pista_fin', { titulo: cola[indice]?.titulo ?? '' });
-    if (indice + 1 < cola.length) sonar(indice + 1);
-    else {
-      pintarBoton(false);
-      marcarFila(null);
-    }
-  });
+  a.addEventListener('ended', alTerminar);
 
   /*
     🔴 Un error de red deja la barra diciendo que suena algo que no suena. Se
@@ -280,7 +620,18 @@ export function prepararPista(): void {
     const t = e.target;
     if (!(t instanceof Element)) return;
 
-    const fila = t.closest<HTMLElement>('[data-pista-src]');
+    /*
+      🔴 La X del visor va ANTES que la fila, y el orden importa: el visor flota
+      encima de la página y podría quedar sobre una fila de Bonus Beat. Si la fila
+      se atendiera primero, cerrar el visor arrancaría la canción de debajo.
+    */
+    if (t.closest('[data-pista-cerrar]')) {
+      e.preventDefault();
+      volverAlDirecto();
+      return;
+    }
+
+    const fila = t.closest<HTMLElement>('[data-pista-src], [data-pista-yt]');
     if (fila) {
       e.preventDefault();
       desdeFila(fila);
@@ -307,8 +658,9 @@ export function prepararPista(): void {
   document.addEventListener('input', (e) => {
     const t = e.target;
     if (!(t instanceof HTMLInputElement) || t.dataset.accion !== 'progreso') return;
-    const total = a.duration;
-    if (Number.isFinite(total) && total > 0) a.currentTime = Number(t.value);
+    const m = mando();
+    const total = m.duracion;
+    if (Number.isFinite(total) && total > 0) m.buscar(Number(t.value));
   });
 
   /*
@@ -317,6 +669,8 @@ export function prepararPista(): void {
     dependa de la página puede quedarse escrito en el bloque persistente.
   */
   document.addEventListener('astro:after-swap', () => {
-    marcarFila(a.paused ? null : (cola[indice]?.src ?? null));
+    const sonando = !mando().pausado;
+    const actual = cola[indice];
+    marcarFila(sonando && actual ? clave(actual) : null);
   });
 }

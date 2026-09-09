@@ -7,6 +7,24 @@
  * design system y las dos reglas de indexación.
  */
 import '@/styles/base.css';
+/*
+  🔴 La piel de Plyr, GLOBAL y desde aquí.
+
+  Vivía en el `<style>` de `Fenomeno.astro`, y ahí Astro la escopaba con el
+  `data-astro-cid` de ese componente: solo vestía al visor del Fenómeno. El visor
+  flotante de las canciones vive en este layout, y le llegaba Plyr sin hoja — los
+  controles a 1049px de alto y el iframe a 640 de ancho dentro de un marco de 360.
+
+  ⚠️ Importado en el frontmatter y NO con un `import()` dinámico desde el script:
+  eso hace que Vite re-optimice dependencias y el navegador se quede con una URL
+  vieja —`504 Outdated Optimize Dep`—, que en pantalla es un visor que no arranca.
+  Está documentado en `video.ts` y ya costó una vez.
+
+  ⚠️ Y sí, son ~10 KB en todas las páginas y no solo en las que tienen visor. Es el
+  precio de que el reproductor viva en el cromo: tiene que seguir sonando al
+  navegar, así que no hay página en la que no pueda hacer falta.
+*/
+import 'plyr/dist/plyr.css';
 import {
   IDIOMA,
   LOCALE_OG,
@@ -20,6 +38,7 @@ import { ClientRouter } from 'astro:transitions';
 import Cabecera from '@/components/Cabecera.astro';
 import MenuLleno from '@/components/MenuLleno.astro';
 import Pie from '@/components/Pie.astro';
+import Icono from '@/components/Icono.astro';
 import { obtenerEstacion, redesEstacion } from '@/lib/cms/estacion';
 
 interface Props {
@@ -681,6 +700,36 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
     */}
     <div class="progreso" data-progreso aria-hidden="true" transition:persist="progreso">
       <div class="progreso-barra"></div>
+    </div>
+
+    {/*
+      🔴 EL VISOR FLOTANTE DE LAS CANCIONES.
+
+      Va en el marcado y no lo construye `pista.ts`, por lo mismo que la barra: con
+      `transition:persist` sobrevive a la navegación y la canción sigue sonando al
+      cambiar de página. Creado desde el script, cada navegación traería un marco
+      nuevo y el iframe anterior quedaría sonando dentro de un nodo huérfano, sin
+      nadie que lo pueda parar.
+
+      🔴 Y va VISIBLE, con su X. Las políticas del reproductor incrustado de
+      YouTube piden un reproductor visible, de al menos 200×200 y sin obstruir, y
+      prohíben separar el audio del video. `min-height: 202px` en el CSS no es un
+      número de gusto: es esa regla.
+
+      ⚠️ Nace con `hidden` y lo quita el script al primer play. Y `hidden` en vez de
+      una clase para que haya UNA sola verdad sobre si se ve — el atributo lo
+      respetan igual el CSS, el lector de pantalla y el tabulador.
+
+      ⚠️ El `<video>` de montaje es lo que Plyr toma para construirse; al asignarle
+      una fuente de YouTube lo REEMPLAZA por su iframe, así que su atributo
+      desaparece del DOM. Está medido y no importa: la instancia se crea una vez y
+      se guarda en `window`.
+    */}
+    <div class="pista-visor" data-pista-visor hidden transition:persist="pista-visor">
+      <button type="button" class="pista-visor-cerrar" data-pista-cerrar aria-label="Cerrar el video">
+        <Icono nombre="x" tamano={16} />
+      </button>
+      <video data-pista-montaje playsinline></video>
     </div>
 
     {/*

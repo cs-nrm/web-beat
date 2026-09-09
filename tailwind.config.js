@@ -3,7 +3,7 @@
 // 🔴 Regla del design system: este archivo NO contiene ni un valor literal — solo
 // MAPEA las CSS vars del DS a utilidades de Tailwind. La fuente de verdad son los
 // tokens en `src/styles/ds/tokens/`, copiados del lienzo de Claude Design
-// (`design/Nuevo sitio de beat/_ds/copy-of-beat-100-9-design-system-d47698bf/`).
+// (`design/Nuevo sitio de beat full/_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/`).
 // No hardcodear valores aquí: siempre referenciar `var(--*)`.
 //
 // Es la diferencia deliberada respecto a los repos hermanos SSG, que tienen este

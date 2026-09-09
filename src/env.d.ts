@@ -22,7 +22,11 @@ interface ImportMetaEnv {
   readonly PUBLIC_SITE_URL: string;
   /** Origen PÚBLICO del CMS: la media que carga el navegador. */
   readonly PUBLIC_CMS_URL?: string;
-  /** Google Ad Manager. 🔴 Nunca hardcodear el ad unit — ver src/config/ads.ts. */
+  /**
+   * Google Ad Manager. 🔴 Nunca hardcodear el ad unit: lo consumen
+   * `src/scripts/anuncios.ts` (los slots de GPT) y `src/scripts/player.ts` (el
+   * VAST del pre-roll), y `scripts/guardas.mjs` lo verifica en CI.
+   */
   readonly PUBLIC_GAM_NETWORK_ID?: string;
   readonly PUBLIC_GAM_AD_UNIT?: string;
   /**

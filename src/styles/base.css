@@ -9,7 +9,8 @@
  *      compitiera con el DS perdía ahí; costaba entender por qué.
  *   3. capas de Tailwind.
  *
- * `src/styles/ds/` es una COPIA de `design/Nuevo sitio de beat/_ds/copy-of-beat-100-9-…/`.
+ * `src/styles/ds/` es una COPIA de
+ * `design/Nuevo sitio de beat full/_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/`.
  * 🔴 No se edita: así se puede re-sincronizar cuando cambie el lienzo. La única
  * intervención es haber neutralizado el `@import` de Google Fonts en
  * `tokens/fonts.css` — las fuentes se cargan desde el `<head>` (ver Base.astro) y

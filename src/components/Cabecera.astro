@@ -13,11 +13,13 @@
  * completo en cada navegación, y sin esto la señal se cortaría al cambiar de
  * página.
  *
- * ⏳ Los controles están MAQUETADOS pero todavía no CABLEADOS: el SDK de Triton, el
- * polling del now-playing y el volumen llegan en B6, al portar el núcleo de
- * `player.js`. Los `data-*` de aquí son los enganches que ese código va a usar.
- * El texto del now-playing sí se renderiza en el servidor, con el fallback
- * documentado ("Beat 100.9") cuando la bitácora no tiene nada.
+ * Los controles están CABLEADOS: el `<script>` del final del archivo llama a
+ * `prepararPlayer()` de `@/scripts/player`, y los `data-*` de aquí son el contrato
+ * que ese módulo lee (`data-mount` el stream, `data-accion` play/volumen/progreso,
+ * `data-campo` el texto). Del now-playing NO hay polling, y no lo habrá: lo que
+ * suena llega por los cue points en banda del canal SBM, dentro del propio stream
+ * — el porqué está en `src/scripts/player.ts`. El texto de partida sí se renderiza
+ * en el servidor (ver `sonando`, unas líneas más abajo).
  */
 import Icono from './Icono.astro';
 import { SECCIONES } from '@/config/navegacion';

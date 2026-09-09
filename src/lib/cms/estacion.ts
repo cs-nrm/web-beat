@@ -6,9 +6,9 @@
  * sitios Astro, antes de tener usuario, y lo que expone ya es información pública
  * (dominio, nombre, color, logo, mount del stream).
  *
- * De aquí sale, entre otras cosas, el `tritonMount` del player. 🔴 Hoy el
- * `player.js` heredado lo tiene hardcodeado como `XHSONFM`; en el port (B6) debe
- * salir de este objeto y bajar al cliente por un `data-*` desde el SSR. Es lo que
+ * De aquí sale, entre otras cosas, el `tritonMount` del player: `Cabecera.astro`
+ * lo emite en el SSR como `data-mount` y `src/scripts/player.ts` lo lee de ahí,
+ * en vez del `XHSONFM` que el `player.js` heredado llevaba hardcodeado. Es lo que
  * hace que el repo sirva de modelo para las otras tres estaciones.
  */
 import { cmsFetch, type RespuestaLista } from './client';

@@ -23,10 +23,10 @@
     "favicon": "node scripts/favicon.mjs"
   },
   "dependencies": {
-    "@astrojs/markdown-remark": "^7.2.4",
+    "@astrojs/markdown-remark": "^7.3.1",
     "@astrojs/node": "^11.1.4",
     "@tailwindcss/vite": "^4.3.3",
-    "astro": "^7.2.6",
+    "astro": "^7.2.10",
     "plyr": "^3.8.4",
     "tailwindcss": "^4.3.3"
   },

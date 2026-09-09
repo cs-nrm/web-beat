@@ -145,6 +145,71 @@ sudo apachectl configtest && sudo systemctl reload apache2
 
 ---
 
+## Tiempos
+
+Los números medidos van marcados; el resto son estimaciones honestas.
+
+### El corte en sí: **~20 segundos**
+
+| | |
+|---|---|
+| `a2ensite` + `configtest` | ~1 s |
+| `systemctl reload apache2` | ~1 s — **y aquí cambia el sitio** |
+| espera del script | 3 s |
+| las seis comprobaciones | ~10-15 s |
+
+🔴 **Sin caída.** `reload` es un *graceful* de Apache: las conexiones en curso
+terminan con la configuración vieja y las nuevas entran con la nueva. Nadie ve un
+error, ni siquiera un parpadeo.
+
+🔴 **Sin propagación.** v1 y v2 están en la misma máquina y el DNS no se toca, así
+que no hay TTL que esperar. La petición siguiente al `reload` ya recibe el v2.
+
+🔴 **Sin CDN que purgar.** `beatdigital.mx` resuelve directo al origen —sin
+cabeceras `Age`, `Via` ni `cf-*`—, así que no hay caché intermedia guardando el v1.
+
+### Lo que sí tarda, y no depende de nosotros
+
+**Hasta ~1 h 30 min** para quien visitó el v1 poco antes del corte.
+
+El v1 no manda `Cache-Control` en su HTML, solo `Last-Modified`, así que los
+navegadores aplican **caché heurística**: guardan la página ~10% del tiempo que
+lleve sin modificarse. Todas las páginas del v1 comparten fecha —es un build
+estático— y a las 10:09 esa fecha tendrá unas 15 horas, o sea hora y media de
+frescura.
+
+Solo afecta a páginas que esa persona **ya visitó**, se cura sola y un recargado
+forzado la salta. No es un bloqueo; conviene saberlo si alguien dice «yo sigo
+viendo el viejo».
+
+**De días a semanas** para que Google reindexe. Los 301 y el sitemap se lo dicen
+desde el minuto uno, pero el reindexado no es cosa de minutos. No lo midas el
+mismo día.
+
+### Lo que tarda cada paso
+
+| Paso | Tiempo |
+|---|---|
+| **Hoy** · desplegar v2 | ~2-4 min (el `install` y el `build` son de segundos —medido: 0.4 s y 5.5 s en local—, el resto es la descarga de paquetes nuevos) |
+| **Hoy** · copiar el vhost | segundos |
+| **Hoy** · ensayo | ~15 s |
+| **Mañana** · repetir el ensayo | ~15 s |
+| **10:09** · el corte | **~20 s** |
+| Comprobación a mano + teléfono | ~10 min |
+| Expand de `www` | ~1 min |
+
+⚠️ El `build` de 5.5 s es en un portátil. En la VM cuenta con más, y sobre todo con
+la **descarga de paquetes**: este despliegue trae dependencias nuevas porque cambió
+el lockfile con la subida de Astro. Es el único paso de mañana con red de por
+medio, y por eso va HOY y no mañana.
+
+### El resumen
+
+**De pulsar Enter a que el dominio sirva el sitio nuevo: unos veinte segundos, sin
+caída.** Todo lo demás del plan es preparación y comprobación.
+
+---
+
 ## Lo que el corte NO arregla
 
 Nada de esto bloquea, pero se va a ver:

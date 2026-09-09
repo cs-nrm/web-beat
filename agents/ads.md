@@ -36,18 +36,37 @@ Salen del lienzo v13/v14, no del sitio actual. Viven en `MEDIDAS`, en
 | Formato | Escritorio (≥900px) | Móvil |
 |---|---|---|
 | `portada` | 1280 × 350 | 390 × 110 |
-| `leaderboard` | 728 × 90 | 320 × 100 |
+| `leaderboard` | 728 × 90 | 320 × 50 |
 | `box` | 300 × 250 | 300 × 250 |
 
 🔴 **El corte es 900px en los dos lados** —el `md` del design system y el
 `sizeMapping` de GPT—. Si el CSS cortara en 900 y el mapping en 768, habría un
 tramo en el que el marco es de escritorio y el creativo que sirve GAM es de móvil.
 
-⚠️ **Tres de esas medidas no existían en Ad Manager al escribir esto**: 1280×350 y
-390×110 son nuevas, y el leaderboard móvil hoy es 320×50, no 320×100. Un slot cuya
-medida no está dada de alta **nunca se llena**, y desde el sitio se ve igual que un
-hueco sin demanda. Antes de dar por bueno un hueco vacío, confirmar la medida en
-GAM.
+⚠️ **Dos de esas medidas no existen en Ad Manager**: 1280×350 y 390×110 son
+nuevas. Un slot cuya medida no está dada de alta **nunca se llena**, y desde el
+sitio se ve igual que un hueco sin demanda. Antes de dar por bueno un hueco vacío,
+confirmar la medida en GAM.
+
+🔴 **El leaderboard móvil pasó de 320×100 a 320×50 el 2026-09-09, y la historia es
+la lección.** El código pedía 320×100 —una medida que NO está en el ad unit—, así
+que GAM no tenía nada de ese tamaño y sirvió el **728×90 de escritorio** en un
+hueco de 320: el creativo se salía de lado y se pintaba encima del Fenómeno en un
+iPhone. Tres cosas fallaron a la vez y conviene reconocer cada una:
+
+1. La medida se eligió sin estar dada de alta, que es justo lo que el párrafo de
+   arriba advierte.
+2. Se documentó como si viniera del lienzo. **El lienzo no dice nada de móvil**:
+   el artboard `publicidad` es solo de escritorio y nombra 728×90, 300×250,
+   300×600 y la portada en 970×250. Toda la columna de móvil de la tabla se
+   inventó en `c79dbd4`.
+3. Y el hueco no CONTENÍA, así que un creativo de otra medida podía romper la
+   página. Eso ya está arreglado (`encajar()` en `anuncios.ts`), pero era el
+   parachoques, no la causa.
+
+⚠️ **La portada declara 1280×350 y el lienzo dice 970×250.** Sin resolver: 970×250
+es el «billboard» estándar de IAB y 1280×350 no es una medida estándar, así que su
+demanda programática es prácticamente nula. Decisión de Carlos.
 
 ### El marco se reserva y luego desaparece
 

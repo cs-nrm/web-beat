@@ -86,10 +86,25 @@ const MEDIDAS = {
     ],
   },
   leaderboard: {
-    tamanos: [[728, 90], [320, 100]],
+    /*
+      🔴 En móvil es **320×50** y no 320×100 (Carlos, 2026-09-09).
+      
+      El 320×100 se había puesto citando el lienzo, y el lienzo NO lo dice: el
+      artboard `publicidad` es solo de escritorio —cero menciones de móvil— y
+      nombra 728×90, 300×250, 300×600 y la portada en 970×250. La columna de móvil
+      de esta tabla se inventó en `c79dbd4` y se documentó como si viniera del
+      diseño, que es peor que no documentarla.
+
+      Y 320×50 es además la medida correcta por dos razones que no son de gusto:
+      es el «mobile leaderboard» estándar de IAB, con mucha más demanda
+      programática que el 320×100 («large mobile banner»); y 100px de alto en una
+      pantalla de 390 son casi un tercio del ancho en vertical, para un formato que
+      es un cintillo.
+    */
+    tamanos: [[728, 90], [320, 50]],
     mapping: [
       [[900, 0], [[728, 90]]],
-      [[0, 0], [[320, 100]]],
+      [[0, 0], [[320, 50]]],
     ],
   },
   box: {
@@ -378,11 +393,11 @@ if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
       font-size: 7px;
       letter-spacing: 0.2em;
     }
-    /* 320×100 en móvil: el 728×90 no cabe en 390px. */
+    /* 320×50 en móvil: el 728×90 no cabe en 390px. Ver `MEDIDAS`. */
     .es-leaderboard .anuncio-hueco {
       width: 320px;
       max-width: 100%;
-      aspect-ratio: 320 / 100;
+      aspect-ratio: 320 / 50;
     }
     .es-box .anuncio-hueco {
       width: 300px;

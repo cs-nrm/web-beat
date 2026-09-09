@@ -382,19 +382,18 @@ const nombreAqui = filtro ? filtro.nombre : (seccion?.rotulo ?? 'esta sección')
       margin: 22px 0 0;
     }
 
-    .sc-anuncio {
-      gap: 6px;
-      padding: 22px 16px;
-    }
-    .sc-anuncio-rotulo {
-      font-size: 7px;
-    }
-    /* 320×100 en móvil: el 728×90 no cabe en 390px. */
-    .sc-anuncio-leader {
-      width: 320px;
-      max-width: 100%;
-      aspect-ratio: 320 / 100;
-    }
+    /*
+      📖 Aquí había tres reglas de publicidad —`.sc-anuncio`, `.sc-anuncio-rotulo`
+      y `.sc-anuncio-leader`— y se fueron el 2026-09-09: **ningún elemento de este
+      archivo las usaba**. Sobrevivían de cuando esta página pintaba su propio
+      marcado de anuncio; hoy usa `<Anuncio formato="leaderboard" …>`, que trae su
+      marco y sus medidas.
+
+      ⚠️ Y no eran inocuas: `.sc-anuncio-leader` reservaba `320 / 100`, o sea que
+      guardaba una copia MUERTA de una medida equivocada. El día que alguien
+      volviera a usar esa clase habría heredado el fallo, y buscando «320 × 100»
+      para corregirlo aparecía aquí sin que este archivo tuviera nada que ver.
+    */
 
     .sc-abajo {
       grid-template-columns: 1fr;

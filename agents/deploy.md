@@ -148,8 +148,8 @@ Contenido: `programas` 0 · `autores` 0 · `paginas` 0 · `podcasts` 0 ·
 `listas` 2, una llamada **«Bonus Beat de Prueba»** · `noticias` 9 · las redes
 sociales **vacías en las 4 estaciones**, así que el pie dice «Próximamente».
 
-Configuración: `PUBLIC_METRICOOL_HASH` sin copiar (el real corre en v1) · tres
-medidas de anuncio sin dar de alta en Ad Manager (1280×350, 390×110, 320×100) ·
+Configuración: `PUBLIC_METRICOOL_HASH` sin copiar (el real corre en v1) · dos
+medidas de anuncio sin dar de alta en Ad Manager (1280×350, 390×110) ·
 `viralize.com` en `ads.txt` sin confirmar con AdOps (comparte el seller id 7587 con
 `showheroes.com`, así que quitarlo puede dejar inventario sin pujar).
 

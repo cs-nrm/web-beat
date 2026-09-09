@@ -1,45 +1,36 @@
 /**
  * La parrilla avanza SOLA.
  *
- * 🔴 Por qué existe: «HOY EN LA SEÑAL» se calcula en el servidor y ahí se
- * congela. Una pestaña abierta media hora seguía marcando al aire un programa que
- * ya terminó, y el panel que existe justamente para afirmar que Beat está en vivo
- * era la parte más muerta de la página.
+ * 🔴 Por qué existe: la parrilla se calcula en el SERVIDOR y ahí se congela. Una
+ * pestaña abierta media hora seguía marcando al aire un programa que ya terminó,
+ * o sea que lo que existe justamente para afirmar que Beat está en vivo era la
+ * parte más muerta de la página.
  *
  * Esto no pide nada al servidor: los horarios ya vienen en el marcado, así que
  * basta con volver a compararlos contra el reloj. Cero peticiones, cero coste por
  * oyente.
+ *
+ * ⚠️ Nació para el panel «HOY EN LA SEÑAL» del Inicio, que se retiró el
+ * 2026-09-09 («en el home nada», Carlos). Hoy sirve a `/programacion`: el hero de
+ * «AL AIRE AHORA» —de donde cuelga que el punto de tally se apague al terminar el
+ * bloque—, las filas de «LO QUE SIGUE HOY» y las celdas de la rejilla semanal.
+ *
+ * ⚠️ Y sirve a CUALQUIER `[data-bloque]`, no a una pantalla concreta: por eso el
+ * selector es de atributo y no de clase. Si no hay ninguno en la página, se apaga
+ * el temporizador solo.
+ *
+ * 🔴 El reloj y la comparación NO se calculan aquí: se importan de
+ * `src/lib/parrilla.ts`, que es el mismo módulo que usa el SERVIDOR para pintar.
+ * Tenía su propia copia de las dos funciones y era la trampa de §11 de
+ * `movimiento.md` esperando su turno — dos copias de la misma regla, y el día que
+ * divergen nadie sabe cuál manda.
  */
+import { ahoraEnMexico, estaAlAire } from '@/lib/parrilla';
 
 /** Cada cuánto se recalcula. Medio minuto: el dato es en minutos. */
 const CADA_MS = 30_000;
 
 let reloj: number | null = null;
-
-/**
- * Minuto del día en la hora de MÉXICO, no la del visitante.
- *
- * 🔴 La parrilla está en hora de la estación. Un oyente en Madrid o en Los
- * Ángeles vería el programa equivocado marcado al aire si esto usara su reloj
- * local — y es exactamente el tipo de error que nadie reporta porque quien lo
- * sufre no sabe cuál era el programa correcto.
- */
-function minutoDeMexico(): number {
-  const partes = new Intl.DateTimeFormat('es-MX', {
-    timeZone: 'America/Mexico_City',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  }).formatToParts(new Date());
-  const h = Number(partes.find((p) => p.type === 'hour')?.value ?? '0');
-  const m = Number(partes.find((p) => p.type === 'minute')?.value ?? '0');
-  return h * 60 + m;
-}
-
-/** Un bloque que cruza medianoche va de `desde` a 24:00 y de 00:00 a `hasta`. */
-function estaAlAire(desde: number, hasta: number, cruza: boolean, ahora: number): boolean {
-  return cruza ? ahora >= desde || ahora < hasta : ahora >= desde && ahora < hasta;
-}
 
 function repasar(): void {
   const filas = document.querySelectorAll<HTMLElement>('[data-bloque]');
@@ -51,7 +42,7 @@ function repasar(): void {
     return;
   }
 
-  const ahora = minutoDeMexico();
+  const { dia, minuto: ahora } = ahoraEnMexico();
 
   for (const fila of filas) {
     const desde = Number(fila.dataset.desde);
@@ -60,9 +51,26 @@ function repasar(): void {
     const vivo = fila.dataset.vivo === '1';
     if (!Number.isFinite(desde) || !Number.isFinite(hasta)) continue;
 
-    const alAire = estaAlAire(desde, hasta, cruza, ahora);
+    /*
+      ⚠️ Una celda de la rejilla semanal declara SU día (`data-dia`), y solo puede
+      estar al aire si hoy es ese día. Sin esta comprobación, el bloque de las
+      21:00 del martes se marcaría al aire también el sábado a las 21:00 —siete
+      celdas encendidas a la vez, una por columna—. El hero y las filas de «LO QUE
+      SIGUE HOY» no llevan el atributo porque ya son las de hoy, y ahí la
+      condición sobra.
+    */
+    const suDia = fila.dataset.dia;
+    const alAire = (!suDia || suDia === dia) && estaAlAire(desde, hasta, cruza, ahora);
     fila.classList.toggle('es-aire', alAire);
 
+    /*
+      🔴 `[data-estado]` es el CONTRATO de este archivo: el elemento cuyo TEXTO se
+      reescribe con el estado del bloque. Quien meta ese atributo dentro de un
+      `[data-bloque]` para otra cosa va a perder su contenido — le pasó al botón
+      de «Escuchar en vivo» del hero de `/programacion`, que quedó diciendo «AL
+      AIRE · 58 MIN». Si hace falta un atributo de estado para otra cosa ahí
+      dentro, cualquier nombre menos este.
+    */
     const estado = fila.querySelector<HTMLElement>('[data-estado]');
     if (!estado) continue;
 

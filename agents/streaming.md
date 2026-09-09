@@ -26,7 +26,7 @@ Y describía una arquitectura que ya no es esta:
 | jQuery, Day.js, Flickity y `player-0.1.0.min.js` del CDN de NRM | Ninguno. La única dependencia externa es el SDK de Triton |
 | El SDK cargado con la página | **A demanda**, al primer indicio de intención |
 | `station: 'XHSONFM'` en la config | Sale del CMS (`estaciones.tritonMount`) y baja por `data-mount` |
-| Carrusel Flickity de la programación dentro del player | La parrilla es `src/components/inicio/PanelSenal.astro`, en el Inicio |
+| Carrusel Flickity de la programación dentro del player | La parrilla es `/programacion`, y no va dentro del player ni en el Inicio |
 
 Un agente que manda a editar archivos fantasma es peor que no tener agente: hace
 perder una tarde y luego hace dudar del resto de la documentación.
@@ -40,7 +40,7 @@ perder una tarde y luego hace dudar del resto de la documentación.
 | `src/scripts/player.ts` | El núcleo: construir el SDK, la máquina de 6 estados, los cue points, el pre-roll VAST, el modal del anuncio, el volumen y la marquesina |
 | `src/scripts/audio.ts` | 🔴 El **árbitro**: solo una fuente suena a la vez. Lo comparten radio, video, podcast y pista |
 | `src/scripts/pista.ts` | Las pistas a demanda de Bonus Beat, en la MISMA barra. Un `<audio>` nativo, no Plyr |
-| `src/scripts/senal.ts` | Que «HOY EN LA SEÑAL» avance solo, sin pedirle nada al servidor |
+| `src/scripts/senal.ts` | Que la parrilla de `/programacion` avance sola, sin pedirle nada al servidor |
 | `src/scripts/video.ts` | El visor de las cápsulas (Plyr a demanda). Entra aquí por el árbitro de audio |
 | `src/components/Cabecera.astro` | **Solo los `data-*` y `#td_container` / `#td-telon`.** El marcado y el CSS son de `agents/frontend.md` |
 | `src/lib/cms/estacion.ts` | De donde sale `tritonMount` |
@@ -78,7 +78,7 @@ está escuchando. ⚠️ El efecto visible: hasta que alguien pulsa play, la bar
 nombre de la estación en vez de una canción. **Eso es MÁS honesto, no menos** — antes
 afirmaba saber qué sonaba para un oyente que no estaba oyendo nada.
 
-⚠️ **Lo que NO se puede mover al SDK es el HISTORIAL** —«LO QUE SONÓ» del Inicio y de
+⚠️ **Lo que NO se puede mover al SDK es el HISTORIAL** —«LO QUE SONÓ», hoy solo en
 `/en-vivo`—: los cue points solo cuentan el presente, y solo mientras haya una
 conexión abierta. Eso sigue saliendo de `bitacora`, y por eso `src/lib/cms/aire.ts`
 sigue vivo.

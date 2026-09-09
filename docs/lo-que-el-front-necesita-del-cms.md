@@ -190,7 +190,79 @@ datos. Sus cifras son relleno verosímil. Ya pasó una vez: el contador de "4 21
 escuchando" se leyó como requisito y era decoración. **Nada de aquí se vuelve campo
 sin confirmarlo.**
 
-- **Duración por cápsula.** El artboard 14g pide "las once cápsulas con día y
+- ❌ **La CLASIFICACIÓN de un programa — NO VA. Decisión de Carlos, 2026-09-09:**
+  «no lo necesitamos, el diseño se lo inventó».
+
+  Se deja escrito porque el lienzo sigue pidiéndola y se va a volver a proponer. El
+  diseño de `/programacion` pinta tres filtros sobre la parrilla —`SHOW
+  INTERNACIONAL · SHOW SINDICADO · PRODUCCIÓN BEAT`— y una rejilla «SHOWS
+  INTERNACIONALES» con su conteo. Se pidió el campo, **se acordó cerrado**
+  (`tipoDeShow: 'internacional' | 'sindicado' | 'propio'`, `select` opcional sin
+  default), se construyó el front entero contra él… y se retiró **sin desplegar
+  nada**: internacional / sindicado / propio no es una distinción que la estación
+  lleve en la operación. Apareció en el lienzo, no en la radio.
+
+  🔴 **Cero cambios de esquema y cero deploy.** No hay `tipoDeShow`, no hay
+  migración y no hay commit que esperar. El lock en `cms-estaciones@eb0ad49` sigue
+  válido y **no hay que correr `pnpm sync:types`**.
+
+  🔴 **Y no hay camino B.** `programas` no tiene NINGUNA taxonomía con la que
+  aproximarla —ni `categorias` ni `etiquetas` ni nada parecido—: sus campos son
+  `nombre`, `descripcionCorta`, `descripcion`, `locutores`, `imagen`, `horarios[]`,
+  el contacto al aire (`whatsapp`/`telefono`/`hashtag`), `slug` y `estado`.
+  Confirmado por la sesión del CMS. Así que si vuelve, vuelve con un campo nuevo,
+  con quien lo capture, y con el contrato acordado otra vez desde cero.
+
+  ⚠️ Del lado del front se quitó todo —las casillas, la sección, el conteo y
+  `clasificacionDe()`— y **no quedó tolerancia ni flag**: una casilla que no puede
+  encenderse nunca es peor que no tenerla. Está en el historial de git.
+
+  ℹ️ Lo único que sobrevive de ese viaje, y vale por sí solo: **el rótulo con marca
+  se arma desde `estaciones.nombrePublicacion`, no escrito a mano.** El valor del
+  CMS iba a ser `'propio'` justamente para no llevar «Beat» dentro, porque el mismo
+  campo lo usarían Oye, Sabrosita y Stereo Cien. Ese es el patrón del repo y se va
+  a repetir con cualquier otro rótulo que el diseño pida con la marca adentro.
+
+- ✅ **Imagen del hero: UNA sola, con punto focal — RESUELTO el 2026-09-09.** No se
+  crea un `imagenApaisada`.
+
+  El hero de `/programacion` es una franja apaisada, así que la `imagen` del
+  programa —que puede venir vertical— se recorta fuerte. Lo que lo hace viable es
+  que
+  **`media` lleva `focalPoint: true`**: todo documento trae `focalX`/`focalY` en
+  porcentaje, y el front los pinta como `object-position` (`puntoFocal()` en
+  `lib/cms/client.ts`). Sin eso, `object-fit: cover` recorta por el centro, que en
+  una foto vertical de un DJ es el pecho.
+
+  🔴 **Los `sizes` del CMS son solo de ANCHO y conservan la proporción: ninguno es
+  un recorte.** `thumbnail` 400 / `card` 768 / `large` 1280. No esperar un cuadrado
+  ni un 16:9 del CMS — el recorte lo hace el front.
+
+  Por qué no dos campos: son ~39 programas y la mitad llegaría sin el apaisado el
+  día del lanzamiento, así que el fallback a `imagen` haría falta igual, y el editor
+  se quedaría con dos casillas sin regla de cuál gana. ⚠️ Esto sigue vigente aunque
+  la clasificación se haya caído: el punto focal era dato REAL que ya venía en la
+  respuesta y no se estaba usando, y el hero lo necesita igual. Si algún día Carlos quiere
+  arte de hero de verdad, el patrón ya existe y no es un campo suelto:
+  `cabeceraField` (`src/fields/cabecera.ts`), que es lo que usa `especiales` para
+  esta misma división hero-vs-tarjeta. **No se construyó nada para eso.**
+
+- 🔴 **`programas.estado` NO lo filtra el servidor** (avisado por la sesión del CMS,
+  2026-09-09). Su acceso de lectura es `lecturaPublicaTotal` (`() => true`), no el
+  de `noticias`: **los archivados llegan igual**. El front ya filtra
+  `where[estado][equals]=activo` en sus dos consultas de listado, pero conviene
+  tenerlo escrito, porque por analogía con las notas uno supone que el servidor
+  protege — y aquí esa condición es la ÚNICA defensa.
+
+  ⚠️ Lo que **no** filtra es `obtenerPrograma(slug)`, y es a propósito: la ayuda del
+  propio campo dice «Archivar lo saca de la parrilla sin borrar su página ni sus
+  episodios».
+
+- ℹ️ **Los episodios de un programa no tienen campo inverso** en `programas`, y es
+  a propósito: se piden con `?where[programa][equals]=<id>` sobre `/api/podcasts`,
+  donde el servidor sí filtra borradores y despublicados. Aplica a `/programas/*`.
+
+- **Duración por cápsula.**- **Duración por cápsula.** El artboard 14g pide "las once cápsulas con día y
   duración". `canciones.duracion` existe, pero `noticias` no tiene duración. ¿Es
   dato editorial o relleno?
 - **`bandcamp` y `beatport` en `canciones`.** El lienzo los muestra en Bonus Beat;

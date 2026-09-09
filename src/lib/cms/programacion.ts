@@ -1,127 +1,67 @@
 /**
- * La parrilla — «HOY EN LA SEÑAL» de 13a, y §9 del mapa de sitio.
+ * La parrilla — «HOY EN LA SEÑAL» de 13a, `/programacion` y §9 del mapa de sitio.
  *
  * 🔴 Esto se resuelve en el SERVIDOR, no en el cliente. El sitio viejo lo hacía en
  * el navegador: leía 7 booleanos ACF (`lunes`…`domingo`), comparaba
  * `acf.hora_inicio`/`hora_fin` como cadenas y se refrescaba con un `setInterval`
  * de 5 minutos. Aquí la parrilla del día y el «al aire ahora» salen renderizados,
  * y el TTL de la caché los mantiene frescos sin JavaScript.
+ *
+ * ⚠️ Este archivo es SOLO el CMS: qué se pide y con qué filtros. La aritmética
+ * —qué está al aire, cómo se corta un bloque en medianoche— vive en
+ * `src/lib/parrilla.ts`, que es puro y lo importa también el navegador. La razón
+ * está escrita en la cabecera de ese archivo y es la de §11 de `movimiento.md`.
  */
 import { cmsFetchEstacion, SIN_PAGINACION, type RespuestaLista } from './client';
 import type { Programa } from '@/types/payload';
+import {
+  ahoraEnMexico,
+  parrillaDelDia,
+  parrillaSemanal,
+  type Bloque,
+  type Dia,
+} from '@/lib/parrilla';
 
-/** Los códigos de día del CMS, en el orden de `Date.getDay()` (0 = domingo). */
-const DIAS = ['dom', 'lun', 'mar', 'mie', 'jue', 'vie', 'sab'] as const;
-type Dia = (typeof DIAS)[number];
+/*
+  Se re-exportan porque son los tipos que devuelve `obtenerProgramacion`, y quien
+  la llama debería poder nombrarlos sin saber que la aritmética vive en otro
+  archivo.
 
-/** Un bloque de la parrilla, ya resuelto contra el reloj. */
-export interface Bloque {
-  programa: Programa;
-  horaInicio: string;
-  horaFin: string;
-  /** Minutos desde medianoche — para ordenar y comparar sin volver a parsear. */
-  desde: number;
-  hasta: number;
-  esVivo: boolean;
-  alAire: boolean;
-  /** El bloque termina al día siguiente. */
-  cruzaMedianoche: boolean;
-}
+  ⚠️ Aquí había además `obtenerParrillaDeHoy()`, que devolvía solo la parrilla del
+  día. Su único cliente era el panel «HOY EN LA SEÑAL» del Inicio, retirado el
+  2026-09-09; sin él era un export que nadie llama. No se pierde nada: la
+  aritmética es `parrillaDelDia()` en `lib/parrilla.ts` y `obtenerProgramacion()`
+  ya devuelve el día en `hoy`.
+*/
+export type { Bloque, Segmento } from '@/lib/parrilla';
 
-/**
- * `HH:MM` a minutos desde medianoche.
- *
- * ⚠️ Las horas son TEXTO en el CMS, no un tipo hora. Un `"9:5"` o un `"24:00"`
- * capturado a mano no debe tumbar la página, así que lo que no parsea devuelve
- * `null` y su bloque se descarta.
- */
-function minutos(hhmm: string | null | undefined): number | null {
-  const m = /^(\d{1,2}):(\d{2})$/.exec((hhmm ?? '').trim());
-  if (!m) return null;
-  const h = Number(m[1]);
-  const min = Number(m[2]);
-  if (h > 23 || min > 59) return null;
-  return h * 60 + min;
-}
+/*
+  ⚠️ NO HAY CLASIFICACIÓN DE PROGRAMAS, y es decisión de Carlos (2026-09-09):
+  «no lo necesitamos, el diseño se lo inventó».
 
-/** El día y el minuto actuales EN HORA DE MÉXICO, no en la del servidor. */
-function ahoraEnMexico(): { dia: Dia; minuto: number } {
-  const partes = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'America/Mexico_City',
-    weekday: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  }).formatToParts(new Date());
-  const g = (t: string) => partes.find((p) => p.type === t)?.value ?? '';
-  const mapa: Record<string, Dia> = {
-    Sun: 'dom', Mon: 'lun', Tue: 'mar', Wed: 'mie', Thu: 'jue', Fri: 'vie', Sat: 'sab',
-  };
-  // `hour12: false` puede dar "24" a medianoche en algunos entornos.
-  const hora = Number(g('hour')) % 24;
-  return { dia: mapa[g('weekday')] ?? 'lun', minuto: hora * 60 + Number(g('minute')) };
-}
+  Se anota porque va a volver a preguntarse. El lienzo de `/programacion` pinta
+  tres filtros sobre la parrilla —`SHOW INTERNACIONAL · SHOW SINDICADO ·
+  PRODUCCIÓN BEAT`— y una rejilla «SHOWS INTERNACIONALES» con su conteo. Las
+  cuatro cosas se construyeron, se acordó el campo con `cms-estaciones`
+  (`tipoDeShow: 'internacional' | 'sindicado' | 'propio'`) y **se retiraron sin
+  desplegarlo**: internacional / sindicado / propio no es una distinción que la
+  estación lleve en la operación, apareció en el diseño.
 
-/**
- * La parrilla de hoy, ordenada, con el bloque al aire marcado.
- *
- * Se piden TODOS los programas activos en una consulta y se resuelve en memoria:
- * `horarios` es un array anidado y filtrar por día del lado del CMS pediría un
- * `where` sobre un campo de array —lento— y además metería el día de hoy en la
- * clave de caché, que es la regla de oro de este cliente.
- */
-export async function obtenerParrillaDeHoy(): Promise<{ bloques: Bloque[]; alAire: Bloque | null }> {
-  let programas: Programa[] = [];
-  try {
-    const r = await cmsFetchEstacion<RespuestaLista<Programa>>('programas', {
-      'where[estado][equals]': 'activo',
-      ...SIN_PAGINACION,
-      depth: 1,
-    });
-    programas = r.docs;
-  } catch {
-    return { bloques: [], alAire: null };
-  }
+  🔴 Y `programas` no tiene NINGUNA otra taxonomía con la que aproximarla —ni
+  `categorias` ni `etiquetas`—: sus campos son `nombre`, `descripcionCorta`,
+  `descripcion`, `locutores`, `imagen`, `horarios[]`, el contacto al aire, `slug` y
+  `estado`. Así que no hay camino B sin tocar el esquema del CMS.
 
-  const { dia, minuto } = ahoraEnMexico();
-  const bloques: Bloque[] = [];
+  👉 Si alguien vuelve con esos filtros: **no se reconstruyen desde el lienzo.**
+  Hace falta un campo nuevo con quien lo capture, y el contrato se acuerda otra vez
+  desde cero. Lo que hubo está en el historial de git.
+*/
 
-  for (const programa of programas) {
-    for (const h of programa.horarios ?? []) {
-      if (!h.dias?.includes(dia)) continue;
-      const desde = minutos(h.horaInicio);
-      const hastaCrudo = minutos(h.horaFin);
-      if (desde === null || hastaCrudo === null) continue;
+// ============================================================
+// Las consultas
+// ============================================================
 
-      /*
-        ⚠️ El bloque que cruza medianoche. Si `horaFin <= horaInicio` el bloque
-        termina al día siguiente: «23:00 → 01:00». Sin esto, la comparación
-        `minuto >= desde && minuto < hasta` es FALSA siempre para esos bloques, y
-        el programa de la madrugada nunca aparecería al aire. Está anotado igual en
-        el CMS, y el sitio viejo comparaba cadenas, así que lo tenía roto.
-      */
-      const cruzaMedianoche = hastaCrudo <= desde;
-      const hasta = cruzaMedianoche ? hastaCrudo + 24 * 60 : hastaCrudo;
-      const minutoAjustado = cruzaMedianoche && minuto < desde ? minuto + 24 * 60 : minuto;
-
-      bloques.push({
-        programa,
-        horaInicio: h.horaInicio,
-        horaFin: h.horaFin,
-        desde,
-        hasta,
-        esVivo: h.tipo !== 'repeticion',
-        alAire: minutoAjustado >= desde && minutoAjustado < hasta,
-        cruzaMedianoche,
-      });
-    }
-  }
-
-  bloques.sort((a, b) => a.desde - b.desde);
-  return { bloques, alAire: bloques.find((b) => b.alAire) ?? null };
-}
-
-/** Todos los programas activos — el índice de `/programacion`. */
+/** Todos los programas activos, ordenados por nombre. */
 export async function obtenerProgramas(): Promise<Programa[]> {
   try {
     const r = await cmsFetchEstacion<RespuestaLista<Programa>>('programas', {
@@ -134,6 +74,44 @@ export async function obtenerProgramas(): Promise<Programa[]> {
   } catch {
     return [];
   }
+}
+
+/**
+ * Todo lo que `/programacion` necesita, en UNA consulta al CMS.
+ *
+ * 🔴 Una y no tres. La página pinta el «al aire ahora», «lo que sigue hoy» y la
+ * rejilla de la semana, y las tres cosas salen del MISMO listado de programas:
+ * pedirlo tres veces serían tres claves de caché distintas —`sort` distinto,
+ * params distintos— y por tanto tres viajes al CMS para responder la misma
+ * pregunta. Se pide una vez y se deriva en memoria con las funciones puras de
+ * `lib/parrilla.ts`.
+ *
+ * ⚠️ NO devuelve la lista de programas. La devolvía, para las tarjetas de «SHOWS
+ * INTERNACIONALES»; sin esa sección nadie la usaba y un campo que nadie lee es lo
+ * que hace creer que falta cablear algo. Quien la necesite llama a
+ * `obtenerProgramas()`, que sigue exportada y comparte la misma caché.
+ *
+ * ⚠️ Y por eso el reloj se resuelve UNA vez y se pasa hacia abajo: si cada
+ * derivación llamara a `ahoraEnMexico()` por su cuenta, una petición servida en el
+ * segundo 59 de un minuto podría calcular el «al aire» con un minuto y la rejilla
+ * con el siguiente, y marcar dos programas al aire —o ninguno—.
+ */
+export async function obtenerProgramacion(): Promise<{
+  ahora: { dia: Dia; minuto: number };
+  semana: ReturnType<typeof parrillaSemanal>;
+  hoy: Bloque[];
+  alAire: Bloque | null;
+}> {
+  const programas = await obtenerProgramas();
+  const ahora = ahoraEnMexico();
+  const { bloques, alAire } = parrillaDelDia(programas, ahora.dia, ahora.minuto);
+
+  return {
+    ahora,
+    semana: parrillaSemanal(programas, ahora),
+    hoy: bloques,
+    alAire,
+  };
 }
 
 /**

@@ -54,7 +54,6 @@ perder una tarde y luego hace dudar del resto de la documentación.
 | `src/components/inicio/ArchivoTemas.astro` | El archivo de temas del Fenómeno |
 | `src/components/inicio/BonusBeat.astro` | Las tres canciones con su viñeta |
 | `src/components/inicio/Agenda.astro` | La agenda |
-| `src/components/inicio/PanelSenal.astro` | «HOY EN LA SEÑAL» y «LO QUE SONÓ» |
 | `src/components/inicio/Marquee.astro` | La tira que corre |
 | `src/components/IndiceScanner.astro` | El interior compartido de `/beat-scanner`, `/editorial` y `/etiqueta/*` |
 | `src/components/TarjetaNota.astro` | La tarjeta de nota, en todos sus contextos |

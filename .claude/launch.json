@@ -28,9 +28,10 @@
       "runtimeExecutable": "sh",
       "runtimeArgs": [
         "-c",
-        "set -a; . ./.env; set +a; PORT=4322 node ./dist/server/entry.mjs"
+        "set -a; . ./.env; set +a; node ./dist/server/entry.mjs"
       ],
-      "port": 4322
+      "port": 4322,
+      "autoPort": true
     }
   ]
 }

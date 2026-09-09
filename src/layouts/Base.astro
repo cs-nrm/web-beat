@@ -155,9 +155,9 @@ const vista = Astro.props.vista ?? (esInicio ? 'inicio' : 'interior');
  * la estación en vez de una canción. Eso es MÁS honesto, no menos: antes
  * afirmaba saber qué sonaba para un oyente que no estaba oyendo nada.
  *
- * ⚠️ Lo que NO se puede mover al SDK es el HISTORIAL —«LO QUE SONÓ» del Inicio y
- * de `/en-vivo`—: los cue points solo cuentan el presente, y solo mientras haya
- * una conexión abierta. Eso sigue saliendo de `bitacora`.
+ * ⚠️ Lo que NO se puede mover al SDK es el HISTORIAL —«LO QUE SONÓ», que desde el
+ * 2026-09-09 vive solo en `/en-vivo`—: los cue points solo cuentan el presente, y
+ * solo mientras haya una conexión abierta. Eso sigue saliendo de `bitacora`.
  *
  * Si el CMS no responde, el sitio se sirve igual: la estación cae a un objeto
  * mínimo y el player anuncia la marca. Degradar es la regla — `web-enfoque`
@@ -828,6 +828,7 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
       import { prepararEscritura } from '@/scripts/escribir';
       import { prepararRevelado } from '@/scripts/revelar';
       import { prepararSenal } from '@/scripts/senal';
+      import { prepararParrilla } from '@/scripts/parrilla';
       import { prepararCursor } from '@/scripts/cursor';
       import { prepararRejilla } from '@/scripts/rejilla';
       import { prepararIntro } from '@/scripts/intro';
@@ -839,6 +840,7 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
       prepararEscritura();
       prepararRevelado();
       prepararSenal();
+      prepararParrilla();
       prepararCursor();
       prepararRejilla();
       prepararIntro();

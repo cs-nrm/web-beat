@@ -388,6 +388,35 @@ export function urlArchivo(media: DocMedia | number | null | undefined): string 
 }
 
 /**
+ * El punto focal de la imagen como `object-position`, o `null` si está centrado.
+ *
+ * 🔴 Es lo que evita decapitar a alguien en un recorte apaisado, y hace falta
+ * porque **el CMS no recorta**: `thumbnail` 400 / `card` 768 / `large` 1280 son
+ * variantes de ANCHO y todas conservan la proporción del original. Ninguna es un
+ * cuadrado ni un 16:9 — el recorte lo hace el front con `object-fit: cover`, y sin
+ * punto focal recorta por el centro, que en una foto vertical de un DJ es el
+ * pecho.
+ *
+ * `media` lleva `focalPoint: true` en el CMS, así que todo documento trae `focalX`
+ * y `focalY` en porcentaje, con 50/50 por defecto.
+ *
+ * ⚠️ Devuelve `null` cuando el punto ya es el centro, para no ensuciar el marcado
+ * con un `object-position: 50% 50%` que es justo lo que el CSS hace solo. Quien lo
+ * use tiene que tratar el `null` como «no pongas nada», no como un error.
+ *
+ * ⚠️ Se acota a 0–100: son porcentajes capturados arrastrando en el admin, y un
+ * valor fuera de rango movería la foto fuera de su caja.
+ */
+export function puntoFocal(media: DocMedia | number | null | undefined): string | null {
+  if (!media || typeof media !== 'object') return null;
+  const acotar = (v: number | null | undefined) =>
+    typeof v === 'number' && Number.isFinite(v) ? Math.min(100, Math.max(0, v)) : 50;
+  const x = acotar(media.focalX);
+  const y = acotar(media.focalY);
+  return x === 50 && y === 50 ? null : `${x}% ${y}%`;
+}
+
+/**
  * URL de la variante pedida, con degradación hacia abajo y hacia el original.
  *
  * ⚠️ Las tres variantes se generan con `withoutEnlargement: true`, así que un

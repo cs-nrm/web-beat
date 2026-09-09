@@ -193,9 +193,17 @@ uno forzando datos en la capa `src/lib/cms/*` (ver «Cómo se verifica»).
   ANTERIORES», así que cuelga de que HAYA ediciones anteriores. `bonus-beat` tiene
   una sola capturada. Sin esa condición, el box quedaría a 40px del leaderboard
   del pie: una página que termina en dos anuncios seguidos.
-- **`programacion-box`** — va tras «AL AIRE AHORA», que sale de la parrilla, que
-  sale de `programas`: cero documentos. Sin ese panel encima, el box sería lo
-  primero bajo el titular de la sección.
+- **`programacion-box`** — va tras «AL AIRE AHORA», y cuelga de que HAYA algo al
+  aire. Sin ese panel encima, el box sería lo primero de la página: un anuncio
+  antes de cualquier contenido.
+
+  ⚠️ **Su motivo cambió el 2026-09-09 y conviene no confundirlos.** Antes no se
+  pintaba porque `programas` tenía cero documentos; ahora la estación ya está
+  capturando la parrilla, así que el panel existe **a las horas que hay programa
+  y no a las que la parrilla tiene hueco**. O sea que este hueco pasó de «vacío
+  hasta que haya contenido» a «vacío a ratos, por diseño», y verlo vacío a las
+  14:00 ya no es señal de nada: la comprobación es entrar a una hora con
+  programa, no volver a mirar mañana.
 - **`agenda-box`** — se intercala cada SEIS eventos de la lista y nunca de cola
   (ver abajo). Hoy hay un evento capturado, o sea cero filas.
 

@@ -6,9 +6,18 @@
  * qué suena, qué se cuenta y qué viene**. De ahí sale el orden, que no es
  * decorativo:
  *
- *   1. qué suena  → el player (en la cabecera) + «HOY EN LA SEÑAL / LO QUE SONÓ»
+ *   1. qué suena  → el player, en la cabecera
  *   2. qué se cuenta → el mosaico de portada, el Fenómeno, la pila de Editorial
  *   3. qué viene  → Bonus Beat y la Agenda
+ *
+ * ⚠️ El «qué suena» lo contesta SOLO el player, y es decisión de Carlos
+ * (2026-09-09): «en el home nada». Debajo del player había un panel claro con
+ * «HOY EN LA SEÑAL» —cuatro bloques de la parrilla de hoy— y «LO QUE SONÓ». Se
+ * retiró entero, y con él dos consultas al CMS por visita.
+ *
+ * Las dos mitades siguen existiendo, cada una donde le toca: la parrilla completa
+ * en `/programacion` y el historial en `/en-vivo`. El player, que es como escucha
+ * de verdad la gente, no se toca.
  *
  * 🔴 Y desde el 2026-09-07 el «qué se cuenta» se reparte en DOS, por decisión
  * editorial de Carlos: **arriba el día a día, abajo lo elaborado.** El mosaico de
@@ -24,7 +33,6 @@
 import Base from '@/layouts/Base.astro';
 import Intro from '@/components/Intro.astro';
 import Anuncio from '@/components/Anuncio.astro';
-import PanelSenal from '@/components/inicio/PanelSenal.astro';
 import Mosaico from '@/components/inicio/Mosaico.astro';
 import Marquee from '@/components/inicio/Marquee.astro';
 import Fenomeno from '@/components/inicio/Fenomeno.astro';
@@ -34,8 +42,6 @@ import BonusBeat from '@/components/inicio/BonusBeat.astro';
 import Agenda from '@/components/inicio/Agenda.astro';
 
 import { obtenerScanner, filtroDeCategoria } from '@/lib/cms/noticias';
-import { obtenerParrillaDeHoy } from '@/lib/cms/programacion';
-import { loQueSono } from '@/lib/cms/aire';
 import { obtenerEspecialVigente, obtenerEspeciales } from '@/lib/cms/especiales';
 import { obtenerTiposDeLista, obtenerListaReciente } from '@/lib/cms/listas';
 import { obtenerAgenda } from '@/lib/cms/eventos';
@@ -44,8 +50,9 @@ import { SERIE_FENOMENO, TIPO_LISTA_DESTACADA } from '@/config/site';
 import { SECCIONES_EDITORIALES } from '@/config/navegacion';
 
 /*
-  Todo en PARALELO. Son nueve consultas y ninguna depende de otra salvo la lista
-  destacada, que necesita saber qué tipos existen. Secuenciales sumarían sus
+  Todo en PARALELO. Son siete consultas y ninguna depende de otra salvo la lista
+  destacada, que necesita saber qué tipos existen. Eran nueve: la parrilla de hoy y
+  la bitácora se fueron con el panel de la señal. Secuenciales sumarían sus
   latencias; en paralelo el Inicio cuesta lo que la más lenta.
 
   Cada `obtener*` ya trae su propio `catch` que degrada a vacío, así que un
@@ -70,12 +77,10 @@ const [filtroScanner, filtroEditorial] = await Promise.all([
 
 const VACIO = { destacada: null, rejilla: [] as Awaited<ReturnType<typeof obtenerScanner>>['rejilla'] };
 
-const [{ destacada, rejilla }, editorial, parrilla, sono, especial, especiales, tipos, agenda, banners] =
+const [{ destacada, rejilla }, editorial, especial, especiales, tipos, agenda, banners] =
   await Promise.all([
     filtroScanner ? obtenerScanner(6, filtroScanner) : Promise.resolve(VACIO),
     filtroEditorial ? obtenerScanner(4, filtroEditorial) : Promise.resolve(VACIO),
-    obtenerParrillaDeHoy(),
-    loQueSono(4).catch(() => []),
     obtenerEspecialVigente(SERIE_FENOMENO),
     obtenerEspeciales(SERIE_FENOMENO, 8),
     obtenerTiposDeLista(),
@@ -181,7 +186,6 @@ const LEMA = 'Beat 100.9 — Aquí la música se elige';
   <Anuncio formato="portada" nombre="inicio-portada" banners={banners} slot="sobre-cabecera" />
 
   {/* 1. qué suena — la señal */}
-  <PanelSenal parrilla={parrilla.bloques} alAire={parrilla.alAire} sono={sono} />
 
   {/*
     2 y 3 van dentro del contenedor con TOPE de ancho.

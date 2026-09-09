@@ -79,9 +79,24 @@ const { formato, nombre = formato, unidad, banners = [], class: clase } = Astro.
  */
 const MEDIDAS = {
   portada: {
-    tamanos: [[1280, 350], [390, 110]],
+    /*
+      ⚠️ 1280×**360**, no 350. La banda es una proporción (1600/450 = 3.556, ver el
+      CSS) y el CMS genera sus derivadas con ella —`…-1280x360.webp`, comprobado en
+      lo servido—. El 350 dejaba la medida pedida a GAM 10px por debajo de su propio
+      hueco: no rompe nada, pero era la tercera cifra distinta para el mismo formato.
+
+      🔴 Y lo que estas dos medidas NO pueden dar es lo que se pidió. Un creativo de
+      GAM es de tamaño FIJO, así que en una pantalla de 1920 se queda en 1280
+      centrado, con la banda a sangre alrededor. Para programático a todo lo ancho
+      hace falta pedir `'fluid'` —que toma el ancho del contenedor— y eso exige que
+      AdOps dé de alta un creativo fluido. Está sin hacer y no lo añado a ciegas:
+      pedir `fluid` sin nada fluido en el ad unit solo añade una medida que nunca
+      se llena. La VENTA DIRECTA del CMS sí llena a todo lo ancho, y es por donde
+      este hueco está funcionando hoy.
+    */
+    tamanos: [[1280, 360], [390, 110]],
     mapping: [
-      [[900, 0], [[1280, 350]]],
+      [[900, 0], [[1280, 360]]],
       [[0, 0], [[390, 110]]],
     ],
   },
@@ -328,10 +343,34 @@ if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
   /* El banner de portada va a sangre y con el rótulo ENCIMA, no arriba: es lo
      primero de la página y una línea de texto suelta antes del banner se lee como
      contenido del sitio. */
+  /*
+    🔴 UNA proporción, no dos altos fijos (Carlos, 2026-09-09: «es un banner
+    inventado por nosotros, debería ir a full width»).
+
+    Antes eran `height: 350px` en escritorio y `110px` en móvil, y esos números
+    venían de las dos medidas de `MEDIDAS.portada` —1280×350 y 390×110—. Al
+    medirlas se vio que **son la misma proporción**: 3.657 y 3.545, y las imágenes
+    que la redacción ya subió al CMS son de 1600×450, o sea 3.556. Con 1600/450 el
+    móvil sale EXACTO: 390 de ancho dan 110 de alto. El formato siempre fue una
+    banda a lo ancho y se había anotado como dos tamaños sueltos.
+
+    Con la proporción el banner llena de borde a borde en cualquier pantalla, sin
+    franjas negras a los lados y sin recortar nada.
+
+    ⚠️ El coste, con su número: el alto crece con el ancho. A 1440 son 405px y a
+    1920 son **540px**, contra los 350 fijos de antes. Es lo que significa «a todo
+    lo ancho» sin recortar. Si algún día estorba, la salida es `max-height` en esta
+    misma regla —una línea— y el precio es que el creativo se recorta arriba y
+    abajo en pantallas anchas. No se pone hoy porque nadie lo ha pedido y recortar
+    un creativo vendido es peor que una banda alta.
+  */
   .es-portada {
     position: relative;
     display: block;
-    height: 350px;
+    /* El único número del formato. Cambiarlo mueve el hueco y la reserva a la vez. */
+    --portada-proporcion: 1600 / 450;
+    width: 100%;
+    aspect-ratio: var(--portada-proporcion);
     background: var(--noche-1);
     box-shadow: inset 0 -1px 0 var(--border-hairline);
   }
@@ -348,9 +387,23 @@ if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
     box-shadow: none;
   }
 
-  /* La creatividad del CMS. `contain` y no `cover`: un creativo vendido no se
-     recorta ni se estira —el anunciante mandó ESE archivo— así que se centra en la
-     banda y lo que sobra queda en negro, que es el fondo de la franja. */
+  /*
+    La creatividad del CMS.
+
+    📖 Iba en `object-fit: contain` —«un creativo vendido no se recorta ni se
+    estira»— y pasa a `cover` el 2026-09-09. El argumento de entonces era bueno pero
+    describía otra caja: con la banda a un alto FIJO, `contain` era lo único que
+    evitaba deformar un creativo de otra proporción, al precio de dejar franjas
+    negras a los lados.
+
+    Ahora la banda tiene la proporción DE LOS CREATIVOS (1600/450), así que para un
+    archivo bien medido `cover` y `contain` pintan exactamente igual: no hay nada
+    que recortar. La diferencia solo aparece con un creativo mal medido, y ahí
+    `cover` llena la banda —que es lo pedido— en vez de enseñar el fondo.
+
+    ⚠️ Lo que esto sí exige: que el CMS pida los creativos a 1600×450. Un archivo
+    con otra proporción ahora se recorta en silencio en vez de avisar con franjas.
+  */
   .anuncio-creatividad {
     display: block;
     height: 100%;
@@ -362,7 +415,7 @@ if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
     height: 100%;
   }
   .anuncio-creatividad img {
-    object-fit: contain;
+    object-fit: cover;
   }
   /* Con creativo debajo, el rótulo necesita su propio fondo: a 8px y en
      `--text-faint` se pierde sobre cualquier imagen clara. Y el color va fijo y no
@@ -384,9 +437,11 @@ if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
   }
 
   @media (max-width: 899px) {
-    .es-portada {
-      height: 110px;
-    }
+    /*
+      📖 Aquí había `height: 110px` para el móvil, y se fue: la proporción lo da
+      sola. A 390px de ancho, 1600/450 son 109.7px — el mismo número que estaba
+      escrito a mano. Un alto fijo menos que mantener sincronizado.
+    */
     .es-portada .anuncio-rotulo {
       left: 12px;
       top: 8px;

@@ -35,7 +35,7 @@ Salen del lienzo v13/v14, no del sitio actual. Viven en `MEDIDAS`, en
 
 | Formato | Escritorio (≥900px) | Móvil |
 |---|---|---|
-| `portada` | 1280 × 350 | 390 × 110 |
+| `portada` | 1280 × 360 | 390 × 110 |
 | `leaderboard` | 728 × 90 | 320 × 50 |
 | `box` | 300 × 250 | 300 × 250 |
 
@@ -64,9 +64,22 @@ iPhone. Tres cosas fallaron a la vez y conviene reconocer cada una:
    página. Eso ya está arreglado (`encajar()` en `anuncios.ts`), pero era el
    parachoques, no la causa.
 
-⚠️ **La portada declara 1280×350 y el lienzo dice 970×250.** Sin resolver: 970×250
-es el «billboard» estándar de IAB y 1280×350 no es una medida estándar, así que su
-demanda programática es prácticamente nula. Decisión de Carlos.
+🔴 **La portada es un formato de la casa y va A TODO LO ANCHO** (Carlos,
+2026-09-09). No es una medida fija: es **una proporción**, 1600/450 = 3.556, y la
+banda la aplica con `aspect-ratio`. Las dos «medidas» que había —1280×350 y
+390×110— eran esa misma proporción escrita dos veces, y a 390 de ancho la
+proporción da 110 exacto. Las derivadas que genera el CMS ya la siguen
+(`…-1280x360.webp`).
+
+⚠️ **Consecuencia para programático:** un creativo de GAM es de tamaño fijo, así
+que nunca llenará el ancho —en 1920 se queda en 1280 centrado—. A todo lo ancho
+solo llega por dos caminos: la **venta directa** del CMS (que es por donde funciona
+hoy, con imágenes de 1600×450) o pedir `'fluid'` a GPT, que exige un creativo
+fluido dado de alta en el ad unit. Lo segundo está sin hacer.
+
+⚠️ **El lienzo dice 970×250 para la portada** y nadie ha resuelto esa diferencia.
+970×250 es el «billboard» estándar de IAB; la proporción de la casa (3.556) no lo
+es, así que su demanda programática es prácticamente nula. Decisión de Carlos.
 
 ### El marco se reserva y luego desaparece
 

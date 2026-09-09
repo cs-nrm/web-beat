@@ -594,6 +594,19 @@ html {
   z-index: var(--z-overlay);
   background: rgba(5, 7, 6, 0.82);
   backdrop-filter: blur(6px);
+  /*
+    🔴 El telón NO captura el puntero, y por la misma razón que la caja de al lado.
+
+    Cubre el 100% del viewport mientras suena el pre-roll, y lo único que lo
+    retiraba era un `setTimeout(cerrarAnuncio, 45_000)` en `player.ts`. O sea que
+    un SDK atorado dejaba el sitio entero sin clics durante 45 segundos, y desde el
+    código eso no se ve: el telón se pinta bien y el reloj «funciona».
+
+    Lo clicable del anuncio es `.td-contenedor.es-anuncio`, que conmuta su propio
+    `pointer-events`. El telón es solo oscurecimiento, así que no necesita capturar
+    nada — y no capturando, el peor caso del reloj deja de ser «sitio muerto».
+  */
+  pointer-events: none;
   /* La opacidad no afecta al layout, así que animarla no puede desalinear al IMA. */
   animation: beat-telon-entra var(--dur-2) var(--ease-out);
 }

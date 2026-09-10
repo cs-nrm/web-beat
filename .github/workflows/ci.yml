@@ -11,15 +11,15 @@
 # reventó el build—. Por eso aquí corre `build`, que encadena check + guardas +
 # build + guarda-cascada.
 #
-# ⚠️ NO despliega, y es a propósito. Este repo es PÚBLICO: darle a un workflow
-# acceso a la VM significa poner una llave donde cualquiera puede leer el contexto
-# en el que se usa, y un runner self-hosted en un repo público es directamente lo
-# que GitHub desaconseja. El despliegue lo decide la VM; ver deploy/PENDIENTES.md.
+# ⚠️ Esta puerta NO despliega y no necesita un solo secreto, así que es segura de
+# correr en un pull request de quien sea. El despliegue vive en `deploy.yml`, con
+# sus secretos y su palanca.
 name: CI
 
+# ⚠️ SOLO pull requests. Los pushes a `beat` los cubre `deploy.yml`, que corre la
+# misma puerta y además despliega; tenerlos en los dos sitios haría el mismo build
+# dos veces por push y dejaría dos checks verdes diciendo lo mismo.
 on:
-  push:
-    branches: [beat]
   pull_request:
     branches: [beat]
 

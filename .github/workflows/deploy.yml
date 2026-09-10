@@ -1,0 +1,111 @@
+# Build y Deploy — beatdigital.mx
+#
+# Mismo patrón de casa que `web-enfoque` y `cms-estaciones`: CI valida, la VM
+# despliega por SSH. Con UNA diferencia deliberada, y conviene saber por qué.
+#
+# 🔴 Aquí NO se construye una imagen ni se publica en GHCR. Los otros dos lo hacen
+# porque compilan en la VM y se quedaban sin memoria; este sitio no está
+# dockerizado —es un servicio de systemd (`web-beat-v2`) que corre `pnpm build` en
+# la máquina— y ese build tarda segundos. Meter Docker por simetría sería
+# reescribir el despliegue del sitio recién lanzado para resolver un problema que
+# no tiene.
+#
+# ⚠️ Y una advertencia que no aplica a los repos hermanos: este sitio NO tiene
+# entorno de pruebas. `v2.beatdigital.mx` lo parecía, pero era el mismo proceso con
+# otro nombre, y se apagó el 10 sep. Así que un push a `beat` con el deploy
+# encendido va DIRECTO al aire, y cada despliegue reinicia el servicio: unos
+# segundos de 502 para quien esté navegando. Por eso el job de deploy nace apagado
+# detrás de `DEPLOY_HABILITADO`.
+name: Build y Deploy
+
+on:
+  push:
+    branches: [beat]
+    paths-ignore:
+      - '**.md'
+      - '.agents/**'
+      - '.claude/**'
+      - 'design/**'
+  # Relanzar a mano desde la pestaña Actions, sin inventar un push vacío. Hace
+  # falta justo por el `paths-ignore` de arriba: un cambio de solo documentación
+  # no dispara nada, y a veces se quiere desplegar igual (por ejemplo tras tocar
+  # una variable del entorno en la VM).
+  workflow_dispatch:
+
+# Dos pushes seguidos no deben desplegar a la vez. Y NO se cancela el que va en
+# curso: cancelarlo dejaría la VM a medio actualizar, que es peor que esperar.
+concurrency:
+  group: deploy-web-beat
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  puerta:
+    name: build (la puerta)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Escape manual, igual que en los repos hermanos: el token en el mensaje del
+    # commit salta build y deploy. ⚠️ No lo escribas literal en un commit que SÍ
+    # quieras desplegar — en cms-nrm ya pasó una vez, describiendo esta función.
+    if: ${{ !contains(github.event.head_commit.message, '[skip deploy]') }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Habilitar corepack
+        run: corepack enable
+        env:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: 0
+
+      - name: Caché del almacén de pnpm
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: pnpm-${{ runner.os }}-
+
+      - name: Dependencias
+        run: pnpm install --frozen-lockfile
+
+      # Sin `.env`: comprobado que el build pasa limpio sin él. Lo que NO cubre es
+      # que el sitio tenga contenido —`CMS_URL` es de runtime—, y eso lo caza
+      # `desplegar-v2.sh` en la VM contando las notas de la portada.
+      - name: Build
+        run: pnpm build
+
+  deploy:
+    name: Deploy a la VM
+    needs: puerta
+    runs-on: ubuntu-latest
+    # 🔴 Nace APAGADO. Para encenderlo: Settings → Secrets and variables → Actions
+    # → Variables → `DEPLOY_HABILITADO` = `true`. Mientras no exista, el job se
+    # salta y la puerta sigue corriendo, que ya es la mitad del valor.
+    #
+    # Y no es solo por los secretos que faltan: encenderlo significa que cada push
+    # a `beat` reinicia el sitio en vivo. Esa es una decisión aparte de montar el
+    # pipeline, y por eso es una palanca y no una línea de código.
+    if: ${{ vars.DEPLOY_HABILITADO == 'true' }}
+    steps:
+      # 🔴 Aquí NO va un `git pull` antes del script, a diferencia de los repos
+      # hermanos. `desplegar-v2.sh` hace el pull él mismo, y hacerlo fuera rompe
+      # su vuelta atrás: el script guarda el commit de PARTIDA para poder volver,
+      # y si alguien ya jaló, el commit que guarda es el nuevo. O sea que la
+      # vuelta atrás te devolvería exactamente a donde estás.
+      - name: SSH a la VM y desplegar
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          # El script aborta con exit≠0 si algo no cuadra —servicio caído, portada
+          # sin contenido, sitio salido en noindex— y la acción propaga ese código,
+          # así que el job sale en rojo. ⚠️ Lo que NO hace es revertir solo: deja
+          # el servicio como quedó. Si sale rojo, hay que mirar la VM.
+          script: |
+            cd /var/www/web-beat-v2
+            ./scripts/desplegar-v2.sh

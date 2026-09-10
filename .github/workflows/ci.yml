@@ -1,0 +1,81 @@
+# La puerta: lo mismo que corre el despliegue, pero antes de que llegue a la VM.
+#
+# 🔴 Por qué existe. El despliegue de la VM corre `pnpm build` completo, y una
+# puerta que falla aborta el despliegue A MEDIAS: el `git pull` ya se hizo, el
+# `install` ya cambió `node_modules`, y el servicio sigue con el artefacto viejo
+# mientras el repo dice otra cosa. Descubrirlo aquí cuesta dos minutos; descubrirlo
+# en la VM cuesta un despliegue torcido, y ya pasó tres veces en una tarde.
+#
+# ⚠️ `pnpm check` NO sería puerta suficiente: el compilador del build rechaza cosas
+# que `astro check` acepta —un comentario mal cerrado dio 0 errores en `check` y
+# reventó el build—. Por eso aquí corre `build`, que encadena check + guardas +
+# build + guarda-cascada.
+#
+# ⚠️ NO despliega, y es a propósito. Este repo es PÚBLICO: darle a un workflow
+# acceso a la VM significa poner una llave donde cualquiera puede leer el contexto
+# en el que se usa, y un runner self-hosted en un repo público es directamente lo
+# que GitHub desaconseja. El despliegue lo decide la VM; ver deploy/PENDIENTES.md.
+name: CI
+
+on:
+  push:
+    branches: [beat]
+  pull_request:
+    branches: [beat]
+
+# Si llegan dos pushes seguidos, el primero se cancela: lo que importa es si la
+# punta de la rama compila, no si compilaba un commit que ya nadie va a desplegar.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  puerta:
+    name: build (la puerta del despliegue)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # La versión sale de `.nvmrc`, que es la misma que declara `engines` y la
+      # que corre la VM (v22). Que se lea del archivo y no esté escrita aquí es
+      # justo lo que evita que las dos se separen sin que nadie lo note.
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      # 🔴 pnpm entra por corepack leyendo `packageManager` de package.json
+      # (pnpm@9.0.0), igual que en la VM. Ninguna acción de terceros: en un repo
+      # público, cada acción externa es código ajeno con acceso al workflow.
+      - name: Habilitar corepack
+        run: corepack enable
+        env:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: 0
+
+      - name: Caché del almacén de pnpm
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: pnpm-${{ runner.os }}-
+
+      # `--frozen-lockfile` a propósito, igual que el despliegue: si el lock y el
+      # package.json no cuadran, que falle aquí. Una puerta no es sitio para
+      # resolver un árbol de dependencias.
+      - name: Dependencias
+        run: pnpm install --frozen-lockfile
+
+      # ⚠️ SIN `.env`, y es deliberado: comprobado que el build pasa limpio sin él.
+      # Así esta puerta no necesita un solo secreto, que es lo que la hace segura
+      # de correr en un repo público y en pull requests de cualquiera.
+      #
+      # Lo que NO cubre, por lo mismo: que el sitio tenga contenido. `CMS_URL` es
+      # de runtime y aquí no existe, así que un build verde puede seguir sirviendo
+      # la casa vacía. Eso lo caza `desplegar-v2.sh` en la VM, contando las notas
+      # enlazadas en la portada, y ahí es donde tiene que seguir cazándose.
+      - name: Build
+        run: pnpm build

@@ -299,11 +299,16 @@ const HORAS = Array.from({ length: 24 }, (_, h) => comoHora(h * 60));
       background var(--dur-2) var(--ease-out),
       box-shadow var(--dur-2) var(--ease-out);
   }
-  a.pa-celda:hover {
+  /*
+    ⚠️ El hover se salta la celda al aire: es blanca con texto negro, así que
+    aclararle el fondo y pintarle el nombre en `--mist-0` la dejaba en blanco
+    sobre blanco. Su propio hover va debajo, con la celda invertida.
+  */
+  a.pa-celda:not(.es-aire):hover {
     background: var(--surface-card-hover);
     box-shadow: inset 0 0 0 1px var(--border-strong);
   }
-  a.pa-celda:hover .pa-nombre {
+  a.pa-celda:not(.es-aire):hover .pa-nombre {
     color: var(--mist-0);
   }
   .pa-nombre {
@@ -343,17 +348,37 @@ const HORAS = Array.from({ length: 24 }, (_, h) => comoHora(h * 60));
     color: var(--text-faint);
   }
 
-  /* Al aire: filete blanco, texto blanco y en negrita, y el punto de tally. */
+  /*
+    Al aire: la celda se INVIERTE —blanco pleno, texto negro— y lleva el punto de
+    tally (Carlos, 2026-09-10). Es el mismo gesto que la sección activa de la nav
+    y que el botón principal de `/en-vivo`: lo que está encendido se marca dando
+    la vuelta al blanco y negro, nunca con un color. Antes era un filete blanco
+    sobre `--noche-3`, que en una fila de 34px se leía como una celda cualquiera
+    con borde — había que buscarla.
+  */
   .pa-celda.es-aire {
-    background: var(--noche-3);
-    box-shadow: inset 0 0 0 1px var(--mist-0);
+    background: var(--mist-0);
+    /* El filete sobraba en cuanto el fondo pasó a blanco: era su mismo color. */
+    box-shadow: none;
+  }
+  a.pa-celda.es-aire:hover {
+    background: var(--mist-2);
   }
   .pa-celda.es-aire .pa-nombre {
-    color: var(--mist-0);
+    color: var(--noche-0);
     font-weight: 700;
   }
-  .pa-celda.es-aire .pa-rango {
-    color: var(--mist-3);
+  /*
+    ⚠️ El secundario NO puede ser `--text-faint`: los tokens de texto del DS están
+    calculados sobre negro y sobre blanco desaparecen — es lo mismo que le pasa a
+    la barra del player, la otra superficie clara del sitio. `--graphite-3` es el
+    gris que sí se lee. Va también en la flecha de `es-continua`, que es un
+    `::before` del nombre y por tanto heredaría el negro en negrita.
+  */
+  .pa-celda.es-aire .pa-rango,
+  .pa-celda.es-aire .pa-repeticion,
+  .pa-celda.es-aire .pa-nombre::before {
+    color: var(--graphite-3);
   }
   /*
     El punto está en todas las celdas y solo se ve en la que está al aire — el
@@ -487,9 +512,6 @@ const HORAS = Array.from({ length: 24 }, (_, h) => comoHora(h * 60));
     .pa-celda .pa-repeticion {
       order: 3;
       grid-column: 2;
-    }
-    .pa-celda.es-aire {
-      box-shadow: inset 0 0 0 1px var(--mist-0);
     }
 
     .pr-franja-anuncio {

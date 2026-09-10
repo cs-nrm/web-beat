@@ -7,12 +7,24 @@
  * portado. Portada (Carlos, 2026-09-07), y con eso el pie se queda sin un solo
  * enlace apagado.
  *
- * Los tres pasos y las capturas son los del sitio actual (`beatdigital.mx/alexa/`).
+ * Los tres pasos son los del sitio actual (`beatdigital.mx/alexa/`). (El v1 repetía
+ * el paso 2 dos veces por un error de su plantilla; aquí van los tres que son.)
  *
- * ⚠️ Las capturas salen del bucket del corporativo, el mismo de los logos del pie,
- * y NO se copian a `public/`: son las imágenes que la propia estación mantiene, y
- * copiarlas dejaría una versión envejeciendo por su cuenta. (El v1 repetía el paso
- * 2 dos veces por un error de su plantilla; aquí van los tres pasos que son.)
+ * 🔴 Las capturas 2 y 3 son LOCALES desde el 2026-09-10, y es un cambio de criterio
+ * a propósito: las del bucket enseñan el logo VIEJO —el redondo dorado de «Beat
+ * Digital»— en la ficha de la skill. No están desactualizadas por descuido, están
+ * congeladas: el archivo del bucket es de julio de 2024 y responde siempre el mismo
+ * `etag`. Y ahí no publicamos nosotros. Carlos las volvió a capturar con la marca
+ * nueva y se copian a `public/`, que es el único sitio donde este repo puede
+ * cambiarlas.
+ *
+ * ⚠️ El paso 1 SE QUEDA en el bucket, y no es incoherencia: es el menú de la app de
+ * Alexa, no sale ningún logo y sigue siendo exacta. Copiarla solo por uniformidad
+ * añadiría 220 KB al repo para clonar una imagen que no tiene nada que arreglar.
+ *
+ * ⚠️ Lo que se pierde con las locales es lo que decía la nota anterior: ya NO se
+ * actualizan solas cuando el corporativo toque el bucket. Si la app de Alexa cambia
+ * de aspecto, estas dos hay que volver a capturarlas a mano.
  */
 import Base from '@/layouts/Base.astro';
 import PaginaTexto from '@/components/PaginaTexto.astro';
@@ -20,19 +32,35 @@ import PaginaTexto from '@/components/PaginaTexto.astro';
 /** El bucket del corporativo. Mismo origen que `MARCAS_NRM` en `navegacion.ts`. */
 const IMG = 'https://storage.googleapis.com/nrm-web/nrm/images/';
 
+/*
+  ⚠️ Cada captura trae SU medida, y no es un detalle: las tres declaraban 640×945
+  —la del paso 1— y las otras dos no son ni de ese tamaño ni de esa forma (una es
+  apaisada). El navegador reserva el hueco con lo que se le declara, así que dos de
+  los tres pasos apartaban una caja vertical para meter luego una imagen ancha y
+  baja: el salto de maquetado que el `width`/`height` existe para evitar.
+*/
 const PASOS = [
   {
     texto:
       'Desde la app de Alexa, en la parte de abajo, dale clic en el menú «Más» y selecciona la opción «Skills y juegos».',
     captura: `${IMG}IMG_5422-640x945.png`,
+    ancho: 640,
+    alto: 945,
+    alt: 'El menú «Más» de la app de Alexa, con «Skills y juegos» remarcado.',
   },
   {
     texto: 'Busca la skill «Beat 100.9» en el icono de la lupa de la parte superior.',
-    captura: `${IMG}IMG_8558-min.jpg`,
+    captura: '/img/alexa-buscar-la-skill.jpg',
+    ancho: 300,
+    alto: 226,
+    alt: 'La búsqueda de «beat 100.9» en la app de Alexa, con dos resultados de Beat 100.9.',
   },
   {
     texto: 'Activa la skill.',
-    captura: `${IMG}IMG_8559-min.jpg`,
+    captura: '/img/alexa-activar-la-skill.jpg',
+    ancho: 300,
+    alto: 359,
+    alt: 'La ficha de la skill Beat 100.9 en la app de Alexa, con el botón «Iniciar».',
   },
 ];
 ---
@@ -57,17 +85,17 @@ const PASOS = [
             <span class="beat-display al-n">{String(i + 1).padStart(2, '0')}</span>
             <p class="al-texto">{p.texto}</p>
             {/*
-              Con medidas y `lazy`: son capturas de teléfono, altas y pesadas, y
-              sin `width`/`height` cada una provoca un salto de maquetado al
-              llegar. El `alt` describe lo que se ve, no repite el paso —quien usa
-              un lector de pantalla ya leyó la instrucción justo encima—.
+              Con medidas y `lazy`: son capturas de teléfono y sin `width`/`height`
+              cada una provoca un salto de maquetado al llegar. El `alt` describe lo
+              que se ve, no repite el paso —quien usa un lector de pantalla ya leyó
+              la instrucción justo encima—.
             */}
             <img
               class="al-captura"
               src={p.captura}
-              alt={`Paso ${i + 1} en la app de Alexa`}
-              width="640"
-              height="945"
+              alt={p.alt}
+              width={p.ancho}
+              height={p.alto}
               loading="lazy"
               decoding="async"
             />

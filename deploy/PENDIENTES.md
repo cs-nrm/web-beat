@@ -40,19 +40,37 @@ era eso.
 
 ---
 
-## 1 · La analítica del sitio real cuenta también el tráfico de preproducción ✅
+## 1 · ~~La medición contaba también el tráfico de preproducción~~ · RESUELTO ✅
 
-`v2.beatdigital.mx` sigue habilitado y sirve **el mismo proceso** que el sitio real,
-así que arrastra el mismo `GTM-PN2NKB2P` y el mismo comScore `6906652` que se
-hornearon para producción. Medido: el HTML de v2 los trae.
+`v2.beatdigital.mx` quedaba habilitado sirviendo **el mismo proceso** que el sitio,
+así que arrastraba el mismo `GTM-PN2NKB2P` y el mismo comScore `6906652`. Cada
+visita del equipo o de un bot entraba como tráfico real — y comScore es lo que NRM
+le reporta a los anunciantes para justificar CPMs, así que no era un número feo en
+un panel.
 
-Los anuncios sí están protegidos por host —`Anuncio.astro:231` comprueba
-`!noIndexarHost(...)`— pero los cuatro contenedores de medición de `Base.astro`
-(508, 563, 594, 627) solo miran que la variable no venga vacía.
+**Se apagó el 10 sep 2026** (`a2dissite 010-v2-beatdigital`). Comprobado después:
+`v2.beatdigital.mx` ya no sirve el sitio ni el contenedor de medición.
 
-**Arreglo**, y es el mismo patrón que ya usa `Anuncio.astro`: añadir
-`!noIndexarHost(Astro.url.hostname)` a la condición de los cuatro. Deja la
-preproducción sin medir, que es lo correcto, y no obliga a apagar v2.
+🔴 **Y con eso el nombre «v2» se retira del vocabulario** (Carlos, 10 sep): era el
+entorno de prueba que se convirtió en el sitio. A partir de aquí es **el sitio**, y
+lo anterior es **el sitio viejo**.
+
+⚠️ El nombre sigue vivo donde no es texto: `/var/www/web-beat-v2`, el servicio de
+systemd `web-beat-v2`, `scripts/desplegar-v2.sh`, `docs/despliegue-v2.md`, el vhost
+`010-v2-beatdigital.conf`. Renombrarlos es tocar systemd y rutas del servidor, no un
+buscar-y-reemplazar; queda para un día tranquilo.
+
+⚠️ **Lo que esto deja al descubierto: ya no hay dónde probar.** Y tampoco lo había
+antes: los dos vhosts apuntaban al MISMO proceso en el MISMO puerto (`127.0.0.1:4322`),
+o sea un sitio con dos nombres. Lo que se «probara» en v2 ERA el sitio. Un entorno de
+pruebas de verdad —proceso, puerto y build propios— está por hacer, y es la pieza que
+más falta va a hacer en el próximo cambio grande.
+
+Queda pendiente el arreglo de fondo, por si algún día vuelve a existir un segundo
+nombre: los cuatro contenedores de medición de `Base.astro` (508, 563, 594, 627) solo
+comprueban que la variable no venga vacía, mientras que `Anuncio.astro:231` sí mira
+el host. Igualarlos con `!noIndexarHost(Astro.url.hostname)` haría que esto no pueda
+repetirse por descuido.
 
 ---
 

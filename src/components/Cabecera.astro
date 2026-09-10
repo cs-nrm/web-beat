@@ -205,7 +205,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
       aria-pressed="false"
       disabled
       aria-busy="true"
-      class="beat-play-emite grid h-[40px] w-[40px] flex-none place-items-center rounded-pill bg-noche-0 text-mist-0 disabled:opacity-60 transition-colors duration-2 ease-out hover:bg-graphite-4"
+      class="beat-play-emite grid h-[40px] w-[40px] flex-none cursor-pointer place-items-center rounded-pill bg-noche-0 text-mist-0 disabled:cursor-default disabled:opacity-60 transition-colors duration-2 ease-out hover:bg-graphite-4"
     >
       <span data-icono="play" class="contents"><Icono nombre="play" tamano={17} /></span>
       <span data-icono="pause" class="contents hidden"><Icono nombre="pause" tamano={17} /></span>

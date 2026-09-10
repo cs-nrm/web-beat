@@ -46,7 +46,7 @@ import { obtenerEspecialVigente, obtenerEspeciales } from '@/lib/cms/especiales'
 import { obtenerTiposDeLista, obtenerListaReciente } from '@/lib/cms/listas';
 import { obtenerAgenda } from '@/lib/cms/eventos';
 import { obtenerBanners } from '@/lib/cms/publicidad';
-import { SERIE_FENOMENO, TIPO_LISTA_DESTACADA } from '@/config/site';
+import { SERIE_FENOMENO, TIPO_LISTA_DESTACADA, TARJETA_INICIO } from '@/config/site';
 import { SECCIONES_EDITORIALES } from '@/config/navegacion';
 
 /*
@@ -153,9 +153,25 @@ const LEMA = 'Beat 100.9 — Aquí la música se elige';
   El guion es LARGO, como en las otras 18 rutas del sitio («Beat Scanner — Beat
   100.9»). Carlos lo escribió corto: se normaliza la puntuación, no el texto.
 */}
+{/*
+  🔴 El Inicio pasa SU tarjeta y ya no cae al respaldo (Carlos, 2026-09-09): «para
+  el share desde el home, si compartimos la página tal cual, esta imagen debería
+  ir». Es el arte de la estación —wordmark, trama y la frase—, servido desde el
+  CMS, y esa segunda mitad no es un detalle: el respaldo del repo se declara contra
+  `beatdigital.mx`, que hoy todavía sirve el v1 y devuelve 404 ahí. Por eso al
+  compartir salía el logo viejo. El porqué completo, en `TARJETA_INICIO`.
+
+  ⚠️ Los cuatro datos van JUNTOS —ruta, alt y las dos medidas— porque `Base.astro`
+  los elige del mismo lado: pasar la imagen sin las medidas deja la publicación
+  reservando el hueco a ojo.
+*/}
 <Base
   titulo={LEMA}
   descripcion="La estación de música electrónica de la Ciudad de México. Escucha el 100.9 FM en vivo y sigue lo que suena, se lanza y se mueve en la pista."
+  imagen={TARJETA_INICIO.ruta}
+  imagenAlt={TARJETA_INICIO.alt}
+  imagenAncho={TARJETA_INICIO.ancho}
+  imagenAlto={TARJETA_INICIO.alto}
 >
   {/*
     El `h1` del Inicio va SOLO PARA LECTORES DE PANTALLA: el titular visible de

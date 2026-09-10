@@ -194,6 +194,44 @@ export const TARJETA_COMPARTIR = {
   ...MEDIDA_TARJETA,
 } as const;
 
+/**
+ * La tarjeta del INICIO, y es la única que NO sale del repo.
+ *
+ * 🔴 La pidió Carlos el 2026-09-09, con la URL en la mano: «para el share desde el
+ * home, si compartimos la página tal cual, esta imagen debería ir». Es el arte que
+ * subió la estación —wordmark, la trama de la marca y «Aquí la música se elige»—,
+ * ya recortado a 1200×630. La de respaldo que había es el wordmark pelón, correcto
+ * pero sin nada del sitio.
+ *
+ * 🔴 Y va ABSOLUTA a `admin.nrm.com.mx` a propósito, que es lo que arregla el fallo
+ * que lo destapó. `Base.astro` resuelve `og:image` contra `SITE_URL` —el dominio
+ * CANÓNICO, `beatdigital.mx`— y HOY ese dominio todavía sirve el v1, donde
+ * `/img/og-beat.png` no existe: medido, **404**. O sea que quien compartía el Inicio
+ * declaraba una imagen que el rastreador no podía bajar, y Facebook caía al logo
+ * que encontrara en el v1 — el VIEJO. Es exactamente el «efecto secundario
+ * conocido» que ya estaba anotado junto a `imagenCompartir`, cobrado.
+ *
+ * Una URL del CMS no depende de qué sirva el dominio, así que funciona hoy y sigue
+ * funcionando después del corte. `new URL()` deja intacta una URL ya absoluta, por
+ * lo que `Base.astro` no necesita saber nada de esto.
+ *
+ * ⚠️ **Es WebP, y no todos los previsualizadores lo bajan.** X lo documenta como
+ * formato válido y Facebook lo acepta en la práctica; WhatsApp y LinkedIn son los
+ * que fallan, y cuando fallan la publicación sale sin imagen. El CMS no tiene otra
+ * variante —las tres medidas del documento 58 son WebP—, así que la salida, si
+ * aparece el problema, es subir el MISMO arte en JPG y cambiar esta ruta. No se
+ * arregla desde el front.
+ *
+ * ⚠️ Las medidas se comprobaron contra el archivo, no contra el nombre: 1200×630
+ * reales. Unas medidas que no correspondan son peores que ninguna — ver
+ * `MEDIDA_TARJETA`.
+ */
+export const TARJETA_INICIO = {
+  ruta: 'https://admin.nrm.com.mx/api/media/file/portada-c.webp?prefix=media',
+  alt: 'El wordmark de Beat 100.9 sobre el negro de la marca, con la frase «Aquí la música se elige».',
+  ...MEDIDA_TARJETA,
+} as const;
+
 // ============================================================
 // Contrato de URLs (decisión 10 del plan)
 // ============================================================

@@ -43,6 +43,25 @@
 }
 
 /*
+  🔴 Y el TEXTO SELECCIONADO, que se escapó por la rendija que este bloque avisa:
+  el DS pinta `::selection` con `var(--luz-coral)` a pelo, no con un token de
+  texto, así que redefinir `--text-accent` no lo alcanzaba. Seleccionar un párrafo
+  de una nota lo dejaba en naranja —el único naranja que quedaba a la vista en todo
+  el sitio— y lo vio Carlos leyendo (2026-09-10).
+
+  Va invertido, como todo lo que aquí se marca: blanco pleno con la letra negra. Es
+  el mismo gesto de la sección activa de la nav y de la celda al aire de la parrilla.
+
+  ⚠️ Se sobrescribe la REGLA, no el token: `--luz-coral` sigue siendo el naranja de
+  la marca y hay superficies y bordes que lo usan (`beat-input:focus`, la estela).
+  Cambiarlo aquí les cambiaría el color a todos ellos.
+*/
+::selection {
+  background: var(--mist-0);
+  color: var(--noche-0);
+}
+
+/*
    🔴 LA ÚNICA EXCEPCIÓN AL BLANCO Y NEGRO: el punto de «al aire».
    ------------------------------------------------------------
    Decisión de Carlos, 2026-09-03. Es el único color de toda la interfaz, y se

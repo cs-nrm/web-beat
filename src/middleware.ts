@@ -83,6 +83,12 @@ const DEL_V1: Array<[RegExp, string]> = [
   [/^\/(que-plan|rebels|locutores)(\/|$)/, '/programacion'],
 
   /*
+    `/live` es el OTRO nombre del directo en el v1: convive con `/en-vivo`, que el
+    v2 sí rehízo. Es la única de las cuatro que faltaban con equivalente 1:1.
+  */
+  [/^\/live(\/|$)/, '/en-vivo'],
+
+  /*
     ── Lo que ya no existe ──
 
     Secciones editoriales y de contenido del v1 que el v2 no rehízo. Van al Inicio
@@ -91,9 +97,20 @@ const DEL_V1: Array<[RegExp, string]> = [
 
     ⚠️ `beatzilla`, `podcast` y `promociones` tenían páginas DENTRO, así que la
     regla cubre también sus rutas profundas — de ahí el `(\/|$)` y no un igual.
+
+    ⚠️ `tomorrowland`, `mejores-tracks-2025` y `pruebas` faltaban desde el
+    principio y se encontraron el 10 sep, horas antes del corte, enumerando las
+    rutas reales de `main` en vez de fiarse de la lista de secciones del plan.
+    Las tres responden 200 en el v1 de HOY —comprobado con curl contra
+    beatdigital.mx—, así que con `live` iban a ser cuatro secciones vivas cayendo
+    en 404 en el momento de más tráfico. `tomorrowland` y
+    `mejores-tracks-2025` son categorías editoriales del v1, del mismo tipo que
+    `beat-trends` o `lanzamientos`, así que van al Inicio por el mismo motivo que
+    ellas y no a `/beat-scanner`: mandar a alguien al índice de notas nuevas
+    cuando buscaba la cobertura de un festival no es más honesto que la portada.
   */
   [
-    /^\/(beatzilla|podcast|promociones|beat-ten|beat-trends|beat-recordings|lanzamientos|purple-noise|nerdosis)(\/|$)/,
+    /^\/(beatzilla|podcast|promociones|beat-ten|beat-trends|beat-recordings|lanzamientos|purple-noise|nerdosis|tomorrowland|mejores-tracks-2025|pruebas)(\/|$)/,
     '/',
   ],
 ];

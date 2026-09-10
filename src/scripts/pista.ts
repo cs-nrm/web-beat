@@ -579,6 +579,9 @@ function desdeFila(boton: HTMLElement): void {
     ? Array.from(lista.querySelectorAll<HTMLElement>('[data-pista-src], [data-pista-yt]'))
     : [boton];
 
+  /* Qué sonaba ANTES de cambiar la cola: después de reasignarla ya no se sabe. */
+  const sonando = cola[indice] ? clave(cola[indice]) : null;
+
   cola = filas.map((f) => ({
     src: f.dataset.pistaSrc ?? null,
     yt: f.dataset.pistaYt ?? null,
@@ -586,19 +589,30 @@ function desdeFila(boton: HTMLElement): void {
     artista: f.dataset.pistaArtista ?? '',
   }));
 
-  const i = filas.indexOf(boton);
+  const posicion = filas.indexOf(boton);
+  const i = posicion < 0 ? 0 : posicion;
 
   /*
-    🔴 Pulsar la que YA está sonando es un INTERRUPTOR, no un reinicio — y ahora se
+    🔴 Pulsar la que YA está sonando es un INTERRUPTOR, no un reinicio — y se
     resuelve con `alternar`, que también sabe retomar. Antes solo pausaba: al volver
     a pulsar caía en `sonar()`, que reasigna la fuente y devuelve la canción al
     segundo 0. Es el mismo fallo que tenían las cápsulas del Fenómeno.
+
+    🔴 Y la comparación es por PISTA, no por posición (`i === indice`), que es lo
+    que decía antes. En el Inicio hay DOS listas —Bonus Beat y la playlist del
+    Fenómeno— y la primera fila de las dos es la posición 0: pulsar la primera de
+    una después de la primera de la otra se leía como volver a pulsar la misma
+    canción, y en vez de cambiar de pista hacía play/pausa. La posición solo
+    significa algo dentro de la cola en la que se midió.
   */
-  if (i === indice && i >= 0) {
+  if (sonando && clave(cola[i]) === sonando) {
+    /* La cola es OTRA: el índice tiene que apuntar dentro de esta, o `alTerminar`
+       encadenaría la siguiente de la lista anterior. */
+    indice = i;
     alternar();
     return;
   }
-  sonar(i < 0 ? 0 : i);
+  sonar(i);
 }
 
 export function prepararPista(): void {

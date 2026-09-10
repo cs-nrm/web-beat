@@ -289,9 +289,18 @@ const tiendas = (
 
         {/* ── la playlist y, debajo, el box ── */}
         <div class="fr-lateral">
-          <div class="fr-playlist">
+          {/*
+            🔴 `data-pistas` es el CONTRATO de la cola de `pista.ts`: el módulo sube
+            desde la fila pulsada hasta este atributo para saber qué canciones van
+            detrás. Sin él —y estuvo sin él hasta el 2026-09-10— cada fila era una
+            lista de UNA, así que las dos canciones ocupaban la posición 0 de su
+            propia cola y pulsar la segunda se leía como volver a pulsar la primera:
+            play/pausa en vez de cambiar de canción. Lo tenía Bonus Beat y aquí se
+            copió el marcado sin él.
+          */}
+          <div class="fr-playlist" data-pistas>
             <div class="fr-playlist-cabeza">
-              <span class="beat-label fr-playlist-titulo">PLAYLIST DEL TEMA</span>
+              <span class="beat-label fr-playlist-titulo">PLAYLIST ASOCIADO</span>
               {playlist?.canciones && (
                 <span class="beat-label fr-playlist-nota">{playlist.canciones.length} TRACKS</span>
               )}

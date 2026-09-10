@@ -231,10 +231,10 @@ export const SECCIONES_FUTURAS: EntradaNav[] = [
  * que funciona perfectamente, y ese es justo el motivo de que esto esté escrito.
  * De hecho estuvo enlazada unas horas, hasta que Carlos lo vio.
  *
- * ⚠️ Con una sola entrada, la columna «Escucha en» del pie sigue teniendo sentido:
- * el bloque recorre la lista, así que ni sobra ni hay que tocar el marcado. Y si
- * algún día no queda ninguna, el `<ul>` se pinta vacío — es el único caso que
- * habría que mirar antes de borrar la última.
+ * ⚠️ Con una sola entrada, la columna «También escucha en» del pie sigue teniendo
+ * sentido: el bloque recorre la lista, así que ni sobra ni hay que tocar el
+ * marcado. Y si algún día no queda ninguna, el `<ul>` se pinta vacío — es el
+ * único caso que habría que mirar antes de borrar la última.
  */
 export const PLATAFORMAS_RADIO = [
   { nombre: 'iHeartRadio', url: 'https://www.iheart.com/live/beat-1009-11329/' },

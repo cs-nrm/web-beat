@@ -1,5 +1,5 @@
 /* ⚠️ GENERADO — NO EDITAR A MANO.
- * Vendorizado desde cms-estaciones:src/payload-types.ts en el ref eb0ad49.
+ * Vendorizado desde cms-estaciones:src/payload-types.ts en el ref 0190393.
  * Regenerar con: pnpm sync:types  (el pin vive en payload-types.lock.json).
  * Nota: se quita la augmentation `declare module 'payload'` del upstream
  *       (el front no instala el paquete payload; solo usa las interfaces).
@@ -94,6 +94,7 @@ export interface Config {
     avisos: Aviso;
     paginas: Pagina;
     estaciones: Estacione;
+    auditoria: Auditoria;
     search: Search;
     redirects: Redirect;
     exports: Export;
@@ -133,6 +134,7 @@ export interface Config {
     avisos: AvisosSelect<false> | AvisosSelect<true>;
     paginas: PaginasSelect<false> | PaginasSelect<true>;
     estaciones: EstacionesSelect<false> | EstacionesSelect<true>;
+    auditoria: AuditoriaSelect<false> | AuditoriaSelect<true>;
     search: SearchSelect<false> | SearchSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     exports: ExportsSelect<false> | ExportsSelect<true>;
@@ -262,6 +264,10 @@ export interface Estacione {
    * Aclaraciones sobre qué transmite este mount, si no es obvio. Ver el caso de Stereo Cien.
    */
   notaStream?: string | null;
+  /**
+   * Enciéndelo SOLO mientras corre una campaña de preroll vendida, y apágalo al terminar: mientras esté prendido el player le pide anuncio a Google Ad Manager antes de abrir el aire, y si no hay campaña eso solo lo hace arrancar más lento.
+   */
+  preroll?: boolean | null;
   /**
    * Solo estas categorías se guardan en la bitácora al aire. Si está vacía, no se guarda nada de esta estación (falla cerrado a propósito). El endpoint de ingesta responde qué categoría rechazó, para ir descubriendo la lista.
    */
@@ -1471,6 +1477,48 @@ export interface Pagina {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Registro automático de altas, cambios y borrados. Solo lectura: lo escribe el sistema.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "auditoria".
+ */
+export interface Auditoria {
+  id: number;
+  coleccion: string;
+  documentoId: string;
+  documentoTitulo?: string | null;
+  accion: 'crear' | 'actualizar' | 'borrar';
+  /**
+   * "Sistema" son cambios automáticos, como la publicación programada.
+   */
+  origen: 'panel' | 'sistema';
+  usuario?: (number | null) | User;
+  usuarioCorreo?: string | null;
+  usuarioRol?: string | null;
+  /**
+   * Código de la estación del documento. Vacío si el cambio no es de una.
+   */
+  estacion?: string | null;
+  /**
+   * Lista corta para escanear el listado; el detalle va en "Cambios".
+   */
+  campos?: string | null;
+  /**
+   * Antes/después de cada campo, resumido. Los valores largos (contenido, imágenes) solo se marcan como cambiados.
+   */
+  cambios?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This is a collection of automatically created search results. These results are used by the global site search and will be updated automatically as documents in the CMS are created or updated.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1820,6 +1868,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'estaciones';
         value: number | Estacione;
+      } | null)
+    | ({
+        relationTo: 'auditoria';
+        value: number | Auditoria;
       } | null)
     | ({
         relationTo: 'search';
@@ -2415,6 +2467,7 @@ export interface EstacionesSelect<T extends boolean = true> {
   logoReversa?: T;
   tritonMount?: T;
   notaStream?: T;
+  preroll?: T;
   categoriasMusicales?:
     | T
     | {
@@ -2426,6 +2479,25 @@ export interface EstacionesSelect<T extends boolean = true> {
   x?: T;
   youtube?: T;
   tiktok?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "auditoria_select".
+ */
+export interface AuditoriaSelect<T extends boolean = true> {
+  coleccion?: T;
+  documentoId?: T;
+  documentoTitulo?: T;
+  accion?: T;
+  origen?: T;
+  usuario?: T;
+  usuarioCorreo?: T;
+  usuarioRol?: T;
+  estacion?: T;
+  campos?: T;
+  cambios?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2806,6 +2878,7 @@ export interface TaskCreateCollectionExport {
       | 'avisos'
       | 'paginas'
       | 'estaciones'
+      | 'auditoria'
       | 'search'
       | 'redirects'
       | 'exports'

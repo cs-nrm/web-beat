@@ -23,7 +23,7 @@
  */
 import Icono from './Icono.astro';
 import { SECCIONES } from '@/config/navegacion';
-import type { Estacion } from '@/lib/cms/estacion';
+import { prerollActivo, type Estacion } from '@/lib/cms/estacion';
 
 interface Props {
   estacion: Estacion;
@@ -125,6 +125,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     data-status="init"
     data-modo="directo"
     data-mount={estacion.tritonMount}
+    data-preroll={prerollActivo(estacion) ? 'si' : 'no'}
     class="flex h-player items-center gap-3 bg-mist-0 pl-2 pr-4 text-noche-0 md:gap-4 md:pl-3 md:pr-6"
   >
     {/*

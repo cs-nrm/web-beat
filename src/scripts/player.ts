@@ -149,6 +149,19 @@ function mandaLaPista(): boolean {
   return contenedor()?.dataset.modo === 'pista';
 }
 
+/**
+ * ¿Hay campaña de preroll? Lo decide el CMS por fechas y lo resuelve el SERVIDOR;
+ * aquí solo se lee. Ver `hayPrerollAhora()` en `src/lib/cms/estacion.ts`.
+ *
+ * ⚠️ El atributo lleva valor —`si`/`no`— y no es palabrería: un atributo SIN valor
+ * vale la cadena vacía, y `!!''` es `false`. Ese descuido exacto dejó la barra del
+ * menú plegada al volver al Inicio (`data-compacta` leído con `!!`). Con un valor
+ * explícito no hay forma de equivocarse, y además se lee en el inspector.
+ */
+function hayPreroll(): boolean {
+  return contenedor()?.dataset.preroll === 'si';
+}
+
 function contenedor(): HTMLElement | null {
   return el('#player');
 }
@@ -493,7 +506,7 @@ function arrancar(): void {
   const red = import.meta.env.PUBLIC_GAM_NETWORK_ID;
   const unidad = import.meta.env.PUBLIC_GAM_AD_UNIT;
 
-  if (yaSonoElAnuncio || !red || !unidad) {
+  if (yaSonoElAnuncio || !hayPreroll() || !red || !unidad) {
     reproducir();
     return;
   }
@@ -756,6 +769,24 @@ export function iniciarPlayer(): void {
            * decorativo. El único que cuenta es este.
            */
           audioAdaptive: false,
+          /**
+           * ⚠️ NO se toca esta lista para ahorrar la descarga del IMA. Se probó, y
+           * NO funciona — queda escrito para que nadie lo vuelva a intentar.
+           *
+           * La idea era: el módulo de anuncios del SDK hace
+           * `$script('//imasdk.googleapis.com/js/sdkloader/ima3.js')` en su `init()`,
+           * y ese archivo son **499,908 B sin comprimir** (el CDN de Google no lo
+           * gzipea), más de la mitad de los 854 KB que cuesta el player. Parecía que
+           * quitando el plugin fuera de campaña se ahorraban.
+           *
+           * Medido el 2026-09-10 en un build servido, construyendo el SDK 2.9 con
+           * `plugins: []` y nada más: **ima3.js se baja igual**. Lo arrastra el
+           * módulo MediaPlayer al construirse, no el plugin. Así que el ahorro no
+           * está aquí; si algún día hace falta, hay que no construir el SDK.
+           *
+           * Lo que sí evita el preroll apagado está en `arrancar()`: no se le pide
+           * a GAM un anuncio que no existe.
+           */
           plugins: [{ id: 'vastAd' }],
         },
       ],

@@ -67,23 +67,30 @@ Este repo lleva el porqué escrito en el propio código: comentarios con 🔴 pa
 que no se debe romper y ⚠️ para las trampas medidas. **Léelos antes de cambiar la
 línea que comentan** — casi todos existen porque algo ya falló ahí.
 
-Y hay seis agentes con su alcance delimitado, en `agents/*.md`:
+Y hay siete agentes con su alcance delimitado, en `agents/*.md`:
 
 | Agente | Qué le toca |
 |---|---|
 | `ads` | El inventario publicitario: huecos, medidas, GAM y venta directa |
 | `analytics` | La medición. 🔴 Hoy hay emisor y NO hay receptor: leer su acta |
 | `content` | Las colecciones del CMS y cómo se leen |
+| `deploy` | La VM, el despliegue y los tres fallos que son 200 OK |
 | `frontend` | Maquetado, design system y la política de caché |
 | `metadata` | Títulos, canónicas, Open Graph, indexación y sitemaps |
 | `streaming` | El player, la señal de Triton y los cue points |
+
+`CLAUDE.md` es la puerta de entrada para quien llegue con un agente: el mapa de
+las actas, las puertas y las trampas que cuestan una tarde.
 
 ## Documentos que sí valen
 
 | Archivo | Qué es |
 |---|---|
+| `CLAUDE.md` | La puerta de entrada: actas, puertas, trampas y vocabulario |
 | `movimiento.md` | El contrato de movimiento y de color. Vigente, y se cita desde el código |
-| `docs/despliegue-v2.md` | Cómo está montado v2, cómo se actualiza y qué falta para el corte de dominio |
+| `deploy/LANZAMIENTO.md` | El corte del 10 sep 2026, paso a paso, y la vuelta atrás |
+| `deploy/PENDIENTES.md` | Lo que quedó abierto tras el corte, con el respaldo de cada punto |
+| `docs/despliegue-v2.md` | Cómo está montado el servicio y cómo se actualiza. ⚠️ Escrito antes del corte |
 | `docs/lo-que-el-front-necesita-del-cms.md` | Traspaso con el CMS |
 | `src/js/README.md` | Qué falta portar del v1 y las reglas que el port debe respetar |
 

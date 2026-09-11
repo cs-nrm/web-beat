@@ -2,12 +2,25 @@
 
 ## Rol
 
-Llevar la rama `beat` a **preproducción** (`v2.beatdigital.mx`) y saber por qué
-falla cuando falla. Nada más: producción es otra cosa y está más abajo.
+Llevar la rama `beat` al sitio **al aire** (`beatdigital.mx`) y saber por qué falla
+cuando falla.
 
 🔴 **Este agente nace el 2026-09-09 después de tres despliegues torcidos en una
 tarde.** No lo nace la teoría: lo nace que el despliegue se hacía a mano, con un
 comando que se pasaba por chat y se degradaba en cada vuelta.
+
+🔴 **Corregido el 2026-09-10, después del corte.** Nació describiendo un agente de
+PREPRODUCCIÓN con destino `v2.beatdigital.mx`, y eso dejó de ser cierto el mismo
+día: se hizo el corte de dominio y `v2` se apagó unas horas después. Lo que decía
+la versión vieja y hoy es **falso y peligroso**: que esto no toca producción, que
+el `noindex` tiene que estar puesto, y que el corte está pendiente. Se invirtieron
+las dos comprobaciones de indexación, igual que en `scripts/desplegar-v2.sh`.
+
+🔴 **Y ya no hay dónde probar.** `v2.beatdigital.mx` lo parecía, pero los dos
+vhosts apuntaban al MISMO proceso en el MISMO puerto: era un sitio con dos
+nombres. Cada despliegue va directo al aire y reinicia el servicio —unos segundos
+de 502 para quien esté navegando—. Un entorno de pruebas de verdad, con proceso,
+puerto y build propios, está por hacer.
 
 ---
 
@@ -26,7 +39,8 @@ corregirlo aquí antes de seguir.
 | Node | v22.23.2 |
 | Gestor | corepack en `/usr/bin/corepack`, con **pnpm 9.0.0 fijado** |
 | Delante | Apache como proxy inverso |
-| URL | `https://v2.beatdigital.mx` |
+| URL | `https://beatdigital.mx` |
+| Puerto interno | `127.0.0.1:4322` |
 
 ⚠️ **No es pm2.** Se dio `pm2 restart` por error y no existe en esta máquina.
 
@@ -78,7 +92,7 @@ que descartar ante un «se ve raro».
 
 ```bash
 sudo systemctl show web-beat-v2 -p Environment
-curl -s https://v2.beatdigital.mx/ | grep -c 'href="/noticias/'
+curl -s https://beatdigital.mx/ | grep -c 'href="/noticias/'
 ```
 
 Con contenido, la portada enlaza varias notas. Cero notas = esto.
@@ -88,10 +102,12 @@ Con contenido, la portada enlaza varias notas. Cero notas = esto.
 Por omisión Apache reescribe el `Host` hacia el backend, así que Node recibe
 `Host: localhost:<puerto>`. Consecuencias, en orden de gravedad:
 
-- `noIndexarHost()` pierde su única señal. La indexación **sigue cerrada**
-  («localhost» tampoco es el canónico), así que esto NO abre el sitio.
-- Pero `Astro.url` deja de decir la verdad, y con ella `checkOrigin` compara
-  `localhost` contra el dominio real y **responde 403 a todo POST**.
+- 🔴 `noIndexarHost()` pierde su única señal y «localhost» no es el canónico, así
+  que el sitio **se autocierra a Google**. Antes del corte esto era inocuo —el
+  `noindex` ya tenía que estar—; con el sitio al aire es el fallo más caro de los
+  tres, y es silencioso.
+- Y `Astro.url` deja de decir la verdad: `checkOrigin` compara `localhost` contra
+  el dominio real y **responde 403 a todo POST**.
 
 Depende además de `security.allowedDomains` en `astro.config.mjs`, que sí vive en
 el repo.
@@ -111,87 +127,94 @@ El script lo hace solo. A mano, esto:
 
 | Qué | Cómo | Qué se espera |
 |---|---|---|
-| Responde | `curl -o /dev/null -w '%{http_code}' https://v2.beatdigital.mx/` | `200` |
+| Responde | `curl -o /dev/null -w '%{http_code}' https://beatdigital.mx/` | `200` |
 | Tiene contenido | `curl -s … \| grep -c 'href="/noticias/'` | ≥ 1 |
-| Sigue fuera de Google | `curl -sI … \| grep -i x-robots-tag` | `noindex, nofollow` |
-| Y en la etiqueta | `curl -s … \| grep '<meta name="robots"'` | `noindex, nofollow` |
+| Abierto a Google | `curl -sI … \| grep -i x-robots-tag` | **nada** |
+| Y en la etiqueta | `curl -s … \| grep '<meta name="robots"'` | `index, follow` |
 
-🔴 **El `noindex` se comprueba en las DOS capas porque se rompen por su lado**: la
+🔴 **La indexación se comprueba en las DOS capas porque se rompen por su lado**: la
 cabecera la pone el middleware según el `Host` de la petición; la etiqueta la pone
-el layout según el dominio con el que se COMPILÓ. Que una esté no dice nada de la
-otra.
+el layout según el dominio con el que se COMPILÓ. Que una esté bien no dice nada
+de la otra.
 
-⚠️ En v2 el `noindex` tiene que estar **PUESTO**. Que falte es el fallo, no lo
-contrario.
+🔴 **Desde el corte, el `noindex` es el FALLO.** Que aparezca —en la cabecera o en
+la etiqueta— significa que el sitio se cerró a Google, y casi siempre es
+`ProxyPreserveHost`. Antes del corte era justo al revés; si lees una comprobación
+que exige `noindex`, es de la época vieja.
 
 ---
 
-## Producción: lo que este agente NO hace
+## El corte ya se hizo — lo que este agente SÍ hace ahora
 
-**No despliega a producción y no toca `main`.** Es una operación distinta:
+**Despliega al sitio real.** No hay paso intermedio y no hay que pedir permiso para
+un despliegue ordinario: lo que está en `beat` es lo que va al aire.
 
-- `main` es el v1 que está al aire. El 2026-09-09, `beat` iba **120 commits por
-  delante**.
-- Mandar a producción significa el corte del relanzamiento, reemplazando el sitio
-  de la estación. Es irreversible de hecho, aunque no de derecho.
-- Y hay que compilar con `PUBLIC_SITE_URL=https://beatdigital.mx`, o el sitio se
-  autoetiqueta `noindex` y Google no lo indexa. **Falla del lado seguro, pero en un
-  relanzamiento eso es lo peor que puede pasar en silencio.**
+🔴 **Lo que sí exige un «va» explícito:** cualquier cosa que cambie el vhost, el
+certificado, las variables del entorno del servicio o el estado de indexación. Eso
+no es desplegar, es tocar el servidor, y se enumera antes de hacerlo.
 
-🔴 **VOCABULARIO, fijado por Carlos el 2026-09-09.** «Manda a producción» significa
-**v2**. El corte al dominio real se pide con otras palabras: **«vamos a cambiar de
-dominio»**. Se confundió dos veces antes de fijarlo; no volver a preguntar cuál es.
+⚠️ **`main` sigue siendo el sitio viejo y no se toca.** Ya no sirve a nadie —el
+vhost `020-beatdigital.conf` atiende el dominio—, pero sigue ahí y `000-default`
+intacto es justo lo que hace que la vuelta atrás sea de dos comandos.
 
-## El corte de dominio
+### El pipeline
 
-**Un script:** `scripts/cambiar-dominio.sh`. Por defecto ENSAYA —enseña los vhosts
-que encuentra y lo que haría— y solo actúa con `CONFIRMAR=1`.
+`.github/workflows/ci.yml` corre la puerta en cada PR contra `beat`.
+`.github/workflows/deploy.yml` corre la misma puerta en cada push a `beat` y luego
+despliega por SSH llamando a `scripts/desplegar-v2.sh`.
 
-🔴 **Basta con Apache, y esto está verificado contra lo servido:**
+🔴 **El job de deploy NACE APAGADO**, detrás de la variable `DEPLOY_HABILITADO`.
+No es que falten secretos: encenderlo significa que cada push a `beat` reinicia el
+sitio en vivo. Esa es una decisión aparte de montar el pipeline.
 
-- El build del v2 ya lleva horneado `PUBLIC_SITE_URL=https://beatdigital.mx`: su
-  canonical ya dice el dominio real. **No hay que reconstruir para el corte.**
-- El `noindex`, el `X-Robots-Tag` y el `robots.txt` se deciden POR PETICIÓN, leyendo
-  el `Host`. En cuanto Apache pase `Host: beatdigital.mx`, el sitio se abre solo.
-- v1 y v2 están en el MISMO servidor (los dos resuelven a `34.169.1.149`), así que
-  no hay DNS ni propagación. El corte y la vuelta atrás son de segundos.
+⚠️ El paso de SSH **no hace `git pull`** antes del script, a diferencia de los
+repos hermanos: `desplegar-v2.sh` lo hace él mismo y guarda el commit de PARTIDA
+para poder volver. Jalar por fuera le haría guardar el nuevo, y la vuelta atrás te
+devolvería exactamente a donde estás.
 
-⚠️ **De lo que cuelga todo: `ProxyPreserveHost On` en el vhost nuevo.** Sin eso Node
-recibe `Host: localhost`, el sitio NO se abre a Google y `checkOrigin` responde 403
-a todo POST. El script lo exige antes de tocar nada.
+⚠️ `[skip deploy]` en el asunto del commit salta puerta y despliegue. No lo
+escribas literal en un commit que sí quieras desplegar.
 
-⚠️ **El sitemap da 404 en cualquier host no canónico, y es correcto** — publicarlo
-sería invitar a rastrear un duplicado. Tras el corte, el front proxea
-`/feeds/beat/sitemap.xml` del CMS, que ya emite URLs con `beatdigital.mx`.
+### La vuelta atrás del corte, por si hace falta
 
-### Lo que el vhost NO arregla
+Dos comandos, segundos, sin DNS de por medio:
 
-- **Las URLs del v1.** De sus 22 secciones de primer nivel solo tres coinciden con
-  el v2. Ya hay tabla de redirecciones 301 en `src/middleware.ts` (`DEL_V1`),
-  aprobada por Carlos: lo que tiene equivalente va a su equivalente y el resto al
-  Inicio. ⚠️ Requiere que el v2 esté desplegado CON esa tabla antes del corte.
-- **`PUBLICIDAD_TOKEN`** en el entorno del servicio, o las campañas vendidas no
-  cuentan impresiones ni clics. En preproducción va vacío a propósito.
-- **El certificado de `beatdigital.mx` no cubre `www`** (el SAN es solo el ápex).
-  Ya pasa hoy, así que el corte no lo empeora, pero `https://www.beatdigital.mx` da
-  error de seguridad y en día de lanzamiento la gente escribe www.
-- **`PUBLIC_METRICOOL_HASH`** sigue sin copiar, y es de build: entrarlo después del
-  corte exige reconstruir.
+```bash
+sudo a2dissite 020-beatdigital && sudo systemctl reload apache2
+```
 
-Si alguien pide el corte: enumerar los huecos, dar los pasos, y esperar un «va»
-explícito. No deducirlo.
+Funciona porque el corte **sumó** un vhost en vez de quitar uno: `000-default`
+sigue sirviendo el sitio viejo, intacto.
 
-### Huecos conocidos al 2026-09-09, medidos contra el CMS
+### Lo que quedó abierto
 
-Contenido: `programas` 0 · `autores` 0 · `paginas` 0 · `podcasts` 0 ·
-`especiales` 1 (la rejilla del archivo excluye al vigente, así que no pinta nada) ·
-`listas` 2, una llamada **«Bonus Beat de Prueba»** · `noticias` 9 · las redes
-sociales **vacías en las 4 estaciones**, así que el pie dice «Próximamente».
+El registro del corte está en `deploy/LANZAMIENTO.md` y lo que quedó pendiente en
+`deploy/PENDIENTES.md`, con el respaldo de cada punto marcado (medido / leído / sin
+verificar). Lo que este agente tiene que tener a mano:
 
-Configuración: `PUBLIC_METRICOOL_HASH` sin copiar (el real corre en v1) · dos
-medidas de anuncio sin dar de alta en Ad Manager (1280×350, 390×110) ·
-`viralize.com` en `ads.txt` sin confirmar con AdOps (comparte el seller id 7587 con
-`showheroes.com`, así que quitarlo puede dejar inventario sin pujar).
+- 🔴 **`beatdigital.mx` era un `ServerAlias` del vhost de `oyedigital.mx`** en
+  `000-default-le-ssl.conf`, y por eso el primer intento del corte no cambió nada.
+  Se quitó a mano en la VM, y es **el único cambio del lanzamiento que no está
+  versionado en este repo** (respaldo en `/root/respaldo-000-default-le-ssl.conf.bak`).
+  ⚠️ Antes de dar por bueno cualquier corte por vhost: `apachectl -S | grep -i
+  <dominio>`, que enseña los alias. `apachectl configtest` **no** avisa de un
+  nombre duplicado entre vhosts.
+- ⚠️ **`PUBLICIDAD_TOKEN` sigue sin ponerse**: sin ella las campañas vendidas no
+  cuentan impresiones ni clics. Es de runtime, así que no exige reconstruir — pero
+  sí reiniciar, y ahora eso son segundos de 502 en el sitio real. Fuera de hora
+  punta.
+- ⚠️ **`PUBLIC_METRICOOL_HASH` es de BUILD** y no entró en el artefacto del corte:
+  ponerlo ahora obliga a reconstruir.
+- ⚠️ **`scripts/cambiar-dominio.sh` tiene tres defectos reproducidos y ninguno
+  arreglado**, incluido que `VALIDAR_NUEVO=1` **deshabilita el sitio vivo** y lo
+  reporta en verde. Están detallados en `deploy/PENDIENTES.md`. No volver a
+  correrlo sin leerlos.
+- El certificado ya cubre `www`, y las cuatro secciones del sitio viejo que daban
+  404 se arreglaron antes del corte. Esos dos están cerrados: no volver a
+  levantarlos.
+- Los huecos de contenido —`programas`, `autores`, `paginas` y `podcasts` en 0,
+  redes sociales vacías, dos medidas de anuncio sin dar de alta— se llenan desde
+  el CMS, sin desplegar.
 
 ---
 

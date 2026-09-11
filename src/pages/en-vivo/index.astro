@@ -12,10 +12,12 @@
  * pregunta es otra —«¿qué suena el sábado a las nueve?»— y esa la contesta la
  * rejilla, que se quedó allá. Cada página con una sola pregunta.
  *
- * Cuatro piezas, en este orden:
+ * Dos piezas, en este orden:
  *   1. AL AIRE AHORA + LO QUE SIGUE HOY   — la señal
- *   2. TAMBIÉN ESCUCHA EN                 — los agregadores de terceros
- *   3. LO QUE HA SONADO                   — la bitácora del playout
+ *   2. LO QUE HA SONADO                   — la bitácora del playout
+ *
+ * ⚠️ Entre las dos hubo una tercera, «TAMBIÉN ESCUCHA EN», con los agregadores de
+ * terceros. Se fue el 2026-09-11 al retirar iHeart, que era el único que había.
  *
  * ⚠️ NO lleva publicidad, y es una decisión tomada (Carlos, 2026-09-08): es la
  * página a la que alguien viene a ESCUCHAR, y un anuncio al lado de la señal hace
@@ -41,7 +43,6 @@ import Remate from '@/components/Remate.astro';
 import { loQueSono } from '@/lib/cms/aire';
 import { obtenerProgramacion } from '@/lib/cms/programacion';
 import { urlMedia, puntoFocal } from '@/lib/cms/client';
-import { PLATAFORMAS_RADIO } from '@/config/navegacion';
 
 const { ahora, hoy, alAire } = await obtenerProgramacion();
 const sono = await loQueSono(20);
@@ -237,28 +238,15 @@ const altHero =
       )
     }
 
-    {/* ═══ 2. TAMBIÉN ESCUCHA EN ═══ */}
-    <section class="vivo-bloque">
-      <h2 class="beat-label vivo-titulo">TAMBIÉN ESCUCHA EN</h2>
-      <ul class="vivo-plataformas">
-        {
-          PLATAFORMAS_RADIO.map((p) => (
-            <li>
-              <a
-                href={p.url}
-                class="beat-label vivo-plataforma"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                {p.nombre}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </section>
+    {/*
+      ⚠️ Aquí iba «TAMBIÉN ESCUCHA EN», con la ficha de iHeartRadio. Salió el
+      2026-09-11 con todo lo de iHeart (Carlos), y como era la única plataforma
+      de `PLATAFORMAS_RADIO` no quedó lista que recorrer: se va la sección
+      completa, rótulo incluido, y el CSS `.vivo-plataforma*` con ella. Una zona
+      sin contenido se deja vacía y sin rótulo.
+    */}
 
-    {/* ═══ 3. LO QUE HA SONADO ═══ */}
+    {/* ═══ 2. LO QUE HA SONADO ═══ */}
     {
       /*
         🔴 Sin bitácora no hay sección, ni rótulo, ni explicación.
@@ -591,29 +579,6 @@ const altHero =
     padding-bottom: 12px;
     border-bottom: 1px solid var(--border-quiet);
     color: var(--mist-3);
-  }
-
-  .vivo-plataformas {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  .vivo-plataforma {
-    display: inline-block;
-    padding: 12px 22px;
-    border-radius: var(--r-control);
-    box-shadow: inset 0 0 0 1px var(--border-quiet);
-    color: var(--text-muted);
-    transition:
-      box-shadow var(--dur-2) var(--ease-out),
-      color var(--dur-2) var(--ease-out);
-  }
-  .vivo-plataforma:hover {
-    box-shadow: inset 0 0 0 1px var(--border-strong);
-    color: var(--mist-0);
   }
 
   .vivo-sono {

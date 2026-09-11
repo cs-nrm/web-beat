@@ -7,7 +7,6 @@
  */
 import {
   SECCIONES,
-  PLATAFORMAS_RADIO,
   APPS,
   LEGALES,
   MARCAS_NRM,
@@ -71,22 +70,16 @@ const todasLasSecciones = SECCIONES;
 
       <div>
         <h2 class="t-label mb-6 font-bold text-text-primary">Radio en vivo</h2>
-        <p class="mb-6 text-body-sm text-text-muted">
+        {/*
+          ⚠️ Aquí iba «También escucha en» con la ficha de iHeartRadio. Salió el
+          2026-09-11 con todo lo de iHeart, y como era la única plataforma de la
+          lista se fue también el rótulo: una zona sin contenido se deja vacía y
+          sin rótulo. La columna se queda con el enlace a la señal, que es lo que
+          contesta la pregunta con la que alguien llega al pie.
+        */}
+        <p class="text-body-sm text-text-muted">
           Escucha nuestra señal <a href="/en-vivo" class="text-text-link underline decoration-borde-quiet underline-offset-4 transition-colors duration-2 ease-out hover:text-text-link-hover">aquí</a>.
         </p>
-        <h3 class="t-label mb-4 text-text-faint">También escucha en</h3>
-        <ul class="space-y-4 text-body-sm">
-          {PLATAFORMAS_RADIO.map((p) => (
-            <li>
-              <a
-                href={p.url}
-                rel="noopener noreferrer"
-                target="_blank"
-                class="text-text-muted transition-colors duration-2 ease-out hover:text-text-primary"
-              >{p.nombre}</a>
-            </li>
-          ))}
-        </ul>
       </div>
 
       <div>

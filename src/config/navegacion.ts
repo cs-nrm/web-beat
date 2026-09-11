@@ -208,37 +208,24 @@ export const SECCIONES_FUTURAS: EntradaNav[] = [
   concatenando una lista que nunca tiene nada se leen como un cable suelto.
 */
 
-/**
- * Donde también se puede escuchar la señal. Agregadores de terceros.
- *
- * 🔴 Es la ficha de LA ESTACIÓN, no la portada de la plataforma (2026-09-07).
- * Antes apuntaba a `iheart.com` a secas, y por eso «no iba»: llevaba al buscador de
- * un servicio, donde el oyente tiene que volver a encontrar Beat por su cuenta. Un
- * enlace que te deja a medio camino es peor que no tenerlo, porque parece que
- * funciona.
- *
- * La URL sale del pie del v1, que ya traía la ficha real con su id (`11329`), y
- * responde 200 sin redirecciones. ⚠️ Ese id es parte de la URL y no se puede
- * adivinar: si algún día deja de responder, se vuelve a buscar la ficha — NO se
- * recorta la URL a la portada, que es de donde venimos.
- *
- * 🔴 **TuneIn NO va aquí, y es decisión comercial, no técnica** (Carlos,
- * 2026-09-07): es competencia, no un aliado de distribución.
- *
- * ⚠️ Se anota porque el dato existe y la tentación de «arreglarlo» va a volver: la
- * estación SÍ está en TuneIn —«BEAT 100.9 · Total Music», `guideId: s87618`— y su
- * ficha responde 200. O sea que quien vaya a buscar por qué falta va a encontrar
- * que funciona perfectamente, y ese es justo el motivo de que esto esté escrito.
- * De hecho estuvo enlazada unas horas, hasta que Carlos lo vio.
- *
- * ⚠️ Con una sola entrada, la columna «También escucha en» del pie sigue teniendo
- * sentido: el bloque recorre la lista, así que ni sobra ni hay que tocar el
- * marcado. Y si algún día no queda ninguna, el `<ul>` se pinta vacío — es el
- * único caso que habría que mirar antes de borrar la última.
- */
-export const PLATAFORMAS_RADIO = [
-  { nombre: 'iHeartRadio', url: 'https://www.iheart.com/live/beat-1009-11329/' },
-] as const;
+/*
+  🔴 Y aquí vivía `PLATAFORMAS_RADIO`, la columna «También escucha en» del pie y
+  la sección 2 de `/en-vivo`. Se retiró entera el 2026-09-11 (Carlos): «vamos a
+  quitar de la página todo lo que encontremos de iHeart».
+
+  Tenía UNA entrada —la ficha de iHeartRadio— porque TuneIn está vetado por
+  decisión comercial (Carlos, 2026-09-07): es competencia, no un aliado de
+  distribución. Al salir iHeart no quedaba ningún agregador, así que la lista se
+  fue con él y con ella los dos rótulos y el CSS de `.vivo-plataforma*`. Una zona
+  sin contenido se deja vacía y sin rótulo; un `<ul>` vacío bajo un «También
+  escucha en» es exactamente lo que la regla prohíbe.
+
+  ⚠️ Si algún día vuelve a haber un agregador que enlazar, lo que hay que
+  recuperar es el bloque de marcado, no solo la constante: el pie y `/en-vivo`
+  ya no recorren nada. Ver `git show 36d572f:src/config/navegacion.ts` para la
+  nota de por qué la URL tiene que ser la ficha de la estación y no la portada
+  del servicio.
+*/
 
 /**
  * Apps de la estación.

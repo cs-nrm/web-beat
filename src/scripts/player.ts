@@ -125,6 +125,71 @@ const MS_TOPE_CONEXION = 20000;
 let topePreroll: number | null = null;
 const MS_TOPE_PREROLL = 6000;
 
+/**
+ * 🔴 El arranque en curso salió de una INTENCIÓN GUARDADA, no del dedo.
+ *
+ * Es la distinción que explica el fallo de iOS, medido el 2026-09-11 en un iPhone
+ * 17 Pro con iOS 26.5: WebKit exige que `play()` salga DENTRO del gesto del
+ * usuario. Chrome tiene «activación pegajosa» —tocaste algo una vez y un `play()`
+ * posterior vale—, y este archivo daba eso por bueno para todos los navegadores.
+ * No lo es.
+ *
+ * En frío el clic solo GUARDA la intención, el SDK tarda segundos en cargar, y
+ * `playerReady` llama a `arrancar()` cuando el gesto ya caducó: iOS se traga el
+ * `play()` sin un error, sin un evento y sin audio. Medido: de 4 arranques en frío,
+ * 2 sonaron y 2 se quedaron mudos hasta el tope. Con el SDK ya construido, 2 de 2
+ * sonaron en 2-3 s.
+ *
+ * ⚠️ Y por eso el sitio viejo NO tenía este fallo: `web-stereocien` y el Beat v1
+ * cargan el SDK con la página (`<script src="//sdk.listenlive.co/…">` en el
+ * marcado) y construyen al cargar, así que el botón siempre encontraba todo listo.
+ * Lo rompió la carga a demanda de los 854 KB, que es una mejora real en datos. Las
+ * dos cosas están peleadas y aquí se reparte: ver `esOyenteConocido()`.
+ */
+let arranqueSinGesto = false;
+
+/**
+ * Cuando el arranque no lleva gesto, no se espera lo mismo.
+ *
+ * 20 s y un «No se pudo conectar» es el diagnóstico correcto para una conexión que
+ * falla. Pero si iOS se comió el `play()`, no hay nada que esperar: no va a llegar
+ * nunca, y lo único que resuelve es otro toque —ahora sí con el SDK listo—.
+ *
+ * 8 s y no menos, porque el primer byte de Triton está medido entre 1.5 s y 5.8 s
+ * el mismo día: cortar antes mataría conexiones lentas pero sanas.
+ */
+const MS_TOPE_SIN_GESTO = 8000;
+
+/**
+ * La marca de que en ESTE dispositivo ya se dio play alguna vez.
+ *
+ * Es lo que permite tener las dos cosas: quien solo viene a leer una nota no
+ * descarga los 854 KB del SDK, y quien ya demostró que escucha se los encuentra
+ * cargados al llegar, con lo que su `play()` sale dentro del gesto y iOS no tiene
+ * nada que objetar.
+ *
+ * ⚠️ Va en `localStorage` con try/catch: en modo privado lanza, y un player que se
+ * cae por no poder escribir una marca de conveniencia sería un arreglo peor que el
+ * problema. Sin marca, el comportamiento es el de hoy.
+ */
+const MARCA_OYENTE = 'beatYaEscucho';
+
+function esOyenteConocido(): boolean {
+  try {
+    return localStorage.getItem(MARCA_OYENTE) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function marcarOyente(): void {
+  try {
+    localStorage.setItem(MARCA_OYENTE, '1');
+  } catch {
+    /* modo privado: se queda sin la mejora, no sin el player */
+  }
+}
+
 function cancelarTopePreroll(): void {
   if (topePreroll !== null) window.clearTimeout(topePreroll);
   topePreroll = null;
@@ -259,11 +324,19 @@ function pintarEstado(estado: EstadoUI): void {
     topeConexion = null;
   }
   if (estado === 'cargando') {
+    /*
+      Dos topes distintos porque son dos fallos distintos. Con gesto, lo que puede
+      fallar es la conexión, y se dice. Sin gesto, lo más probable es que WebKit
+      haya ignorado el `play()`, y entonces el único remedio es otro toque — que
+      además ya funciona, porque a estas alturas el SDK está construido.
+    */
+    const sinGesto = arranqueSinGesto;
     topeConexion = window.setTimeout(
-      () => fallo('No se pudo conectar'),
-      MS_TOPE_CONEXION,
+      () => fallo(sinGesto ? 'Toca otra vez' : 'No se pudo conectar'),
+      sinGesto ? MS_TOPE_SIN_GESTO : MS_TOPE_CONEXION,
     );
   } else {
+    arranqueSinGesto = false;
     /*
       El tope del pre-roll muere con cualquier estado que NO sea «conectando»: el
       anuncio arrancó ('anuncio'), la señal entró ('sonando') o el oyente canceló
@@ -697,6 +770,10 @@ export function prepararPlayer(): void {
          de verdad sirve. Ponerlo solo en el handler de `iniciarPlayer()` lo dejaba
          sin efecto justo aquí: comprobado, un clic en frío abría cero conexiones. */
       precalentarConexiones();
+      /* Tocar play es la señal de que esta persona viene a escuchar, y vale aunque
+         este primer arranque acabe fallando: justo entonces es cuando más sirve
+         que la próxima visita traiga el SDK puesto. */
+      marcarOyente();
       if (iniciado) return; // ya hay SDK: el handler de iniciarPlayer se encarga
       /**
        * 🔴 Se pinta `cargando` AQUÍ, no al recibir el primer `stream-status`.
@@ -736,6 +813,9 @@ export function prepararPlayer(): void {
           // adelantó— se arranca aquí. Si no, `playerReady` recoge la intención.
           if (listo) {
             arranquePendiente = false;
+            /* El SDK ya estaba: `cargarSdk()` resolvió sin red, así que esto sigue
+               dentro de la misma tarea del clic y el gesto vale. */
+            arranqueSinGesto = false;
             arrancar();
           }
         })
@@ -768,7 +848,25 @@ export function prepararPlayer(): void {
     boton.removeAttribute('aria-busy');
   }
 
-  precargarEnIntencion();
+  /**
+   * 🔴 El reparto: el lector no paga, el oyente no espera.
+   *
+   * Quien ya dio play en este dispositivo se lleva el contrato del sitio viejo —el
+   * SDK cargado y construido con la página—, y con él la garantía de que su toque
+   * encuentra `listo === true` y el `play()` sale dentro del gesto. Es exactamente
+   * lo que hace `web-stereocien` desde siempre, y por eso allá esto nunca falló.
+   *
+   * Quien llega por primera vez no descarga nada hasta que roza la barra, como
+   * hasta hoy. Si su primer arranque en frío se lo come WebKit, el tope corto le
+   * pide otro toque a los 8 s en vez de dejarlo 20 s para decirle que no se pudo
+   * conectar — y ese segundo toque ya funciona siempre.
+   */
+  if (esOyenteConocido()) {
+    precalentarConexiones();
+    void cargarSdk().then(iniciarPlayer).catch(() => {});
+  } else {
+    precargarEnIntencion();
+  }
 }
 
 export function iniciarPlayer(): void {
@@ -882,6 +980,10 @@ export function iniciarPlayer(): void {
         // que el PRIMER clic de la sesión reproduzca.
         if (arranquePendiente) {
           arranquePendiente = false;
+          /* 🔴 Aquí el gesto ya caducó — pasaron los segundos de la descarga. Se
+             marca para que el tope sea el corto y el mensaje invite a otro toque
+             en vez de declarar una avería de red que no ocurrió. */
+          arranqueSinGesto = true;
           arrancar();
         }
       },
@@ -1256,6 +1358,7 @@ export function iniciarPlayer(): void {
   el<HTMLButtonElement>('[data-accion="play"]')?.addEventListener('click', () => {
     if (mandaLaPista()) return; // el clic es de la pista, no del directo
     precalentarConexiones();
+    marcarOyente();
     const estado = contenedor()?.dataset.status;
     if (estado === 'sonando' || estado === 'cargando' || estado === 'anuncio') {
       sdk?.stop();

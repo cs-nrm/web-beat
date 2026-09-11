@@ -592,11 +592,54 @@ function cargarSdk(): Promise<void> {
  * botón antes de hacer clic, así que en la práctica la descarga ya empezó cuando
  * el clic llega. Y quien solo viene a leer una nota no paga nada.
  */
+/**
+ * Los orígenes que toca el arranque del aire, en el orden real en que los toca:
+ * el SDK, después el IMA que ese SDK se trae solo, y al final el stream.
+ *
+ * Se abren las conexiones al primer indicio de intención para que el DNS y el TLS
+ * de los dos últimos corran MIENTRAS se descarga el SDK, en vez de después. En un
+ * teléfono ese solapamiento es lo único que hay que ganar: el aire no empieza
+ * hasta el tercero, y cada origen nuevo son un DNS y un handshake.
+ *
+ * ⚠️ Honestidad sobre el tamaño del arreglo: medido contra producción desde un Mac
+ * con el DNS caliente, esto ahorra unos 40 ms — casi nada. No está medido en un
+ * teléfono con datos, que es donde debería valer. Si alguien lo mide ahí y sale
+ * cero, esto sobra y se quita sin discusión.
+ *
+ * 🔴 Van AQUÍ y no en el `<head>` por lo mismo que el SDK se carga a demanda: en el
+ * `<head>` abriría tres conexiones en CADA visita, incluida la de quien solo viene
+ * a leer una nota. Lo de `imasdk` no añade exposición a Google —`gpt.js` ya se
+ * carga en todas las páginas para los banners—, pero abrir lo que nadie va a usar
+ * sigue siendo gasto.
+ */
+const ORIGENES_DEL_AIRE = [
+  'https://sdk.listenlive.co',
+  'https://imasdk.googleapis.com',
+  'https://playerservices.streamtheworld.com',
+];
+
+let conexionesCalientes = false;
+
+function precalentarConexiones(): void {
+  // Una sola vez: la intención y el clic son dos caminos y los dos llaman aquí.
+  // Un ratón siempre pasa por `pointerenter` y un dedo por `touchstart`, pero el
+  // clic también lo pide por si alguna ruta llega sin haber pasado por la barra.
+  if (conexionesCalientes) return;
+  conexionesCalientes = true;
+  for (const origen of ORIGENES_DEL_AIRE) {
+    const enlace = document.createElement('link');
+    enlace.rel = 'preconnect';
+    enlace.href = origen;
+    document.head.appendChild(enlace);
+  }
+}
+
 function precargarEnIntencion(): void {
   const barra = contenedor();
   if (!barra) return;
   const arrancar = () => {
     quitar();
+    precalentarConexiones();
     void cargarSdk().then(iniciarPlayer).catch(() => {});
   };
   const eventos: Array<keyof HTMLElementEventMap> = [
@@ -649,6 +692,11 @@ export function prepararPlayer(): void {
     'click',
     () => {
       if (mandaLaPista()) return; // el clic es de la pista, no del directo
+      /* 🔴 Antes del `return` de abajo, y esa es la gracia: ESTE es el camino frío
+         —nadie rozó la barra, el SDK no está— y por tanto el único donde precalentar
+         de verdad sirve. Ponerlo solo en el handler de `iniciarPlayer()` lo dejaba
+         sin efecto justo aquí: comprobado, un clic en frío abría cero conexiones. */
+      precalentarConexiones();
       if (iniciado) return; // ya hay SDK: el handler de iniciarPlayer se encarga
       /**
        * 🔴 Se pinta `cargando` AQUÍ, no al recibir el primer `stream-status`.
@@ -1207,6 +1255,7 @@ export function iniciarPlayer(): void {
   // ---- Controles ----
   el<HTMLButtonElement>('[data-accion="play"]')?.addEventListener('click', () => {
     if (mandaLaPista()) return; // el clic es de la pista, no del directo
+    precalentarConexiones();
     const estado = contenedor()?.dataset.status;
     if (estado === 'sonando' || estado === 'cargando' || estado === 'anuncio') {
       sdk?.stop();

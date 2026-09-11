@@ -98,6 +98,38 @@ let caducidad: number | null = null;
 let topeConexion: number | null = null;
 const MS_TOPE_CONEXION = 20000;
 
+/**
+ * Tope del PRE-ROLL. Es otro, y no sustituye al de arriba.
+ *
+ * 🔴 Existe por un fallo medido el 2026-09-10 en un iPhone con buena wifi: el
+ * PRIMER play de la sesión se quedaba 20 s en «Conectando…» y terminaba en «No se
+ * pudo conectar»; el segundo sonaba en 3 s. La única diferencia entre los dos es
+ * este pre-roll, que va una vez por sesión — así que el anuncio se estaba llevando
+ * por delante la radio de todo oyente nuevo, que es la acción principal del sitio.
+ *
+ * La mecánica: `playAd()` puede no emitir NINGÚN evento —ni `ad-playback-start` ni
+ * `ad-playback-error`—, y entonces lo único que quedaba era el tope de conexión,
+ * que no es un reintento: llama a `fallo()`, que hace `sdk.stop()` y pinta el
+ * error. Un anuncio que se cuelga no debe poder apagar la señal.
+ *
+ * ⚠️ Y ese anuncio hoy NO EXISTE: medido el mismo día contra el ad unit de la
+ * config, GAM devuelve un VAST vacío —`<VAST version="3.0"/>`, 156 bytes, sin un
+ * solo `<Ad>`— en 0.3 s. O sea que ese camino no está dando ingresos y sí está
+ * costando el arranque.
+ *
+ * 6 s es corto a propósito, y se puede: cuando `arrancar()` corre, el SDK ya está
+ * cargado —solo entra con `listo`—, así que esto cubre la petición del VAST y nada
+ * más. Y no tira ingresos: si el anuncio llega tarde, el SDK lo anuncia igual y
+ * `ad-playback-start` pinta la pausa comercial sobre la señal ya sonando.
+ */
+let topePreroll: number | null = null;
+const MS_TOPE_PREROLL = 6000;
+
+function cancelarTopePreroll(): void {
+  if (topePreroll !== null) window.clearTimeout(topePreroll);
+  topePreroll = null;
+}
+
 const el = <T extends HTMLElement>(sel: string): T | null =>
   document.querySelector<T>(sel);
 
@@ -218,6 +250,18 @@ function pintarEstado(estado: EstadoUI): void {
       () => fallo('No se pudo conectar'),
       MS_TOPE_CONEXION,
     );
+  } else {
+    /*
+      El tope del pre-roll muere con cualquier estado que NO sea «conectando»: el
+      anuncio arrancó ('anuncio'), la señal entró ('sonando') o el oyente canceló
+      ('init'). Va aquí y no en cada manejador para que no haya un camino de
+      salida que se olvide de desarmarlo y arranque la señal por detrás.
+
+      ⚠️ En 'cargando' NO se toca: el SDK emite LIVE_CONNECTING y LIVE_BUFFERING
+      varias veces mientras el pre-roll sigue en marcha, y desarmarlo ahí sería
+      desarmarlo siempre.
+    */
+    cancelarTopePreroll();
   }
 
   /*
@@ -458,6 +502,12 @@ function arrancar(): void {
     `https://pubads.g.doubleclick.net/gampad/ads?sz=600x360&iu=/${red}/${unidad}/VideoVast` +
     '&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1' +
     '&url=[referrer_url]&description_url=[description_url]&correlator=[timestamp]';
+  cancelarTopePreroll();
+  topePreroll = window.setTimeout(() => {
+    topePreroll = null;
+    traza(`el pre-roll no dijo nada en ${MS_TOPE_PREROLL} ms → directo a la señal`);
+    reproducir();
+  }, MS_TOPE_PREROLL);
   sdk.playAd('vastAd', { url: vast });
 }
 
@@ -1102,6 +1152,7 @@ export function iniciarPlayer(): void {
   });
 
   sdk.addEventListener('ad-playback-complete', () => {
+    cancelarTopePreroll();
     cerrarAnuncio();
     eventoTriton('ad_complete', ctxAnalitica());
     reproducir();
@@ -1113,6 +1164,10 @@ export function iniciarPlayer(): void {
    * como «comportamiento esperado, no bug».
    */
   sdk.addEventListener('ad-playback-error', () => {
+    /* Desarmar aquí y no fiarlo a `pintarEstado`: si el anuncio falla SIN haber
+       arrancado, el estado sigue siendo 'cargando' y el tope quedaría vivo para
+       llamar a `reproducir()` una segunda vez sobre una señal ya en marcha. */
+    cancelarTopePreroll();
     cerrarAnuncio();
     eventoTriton('ad_error', ctxAnalitica());
     reproducir();

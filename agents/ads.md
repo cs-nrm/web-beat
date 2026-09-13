@@ -22,13 +22,15 @@ la documentación.
 | Archivo | Qué le toca |
 |---|---|
 | `src/components/Anuncio.astro` | El marco. Declara el slot con `data-*`, reserva el espacio y decide entre venta directa y programático |
+| `src/components/Takeover.astro` | El modal a pantalla completa: sus tres variantes, su slot de GAM y todo su comportamiento |
 | `src/scripts/anuncios.ts` | El motor de GPT: descubre los slots por sus `data-*`, los define, los pinta y los cierra si vienen vacíos |
 | `src/lib/cms/publicidad.ts` | La venta DIRECTA: campañas de la colección `publicidad`, su vigencia y el conteo de impresiones |
+| `src/pages/api/anuncio/[id].ts` | El proxy. `GET` cuenta el clic y redirige; `POST` cuenta la impresión del takeover |
 | `src/layouts/Base.astro` | La carga de `gpt.js` y el stub de `window.googletag` |
 | `public/ads.txt` | Los sellers autorizados |
 | `.env` | `PUBLIC_GAM_NETWORK_ID`, `PUBLIC_GAM_AD_UNIT`, `PUBLICIDAD_TOKEN` |
 
-### Los tres formatos, y sus medidas
+### Los formatos, y sus medidas
 
 Salen del lienzo v13/v14, no del sitio actual. Viven en `MEDIDAS`, en
 `Anuncio.astro`:
@@ -81,6 +83,128 @@ fluido dado de alta en el ad unit. Lo segundo está sin hacer.
 970×250 es el «billboard» estándar de IAB; la proporción de la casa (3.556) no lo
 es, así que su demanda programática es prácticamente nula. Decisión de Carlos.
 
+### El TAKEOVER, el cuarto formato (2026-09-13)
+
+Lo que el equipo comercial llama **«el modal»**: el overlay a pantalla completa que
+tapa el Inicio al entrar. Vive en `src/components/Takeover.astro` y **no se pinta
+con `Anuncio.astro`**.
+
+🔴 **Es un `tipo` más de la colección `publicidad`, no una colección aparte**
+(decisión de Carlos en el CMS, 2026-09-11). Tiene anunciante, vigencia, contadores y
+`estado` igual que los otros dos; lo único que lo distingue es dónde lo pinta el
+sitio. ⚠️ En Enfoque SÍ es una colección propia (`takeovers`), porque allá nació de
+mudar al CMS un `Modal.astro` que se prendía y apagaba comentando HTML: **no se
+traduce campo por campo entre los dos repos**.
+
+🔴 **`fuente` decide todo, y `admanager` es el caso NORMAL** («casi siempre son
+provenientes de Ad Manager», Carlos). Ahí el CMS no guarda pieza ni enlace: el slot
+está fijo en el sitio, el creativo lo pone Google y la campaña del CMS es solo la
+VIGENCIA y el permiso — «durante estos días pídele el modal a GAM».
+
+🔴 **Se decide por `fuente`, jamás por «si viene imagen, píntala».** Una campaña que
+empezó con creatividad propia y se pasó a Ad Manager **conserva** su `imagen` y su
+`enlace` viejos en la base —el CMS no los limpia a propósito, para no borrarle a
+nadie lo que ya eligió— y la API los devuelve. Son basura inerte. `obtenerTakeover()`
+los anula en la capa de datos para que la plantilla no pueda equivocarse.
+
+| Campo del CMS | Qué hace en el sitio |
+|---|---|
+| `fuente` | `propia` (imagen/video del CMS) o `admanager` (slot de GAM) |
+| `imagen` | La pieza; con video es además el `poster` y el respaldo |
+| `imagenMovil` | Opcional. Si falta, se usa `imagen` |
+| `video` | Opcional, solo con `propia`. Un mp4 corto |
+| `frecuencia` | `sesion` (`sessionStorage`) o `siempre`. **No hay «por día»** |
+| `orden` | Con varios vigentes gana el más bajo. Nunca se apilan dos modales |
+
+⚠️ **No existen y no hay que esperarlos**: rutas donde aparece, retardo antes de
+abrir, si se puede cerrar, y a los cuántos segundos. Nada de eso está en el CMS —el
+markup, la cruz y el timing son del front—. Si hiciera falta, se pide y se agrega.
+
+#### Las medidas y el corte por ALTO
+
+`600×800` y `320×480`, heredadas del `ad-slot14` del sitio viejo. El lienzo no dice
+nada de este formato.
+
+🔴 **Es el único formato cuyo `sizeMapping` mira el ALTO del viewport**, y la razón
+está medida (Enfoque, 2026-09-08): un 600×800 en una laptop de 720px de alto **no
+cabe**, y el lector tendría que hacer scroll dentro del overlay para ver el final del
+anuncio. Se pide la pieza grande solo con ≥768 de ancho **y** ≥860 de alto.
+
+⚠️ Ese par (768 × 860) está escrito DOS veces —en el `mapping` y en el
+`@media (min-height:)` que reserva `.tk-slot`— y tienen que coincidir. Comprobado en
+el build servido el 2026-09-13: a 1280×900 el hueco mide 600×800; a 1024×700 y a
+375×812, 320×480.
+
+⚠️ **`/…/Beat/Takeover` no existe todavía en GAM.** Pedir una ruta que no existe no
+falla —GAM la atiende contra el padre y el modal se llena igual—, lo que se pierde es
+poder medir este formato por separado. El día que ad ops cree el bloque empieza a
+reportarse solo, sin desplegar. 🔴 Y si alguien va a ponerle una protección para
+bloquearle la programática, **el bloque hijo tiene que existir primero**: aplicada
+sobre el padre, apaga la programática de TODO el sitio.
+
+#### Las reglas de comportamiento, y cuál pagó cada una
+
+Casi todas vienen medidas de la primera campaña de Enfoque (`leap auto`, 8-9 sep) o
+del build servido de Beat el 13-sep.
+
+1. 🔴 **Si ya se vio en esta sesión, el nodo se va del DOM en un script EN LÍNEA**,
+   antes de que `anuncios.ts` descubra el slot. Pedirle el anuncio a Google y decidir
+   después le factura al anunciante un modal que nadie vio.
+2. 🔴 **La llave de sesión lleva `id:updatedAt`.** Con una llave fija por campaña,
+   corregir la pieza no se la vuelve a mostrar a quien ya la vio; con una llave fija
+   a secas, la campaña siguiente nace YA VISTA para quien tenga la pestaña abierta —
+   y eso no truena, simplemente no se muestra.
+3. 🔴 **Se marca al MOSTRAR, no al cerrar.** Al cerrar, un recargar a media pantalla
+   lo vuelve a abrir. Y un takeover que nunca se vio no debe gastar la sesión.
+4. 🔴 **Con Ad Manager el overlay espera INVISIBLE** (`opacity: 0`, con el hueco
+   midiendo de verdad) y se revela solo cuando llega creativo. Enfoque lo revelaba de
+   inmediato y el lector veía una caja vacía ~1.5 s en cada visita: GAM contesta
+   entre **1700 y 2659 ms** con red de cable.
+5. 🔴 **El plazo de respaldo son 10 s, no 3.** Existe por el bloqueador de anuncios
+   —con `gpt.js` bloqueado el evento no llega nunca—, y con 3 s se cierra en firme
+   una impresión que venía en camino por 3G. Esperar no cuesta nada: no se ve nada.
+6. 🔴 **Sin animación de entrada.** Con `animation: … both` el fotograma inicial
+   (`opacity: 0`) se aplica antes de arrancar, y en una pestaña que el navegador no
+   está pintando Chrome la deja pausada ahí: capa montada, scroll bloqueado y nada
+   visible. La regla es «si está montada, se ve», que es una invariante comprobable
+   con `getComputedStyle` — y en este repo eso importa el doble.
+7. 🔴 **La impresión de `propia` se cuenta al MOSTRAR, por `sendBeacon` al proxy**, y
+   no en el render como la portada. El modal sale una vez por sesión: contar renders
+   multiplicaría por cinco lo que se le factura a quien abre el Inicio cinco veces.
+   Con `admanager` no se cuenta — ese número lo lleva Google.
+8. ⚠️ **El intro y el takeover coinciden** en la primera visita de una sesión: los
+   dos tapan la pantalla, los dos salen una vez y los dos viven en el Inicio. Van EN
+   FILA (el takeover espera a que `data-intro` se limpie, con red de 4 s). Con Ad
+   Manager casi nunca cuesta tiempo: los ~2 s de GAM transcurren bajo el intro.
+9. ⚠️ **El plazo en pantalla cuenta desde que SE VE**, no desde que se monta, y se
+   decide una sola vez. Enfoque sondeaba `video.paused` cada segundo y se le cerraba
+   el overlay cuando el lector pausaba el spot, o a mitad en una pestaña de fondo.
+
+#### Lo que este formato NO hace
+
+- **No reserva hueco en la página**: sin campaña no emite nada. Un rectángulo vacío
+  tapando el Inicio no es un marco, es el sitio roto.
+- **No usa `encajar()`.** No le hace falta: es `position: fixed` con
+  `overflow-y: auto`, así que un creativo más grande de lo pedido hace scroll dentro
+  del velo y no puede romper el Inicio que está detrás.
+- **No va envuelto en `.anuncio`.** El motor colapsa el marco de un hueco vacío
+  buscando ese ancestro, y aquí colapsar el marco sería esconder la caja dejando el
+  overlay puesto.
+- **No sale fuera del Inicio.** Un modal encima de una nota que alguien vino a leer
+  es otra conversación, y no está tenida.
+
+#### Cómo se prueba
+
+`?takeover=imagen|video|admanager` sobre el **build servido** (entrada
+`web-beat-build`), que es donde la cascada dice la verdad. 🔴 Apagado en el host
+canónico: un takeover que cualquiera invoca por la URL es un modal a pantalla
+completa servido desde nuestro dominio, y con Ad Manager una impresión facturada que
+nadie pidió.
+
+⚠️ La puerta de «GAM sí trajo creativo» no se puede disparar sola mientras no haya
+campaña: se reinserta el nodo que emite el servidor, se dispara `astro:page-load` y
+se emite a mano un `beat:anuncio-render` con `vacio: false`.
+
 ### El marco se reserva y luego desaparece
 
 Las dos mitades hacen falta, por razones distintas:
@@ -119,6 +243,21 @@ ejecutaría la inicialización n veces.
 ⚠️ Tercera, de las que cuestan una tarde: `sizeMapping().addSize()` necesita **dos**
 argumentos —viewport y tamaños—. `addSize([970, 250])` a secas compila y no mapea
 nada.
+
+🔴 **Y la cuarta, encontrada el 2026-09-13 midiendo el takeover: el oyente de
+`slotRenderEnded` se registra UNA vez por contexto de JavaScript, no por vista.**
+`addEventListener` de GPT **acumula**, y una navegación de Astro no recarga el
+contexto: registrándolo dentro de la inicialización, la enésima navegación tenía n
+oyentes y cada render llegaba n veces. Medido en el build servido con el flujo Inicio
+→ nota → atrás: el render de `beat-takeover-slot` entró **tres** veces y el de
+`ad-nota-box` dos.
+
+No había roto nada —`marcar()` es idempotente y GPT lleva sus impresiones por su
+cuenta, así que no hubo conteo doble— y por eso llevaba ahí desde el principio sin
+que nadie lo notara. Deja de ser inocuo en cuanto algo que NO sea idempotente cuelgue
+de ese evento, y el takeover ya cuelga. El conjunto `atendidos` tuvo que subir al
+módulo con él: el oyente vive más que la vista, así que no puede quedarse mirando el
+conjunto de la primera.
 
 ---
 
@@ -179,6 +318,12 @@ porque le falta el CONTENIDO del que cuelga (no porque el hueco esté mal).
 | `/eventos/*` | — | ✅ `evento-leader` | ✅ `evento-box` |
 | `/especiales/*` | — | ✅ `especial-leader` | ✅ `especial-box` |
 | `/en-vivo`, `/alexa`, legales | — | ✗ | ✗ |
+
+⚠️ El **takeover** no entra en esta tabla porque no es una superficie más: es un
+overlay, solo vive en el Inicio y su columna sería una sola celda. Su estado al
+2026-09-13 es «declarado y sin campaña que lo dispare» — el CMS todavía no tiene
+ninguno capturado, así que en el sitio no se ve nada. Ver la sección del takeover
+más arriba.
 
 🔴 **`/en-vivo` no lleva box, y es una decisión tomada** (Carlos, 2026-09-08): es
 la página a la que alguien va a ESCUCHAR, y un anuncio al lado de la señal hace

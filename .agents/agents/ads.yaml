@@ -7,11 +7,17 @@ interface:
     Tu alcance principal incluye:
     - `src/components/Anuncio.astro` — el marco: declara el slot con `data-*`,
       reserva el espacio y decide entre venta directa y programático. Aquí viven
-      los tres formatos y sus medidas (`MEDIDAS`)
+      los tres formatos EN FLUJO y sus medidas (`MEDIDAS`)
+    - `src/components/Takeover.astro` — el CUARTO formato, el modal a pantalla
+      completa. No se pinta con `Anuncio.astro` (ver abajo) y declara sus propias
+      medidas: 600×800 / 320×480, con el corte por ALTO de viewport
     - `src/scripts/anuncios.ts` — el motor de GPT: descubre los slots, los define,
       los pinta y los cierra si vienen vacíos
     - `src/lib/cms/publicidad.ts` — la venta DIRECTA: campañas del CMS, vigencia y
-      conteo de impresiones
+      conteo de impresiones. Tres tipos: `portada`, `nativo` y `takeover`
+    - `src/pages/api/anuncio/[id].ts` — el proxy: GET cuenta el clic y redirige,
+      POST cuenta la impresión del takeover (la única que no se puede contar en el
+      render)
     - `src/layouts/Base.astro` — solo la carga de `gpt.js` y el stub de `googletag`
     - `public/ads.txt` y las variables `PUBLIC_GAM_*` / `PUBLICIDAD_TOKEN`
 
@@ -27,7 +33,14 @@ interface:
     - confirmar que la medida existe en Ad Manager antes de dar por bueno un hueco
       vacío: un slot con medida no dada de alta nunca se llena y se ve igual que uno
       sin demanda
-    - respetar View Transitions y no duplicar oyentes ni slots entre navegaciones
+    - respetar View Transitions y no duplicar oyentes ni slots entre navegaciones.
+      🔴 El oyente de `slotRenderEnded` se registra UNA vez por contexto, no por
+      vista: GPT los ACUMULA y una navegación de Astro no recarga el contexto
+    - en el takeover, decidir por `fuente` y NUNCA por «si viene imagen, píntala»:
+      una campaña que pasó de creatividad propia a Ad Manager conserva su `imagen` y
+      su `enlace` viejos en la base, y la API los devuelve
+    - no pedirle el modal a GAM si el lector ya lo vio en esta sesión. Pedir primero
+      y decidir después le factura al anunciante un modal que nadie vio
 
     Trabaja asumiendo que:
     - NO hay un componente por hueco. Un hueco es `<Anuncio formato="…" nombre="…" />`
@@ -40,8 +53,16 @@ interface:
       que la colocación se PROPONE y la aprueba Carlos — no la inventes
     - `PUBLICIDAD_TOKEN` va vacío en preproducción a propósito: con token, cada
       visita de revisión suma impresiones y clics a campañas facturables
+    - el takeover NO se pinta con `Anuncio.astro`: aquel reserva alto y escribe
+      «PUBLICIDAD», y dentro de un overlay eso es una pantalla completa que dice
+      «PUBLICIDAD · 600×800». Su slot sí entra en el motor de `anuncios.ts` por
+      `data-anuncio`, pero sin envoltorio `.anuncio`
+    - el takeover solo vive en el Inicio, y solo hay UNO por página
 
     Verifica con `curl` sobre el HTML servido, no mirando la página: un hueco que no
-    se llena y un hueco que no existe se ven idénticos.
+    se llena y un hueco que no existe se ven idénticos. El takeover, además, con
+    `?takeover=imagen|video|admanager` sobre el build servido (apagado en el sitio
+    real), y midiendo el DOM —clases, `inert`, `getBoundingClientRect`— nunca con una
+    captura.
 
     Si necesitas más contexto del dominio, revisa `agents/ads.md`.

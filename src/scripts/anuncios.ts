@@ -77,6 +77,39 @@ const PLAZO_VACIO = 3500;
 
 let temporizador: ReturnType<typeof setTimeout> | undefined;
 
+/**
+ * Los huecos de los que GPT ya contestó algo en ESTA vista.
+ *
+ * 🔴 Es lo que distingue «GAM dijo que no tiene» de «GAM no contestó», que es de lo
+ * que depende `PLAZO_VACIO`: sin la distinción, el plazo escondería también los
+ * huecos que sí se llenaron pero tardaron más que él.
+ *
+ * ⚠️ Vive en el módulo y no dentro de la función porque el oyente de GPT se registra
+ * UNA sola vez (ver `oyenteRegistrado`) y tiene que leer el conjunto de la vista en
+ * curso, no el de la primera. Se vacía al empezar cada vista.
+ */
+const atendidos = new Set<string>();
+
+/**
+ * 🔴 El oyente de `slotRenderEnded` se registra UNA vez por contexto de JavaScript,
+ * no por vista.
+ *
+ * `addEventListener` de GPT ACUMULA, y una navegación de Astro no recarga el
+ * contexto: registrándolo en cada vista, la enésima navegación tenía n oyentes y
+ * cada render llegaba n veces. Medido en el build servido el 2026-09-13 con el flujo
+ * Inicio → nota → atrás: el mismo `slotRenderEnded` de `beat-takeover-slot` entró
+ * tres veces, y el de `ad-nota-box` dos.
+ *
+ * No llegó a romper nada —`marcar()` es idempotente y GPT cuenta sus impresiones por
+ * su cuenta, así que no hay conteo doble— pero es una fuga sin techo, y sobre todo
+ * deja de serlo cuando alguien cuelgue de este evento algo que NO sea idempotente.
+ * El takeover ya cuelga de él.
+ *
+ * ⚠️ Y se registra igual ANTES de `enableServices()`: la primera vista, que es la que
+ * importa, lo hace en el mismo orden de siempre.
+ */
+let oyenteRegistrado = false;
+
 /** El `.anuncio` que envuelve a un hueco, que es lo que se esconde. */
 function marcoDe(id: string): HTMLElement | null {
   return document.getElementById(id)?.closest<HTMLElement>('.anuncio') ?? null;
@@ -95,6 +128,31 @@ function marcar(id: string, vacio: boolean): void {
   if (vacio) marco.dataset.vacio = '';
   else delete marco.dataset.vacio;
   if (!vacio) encajar(id);
+}
+
+/**
+ * Reemite el render de un hueco como evento del DOM.
+ *
+ * 🔴 Existe para el TAKEOVER (`src/components/Takeover.astro`), que necesita saber
+ * si su slot se llenó para decidir si abre el overlay, y NO puede enterarse por su
+ * cuenta: el oyente de GPT tiene que quedar registrado antes de `enableServices()`,
+ * y cualquier módulo de una página se evalúa después del `cmd.push` de este archivo.
+ * Un segundo `addEventListener` allá llegaría tarde justo al primer render, que es
+ * el que importa. Aquí ya estamos dentro del único oyente que sí llega a tiempo.
+ *
+ * 🔴 Se avisa SOLO desde el evento de GPT, nunca desde `PLAZO_VACIO`. Los tres
+ * segundos y medio de este archivo son para un hueco que está a la vista y no se
+ * puede quedar abierto; el takeover espera INVISIBLE, así que le sobra paciencia y
+ * tiene su propio plazo más largo. Cerrarlo a los 3.5 s tiraría una impresión
+ * pagada que venía en camino — GAM contesta entre 1700 y 2659 ms con red de cable,
+ * medido en producción, y un teléfono en 3G se pasa de aquí sin despeinarse.
+ *
+ * ⚠️ Es un `CustomEvent` en `document` y no una función importada a propósito: este
+ * módulo no debe saber que el takeover existe. Cualquier otro hueco que algún día
+ * necesite reaccionar a su propio render escucha lo mismo y no hay que tocar esto.
+ */
+function avisar(id: string, vacio: boolean): void {
+  document.dispatchEvent(new CustomEvent('beat:anuncio-render', { detail: { id, vacio } }));
 }
 
 /**
@@ -209,6 +267,10 @@ export function iniciarAnuncios(): void {
     definidos = [];
     // Y el plazo de la página anterior tampoco vale: sus ids ya no están.
     clearTimeout(temporizador);
+    // Los renders de la vista anterior tampoco: los ids se repiten entre páginas
+    // (`ad-inicio-leader` está en cada visita al Inicio) y un id que quedara marcado
+    // daría por atendido un hueco del que todavía no se sabe nada.
+    atendidos.clear();
 
     const huecos = Array.from(document.querySelectorAll<HTMLElement>('[data-anuncio]'));
     if (!huecos.length) return;
@@ -276,12 +338,15 @@ export function iniciarAnuncios(): void {
       contestó». Sin esa distinción el plazo de abajo escondería también los huecos
       que sí se llenaron, si el creativo tardó más que el plazo.
     */
-    const atendidos = new Set<string>();
-    gt.pubads().addEventListener('slotRenderEnded', (e) => {
-      const id = e.slot.getSlotElementId();
-      atendidos.add(id);
-      marcar(id, e.isEmpty);
-    });
+    if (!oyenteRegistrado) {
+      oyenteRegistrado = true;
+      gt.pubads().addEventListener('slotRenderEnded', (e) => {
+        const id = e.slot.getSlotElementId();
+        atendidos.add(id);
+        marcar(id, e.isEmpty);
+        avisar(id, e.isEmpty);
+      });
+    }
 
     /*
       ⚠️ `setConfig({ singleRequest })` y NO `pubads().enableSingleRequest()`.

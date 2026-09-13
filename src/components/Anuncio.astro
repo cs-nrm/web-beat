@@ -34,7 +34,7 @@
  * Y quedan sin usar tres formatos del v1: 300×600, 600×800 y 400×311.
  */
 import { urlMedia } from '@/lib/cms/client';
-import { contarImpresion, type Banner } from '@/lib/cms/publicidad';
+import { contarImpresion, type BannerConEnlace } from '@/lib/cms/publicidad';
 import { HOST_CANONICO, NOINDEX_SITIO, noIndexarHost } from '@/config/site';
 
 interface Props {
@@ -64,8 +64,14 @@ interface Props {
    * tiene anunciante, fechas y compromiso; el programático rellena lo que sobra.
    *
    * Solo aplica al formato `portada`: es el único tipo que el CMS coloca aquí.
+   *
+   * ⚠️ `BannerConEnlace` y no `Banner`: desde que el CMS admite takeovers de Ad
+   * Manager, `Banner.enlace` puede venir vacío. Aquí no puede —lo que llega salió de
+   * `obtenerBanners`, que descarta lo que no tenga enlace utilizable— y decirlo en el
+   * tipo es lo que deja al compilador cuidar el `href` en vez de una comprobación en
+   * ejecución que habría que acordarse de escribir.
    */
-  banners?: Banner[];
+  banners?: BannerConEnlace[];
   class?: string;
 }
 

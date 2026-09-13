@@ -33,6 +33,7 @@
 import Base from '@/layouts/Base.astro';
 import Intro from '@/components/Intro.astro';
 import Anuncio from '@/components/Anuncio.astro';
+import Takeover from '@/components/Takeover.astro';
 import Mosaico from '@/components/inicio/Mosaico.astro';
 import Marquee from '@/components/inicio/Marquee.astro';
 import Fenomeno from '@/components/inicio/Fenomeno.astro';
@@ -45,8 +46,20 @@ import { obtenerScanner, filtroDeCategoria } from '@/lib/cms/noticias';
 import { obtenerEspecialVigente, obtenerEspeciales } from '@/lib/cms/especiales';
 import { obtenerTiposDeLista, obtenerListaReciente } from '@/lib/cms/listas';
 import { obtenerAgenda } from '@/lib/cms/eventos';
-import { obtenerBanners } from '@/lib/cms/publicidad';
-import { SERIE_FENOMENO, TIPO_LISTA_DESTACADA, TARJETA_INICIO } from '@/config/site';
+// El alias evita el choque con el COMPONENTE `Takeover` de arriba: el tipo y el
+// componente se llaman igual, y sin él TypeScript declara identificador duplicado.
+import {
+  obtenerBanners,
+  obtenerTakeover,
+  type Takeover as DatosTakeover,
+} from '@/lib/cms/publicidad';
+import {
+  SERIE_FENOMENO,
+  TIPO_LISTA_DESTACADA,
+  TARJETA_INICIO,
+  NOINDEX_SITIO,
+  noIndexarHost,
+} from '@/config/site';
 import { SECCIONES_EDITORIALES } from '@/config/navegacion';
 
 /*
@@ -77,7 +90,7 @@ const [filtroScanner, filtroEditorial] = await Promise.all([
 
 const VACIO = { destacada: null, rejilla: [] as Awaited<ReturnType<typeof obtenerScanner>>['rejilla'] };
 
-const [{ destacada, rejilla }, editorial, especial, especiales, tipos, agenda, banners] =
+const [{ destacada, rejilla }, editorial, especial, especiales, tipos, agenda, banners, takeover] =
   await Promise.all([
     filtroScanner ? obtenerScanner(6, filtroScanner) : Promise.resolve(VACIO),
     filtroEditorial ? obtenerScanner(4, filtroEditorial) : Promise.resolve(VACIO),
@@ -86,6 +99,7 @@ const [{ destacada, rejilla }, editorial, especial, especiales, tipos, agenda, b
     obtenerTiposDeLista(),
     obtenerAgenda(4),
     obtenerBanners('portada'),
+    obtenerTakeover(),
   ]);
 
 /*
@@ -94,6 +108,61 @@ const [{ destacada, rejilla }, editorial, especial, especiales, tipos, agenda, b
   no desaparece porque alguien renombró «Bonus Beat», ni hay que desplegar cuando
   inventen otro tipo.
 */
+/**
+ * Vista previa del takeover: `?takeover=imagen|video|admanager`.
+ *
+ * 🔴 Existe porque el formato NO SE PUEDE VER de otra forma. Es el único hueco del
+ * sitio que no se puede probar con lo que hay capturado: en el CMS no hay ninguna
+ * campaña de este tipo todavía, y las tres variantes se comportan distinto —la de Ad
+ * Manager ni siquiera se abre hasta que Google contesta—. Sin esto, la única manera
+ * de comprobar un cambio sería pedirle a alguien que dé de alta una campaña real.
+ *
+ * 🔴 **Apagada en el sitio real**, y con la misma guarda que usa el contador de
+ * impresiones: fuera del host canónico. En `beatdigital.mx` este parámetro no hace
+ * nada. No es un detalle de higiene — un takeover que cualquiera puede invocar por
+ * la URL es un modal a pantalla completa servido desde nuestro dominio, y con la
+ * variante de Ad Manager sería además una impresión facturada que nadie pidió.
+ *
+ * ⚠️ La pieza de `imagen` y `video` es un placeholder del propio sitio: la campaña
+ * de verdad trae su creatividad del CMS. Lo que esta previa reproduce fielmente es
+ * el COMPORTAMIENTO —la llave de sesión, el plazo, la fila detrás del intro, el
+ * bloqueo del scroll—, que es lo que se rompe.
+ */
+function vistaPreviaTakeover(url: URL): DatosTakeover | null {
+  // Solo fuera del sitio real. Las dos mitades: el dominio con el que se compiló
+  // y el de ESTA petición (el mismo par que usa el contador de impresiones).
+  if (!NOINDEX_SITIO && !noIndexarHost(url.hostname)) return null;
+  const que = url.searchParams.get('takeover');
+  if (que !== 'imagen' && que !== 'video' && que !== 'admanager') return null;
+
+  /*
+    La llave lleva el parámetro y NO una fecha fija: así cada variante tiene su
+    propia sesión y probar la de imagen no deja «ya vista» la de video. Un `Date.now`
+    tampoco sirve — cambiaría en cada recarga y nunca se podría comprobar que la
+    llave de sesión funciona, que es justo lo que más se rompe.
+  */
+  const base = { id: 0, clave: `previa:${que}`, frecuencia: 'sesion' as const, enlace: '/' };
+  if (que === 'admanager') {
+    return { ...base, fuente: 'admanager', imagen: null, imagenMovil: null, video: null, enlace: null };
+  }
+  /*
+    ⚠️ ABSOLUTA y contra el origen de ESTA petición. Una ruta relativa aquí no vale:
+    `urlMedia()` absolutiza contra `CMS_URL_PUBLICA` —que es lo correcto para una
+    media de verdad— así que `/img/og-beat.png` acabaría pidiéndose al CMS, donde no
+    existe, y la previa se vería con la imagen rota. Medido, no supuesto.
+  */
+  const pieza = new URL('/img/og-beat.png', url.origin).href;
+  return {
+    ...base,
+    fuente: 'propia',
+    imagen: { url: pieza, alt: 'Vista previa del takeover' },
+    imagenMovil: null,
+    video: que === 'video' ? { url: pieza } : null,
+  };
+}
+
+const takeoverVisible = vistaPreviaTakeover(Astro.url) ?? takeover;
+
 const tipoDestacado = tipos.find((t) => t.slug === TIPO_LISTA_DESTACADA) ?? tipos[0] ?? null;
 const listaDestacada = tipoDestacado?.slug ? await obtenerListaReciente(tipoDestacado.slug) : null;
 
@@ -199,6 +268,16 @@ const LEMA = 'Beat 100.9 — Aquí la música se elige';
     para el apilamiento — y aquí ningún ancestro crea contexto propio.
   */}
   <Intro slot="sobre-cabecera" />
+  {/*
+    El takeover va por el mismo slot y por la misma razón que los dos de arriba: es
+    `position: fixed`, pero desde el `<slot />` de contenido ningún overlay puede
+    tapar la cabecera.
+
+    🔴 Solo aquí. El CMS dice que es «el modal que tapa la portada al entrar», y un
+    modal encima de una nota que alguien vino a leer es otra conversación. Si no hay
+    campaña vigente el componente no emite NADA — ni overlay, ni slot de GAM.
+  */}
+  <Takeover takeover={takeoverVisible} slot="sobre-cabecera" />
   <Anuncio formato="portada" nombre="inicio-portada" banners={banners} slot="sobre-cabecera" />
 
   {/* 1. qué suena — la señal */}

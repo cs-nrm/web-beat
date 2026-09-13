@@ -16,6 +16,7 @@
 import type { APIRoute } from 'astro';
 import { obtenerBannerPorId, registrarEvento } from '@/lib/cms/publicidad';
 import { idEstacion } from '@/lib/cms/client';
+import { NOINDEX_SITIO, noIndexarHost } from '@/config/site';
 
 export const prerender = false;
 
@@ -75,4 +76,83 @@ export const GET: APIRoute = async ({ params }) => {
       'referrer-policy': 'no-referrer',
     },
   });
+};
+
+/**
+ * La IMPRESIÓN de un takeover, que es la única que no se puede contar en el render.
+ *
+ * 🔴 Por qué existe, y por qué solo para el takeover. Un banner de portada se cuenta
+ * en el render del servidor (`Anuncio.astro`) porque render y vista son casi lo
+ * mismo: si la página se pintó, la franja estaba ahí. El takeover NO: sale una vez
+ * por sesión, así que un lector que abre el Inicio cinco veces genera cinco renders
+ * y **una** vista. Contarlo en el render sería multiplicar por cinco lo que se le
+ * factura a un anunciante, y la regla de la casa es que el error caiga siempre del
+ * lado de no cobrarle de más a nadie (ver `Anuncio.astro`).
+ *
+ * 🔴 La línea roja se respeta: el navegador avisa a NUESTRO servidor, y es este
+ * proceso el que habla con el CMS con `PUBLICIDAD_TOKEN`. El token no sale de aquí.
+ * Lo mismo que hace el GET de arriba para el clic.
+ *
+ * ⚠️ Es un aviso `sendBeacon`, así que llega sin cuerpo y sin cabeceras propias: lo
+ * único que viaja es el id en la ruta. Por eso la respuesta es 204 siempre que la
+ * petición esté bien formada — al navegador no le sirve saber más, y describirle al
+ * de fuera qué campañas existen sería regalar un mapa.
+ */
+export const POST: APIRoute = async ({ params, request, url }) => {
+  const id = Number(params.id);
+  if (!Number.isInteger(id) || id < 1) {
+    return new Response(null, { status: 400, headers: { 'cache-control': 'no-store' } });
+  }
+
+  /*
+    Tope de velocidad, no cerradura. `Sec-Fetch-Site` lo pone el NAVEGADOR y no se
+    puede falsificar desde una página, así que corta el caso realista —una pestaña
+    ajena martilleando el contador— sin estorbar a nadie: los navegadores que no lo
+    mandan (los viejos, y algún proxy) pasan igual. Contra un `curl` no sirve, y
+    tampoco pretende: eso es exactamente el mismo hueco que ya tiene el GET del clic,
+    y taparlo de verdad es firmar el id, no adivinar por cabeceras.
+  */
+  const origen = request.headers.get('sec-fetch-site');
+  if (origen && origen !== 'same-origin') {
+    return new Response(null, { status: 403, headers: { 'cache-control': 'no-store' } });
+  }
+
+  /*
+    🔴 En una beta NO se cuenta, igual que en el render de `Anuncio.astro`: las
+    impresiones de un despliegue de prueba se le facturarían a un anunciante real.
+  */
+  if (NOINDEX_SITIO || noIndexarHost(url.hostname)) {
+    return new Response(null, { status: 204, headers: { 'cache-control': 'no-store' } });
+  }
+
+  const banner = await obtenerBannerPorId(id);
+
+  /*
+    🔴 SOLO takeover, y la comprobación no es una formalidad: sin ella, un POST a un
+    banner de portada le sumaría una impresión que su propio render YA contó. El
+    contador quedaría al doble y nadie lo notaría hasta el reporte de fin de mes.
+
+    🔴 Y solo con creatividad PROPIA. En un takeover de Ad Manager el conteo que se
+    le factura al anunciante lo lleva Google; llamar al CMS ahí solo mete ruido en un
+    número que a propósito se queda en cero.
+  */
+  if (!banner || banner.tipo !== 'takeover' || banner.fuente === 'admanager') {
+    return new Response(null, { status: 204, headers: { 'cache-control': 'no-store' } });
+  }
+
+  // El id es único en todo el CMS, que sirve a cuatro marcas: la misma comprobación
+  // que el clic, y por lo mismo — que Beat no le sume impresiones a otra estación.
+  const estacion = typeof banner.estacion === 'object' ? banner.estacion?.id : banner.estacion;
+  if (estacion !== undefined && estacion !== (await idEstacion().catch(() => -1))) {
+    return new Response(null, { status: 204, headers: { 'cache-control': 'no-store' } });
+  }
+
+  /*
+    No se espera: el navegador ya se fue y la respuesta no depende del número. El
+    `.catch` no es decorativo — una promesa rechazada sin capturar es un
+    `unhandledRejection`, y en Node eso puede tumbar el proceso.
+  */
+  void registrarEvento(id, 'impresion').catch(() => {});
+
+  return new Response(null, { status: 204, headers: { 'cache-control': 'no-store' } });
 };

@@ -163,16 +163,15 @@ const foto = urlMedia(nota.imagen, variante === 'fila' ? 'card' : 'card');
   }
 
   /*
-    🔴 3:2 en TODAS las fotos del sitio (Carlos, 2026-09-07).
+    🔴 UNA proporción para todas las fotos del sitio, y hoy es 16:9.
 
-    Es la proporción nativa de casi cualquier cámara, así que una foto capturada tal
-    cual entra ENTERA en su caja: `object-fit: cover` no tiene nada que recortar.
-    Antes cada superficie tenía la suya —16/10 aquí, 16/7 en la nota, 4/3 en móvil—
-    y eso significaba que la misma foto se recortaba distinto en cada sitio donde
-    aparecía: en la tarjeta salía una cara y en la nota salía media.
+    El porqué del número —y el porqué de que sea la misma en todas partes— está
+    escrito una sola vez, junto al token, en `src/styles/beat.css`. Aquí no se pone
+    un literal: el día que vuelva a cambiar se cambia allá y se mueven las siete
+    superficies juntas.
   */
   .tarjeta-foto {
-    aspect-ratio: 3 / 2;
+    aspect-ratio: var(--proporcion-foto);
   }
 
   /* ── rejilla (14b: 3 col · 14e: 2 col) ── */

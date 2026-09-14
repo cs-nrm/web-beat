@@ -224,6 +224,43 @@
 }
 
 /* ============================================================
+   🔴 UNA SOLA PROPORCIÓN PARA TODAS LAS FOTOS DEL SITIO
+   ------------------------------------------------------------
+   Decisión de Carlos, 2026-09-07 (era 3:2) y 2026-09-14 (pasa a 16:9).
+
+   Lo que NO cambia es la regla: la misma foto tiene que recortarse IGUAL en todas
+   las superficies donde aparece. Antes de esa decisión cada una tenía la suya
+   —16/10 en la tarjeta, 16/7 en la nota, 4/3 en móvil, 4/3.4 en el mosaico— y la
+   misma imagen salía con una cara en la portada y con media en la nota. Peor: la
+   tarjeta y el hero comparten `transition:name`, así que el cambio de encuadre se
+   veía EN MOVIMIENTO al entrar a la nota.
+
+   Lo que cambia es el número, y lo cambia el CONTENIDO REAL, no el gusto. El 3:2
+   se eligió porque es lo que sale de una cámara, contando con que la redacción
+   subiría fotos de cámara. Con el sitio al aire y más volumen, lo que de verdad
+   está subiendo la gente es 16:9 — y una foto de 1.78 metida en una caja de 1.5
+   se recorta por los COSTADOS, que en una foto de grupo o de escenario es
+   exactamente donde está la mitad de la escena.
+
+   ✨ Un token y no siete literales. Los siete sitios que lo usan (tarjeta, mosaico,
+   índice y pila de Scanner, ediciones, hero de la nota, y el mosaico en móvil)
+   decían `aspect-ratio: 3 / 2` a mano con un comentario que remitía a
+   `TarjetaNota.astro`. Con el literal repetido, la próxima vez que esto cambie
+   alguien deja uno atrás y el sitio vuelve a recortar distinto según la página —
+   que es el fallo que esta regla existe para evitar.
+
+   ⚠️ El CMS **no recorta**: `thumbnail`/`card`/`large` son variantes de ANCHO y
+   todas conservan la proporción del original (ver `urlMedia` en
+   `src/lib/cms/client.ts`). El recorte lo hace el front con `object-fit: cover`,
+   así que lo que no encaje en esta caja se pierde por el centro. Para las fotos
+   que NO vengan en 16:9 el CMS ya guarda punto focal (`puntoFocal`, mismo
+   archivo), hoy usado solo en `/en-vivo`.
+   ============================================================ */
+:root {
+  --proporcion-foto: 16 / 9;
+}
+
+/* ============================================================
    Barra del player — tokens y controles
    ------------------------------------------------------------
    🔴 Estos tokens existen por una razón concreta, y vale dejarla escrita porque

@@ -248,8 +248,8 @@ const enLaPila = notas.slice(0, 4).map((n) => ({
 
   .pila-carta-foto {
     position: relative;
-    /* 3:2, como el resto del sitio. Ver `TarjetaNota.astro`. */
-    aspect-ratio: 3 / 2;
+    /* La proporción del sitio. El porqué, en `src/styles/beat.css`. */
+    aspect-ratio: var(--proporcion-foto);
     background: var(--grad-noche);
     border-radius: var(--r-media);
     overflow: hidden;

@@ -219,8 +219,8 @@ const nombreAqui = filtro ? filtro.nombre : (seccion?.rotulo ?? 'esta sección')
   }
   .sc-lead-foto {
     position: relative;
-    /* 3:2, como el resto del sitio. Ver `TarjetaNota.astro`. */
-    aspect-ratio: 3 / 2;
+    /* La proporción del sitio. El porqué, en `src/styles/beat.css`. */
+    aspect-ratio: var(--proporcion-foto);
     background: var(--grad-noche);
     overflow: hidden;
   }

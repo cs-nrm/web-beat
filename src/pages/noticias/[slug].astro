@@ -387,7 +387,7 @@ const etiquetas = (nota.etiquetas ?? []).filter(
       </div>
     </div>
 
-    {/* ── Foto principal, 16:7 a lo ancho ── */}
+    {/* ── Foto principal, a lo ancho ── */}
     {
       hero && (
         <figure class="nt-hero-caja">
@@ -614,12 +614,15 @@ const etiquetas = (nota.etiquetas ?? []).filter(
   .nt-hero {
     position: relative;
     /*
-      🔴 3:2, y era `16 / 7` (Carlos, 2026-09-07). Una caja de 2.29 sobre una foto
-      de 1.5 se come un tercio del alto: en los retratos de artista que publica la
-      estación, eso es cortar la cabeza o los pies. 3:2 es lo que sale de la cámara,
-      así que la foto entra entera y `cover` no recorta nada.
+      🔴 La proporción del sitio, y es la MISMA que la de la tarjeta a propósito:
+      esta foto y la de la tarjeta comparten `transition:name`, así que dos cajas
+      distintas se verían cambiar de encuadre durante la transición. El porqué del
+      número está en `src/styles/beat.css`.
+
+      Pasó por `16 / 7` y por `3 / 2` antes de esto. El 16:7 sobraba: una caja de
+      2.29 sobre una foto de 1.5 se comía un tercio del alto y cortaba cabezas.
     */
-    aspect-ratio: 3 / 2;
+    aspect-ratio: var(--proporcion-foto);
     background: var(--grad-noche);
     overflow: hidden;
     /* Flota sobre el fondo, así que lleva radio de media. Ver movimiento.md §6. */

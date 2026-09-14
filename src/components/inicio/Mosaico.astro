@@ -2,9 +2,9 @@
 /**
  * El mosaico de portada — `300px | 1fr | 300px` en 13a.
  *
- * La columna del centro es el retrato principal en 3:2, con las tres estelas del
- * DS encima; a los lados dos notas por columna, que se estiran al alto de la
- * columna. En móvil (14a) se convierte en portada a lo ancho + rejilla de 2, que es
+ * La columna del centro es el retrato principal en la proporción del sitio, con las
+ * tres estelas del DS encima; a los lados dos notas por columna, que se estiran al
+ * alto de la columna. En móvil (14a) se convierte en portada a lo ancho + rejilla de 2, que es
  * lo que ya hace `TarjetaNota`.
  *
  * 🔴 Igual que en Scanner: el `gap: 2px` con el fondo en `--border-hairline` es la
@@ -155,12 +155,19 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
   .mosaico-foto {
     position: relative;
     /*
-      3:2, como el resto del sitio (ver `TarjetaNota.astro`). Era `4 / 3.4`, más
-      alta que ancha, para que la columna del centro pesara más que las de los
+      La proporción del sitio (el porqué, en `src/styles/beat.css`). Era `4 / 3.4`,
+      más alta que ancha, para que la columna del centro pesara más que las de los
       lados. Ese peso ahora lo da el ANCHO de la columna, que no cambió: la portada
       sigue siendo la pieza grande, pero deja de recortar la foto por los costados.
+
+      ⚠️ Esta foto MANDA sobre el alto de la fila entera: las columnas laterales se
+      estiran a la más alta y sus tarjetas absorben la diferencia (`flex: 1` sobre
+      `.tarjeta-foto`, más abajo). Al pasar de 3:2 a 16:9 la columna del centro
+      baja, así que las fotos laterales bajan con ella. Medido en el build servido a
+      900 / 1280 / 1920 antes de dar esto por bueno — el piso de 120px de las
+      laterales no se toca en ninguno de los tres.
     */
-    aspect-ratio: 3 / 2;
+    aspect-ratio: var(--proporcion-foto);
     background: var(--grad-noche);
     overflow: hidden;
   }
@@ -267,7 +274,7 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
       padding-bottom: 20px;
     }
     .mosaico-foto {
-      aspect-ratio: 3 / 2;
+      aspect-ratio: var(--proporcion-foto);
     }
     .mosaico-meta {
       padding: 16px 16px 0;

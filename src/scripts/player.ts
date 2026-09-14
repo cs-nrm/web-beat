@@ -13,16 +13,39 @@
  * módulo con dependencias explícitas.
  */
 import { eventoTriton } from './analitica';
-import { FUENTES, reclamarAudio, registrarAudio } from './audio';
+import { duenoAudio, FUENTES, reclamarAudio, registrarAudio } from './audio';
 
-/** Los 6 códigos que emite `stream-status`. */
+/**
+ * Los códigos que emite `stream-status`.
+ *
+ * ⚠️ Aquí decía «los 6 códigos» y eran menos de los que llegan: faltaban los tres
+ * de abajo, que caían todos en el `else` final de `alCambiarEstado` y pintaban
+ * 'pausa'. O sea que un corte de red se veía EXACTAMENTE igual que una pausa
+ * pedida por el oyente, y de ahí venía el «se cae y no vuelve»: la barra enseñaba
+ * un botón de play, el oyente creía que lo había pulsado él, y nadie reconectaba.
+ *
+ * ✅ Verificado el 2026-09-12 de dos formas independientes: leyendo el `statusMap`
+ * del bundle 2.9 (`error→LIVE_FAILED`, `reconnecting→LIVE_RECONNECTING`,
+ * `playbackNotAllowed→PLAY_NOT_ALLOWED`) y provocando los tres casos contra la
+ * señal real, anotando el evento crudo:
+ *
+ *   pausa del oyente  → LIVE_STOP   `{status:'Disconnected', isReconnect:false}`
+ *   pausa externa     → LIVE_PAUSE  `{status:'Paused'}`
+ *   mount inalcanzable→ LIVE_FAILED `{status:'Stream unavailable'}`
+ */
 type EstadoTriton =
   | 'GETTING_STATION_INFORMATION'
   | 'LIVE_CONNECTING'
   | 'LIVE_BUFFERING'
   | 'LIVE_PLAYING'
   | 'LIVE_PAUSE'
-  | 'LIVE_STOP';
+  | 'LIVE_STOP'
+  /** La señal se cayó o el mount no se alcanza. Es el que dispara la reconexión. */
+  | 'LIVE_FAILED'
+  /** Lo manda el SDK cuando reconecta ÉL: se le da gracia en vez de encimarle un play. */
+  | 'LIVE_RECONNECTING'
+  /** WebKit rechazó el `play()` por no venir de un gesto. Contra esto no se insiste. */
+  | 'PLAY_NOT_ALLOWED';
 
 /** Lo que el DOM expone en `#player[data-status]`. Lo consume el CSS. */
 type EstadoUI = 'init' | 'cargando' | 'sonando' | 'pausa' | 'anuncio';
@@ -195,6 +218,65 @@ function cancelarTopePreroll(): void {
   topePreroll = null;
 }
 
+/* ───────── Reconexión: un corte que el front no pidió se reintenta ─────────
+ *
+ * 🔴 El fallo que esto arregla, medido el 2026-09-12 contra producción: cuando la
+ * señal se caía, `alCambiarEstado` pintaba 'pausa' y NADIE reintentaba. El oyente
+ * se quedaba con un botón de play que él no había pulsado, y tenía que darse
+ * cuenta y volver a tocarlo. En una red móvil que parpadea, eso se vive como «el
+ * streaming se cae cada cinco minutos», que es exactamente lo que reportaron.
+ *
+ * ⚠️ Y el peor resultado posible de arreglarlo sería reencender la radio encima
+ * de alguien que acaba de pulsar pausa, o encima del video que acaba de abrir. De
+ * ahí las dos guardas: la marca de parada propia y la pregunta por el dueño del
+ * canal. Ninguna reconexión ocurre sin las dos.
+ */
+
+/**
+ * Ventana en la que un corte se atribuye a un `stop()` NUESTRO.
+ *
+ * 🔴 Es un RELOJ y no una bandera a propósito. Una bandera que se pone antes del
+ * `stop()` y se consume en el manejador se queda echada para siempre si ese
+ * `stop()` no llega a emitir nada —y no siempre emite: el evento sale del `pause`
+ * del elemento, así que si ya estaba parado no hay evento—, y entonces se tragaría
+ * el siguiente corte de VERDAD. Una marca temporal caduca sola. Es la forma de
+ * estado muerto sin salida que `movimiento.md` §3 prohíbe.
+ *
+ * ✅ 2000 ms es holgado: medido, el LIVE_STOP de nuestro propio `stop()` llega en
+ * ~30 ms desde el clic.
+ */
+const MS_PARADA_PROPIA = 2000;
+
+/** Espera antes de cada intento. Tabla y no fórmula: se lee de un vistazo. */
+const ESPERAS_RECONEXION = [2000, 6000, 15000] as const;
+
+/** Lo que se le da a CADA intento para que entre la señal. */
+const MS_PLAZO_INTENTO = 8000;
+
+/** Gracia cuando es el SDK el que avisa que está reconectando él. */
+const MS_GRACIA_SDK = 10000;
+
+/**
+ * 🔴 Techo ABSOLUTO del episodio. Se arma una vez y no lo cancela nadie más que
+ * `cerrarEpisodio()`: pase lo que pase, a los 60 s esto acaba en una barra con el
+ * nombre de la estación y un botón de play. Es lo que hace imposible el cuelgue.
+ *
+ * ⚠️ Las esperas son 2/6/15 y no 2/5/10 para que el peor caso quepa debajo:
+ * (2+8) + (6+8) + (15+8) = 47 s.
+ */
+const MS_PRESUPUESTO = 60000;
+
+/** Señal continua que hay que oír para que se renueve el crédito de intentos. */
+const MS_SANO = 30000;
+
+let paradaPedidaEn = 0;
+let reconectando = false;
+let intentos = 0;
+let relojPaso: number | null = null;
+let topeEpisodio: number | null = null;
+let sonandoDesde = 0;
+let textoEspera = 'Conectando…';
+
 const el = <T extends HTMLElement>(sel: string): T | null =>
   document.querySelector<T>(sel);
 
@@ -212,6 +294,38 @@ const el = <T extends HTMLElement>(sel: string): T | null =>
  */
 function mandaLaPista(): boolean {
   return contenedor()?.dataset.modo === 'pista';
+}
+
+/**
+ * 🔴 Se llama JUSTO ANTES de cada `sdk.stop()` del front. Son tres, y solo tres:
+ * `fallo()`, la devolución del árbitro y la rama de parar del botón.
+ *
+ * Se marca ANTES y no después porque el orden de despacho del SDK no está
+ * garantizado: el botón hace `stop()` y DESPUÉS `pintarEstado('init')`, así que
+ * leer `data-status` dentro del manejador podría leer todavía 'sonando' en una
+ * pausa deliberada. Marcando antes, la pregunta deja de importar.
+ */
+function pedirParada(): void {
+  paradaPedidaEn = Date.now();
+}
+
+function paradaEsNuestra(): boolean {
+  return Date.now() - paradaPedidaEn < MS_PARADA_PROPIA;
+}
+
+/**
+ * ¿Sigue siendo del oyente la intención de oír el DIRECTO?
+ *
+ * 🔴 Las dos mitades hacen falta. `mandaLaPista()` cubre Bonus Beat, que comparte
+ * el nodo del botón y se ve en `data-modo`; el dueño del canal cubre lo que la
+ * barra NO ve —un video de una nota, una cápsula—, porque `data-modo` solo
+ * distingue 'directo' de 'pista'.
+ *
+ * ⚠️ Y no se lee `data-status` para esto: `pista.ts` lo escribe a mano sin pasar
+ * por `pintarEstado`, así que el DOM no es fuente de verdad para el dueño.
+ */
+function laSenalSigueSiendoSuya(): boolean {
+  return !mandaLaPista() && duenoAudio() === FUENTES.radio;
 }
 
 /**
@@ -303,6 +417,9 @@ function fallo(mensaje: string): void {
   if (topeConexion !== null) window.clearTimeout(topeConexion);
   topeConexion = null;
   try {
+    // 🔴 Marcado: sin esto, el LIVE_STOP de este `stop()` abriría otro episodio
+    // de reconexión, y `rendirse()` —que termina aquí— se realimentaría sin fin.
+    pedirParada();
     sdk?.stop();
   } catch {
     /* si el SDK ya no responde, igual hay que devolver la UI a su sitio */
@@ -325,16 +442,26 @@ function pintarEstado(estado: EstadoUI): void {
   }
   if (estado === 'cargando') {
     /*
-      Dos topes distintos porque son dos fallos distintos. Con gesto, lo que puede
-      fallar es la conexión, y se dice. Sin gesto, lo más probable es que WebKit
-      haya ignorado el `play()`, y entonces el único remedio es otro toque — que
-      además ya funciona, porque a estas alturas el SDK está construido.
+      🔴 Durante un episodio de reconexión este tope NO se arma: el plazo lo pone
+      la escalera y el techo lo pone `topeEpisodio`. Armarlo aquí sería poner DOS
+      vigilantes sobre la misma espera, y el de 8/20 s llamaría a `fallo()` —que
+      hace `sdk.stop()`— en mitad de un intento sano, matando el ciclo en el primer
+      escalón. Fuera del episodio esto se comporta exactamente igual que antes: el
+      primer play no cambia en nada.
     */
-    const sinGesto = arranqueSinGesto;
-    topeConexion = window.setTimeout(
-      () => fallo(sinGesto ? 'Toca otra vez' : 'No se pudo conectar'),
-      sinGesto ? MS_TOPE_SIN_GESTO : MS_TOPE_CONEXION,
-    );
+    if (!reconectando) {
+      /*
+        Dos topes distintos porque son dos fallos distintos. Con gesto, lo que puede
+        fallar es la conexión, y se dice. Sin gesto, lo más probable es que WebKit
+        haya ignorado el `play()`, y entonces el único remedio es otro toque — que
+        además ya funciona, porque a estas alturas el SDK está construido.
+      */
+      const sinGesto = arranqueSinGesto;
+      topeConexion = window.setTimeout(
+        () => fallo(sinGesto ? 'Toca otra vez' : 'No se pudo conectar'),
+        sinGesto ? MS_TOPE_SIN_GESTO : MS_TOPE_CONEXION,
+      );
+    }
   } else {
     arranqueSinGesto = false;
     /*
@@ -390,7 +517,9 @@ function pintarEstado(estado: EstadoUI): void {
   }
 
   // El texto acompaña, porque el spinner solo no dice QUÉ está pasando.
-  if (estado === 'cargando') pintarSonando('Conectando…');
+  // ⚠️ Durante un episodio dice «Reconectando…», que es lo honesto: el oyente no
+  // está conectando por primera vez, se le cortó algo que ya estaba sonando.
+  if (estado === 'cargando') pintarSonando(textoEspera);
   else if (estado === 'sonando' || estado === 'init') restaurarSonando();
 }
 
@@ -523,6 +652,109 @@ function pintarHora(valor: string | null): void {
   campo.textContent = valor ?? '';
 }
 
+/** Un solo temporizador de paso vivo a la vez: cancelar antes de armar. */
+function armarPaso(fn: () => void, ms: number): void {
+  if (relojPaso !== null) window.clearTimeout(relojPaso);
+  relojPaso = window.setTimeout(fn, ms);
+}
+
+function cerrarEpisodio(): void {
+  if (relojPaso !== null) window.clearTimeout(relojPaso);
+  relojPaso = null;
+  if (topeEpisodio !== null) window.clearTimeout(topeEpisodio);
+  topeEpisodio = null;
+  reconectando = false;
+  // Si no se restaura, el siguiente arranque en frío diría «Reconectando…».
+  textoEspera = 'Conectando…';
+  /* ⚠️ `intentos` NO se toca aquí: el crédito solo se renueva con señal sana o
+     con el dedo del oyente. Si se reiniciara al volver la señal, una red que
+     parpadea cada 20 s reintentaría para siempre. */
+}
+
+function abrirEpisodio(motivo: string): void {
+  if (reconectando) return;
+  if (!laSenalSigueSiendoSuya()) {
+    traza(`${motivo}, pero el canal ya no es del radio — no se reconecta`);
+    pintarEstado('init');
+    return;
+  }
+  reconectando = true;
+  if (sonandoDesde !== 0 && Date.now() - sonandoDesde >= MS_SANO) intentos = 0;
+  sonandoDesde = 0;
+  /* ⚠️ El rescate del pre-roll no puede competir con la escalera: si el corte
+     pilla el VAST en marcha, su tope llamaría a `reproducir()` por su cuenta y
+     habría dos intentos sobre la misma conexión. */
+  cancelarTopePreroll();
+  textoEspera = 'Reconectando…';
+  /* 🔴 Deja de anunciar una canción que ya no suena. Es la regla de «al PARAR se
+     deja de anunciar», que hasta ahora NO se cumplía tras un corte porque está
+     atada a 'init' y el corte pintaba 'pausa'. */
+  volverALaFrecuencia();
+  pintarEstado('cargando');
+  /* 🔴 El techo ABSOLUTO. Sustituye al tope de conexión —que durante el episodio
+     no se arma— y es lo que hace imposible el estado muerto sin salida. */
+  topeEpisodio = window.setTimeout(() => rendirse(), MS_PRESUPUESTO);
+  traza(`${motivo} → episodio de reconexión (intentos ya gastados: ${intentos})`);
+  programarIntento();
+}
+
+function programarIntento(): void {
+  if (!reconectando) return;
+  const espera = ESPERAS_RECONEXION[intentos];
+  if (espera === undefined) {
+    rendirse();
+    return;
+  }
+  armarPaso(intentar, espera);
+}
+
+function intentar(): void {
+  relojPaso = null;
+  if (!reconectando) return;
+  if (!laSenalSigueSiendoSuya()) {
+    abandonar('otra fuente tiene el canal');
+    return;
+  }
+  if (!sdk || !listo) {
+    abandonar('el SDK ya no responde');
+    return;
+  }
+  intentos += 1;
+  traza(`reconexión: intento ${intentos}/${ESPERAS_RECONEXION.length}`);
+  pintarEstado('cargando');
+  /* 🔴 `reproducir()` y NUNCA `arrancar()`: `arrancar()` es el camino del pre-roll
+     VAST, y metería una petición a GAM —y su tope— tras cada microcorte. */
+  reproducir();
+  /* El plazo del intento es el mismo temporizador de paso: si la señal no entra,
+     se pasa al escalón siguiente. */
+  armarPaso(programarIntento, MS_PLAZO_INTENTO);
+}
+
+/** El SDK dice que reconecta él: se le deja trabajar sin encimarle un `play()`. */
+function posponerPaso(ms: number): void {
+  if (reconectando) armarPaso(programarIntento, ms);
+}
+
+function abandonar(razon: string): void {
+  traza(`reconexión abandonada: ${razon}`);
+  cerrarEpisodio();
+  pintarEstado('init');
+}
+
+function rendirse(): void {
+  /* ⚠️ `navigator.onLine` solo se cree en NEGATIVO: un `true` no promete internet,
+     pero un `false` sí promete que no lo hay. */
+  const texto = navigator.onLine ? 'Se cortó · toca para volver' : 'Sin conexión';
+  traza(`reconexión agotada tras ${intentos} intento(s) → «${texto}»`);
+  cerrarEpisodio();
+  /* `fallo()` ya es el desenlace escrito de la casa: apaga el SDK, pinta 'init',
+     enseña el mensaje y lo retira a los 4 s. Su `stop()` va marcado, así que no
+     puede realimentar otro episodio.
+     ⚠️ El mensaje NO es «No se pudo conectar»: ese es el diagnóstico de un primer
+     play fallido, no el de alguien que ESTABA escuchando y se quedó sin señal. */
+  fallo(texto);
+}
+
 function alCambiarEstado(e: { data?: { code?: string } }): void {
   const estado = e.data?.code as EstadoTriton | undefined;
   traza('stream-status →', estado ?? '(sin código)', e);
@@ -541,17 +773,90 @@ function alCambiarEstado(e: { data?: { code?: string } }): void {
   }
   estadoPrevio = estado;
 
+  if (estado === 'LIVE_PLAYING') {
+    sonandoDesde = Date.now();
+    if (reconectando) traza('reconexión: la señal volvió');
+    cerrarEpisodio();
+    pintarEstado('sonando');
+    return;
+  }
+
+  if (estado === 'PLAY_NOT_ALLOWED') {
+    /* 🔴 WebKit rechazó el `play()` por no salir de un gesto. Contra eso no se
+       insiste: gastar la escalera entera sería silencio para el oyente, y el
+       remedio real es otro toque — que funciona siempre, porque a estas alturas
+       el SDK ya está construido. Es el mismo diagnóstico de iOS que ya está
+       escrito arriba, pero ahora con la señal explícita del SDK en vez de
+       inferido de un tope que vence. */
+    cerrarEpisodio();
+    fallo('Toca otra vez');
+    return;
+  }
+
+  if (estado === 'LIVE_RECONNECTING') {
+    /* ⚠️ Reconecta el SDK, no nosotros. Un `play()` nuestro encima podría abrir
+       una segunda conexión al mount, así que se le da gracia; el presupuesto del
+       episodio sigue corriendo igual, o sea que su lentitud no nos cuelga. */
+    if (!reconectando) abrirEpisodio('el SDK avisa que está reconectando');
+    posponerPaso(MS_GRACIA_SDK);
+    pintarEstado('cargando');
+    return;
+  }
+
+  if (estado === 'LIVE_PAUSE') {
+    /* ⚠️ Se marca como parada propia. Nadie en este front llama a `pause()`: este
+       código solo puede venir de FUERA —los mandos del sistema, los auriculares,
+       una llamada entrante—, y reconectar encima de una llamada entrante sería el
+       peor resultado posible. Medido el 2026-09-12: pausar el elemento por fuera
+       emite LIVE_PAUSE con `{status:'Paused'}`. */
+    pedirParada();
+    pintarEstado('pausa');
+    return;
+  }
+
+  if (estado === 'LIVE_STOP' || estado === 'LIVE_FAILED') {
+    if (paradaEsNuestra()) {
+      traza('parada propia (botón, árbitro o fallo) — no se reconecta');
+      pintarEstado('pausa');
+      return;
+    }
+    if (reconectando) {
+      /* ⚠️ Dentro de un episodio, un corte más NO es un episodio nuevo. Sin esto,
+         una red que parpadea reiniciaría la escalera en cada rebote y nunca
+         llegaría al final. */
+      traza('otro corte dentro del episodio — la escalera sigue, no se reinicia');
+      /* ⚠️ Y se REPINTA 'cargando'. Medido con el mount inalcanzable: el intento
+         fallido dejaba la barra en 'pausa' mientras la escalera seguía corriendo,
+         o sea un botón de play con el texto «Reconectando…» al lado. Mientras algo
+         siga intentándose, el oyente tiene que ver que se está intentando. */
+      pintarEstado('cargando');
+      return;
+    }
+    /* ⚠️ Aquí NO se le da gracia al SDK, y es deliberado. El bundle tiene su
+       propio `__reconnect`, así que la tentación es esperarlo antes del primer
+       intento; pero medido el 2026-09-12 con el mount inalcanzable, tras
+       LIVE_FAILED el SDK se quedó quieto 15 s sin emitir LIVE_RECONNECTING ni
+       recuperarse. Esperarlo sería silencio regalado al oyente en cada corte.
+       Cuando el SDK sí trabaja, lo DICE —y ese caso se atiende arriba, en
+       LIVE_RECONNECTING—. Si una medición con red real desmiente esto, la vuelta
+       atrás es una línea: `posponerPaso(MS_GRACIA_SDK)` justo aquí. */
+    abrirEpisodio(estado === 'LIVE_FAILED' ? 'LIVE_FAILED' : 'LIVE_STOP sin parada pedida');
+    return;
+  }
+
   if (
     estado === 'GETTING_STATION_INFORMATION' ||
     estado === 'LIVE_CONNECTING' ||
     estado === 'LIVE_BUFFERING'
   ) {
     pintarEstado('cargando');
-  } else if (estado === 'LIVE_PLAYING') {
-    pintarEstado('sonando');
-  } else {
-    pintarEstado('pausa');
+    return;
   }
+
+  /* Cualquier código que no conozcamos: como hasta ahora, reposo — salvo dentro de
+     un episodio, donde la barra debe seguir diciendo que se está intentando. Un
+     código desconocido no es motivo para dejar de mostrar el intento en marcha. */
+  pintarEstado(reconectando ? 'cargando' : 'pausa');
 }
 
 /** Arranca la señal. `station` sale del CMS (`estaciones.tritonMount`). */
@@ -835,8 +1140,24 @@ export function prepararPlayer(): void {
    * implícita, y esas son las que muerden cuando alguien agregue una fuente nueva.
    */
   registrarAudio(FUENTES.radio, () => {
+    /* ⚠️ FUERA del `if`, y esa es la gracia. Tras un corte el estado es 'cargando'
+       o 'pausa', así que la condición de abajo puede no entrar — pero el canal YA
+       no es mío. Sin esta línea, el intento programado saltaría segundos después,
+       `reproducir()` reclamaría el canal y el video que el oyente acaba de poner
+       se pausaría solo, sin que él hubiera tocado nada. «El canal ya no es mío»
+       vale aunque yo no esté sonando. */
+    /* 🔴 El estado se lee ANTES de abandonar, y el `stop()` es incondicional si
+       había episodio. Medido el 2026-09-12, con la prueba del robo de canal: un
+       intento ya había llamado a `reproducir()`, o sea que había un `play()` EN
+       VUELO; `abandonar()` pintaba 'init', y entonces la condición de abajo ya no
+       entraba y nadie paraba el SDK. Resultado: el radio volvía a sonar ENCIMA del
+       video que el oyente acababa de poner. Cancelar el episodio no basta — hay
+       que parar lo que ya salió. */
     const estado = contenedor()?.dataset.status;
-    if (estado === 'sonando' || estado === 'cargando') {
+    const habiaIntencion = reconectando || estado === 'sonando' || estado === 'cargando';
+    if (reconectando) abandonar('otra fuente reclamó el canal');
+    if (habiaIntencion) {
+      pedirParada();
       sdk?.stop();
       pintarEstado('init');
     }
@@ -1017,6 +1338,22 @@ export function iniciarPlayer(): void {
   }
 
   sdk.addEventListener('stream-status', alCambiarEstado);
+
+  /* 🔴 Único listener de ventana que añade la reconexión, y va AQUÍ porque
+     `iniciarPlayer()` está guardada por `if (iniciado) return` y corre una sola
+     vez por documento. NO en `prepararPlayer()`, cuya guarda `data-cableado` es un
+     `return` temprano; y NO colgado de `astro:page-load`, que lo multiplicaría por
+     página visitada.
+
+     Sin esto, un intento puede resolver mientras la pestaña se vacía y dejar audio
+     sonando sobre una página que el oyente ya abandonó; y al volver del bfcache la
+     barra se encontraría el anillo girando sin ningún temporizador vivo detrás.
+     ⚠️ `abandonar()` y no `cerrarEpisodio()` a secas: cerrar sin pintar dejaría
+     `data-status='cargando'` congelado, que es el estado muerto sin salida que
+     esta guarda existe justamente para evitar. */
+  window.addEventListener('pagehide', () => {
+    if (reconectando) abandonar('la página se va');
+  });
 
   /**
    * ───────── Metadata en banda (cue points de Triton) ─────────
@@ -1361,9 +1698,22 @@ export function iniciarPlayer(): void {
     marcarOyente();
     const estado = contenedor()?.dataset.status;
     if (estado === 'sonando' || estado === 'cargando' || estado === 'anuncio') {
+      /* 🔴 El oyente debe poder cancelar en cualquier momento, incluida una
+         reconexión en marcha. Durante el episodio el estado es 'cargando', así que
+         el clic cae aquí; y el botón sigue pulsable porque `pintarEstado` usa
+         `aria-busy` y no `disabled`. */
+      if (reconectando) {
+        traza('el oyente cancela la reconexión');
+        cerrarEpisodio();
+      }
+      pedirParada();
       sdk?.stop();
       pintarEstado('init');
     } else {
+      /* 🔴 El dedo siempre renueva el crédito: si el oyente vuelve a pedir la
+         señal, empieza de cero por muchos intentos que se hubieran gastado. */
+      cerrarEpisodio();
+      intentos = 0;
       // Respuesta inmediata al clic: Triton tarda en emitir su primer estado.
       reclamarAudio(FUENTES.radio);
       const p3 = contenedor();

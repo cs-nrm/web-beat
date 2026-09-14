@@ -20,6 +20,8 @@ type Pausar = () => void;
 
 interface VentanaConAudio {
   __beatAudio?: Map<string, Pausar>;
+  /** Quién reclamó el canal el último. Ver `duenoAudio()`. */
+  __beatAudioDueno?: string;
 }
 
 function registro(): Map<string, Pausar> {
@@ -51,6 +53,7 @@ export function olvidarAudio(id: string): void {
  * impedir que las demás se paren.
  */
 export function reclamarAudio(id: string): void {
+  (window as unknown as VentanaConAudio).__beatAudioDueno = id;
   registro().forEach((pausar, otra) => {
     if (otra === id) return;
     try {
@@ -59,6 +62,24 @@ export function reclamarAudio(id: string): void {
       /* una fuente que falla no debe frenar a las demás */
     }
   });
+}
+
+/**
+ * Quién tiene el canal ahora mismo.
+ *
+ * 🔴 Hasta hoy `reclamarAudio` era una difusión de pausas SIN dueño: se podía
+ * decir «ahora sueno yo», pero no había a quién preguntarle «¿sigue siendo mío?».
+ * El player del radio necesita esa pregunta antes de cada intento de reconexión:
+ * si mientras estaba caído el oyente puso un video o una pista, reconectar le
+ * robaría el canal a algo que él acaba de elegir, y volveríamos a tener dos
+ * audios a la vez — el bug que este archivo existe para impedir.
+ *
+ * ⚠️ Se compara siempre contra `FUENTES.radio` y nunca al revés: `FUENTES.video`
+ * NO es una clave real del registro, porque el visor se registra como
+ * `video-nota:<id>` (ver `video.ts`).
+ */
+export function duenoAudio(): string | undefined {
+  return (window as unknown as VentanaConAudio).__beatAudioDueno;
 }
 
 /** Ids conocidos, para que no se escriban a mano en cada sitio. */

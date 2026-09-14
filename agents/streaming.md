@@ -178,9 +178,70 @@ Y dos que parecen paranoia y no lo son:
 - ⚠️ **`audioAdaptive` solo cuenta dentro del módulo MediaPlayer.** El de nivel raíz es
   decorativo —no está en la config que el SDK lee— y se conserva porque los cuatro
   repos hermanos lo tienen y quitarlo invita a que alguien «arregle» el de arriba por
-  simetría. Hoy el del módulo está en `false`, o sea que Beat opta por el mount fijo
-  (MP3 48 kbps por HTTP progresivo, sin escalón al que caer). **Es sospechoso de ser
-  la causa de los cortes que reportan los oyentes**, y sigue abierto.
+  simetría. Hoy el del módulo está en `false`.
+
+- 🔴 **El mount que suena NO es el del CMS.** `estaciones.tritonMount` vale `XHSONFM`
+  (MP3) y eso baja por `data-mount`, pero el SDK pide la config con
+  `transports=http,hls` y acaba reproduciendo **`XHSONFMAAC.aac`, HE-AAC v2 a
+  48 kbps**. Verificado el 2026-09-12 leyendo `currentSrc` del elemento que el SDK
+  crea en producción. ⚠️ Quien diagnostique leyendo el CMS medirá el mount
+  equivocado — ya pasó al montar el monitor de esa fecha.
+
+- ✅ **`audioAdaptive: true` NO es el arreglo de los cortes. Esa sospecha está
+  cerrada** (2026-09-12). Aquí decía que el mount fijo dejaba al oyente «sin escalón
+  al que caer» y que era sospechoso de causar los cortes. Medido contra la API de
+  Triton, los tres mountpoints provisionados son:
+
+  | Mount | Códec | Escalones | El más bajo |
+  |---|---|---|---|
+  | `XHSONFMAAC` ← el que suena | HE-AAC v2 | ninguno | 48 kbps |
+  | `XHSONFM` (el del CMS) | MP3 | ninguno | 48 kbps |
+  | `XHSONFM_ADP` | AAC-LC / HE-AAC | 256 / 128 / 64 | **64 kbps** |
+
+  El peor escalón del adaptativo pide **más** que los 48 fijos de hoy, y encenderlo
+  haría arrancar el player en 256 kbps. Da mejor calidad en redes buenas; para datos
+  móviles en México es peor, no mejor. **La causa de los cortes era otra**, y está
+  abajo.
+
+- 🔴 **Un corte que el front NO pidió se reintenta; uno que pidió el front, no.**
+  Es la regla que cierra el fallo medido el 2026-09-12: `alCambiarEstado` conocía
+  seis códigos y llegan nueve, así que **`LIVE_FAILED` —la caída de red— caía en el
+  `else` final y pintaba `'pausa'`, idéntico a una pausa deliberada.** El oyente se
+  quedaba con un botón de play que no había pulsado, creyendo que lo paró él. En una
+  red móvil que parpadea, eso es el «se cae cada cinco minutos» que reportaron.
+
+  Los tres códigos que faltaban, verificados en el `statusMap` del bundle 2.9 **y**
+  provocando cada caso contra la señal real:
+
+  | Causa | Código | `status` | ¿Reconecta? |
+  |---|---|---|---|
+  | El oyente pulsa pausa | `LIVE_STOP` | `Disconnected` | **no** |
+  | Algo detiene el audio por fuera | `LIVE_PAUSE` | `Paused` | **no** |
+  | La señal se cae | **`LIVE_FAILED`** | `Stream unavailable` | **sí** |
+  | El SDK reconecta él | `LIVE_RECONNECTING` | — | se le da gracia |
+  | WebKit rechazó el `play()` | `PLAY_NOT_ALLOWED` | — | pide otro toque |
+
+  ⚠️ **La parada propia se marca, no se deduce.** Hay TRES `sdk.stop()` en el front
+  —`fallo()`, la devolución del árbitro y la rama de parar del botón— y los tres
+  llaman a `pedirParada()` justo antes. Se marca ANTES porque el botón hace `stop()`
+  y *después* `pintarEstado`, así que leer el DOM dentro del manejador leería un
+  estado viejo. Y es un RELOJ de 2 s, no una bandera: una bandera que no se consume
+  —el `stop()` no siempre emite evento— se tragaría el siguiente corte de verdad.
+
+  🔴 **Ninguna reconexión ocurre sin preguntar por el DUEÑO del canal**
+  (`duenoAudio()` en `src/scripts/audio.ts`). Si mientras el radio estaba caído el
+  oyente puso un video o una pista, reconectar le robaría el canal a algo que él
+  acaba de elegir: dos audios a la vez, que es el peor bug de audio posible.
+
+  ⚠️ **El SDK no siempre se recupera solo.** Tiene su propio `__reconnect`, pero
+  medido con el mount inalcanzable se quedó quieto 15 s sin emitir nada. Por eso la
+  gracia se le da **solo** cuando manda `LIVE_RECONNECTING`, no a ciegas tras un
+  `LIVE_FAILED`.
+
+  ⚠️ **Esto NO se puede medir con reproducciones de GA4.** Cada reconexión con éxito
+  emite un `stop` y luego un `play` (no un `resume`), porque `estadoPrevio` queda en
+  `LIVE_STOP`. Mentirle a la analítica para que saliera `resume` escondería justo el
+  evento con el que se querría medir el arreglo.
 
 ---
 

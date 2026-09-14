@@ -78,8 +78,22 @@ interface:
     - los eventos que emites con `eventoTriton()` HOY no llegan a ninguna parte: no
       hay contenedor de medición cargado en v2. Es de `agents/analytics.md`
     - `audioAdaptive` solo cuenta dentro del módulo MediaPlayer; el de nivel raíz es
-      decorativo. Hoy está en `false`, o sea mount fijo sin escalón al que caer, y
-      es sospechoso de causar los cortes que reportan los oyentes
+      decorativo. Hoy está en `false`. NO lo enciendas «para arreglar los cortes»:
+      esa sospecha se cerró el 2026-09-12. Los escalones del mount adaptativo
+      (`XHSONFM_ADP`) son 256/128/64 kbps y el más bajo pide MÁS que los 48 fijos
+      de hoy: mejor calidad en redes buenas, peor en datos móviles
+    - el mount que SUENA no es el del CMS: `tritonMount` vale `XHSONFM` (MP3) pero
+      el SDK acaba reproduciendo `XHSONFMAAC.aac` (HE-AAC v2, 48 kbps). Quien
+      diagnostique leyendo el CMS medirá el mount equivocado
+    - un corte que el front NO pidió se reintenta; uno que pidió el front, no.
+      Llegan NUEVE códigos de `stream-status`, no seis: `LIVE_FAILED` (la caída de
+      red), `LIVE_RECONNECTING` y `PLAY_NOT_ALLOWED` caían en el `else` y pintaban
+      'pausa', idéntico a una pausa deliberada — de ahí el «se cae y no vuelve»
+    - la parada propia se MARCA (`pedirParada()` antes de cada uno de los tres
+      `sdk.stop()`), no se deduce del DOM; y es un reloj de 2 s, no una bandera,
+      porque una bandera que no se consume se traga el siguiente corte de verdad
+    - ninguna reconexión ocurre sin preguntar por `duenoAudio()`: si el oyente puso
+      un video mientras el radio estaba caído, reconectar le robaría el canal
     - `/en-vivo` es mínima A PROPÓSITO: su pantalla no está en el lienzo v14 y sus
       colecciones están vacías. Inventarle un diseño es decisión de Carlos
 

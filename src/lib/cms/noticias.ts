@@ -50,7 +50,7 @@ export interface FiltroScanner {
 }
 
 /**
- * Traduce el filtro a parámetros del CMS.
+ * Traduce el filtro (y su exclusión opcional) a parámetros del CMS.
  *
  * ✨ Se filtra por **id** y no por slug, y aquí sí es lo correcto: el id sale de
  * una consulta ya cacheada (`obtenerCategoria`), y `where[categorias][in]` con un
@@ -59,13 +59,19 @@ export interface FiltroScanner {
  *
  * ⚠️ Lo que NO se hace es meter algo que varíe por DOCUMENTO en el `where` — esa
  * es la regla de oro del cliente, y es distinta: aquí varía por vista, y hay tantas
- * vistas como categorías, no como notas.
+ * vistas como categorías, no como notas. `excluir` es una categoría, no una nota,
+ * así que sigue siendo una sola entrada de caché por vista.
  */
-function acotar(filtro?: FiltroScanner | null): ParamsCms {
+function acotar(filtro?: FiltroScanner | null, excluir?: FiltroScanner | null): ParamsCms {
   if (!filtro) return {};
-  return filtro.tipo === 'categoria'
-    ? { 'where[categorias][in]': String(filtro.id) }
-    : { 'where[etiquetas][in]': String(filtro.id) };
+  const base =
+    filtro.tipo === 'categoria'
+      ? { 'where[categorias][in]': String(filtro.id) }
+      : { 'where[etiquetas][in]': String(filtro.id) };
+  if (excluir?.tipo === 'categoria') {
+    return { ...base, 'where[categorias][not_in]': String(excluir.id) };
+  }
+  return base;
 }
 
 /**
@@ -107,6 +113,7 @@ export async function filtroDeCategoria(slug: string): Promise<FiltroScanner | n
 export async function obtenerScanner(
   cuantas = 10,
   filtro?: FiltroScanner | null,
+  excluir?: FiltroScanner | null,
 ): Promise<{
   destacada: Noticia | null;
   rejilla: Noticia[];
@@ -115,7 +122,7 @@ export async function obtenerScanner(
     const r = await cmsFetchEstacion<RespuestaLista<Noticia>>('noticias', {
       ...BASE_INDICE,
       ...SOLO_NOTICIAS,
-      ...acotar(filtro),
+      ...acotar(filtro, excluir),
       sort: ORDEN,
       limit: cuantas + 1,
     });

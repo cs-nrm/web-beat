@@ -82,17 +82,24 @@ import { SECCIONES_EDITORIALES } from '@/config/navegacion';
   `null` NO se puede pasar a `obtenerScanner`: ahí significa «sin filtro» y traería
   todas las notas del sitio. Por eso abajo se comprueba antes de consultar, y el
   bloque degrada a vacío —que en el Inicio significa que la sección no se pinta—.
+
+  🔴 `filtroMicroambiente` se resuelve igual, pero para EXCLUIR: «Microambiente» es
+  una categoría nueva del CMS y sus notas también llevan `beat-scanner`, así que sin
+  esto se cuelan en el hero del Inicio. Solo se descarta aquí —en el mosaico— y no en
+  la pila de Editorial ni en `/beat-scanner`: la exclusión es del hero, no de la
+  categoría en general.
 */
-const [filtroScanner, filtroEditorial] = await Promise.all([
+const [filtroScanner, filtroEditorial, filtroMicroambiente] = await Promise.all([
   filtroDeCategoria(SECCIONES_EDITORIALES.scanner.categoria),
   filtroDeCategoria(SECCIONES_EDITORIALES.editorial.categoria),
+  filtroDeCategoria('microambiente'),
 ]);
 
 const VACIO = { destacada: null, rejilla: [] as Awaited<ReturnType<typeof obtenerScanner>>['rejilla'] };
 
 const [{ destacada, rejilla }, editorial, especial, especiales, tipos, agenda, banners, takeover] =
   await Promise.all([
-    filtroScanner ? obtenerScanner(6, filtroScanner) : Promise.resolve(VACIO),
+    filtroScanner ? obtenerScanner(6, filtroScanner, filtroMicroambiente) : Promise.resolve(VACIO),
     filtroEditorial ? obtenerScanner(4, filtroEditorial) : Promise.resolve(VACIO),
     obtenerEspecialVigente(SERIE_FENOMENO),
     obtenerEspeciales(SERIE_FENOMENO, 8),

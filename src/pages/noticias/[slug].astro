@@ -582,6 +582,14 @@ const etiquetas = (nota.etiquetas ?? []).filter(
     height: 400px;
     aspect-ratio: auto;
     margin-bottom: -310px; /* 400 − 90 (alto de reserva en escritorio) */
+    /*
+      Sin el marco del hueco vacío: `Anuncio.astro` le pone fondo y un borde
+      (`box-shadow` inset) para que el espacio reservado se note aunque no
+      haya creativo. Expandido, ese marco se ve como una caja de 400px sin
+      nada dentro si el creativo no llega a cubrirla entera.
+    */
+    background: none;
+    box-shadow: none;
   }
 
   .nt-titular {

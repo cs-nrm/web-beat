@@ -488,6 +488,7 @@ const etiquetas = (nota.etiquetas ?? []).filter(
 
       <aside class="nt-riel">
         <Anuncio formato="box" nombre="nota-box" unidad="Box" />
+        <Anuncio formato="halfpage" nombre="nota-halfpage" unidad="Halfpage" />
       </aside>
     </div>
 
@@ -744,6 +745,9 @@ const etiquetas = (nota.etiquetas ?? []).filter(
   .nt-riel {
     position: sticky;
     top: calc(var(--chrome-h) + 16px);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
   }
 
   .nt-etiquetas {

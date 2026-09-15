@@ -38,8 +38,8 @@ import { contarImpresion, type BannerConEnlace } from '@/lib/cms/publicidad';
 import { HOST_CANONICO, NOINDEX_SITIO, noIndexarHost } from '@/config/site';
 
 interface Props {
-  /** Los tres formatos del lienzo. */
-  formato: 'portada' | 'leaderboard' | 'box';
+  /** Los formatos del lienzo. */
+  formato: 'portada' | 'leaderboard' | 'box' | 'halfpage';
   /**
    * Id del div, y por tanto la llave con la que GAM reporta este hueco. Tiene que
    * ser ÚNICO en la página: dos huecos con el mismo id hacen que GPT pinte solo
@@ -131,6 +131,18 @@ const MEDIDAS = {
   box: {
     tamanos: [[300, 250]],
     mapping: [[[0, 0], [[300, 250]]]],
+  },
+  /*
+    🔴 300×600, uno de los tres formatos del v1 sin usar hasta hoy. El lienzo SÍ
+    lo nombra —«728×90, 300×250, 300×600»— para el artboard `publicidad`, así que
+    no es una medida inventada. Lo que sí es nuevo es la COLOCACIÓN (riel de
+    `/noticias/*`, bajo `nota-box`): eso no lo dice el lienzo y queda pendiente de
+    confirmar con AdOps si la medida ya está dada de alta en GAM (ver
+    `agents/ads.md`, «Antes de dar por bueno un hueco vacío»).
+  */
+  halfpage: {
+    tamanos: [[300, 600]],
+    mapping: [[[0, 0], [[300, 600]]]],
   },
 } as const;
 
@@ -441,6 +453,10 @@ if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
     width: 300px;
     height: 250px;
   }
+  .es-halfpage .anuncio-hueco {
+    width: 300px;
+    height: 600px;
+  }
 
   @media (max-width: 899px) {
     /*
@@ -461,6 +477,10 @@ if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
       aspect-ratio: 320 / 50;
     }
     .es-box .anuncio-hueco {
+      width: 300px;
+      max-width: 100%;
+    }
+    .es-halfpage .anuncio-hueco {
       width: 300px;
       max-width: 100%;
     }

@@ -42,6 +42,7 @@ perder una tarde y luego hace dudar del resto de la documentación.
 | `src/scripts/pista.ts` | Las pistas a demanda de Bonus Beat, en la MISMA barra. Un `<audio>` nativo, no Plyr |
 | `src/scripts/senal.ts` | Que la parrilla de `/programacion` avance sola, sin pedirle nada al servidor |
 | `src/scripts/video.ts` | El visor de las cápsulas (Plyr a demanda). Entra aquí por el árbitro de audio |
+| `src/scripts/audio-nota.ts` | El audio principal de una nota —Microambiente—, en la PÁGINA y no en la barra. Un `<audio>` nativo |
 | `src/components/Cabecera.astro` | **Solo los `data-*` y `#td_container` / `#td-telon`.** El marcado y el CSS son de `agents/frontend.md` |
 | `src/lib/cms/estacion.ts` | De donde sale `tritonMount` |
 | `src/lib/cms/aire.ts` | La bitácora, y hoy **solo** para el HISTORIAL |
@@ -248,8 +249,10 @@ Y dos que parecen paranoia y no lo son:
 ## 🔴 El árbitro de audio: solo una fuente a la vez
 
 `src/scripts/audio.ts` es pequeño y es el archivo que evita el peor bug de audio
-posible. Cuatro fuentes pueden sonar en Beat: el radio (Triton), el video de una nota
-(YouTube/Vimeo/mp4), el audio de un episodio, y las pistas de Bonus Beat.
+posible. Cinco fuentes pueden sonar en Beat: el radio (Triton), el video de una nota
+(YouTube/Vimeo/mp4), el audio de un episodio, las pistas de Bonus Beat y —desde el
+2026-09-15— el audio principal de una nota de Microambiente (`audio-nota.ts`, id
+`audio-nota:<id de la nota>`).
 
 Cada una se **registra** con una forma de pausarse y **reclama** el canal al empezar.
 Funciona en los DOS sentidos, que es donde estaba el bug del sitio viejo: ahí el
@@ -267,6 +270,18 @@ player paraba el radio al abrir un video, **pero no al revés**.
 - ⚠️ **Registrar REEMPLAZA, no acumula.** Con View Transitions una nota puede montarse
   varias veces en la misma sesión, y dos entradas con el mismo id dejarían una
   apuntando a un elemento que ya no está en el DOM.
+- 🔴 **Un `<audio>` que sale del DOM SIGUE SONANDO.** Por eso `audio-nota.ts` se
+  engancha a `astro:before-swap` y no solo a `astro:page-load`: pausa y olvida la
+  fuente en el instante en que la nota que la contenía deja de existir. Sin eso,
+  salir de la nota dejaba una voz sin página y sin botón con el que pararla.
+  Comprobado el 2026-09-15 en el flujo Inicio → nota → atrás: al volver, el registro
+  queda en `['radio', 'pista']`.
+- ⚠️ **Un EMBED no se puede arbitrar, y es una limitación real.** El otro camino de
+  `noticias.audio` es el reproductor de una plataforma dentro de un iframe de otro
+  dominio: no hay forma de pausarlo desde aquí ni de enterarse de que empezó a
+  sonar. Con un embed pueden acabar sonando la radio y el audio a la vez, que es
+  justo lo que este archivo existe para impedir. Por eso `fuenteDeAudio()` prefiere
+  el ARCHIVO cuando están capturados los dos (`src/lib/audio.ts`).
 
 ### La barra tiene DOS modos, y no comparten estado
 

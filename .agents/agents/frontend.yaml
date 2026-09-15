@@ -17,7 +17,10 @@ interface:
       slot `sobre-cabecera`, la barra de progreso y el cableado de `src/scripts/`
     - `src/components/Cabecera.astro`, `MenuLleno.astro`, `Pie.astro`,
       `NavSecciones.astro`, `Intro.astro` — el cromo
-    - `src/components/inicio/` y el resto de `src/components/` — los bloques
+    - `src/components/inicio/` y el resto de `src/components/` — los bloques.
+      ⚠️ En `AudioNota.astro` el marcado y el CSS son tuyos y el COMPORTAMIENTO es
+      de streaming (`src/scripts/audio-nota.ts`); los `data-audio-*` son el
+      contrato entre los dos y no se renombran sin avisar
     - `src/styles/` — 🔴 `base.css` es el archivo más importante de este agente
     - `tailwind.config.js`, `scripts/fuentes.mjs`, `scripts/guarda-cascada.mjs`
     - `src/scripts/cabecera.ts`, `menu.ts`, `revelar.ts`, `escribir.ts`,

@@ -10,6 +10,10 @@
  *   2. qué se cuenta → el mosaico de portada, el Fenómeno, la pila de Editorial
  *   3. qué viene  → Bonus Beat y la Agenda
  *
+ * ⚠️ Y desde el 2026-09-15, **Microambiente abre el 2 de forma PROVISIONAL**: se
+ * subió ahí mientras la portada tiene huecos, y su sitio es entre la pila y Bonus
+ * Beat. El porqué completo está donde se pinta, no aquí.
+ *
  * ⚠️ El «qué suena» lo contesta SOLO el player, y es decisión de Carlos
  * (2026-09-09): «en el home nada». Debajo del player había un panel claro con
  * «HOY EN LA SEÑAL» —cuatro bloques de la parrilla de hoy— y «LO QUE SONÓ». Se
@@ -39,6 +43,7 @@ import Marquee from '@/components/inicio/Marquee.astro';
 import Fenomeno from '@/components/inicio/Fenomeno.astro';
 import ArchivoTemas from '@/components/inicio/ArchivoTemas.astro';
 import PilaScanner from '@/components/inicio/PilaScanner.astro';
+import Microambiente from '@/components/inicio/Microambiente.astro';
 import BonusBeat from '@/components/inicio/BonusBeat.astro';
 import Agenda from '@/components/inicio/Agenda.astro';
 
@@ -63,10 +68,11 @@ import {
 import { SECCIONES_EDITORIALES } from '@/config/navegacion';
 
 /*
-  Todo en PARALELO. Son siete consultas y ninguna depende de otra salvo la lista
-  destacada, que necesita saber qué tipos existen. Eran nueve: la parrilla de hoy y
-  la bitácora se fueron con el panel de la señal. Secuenciales sumarían sus
-  latencias; en paralelo el Inicio cuesta lo que la más lenta.
+  Todo en PARALELO. Son ocho consultas y ninguna depende de otra salvo la lista
+  destacada, que necesita saber qué tipos existen. Eran nueve, bajaron a siete
+  —la parrilla de hoy y la bitácora se fueron con el panel de la señal— y vuelven a
+  ocho con Microambiente. Secuenciales sumarían sus latencias; en paralelo el Inicio
+  cuesta lo que la más lenta.
 
   Cada `obtener*` ya trae su propio `catch` que degrada a vacío, así que un
   `Promise.all` es seguro: ninguna rechaza y una colección caída no tumba la
@@ -74,8 +80,8 @@ import { SECCIONES_EDITORIALES } from '@/config/navegacion';
   concurrencia real contra el CMS es una consulta por TTL, no una por visita.
 */
 /*
-  🔴 Los filtros de las dos secciones editoriales se resuelven ANTES, porque las
-  consultas de notas los necesitan. Son dos consultas por slug ya cacheadas, y van
+  🔴 Los filtros de las TRES secciones editoriales se resuelven ANTES, porque las
+  consultas de notas los necesitan. Son tres consultas por slug ya cacheadas, y van
   en paralelo entre ellas.
 
   ⚠️ `filtroDeCategoria` devuelve `null` si la categoría no existe en el CMS, y ese
@@ -83,24 +89,50 @@ import { SECCIONES_EDITORIALES } from '@/config/navegacion';
   todas las notas del sitio. Por eso abajo se comprueba antes de consultar, y el
   bloque degrada a vacío —que en el Inicio significa que la sección no se pinta—.
 
-  🔴 `filtroMicroambiente` se resuelve igual, pero para EXCLUIR: «Microambiente» es
-  una categoría nueva del CMS y sus notas también llevan `beat-scanner`, así que sin
-  esto se cuelan en el hero del Inicio. Solo se descarta aquí —en el mosaico— y no en
-  la pila de Editorial ni en `/beat-scanner`: la exclusión es del hero, no de la
-  categoría en general.
+  🔴 `filtroMicroambiente` hace DOS trabajos, y conviene no perder ninguno de vista.
+
+  Uno es EXCLUIR: «Microambiente» es una categoría nueva del CMS y sus notas también
+  llevan `beat-scanner`, así que sin esto se cuelan en el hero del Inicio. Solo se
+  descarta en el mosaico y no en la pila de Editorial ni en `/beat-scanner`: la
+  exclusión es del hero, no de la categoría en general.
+
+  El otro es LLENAR su propio bloque, más abajo. Es la misma consulta por slug —ya
+  cacheada— sirviendo a los dos, y por eso se resuelve una sola vez aquí arriba.
+
+  ⚠️ Y el slug NO se escribe a mano: sale de `SECCIONES_EDITORIALES`, como los otros
+  dos. Es la regla de `config/navegacion.ts` y existe para que renombrar la sección
+  se haga en un sitio; con el literal suelto, el día que cambie queda una consulta
+  apuntando a una categoría que ya no existe y el bloque se pinta vacío sin decir por
+  qué.
 */
 const [filtroScanner, filtroEditorial, filtroMicroambiente] = await Promise.all([
   filtroDeCategoria(SECCIONES_EDITORIALES.scanner.categoria),
   filtroDeCategoria(SECCIONES_EDITORIALES.editorial.categoria),
-  filtroDeCategoria('microambiente'),
+  filtroDeCategoria(SECCIONES_EDITORIALES.microambiente.categoria),
 ]);
 
 const VACIO = { destacada: null, rejilla: [] as Awaited<ReturnType<typeof obtenerScanner>>['rejilla'] };
 
-const [{ destacada, rejilla }, editorial, especial, especiales, tipos, agenda, banners, takeover] =
+const [
+  { destacada, rejilla },
+  editorial,
+  microambiente,
+  especial,
+  especiales,
+  tipos,
+  agenda,
+  banners,
+  takeover,
+] =
   await Promise.all([
     filtroScanner ? obtenerScanner(6, filtroScanner, filtroMicroambiente) : Promise.resolve(VACIO),
     filtroEditorial ? obtenerScanner(4, filtroEditorial) : Promise.resolve(VACIO),
+    /*
+      Tres, como Bonus Beat. No es simetría: cada fila lleva una foto de 180px y una
+      bajada de dos líneas, así que con más de tres el bloque deja de ser un asomo a
+      la sección y se convierte en la sección. El resto está a un clic.
+    */
+    filtroMicroambiente ? obtenerScanner(3, filtroMicroambiente) : Promise.resolve(VACIO),
     obtenerEspecialVigente(SERIE_FENOMENO),
     obtenerEspeciales(SERIE_FENOMENO, 8),
     obtenerTiposDeLista(),
@@ -195,6 +227,47 @@ const derecha = rejilla.slice(2, 4);
 const paraLaPila = [editorial.destacada, ...editorial.rejilla]
   .filter((n): n is NonNullable<typeof n> => Boolean(n))
   .slice(0, 4);
+
+/*
+  Y lo mismo en Microambiente, por lo mismo: la sección no tiene una pieza «de
+  portada» que se pinte aparte, así que apartar la destacada dejaría la nota más
+  reciente fuera del Inicio.
+
+  🔴 Pero antes se DESCUENTA lo que ya pinta otro bloque, y no es higiene: una nota
+  que salga dos veces en el Inicio emite dos veces el mismo `transition:name`
+  —`foto-nota-<id>`, que es cómo la foto viaja a la nota— y el navegador ABORTA LA
+  TRANSICIÓN ENTERA. No se rompe esa tarjeta: se rompe el efecto de todas.
+
+  ⚠️ Medido, no supuesto: el 2026-09-15, con este bloque apuntando a la categoría
+  `editorial` durante una prueba, la consola soltó «Unexpected duplicate
+  view-transition-name: foto-nota-66» y un `InvalidStateError` en cada navegación.
+  Con las categorías de verdad no se repite ninguna —comprobado: 9 nombres, 0
+  duplicados—, así que esto es la red para el día que la redacción marque una nota
+  con dos categorías.
+
+  🔴 Y ese día ya llegó: la primera nota de Microambiente lleva TAMBIÉN
+  `beat-scanner`, que es lo que obligó a excluirla del mosaico ahí arriba. O sea que
+  la doble categoría no es un supuesto: es cómo se está capturando. Lo que queda
+  cubierto aquí es el otro cruce —la pila de Editorial—, que no tiene exclusión
+  propia porque nunca se ha dado.
+
+  ⚠️ Se descuenta AQUÍ y no en el CMS: `where[categorias][not_in]` metería en la
+  clave de caché algo que cambia con el contenido. Y cede ESTE bloque —el más nuevo
+  de los tres, no el de más abajo— porque es el único que puede perder una fila sin
+  que el mosaico o la pila cambien de forma. Vale igual ahora que se pinta arriba:
+  lo que decide quién cede es qué bloque aguanta la pérdida, no el orden en la
+  página.
+*/
+const yaEnLaPortada = new Set(
+  [destacada, ...izquierda, ...derecha, ...paraLaPila]
+    .filter((n): n is NonNullable<typeof n> => Boolean(n))
+    .map((n) => n.id),
+);
+
+const paraMicroambiente = [microambiente.destacada, ...microambiente.rejilla]
+  .filter((n): n is NonNullable<typeof n> => Boolean(n))
+  .filter((n) => !yaEnLaPortada.has(n.id))
+  .slice(0, 3);
 
 /*
   🔴 UN solo lugar para el lema: el cintillo y el `<title>` leen esta constante.
@@ -338,6 +411,35 @@ const LEMA = 'Beat 100.9 — Aquí la música se elige';
   </div>
 
   <div class="inicio-contenido">
+    {/*
+      ⚠️ **Microambiente va ARRIBA A PROPÓSITO Y ES PROVISIONAL** (Carlos,
+      2026-09-15): «solo en el home, ahorita que tenemos un poco vacío, pongámoslo
+      entre el marquee y Fenómeno; ya después lo movemos más abajo».
+
+      O sea que esto NO es la colocación editorial del bloque: es un relleno mientras
+      la portada tiene huecos —hoy Bonus Beat no se pinta porque no hay edición
+      publicada, y el archivo de temas del Fenómeno está vacío—. Cuando la portada
+      se llene, **su sitio es entre `PilaScanner` y `BonusBeat`**, que es de donde
+      viene: son notas —por eso después de la pila editorial— pero lo que las
+      justifica es su audio, así que abre la parte de abajo en vez de cerrar la de
+      arriba, con Bonus Beat detrás, que ya es música sin texto.
+
+      🔴 Va DESPUÉS del leaderboard y no entre el cintillo y él, aunque el encargo
+      diga «entre el marquee y Fenómeno». El hueco está donde está por una decisión
+      medida del 2026-09-08 —el cintillo cierra el bloque editorial y el anuncio
+      empieza algo nuevo—, y colarse en medio la deshace: dejaría el anuncio flotando
+      entre dos bloques de contenido, que es justo de donde se le movió.
+
+      ⚠️ Sin notas no se pinta NADA, ni el rótulo de la izquierda. Es la regla de la
+      casa y aquí no es teórica: el 2026-09-15 la categoría existía en el CMS con
+      cero notas, así que el estado por omisión de este bloque es no existir — y
+      entonces la portada se lee exactamente como antes de que existiera.
+    */}
+    <Microambiente
+      notas={paraMicroambiente}
+      seccion={SECCIONES_EDITORIALES.microambiente}
+    />
+
     <Fenomeno especial={especial} />
     <ArchivoTemas temas={especiales} excluir={especial?.id ?? null} />
     <PilaScanner notas={paraLaPila} seccion={SECCIONES_EDITORIALES.editorial} />

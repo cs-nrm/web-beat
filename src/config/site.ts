@@ -281,12 +281,13 @@ export const SEGMENTOS_RESERVADOS = [
   */
   'eventos',
   /*
-    Las DOS secciones editoriales. Son rutas estáticas de `src/pages/`, así que van
+    Las TRES secciones editoriales. Son rutas estáticas de `src/pages/`, así que van
     reservadas como el resto: si no, las resolvería `[tipoLista]` buscando un tipo
     de lista con ese slug, y cada visita dispararía una consulta al CMS.
   */
   'beat-scanner',
   'editorial',
+  'microambiente',
   /*
     ⚠️ `scanner` se queda reservado aunque ya NO sea una sección: es la ruta vieja
     de Beat Scanner y responde 301 hacia `/beat-scanner` (ver `redirects` en

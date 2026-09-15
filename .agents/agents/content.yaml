@@ -16,13 +16,15 @@ interface:
     - `src/lib/cms/` — el transporte (`client.ts`) y un módulo por dominio:
       `noticias`, `categorias`, `listas`, `especiales`, `eventos`, `programacion`,
       `aire`, `estacion`. ⚠️ `publicidad.ts` NO es tuyo: es de ads
-    - `src/lib/nota.ts` y `src/lib/video.ts` — presentación derivada de una nota
+    - `src/lib/nota.ts`, `src/lib/video.ts` y `src/lib/audio.ts` — presentación
+      derivada de una nota (el último resuelve `noticias.audio`: el mp3, o el
+      iframe de una plataforma de la lista blanca)
     - `src/types/payload.ts`, `payload-types.lock.json` y
       `scripts/sync-payload-types.mjs` — los tipos generados y su fijación
     - `src/config/site.ts` — el contrato de rutas y `SEGMENTOS_RESERVADOS`
     - `src/config/navegacion.ts` — qué secciones existen y qué categoría del CMS
       llena a cada una
-    - `src/pages/**` — las 23 rutas: qué consulta cada una y cómo degrada
+    - `src/pages/**` — las 24 rutas: qué consulta cada una y cómo degrada
 
     Prioriza:
     - que el NAVEGADOR nunca hable con el CMS. `client.ts` tiene un guard que
@@ -62,7 +64,11 @@ interface:
     - ⚠️ un campo vacío del admin llega como cadena vacía, no `null`: se lee con
       `?.trim() ||` y NUNCA con `??`
     - ⚠️ un `depth` insuficiente no da error: da un id. `imagen.url` sale
-      `undefined` y la foto no se pinta
+      `undefined` y la foto no se pinta. Vale igual para `audio.archivo`, que solo
+      llega poblado en `obtenerNota` (`depth: 2`)
+    - ⚠️ `noticias.audio.fuente` es un desplegable CON valor por omisión, así que
+      «embed» significa «nadie tocó este campo» en las 43 notas anteriores al
+      2026-09-15. No decide nada: decide qué hay capturado, y el archivo gana
     - el SEO entero —título, canónica, Open Graph, JSON-LD, sitemaps y el grupo
       `noticias.meta`— es de `agents/metadata.md`, no de aquí. Es el reparto que
       más se confunde

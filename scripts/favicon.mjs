@@ -245,6 +245,7 @@ const TARJETAS_SECCION = [
   ['og-eventos.png', 'AGENDA'],
   ['og-fenomeno-residente.png', 'EL FENÓMENO RESIDENTE'],
   ['og-bonus-beat.png', 'BONUS BEAT'],
+  ['og-microambiente.png', 'MICROAMBIENTE'],
   ['og-programacion.png', 'PROGRAMACIÓN'],
 ];
 

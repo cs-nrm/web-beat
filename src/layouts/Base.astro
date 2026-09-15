@@ -834,6 +834,7 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
       import { prepararIntro } from '@/scripts/intro';
       import { prepararCabecera } from '@/scripts/cabecera';
       import { prepararPista } from '@/scripts/pista';
+      import { prepararAudioNota } from '@/scripts/audio-nota';
       import { prepararMenu } from '@/scripts/menu';
       import { prepararProgreso } from '@/scripts/progreso';
       prepararAnuncios();
@@ -846,6 +847,9 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
       prepararIntro();
       prepararCabecera();
       prepararPista();
+      // Solo CABLEA: si la nota no trae mp3 no crea ningún `<audio>` ni descarga
+      // nada. Ver `audio-nota.ts`.
+      prepararAudioNota();
       prepararMenu();
       prepararProgreso();
       // Solo CABLEA los visores; Plyr (110 KB) no se baja hasta que alguien

@@ -1,0 +1,350 @@
+---
+/**
+ * El audio PRINCIPAL de una nota, pegado bajo la foto.
+ *
+ * 🔴 Nace con **Microambiente** (Carlos, 2026-09-15): son notas como las demás,
+ * salvo que lo que las justifica es un audio. De ahí su sitio —arriba, contra la
+ * foto, antes del cuerpo— y no dentro del texto: un reproductor a media nota se
+ * encuentra cuando ya decidiste leerla, y aquí es lo primero que hay que poder
+ * pulsar.
+ *
+ * ⚠️ No es exclusivo de esa sección. Cualquier nota con `audio` capturado lo pinta,
+ * porque el campo es de `noticias` entero y esconderlo en las demás secciones sería
+ * un dato capturado que no llega a ninguna parte — justo lo que pasaba con el grupo
+ * `meta` antes del 2026-09-07.
+ *
+ * DOS caminos, y no se parecen en nada:
+ *
+ *   · `archivo` — un mp3 nuestro. Barra propia, del sitio, que `audio-nota.ts`
+ *     cablea y que el árbitro de audio puede pausar cuando arranca la radio.
+ *   · `embed`   — el reproductor de la plataforma en un iframe. Se pinta tal cual
+ *     llega: ni se estiliza ni se controla, porque es de otro dominio.
+ *
+ * 🔴 Y un tercero que no es un camino sino una salida: si el `embedUrl` apunta a
+ * una plataforma que no está en la lista de `src/lib/audio.ts`, se pinta un ENLACE.
+ * Una nota de Microambiente sin su audio es una nota sin lo único que la hace de
+ * Microambiente, así que el peor resultado posible aquí es el silencio.
+ */
+import Icono from '@/components/Icono.astro';
+import { fuenteDeAudio, enlaceDeAudio } from '@/lib/audio';
+import type { Noticia } from '@/types/payload';
+
+interface Props {
+  nota: Noticia;
+}
+
+const { nota } = Astro.props;
+
+const fuente = fuenteDeAudio(nota.audio);
+/** Solo cuando no se pudo armar nada: es el respaldo, no una segunda salida. */
+const respaldo = fuente ? null : enlaceDeAudio(nota.audio);
+---
+
+{
+  fuente?.tipo === 'archivo' && (
+    <div
+      class="au"
+      data-audio-nota
+      data-audio-src={fuente.src}
+      data-audio-id={String(nota.id)}
+    >
+      {/*
+        🔴 El botón es un `<button>` y no un `<div>`: entra con el tabulador, se
+        anuncia como control y responde a la barra espaciadora sin una línea de
+        JavaScript. El `aria-label` lo cambia el script al alternar, porque el
+        nombre de un control tiene que decir lo que hace AHORA.
+
+        ⚠️ `cursor: pointer` va escrito abajo: Tailwind 4 lo quitó de su preflight y
+        un `<button>` se comporta como texto.
+      */}
+      <button
+        type="button"
+        class="au-boton"
+        data-audio-play
+        aria-pressed="false"
+        aria-label="Reproducir el audio de la nota"
+      >
+        <span class="au-icono" data-icono="play">
+          <Icono nombre="play" tamano={18} />
+        </span>
+        <span class="au-icono au-icono-pausa" data-icono="pause">
+          <Icono nombre="pause" tamano={18} />
+        </span>
+      </button>
+
+      {/*
+        El avance es un `range` y no una barra pintada, por lo mismo que en la
+        cabecera: así se puede BUSCAR, y con el teclado. Nace `disabled` y lo suelta
+        el script al conocer la duración — antes de eso arrastrarlo no lleva a
+        ninguna parte.
+      */}
+      <label class="solo-lectores" for="au-avance">
+        Avance del audio
+      </label>
+      <input
+        id="au-avance"
+        class="au-avance"
+        data-audio-avance
+        type="range"
+        min="0"
+        max="0"
+        value="0"
+        disabled
+      />
+
+      {/*
+        ⚠️ `--:--` y no `00:00` mientras no se sepa: un cero es un dato y esto es la
+        ausencia de uno. Lo escribe el script en cuanto llegan los metadatos.
+      */}
+      <span class="beat-label au-tiempo">
+        <span data-audio-transcurrido>00:00</span>
+        <span class="au-barra-tiempo">/</span>
+        <span data-audio-total>--:--</span>
+      </span>
+
+      {/*
+        El aviso de avería, que solo existe si el archivo no carga: lo enciende
+        `audio-nota.ts` con `data-fallo` en la caja. Va en el marcado y no lo
+        inyecta el script para que sea texto de verdad —traducible, seleccionable y
+        leído por un lector de pantalla— y no una cadena dentro de un `.ts`.
+      */}
+      <span class="au-fallo" role="status">El audio de esta nota no se pudo cargar.</span>
+
+      {/*
+        🔴 Sin JavaScript la barra de arriba es un control que no hace nada, y eso
+        el sitio no lo deja pasar. `<noscript>` la esconde y pone en su lugar el
+        reproductor del navegador, que es feo y funciona.
+      */}
+      <noscript>
+        {/*
+          🔴 `is:inline` NO es opcional: Astro IZA todo `<style>` de la plantilla al
+          `<head>` y lo escopa. Sin la directiva, esta regla se aplicaría SIEMPRE y
+          la barra quedaría invisible para todo el mundo — el fallo se vería como
+          «el audio desapareció», no como un problema de noscript.
+        */}
+        <style is:inline>
+          .au-boton,
+          .au-avance,
+          .au-tiempo {
+            display: none;
+          }
+        </style>
+        <audio class="au-nativo" controls preload="metadata" src={fuente.src}>
+          <a href={fuente.src}>Descargar el audio de la nota</a>
+        </audio>
+      </noscript>
+    </div>
+  )
+}
+
+{
+  fuente?.tipo === 'embed' && (
+    <div class="au-embed" style={`--au-alto:${fuente.alto}px`}>
+      <iframe
+        src={fuente.src}
+        title={`Audio de la nota en ${fuente.plataforma}`}
+        loading="lazy"
+        allow="encrypted-media; clipboard-write"
+      />
+    </div>
+  )
+}
+
+{
+  respaldo && (
+    <p class="au-suelto">
+      <a href={respaldo} target="_blank" rel="noopener noreferrer">
+        Escuchar el audio en el sitio original
+      </a>
+    </p>
+  )
+}
+
+<style>
+  /*
+    Va PEGADO a la foto: 10px de separación y el mismo radio de media, para que se
+    lea como una pieza del mismo bloque y no como el primer párrafo de la nota.
+
+    🔴 El margen LATERAL lo pone este archivo y no la página, y es lo que permite
+    que sin audio no quede nada: la nota inserta el componente sin envoltura, así
+    que cuando no hay fuente no se emite ni un `<div>` con márgenes. Es el mismo
+    valor que `.nt-hero-caja` —24px, y 16 en móvil, donde el hero va a sangre y el
+    pie de foto se mete a 16—, porque a esa medida se lee como parte de la foto.
+  */
+  .au {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 10px 24px 0;
+    padding: 14px 18px;
+    background: var(--surface-card);
+    box-shadow: inset 0 0 0 1px var(--border-hairline);
+    border-radius: var(--r-media);
+  }
+
+  .au-boton {
+    position: relative;
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--r-pill);
+    background: var(--mist-0);
+    color: var(--noche-0);
+    cursor: pointer;
+    transition: scale var(--dur-2) var(--ease-out);
+  }
+  .au-boton:hover {
+    scale: 1.06;
+  }
+  .au-boton:focus-visible {
+    outline: 2px solid var(--mist-0);
+    outline-offset: 3px;
+  }
+  /*
+    Los dos iconos viven en el marcado y se alterna cuál se ve, como en la barra del
+    player y en Bonus Beat: no se reconstruye SVG en cada cambio de estado.
+  */
+  .au-icono {
+    display: grid;
+    place-items: center;
+  }
+  .au-icono-pausa {
+    display: none;
+  }
+  .au[data-sonando] .au-icono[data-icono='play'] {
+    display: none;
+  }
+  .au[data-sonando] .au-icono-pausa {
+    display: grid;
+  }
+
+  /*
+    La misma piel que el avance de la barra del player: misma altura, mismo tirador
+    y el mismo degradado duro sobre `--avance`. Son el mismo control para el ojo, y
+    que se vieran distintos en dos sitios del mismo sitio sería ruido.
+  */
+  .au-avance {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1;
+    min-width: 0;
+    height: 3px;
+    cursor: pointer;
+    background:
+      linear-gradient(var(--mist-0), var(--mist-0)) 0 / var(--avance, 0%) 100% no-repeat,
+      var(--border-strong);
+  }
+  .au-avance:disabled {
+    cursor: default;
+    opacity: 0.45;
+  }
+  .au-avance::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 11px;
+    height: 11px;
+    border: 0;
+    border-radius: var(--r-pill);
+    background: var(--mist-0);
+  }
+  .au-avance::-moz-range-thumb {
+    width: 11px;
+    height: 11px;
+    border: 0;
+    border-radius: var(--r-pill);
+    background: var(--mist-0);
+  }
+  .au-avance:focus-visible {
+    outline: 2px solid var(--mist-0);
+    outline-offset: 4px;
+  }
+
+  .au-tiempo {
+    flex: none;
+    display: flex;
+    gap: 5px;
+    color: var(--text-muted);
+    font-size: 9.5px;
+    /* Tabular: sin esto el ancho del bloque baila con cada segundo. */
+    font-variant-numeric: tabular-nums;
+  }
+  .au-barra-tiempo {
+    color: var(--text-faint);
+  }
+
+  .au-nativo {
+    width: 100%;
+  }
+
+  /*
+    El aviso de avería ocupa el sitio del avance: la barra sigue siendo una barra
+    —el botón queda a la izquierda, apagado— y donde había un control que no lleva
+    a ninguna parte hay una frase que dice por qué.
+  */
+  .au-fallo {
+    display: none;
+    flex: 1;
+    min-width: 0;
+    font: var(--type-body-sm);
+    color: var(--text-muted);
+  }
+  .au[data-fallo] .au-avance,
+  .au[data-fallo] .au-tiempo {
+    display: none;
+  }
+  .au[data-fallo] .au-fallo {
+    display: block;
+  }
+  .au[data-fallo] .au-boton {
+    cursor: default;
+    opacity: 0.4;
+  }
+
+  /* ── El reproductor de la plataforma ── */
+  .au-embed {
+    margin: 10px 24px 0;
+    border-radius: var(--r-media);
+    overflow: hidden;
+    background: var(--surface-card);
+  }
+  .au-embed iframe {
+    display: block;
+    width: 100%;
+    height: var(--au-alto);
+    border: 0;
+  }
+
+  .au-suelto {
+    margin: 10px 24px 0;
+    padding: 16px 18px;
+    background: var(--surface-card);
+    box-shadow: inset 0 0 0 1px var(--border-hairline);
+    border-radius: var(--r-media);
+    font: var(--type-body-sm);
+  }
+  .au-suelto a {
+    color: var(--text-link);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  @media (max-width: 899px) {
+    .au,
+    .au-embed,
+    .au-suelto {
+      margin-inline: 16px;
+    }
+    .au {
+      gap: 12px;
+      padding: 12px 14px;
+    }
+    .au-boton {
+      width: 42px;
+      height: 42px;
+    }
+  }
+</style>

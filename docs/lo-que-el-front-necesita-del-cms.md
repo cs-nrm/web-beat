@@ -276,6 +276,30 @@ sin confirmarlo.**
 
 ---
 
+### ⏳ La DURACIÓN de `noticias.audio` — no se pide todavía, pero conviene saberlo
+
+Microambiente entró el 2026-09-15 leyendo `noticias.audio`, y el grupo **no tiene
+campo de duración** (`video` sí: `video.duracion`, texto, «se muestra en la lista de
+la colección»).
+
+Hoy no hace falta y por eso no se pide: el detalle saca la duración del PROPIO
+archivo, con `preload="metadata"` —unos kilobytes de cabecera, no el audio—, y la
+barra la pinta sola. Medido contra la primera nota capturada: `01:50`, correcto.
+
+⚠️ Lo que ese camino NO puede resolver son dos casos, y los dos son de listado:
+
+- **Las filas del Inicio y de `/microambiente` no pueden decir cuánto dura nada**
+  sin bajar la cabecera de cada mp3 en el navegador. Con tres filas son tres
+  peticiones a media por una etiqueta; por eso las filas llevan fecha y no duración.
+- **Un `embedUrl` de plataforma no tiene duración legible.** El iframe es de otro
+  dominio y su reproductor la sabe, pero nosotros no.
+
+🔴 O sea: si algún día el diseño quiere «12:04» junto al título en el LISTADO, eso sí
+es un campo del CMS y hay que pedirlo. Mientras la duración solo aparezca en el
+detalle, no.
+
+---
+
 ## 6. Lo que NO necesito
 
 - Que se toque nada del front.

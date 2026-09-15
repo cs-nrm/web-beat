@@ -11,6 +11,7 @@ import Base from '@/layouts/Base.astro';
 import NavSecciones from '@/components/NavSecciones.astro';
 import Lexical from '@/components/Lexical.astro';
 import TarjetaNota from '@/components/TarjetaNota.astro';
+import AudioNota from '@/components/AudioNota.astro';
 import Icono from '@/components/Icono.astro';
 import Anuncio from '@/components/Anuncio.astro';
 import { obtenerNota, obtenerRelacionadas } from '@/lib/cms/noticias';
@@ -414,6 +415,30 @@ const etiquetas = (nota.etiquetas ?? []).filter(
         </figure>
       )
     }
+
+    {/*
+      ── El audio principal, pegado bajo la foto ──
+
+      🔴 Va AQUÍ y no dentro del cuerpo (Carlos, 2026-09-15): «como tiene audio
+      principal, sería bueno que en el detalle aparezca en buena posición, hasta
+      arriba». Es lo que justifica una nota de Microambiente, así que tiene que ser
+      lo primero que se pueda pulsar — un reproductor a media nota se encuentra
+      cuando ya decidiste leerla.
+
+      ⚠️ Y comparte el margen del hero —lo pone el propio componente—, no el ancho
+      de lectura de 680px: pegado debajo de la foto y a su misma medida se lee como
+      una pieza del mismo bloque. Centrado y estrecho se leería como el primer
+      párrafo.
+
+      ⚠️ Va SIN envoltura, y es a propósito: si la nota no trae audio el componente
+      no emite nada, y un `<div>` vacío con márgenes puestos aquí sería el hueco que
+      alguien rellena por error dentro de seis meses.
+
+      ⚠️ El componente no se pinta si no hay audio capturado, así que esto NO es una
+      excepción de Microambiente: cualquier nota con `audio` lo trae, y las 43 del
+      CMS —ninguna con el campo lleno el 2026-09-15— siguen viéndose igual que ayer.
+    */}
+    <AudioNota nota={nota} />
 
     {/* ── Cuerpo a 680 + riel ── */}
     <div class="nt-abajo">

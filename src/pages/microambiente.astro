@@ -1,0 +1,127 @@
+---
+/**
+ * Microambiente — las notas que traen audio.
+ *
+ * 🔴 Es la tercera sección editorial y nace el 2026-09-15 (Carlos). A diferencia de
+ * sus dos hermanas NO usa `IndiceScanner`: aquí no hay destacada ni rejilla, hay
+ * una LISTA, y es la misma de `Microambiente.astro` que se pinta en el Inicio. Ese
+ * es todo el motivo de que esta página tenga consulta propia y `/editorial` sean
+ * cinco líneas.
+ *
+ * ⚠️ `microambiente` está en `SEGMENTOS_RESERVADOS` (`config/site.ts`). Sin eso, la
+ * ruta la resolvería `[tipoLista]` buscando un tipo de lista con ese slug, y cada
+ * visita dispararía una consulta al CMS para acabar en un 404.
+ *
+ * ⚠️ Sin publicidad, y es una omisión consciente, no un olvido: los huecos de este
+ * sitio se declaran uno a uno con su nombre (`agents/ads.md`) y no se inventa
+ * inventario al abrir una sección. El día que se quiera vender aquí, es una franja
+ * como la de `/beat-scanner`.
+ */
+import Base from '@/layouts/Base.astro';
+import CabezaSeccion from '@/components/CabezaSeccion.astro';
+import Microambiente from '@/components/inicio/Microambiente.astro';
+import { obtenerScanner, filtroDeCategoria } from '@/lib/cms/noticias';
+import { SECCIONES_EDITORIALES } from '@/config/navegacion';
+import { MEDIDA_TARJETA } from '@/config/site';
+
+const seccion = SECCIONES_EDITORIALES.microambiente;
+
+/*
+  🔴 `filtroDeCategoria` devuelve `null` cuando la categoría no existe en el CMS, y
+  ese `null` NO se le puede pasar a `obtenerScanner`: allí significa «sin filtro» y
+  traería TODAS las notas del sitio. Una sección que de pronto se ve llena de notas
+  ajenas no la reporta nadie; una vacía con un aviso se arregla el mismo día.
+*/
+const filtro = await filtroDeCategoria(seccion.categoria);
+const categoriaPerdida = !filtro;
+
+/*
+  Veinte, en UNA consulta. Es el mismo criterio que `IndiceScanner`: se pide de una
+  vez y se reparte en memoria, para que dos zonas de la misma página no tengan dos
+  relojes de caché y puedan quedar desfasadas.
+
+  ⚠️ Sin paginación, como el resto del sitio. Con la sección recién abierta —cero
+  notas capturadas el 2026-09-15— no hay nada que paginar; cuando el archivo crezca,
+  la decisión se toma con el número delante.
+*/
+const { destacada, rejilla } = filtro
+  ? await obtenerScanner(20, filtro)
+  : { destacada: null, rejilla: [] };
+
+/*
+  La destacada entra en la lista COMO UNA MÁS. En esta sección no hay una pieza de
+  portada que se pinte aparte —la lista es toda la pantalla—, así que apartarla
+  dejaría la nota más reciente fuera de su propia sección.
+*/
+const notas = [destacada, ...rejilla].filter((n): n is NonNullable<typeof n> => Boolean(n));
+---
+
+{/*
+  🔴 Su propia tarjeta de compartir, como las otras cinco secciones: la genera
+  `pnpm favicon` con el nombre de la sección encima (`scripts/favicon.mjs`). Sin
+  ella caería en el respaldo de marca y compartir esta sección se vería igual que
+  compartir la parrilla.
+
+  ⚠️ El `alt` describe lo que la imagen DICE, y ese texto está horneado en el PNG
+  por el script. Si allí se renombra la sección, este `alt` se cambia con él.
+*/}
+<Base
+  titulo="Microambiente — Beat 100.9"
+  descripcion="Las notas de Beat 100.9 que se escuchan: piezas sonoras, sesiones y conversaciones con su audio."
+  imagen="/img/og-microambiente.png"
+  imagenAlt="El wordmark de Beat 100.9 y el rótulo MICROAMBIENTE, en blanco sobre el negro de la marca."
+  imagenAncho={MEDIDA_TARJETA.ancho}
+  imagenAlto={MEDIDA_TARJETA.alto}
+>
+  <div class="mi-envoltura">
+    <CabezaSeccion titulo={seccion.rotulo} activa={seccion.href} />
+
+    <div class="mi-lista">
+      {/*
+        Sin notas no se pinta nada y la sección se queda vacía bajo su titular. Es
+        la regla de la casa: una zona sin contenido se deja vacía y sin rótulo.
+
+        Lo único que sí habla es la AVERÍA —el front pidiendo una categoría que el
+        CMS no tiene—, porque sin ese texto se ve idéntica a una sección vacía y
+        nadie la reporta. Mismo aviso y mismo motivo que en `IndiceScanner.astro`.
+      */}
+      <Microambiente notas={notas} seccion={seccion} contexto="seccion" />
+
+      {
+        categoriaPerdida && (
+          <p class="mi-averia">
+            {`La sección ${seccion.nombre} no encuentra su categoría en el CMS (slug «${seccion.categoria}»). Revisa que exista en «Categorías» y con ese slug exacto.`}
+          </p>
+        )
+      }
+    </div>
+  </div>
+</Base>
+
+<style>
+  .mi-envoltura {
+    max-width: var(--grid-max);
+    margin: 0 auto;
+  }
+  /*
+    El aire de los lados lo pone la PÁGINA y no el bloque, igual que en la sección
+    de Bonus Beat: así el titular de `CabezaSeccion` y las filas empiezan en la
+    misma línea. Con el relleno en los dos se sumaban y quedaba un escalón de 24px
+    que no dice nada.
+  */
+  .mi-lista {
+    padding: 30px 24px 44px;
+  }
+  .mi-averia {
+    max-width: 640px;
+    font: var(--type-body-sm);
+    color: var(--text-muted);
+    text-wrap: pretty;
+  }
+
+  @media (max-width: 899px) {
+    .mi-lista {
+      padding: 22px 16px 32px;
+    }
+  }
+</style>

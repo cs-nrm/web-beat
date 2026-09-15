@@ -15,13 +15,23 @@ interface:
     - `src/scripts/player.ts` — el núcleo: construir el SDK, la máquina de 6
       estados, los cue points, el pre-roll VAST, el modal del anuncio, el volumen
       y la marquesina
-    - `src/scripts/audio.ts` — 🔴 el ÁRBITRO: solo una fuente suena a la vez
+    - `src/scripts/audio.ts` — 🔴 el ÁRBITRO: solo una fuente suena a la vez.
+      ⚠️ Un `<audio>` que sale del DOM SIGUE SONANDO: por eso `audio-nota.ts` se
+      engancha a `astro:before-swap`. Y un EMBED de plataforma no se puede pausar
+      desde fuera — con iframe pueden sonar la radio y el audio a la vez
     - `src/scripts/pista.ts` — las pistas de Bonus Beat, en la MISMA barra
     - `src/scripts/senal.ts` — que «HOY EN LA SEÑAL» avance solo, sin pedir nada
     - `src/scripts/video.ts` — el visor de cápsulas (Plyr a demanda); entra por el
       árbitro
+    - `src/scripts/audio-nota.ts` — el audio principal de una nota (Microambiente),
+      en la PÁGINA y no en la barra. Un `<audio>` nativo, sin Plyr: son 110 KB para
+      dibujar un botón y una barra, y es el mismo criterio del motor nativo de
+      `pista.ts`. Plyr entra solo donde hay YouTube de por medio
     - `src/components/Cabecera.astro`, solo los `data-*` y `#td_container` /
       `#td-telon`. El marcado y el CSS son de frontend
+    - `src/components/AudioNota.astro`, solo los `data-*` (`data-audio-nota`,
+      `-src`, `-id`, `-play`, `-avance`, `-transcurrido`, `-total`) y los estados
+      `data-sonando` / `data-fallo`. El marcado y el CSS son de frontend
     - `src/lib/cms/estacion.ts` (`tritonMount`) y `src/lib/cms/aire.ts` (historial)
     - `src/pages/en-vivo/index.astro`
 

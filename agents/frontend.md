@@ -53,12 +53,14 @@ perder una tarde y luego hace dudar del resto de la documentación.
 | `src/components/inicio/Fenomeno.astro` | El bloque del Fenómeno Residente, con su visor de cápsulas |
 | `src/components/inicio/ArchivoTemas.astro` | El archivo de temas del Fenómeno |
 | `src/components/inicio/BonusBeat.astro` | Las tres canciones con su viñeta |
+| `src/components/inicio/Microambiente.astro` | Las notas con audio: el rótulo en una columna y las filas en las otras dos |
 | `src/components/inicio/Agenda.astro` | La agenda |
 | `src/components/inicio/Marquee.astro` | La tira que corre |
-| `src/components/IndiceScanner.astro` | El interior compartido de `/beat-scanner`, `/editorial` y `/etiqueta/*` |
+| `src/components/IndiceScanner.astro` | El interior compartido de `/beat-scanner`, `/editorial` y `/etiqueta/*`. ⚠️ `/microambiente` NO lo usa |
 | `src/components/TarjetaNota.astro` | La tarjeta de nota, en todos sus contextos |
 | `src/components/Lexical.astro` | El cuerpo de la nota, desde el Lexical del CMS |
 | `src/components/Embed.astro` | Los bloques incrustados del cuerpo |
+| `src/components/AudioNota.astro` | El audio principal de una nota, pegado bajo la foto. ⚠️ El COMPORTAMIENTO es de `agents/streaming.md` |
 | `src/components/CabezaSeccion.astro`, `Remate.astro`, `RejillaEdiciones.astro`, `PaginaTexto.astro`, `Icono.astro` | Las piezas compartidas |
 
 ### Estilos y tipografía
@@ -258,10 +260,15 @@ de pararlo, es justo lo que esa preferencia existe para quitar (WCAG 2.2.2).
   banda de 350px.
 - **La política de caché de `src/middleware.ts`** sí es de este agente; el bloque del
   `X-Robots-Tag` del mismo archivo NO — es de `agents/metadata.md`.
-- **El player**: `src/scripts/player.ts`, `audio.ts`, `pista.ts`, `senal.ts` y
-  `video.ts` son de `agents/streaming.md`. ⚠️ Se cruzan en `Cabecera.astro`, que es
-  donde vive el marcado del player: **el marcado es de este agente y el comportamiento
-  del otro.** Los `data-*` son el contrato entre los dos y no se renombran sin avisar.
+- **El player**: `src/scripts/player.ts`, `audio.ts`, `pista.ts`, `senal.ts`,
+  `video.ts` y `audio-nota.ts` son de `agents/streaming.md`. ⚠️ Se cruzan en
+  `Cabecera.astro`, que es donde vive el marcado del player, y desde el 2026-09-15
+  también en `AudioNota.astro`, que es la barra del audio de una nota: **el marcado
+  es de este agente y el comportamiento del otro.** Los `data-*` son el contrato
+  entre los dos y no se renombran sin avisar — en `AudioNota.astro` son
+  `data-audio-nota`, `data-audio-src`, `data-audio-id`, `data-audio-play`,
+  `data-audio-avance`, `data-audio-transcurrido`, `data-audio-total`, y los dos
+  estados que el CSS mira: `data-sonando` y `data-fallo`.
 - **Qué DATO baja a cada componente** — es de `agents/content.md`. Este agente decide
   cómo se ve; el otro, de dónde sale.
 - **Decidir la maqueta de una pantalla que el lienzo no describe.** El lienzo cubre el

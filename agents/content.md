@@ -45,11 +45,12 @@ perder una tarde y luego hace dudar del resto de la documentación.
 | `src/lib/cms/estacion.ts` | Los datos de marca, memorizados por proceso |
 | `src/lib/nota.ts` | Presentación derivada de una nota: firma, categoría, fecha, sección, enlaces de compartir |
 | `src/lib/video.ts` | `noticias.video` a algo que el reproductor entiende (id de YouTube ya validado) |
+| `src/lib/audio.ts` | `noticias.audio` a algo que se puede pintar: el mp3, o el iframe de una plataforma de la lista blanca |
 | `src/types/payload.ts` | Los tipos generados del CMS. **No se editan a mano** |
 | `payload-types.lock.json` y `scripts/sync-payload-types.mjs` | El commit del CMS al que están fijados esos tipos, y cómo se re-sincronizan |
 | `src/config/site.ts` | El contrato de rutas: `rutaNota`, `rutaEspecial`, `rutaEvento`, `rutaLista`, `rutaPrograma`, y `SEGMENTOS_RESERVADOS` |
 | `src/config/navegacion.ts` | Qué secciones existen, y qué categoría del CMS llena a cada una |
-| `src/pages/**` | Las 23 rutas: qué consulta cada una y cómo degrada si viene vacía |
+| `src/pages/**` | Las 24 rutas: qué consulta cada una y cómo degrada si viene vacía |
 
 ⚠️ **`src/lib/cms/publicidad.ts` NO es de este agente**, aunque viva en la misma
 carpeta: es la venta directa y es de `agents/ads.md`.
@@ -116,10 +117,11 @@ lo que se ve en pantalla ahora mismo.
 
 | Ruta | Archivo | De dónde sale |
 |---|---|---|
-| `/` | `src/pages/index.astro` | nueve consultas en paralelo, una por bloque |
+| `/` | `src/pages/index.astro` | ocho consultas en paralelo, una por bloque |
 | `/noticias/<slug>` | `src/pages/noticias/[slug].astro` | `noticias` |
 | `/beat-scanner` y `/beat-scanner/<categoria>` | `src/pages/beat-scanner.astro`, `src/pages/beat-scanner/[categoria].astro` | `noticias` filtradas por categoría |
 | `/editorial` | `src/pages/editorial.astro` | igual, con la otra categoría |
+| `/microambiente` | `src/pages/microambiente.astro` | igual, con la tercera. ⚠️ Interior PROPIO: una lista, no `IndiceScanner` |
 | `/etiqueta/<slug>` | `src/pages/etiqueta/[slug].astro` | `etiquetas` |
 | `/especiales/<slug>` y `/fenomeno-residente` | `src/pages/especiales/[slug].astro`, `src/pages/fenomeno-residente/index.astro` | `especiales` |
 | `/<tipoLista>` y `/<tipoLista>/<slug>` | `src/pages/[tipoLista]/index.astro`, `src/pages/[tipoLista]/[lista].astro` | `tipos-de-lista` + `listas` |
@@ -155,6 +157,37 @@ una ruta.
 los `redirects` de `astro.config.mjs`, con dos entradas extra escritas a mano para
 que no haya CADENA de redirecciones. De esos 301 dependen la migaja de cada nota ya
 publicada, el sitemap que emite el CMS y lo que la estación haya compartido.
+
+---
+
+## `noticias.audio`: un campo que estaba y no se leía
+
+🔴 **Desde el 2026-09-15 el front lee `noticias.audio`**, que el CMS tenía desde su
+reestructura y que ninguna plantilla tocaba. Lo resuelve `src/lib/audio.ts` y lo
+pinta `src/components/AudioNota.astro`, pegado bajo la foto de la nota.
+
+El grupo tiene tres campos y **`fuente` no decide nada**: es un desplegable con
+valor por omisión, así que las 43 notas capturadas antes de ese día traían
+`fuente: "embed"` con `embedUrl` y `archivo` en NULO — o sea «nadie tocó esto», no
+«esto es un embed». Lo que decide es qué hay capturado, y el ARCHIVO gana:
+
+1. `audio.archivo` → un mp3 nuestro, con la barra del sitio. Es el bueno: sin
+   iframe, sin terceros, y es el único que el árbitro de audio puede pausar cuando
+   arranca la radio.
+2. `audio.embedUrl` → el reproductor de la plataforma en un iframe, **solo si el
+   host está en la lista blanca** de `src/lib/audio.ts`. Si no, se degrada a un
+   enlace; nunca un iframe a una URL que no supimos leer.
+
+⚠️ **El `depth` importa aquí como en todo lo demás.** `audio.archivo` es una
+relación a `media`: con el `depth: 1` de los índices llega como id y `urlArchivo`
+devuelve `null`. Llega poblado en `obtenerNota`, que pide `depth: 2` — y es la
+única consulta que lo necesita, porque el audio solo se pinta en el detalle.
+
+⚠️ **`noticias.formato` sigue sin leerse.** La nota de Microambiente capturada trae
+`formato: "audio"`, pero el front no lo mira: pinta el audio si hay audio. Un
+formato que dijera «audio» sin archivo capturado dejaría una plantilla prometiendo
+algo que no está, y al revés —un archivo capturado con el formato en «estándar»—
+perdería el audio. El dato manda sobre la etiqueta.
 
 ---
 

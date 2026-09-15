@@ -21,18 +21,19 @@ export interface EntradaNav {
 }
 
 /**
- * 🔴 Las DOS secciones editoriales, y qué categoría del CMS alimenta a cada una.
+ * 🔴 Las TRES secciones editoriales, y qué categoría del CMS alimenta a cada una.
  *
- * Esto es nuevo del 2026-09-07 y es una decisión editorial de Carlos, no un
- * refactor: **son dos cosas distintas y hasta hoy el sitio las trataba como una.**
+ * Las dos primeras son del 2026-09-07 y son una decisión editorial de Carlos, no un
+ * refactor: **son cosas distintas y hasta ese día el sitio las trataba como una.**
  *
- *   `Beat Scanner` → el día a día. Va en la parte principal del Inicio.
- *   `Editorial`    → las notas más elaboradas. Va en la pila, más abajo.
+ *   `Beat Scanner`  → el día a día. Va en la parte principal del Inicio.
+ *   `Editorial`     → las notas más elaboradas. Va en la pila, más abajo.
+ *   `Microambiente` → las notas que traen audio (2026-09-15). Va en su bloque.
  *
- * Las dos usan el MISMO interior (`IndiceScanner`) porque la pantalla es la misma;
- * lo que cambia es de qué categoría se llena. Antes `/scanner` traía TODAS las
- * notas sin filtrar, así que las elaboradas y las del día se mezclaban en la misma
- * rejilla y ninguna de las dos secciones significaba nada.
+ * Scanner y Editorial usan el MISMO interior (`IndiceScanner`) porque la pantalla
+ * es la misma; lo que cambia es de qué categoría se llena. Antes `/scanner` traía
+ * TODAS las notas sin filtrar, así que las elaboradas y las del día se mezclaban en
+ * la misma rejilla y ninguna de las dos secciones significaba nada.
  *
  * 🔴 `categoria` es el `slug` de un documento de `categorias` del CMS, y es el
  * único punto de contacto: si la redacción renombra la categoría, el rótulo del
@@ -90,13 +91,38 @@ export const SECCIONES_EDITORIALES = {
     href: '/editorial',
     categoria: 'editorial',
   },
+  /**
+   * 🔴 La TERCERA, y entra el 2026-09-15 (Carlos): «son también como notas, pero su
+   * particularidad es que tienen audio».
+   *
+   * Es una sección editorial más —misma colección, misma URL de nota, mismo
+   * detalle— y por eso vive aquí y no en una estructura aparte: lo que la separa no
+   * es el tipo de documento sino el campo `noticias.audio`, que el CMS tiene desde
+   * la reestructura y que el front no leía. Ver `src/lib/audio.ts`.
+   *
+   * ⚠️ Lo que NO comparte con sus dos hermanas es el INTERIOR: Beat Scanner y
+   * Editorial usan `IndiceScanner` (destacada + rejilla) y esta usa la lista de
+   * `Microambiente.astro`. Por eso `/microambiente` no es una página de cinco
+   * líneas como `/editorial`.
+   *
+   * ⚠️ La categoría existe en el CMS desde el 2026-09-14 y el 2026-09-15 tenía CERO
+   * notas. La sección responde 200 y se pinta vacía hasta que la redacción capture
+   * —que es lo correcto y es la regla de la casa—, así que probarla con contenido
+   * exige capturar una nota primero.
+   */
+  microambiente: {
+    nombre: 'Microambiente',
+    rotulo: 'MICROAMBIENTE',
+    href: '/microambiente',
+    categoria: 'microambiente',
+  },
 } as const satisfies Record<string, SeccionEditorial>;
 
 /**
- * La navegación de arriba: SIETE secciones, en este orden.
+ * La navegación de arriba: OCHO secciones, en este orden.
  *
- * `EN VIVO · PROGRAMACIÓN · FENÓMENO RESIDENTE · BONUS BEAT · BEAT SCANNER ·
- * EDITORIAL · AGENDA`.
+ * `EN VIVO · PROGRAMACIÓN · FENÓMENO RESIDENTE · BONUS BEAT · MICROAMBIENTE ·
+ * BEAT SCANNER · EDITORIAL · AGENDA`.
  *
  * 🔴 «En vivo» y «Programación» entraron el 2026-09-09 (Carlos): «hay que agregar
  * a los menús, todos, la de en vivo y programación; antes las teníamos ocultas».
@@ -113,12 +139,22 @@ export const SECCIONES_EDITORIALES = {
  * 🔴 Van las dos DELANTE de lo editorial, y en este orden: qué suena ahora, qué
  * va a sonar, y luego lo que hay que leer. Es el orden en que se usa una radio.
  *
- * ⚠️ **Son SIETE en una fila que el lienzo dibujó con CINCO.** Medido tras el
- * cambio, no supuesto: la cabecera no desborda ni a 1280 ni a 390 —a partir de
- * 900px la fila de la cabecera se esconde y la navegación pasa a la hamburguesa—
- * y la tira de `NavSecciones` sigue envolviéndose en dos filas. Si un día entra
- * una octava, se vuelve a medir: es el sitio exacto donde ya se coló un desborde
- * de 510px en una caja de 390.
+ * ⚠️ **Son OCHO en una fila que el lienzo dibujó con CINCO**, y la octava entró el
+ * 2026-09-15. La entrada anterior avisaba de que había que volver a medir, así que
+ * se midió sobre el build SERVIDO, no sobre el lienzo:
+ *
+ *   · a 1280 — la fila de la cabecera cabe con holgura: 834px de contenido en una
+ *     caja de 834, terminando en el píxel 988 de 1280. La tira de `NavSecciones`
+ *     mete las ocho pastillas en UNA fila, 1192 de contenido en 1192 de caja.
+ *   · a 375 — la fila de la cabecera se esconde (`display: none`) y manda la
+ *     hamburguesa, como estaba previsto a partir de 900px. La tira envuelve en
+ *     CUATRO filas, 343 en 343.
+ *   · el documento no desborda a lo ancho en ninguna de las dos (`scrollWidth` =
+ *     `innerWidth`).
+ *
+ * 🔴 Si un día entra una NOVENA, se vuelve a medir igual: es el sitio exacto donde
+ * ya se coló un desborde de 510px en una caja de 390. Lo que aprieta primero es la
+ * fila de la cabecera, que es la que no envuelve.
  *
  * 🔴 Beat Scanner y Editorial son DOS entradas desde el 2026-09-07, cuando se
  * separaron en secciones con interior propio. Las dos tienen entrada porque las dos
@@ -134,9 +170,10 @@ export const SECCIONES_EDITORIALES = {
  * porque cabe, y porque abreviar el nombre de la sección estrella para ahorrar
  * 60px era una economía sin destinatario.
  *
- * ⚠️ La tira de `NavSecciones` las pinta todas y se ENVUELVE: a 375px salen en dos
- * filas, sin desbordar (medido). No se convierte en carrusel — una sección que hay
- * que descubrir arrastrando es una sección que no existe.
+ * ⚠️ La tira de `NavSecciones` las pinta todas y se ENVUELVE: a 375px salen en
+ * cuatro filas, sin desbordar (medido con ocho el 2026-09-15; eran dos filas con
+ * siete). No se convierte en carrusel — una sección que hay que descubrir
+ * arrastrando es una sección que no existe.
  *
  * ⚠️ Los `href` editoriales salen de `SECCIONES_EDITORIALES`, no escritos a mano:
  * son los mismos que usan las dos páginas y la migaja de cada nota, y tenerlos en
@@ -149,6 +186,18 @@ export const SECCIONES: EntradaNav[] = [
   { corto: 'Programación', largo: 'Programación', href: '/programacion' },
   { corto: 'Fenómeno Residente', largo: 'El Fenómeno Residente', href: '/fenomeno-residente' },
   { corto: 'Bonus Beat', largo: 'Bonus Beat', href: '/bonus-beat' },
+  /*
+    🔴 Microambiente va JUNTO a Bonus Beat y no con las otras dos editoriales, aunque
+    técnicamente sea hermana de ellas: las dos de aquí son las secciones que SUENAN.
+    El orden de esta fila es el orden en que se usa una radio —qué suena, qué va a
+    sonar, qué se escucha, qué se lee— y agrupar por parentesco de código en vez de
+    por lo que el lector viene a hacer es cómo se llega a un menú que nadie recorre.
+  */
+  {
+    corto: SECCIONES_EDITORIALES.microambiente.nombre,
+    largo: SECCIONES_EDITORIALES.microambiente.nombre,
+    href: SECCIONES_EDITORIALES.microambiente.href,
+  },
   {
     corto: SECCIONES_EDITORIALES.scanner.nombre,
     largo: SECCIONES_EDITORIALES.scanner.nombre,

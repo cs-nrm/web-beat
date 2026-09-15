@@ -1,0 +1,295 @@
+---
+/**
+ * «MICROAMBIENTE» — las notas que traen audio.
+ *
+ * 🔴 Nace el 2026-09-15 (Carlos). Son notas como las de Beat Scanner o Editorial
+ * —misma colección, misma URL, mismo detalle— y lo que las separa es que lo que las
+ * justifica es un AUDIO. Por eso la sección sale de una categoría del CMS y no de
+ * una colección nueva: el CMS ya tiene el campo y ya tiene la categoría
+ * (`microambiente`, creada el 2026-09-14).
+ *
+ * 🔴 La maqueta sale de Bonus Beat y se aparta en tres cosas, las tres pedidas:
+ *
+ *   · **La foto es más grande** — 180px contra los 92 de una canción. Ahí la
+ *     portada es un disco; aquí es la foto editorial de la nota.
+ *   · **No lleva botón de play.** En Bonus Beat la portada ES el botón porque la
+ *     canción suena en la barra sin salir de la página; aquí el audio vive en la
+ *     nota, así que la fila entera es un ENLACE y pulsar lleva al detalle. Dos
+ *     gestos distintos no pueden verse igual.
+ *   · **El rótulo va a la IZQUIERDA**, en su propia columna, y las notas ocupan las
+ *     otras dos. Es lo que más lo distingue de Bonus Beat, que lleva su rótulo
+ *     encima y a todo lo ancho.
+ *
+ * ⚠️ La foto va en 16:9 —`--proporcion-foto`— y no es una elección de esta pieza:
+ * comparte `transition:name` con el hero de la nota, así que dos cajas de distinta
+ * proporción se verían cambiar de encuadre durante la transición. Es lo mismo que
+ * está anotado en `TarjetaNota.astro` y en la nota.
+ */
+import Remate from '@/components/Remate.astro';
+import { urlMedia } from '@/lib/cms/client';
+import { fechaCorta } from '@/lib/nota';
+import type { SeccionEditorial } from '@/config/navegacion';
+import type { Noticia } from '@/types/payload';
+
+interface Props {
+  notas: Noticia[];
+  /** De aquí salen el rótulo y el destino del remate. */
+  seccion: SeccionEditorial;
+  /**
+   * Dónde se pinta.
+   *
+   *   `inicio`  — con su columna de la izquierda: el rótulo y el remate a la
+   *               sección. Es un bloque entre otros.
+   *   `seccion` — dentro de `/microambiente`: solo las filas, a todo lo ancho. El
+   *               rótulo ya lo lleva `CabezaSeccion`, y repetirlo dejaría el mismo
+   *               nombre dos veces con dos tipografías distintas — es la misma
+   *               decisión que `es-edicion` en `BonusBeat.astro`.
+   */
+  contexto?: 'inicio' | 'seccion';
+}
+
+const { notas, seccion, contexto = 'inicio' } = Astro.props;
+
+const enInicio = contexto === 'inicio';
+
+const filas = notas.map((n) => ({
+  nota: n,
+  href: `/noticias/${n.slug}`,
+  foto: urlMedia(n.imagen, 'card'),
+  alt: n.imagen && typeof n.imagen === 'object' ? (n.imagen.alt ?? '') : '',
+  fecha: fechaCorta(n.fecha ?? n.createdAt),
+}));
+---
+
+{
+  filas.length > 0 && (
+    <section class:list={['ma', `es-${contexto}`]}>
+      <div class="ma-reparto">
+        {enInicio && (
+          <div class="ma-columna">
+            {/*
+              El rótulo se descifra al entrar, como el de la pila y el de la cabecera
+              de sección. Ver `movimiento.md`: es el tratamiento de todo titular de
+              display del sitio, no un efecto de esta pieza.
+            */}
+            <h2 class="beat-display ma-seccion" data-escribir>
+              {seccion.rotulo}
+            </h2>
+            <Remate href={seccion.href} texto="VER TODAS" clase="ma-todo" />
+          </div>
+        )}
+
+        <div class="ma-lista">
+          {filas.map((f) => (
+            <a href={f.href} class="ma-fila" data-luz>
+              <div class="ma-foto" transition:name={`foto-nota-${f.nota.id}`}>
+                {f.foto && <img src={f.foto} alt={f.alt} loading="lazy" decoding="async" />}
+                <div class="beat-grid ma-trama" />
+              </div>
+              <div class="ma-texto">
+                <h3 class="ma-titulo">{f.nota.titulo}</h3>
+                {f.nota.resumen && <p class="ma-resumen">{f.nota.resumen}</p>}
+                {f.fecha && <span class="beat-label ma-fecha">{f.fecha}</span>}
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  /*
+    🔴 El relleno de ABAJO es igual que el de arriba, y no es simetría decorativa:
+    el bloque acababa pegado a la sección siguiente —medido el 2026-09-15 en el
+    Inicio: `hueco: 0`— y todo el aire lo ponía el vecino. Un bloque que depende del
+    relleno de quien venga detrás cambia de forma según a quién le toque ir después.
+
+    Con esto quedan 76px por arriba (32 de la franja del anuncio + 44) y 76 por
+    abajo (44 + 32 de la cabecera del Fenómeno).
+  */
+  .ma {
+    padding: 44px 24px;
+  }
+  /*
+    En la sección propia no pone NADA: ni aire arriba (lo trae la cabecera) ni a los
+    lados (lo pone la página). Con el relleno puesto se sumaban los dos y las filas
+    quedaban 48px adentro mientras el titular empezaba a 24. Mismo caso que
+    `.bb.es-edicion`.
+  */
+  .ma.es-seccion {
+    padding: 0;
+  }
+
+  /*
+    🔴 Una columna para el rótulo y DOS para las notas — que es el reparto que pidió
+    Carlos, y es lo que distingue este bloque de Bonus Beat.
+
+    La rejilla solo existe en el Inicio: en la sección no hay columna izquierda, así
+    que las filas van a todo lo ancho sin una rejilla de una sola columna por medio.
+  */
+  .ma.es-inicio .ma-reparto {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    align-items: start;
+    gap: 44px;
+  }
+
+  .ma-columna {
+    /*
+      Pegajosa bajo el cromo, como el riel de la nota: con tres filas no llega a
+      moverse, y en la sección —donde la lista es larga— acompañaría. Hoy solo la
+      pinta el Inicio, pero el valor es el mismo que usa el resto del sitio.
+    */
+    position: sticky;
+    top: calc(var(--chrome-h) + 16px);
+  }
+
+  /*
+    📖 Aquí había un `border-bottom`, copiado de `.bb-cabeza`, y se retiró el
+    2026-09-15 (Carlos: «como que se pierde un poco»).
+
+    🔴 En Bonus Beat ese filete funciona porque su cabecera va ENCIMA del bloque y
+    lo cruza entero. Aquí el rótulo es una columna de un tercio, así que el filete
+    terminaba en x 519 mientras el de la fila empezaba en x 563 y 50px más abajo:
+    dos trozos que no se encuentran, y el ojo los lee como un filete mal dibujado,
+    no como dos elementos distintos. Medido en pantalla, no supuesto.
+
+    Lo que da estructura al bloque son los filetes ENTRE filas, que sí se alinean
+    entre sí porque son la misma columna.
+  */
+  .ma-seccion {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--mist-2);
+    margin: 0;
+    text-wrap: balance;
+  }
+  .ma-todo {
+    margin-top: 16px;
+  }
+
+  .ma-lista {
+    min-width: 0;
+  }
+
+  /*
+    La fila ENTERA es el enlace, no el titular. Es la diferencia de gesto con Bonus
+    Beat —allí la portada es un botón que reproduce— y es también lo que hace que la
+    foto sea pulsable sin ser un control: en una fila-enlace, la foto lleva al mismo
+    sitio que el texto.
+  */
+  .ma-fila {
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr);
+    align-items: center;
+    gap: 20px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--border-hairline);
+  }
+  .ma-fila:first-child {
+    padding-top: 0;
+  }
+  /*
+    🔴 La última no cierra con filete. Separa filas, y después de la última no hay
+    ninguna que separar: lo único que quedaba debajo era el filete de la cabecera de
+    la sección siguiente, a 78px, y dos reglas horizontales casi paralelas con un
+    titular en medio se leen como un error de maqueta.
+  */
+  .ma-fila:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .ma-foto {
+    position: relative;
+    aspect-ratio: var(--proporcion-foto);
+    background: var(--grad-noche);
+    overflow: hidden;
+    border-radius: var(--r-media);
+  }
+  .ma-foto img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .ma-trama {
+    position: absolute;
+    inset: 0;
+  }
+
+  .ma-texto {
+    min-width: 0;
+  }
+  .ma-titulo {
+    margin: 0;
+    font: 600 20px / 1.24 var(--font-text);
+    color: var(--mist-2);
+    text-wrap: pretty;
+  }
+  .ma-fila:hover .ma-titulo {
+    color: var(--mist-0);
+  }
+  .ma-resumen {
+    margin: 8px 0 0;
+    font: 500 14px / 1.45 var(--font-text);
+    color: var(--text-muted);
+    text-wrap: pretty;
+    /* Dos líneas: la bajada acompaña al titular, no compite con él. */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+  .ma-fecha {
+    display: block;
+    margin-top: 10px;
+    color: var(--text-faint);
+    font-size: 8.5px;
+  }
+
+  @media (max-width: 899px) {
+    .ma {
+      padding: 32px 16px;
+    }
+    .ma.es-seccion {
+      padding: 0;
+    }
+    /*
+      Una columna: el rótulo pasa a ser una cabecera normal encima de las notas. La
+      columna pegajosa se suelta — a esta anchura se quedaría fija ocupando media
+      pantalla mientras se recorre la lista.
+    */
+    .ma.es-inicio .ma-reparto {
+      grid-template-columns: 1fr;
+      gap: 22px;
+    }
+    .ma-columna {
+      position: static;
+    }
+    .ma-seccion {
+      font-size: 20px;
+    }
+    /*
+      La foto se encoge y el texto conserva su medida. A 375px una foto de 180
+      dejaba 120px para el titular, y ahí no cabe una línea legible — medido en el
+      mismo sitio donde la onda del player dejó el título en 5px.
+    */
+    .ma-fila {
+      grid-template-columns: 116px minmax(0, 1fr);
+      gap: 14px;
+      padding: 14px 0;
+    }
+    .ma-titulo {
+      font-size: 16px;
+    }
+    .ma-resumen {
+      font-size: 13px;
+      -webkit-line-clamp: 2;
+    }
+  }
+</style>

@@ -201,6 +201,34 @@ nombre de la sección sobre el negro de la marca.
 - ⚠️ Si un cambio deja dos URLs sirviendo lo mismo, se colapsa una en la otra con
   301 en **un solo salto**. Ya pasó con `/scanner/editorial`, que daba dos.
 
+### Los índices paginados (2026-09-17)
+
+🔴 **La página 2 de una sección se canoniza a SÍ MISMA, con su `?pagina=2`.** Es la
+única vez que un parámetro entra en la canónica, y sin ella el sitio le estaría
+diciendo a Google que la 2 es un duplicado de la 1 — con lo que las **42 notas de
+Beat Scanner que solo viven de la página 2 en adelante** se quedarían sin indexar.
+Lo pone `Base.astro` con la prop `pagina`.
+
+🔴 **Y el `<title>` lleva su número**, al final: `Beat Scanner — Beat 100.9 —
+Página 3`. Cinco páginas con el mismo título es exactamente lo que el 301 de
+`/beat-scanner/editorial` vino a arreglar el 2026-09-07. Va al final y no
+incrustado en medio porque los títulos son cadenas escritas a mano en cada página,
+y partirlas aquí por guiones sería adivinar la forma de un texto de otro archivo.
+
+⚠️ **`Base.astro` NO lee `?pagina` de la URL: la prop la pasa la PÁGINA.** Si lo
+leyera solo, `/alexa?pagina=7` —o lo que invente un rastreador— saldría con canónica
+propia y con «Página 7» en el título, o sea que el sitio declararía indexables
+infinitas URLs de páginas que no paginan. Comprobado el 2026-09-17: `/alexa?pagina=7`
+canoniza a `/alexa`.
+
+⚠️ **Todo lo demás del query se sigue descartando.** Un `?utm_source=` o un
+`?fbclid=` no hacen otra página; dejarlos entrar convertiría cada enlace compartido
+en una canónica distinta.
+
+⚠️ `rel="prev"` / `rel="next"` van en los enlaces del paginador porque cuestan cero,
+pero **Google dejó de usarlos en 2019**: lo que hace el trabajo son los enlaces
+`<a href>` de verdad, que es la razón de que la tira sea servidor y no JavaScript.
+
 ---
 
 ## Sitemaps
@@ -221,7 +249,8 @@ preproducción. Ver la lista de `docs/despliegue-v2.md`.
 
 ## Títulos y descripciones
 
-- **Patrón del título:** `<lo específico> — Beat 100.9`. El Inicio es la excepción.
+- **Patrón del título:** `<lo específico> — Beat 100.9`. El Inicio es la excepción, y
+  una página de índice paginada añade ` — Página N` al final (ver arriba).
 - **Descripción: ≤ 160 caracteres.** Google corta ahí, y desde que existe Open Graph
   esa misma frase es lo que se ve al compartir en WhatsApp o Facebook: **deja de ser
   texto para un buscador y pasa a ser una frase que lee una persona.**

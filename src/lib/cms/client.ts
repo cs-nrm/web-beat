@@ -331,6 +331,51 @@ export async function cmsFetchEstacion<T>(
   return cmsFetch<T>(ruta, { ...params, 'where[estacion][equals]': id }, timeoutMs);
 }
 
+/**
+ * Cuántos documentos hay, para pintar un paginador. Devuelve `null` si no se pudo
+ * contar.
+ *
+ * 🔴 Es la «consulta APARTE» que anuncia `SIN_PAGINACION` unas líneas arriba, y
+ * existe para poder tener números de página SIN pagar el `COUNT` en cada consulta
+ * de contenido. Comprobado contra el CMS el 2026-09-17: con `pagination=false`
+ * Payload **sí respeta `page`** —devuelve la tanda correcta— y lo único que pierde
+ * es `totalDocs`/`totalPages`, que es justo lo que esto trae.
+ *
+ * Tres propiedades que no son casualidad:
+ *
+ *   · **No lleva `page`, ni `limit`, ni `sort`, ni `depth`** — solo el `where`. Así
+ *     las cinco páginas de una sección comparten UNA entrada de caché en vez de
+ *     pagar un `COUNT` cada una. Es lo contrario de la regla de oro y por la misma
+ *     razón: lo que no varía, no entra en la clave.
+ *   · **Timeout corto** (2.5 s contra los 8 de una consulta normal). Contar obliga
+ *     a Postgres a visitar la tabla entera —2,746 ms medidos en la producción de
+ *     Enfoque el 2026-08-15—, así que es lo primero que se degrada cuando la base
+ *     va apretada.
+ *   · **`catch` total y `null`**. Sin el total no hay números de página, y eso es
+ *     una vista con menos navegación; un `throw` sería una sección caída entera.
+ *     Quien llama decide, y lo que se pierde es la tira, no las notas.
+ *
+ * ⚠️ `/api/<coleccion>/count` es un endpoint de Payload, no un listado: responde
+ * `{ totalDocs }` y nada más. Comprobado contra el CMS el 2026-09-17.
+ */
+export async function cmsContarEstacion(
+  ruta: ColeccionPorEstacion,
+  params: ParamsCms = {},
+  timeoutMs = 2500,
+): Promise<number | null> {
+  try {
+    const id = await idEstacion();
+    const r = await cmsFetch<{ totalDocs?: number }>(
+      `${ruta}/count`,
+      { ...params, 'where[estacion][equals]': id },
+      timeoutMs,
+    );
+    return typeof r.totalDocs === 'number' ? r.totalDocs : null;
+  } catch {
+    return null;
+  }
+}
+
 // ============================================================
 // Media
 // ============================================================

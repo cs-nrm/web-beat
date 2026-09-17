@@ -20,11 +20,20 @@
 import Base from '@/layouts/Base.astro';
 import CabezaSeccion from '@/components/CabezaSeccion.astro';
 import Microambiente from '@/components/inicio/Microambiente.astro';
+import Paginador from '@/components/Paginador.astro';
 import { obtenerScanner, filtroDeCategoria } from '@/lib/cms/noticias';
 import { SECCIONES_EDITORIALES } from '@/config/navegacion';
 import { MEDIDA_TARJETA } from '@/config/site';
+import { leerPagina } from '@/lib/paginacion';
 
 const seccion = SECCIONES_EDITORIALES.microambiente;
+
+/*
+  La página pedida se lee AQUÍ, una vez, y baja a los tres que la necesitan: el
+  layout para su canónica y su `<title>`, la consulta, y la tira de abajo. El
+  contrato —el tope, la validación— vive en `src/lib/paginacion.ts`.
+*/
+const pagina = leerPagina(Astro.url);
 
 /*
   🔴 `filtroDeCategoria` devuelve `null` cuando la categoría no existe en el CMS, y
@@ -36,22 +45,27 @@ const filtro = await filtroDeCategoria(seccion.categoria);
 const categoriaPerdida = !filtro;
 
 /*
-  Veinte, en UNA consulta. Es el mismo criterio que `IndiceScanner`: se pide de una
-  vez y se reparte en memoria, para que dos zonas de la misma página no tengan dos
-  relojes de caché y puedan quedar desfasadas.
+  Veintiuna por página, en UNA consulta. Es el mismo criterio que `IndiceScanner`:
+  se pide de una vez y se reparte en memoria, para que dos zonas de la misma página
+  no tengan dos relojes de caché y puedan quedar desfasadas.
 
-  ⚠️ Sin paginación, como el resto del sitio. Con la sección recién abierta —cero
-  notas capturadas el 2026-09-15— no hay nada que paginar; cuando el archivo crezca,
-  la decisión se toma con el número delante.
+  🔴 Pagina desde el 2026-09-17, con las demás vistas. Aquí todavía no hacía falta
+  —una sola nota capturada— y se pone igual: el día que la sección crezca, el
+  archivo ya es alcanzable sin que nadie se acuerde de volver. Lo que lo motivó
+  fue Beat Scanner, que tenía 53 notas y 11 alcanzables.
 */
-const { destacada, rejilla } = filtro
-  ? await obtenerScanner(20, filtro)
-  : { destacada: null, rejilla: [] };
+const { destacada, rejilla, paginas } = filtro
+  ? await obtenerScanner(20, filtro, null, pagina)
+  : { destacada: null, rejilla: [], paginas: 1 };
 
 /*
   La destacada entra en la lista COMO UNA MÁS. En esta sección no hay una pieza de
   portada que se pinte aparte —la lista es toda la pantalla—, así que apartarla
   dejaría la nota más reciente fuera de su propia sección.
+
+  ⚠️ De la página 2 en adelante `destacada` llega `null` a propósito (ver
+  `obtenerScanner`), y este aplanado ya lo absorbía: el `filter` lo descarta y las
+  veintiuna de la tanda quedan en la lista. No hace falta nada más aquí.
 */
 const notas = [destacada, ...rejilla].filter((n): n is NonNullable<typeof n> => Boolean(n));
 ---
@@ -72,6 +86,7 @@ const notas = [destacada, ...rejilla].filter((n): n is NonNullable<typeof n> => 
   imagenAlt="El wordmark de Beat 100.9 y el rótulo MICROAMBIENTE, en blanco sobre el negro de la marca."
   imagenAncho={MEDIDA_TARJETA.ancho}
   imagenAlto={MEDIDA_TARJETA.alto}
+  pagina={pagina}
 >
   <div class="mi-envoltura">
     <CabezaSeccion titulo={seccion.rotulo} activa={seccion.href} />
@@ -95,6 +110,12 @@ const notas = [destacada, ...rejilla].filter((n): n is NonNullable<typeof n> => 
         )
       }
     </div>
+
+    {/*
+      La tira de páginas. Con una sola no pinta nada, que es el caso de hoy —una
+      nota capturada—; la regla vive en `Paginador.astro`.
+    */}
+    <Paginador actual={pagina} paginas={paginas} ruta={Astro.url.pathname} />
   </div>
 </Base>
 

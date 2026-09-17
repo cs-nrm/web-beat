@@ -33,6 +33,7 @@ import {
   TARJETA_COMPARTIR,
   noIndexarHost,
 } from '@/config/site';
+import { rutaPagina } from '@/lib/paginacion';
 import { nodoEstacion, serializar } from '@/lib/jsonld';
 import { ClientRouter } from 'astro:transitions';
 import Cabecera from '@/components/Cabecera.astro';
@@ -106,6 +107,24 @@ interface Props {
    * recogida. Se calcula solo a partir de la ruta y casi nunca hay que pasarlo.
    */
   vista?: 'inicio' | 'interior';
+  /**
+   * 🔴 La página de un índice paginado (`?pagina=2`). Solo la pasan las vistas que
+   * paginan, y por eso NO se lee aquí de `Astro.url`.
+   *
+   * La diferencia importa: si este layout leyera el parámetro por su cuenta,
+   * `/alexa?pagina=7` —o cualquier basura que un rastreador invente— saldría con
+   * canónica propia y con «Página 7» en el título, o sea que el sitio estaría
+   * declarando indexables infinitas URLs de páginas que no paginan. Declarándolo
+   * la página, una vista sin paginador no puede tenerlas.
+   *
+   * Lo que cambia son dos cosas, y las dos por el mismo motivo —que la 2 no es la
+   * 1—: la canónica se apunta a SÍ MISMA con el parámetro, y el `<title>` lleva su
+   * número. Sin lo primero, la página 2 le dice a Google que es un duplicado de la
+   * 1 y las 42 notas que solo viven ahí se quedan sin indexar; sin lo segundo, las
+   * cinco páginas de Beat Scanner comparten título, que es justo lo que el 301 de
+   * `/beat-scanner/editorial` vino a arreglar el 2026-09-07.
+   */
+  pagina?: number | null;
 }
 
 const {
@@ -119,6 +138,7 @@ const {
   publicado = null,
   modificado = null,
   noIndex = false,
+  pagina = null,
 } = Astro.props;
 
 /** El Inicio se distingue por la RUTA, no por lo que declare la página. */
@@ -193,7 +213,27 @@ const marca = estacion ?? {
   que otra cerró.
 */
 const noIndexar = NOINDEX_SITIO || noIndexarHost(Astro.url.hostname) || noIndex;
-const canonical = new URL(Astro.url.pathname, SITE_URL).href;
+/*
+  La canónica se apunta a SÍ MISMA, con la página cuando la hay.
+
+  ⚠️ Es el ÚNICO parámetro que entra: todo lo demás del query se descarta, como
+  siempre. Un `?utm_source=…` o un `?fbclid=…` no hacen otra página, y dejarlos
+  entrar convertiría cada enlace compartido en una URL canónica distinta.
+*/
+const paginaCanonica = typeof pagina === 'number' && pagina > 1 ? pagina : null;
+const canonical = new URL(
+  paginaCanonica ? rutaPagina(Astro.url.pathname, paginaCanonica) : Astro.url.pathname,
+  SITE_URL,
+).href;
+
+/*
+  El número va al FINAL y no incrustado en medio. Los títulos de este sitio son
+  cadenas escritas a mano —«Beat Scanner — Beat 100.9», «Ibiza — Beat Scanner —
+  Beat 100.9»— y meter el segmento en su sitio «correcto» obligaría a partirlas
+  aquí por guiones, que es adivinar la forma de un texto que escribió otro archivo.
+  Al final funciona con las dos y no puede romper ninguna.
+*/
+const tituloPagina = paginaCanonica ? `${titulo} — Página ${paginaCanonica}` : titulo;
 
 /**
  * 🔴 La imagen de compartir, SIEMPRE absoluta y siempre presente.
@@ -352,7 +392,7 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{titulo}</title>
+    <title>{tituloPagina}</title>
     <meta name="description" content={resumen} />
     <link rel="canonical" href={canonical} />
 
@@ -391,7 +431,7 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
     <meta property="og:site_name" content="Beat 100.9" />
     <meta property="og:locale" content={LOCALE_OG} />
     <meta property="og:type" content={tipo} />
-    <meta property="og:title" content={titulo} />
+    <meta property="og:title" content={tituloPagina} />
     <meta property="og:description" content={resumen} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={imagenCompartir} />

@@ -1,0 +1,186 @@
+---
+/**
+ * La tira de páginas de una vista de índice.
+ *
+ * 🔴 Nace el 2026-09-17 con un número detrás: Beat Scanner tenía **53 notas
+ * publicadas y 11 alcanzables**. Las otras 42 respondían por URL y estaban en el
+ * sitemap, pero desde el sitio no había manera de llegar a ellas. El contrato de la
+ * URL —`?pagina=N`, el tope y la ventana de números— vive en `src/lib/paginacion.ts`.
+ *
+ * 🔴 Es SERVIDOR, no JavaScript: cada página tiene su enlace, se puede compartir,
+ * el buscador la recorre y funciona sin JS. Es el mismo criterio con el que la
+ * Agenda resolvía su filtro en el servidor en vez de esconder filas en el cliente.
+ *
+ * ⚠️ Con una sola página no se pinta NADA. Es la regla de la casa —una zona sin
+ * contenido se deja vacía y sin rótulo—: una tira que solo dice «1» cuenta el
+ * inventario de la página que el lector ya tiene delante, que es exactamente lo
+ * que tumbó el rótulo de `CabezaSeccion`.
+ *
+ * 🔴 Salvo si la página pedida NO EXISTE, y ahí sí se pinta. `?pagina=9` tecleado a
+ * mano en una sección de cinco sirve una vista vacía, y sin tira era un callejón
+ * sin salida: nada en pantalla llevaba de vuelta al contenido. Peor todavía con un
+ * «Anterior» ingenuo —9 → 8 → 7—, que son tres vistas vacías más antes de llegar a
+ * algo. Por eso `anterior` se ACOTA a la última página real: un clic y el lector
+ * está de vuelta en notas.
+ */
+import { HUECO, rutaPagina, ventanaPaginas } from '@/lib/paginacion';
+
+interface Props {
+  /** La página en curso, ya validada por `leerPagina`. */
+  actual: number;
+  /** Cuántas hay. Con 1 o menos, este componente no pinta nada. */
+  paginas: number;
+  /**
+   * La ruta sobre la que se cuelga el `?pagina=`. La pone quien llama y no se
+   * adivina con `Astro.url.pathname`: en un componente que usan cuatro rutas, leer
+   * la URL por su cuenta es lo que hace que un día una de las cuatro pagine sobre
+   * el path equivocado sin que nadie lo note.
+   */
+  ruta: string;
+}
+
+const { actual, paginas, ruta } = Astro.props;
+
+const numeros = ventanaPaginas(actual, paginas);
+/* Acotado a la última que existe: ver el porqué en la cabecera. */
+const anterior = actual > 1 ? Math.min(actual - 1, paginas) : null;
+const siguiente = actual < paginas ? actual + 1 : null;
+/** Se pinta si hay dónde ir, o si el lector está en una página que no existe. */
+const sirve = paginas > 1 || actual > paginas;
+---
+
+{
+  sirve && (
+    <nav class="pg" aria-label="Paginación">
+      {/*
+        Los extremos se pintan como `<span>` cuando no llevan a ningún sitio, no
+        como un enlace apagado: un `<a>` sin `href` no es enfocable ni anunciable, y
+        uno con `href` y `aria-disabled` sigue navegando al hacer clic.
+      */}
+      {anterior ? (
+        <a href={rutaPagina(ruta, anterior)} rel="prev" class="beat-label pg-salto">
+          Anterior
+        </a>
+      ) : (
+        <span class="beat-label pg-salto es-muda">Anterior</span>
+      )}
+
+      <div class="pg-numeros">
+        {numeros.map((n) =>
+          n === HUECO ? (
+            <span class="beat-label pg-hueco" aria-hidden="true">
+              …
+            </span>
+          ) : n === actual ? (
+            <span class="beat-label pg-num es-activa" aria-current="page">
+              {n}
+            </span>
+          ) : (
+            <a href={rutaPagina(ruta, n)} class="beat-label pg-num" aria-label={`Página ${n}`}>
+              {n}
+            </a>
+          ),
+        )}
+      </div>
+
+      {siguiente ? (
+        <a href={rutaPagina(ruta, siguiente)} rel="next" class="beat-label pg-salto">
+          Siguiente
+        </a>
+      ) : (
+        <span class="beat-label pg-salto es-muda">Siguiente</span>
+      )}
+    </nav>
+  )
+}
+
+<style>
+  /*
+    Misma pastilla que la tira de secciones (`NavSecciones.astro`): el sitio ya
+    tiene UNA forma de «pastilla de navegación» y esta es otra instancia, no un
+    elemento nuevo. Si esa medida cambia, cambia en los dos sitios a la vez — y es
+    preferible a inventar aquí un tercer tamaño de pastilla.
+  */
+  .pg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 36px 24px 8px;
+    border-top: 1px solid var(--border-quiet);
+    margin: 0 24px;
+  }
+  .pg-numeros {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pg-num,
+  .pg-salto {
+    padding: 9px 14px;
+    border-radius: 999px;
+    background: var(--surface-card);
+    box-shadow: inset 0 0 0 1px var(--border-hairline);
+    color: var(--text-body);
+    font-size: 9px;
+    white-space: nowrap;
+    transition: color var(--dur-2) var(--ease-out);
+  }
+  .pg-num {
+    /* Los dígitos no tienen el mismo ancho que las letras: sin esto la tira se
+       reacomoda al pasar de «9» a «10» y los números bailan. */
+    min-width: 34px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .pg-num:hover,
+  .pg-salto:hover {
+    color: var(--mist-0);
+  }
+  /*
+    La actual se INVIERTE, no se aclara — igual que la sección activa de la tira, y
+    por el mismo motivo escrito allá: nunca por opacidad sobre las demás.
+  */
+  .pg-num.es-activa {
+    background: var(--mist-0);
+    box-shadow: none;
+    color: var(--noche-0);
+  }
+  /* El extremo que no lleva a ningún sitio: se ve que está, y se ve que no va. */
+  .pg-salto.es-muda {
+    color: var(--text-faint);
+    background: transparent;
+    box-shadow: inset 0 0 0 1px var(--border-quiet);
+  }
+  .pg-hueco {
+    padding: 0 2px;
+    color: var(--text-faint);
+    font-size: 9px;
+  }
+
+  @media (max-width: 899px) {
+    .pg {
+      gap: 7px;
+      padding: 28px 16px 4px;
+      margin: 0 16px;
+    }
+    .pg-numeros {
+      gap: 7px;
+      /* En 390 la tira completa no cabe en una línea junto a los dos extremos:
+         los números se van solos a la suya y quedan centrados bajo ellos. */
+      order: 3;
+      width: 100%;
+      justify-content: center;
+      padding-top: 10px;
+    }
+    .pg-num,
+    .pg-salto {
+      padding: 10px 13px;
+      font-size: 8.5px;
+    }
+    .pg-num {
+      min-width: 32px;
+    }
+  }
+</style>

@@ -19,6 +19,14 @@ import Base from '@/layouts/Base.astro';
 import IndiceScanner from '@/components/IndiceScanner.astro';
 import { SECCIONES_EDITORIALES } from '@/config/navegacion';
 import { MEDIDA_TARJETA } from '@/config/site';
+import { leerPagina } from '@/lib/paginacion';
+/*
+  La página pedida se lee AQUÍ, una vez, y baja a los dos que la necesitan: el
+  layout para su canónica y su `<title>`, y el índice para su consulta. Leerla en
+  cada uno por su cuenta es como se acaba sirviendo la página 2 con la canónica de
+  la 1. El contrato —el tope, la validación— vive en `src/lib/paginacion.ts`.
+*/
+const pagina = leerPagina(Astro.url);
 ---
 
 {/*
@@ -44,6 +52,7 @@ import { MEDIDA_TARJETA } from '@/config/site';
   imagenAlt="El wordmark de Beat 100.9 y el rótulo EDITORIAL, en blanco sobre el negro de la marca."
   imagenAncho={MEDIDA_TARJETA.ancho}
   imagenAlto={MEDIDA_TARJETA.alto}
+  pagina={pagina}
 >
-  <IndiceScanner seccion={SECCIONES_EDITORIALES.editorial} />
+  <IndiceScanner seccion={SECCIONES_EDITORIALES.editorial} pagina={pagina} />
 </Base>

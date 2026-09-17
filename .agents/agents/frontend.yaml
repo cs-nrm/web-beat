@@ -16,7 +16,10 @@ interface:
     - `src/layouts/Base.astro` — el cascarón: el orden del `body`, `data-vista`, el
       slot `sobre-cabecera`, la barra de progreso y el cableado de `src/scripts/`
     - `src/components/Cabecera.astro`, `MenuLleno.astro`, `Pie.astro`,
-      `NavSecciones.astro`, `Intro.astro` — el cromo
+      `NavSecciones.astro`, `Paginador.astro`, `Intro.astro` — el cromo.
+      ⚠️ `Paginador.astro` reusa la pastilla de `NavSecciones.astro` a propósito:
+      el sitio tiene UNA forma de pastilla de navegación y esa medida cambia en
+      los dos a la vez. Es SERVIDOR, no JavaScript
     - `src/components/inicio/` y el resto de `src/components/` — los bloques.
       ⚠️ En `AudioNota.astro` el marcado y el CSS son tuyos y el COMPORTAMIENTO es
       de streaming (`src/scripts/audio-nota.ts`); los `data-audio-*` son el

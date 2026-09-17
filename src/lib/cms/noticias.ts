@@ -6,11 +6,13 @@
  * sección vive en la ruta y en la nav, no en el CMS.
  */
 import {
+  cmsContarEstacion,
   cmsFetchEstacion,
   SIN_PAGINACION,
   type ParamsCms,
   type RespuestaLista,
 } from './client';
+import { totalPaginas } from '@/lib/paginacion';
 import { obtenerCategoria } from './categorias';
 import type { Noticia } from '@/types/payload';
 
@@ -103,35 +105,74 @@ export async function filtroDeCategoria(slug: string): Promise<FiltroScanner | n
 }
 
 /**
- * Portada de una sección editorial: la nota principal y la rejilla.
+ * Portada de una sección editorial: la nota principal, la rejilla y su paginación.
  *
  * Se pide UNA sola consulta y se reparte en memoria. Es deliberado: si la
  * destacada y la rejilla fueran dos consultas, tendrían dos relojes de caché
  * independientes y podrían quedar desfasadas —la destacada vieja con la rejilla
  * nueva—. Le pasó a `web-enfoque` y se arregló exactamente así.
+ *
+ * 🔴 Pagina desde el 2026-09-17, y la razón es un número: Beat Scanner tenía **53
+ * notas y 11 alcanzables**. Ver `src/lib/paginacion.ts` para el contrato de la URL.
+ *
+ * 🔴 El tamaño de página es `cuantas + 1` y es CONSTANTE entre páginas. Tiene que
+ * serlo: el desplazamiento lo calcula Payload como `(page - 1) * limit`, así que un
+ * `limit` distinto en la página 2 —por ejemplo, 11 en la primera y 10 en las demás
+ * por no tener destacada— se saltaría una nota en cada salto. La destacada sale de
+ * la tanda, no de una consulta aparte.
+ *
+ * ⚠️ `SIN_PAGINACION` se queda PUESTO aunque esto pagine, y no es una contradicción
+ * con lo que dice `client.ts`. Comprobado contra el CMS el 2026-09-17: con
+ * `pagination=false` Payload respeta `page` y devuelve la tanda correcta; lo único
+ * que deja de servir es su `totalDocs`. El total lo trae `cmsContarEstacion` en una
+ * consulta aparte que NO lleva `page`, así que las cinco páginas de una sección
+ * comparten un solo `COUNT` en vez de pagar uno cada una.
  */
 export async function obtenerScanner(
   cuantas = 10,
   filtro?: FiltroScanner | null,
   excluir?: FiltroScanner | null,
+  pagina = 1,
 ): Promise<{
+  /** La nota principal. **Solo en la página 1**: en las demás no hay portada que destacar. */
   destacada: Noticia | null;
   rejilla: Noticia[];
+  /** Cuántas páginas hay, ya acotado. 1 cuando no se pudo contar: la tira no se pinta. */
+  paginas: number;
 }> {
-  try {
-    const r = await cmsFetchEstacion<RespuestaLista<Noticia>>('noticias', {
+  const porPagina = cuantas + 1;
+  const where = { ...SOLO_NOTICIAS, ...acotar(filtro, excluir) };
+
+  /*
+    Las dos en paralelo: el conteo no es la ruta crítica y ya degrada solo. Si
+    tarda más que su timeout corto devuelve `null` y la vista se queda sin tira de
+    números —que es una vista con menos navegación, no una vista rota—.
+  */
+  const [lista, total] = await Promise.all([
+    cmsFetchEstacion<RespuestaLista<Noticia>>('noticias', {
       ...BASE_INDICE,
-      ...SOLO_NOTICIAS,
-      ...acotar(filtro, excluir),
+      ...where,
       sort: ORDEN,
-      limit: cuantas + 1,
-    });
-    const [destacada, ...rejilla] = r.docs;
-    return { destacada: destacada ?? null, rejilla };
-  } catch {
-    // Degrada: media portada es mejor que un 500.
-    return { destacada: null, rejilla: [] };
-  }
+      limit: porPagina,
+      page: pagina,
+    }).catch(() => null),
+    cmsContarEstacion('noticias', where),
+  ]);
+
+  // Degrada: media portada es mejor que un 500.
+  if (!lista) return { destacada: null, rejilla: [], paginas: 1 };
+
+  const paginas = totalPaginas(total ?? 0, porPagina);
+
+  /*
+    La destacada es de la PÁGINA 1. En la 2 no hay ninguna nota que sea «la
+    principal» —son las siguientes once, todas del mismo peso—, y darle a la
+    duodécima nota más vieja el tratamiento de portada diría algo que no es cierto.
+  */
+  if (pagina > 1) return { destacada: null, rejilla: lista.docs, paginas };
+
+  const [destacada, ...rejilla] = lista.docs;
+  return { destacada: destacada ?? null, rejilla, paginas };
 }
 
 /** Una nota por slug. A diferencia del resto, este error SÍ se propaga: la página

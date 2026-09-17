@@ -19,7 +19,7 @@ Lo que decía y lo que hay:
 | `src/content/` + `src/content/config.ts` con schema Zod | **No existe.** No hay colecciones de contenido de Astro, ni MDX, ni Markdown |
 | `src/pages/rss.xml.js` y `@astrojs/sitemap` | **No existen.** Los feeds los genera el CMS y este dominio los proxea |
 | Astro SSG, 53 rutas, 16 secciones por categoría de WP | **SSR** (`output: 'server'`, adaptador node), 23 archivos de ruta, 5 secciones |
-| `getStaticPaths()` y `paginate()` | **No se usan en ninguna ruta.** Todo se resuelve por petición |
+| `getStaticPaths()` y `paginate()` | **No se usan en ninguna ruta.** Todo se resuelve por petición — la paginación de los índices es propia, ver abajo |
 | SEO y Open Graph «en `BaseHead.astro`» | `BaseHead.astro` no existe, y el SEO es de `agents/metadata.md` |
 | Compatibilidad con Yoast | No hay Yoast: la ficha SEO es el grupo `noticias.meta` de Payload |
 
@@ -34,7 +34,7 @@ perder una tarde y luego hace dudar del resto de la documentación.
 
 | Archivo | Qué le toca |
 |---|---|
-| `src/lib/cms/client.ts` | El transporte: `cmsFetch`, `cmsFetchEstacion`, la caché con deduplicación, y `urlMedia` / `urlArchivo` |
+| `src/lib/cms/client.ts` | El transporte: `cmsFetch`, `cmsFetchEstacion`, `cmsContarEstacion`, la caché con deduplicación, y `urlMedia` / `urlArchivo` |
 | `src/lib/cms/noticias.ts` | Beat Scanner y Editorial: el índice, la nota, las relacionadas y el filtro `distribucion` |
 | `src/lib/cms/categorias.ts` | Categorías y etiquetas, siempre **por slug** |
 | `src/lib/cms/listas.ts` | Bonus Beat y cualquier tipo de lista que la estación cree |
@@ -43,6 +43,7 @@ perder una tarde y luego hace dudar del resto de la documentación.
 | `src/lib/cms/programacion.ts` | La parrilla, resuelta contra el reloj **en el servidor** |
 | `src/lib/cms/aire.ts` | La bitácora del playout: «lo que sonó» |
 | `src/lib/cms/estacion.ts` | Los datos de marca, memorizados por proceso |
+| `src/lib/paginacion.ts` | El contrato de `?pagina=N`: el tope, la validación, la ventana de números |
 | `src/lib/nota.ts` | Presentación derivada de una nota: firma, categoría, fecha, sección, enlaces de compartir |
 | `src/lib/video.ts` | `noticias.video` a algo que el reproductor entiende (id de YouTube ya validado) |
 | `src/lib/audio.ts` | `noticias.audio` a algo que se puede pintar: el mp3, o el iframe de una plataforma de la lista blanca |
@@ -191,6 +192,63 @@ perdería el audio. El dato manda sobre la etiqueta.
 
 ---
 
+## La paginación de los índices (2026-09-17)
+
+🔴 **Nació con un número: Beat Scanner tenía 53 notas publicadas y 11
+alcanzables.** Las otras 42 respondían por su URL y estaban en el sitemap que emite
+el CMS, pero desde el sitio no había forma de llegar a ellas. Medido contra el CMS
+ese día: Beat Scanner 53, Editorial 5, Microambiente 1, y la etiqueta más poblada
+(`musica`) 10 — o sea que la única vista que perdía contenido era la primera, pero
+el arreglo va en `IndiceScanner.astro`, que lo comparten cuatro rutas.
+
+Paginan cinco vistas: `/beat-scanner`, `/editorial`, `/beat-scanner/<categoria>`,
+`/etiqueta/<slug>` (las cuatro por `IndiceScanner`) y `/microambiente`, que tiene
+lista propia. La Agenda y `/<tipoLista>` **no**: 1 evento y 1 edición en el CMS.
+
+🔴 **`SIN_PAGINACION` se queda PUESTO, y aun así se pagina.** Parece contradecir lo
+que dice `client.ts` y no lo hace. Comprobado contra el CMS el 2026-09-17: con
+`pagination=false` Payload **sí respeta `page`** y devuelve la tanda correcta; lo
+único que deja de servir es su `totalDocs`, que pasa a contar los documentos
+devueltos. Así que el contenido no paga el `COUNT`.
+
+🔴 **El total lo trae `cmsContarEstacion`, en la consulta APARTE que anuncia
+`client.ts`**, contra el endpoint `/api/<coleccion>/count` de Payload. No lleva
+`page`, ni `limit`, ni `sort`, ni `depth` — solo el `where`—, así que **las cinco
+páginas de una sección comparten un solo `COUNT`** en vez de pagar uno cada una.
+Timeout corto (2.5 s contra los 8 de una consulta normal) y `catch` total: sin total
+no hay tira de números, que es una vista con menos navegación y no una vista rota.
+
+🔴 **El tamaño de página es CONSTANTE entre páginas** (11 en `IndiceScanner`, 21 en
+Microambiente). Tiene que serlo: el desplazamiento lo calcula Payload como
+`(page - 1) * limit`, así que un `limit` distinto en la página 2 —por ejemplo, por
+no tener destacada— se saltaría una nota en cada salto. La destacada sale de la
+tanda, y de la página 2 en adelante **no hay destacada**: no hay ninguna nota que
+sea «la principal» entre las once más viejas.
+
+⚠️ **`?pagina=N` va validado contra un rango CERRADO** (`TOPE_PAGINA`, 200). Es la
+regla de oro de este cliente aplicada a la URL: la clave de caché es la consulta
+entera, así que `?pagina=999999999` es una entrada de caché regalada y hay tantas
+como números quiera teclear alguien. Mismo motivo y misma forma que el `PAGINA_MAX`
+de `src/lib/feeds.ts`. Lo que no sea un entero dentro del rango cae a la página 1.
+
+⚠️ **La página va en el QUERY y no en la ruta.** Dos de las cuatro vistas de
+`IndiceScanner` ya son rutas dinámicas, así que con segmento habría cuatro archivos
+de ruta más — y un `/pagina/` de primer nivel chocaría con `[tipoLista]`, que reclama
+cualquier primer segmento que no esté reservado.
+
+⚠️ **La página 1 va SIN parámetro.** Sin eso, `/beat-scanner` y
+`/beat-scanner?pagina=1` son dos URLs con el mismo contenido.
+
+⚠️ **Una página fuera de rango no es un 404**, porque `IndiceScanner` es un
+componente y no puede hacer `Astro.rewrite`. Sirve una vista vacía, y para que no
+sea un callejón sin salida el «Anterior» del paginador se **acota a la última página
+real**: `?pagina=9` en una sección de cinco lleva de vuelta a la 5 en un clic, no a
+la 8. Nada del sitio enlaza esas URLs.
+
+La canónica y el `<title>` de una página paginada son de `agents/metadata.md`.
+
+---
+
 ## Los tipos: generados y FIJADOS a un commit
 
 `src/types/payload.ts` sale del CMS, y `payload-types.lock.json` guarda a qué commit
@@ -284,6 +342,24 @@ mira el contenido:
 ```bash
 # ¿Trae notas de verdad, o es el estado vacío?
 curl -s http://localhost:4321/beat-scanner | grep -c 'href="/noticias/'
+```
+
+🔴 **Y de una vista paginada se comprueba que el archivo ENTERO es alcanzable**, no
+que la página 2 responda: el fallo que esto vino a arreglar no era un 500, era una
+sección que se veía completa. Lo que delata un `limit` mal repartido es una nota
+repetida entre páginas o una que no sale en ninguna.
+
+```bash
+# Las 5 páginas de Beat Scanner: la unión tiene que dar el total del CMS, sin repetidas.
+for p in 1 2 3 4 5; do
+  curl -s "http://localhost:4322/beat-scanner?pagina=$p" |
+    grep -o 'href="/noticias/[a-z0-9-]*"' | sort -u
+done | sort | tee /tmp/paginas.txt | uniq -d           # vacío = ninguna repetida
+sort -u /tmp/paginas.txt | wc -l                        # = totalDocs de la categoría
+
+# La canónica de la 2 se apunta a sí misma, y la de una página que NO pagina no.
+curl -s 'http://localhost:4322/beat-scanner?pagina=3' | grep -E 'canonical|<title>'
+curl -s 'http://localhost:4322/alexa?pagina=7'        | grep -E 'canonical|<title>'
 ```
 
 🔴 **Y toda ruta nueva se prueba con Inicio → nota → atrás.** No es ceremonia: es

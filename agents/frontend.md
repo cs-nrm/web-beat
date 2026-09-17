@@ -56,11 +56,12 @@ perder una tarde y luego hace dudar del resto de la documentación.
 | `src/components/inicio/Microambiente.astro` | Las notas con audio: el rótulo en una columna y las filas en las otras dos |
 | `src/components/inicio/Agenda.astro` | La agenda |
 | `src/components/inicio/Marquee.astro` | La tira que corre |
-| `src/components/IndiceScanner.astro` | El interior compartido de `/beat-scanner`, `/editorial` y `/etiqueta/*`. ⚠️ `/microambiente` NO lo usa |
+| `src/components/IndiceScanner.astro` | El interior compartido de `/beat-scanner`, `/editorial`, `/beat-scanner/*` y `/etiqueta/*`. ⚠️ `/microambiente` NO lo usa. Desde el 2026-09-17 pagina: la destacada es de la página 1 y de la 2 en adelante la cuadrícula es lo primero (`.es-cabeza`) |
 | `src/components/TarjetaNota.astro` | La tarjeta de nota, en todos sus contextos |
 | `src/components/Lexical.astro` | El cuerpo de la nota, desde el Lexical del CMS |
 | `src/components/Embed.astro` | Los bloques incrustados del cuerpo |
 | `src/components/AudioNota.astro` | El audio principal de una nota, pegado bajo la foto. ⚠️ El COMPORTAMIENTO es de `agents/streaming.md` |
+| `src/components/Paginador.astro` | La tira de páginas de los índices. ⚠️ Es SERVIDOR, no JavaScript, y con una sola página no pinta nada |
 | `src/components/CabezaSeccion.astro`, `Remate.astro`, `RejillaEdiciones.astro`, `PaginaTexto.astro`, `Icono.astro` | Las piezas compartidas |
 
 ### Estilos y tipografía

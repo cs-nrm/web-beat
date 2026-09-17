@@ -17,6 +17,7 @@ import CabezaSeccion from '@/components/CabezaSeccion.astro';
 import TarjetaNota from '@/components/TarjetaNota.astro';
 import Anuncio from '@/components/Anuncio.astro';
 import Icono from '@/components/Icono.astro';
+import Paginador from '@/components/Paginador.astro';
 import { obtenerScanner, filtroDeCategoria, type FiltroScanner } from '@/lib/cms/noticias';
 import { nombreCategoria, fechaCorta } from '@/lib/nota';
 import { urlMedia } from '@/lib/cms/client';
@@ -35,9 +36,16 @@ interface Props {
    * etiqueta (`/etiqueta/<slug>`). Cuando viene, manda él.
    */
   filtro?: FiltroScanner | null;
+  /**
+   * La página pedida, ya validada con `leerPagina`. La lee la PÁGINA y la pasa,
+   * no se saca aquí de `Astro.url`: la misma cifra la necesita `<Base>` para su
+   * canónica y su `<title>`, y dos lecturas de la URL en dos archivos distintos
+   * es como se acaba con una canónica que apunta a otra página que la servida.
+   */
+  pagina?: number;
 }
 
-const { seccion = null, filtro = null } = Astro.props;
+const { seccion = null, filtro = null, pagina = 1 } = Astro.props;
 
 /*
   🔴 Si no hay un filtro más estrecho, filtra la SECCIÓN por su categoría.
@@ -54,16 +62,35 @@ const categoriaPerdida = Boolean(!filtro && seccion && !deLaSeccion);
 const efectivo = filtro ?? deLaSeccion;
 
 /**
- * Se piden 11: 1 destacada + 6 de rejilla + 4 de las filas de abajo. Es una sola
- * consulta repartida en memoria, para que las tres zonas no puedan quedar
- * desfasadas entre sí (ver el comentario de `obtenerScanner`).
+ * Once por página: en la primera, 1 destacada + 6 de rejilla + 4 de las filas de
+ * abajo; de la segunda en adelante, 6 + 5. Es una sola consulta repartida en
+ * memoria, para que las zonas no puedan quedar desfasadas entre sí (ver el
+ * comentario de `obtenerScanner`).
  */
-const { destacada, rejilla } = categoriaPerdida
-  ? { destacada: null, rejilla: [] }
-  : await obtenerScanner(10, efectivo);
+const { destacada, rejilla, paginas } = categoriaPerdida
+  ? { destacada: null, rejilla: [], paginas: 1 }
+  : await obtenerScanner(10, efectivo, null, pagina);
 
+/*
+  El MISMO reparto en todas las páginas —seis en la cuadrícula y el resto en
+  filas—, para que la sección no cambie de forma al pasar de página y el
+  leaderboard no se mueva de sitio.
+
+  ⚠️ `slice(6)` y no `slice(6, 10)`: en la página 1 son diez (la destacada salió
+  de la tanda) y da lo mismo, pero de la 2 en adelante son ONCE, y el tope de 10
+  se habría comido una nota por página sin decir nada. Es justo el fallo que este
+  componente venía a arreglar, escrito en pequeño.
+*/
 const enRejilla = rejilla.slice(0, 6);
-const enLista = rejilla.slice(6, 10);
+const enLista = rejilla.slice(6);
+const hayNotas = Boolean(destacada) || rejilla.length > 0;
+
+/*
+  La ruta sobre la que cuelga el `?pagina=`: la de ESTA petición. Las cuatro
+  vistas que usan este componente tienen path distinto —dos de ellas dinámico— y
+  ninguna lleva otro parámetro en la URL.
+*/
+const rutaAqui = Astro.url.pathname;
 
 /**
  * La fecha de la nota principal — el sello que sustituyó a sus minutos de lectura
@@ -96,9 +123,18 @@ const nombreAqui = filtro ? filtro.nombre : (seccion?.rotulo ?? 'esta sección')
     <CabezaSeccion titulo={titulo} activa={seccion?.href ?? null} />
 
     {
-      destacada ? (
+      hayNotas ? (
         <>
-          {/* ── La nota principal, a dos columnas ── */}
+          {/*
+            ── La nota principal, a dos columnas ──
+
+            🔴 Solo en la PÁGINA 1. Antes toda esta rama colgaba de `destacada`, y
+            con el paginador eso habría dejado la página 2 en blanco: `obtenerScanner`
+            devuelve `destacada: null` de la segunda en adelante a propósito —no hay
+            ninguna nota que sea «la principal» entre las once más viejas—. Lo que
+            manda ahora es `hayNotas`.
+          */}
+          {destacada && (
           <a href={`/noticias/${destacada.slug}`} class="sc-lead" data-luz>
             <div class="sc-lead-foto" transition:name={`foto-nota-${destacada.id}`}>
               {fotoDestacada && (
@@ -134,12 +170,19 @@ const nombreAqui = filtro ? filtro.nombre : (seccion?.rotulo ?? 'esta sección')
               </span>
             </div>
           </a>
+          )}
 
           {/* ── La rejilla de seis ── */}
           {enRejilla.length > 0 && (
-            <div class="sc-rejilla">
-              {enRejilla.map((n) => (
-                <TarjetaNota nota={n} variante="rejilla" />
+            <div class:list={['sc-rejilla', { 'es-cabeza': !destacada }]}>
+              {/*
+                ⚠️ Sin destacada —página 2 en adelante— la primera fila de la
+                cuadrícula es lo que está sobre el pliegue, así que le toca a ella
+                el `fetchpriority` que en la página 1 lleva la foto del lead. Sin
+                esto la página 2 empieza con tres huecos en degradado.
+              */}
+              {enRejilla.map((n, i) => (
+                <TarjetaNota nota={n} variante="rejilla" prioridad={!destacada && i < 3} />
               ))}
             </div>
           )}
@@ -199,6 +242,16 @@ const nombreAqui = filtro ? filtro.nombre : (seccion?.rotulo ?? 'esta sección')
         )
       )
     }
+
+    {/*
+      La tira de páginas. Va FUERA de la rama de arriba a propósito: si la página
+      pedida se queda sin notas —`?pagina=9` tecleado a mano en una sección de
+      cinco—, lo único que se pinta es la tira, y con ella el lector vuelve. Dentro
+      de la rama habría acabado en un callejón sin salida.
+
+      Con una sola página no pinta nada; la regla vive en `Paginador.astro`.
+    */}
+    <Paginador actual={pagina} paginas={paginas} ruta={rutaAqui} />
   </div>
 
 <style>
@@ -306,6 +359,15 @@ const nombreAqui = filtro ? filtro.nombre : (seccion?.rotulo ?? 'esta sección')
     padding: 2px;
     margin: 32px 24px 0;
   }
+  /*
+    Sin destacada encima —página 2 en adelante— la cuadrícula es lo primero bajo el
+    titular, y hereda el aire que en la página 1 pone el lead (`.sc-lead`, 28px /
+    20px). Sin esto la sección arranca 4px más arriba al pasar de página, que es
+    poco pero se ve como un salto al volver atrás.
+  */
+  .sc-rejilla.es-cabeza {
+    margin-top: 28px;
+  }
 
   .sc-franja-anuncio {
     padding: 32px 24px;
@@ -391,6 +453,9 @@ const nombreAqui = filtro ? filtro.nombre : (seccion?.rotulo ?? 'esta sección')
     .sc-rejilla {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       margin: 22px 0 0;
+    }
+    .sc-rejilla.es-cabeza {
+      margin-top: 20px;
     }
 
     /*

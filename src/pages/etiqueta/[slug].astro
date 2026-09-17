@@ -10,10 +10,19 @@
 import Base from '@/layouts/Base.astro';
 import IndiceScanner from '@/components/IndiceScanner.astro';
 import { obtenerEtiqueta } from '@/lib/cms/categorias';
+import { leerPagina } from '@/lib/paginacion';
 
 const { slug } = Astro.params;
 const et = slug ? await obtenerEtiqueta(slug) : null;
 if (!et) return Astro.rewrite('/404');
+
+/*
+  La página pedida se lee AQUÍ, una vez, y baja a los dos que la necesitan: el
+  layout para su canónica y su `<title>`, y el índice para su consulta. Leerla en
+  cada uno por su cuenta es como se acaba sirviendo la página 2 con la canónica de
+  la 1. El contrato —el tope, la validación— vive en `src/lib/paginacion.ts`.
+*/
+const pagina = leerPagina(Astro.url);
 ---
 
 {/*
@@ -26,8 +35,10 @@ if (!et) return Astro.rewrite('/404');
 <Base
   titulo={`${et.nombre} — Etiqueta — Beat 100.9`}
   descripcion={`Todo lo que hemos publicado sobre ${et.nombre} en Beat 100.9.`}
+  pagina={pagina}
 >
   <IndiceScanner
     filtro={{ tipo: 'etiqueta', id: et.id, nombre: et.nombre ?? '', slug: et.slug ?? '' }}
+    pagina={pagina}
   />
 </Base>

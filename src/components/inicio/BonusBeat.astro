@@ -310,7 +310,13 @@ function plataformasDe(c: unknown): Array<[string, string]> {
                       data-voto-cancion={String(idCancion)}
                       aria-label={`Votar por ${cancion?.titulo ?? 'esta canción'}`}
                     >
-                      VOTAR
+                      {/*
+                        Los dos rótulos viven en el marcado y se alterna cuál se
+                        ve, igual que los dos iconos de `.bb-play`: no se reescribe
+                        el texto del botón en cada cambio de estado.
+                      */}
+                      <span class="bb-voto-rotulo">VOTAR</span>
+                      <span class="bb-voto-rotulo bb-voto-listo">LISTO</span>
                     </button>
                   )}
                 </div>
@@ -321,18 +327,48 @@ function plataformasDe(c: unknown): Array<[string, string]> {
       )}
 
       {/*
-        El aviso del voto, uno por lista y vacío en reposo.
+        La respuesta al voto, en un MODAL.
 
-        Es la excepción de la regla de las zonas vacías: una zona sin contenido se
-        deja vacía y sin rótulo, pero una AVERÍA se delata. Un 429 mudo —te quedaste
-        sin votos— se ve igual que un botón roto. Y no hay toasts en este sitio:
-        Toastify era del sitio viejo y no se hereda.
+        Aquí hubo una línea de texto debajo de la lista con `aria-live`, y se
+        cambió el 2026-09-21 (Carlos): «ahí hasta abajo no se ve». Tenía razón —
+        quien vota está mirando el botón que acaba de pulsar, a media página, y el
+        aviso aparecía fuera de su campo de visión y a veces fuera de la pantalla.
 
-        `aria-live` y no un `role="alert"`: es una confirmación, no una alarma, y
-        `polite` espera a que el lector de pantalla termine lo que estaba diciendo.
+        `<dialog>` nativo con `showModal()` y no un `<div>` con `aria-modal`: trae
+        de fábrica la trampa de foco, el cierre con Escape y el velo como
+        `::backdrop`. `Takeover.astro` se escribió a mano, veinte líneas de trampa
+        de foco incluidas, porque ahí el contenido es de un tercero y hace falta
+        control; aquí no hay nada que justifique repetirlas.
+
+        Lleva el mismo velo que el takeover para que el sitio tenga UN gesto de
+        modal y no dos.
+
+        El texto lo escribe `voto.ts`; nace vacío. No es una zona vacía con rótulo:
+        el diálogo no existe en pantalla hasta que hay algo que decir.
       */}
       {votacionAbierta && (
-        <p class="beat-label bb-voto-aviso" data-voto-aviso aria-live="polite"></p>
+        <dialog
+          class="bb-modal"
+          data-voto-modal
+          aria-labelledby={`voto-titulo-${lista.id}`}
+        >
+          <div class="bb-modal-caja">
+            <button
+              type="button"
+              class="bb-modal-cerrar"
+              data-voto-cerrar
+              aria-label="Cerrar"
+            >
+              <Icono nombre="x" tamano={16} />
+            </button>
+            <p
+              class="beat-display bb-modal-titulo"
+              id={`voto-titulo-${lista.id}`}
+              data-voto-titulo
+            />
+            <p class="beat-label bb-modal-detalle" data-voto-detalle />
+          </div>
+        </dialog>
       )}
 
       {enInicio && rutaTipo && (
@@ -597,14 +633,125 @@ function plataformasDe(c: unknown): Array<[string, string]> {
       color var(--dur-2) var(--ease-out);
   }
 
-  .bb-voto-aviso {
-    margin-top: 14px;
+  /*
+    El rótulo del botón: los dos existen y se alterna cuál se ve. Mismo mecanismo
+    que `.bb-play-icono`, y por el mismo motivo — el ancho no salta al cambiar de
+    estado porque el botón ya está dimensionado por el más largo de los dos.
+  */
+  .bb-voto-listo {
+    display: none;
+  }
+  .bb-voto-btn[data-votado] .bb-voto-rotulo {
+    display: none;
+  }
+  .bb-voto-btn[data-votado] .bb-voto-listo {
+    display: inline;
+  }
+
+  /* El modal de respuesta al voto. */
+  .bb-modal {
+    /*
+      `inset: 0` + `margin: auto` es lo que centra un diálogo modal, y lo pone el
+      navegador solo... salvo que algo del reset lo pise. Aquí lo pisa: medido en
+      375px, el computado del diálogo salía `margin: 0px` y la caja quedaba pegada
+      a la izquierda con 36px muertos a la derecha. Se repone explícito, que es
+      barato y no depende de en qué capa esté el reset.
+    */
+    inset: 0;
+    margin: auto;
+    width: min(380px, calc(100vw - 32px));
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+  }
+  /*
+    El mismo velo que `Takeover.astro`, para que el sitio tenga UN gesto de modal.
+    Un `<dialog>` abierto con `showModal()` vive en la top layer, así que no hace
+    falta z-index: nada del sitio puede quedar por encima.
+  */
+  .bb-modal::backdrop {
+    background: rgb(5 7 6 / 0.86);
+    backdrop-filter: blur(6px);
+  }
+  .bb-modal-caja {
+    position: relative;
+    background: var(--noche-1);
+    box-shadow: inset 0 0 0 1px var(--border-hairline);
+    padding: 44px 28px 34px;
+    text-align: center;
+  }
+  .bb-modal-titulo {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--mist-0);
+    text-wrap: balance;
+  }
+  .bb-modal-detalle {
+    margin-top: 12px;
     font-size: 9px;
     color: var(--text-muted);
   }
-  /* Sin nada que decir no ocupa sitio: una zona vacía se deja vacía. */
-  .bb-voto-aviso:empty {
+  .bb-modal-detalle:empty {
     display: none;
+  }
+  .bb-modal-cerrar {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    background: transparent;
+    color: var(--text-faint);
+    cursor: pointer;
+    transition: color var(--dur-2) var(--ease-out);
+  }
+  .bb-modal-cerrar:hover,
+  .bb-modal-cerrar:focus-visible {
+    color: var(--mist-0);
+  }
+  .bb-modal-cerrar:focus-visible {
+    outline: 2px solid var(--mist-0);
+    outline-offset: 2px;
+  }
+
+  /*
+    La entrada. `@starting-style` y no una clase que ponga el script: el diálogo
+    entra en la top layer en el mismo cuadro en que se abre, y meter una clase
+    después obliga a un `requestAnimationFrame` para que el navegador vea los dos
+    estados. Donde no exista `@starting-style`, el modal aparece de golpe — que es
+    degradar bien, no romperse.
+
+    Va en `scale` y no en `transform`, como el pulso del botón.
+  */
+  .bb-modal[open] .bb-modal-caja {
+    opacity: 1;
+    scale: 1;
+    transition:
+      opacity var(--dur-2) var(--ease-out),
+      scale var(--dur-2) var(--ease-out);
+  }
+  @starting-style {
+    .bb-modal[open] .bb-modal-caja {
+      opacity: 0;
+      scale: 0.96;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bb-modal[open] .bb-modal-caja {
+      transition: none;
+    }
+    @starting-style {
+      .bb-modal[open] .bb-modal-caja {
+        opacity: 1;
+        scale: 1;
+      }
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

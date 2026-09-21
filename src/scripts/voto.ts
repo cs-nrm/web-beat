@@ -39,16 +39,58 @@ import { ga4 } from './analitica';
  */
 const PLAZO_MS = 6000;
 
-/** Lo que dura el pulso de confirmación, alineado con `--dur-2` del DS. */
-const PULSO_MS = 600;
+/**
+ * Lo que el botón se queda en «LISTO».
+ *
+ * Un poco más que el modal (`CIERRE_MS`), a propósito: al cerrarse el diálogo la
+ * mirada vuelve a la lista y tiene que encontrar todavía marcada la fila que se
+ * acaba de votar.
+ */
+const CONFIRMADO_MS = 3200;
 
-function menosMovimiento(): boolean {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let marcado: ReturnType<typeof setTimeout> | undefined;
+
+/** Cuánto se queda en pantalla la confirmación antes de irse sola. */
+const CIERRE_MS = 2600;
+
+let cierre: ReturnType<typeof setTimeout> | undefined;
+
+/**
+ * La respuesta al voto, en el modal de la lista.
+ *
+ * Sustituye a la línea de texto que iba debajo de la lista (Carlos, 2026-09-21:
+ * «ahí hasta abajo no se ve»). Quien vota mira el botón que acaba de pulsar, y el
+ * aviso caía fuera de su campo de visión — a veces fuera de la pantalla.
+ *
+ * Un ACIERTO se va solo a los 2.6 s: quien está repartiendo sus tres votos no
+ * tiene por qué cerrar tres diálogos. Un ERROR se queda hasta que lo cierren,
+ * porque dice algo que hay que leer —te quedaste sin votos, la votación cerró— y
+ * un mensaje que se va solo es un mensaje que no se leyó.
+ */
+function responder(caja: HTMLElement, titulo: string, detalle: string, seVaSola: boolean): void {
+  const modal = caja.querySelector<HTMLDialogElement>('[data-voto-modal]');
+  if (!modal) return;
+
+  const t = modal.querySelector<HTMLElement>('[data-voto-titulo]');
+  const d = modal.querySelector<HTMLElement>('[data-voto-detalle]');
+  if (t) t.textContent = titulo;
+  if (d) d.textContent = detalle;
+
+  if (cierre !== undefined) clearTimeout(cierre);
+  cierre = undefined;
+
+  // `showModal` lanza si ya está abierto — pasa al votar dos veces seguidas.
+  if (!modal.open) modal.showModal();
+
+  if (seVaSola) cierre = setTimeout(() => modal.close(), CIERRE_MS);
 }
 
-function avisar(caja: HTMLElement, texto: string): void {
-  const aviso = caja.querySelector<HTMLElement>('[data-voto-aviso]');
-  if (aviso) aviso.textContent = texto;
+function cerrarModales(): void {
+  if (cierre !== undefined) clearTimeout(cierre);
+  cierre = undefined;
+  document.querySelectorAll<HTMLDialogElement>('[data-voto-modal]').forEach((m) => {
+    if (m.open) m.close();
+  });
 }
 
 async function votar(boton: HTMLButtonElement): Promise<void> {
@@ -80,7 +122,7 @@ async function votar(boton: HTMLButtonElement): Promise<void> {
   } catch {
     // Sin red. Se dice, y el botón vuelve: reintentar es lo razonable aquí.
     soltar();
-    avisar(caja, 'No hay conexión. Inténtalo otra vez.');
+    responder(caja, 'No se pudo registrar tu voto', 'Revisa tu conexión e inténtalo otra vez.', false);
     return;
   }
 
@@ -100,7 +142,7 @@ async function votar(boton: HTMLButtonElement): Promise<void> {
       se ve exactamente igual que un botón roto, y eso le enseña al lector a
       desconfiar de los demás controles de la página.
     */
-    avisar(caja, datos.error ?? 'No se pudo registrar tu voto.');
+    responder(caja, 'Tu voto no se registró', datos.error ?? 'Inténtalo otra vez.', false);
     return;
   }
 
@@ -116,25 +158,32 @@ async function votar(boton: HTMLButtonElement): Promise<void> {
     repartiendo sus tres votos entre varias canciones.
   */
   const quedan = datos.restantes;
-  avisar(
+  responder(
     caja,
+    'Gracias por tu voto',
     quedan === 0
-      ? 'Listo. Ese fue tu último voto de esta hora.'
+      ? 'Ese fue tu último voto de esta hora.'
       : quedan === 1
-        ? 'Listo. Te queda un voto esta hora.'
-        : `Listo. Te quedan ${quedan} votos esta hora.`,
+        ? 'Te queda un voto esta hora.'
+        : `Te quedan ${quedan} votos esta hora.`,
+    true,
   );
 
   /*
-    El pulso va en `scale` y NO en `transform`: la cascada de entrada ya escribe
-    `transform` sobre estas mismas filas, y dos efectos sobre la misma propiedad es
-    lo que nos costó el hover de las tarjetas. `scale`, `translate` y `rotate` son
-    independientes y se componen (`movimiento.md` §1).
+    El botón se queda en «LISTO», invertido, mientras el modal está en pantalla.
+    Antes solo daba un pulso de 600 ms y Carlos lo pidió más claro: al volver del
+    modal tiene que quedar dicho cuál acabas de votar, o con tres filas iguales no
+    se sabe.
+
+    Va SIEMPRE, también con `prefers-reduced-motion`: cambiar de rótulo no es
+    movimiento. Lo que esa preferencia apaga es la transición, y eso lo hace el CSS.
   */
-  if (!menosMovimiento()) {
-    boton.dataset.votado = 'sí';
-    setTimeout(() => delete boton.dataset.votado, PULSO_MS);
-  }
+  boton.dataset.votado = 'sí';
+  if (marcado !== undefined) clearTimeout(marcado);
+  marcado = setTimeout(() => {
+    marcado = undefined;
+    delete boton.dataset.votado;
+  }, CONFIRMADO_MS);
 }
 
 /**
@@ -146,12 +195,12 @@ async function votar(boton: HTMLButtonElement): Promise<void> {
  * que ya no es verdad. Es el mismo barrido que hace `revelar.ts` con `data-animando`.
  */
 function iniciar(): void {
+  if (marcado !== undefined) clearTimeout(marcado);
+  marcado = undefined;
+  cerrarModales();
   document.querySelectorAll<HTMLButtonElement>('[data-voto-cancion]').forEach((b) => {
     b.disabled = false;
     delete b.dataset.votado;
-  });
-  document.querySelectorAll<HTMLElement>('[data-voto-aviso]').forEach((a) => {
-    a.textContent = '';
   });
 }
 
@@ -163,10 +212,42 @@ export function prepararVoto(): void {
   // Delegación en `document` y no un listener por fila: las filas cambian con cada
   // navegación y el listener no, igual que en `pista.ts`.
   document.addEventListener('click', (e) => {
-    const boton = (e.target as HTMLElement | null)?.closest<HTMLButtonElement>(
-      '[data-voto-cancion]',
-    );
+    const t = e.target as HTMLElement | null;
+
+    if (t?.closest('[data-voto-cerrar]')) {
+      cerrarModales();
+      return;
+    }
+
+    const boton = t?.closest<HTMLButtonElement>('[data-voto-cancion]');
     if (boton) void votar(boton);
+  });
+
+  /*
+    Cerrar con Escape, a mano.
+
+    Debería venir gratis: un `<dialog>` abierto con `showModal()` se cierra solo al
+    pulsar Escape, vía el evento `cancel`. MEDIDO y no es así — al menos en el
+    navegador con el que se probó esto: la tecla llega al documento, nadie la
+    cancela (`defaultPrevented` en false en captura y en burbuja), y aun así
+    `cancel` no se dispara ni una vez y el diálogo se queda abierto.
+
+    No merece la pena averiguar de quién es la culpa: son cuatro líneas y con ellas
+    Escape funciona pase lo que pase. Donde el cierre nativo SÍ vaya, esto llega
+    primero y hace lo mismo.
+  */
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') cerrarModales();
+  });
+
+  /*
+    Cerrar pulsando el velo, que es lo que la gente intenta primero. El
+    `::backdrop` no recibe eventos: el clic llega al propio `<dialog>`, así que
+    basta con comprobar que el objetivo sea el diálogo y no la caja de dentro.
+  */
+  document.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement | null;
+    if (t instanceof HTMLDialogElement && t.matches('[data-voto-modal]')) cerrarModales();
   });
 
   document.addEventListener('astro:page-load', iniciar);

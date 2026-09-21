@@ -13,7 +13,14 @@
 import Icono from '@/components/Icono.astro';
 import Anuncio from '@/components/Anuncio.astro';
 import { urlMedia } from '@/lib/cms/client';
-import { fuenteDeCancion, suena } from '@/lib/canciones';
+import {
+  fuenteDeCancion,
+  MINIMO_PARA_PORCENTAJE,
+  ordenarPorVotos,
+  repartirPorcentajes,
+  suena,
+  totalDeVotos,
+} from '@/lib/canciones';
 import type { Lista, TiposDeLista } from '@/types/payload';
 
 interface Props {
@@ -45,6 +52,40 @@ const enInicio = contexto === 'inicio';
 const rutaTipo = tipo?.slug ? `/${tipo.slug}` : null;
 
 /**
+ * El orden que se pinta, y el voto.
+ *
+ * `ordenarPorVotos` devuelve el array INTACTO mientras nadie haya votado, así que
+ * Bonus Beat —que nunca pinta botón— conserva su orden editorial y el Top Ten
+ * muestra el de la estación hasta el primer voto. No hace falta que este
+ * componente sepa qué tipo de lista está pintando.
+ *
+ * El botón se pinta SOLO con la votación abierta. `agents/frontend.md`: «un
+ * control que no hace nada se RETIRA, no se deja inerte» — un botón muerto es
+ * alcanzable con el tabulador, se anuncia en un lector de pantalla y le enseña al
+ * lector a desconfiar de los demás. Cerrada la votación, no hay botón.
+ *
+ * El CONTEO sí sobrevive al cierre: es lo que explica por qué la lista está en ese
+ * orden. Pero si nadie ha votado no se pinta ni un cero, por la regla de las zonas
+ * vacías.
+ */
+const canciones = lista?.canciones?.length ? ordenarPorVotos(lista.canciones) : [];
+const votacionAbierta = Boolean(lista?.votacionAbierta);
+
+/*
+  Se pinta el PORCENTAJE, no el número de votos. Decisión de Carlos
+  (2026-09-21): «así no evidenciamos si tenemos solo 5 votos».
+
+  Y por eso hay un piso (`MINIMO_PARA_PORCENTAJE`): con pocos votos el porcentaje
+  delata más que el número —un voto de un total es «100%» y nueve «0%»—, así que por
+  debajo del mínimo no se pinta cifra ninguna y la lista se queda con su orden. El
+  orden sí sale siempre de los votos crudos.
+*/
+const totalVotos = totalDeVotos(canciones);
+const conPorcentaje = totalVotos >= MINIMO_PARA_PORCENTAJE;
+const porcentajes = repartirPorcentajes(canciones);
+const conVoto = votacionAbierta || conPorcentaje;
+
+/**
  * Las plataformas de una canción, solo las que tienen enlace.
  *
  * Recibe `unknown` y no un tipo: `canciones[].cancion` es `number | Cancione`
@@ -52,7 +93,7 @@ const rutaTipo = tipo?.slug ? `/${tipo.slug}` : null;
  * que Astro no parsea cuando el cast lleva una unión.
  */
 /*
-  📖 Aquí vivía `audioDe()`, que leía `canciones.audio` a mano, y se fue el
+  Aquí vivía `audioDe()`, que leía `canciones.audio` a mano, y se fue el
   2026-09-09 a `src/lib/canciones.ts` como `fuenteDeCancion()`.
 
   El motivo no fue ordenar: la playlist del Fenómeno necesita exactamente la misma
@@ -72,7 +113,7 @@ function plataformasDe(c: unknown): Array<[string, string]> {
   };
 
   /*
-    📖 Aquí iba `['YOUTUBE', texto('youtube') ?? texto('embedUrl')]`, y se fue el
+    Aquí iba `['YOUTUBE', texto('youtube') ?? texto('embedUrl')]`, y se fue el
     2026-09-09: la pista YA SE OYE en la página. El botón de la portada llama a
     `fuenteDeCancion()`, que lee esos dos mismos campos, así que el chip no daba
     una forma más de escuchar — daba una forma de IRSE a escucharlo a otro sitio.
@@ -102,7 +143,11 @@ function plataformasDe(c: unknown): Array<[string, string]> {
 
 {
   lista && (
-    <section class:list={['bb', `es-${contexto}`]} data-pistas>
+    <section
+      class:list={['bb', `es-${contexto}`]}
+      data-pistas
+      data-voto-lista={conVoto ? String(lista.id) : undefined}
+    >
       {/*
         Solo el rótulo de la sección.
 
@@ -145,13 +190,15 @@ function plataformasDe(c: unknown): Array<[string, string]> {
       <div class:list={['bb-reparto', { 'con-anuncio': enInicio && anuncio }]}>
       <div class="bb-canciones">
       {/*
-        📖 Sin canciones no se pinta nada — decisión del 2026-09-09. Aquí caía
+        Sin canciones no se pinta nada — decisión del 2026-09-09. Aquí caía
         «Esta edición todavía no tiene canciones cargadas», que en el Inicio dejaba
         el módulo abierto con una disculpa dentro. Se fue con él su `.bb-vacio`.
       */}
-      {lista.canciones && lista.canciones.length > 0 && (
-        lista.canciones.map((c, i) => {
+      {canciones.length > 0 && (
+        canciones.map((c, i) => {
           const cancion = typeof c.cancion === 'object' ? c.cancion : null;
+          const idCancion = cancion?.id ?? (typeof c.cancion === 'number' ? c.cancion : null);
+          const porcentaje = porcentajes[i] ?? 0;
           const portada = urlMedia(cancion?.portada, 'thumbnail');
           const plataformas = plataformasDe(cancion);
           const fuente = fuenteDeCancion(cancion);
@@ -234,9 +281,58 @@ function plataformasDe(c: unknown): Array<[string, string]> {
                   ))}
                 </div>
               )}
+              {conVoto && idCancion !== null && (
+                <div class="bb-voto">
+                  {/*
+                    El porcentaje lo pinta el SERVIDOR y el script no lo toca. No
+                    puede: el endpoint devuelve el conteo de UNA canción, y recalcular
+                    el reparto exigiría los votos de las otras nueve — que es
+                    justamente lo que no puede viajar al navegador, porque un
+                    `data-votos` en el marcado se lee con ver el código fuente y
+                    tiraría por tierra el motivo de poner porcentajes.
+
+                    Así que el voto se confirma con el pulso del botón y la línea de
+                    aviso, y la cifra se mueve en la siguiente carga.
+                  */}
+                  {/*
+                    El 0% no se pinta (Carlos, 2026-09-21). Una canción que no ha
+                    recibido un solo voto no necesita que se le ponga un cero al
+                    lado: el sitio no rellena huecos con ceros, y su posición al
+                    final de la lista ya lo dice.
+                  */}
+                  {conPorcentaje && porcentaje > 0 && (
+                    <span class="beat-label bb-voto-conteo">{porcentaje}%</span>
+                  )}
+                  {votacionAbierta && (
+                    <button
+                      type="button"
+                      class="beat-label bb-voto-btn"
+                      data-voto-cancion={String(idCancion)}
+                      aria-label={`Votar por ${cancion?.titulo ?? 'esta canción'}`}
+                    >
+                      VOTAR
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           );
         })
+      )}
+
+      {/*
+        El aviso del voto, uno por lista y vacío en reposo.
+
+        Es la excepción de la regla de las zonas vacías: una zona sin contenido se
+        deja vacía y sin rótulo, pero una AVERÍA se delata. Un 429 mudo —te quedaste
+        sin votos— se ve igual que un botón roto. Y no hay toasts en este sitio:
+        Toastify era del sitio viejo y no se hereda.
+
+        `aria-live` y no un `role="alert"`: es una confirmación, no una alarma, y
+        `polite` espera a que el lector de pantalla termine lo que estaba diciendo.
+      */}
+      {votacionAbierta && (
+        <p class="beat-label bb-voto-aviso" data-voto-aviso aria-live="polite"></p>
       )}
 
       {enInicio && rutaTipo && (
@@ -315,7 +411,7 @@ function plataformasDe(c: unknown): Array<[string, string]> {
   }
   .bb-fila {
     display: grid;
-    grid-template-columns: 44px 92px minmax(0, 1fr) auto;
+    grid-template-columns: 44px 92px minmax(0, 1fr) auto auto;
     align-items: center;
     gap: 20px;
     padding: 18px 0;
@@ -431,6 +527,93 @@ function plataformasDe(c: unknown): Array<[string, string]> {
     background: var(--mist-0);
     color: var(--noche-0);
   }
+
+  /* ── El voto ──
+     Va en BLANCO Y NEGRO, como todo. El sitio viejo pintaba un corazón en
+     `#ef4444` y eso aquí está prohibido: `--rojo-aire` es la ÚNICA excepción
+     cromática del sitio —el punto de «al aire», que es una luz de tally, no
+     decoración— y `movimiento.md` §8 dice que no se abre una segunda. En cuanto
+     haya un segundo color, el primero deja de significar.
+
+     Lo que resalta resalta INVIRTIENDO: blanco pleno con la letra negra. Es el
+     gesto que ya está en `::selection`, en la sección activa de la nav, en la
+     celda al aire de la parrilla y aquí mismo en `.bb-plataforma:hover`. */
+  .bb-voto {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .bb-voto-conteo {
+    /* Tabular para que el número no baile de ancho al pasar de 9 a 10. */
+    font-variant-numeric: tabular-nums;
+    font-size: 11px;
+    color: var(--text-faint);
+    min-width: 2ch;
+    text-align: right;
+  }
+  .bb-voto-btn {
+    padding: 9px 13px;
+    border: 0;
+    background: var(--surface-card);
+    box-shadow: inset 0 0 0 1px var(--border-hairline);
+    color: var(--text-body);
+    font-size: 9px;
+    white-space: nowrap;
+    /* Tailwind 4 lo quitó de su preflight y hay que ponerlo a mano. */
+    cursor: pointer;
+    transition:
+      background var(--dur-2) var(--ease-out),
+      color var(--dur-2) var(--ease-out);
+  }
+  .bb-voto-btn:hover,
+  .bb-voto-btn:focus-visible {
+    background: var(--mist-0);
+    color: var(--noche-0);
+  }
+  .bb-voto-btn:focus-visible {
+    outline: 2px solid var(--mist-0);
+    outline-offset: 2px;
+  }
+  /* Mientras la petición está en vuelo. No se esconde: se apaga y no se pulsa. */
+  .bb-voto-btn:disabled {
+    cursor: default;
+    opacity: 0.45;
+  }
+
+  /*
+     El pulso de confirmación va en `scale` y NO en `transform`: la cascada de
+     entrada ya escribe `transform` sobre estas filas y dos efectos en la misma
+     propiedad es lo que costó el hover de las tarjetas. `scale`, `translate` y
+     `rotate` son independientes y se componen (`movimiento.md` §1), y
+     `scripts/guarda-cascada.mjs` lo comprueba sobre el CSS construido.
+  */
+  .bb-voto-btn[data-votado] {
+    background: var(--mist-0);
+    color: var(--noche-0);
+    scale: 1.08;
+    transition:
+      scale var(--dur-2) var(--ease-out),
+      background var(--dur-2) var(--ease-out),
+      color var(--dur-2) var(--ease-out);
+  }
+
+  .bb-voto-aviso {
+    margin-top: 14px;
+    font-size: 9px;
+    color: var(--text-muted);
+  }
+  /* Sin nada que decir no ocupa sitio: una zona vacía se deja vacía. */
+  .bb-voto-aviso:empty {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bb-voto-btn,
+    .bb-voto-btn[data-votado] {
+      scale: 1;
+      transition: none;
+    }
+  }
   .bb-pie {
     display: flex;
     justify-content: center;
@@ -482,7 +665,26 @@ function plataformasDe(c: unknown): Array<[string, string]> {
       text-align: left;
       font-size: 8.5px;
     }
-    /* La portada y el número se juntan arriba; las plataformas bajan a su fila. */
+    /*
+      La portada y el número se juntan arriba; las plataformas y el VOTO bajan a su
+      fila.
+
+      El voto se quedaba arriba, al lado del título, con el argumento de que un
+      mando separado de la canción a la que vota obliga a mirar dos veces. Bajó el
+      2026-09-21 porque el argumento no sobrevivió a la medida: en 375px la celda
+      del voto se lleva 102 de los 343 disponibles y al título le quedan 111, o sea
+      que «In The Cold, Cold Night (Salamoni, Antônio Farhy Rework)» —un título real
+      del catálogo— envolvía en 119px de alto. Bajándolo, el título pasa de 111 a
+      225 y su alto máximo cae de 119 a 59.
+
+      El precio es real y está medido: la lista entera crece 276px, porque las filas
+      de título corto también pagan el renglón. Se acepta a cambio de que el título
+      se lea. Apretar la celda arriba se probó y no alcanza: quitarle el hueco y el
+      ancho mínimo al conteo solo le devuelve 10px al título.
+
+      Y no obliga a mirar dos veces, porque el conteo baja PEGADO al botón y la fila
+      la delimita su propia línea. Es el mismo reparto que ya hacen las plataformas.
+    */
     .bb-fila {
       grid-template-columns: 30px 64px minmax(0, 1fr);
       gap: 12px;
@@ -496,6 +698,11 @@ function plataformasDe(c: unknown): Array<[string, string]> {
     }
     .bb-linea {
       font-size: 13px;
+    }
+    .bb-voto {
+      grid-column: 2 / -1;
+      justify-content: flex-end;
+      margin-top: 10px;
     }
     .bb-plataformas {
       grid-column: 2 / -1;

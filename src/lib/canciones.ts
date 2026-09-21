@@ -52,3 +52,104 @@ export function fuenteDeCancion(c: unknown): FuenteCancion {
 export function suena(f: FuenteCancion): boolean {
   return Boolean(f.audio || f.youtube);
 }
+
+/**
+ * Ordena las canciones de una lista por votos, de más a menos.
+ *
+ * Si NINGUNA tiene votos, devuelve el array intacto — y eso es lo que ahorra un
+ * interruptor nuevo. Bonus Beat no pinta botón de voto, así que sus canciones se
+ * quedan en cero para siempre y conserva el orden EDITORIAL, que es justo el punto
+ * de esa sección. El Top Ten muestra el orden que puso la estación hasta que entra
+ * el primer voto, y a partir de ahí manda el público.
+ *
+ * El desempate es el orden del CMS, o sea el de la estación: el `sort` de V8 es
+ * estable desde 2018, así que dos canciones con los mismos votos salen en el orden
+ * en que venían. No hace falta un índice auxiliar.
+ *
+ * COPIA antes de ordenar. `sort` muta, y el array que llega es el del documento
+ * que `cmsFetch` tiene cacheado: ordenarlo en sitio le cambiaría el orden a todo el
+ * que comparta esa entrada durante el TTL —hasta cinco minutos en producción—, y a
+ * la página del Inicio, que pide la misma lista.
+ */
+export function ordenarPorVotos<T extends { votos?: number | null }>(cs: T[]): T[] {
+  if (!cs.some((c) => (c.votos ?? 0) > 0)) return cs;
+  return [...cs].sort((a, b) => (b.votos ?? 0) - (a.votos ?? 0));
+}
+
+/**
+ * El total de votos de una lista, para repartir porcentajes.
+ *
+ * Separado de `ordenarPorVotos` a propósito: el ORDEN siempre sale de los votos
+ * crudos, se pinte el porcentaje o no. Que un número esté escondido no es razón
+ * para que la lista salga desordenada.
+ */
+export function totalDeVotos(cs: Array<{ votos?: number | null }>): number {
+  return cs.reduce((suma, c) => suma + Number(c.votos ?? 0), 0);
+}
+
+/**
+ * Cuántos votos tiene que juntar la lista para que se pinten los porcentajes.
+ *
+ * Se pinta PORCENTAJE y no número de votos por decisión de Carlos (2026-09-21):
+ * «así no evidenciamos si tenemos solo 5 votos».
+ *
+ * Estuvo en 20 unas horas, con el argumento de que con pocos votos el porcentaje
+ * delata más que el número —con uno solo sale «100%»—, y Carlos lo bajó a 1 el
+ * mismo día: «creo sí muestra el porcentaje aunque sea menos, a partir de 1». El
+ * argumento no era malo pero pesaba menos que lo otro: una lista que pasa días sin
+ * una sola cifra parece rota, y la que se estrena con «100%» al menos demuestra que
+ * el botón sirve.
+ *
+ * Así que hoy basta UN voto en toda la lista. Con cero sigue sin pintarse nada, que
+ * es la regla de la casa: una zona sin contenido se deja vacía, no se rellena con
+ * un cero. Y las canciones en 0% tampoco se pintan, aunque la lista ya tenga votos.
+ *
+ * Subirlo otra vez es cambiar este número y nada más.
+ */
+export const MINIMO_PARA_PORCENTAJE = 1;
+
+/**
+ * El reparto de la lista en porcentajes enteros que **suman 100 exacto**.
+ *
+ * Se reparte de golpe y no canción por canción, y esa es toda la razón de que
+ * esta función exista. Redondeando cada una por su cuenta la columna sumaba 101
+ * —medido: 42+22+15+10+6+3+2+1 con 285 votos—, y un 101% se lee como un error de
+ * cuentas del sitio aunque cada cifra por separado sea la correcta (Carlos,
+ * 2026-09-21: «101 se ve como error»).
+ *
+ * El método es el del RESTO MAYOR, el mismo con el que se reparten escaños: se
+ * trunca cada porcentaje, se cuenta cuántos puntos sobran para llegar a 100, y se
+ * le da uno a cada canción por orden de la fracción que perdió al truncar.
+ *
+ * Y no puede desordenar la lista, que era el riesgo: si A tiene más votos que B,
+ * su porcentaje exacto es mayor, así que o su parte entera ya es mayor —y le saca
+ * al menos un punto—, o son iguales y entonces la fracción de A es la mayor, con lo
+ * que A cobra antes que B. En ningún caso B acaba por encima de A.
+ *
+ * Una canción con CERO votos tiene fracción cero, así que nunca cobra un punto de
+ * los que sobran: se queda en 0 y la plantilla no la pinta.
+ */
+export function repartirPorcentajes(cs: Array<{ votos?: number | null }>): number[] {
+  const total = totalDeVotos(cs);
+  if (total <= 0) return cs.map(() => 0);
+
+  const exactos = cs.map((c) => (Number(c.votos ?? 0) / total) * 100);
+  const reparto = exactos.map((e) => Math.floor(e));
+  let sobran = 100 - reparto.reduce((a, b) => a + b, 0);
+
+  /*
+    `sort` es estable, así que a igualdad de fracción cobra primero la que venía
+    antes — y como la lista llega ordenada por votos, eso es la que más tiene.
+  */
+  const porResto = exactos
+    .map((e, i) => ({ i, resto: e - Math.floor(e) }))
+    .filter((x) => x.resto > 0)
+    .sort((a, b) => b.resto - a.resto);
+
+  for (const { i } of porResto) {
+    if (sobran <= 0) break;
+    reparto[i] += 1;
+    sobran -= 1;
+  }
+  return reparto;
+}

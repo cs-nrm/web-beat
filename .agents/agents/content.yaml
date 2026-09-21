@@ -85,7 +85,13 @@ interface:
     - el tamaño de página es CONSTANTE entre páginas: el desplazamiento es
       `(page - 1) * limit`, así que un `limit` distinto en la 2 se salta una nota
       por salto. La destacada sale de la tanda y solo existe en la página 1
-    - el front es cliente de SOLO LECTURA
+    - el front es cliente de SOLO LECTURA, con TRES excepciones y todas por
+      proxy de servidor: el conteo de publicidad (de ads), el VOTO del público
+      (`src/pages/api/votar.ts`, 2026-09-21) y las escrituras de oyente
+      (Comunidad, que aún no existe). El navegador nunca habla con el CMS
+    - el proxy del voto NO comprueba que la lista sea de esta estación, a
+      propósito: eso pediría un `where[id][equals]` variable por petición, que es
+      justo lo que esta acta prohíbe. Quien valida es el CMS
 
     Verifica que la ruta responda Y degrade bien: barre las rutas con `curl`
     esperando 200/301/404 y nunca 500, comprueba que las URLs viejas redirijan en

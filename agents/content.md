@@ -302,9 +302,22 @@ pintar una cápsula que no se puede enlazar.
   `/en-vivo`.
 - **La publicidad**, programática y vendida — es de `agents/ads.md`, incluido
   `src/lib/cms/publicidad.ts`.
-- **Escribir al CMS.** El front es cliente de **solo lectura**. Las dos únicas
-  excepciones previstas son las escrituras de oyente (Comunidad, que no existe) y el
-  conteo de publicidad, que va por proxy de servidor.
+- **Escribir al CMS.** El front es cliente de **solo lectura**, y las excepciones
+  son TRES, todas por proxy de servidor porque el navegador nunca habla con el CMS:
+  el conteo de publicidad (de `agents/ads.md`), **el voto del público**
+  (`src/pages/api/votar.ts`, desde el 2026-09-21) y las escrituras de oyente
+  (Comunidad, que no existe todavía).
+
+  El voto faltaba de esta lista hasta el 2026-09-21, y este documento y
+  `docs/lo-que-el-front-necesita-del-cms.md` llevaban semanas contradiciéndose:
+  aquel ya lo daba por previsto —«el voto irá por un proxy `/api/votar` de Astro»—
+  y aquí no aparecía.
+
+  Y hay una regla que sale de construirlo: **el proxy del voto NO comprueba que
+  la lista sea de esta estación**, a propósito. Hacerlo pediría un
+  `where[id][equals]` que cambia en cada petición, o sea la regla 2 de este mismo
+  documento. Quien valida es el CMS, que ya mira existencia, publicación, votación
+  abierta y pertenencia de la canción.
 - **Pedirle campos nuevos al CMS.** Eso se escribe en
   `docs/lo-que-el-front-necesita-del-cms.md`, que es el documento de traspaso, y su
   regla de oro aplica aquí: **el lienzo es un mockup de diseño, no una especificación

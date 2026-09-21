@@ -152,8 +152,37 @@ export const SECCIONES_EDITORIALES = {
  *   · el documento no desborda a lo ancho en ninguna de las dos (`scrollWidth` =
  *     `innerWidth`).
  *
- * Si un día entra una NOVENA, se vuelve a medir igual: es el sitio exacto donde
- * ya se coló un desborde de 510px en una caja de 390. Lo que aprieta primero es la
+ * **EL TOP TEN NO ENTRA AQUÍ TODAVÍA, y hay una medida detrás.** Se añadió como
+ * novena el 2026-09-21, se midió sobre el build SERVIDO y se retiró el mismo día
+ * (Carlos: «en el home por ahora no lo pongamos»). Lo medido, para quien lo intente
+ * de nuevo:
+ *
+ *   · La fila necesita **1064px** con nueve; con ocho necesita 988. El Top Ten
+ *     cuesta 76px.
+ *   · La hamburguesa no entra hasta los 900 (`md`), y esta fila va dentro de un
+ *     `overflow-x: hidden` (`Cabecera.astro`). O sea que entre 900 y 1064 la última
+ *     sección —«Agenda»— **se recorta sin aviso**: no hay scroll ni puntos
+ *     suspensivos, simplemente no está.
+ *   · **Con OCHO eso ya pasa entre 900 y 988.** El defecto es anterior al Top
+ *     Ten; la novena solo ensancha la banda. A 1024 —un iPad apaisado— con ocho
+ *     cabe por 36px, y con nueve no.
+ *   · Los parches que se probaron NO alcanzan: «Fenómeno Residente» → «Fenómeno»
+ *     deja la fila en 984, el espaciado de 20 a 16px la deja en 1032, y los dos
+ *     juntos en 952 — los tres siguen por encima de 900.
+ *
+ * Arreglarlo de verdad es subir el corte de la fila a ~1100px, que es un cambio de
+ * cabecera para TODO el sitio y no se hace de paso en un encargo de otra cosa.
+ *
+ * Cuando el Top Ten tenga una lista publicada y toque anunciarlo, la decisión es
+ * esa. Mientras no la tenga, tampoco hay qué anunciar: una sección vacía en el menú
+ * es exactamente lo que este archivo evita con `SECCIONES_FUTURAS`. La ruta
+ * `/top-ten` responde 200 desde ya —la sirve `src/pages/[tipoLista]/`— y el enlace
+ * es literalmente esta línea:
+ *
+ *     { corto: 'Top Ten', largo: 'Top Ten', href: '/top-ten' },
+ *
+ * Si un día entra una NOVENA, se vuelve a medir igual: es el sitio exacto donde ya
+ * se coló un desborde de 510px en una caja de 390. Lo que aprieta primero es la
  * fila de la cabecera, que es la que no envuelve.
  *
  * Beat Scanner y Editorial son DOS entradas desde el 2026-09-07, cuando se

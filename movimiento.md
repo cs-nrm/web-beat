@@ -2,7 +2,7 @@
 
 El design system dice cómo se ve el sitio. Esto dice cómo se **comporta**.
 
-🔴 **Por qué existe.** Sin este documento acabamos donde acabamos: cinco tarjetas
+**Por qué existe.** Sin este documento acabamos donde acabamos: cinco tarjetas
 con tres comportamientos distintos, una regla vieja peleando con una nueva por la
 misma propiedad, y el mismo tipo de fallo tres veces. Ninguna de esas tres cosas
 fue un descuido puntual — las tres salen de no haber decidido por escrito qué le
@@ -18,7 +18,7 @@ resuelta, y apartarse de ella exige razón escrita en el mismo commit.
 | Rol | Tratamiento | Dónde vive |
 |---|---|---|
 | Título de sección o titular display | **Descifrado** al entrar en pantalla, una vez | `escribir.ts` · `[data-escribir]` |
-| Imagen editorial | **Parallax** ligado al scroll. Nada al entrar. | `animation-timeline: view()` |
+| Imagen editorial | **Nada.** Ni al entrar ni al hacer scroll. Solo responde al cursor. | `.tarjeta-foto img` · `--foto-base` |
 | Lista de texto | **Cascada** de entrada, 70 ms entre ítems | `[data-cascada]` |
 | Cabecera de sección | **Barrido** de luz, una vez | `[data-barrido]` |
 | Cifra que es un dato | **Conteo** desde cero | `[data-contar]` |
@@ -26,7 +26,7 @@ resuelta, y apartarse de ella exige razón escrita en el mismo commit.
 | Enlace de «ver más» | Texto + subrayado que se dibuja + flecha que sale y entra | `Remate.astro` |
 | Fondo del sitio | **Luz que recorre la cuadrícula**, posición y ritmo al azar | `rejilla.ts` |
 
-⚠️ **Nunca dos efectos escribiendo la misma propiedad CSS sobre el mismo
+**Nunca dos efectos escribiendo la misma propiedad CSS sobre el mismo
 elemento.** Es lo que nos costó el hover: dos reglas de la misma capa y la misma
 especificidad peleando por `transform`, y el empate lo resolvía el orden en el
 archivo — o sea, por accidente. Si dos gestos deben convivir sobre un elemento, van
@@ -37,25 +37,35 @@ independientes y se componen).
 
 | Propiedad | Quién la usa |
 |---|---|
-| `translate` | parallax del scroll |
 | `scale` | el aire que el desplazamiento necesita |
 | `transform` | el desplazamiento hacia el cursor |
 
+`translate` quedó libre: era del parallax del scroll, retirado el 2026-09-14.
+
 ---
 
-⚠️ **La imagen NO tiene animación de entrada, y es una decisión.** Hubo una: una
-máscara que subía desde abajo al aparecer. Se retiró porque se leía como una
-cortinilla abriéndose, y en una rejilla de tarjetas eso ocurre varias veces por
-pantalla — con la agravante de que se repetía en cada vuelta al inicio. Lo que
-conserva la imagen es el parallax, que **responde al lector** en vez de ejecutarse
-solo. Si alguna vez vuelve a plantearse una entrada para la media, esta es la razón
-por la que no la hay.
+**La imagen NO tiene movimiento propio, y las dos veces fue una decisión.**
+
+Hubo una animación de entrada: una máscara que subía desde abajo al aparecer. Se
+retiró porque se leía como una cortinilla abriéndose, y en una rejilla de tarjetas
+eso ocurre varias veces por pantalla — con la agravante de que se repetía en cada
+vuelta al inicio.
+
+Y hubo un parallax ligado al scroll, que era lo que quedaba. Se retiró el
+2026-09-14 (Carlos), y el motivo no fue el movimiento sino su **precio**: para que
+el desplazamiento de ±4% no dejara asomar los bordes, la foto iba permanentemente
+al 109%. Todas las fotos del sitio se veían recortadas un 9% estuvieran quietas o
+no, y eso se leía como un zoom. **Un efecto que solo se nota al hacer scroll no
+justifica un recorte que se ve siempre.**
+
+Si alguna vez vuelve a plantearse movimiento para la media, estas son las dos
+razones por las que hoy no lo hay.
 
 ---
 
 ## 2. Lo que NO lleva movimiento
 
-- 🔴 **Las creatividades de publicidad.** Es contenido de un tercero servido por su
+- **Las creatividades de publicidad.** Es contenido de un tercero servido por su
   ad server. Lo que se le monte encima no lo hemos acordado con nadie, y en un
   formato medido por viewability, alterarlo es meterse donde no toca.
 - **El texto de cuerpo.** Partirlo en letras destruye enlaces y negritas, y un
@@ -63,7 +73,7 @@ por la que no la hay.
 - **La interfaz funcional del player.** Los controles contestan (hover, foco), pero
   no se animan solos: son mandos, no decoración.
 
-  🔴 Y la barra tiene DOS modos —directo y pista a demanda— que comparten la misma
+  Y la barra tiene DOS modos —directo y pista a demanda— que comparten la misma
   geometría: al cambiar de uno a otro no se mueve nada de sitio, cambia lo que
   dice. El indicador «AL AIRE» pasa a ser el botón de **volver al directo**, el
   título de la señal pasa a ser el de la pista, y la onda decorativa pasa a ser la
@@ -72,14 +82,14 @@ por la que no la hay.
   (§4.1 del mapa de sitio). Sacar a alguien del directo sin salida visible sería
   una trampa.
 
-  ⚠️ Al acabar la última pista de una tanda, **no arranca el radio solo**. Que
+  Al acabar la última pista de una tanda, **no arranca el radio solo**. Que
   empiece a sonar algo que nadie pidió es peor que el silencio.
 - **Cualquier cosa por debajo del umbral de texto grande** si el efecto baja la
   opacidad. Ver §4.
 
 ---
 
-## 3. 🔴 Ningún efecto puede dejar el contenido inalcanzable
+## 3. Ningún efecto puede dejar el contenido inalcanzable
 
 Esta es la regla que más veces hemos roto —tres— y la que más caro sale, porque el
 fallo no se ve en desarrollo: se ve en producción, como una foto en negro o un
@@ -150,7 +160,7 @@ Se usa el token semántico `--r-media`, no `--r-3`. Valen lo mismo hoy, pero uno
 dice *qué es* y el otro *cuánto mide*: el día que la marca cambie el radio de la
 media, se cambia en un sitio.
 
-⚠️ Inventariado el 2026-08-27: solo las tarjetas apiladas cumplían esto. El hero de
+Inventariado el 2026-08-27: solo las tarjetas apiladas cumplían esto. El hero de
 la nota y el marco del visor estaban en cero por descuido, no por decisión.
 
 ---
@@ -169,7 +179,7 @@ página**.
 
 ---
 
-## 8. 🔴 El sitio va en blanco y negro
+## 8. El sitio va en blanco y negro
 
 Decisión de Carlos, 2026-08-27. El design system trae una paleta cálida
 —`--luz-ambar`, `--luz-coral`, `--luz-ink`— y **Beat no la usa para texto**.
@@ -189,7 +199,7 @@ Decisión de Carlos, 2026-08-27. El design system trae una paleta cálida
 --text-link:   var(--mist-0);
 ```
 
-⚠️ Quedaban dos naranjas fuera del alcance de los tokens, y se cerraron el
+Quedaban dos naranjas fuera del alcance de los tokens, y se cerraron el
 2026-09-01:
 
 - **La línea coral bajo la sección activa de la nav.** Estaba ahí porque los cinco
@@ -201,7 +211,7 @@ Decisión de Carlos, 2026-08-27. El design system trae una paleta cálida
 - **El acento de Plyr** (`--plyr-color-main`), que era la barra de progreso del
   visor de cápsulas: naranja a pantalla completa.
 
-⚠️ Y una trampa de capas que se repite: el color y el peso NO pueden ir como
+Y una trampa de capas que se repite: el color y el peso NO pueden ir como
 utilidades de Tailwind en el marcado si `beat.css` tiene que poder cambiarlos. Las
 utilidades van en una capa POSTERIOR a `proyecto`, así que desde ahí no hay
 especificidad que valga.
@@ -211,11 +221,11 @@ componente volviera a traer naranja, porque el token seguiría diciendo ámbar.
 Redefiniéndolo, quien escriba `--text-accent` obtiene el color correcto sin
 enterarse de que hubo una decisión — que es como debe funcionar un token.
 
-⚠️ Los `--luz-*` NO se tocan. Siguen sirviendo en superficies, bordes y las estelas
+Los `--luz-*` NO se tocan. Siguen sirviendo en superficies, bordes y las estelas
 de marca, donde el umbral es 3:1 y el naranja es identidad, no texto. Lo que cambia
 es a qué apunta el TEXTO.
 
-🔴 **Y hay UNA excepción, exactamente una: el punto de «al aire» va en rojo**
+**Y hay UNA excepción, exactamente una: el punto de «al aire» va en rojo**
 (`--rojo-aire`, decisión de Carlos del 2026-09-03). Se sostiene porque no es
 decoración: el rojo de «al aire» es la luz de tally de un estudio, una convención
 que significa algo concreto. Un punto blanco parpadeando no dice «estamos
@@ -226,14 +236,14 @@ tiene tono, el ojo va ahí solo. En cuanto haya un segundo color, este deja de
 significar. **Si alguna vez hace falta otro acento, la pregunta no es «¿cuál?»
 sino «¿a costa de qué?».**
 
-⚠️ Y el enlace pierde el color pero **conserva el subrayado**, que ya tenía. Sin él
+Y el enlace pierde el color pero **conserva el subrayado**, que ya tenía. Sin él
 esto rompería WCAG 1.4.1: el color no puede ser lo único que distingue un enlace.
 
 ---
 
 ---
 
-## 9. 🔴 El cromo de un interior, y qué es una tira de pastillas
+## 9. El cromo de un interior, y qué es una tira de pastillas
 
 Decisión de Carlos, 2026-09-01. Son dos reglas y salen del mismo problema: había
 **dos controles con la misma pinta haciendo cosas distintas**.
@@ -249,7 +259,7 @@ Dentro de una sección, lo que orienta es dónde estás, y eso ya lo dice la tir
 secciones. Dos navegaciones apiladas repiten el mismo trabajo y se comen 56px de
 la primera pantalla justo donde empieza a leerse.
 
-⚠️ La cabecera lleva `transition:persist`, así que su marcado del servidor se
+La cabecera lleva `transition:persist`, así que su marcado del servidor se
 descarta al navegar. El estado se reconcilia en `astro:after-swap` —antes de
 pintar— y NO en `astro:page-load`, que llega un fotograma tarde y deja ver la
 barra oscura aparecer y plegarse.
@@ -261,7 +271,7 @@ barra oscura aparecer y plegarse.
 | Navegar el sitio | **pastillas**, la activa invertida en blanco | `NavSecciones.astro`, arriba del titular |
 | Filtrar una lista | **texto con subrayado**, la activa en negrita | dentro de la página, pegado a lo que filtra |
 
-🔴 Y sin «TODO» en las secciones: no hay nada que reiniciar, porque una sección no
+Y sin «TODO» en las secciones: no hay nada que reiniciar, porque una sección no
 es un estado de filtro.
 
 De dónde sale: en el Scanner la tira eran las CATEGORÍAS de `noticias`, y las que
@@ -287,7 +297,7 @@ acaba de entrar.
 
 ---
 
-## 10. 🔴 Un hueco de publicidad se reserva, y luego desaparece
+## 10. Un hueco de publicidad se reserva, y luego desaparece
 
 Las dos mitades hacen falta, y por razones distintas:
 
@@ -304,11 +314,11 @@ Lo cierra `anuncios.ts` con `data-vacio`, y por DOS caminos:
 2. **Pasa el plazo y GAM no contesta** — un bloqueador, un `gpt.js` que no bajó,
    la red que corta `securepubads`.
 
-🔴 El segundo no es un extra: es el modo de falla MÁS COMÚN, y sin él la banda se
+El segundo no es un extra: es el modo de falla MÁS COMÚN, y sin él la banda se
 queda abierta para siempre. Es el patrón de «bandera que solo se suelta dentro del
 callback» de §3, aplicado al dinero.
 
-⚠️ Y `data-vacio` se RETIRA cuando sí hay anuncio. Si sobreviviera a una
+Y `data-vacio` se RETIRA cuando sí hay anuncio. Si sobreviviera a una
 navegación, el hueco quedaría escondido con un creativo dentro: servido,
 facturado y sin que nadie lo vea.
 
@@ -323,22 +333,22 @@ así que una elección al azar quedaría congelada para todos los lectores de es
 
 ## 11. Cómo se verifica
 
-🔴 **Recargar no basta.** Los tres fallos de contenido inalcanzable aparecieron
+**Recargar no basta.** Los tres fallos de contenido inalcanzable aparecieron
 solo en el flujo **Home → nota → atrás**, porque el estado vive en el DOM y el DOM
 sobrevive a la navegación.
 
-⚠️ Y el servidor de desarrollo **sirve hojas de estilo viejas** tras una navegación
+Y el servidor de desarrollo **sirve hojas de estilo viejas** tras una navegación
 del lado del cliente. Nos ha engañado cinco veces. Ante cualquier duda:
 `pnpm build && CMS_URL=… node dist/server/entry.mjs`, o reiniciar el servidor.
 
-⚠️ El panel del navegador reporta `visibilityState: hidden`, y con eso están
+El panel del navegador reporta `visibilityState: hidden`, y con eso están
 CONGELADAS las transiciones, `requestAnimationFrame`, el `IntersectionObserver`,
 los eventos de scroll y las líneas de tiempo de scroll. Un elemento correctamente
 animado y uno atascado se leen IGUAL. Para medir el estado de destino, inyecta
 `* { transition: none !important; animation: none !important }` antes de leer — o
 mejor, lee el DOM (atributos, clases) en vez de valores calculados.
 
-🔴 **Quinto caso, 2026-09-01:** la marca de «sección en curso» de la nav se
+**Quinto caso, 2026-09-01:** la marca de «sección en curso» de la nav se
 quedaba pegada al navegar. La pinta el servidor, y la cabecera es persistente, así
 que el nodo que sobrevive es el de la página ANTERIOR: entrar a Agenda y volver al
 Inicio dejaba «AGENDA» marcada sobre el mosaico del Inicio, y le decía «página
@@ -350,7 +360,7 @@ dos divergen, la marca cambia al navegar y no se sabe cuál manda.
 RUTA puede quedarse escrito dentro del bloque persistente.** Ni el estado plegado,
 ni la sección activa, ni lo que venga después.
 
-🔴 **Cuarto caso, 2026-09-01, cazado exactamente en ese flujo:** al volver de un
+**Cuarto caso, 2026-09-01, cazado exactamente en ese flujo:** al volver de un
 interior al Inicio la barra oscura se quedaba plegada. La causa era una lectura
 `!!cabecera.dataset.compacta` sobre un atributo que se escribe como
 `data-compacta` a secas — su valor es la CADENA VACÍA, y `!!''` es `false`. El

@@ -1,7 +1,7 @@
 /**
  * Deltas del proyecto sobre el design system.
  *
- * 🔴 Se importa DESPUÉS del DS, a propósito. En `web-enfoque` el archivo
+ * Se importa DESPUÉS del DS, a propósito. En `web-enfoque` el archivo
  * equivalente iba ANTES, así que cualquier regla que compitiera con el DS perdía
  * ahí y costaba entender por qué. Acá gana el proyecto.
  *
@@ -10,7 +10,7 @@
  */
 
 /* ============================================================
-   🔴 EL SITIO VA EN BLANCO Y NEGRO
+   EL SITIO VA EN BLANCO Y NEGRO
    ------------------------------------------------------------
    Decisión de Carlos, 2026-08-27. El design system trae una paleta cálida
    —`--luz-ambar`, `--luz-coral`, `--luz-ink`— y Beat no la usa: lo que resalta va
@@ -22,14 +22,14 @@
    traer naranja, porque el token seguiría diciendo ámbar. Redefiniéndolo, quien
    escriba `--text-accent` obtiene el color correcto sin saber que hubo una decisión.
 
-   ⚠️ Los tokens `--luz-*` NO se tocan: siguen sirviendo en superficies, bordes y
+   Los tokens `--luz-*` NO se tocan: siguen sirviendo en superficies, bordes y
    estelas de marca —donde el umbral es 3:1 y el naranja es identidad, no texto—.
    Lo que cambia es a qué apunta el TEXTO.
 
-   ⚠️ Y el enlace pierde el color pero conserva el subrayado, que ya tenía. Sin él
+   Y el enlace pierde el color pero conserva el subrayado, que ya tenía. Sin él
    esto rompería WCAG 1.4.1: el color no puede ser lo único que distingue un enlace.
 
-   ⚠️ `--text-live` se sumó el 2026-09-01. Se había quedado fuera y hoy no se ve,
+   `--text-live` se sumó el 2026-09-01. Se había quedado fuera y hoy no se ve,
    porque ninguna página usa todavía `.beat-live` ni `.beat-sectionhead__kicker` —
    que es exactamente el descuido que este bloque existe para evitar: el token
    seguía diciendo ámbar, así que el primero que usara esas clases habría traído el
@@ -43,7 +43,7 @@
 }
 
 /*
-  🔴 Y el TEXTO SELECCIONADO, que se escapó por la rendija que este bloque avisa:
+  Y el TEXTO SELECCIONADO, que se escapó por la rendija que este bloque avisa:
   el DS pinta `::selection` con `var(--luz-coral)` a pelo, no con un token de
   texto, así que redefinir `--text-accent` no lo alcanzaba. Seleccionar un párrafo
   de una nota lo dejaba en naranja —el único naranja que quedaba a la vista en todo
@@ -52,7 +52,7 @@
   Va invertido, como todo lo que aquí se marca: blanco pleno con la letra negra. Es
   el mismo gesto de la sección activa de la nav y de la celda al aire de la parrilla.
 
-  ⚠️ Se sobrescribe la REGLA, no el token: `--luz-coral` sigue siendo el naranja de
+  Se sobrescribe la REGLA, no el token: `--luz-coral` sigue siendo el naranja de
   la marca y hay superficies y bordes que lo usan (`beat-input:focus`, la estela).
   Cambiarlo aquí les cambiaría el color a todos ellos.
 */
@@ -62,7 +62,7 @@
 }
 
 /*
-   🔴 LA ÚNICA EXCEPCIÓN AL BLANCO Y NEGRO: el punto de «al aire».
+   LA ÚNICA EXCEPCIÓN AL BLANCO Y NEGRO: el punto de «al aire».
    ------------------------------------------------------------
    Decisión de Carlos, 2026-09-03. Es el único color de toda la interfaz, y se
    sostiene porque no es decoración: el rojo de «al aire» es una convención de
@@ -73,12 +73,12 @@
    Que sea el ÚNICO color es lo que lo hace funcionar. En una interfaz donde nada
    más tiene tono, el ojo va ahí solo.
 
-   ⚠️ 4.88:1 sobre la barra clara (`--mist-0`), medido. El umbral de WCAG 1.4.11
+   4.88:1 sobre la barra clara (`--mist-0`), medido. El umbral de WCAG 1.4.11
    para un elemento gráfico portador de información es 3:1, así que sobra — y de
    todas formas el color NO es el único portador: al lado dice «Al aire» con
    letras.
 
-   ⚠️ NO se llama `--luz-*` ni cuelga de esa gama: los `--luz-*` son la paleta
+   NO se llama `--luz-*` ni cuelga de esa gama: los `--luz-*` son la paleta
    cálida del DS, que Beat no usa. Este rojo es un semáforo, no una marca.
 */
 :root {
@@ -96,7 +96,7 @@
  *
  * Qué corrige, medido contra el `--surface-base` (#E7EBE9) del propio tema:
  *   · --text-accent / --text-link = --luz-ink (#D9451C) → 3.62:1  ❌
- *   · --text-faint = --graphite-2 (#6B7471)             → 4.00:1  ⚠️
+ *   · --text-faint = --graphite-2 (#6B7471)             → 4.00:1
  *
  * WCAG 1.4.3 pide 4.5:1 para texto normal. El primero es el que muerde, porque es
  * el color de los ENLACES. Es el mismo hallazgo que en Enfoque, donde el rojo de
@@ -116,7 +116,7 @@
 /**
  * Roles tipográficos como clases.
  *
- * 🔴 Por qué existen: el DS define su tipografía en `font` SHORTHANDS compuestos
+ * Por qué existen: el DS define su tipografía en `font` SHORTHANDS compuestos
  * (`--type-display-3: var(--w-bold) var(--size-display-3)/var(--lh-tight)
  * var(--font-display)`), no como propiedades sueltas. Si se reensamblan con
  * utilidades de Tailwind (`text-display-3 font-display`), se pierde el PESO en
@@ -195,10 +195,10 @@
  *   ·  --size-body-lg   18 → 16   (14f: "cuerpo a 16px")
  *   ·  --size-body      16 → 15   (14a/14g, cuerpo de tarjeta)
  *
- * ⚠️ El resto se escala en la misma proporción (~0.6–0.9 según el escalón), que es
+ * El resto se escala en la misma proporción (~0.6–0.9 según el escalón), que es
  * una INFERENCIA, no una medición: el lienzo solo trae 390 y 1280.
  *
- * ⚠️ Y el corte va en `--bp-md` (900px) y no en 640, también a falta de artboard:
+ * Y el corte va en `--bp-md` (900px) y no en 640, también a falta de artboard:
  * entre 640 y 900 no hay diseño, y quedarse con la escala chica de más es seguro
  * (un titular pequeño nunca rompe la retícula; uno grande sí). Revisar cuando haya
  * un artboard de tableta.
@@ -224,7 +224,7 @@
 }
 
 /* ============================================================
-   🔴 UNA SOLA PROPORCIÓN PARA TODAS LAS FOTOS DEL SITIO
+   UNA SOLA PROPORCIÓN PARA TODAS LAS FOTOS DEL SITIO
    ------------------------------------------------------------
    Decisión de Carlos, 2026-09-07 (era 3:2) y 2026-09-14 (pasa a 16:9).
 
@@ -249,7 +249,7 @@
    alguien deja uno atrás y el sitio vuelve a recortar distinto según la página —
    que es el fallo que esta regla existe para evitar.
 
-   ⚠️ El CMS **no recorta**: `thumbnail`/`card`/`large` son variantes de ANCHO y
+   El CMS **no recorta**: `thumbnail`/`card`/`large` son variantes de ANCHO y
    todas conservan la proporción del original (ver `urlMedia` en
    `src/lib/cms/client.ts`). El recorte lo hace el front con `object-fit: cover`,
    así que lo que no encaje en esta caja se pierde por el centro. Para las fotos
@@ -263,7 +263,7 @@
 /* ============================================================
    Barra del player — tokens y controles
    ------------------------------------------------------------
-   🔴 Estos tokens existen por una razón concreta, y vale dejarla escrita porque
+   Estos tokens existen por una razón concreta, y vale dejarla escrita porque
    ya me costó una vuelta: **los modificadores de opacidad de Tailwind NO
    funcionan sobre colores definidos con `var()`**. Está avisado en el comentario
    de `tailwind.config.js` y caí igual.
@@ -322,14 +322,14 @@
  * dibuja el header a 68px en escritorio y 56 en móvil, y la barra del player a
  * 48px. Gana el artboard, que es posterior y es lo que se aprobó.
  *
- * 🔴 …salvo en MÓVIL, donde la barra sube a 60px (Carlos, 2026-09-08): «la barra
+ * …salvo en MÓVIL, donde la barra sube a 60px (Carlos, 2026-09-08): «la barra
  * se ve muy chiquita». Y no era una impresión — medido a 375px, el problema no es
  * que sea chica, es que está LLENA: dentro hay un botón táctil de 44px, así que
  * los 48 dejaban 2px de aire arriba y 2 abajo. Encima el banner de publicidad mide
  * 110px, más del doble que la barra, así que la marca no competía con la foto de
  * portada sino con el anuncio que tiene sobre la cabeza.
  *
- * ⚠️ A 60px el botón de 44 respira 8px por lado y el logo puede crecer sin apretar
+ * A 60px el botón de 44 respira 8px por lado y el logo puede crecer sin apretar
  * nada. En ESCRITORIO se queda en 48: ahí la barra clara convive con la oscura de
  * 68 y el conjunto ya pesa 116px.
  *
@@ -344,7 +344,7 @@
   /*
     Lo que tapa el chrome pegajoso, para anclas y para `scroll-padding`.
 
-    🔴 En MÓVIL es solo la barra del player: la oscura no se muestra nunca ahí
+    En MÓVIL es solo la barra del player: la oscura no se muestra nunca ahí
     (decisión de Carlos, 2026-09-03). Contar sus 56px dejaría todo lo pegajoso
     —los rieles, el menú, los anclajes— desplazado hacia abajo por un espacio que
     no existe.
@@ -352,7 +352,7 @@
   --chrome-h: var(--player-h);
 }
 /*
-  🔴 En móvil la barra del player sube a 60px, y se hace tocando `--player-h` y no
+  En móvil la barra del player sube a 60px, y se hace tocando `--player-h` y no
   una altura suelta en la cabecera: de este token cuelgan `--chrome-h` y con él los
   rieles pegajosos, el `scroll-padding` de las anclas y el relleno del menú a
   pantalla completa. Cambiarlo aquí los mueve a todos a la vez, que es para lo que
@@ -416,7 +416,7 @@ html {
 /**
  * SONANDO — dos animaciones por barra, con periodos distintos.
  *
- * 🔴 Es el arreglo de fondo. Con una sola animación el movimiento era un patrón
+ * Es el arreglo de fondo. Con una sola animación el movimiento era un patrón
  * FIJO que se repetía idéntico cada `--dur`, y el ojo detecta esa periodicidad
  * aunque no sepa nombrarla: por eso seguía sintiéndose artificial incluso con
  * variación entre barras.
@@ -432,7 +432,7 @@ html {
 /**
  * REPOSO — la señal respira aunque nadie haya dado play.
  *
- * 🔴 Este es el estado que faltaba, y era el más importante de los tres. La onda
+ * Este es el estado que faltaba, y era el más importante de los tres. La onda
  * solo se movía con `data-status='sonando'`, o sea que quien llegaba al sitio y no
  * pulsaba nada veía 72 barras CONGELADAS: precisamente el elemento que representa
  * "hay señal en vivo", muerto. Un sitio de radio no puede recibirte con la señal
@@ -537,7 +537,7 @@ html {
    eso necesita sus propios tokens de tinta: los semánticos del DS están calculados
    contra el fondo oscuro y aquí darían texto claro sobre claro.
 
-   🔴 Y hay una corrección de contraste medida. El lienzo usa `rgba(5,7,6,.45)`
+   Y hay una corrección de contraste medida. El lienzo usa `rgba(5,7,6,.45)`
    para los rótulos de 8px en mayúsculas, y sobre `#F1F3F2` eso da **3.17:1**.
    «AA grande» (3:1) solo aplica desde 18.66px en negrita o 24px normal, así que un
    rótulo de 8px cae bajo la regla de 4.5:1 y NO la cumple. Con alfa `.60` da
@@ -565,7 +565,7 @@ html {
    los lectores de pantalla lo usan para saber en qué página están, y los
    buscadores para entender de qué es.
 
-   🔴 No se usa `display:none` ni `visibility:hidden`: ésos lo sacan del árbol de
+   No se usa `display:none` ni `visibility:hidden`: ésos lo sacan del árbol de
    accesibilidad, o sea que tampoco lo lee nadie y no arregla nada. La técnica es
    recortarlo a 1px fuera de la vista dejándolo en el flujo.
    ============================================================ */
@@ -584,7 +584,7 @@ html {
 /* ============================================================
    El modal del pre-roll VAST
    ------------------------------------------------------------
-   🔴 `#td_container` NO puede llevar `display:none`. Es el `playerId` del SDK, y
+   `#td_container` NO puede llevar `display:none`. Es el `playerId` del SDK, y
    ahí dentro el IMA de Google monta el `<lima-video>` del anuncio: un elemento en
    `display:none` no tiene caja, así que el IMA no puede medirlo ni renderizarlo y
    el video ad no se ve. El inventario de VideoVast se serviría a un contenedor
@@ -607,7 +607,7 @@ html {
   z-index: var(--z-dialog);
   overflow: hidden;
   /*
-    🔴 En reposo NO recibe el puntero, y esto es un fallo real por pequeño que sea.
+    En reposo NO recibe el puntero, y esto es un fallo real por pequeño que sea.
 
     La caja vive SIEMPRE en la página: 1×1 px, `position: fixed`, `margin: auto`
     sobre `inset: 0` —o sea, clavada en el centro EXACTO del viewport— y con el
@@ -620,7 +620,7 @@ html {
   */
   pointer-events: none;
   /*
-    🔴 SIN transición de `width`/`height`, a propósito.
+    SIN transición de `width`/`height`, a propósito.
     El IMA de Google MIDE el contenedor cuando arranca el anuncio para decidir a
     qué tamaño renderizar el creativo. Si en ese instante la caja va animándose
     desde 1px, mide una caja equivocada. El sitio actual tiene `transition: all
@@ -651,7 +651,7 @@ html {
   background: rgba(5, 7, 6, 0.82);
   backdrop-filter: blur(6px);
   /*
-    🔴 El telón NO captura el puntero, y por la misma razón que la caja de al lado.
+    El telón NO captura el puntero, y por la misma razón que la caja de al lado.
 
     Cubre el 100% del viewport mientras suena el pre-roll, y lo único que lo
     retiraba era un `setTimeout(cerrarAnuncio, 45_000)` en `player.ts`. O sea que
@@ -711,7 +711,7 @@ html {
    no lo percibe bien se quedaría sin saber en qué sección está (WCAG 1.4.1).
    ============================================================ */
 /*
-  🔴 En reposo, GRIS y sin negrita. La sección en curso, BLANCA, en negrita y con
+  En reposo, GRIS y sin negrita. La sección en curso, BLANCA, en negrita y con
   luz. Es la regla del §8 de movimiento.md aplicada al menú, y de paso se lleva el
   último naranja que quedaba en la interfaz: una línea coral de 2px debajo del
   activo.
@@ -721,13 +721,13 @@ html {
   hubo que añadirle algo encima. Con los inactivos apagados, el activo se
   distingue por lo que ya es, y no hace falta subrayarlo.
 
-  ⚠️ WCAG 1.4.1: el portador no es el color, es el PESO. Un enlace blanco y en
+  WCAG 1.4.1: el portador no es el color, es el PESO. Un enlace blanco y en
   negrita entre cuatro grises y regulares se distingue aunque no se perciba el
   tono. Por eso los inactivos bajan de peso además de color: si todos siguieran en
   negrita, lo único que quedaría sería el tono, y eso es justo lo que la norma
   prohíbe.
 
-  ⚠️ Y el hover NO cambia el peso, solo el color y la luz. Cambiar la negrita al
+  Y el hover NO cambia el peso, solo el color y la luz. Cambiar la negrita al
   pasar el cursor movería a los vecinos de sitio en la fila.
 */
 .beat-nav-enlace {
@@ -764,7 +764,7 @@ html {
    Referencia que trajo Carlos (2026-08-24): campaña de Mazda, letras y logotipo
    blancos con un halo suave, como retroiluminados.
 
-   🔴 Es distinto de lo que el DS ya tiene. Sus `--glow-*` son sombras ARROJADAS:
+   Es distinto de lo que el DS ya tiene. Sus `--glow-*` son sombras ARROJADAS:
    llevan desplazamiento en Y y spread negativo (`--glow-blanco: 0 10px 30px -16px`),
    así que leen como un objeto flotando sobre una superficie. Esto es lo contrario:
    sin desplazamiento y en todas direcciones, así que lee como un objeto que EMITE.
@@ -791,7 +791,7 @@ html {
       rgba(250, 251, 250, min(calc(0.05 * var(--resplandor-intensidad)), 0.28));
   /* La versión cálida, para cuando el acento de marca es el que emite. */
   /*
-    ⚠️ Las bases van BAJAS a propósito. El dial las multiplica, y con las que tenía
+    Las bases van BAJAS a propósito. El dial las multiplica, y con las que tenía
     (0.5 y 0.28) a intensidad 2.6 la primera capa llegaba a alfa 1.0: dejaba de ser
     luz y se veía como un anillo naranja sólido alrededor del botón.
     Con 0.26 y 0.15, a 2.6 quedan en 0.68 y 0.39 — halo, no borde.
@@ -801,10 +801,10 @@ html {
     0 0 30px rgba(255, 138, 91, calc(0.15 * var(--resplandor-intensidad)));
 
   /*
-    🔴 EL DIAL. Todo el resplandor del sitio se sube o se baja desde aquí, sin
+    EL DIAL. Todo el resplandor del sitio se sube o se baja desde aquí, sin
     tocar una sola regla.
 
-    🔴 EL DIAL SUBE EL BRILLO —con tope— Y EL RADIO SOLO UN POCO.
+    EL DIAL SUBE EL BRILLO —con tope— Y EL RADIO SOLO UN POCO.
 
     Costó llegar aquí, con un error mío en medio. Primero el dial multiplicaba el
     ALFA a secas: cualquier valor alto lo empujaba por encima de 1, el navegador lo
@@ -821,7 +821,7 @@ html {
     Está en 2.6, y llegar ahí costó otra lección: a 1.4 —donde estaba— Carlos no lo
     notaba, y tenía razón.
 
-    🔴 El resplandor necesita HUECO OSCURO alrededor del trazo para ocuparlo. La
+    El resplandor necesita HUECO OSCURO alrededor del trazo para ocuparlo. La
     referencia de Mazda son letras finas con muchísimo tracking: cada letra está
     rodeada de fondo. Nuestra nav son 9.5px en NEGRITA y con tracking cerrado — no
     hay dónde poner luz, y por más que se suba el dial ahí no va a lucir.
@@ -836,7 +836,7 @@ html {
    En texto va por `text-shadow`; en cajas, por `box-shadow`. Son propiedades
    distintas, así que hacen falta dos clases y no una.
 
-   ⚠️ Dónde SÍ funciona: tipografía grande y de peso ligero o normal, con aire
+   Dónde SÍ funciona: tipografía grande y de peso ligero o normal, con aire
    alrededor. En texto pequeño y en negrita el halo no tiene dónde caer y solo
    ensucia el canto de la letra.
 */
@@ -854,7 +854,7 @@ html {
 }
 
 /*
-  🔴 Se apaga con `prefers-contrast: more`.
+  Se apaga con `prefers-contrast: more`.
   Un halo difumina el borde de la letra, que es justo lo que esa preferencia pide
   evitar: quien la activa necesita cantos definidos, no luz alrededor.
 */
@@ -871,7 +871,7 @@ html {
 /* ============================================================
    El botón de aire, encendido
    ------------------------------------------------------------
-   🔴 La luz va DENTRO del botón, no alrededor.
+   La luz va DENTRO del botón, no alrededor.
 
    Se probó el halo cálido rodeando el círculo y Carlos lo descartó (2026-08-24):
    sobre la barra clara, un anillo naranja lee como un borde de alerta, no como
@@ -885,12 +885,12 @@ html {
    Dos capas —un núcleo apretado y un bloom ancho— porque `drop-shadow` no admite
    varias sombras en una sola función.
 
-   ⚠️ NO se pone resplandor en la barra del player: se probó y Carlos la prefirió
+   NO se pone resplandor en la barra del player: se probó y Carlos la prefirió
    sin él (2026-08-24). La barra ya es la superficie más luminosa del sitio por su
    propio color; sumarle halo la volvía pesada.
    ============================================================ */
 /*
-  🔴 El techo de este efecto no es el dial, es la GEOMETRÍA.
+  El techo de este efecto no es el dial, es la GEOMETRÍA.
 
   El halo solo se ve donde hay fondo oscuro que ocupar, y aquí ese fondo es el
   anillo de círculo que queda alrededor del triángulo — más allá está la barra
@@ -987,7 +987,7 @@ html {
     transition: transform var(--dur-4) var(--ease-out);
   }
   /*
-    ⚠️ Este bloque quedó VACÍO y por eso ya no existe: las cinco tarjetas que
+    Este bloque quedó VACÍO y por eso ya no existe: las cinco tarjetas que
     llevaban el acercamiento simple pasaron al hover que responde al cursor. Se
     deja la nota porque el hueco entre `.tarjeta-foto img` de arriba y las reglas
     de abajo invita a pensar que falta algo.
@@ -996,7 +996,7 @@ html {
   /*
     ── el titular se enciende ──
 
-    🔴 Aquí SOLO va la transición; el color de hover vive en cada componente, y no
+    Aquí SOLO va la transición; el color de hover vive en cada componente, y no
     por gusto.
 
     Los `<style>` de componente de Astro se emiten SIN CAPA, y en la cascada **las
@@ -1067,7 +1067,7 @@ html {
 }
 
 /*
-  🔴 Nada de esto ocurre si el lector pidió menos movimiento. El DS ya trae un
+  Nada de esto ocurre si el lector pidió menos movimiento. El DS ya trae un
   reset global que recorta las transiciones a 0.01ms, y esto lo refuerza donde
   importa: aquí las transformaciones se anulan del todo, no solo se aceleran.
 */
@@ -1111,7 +1111,7 @@ html {
    El PASO sí es el mismo (48px) a propósito: así la trama del fondo y la de las
    fotos leen como un solo sustrato y no como dos tramas distintas superpuestas.
 
-   ⚠️ PARA QUITARLO: borrar este bloque, o poner `--cuadricula-alfa: 0`.
+   PARA QUITARLO: borrar este bloque, o poner `--cuadricula-alfa: 0`.
    ============================================================ */
 :root {
   --cuadricula-alfa: 0.04;
@@ -1126,7 +1126,7 @@ body {
 }
 
 /*
-  🔴 El chrome NO lleva cuadrícula (decisión de Carlos, 2026-08-24): la trama
+  El chrome NO lleva cuadrícula (decisión de Carlos, 2026-08-24): la trama
   empieza debajo del menú.
 
   No se resuelve desplazando el fondo, y ahí está el detalle: la cabecera es
@@ -1150,7 +1150,7 @@ body {
    Astro igual que nosotros. Las letras arrancan APAGADAS pero legibles y suben a
    full conforme el párrafo cruza la pantalla.
 
-   🔴 El reposo no es 0, es 0.4. Y los dos números importan.
+   El reposo no es 0, es 0.4. Y los dos números importan.
 
    Que no sea 0: un texto que empieza invisible es contenido rehén de una
    animación. Si el JS falla, si el navegador no lo soporta o si alguien llega con
@@ -1169,7 +1169,7 @@ body {
    Por eso `escribir.ts` COMPRUEBA el tamaño antes de partir nada: sobre texto
    chico simplemente no actúa. La garantía es de código, no de comentario.
 
-   ⚠️ Y las reglas solo aplican cuando el script ya partió el texto
+   Y las reglas solo aplican cuando el script ya partió el texto
    (`[data-escribiendo]`). Sin JS, el párrafo se queda como vino del servidor: a
    opacidad plena y sin partir.
    ============================================================ */
@@ -1207,13 +1207,13 @@ body {
    arrancar y `data-visto` cuando el elemento entra en pantalla. Aquí no hay
    JavaScript de por medio; son transiciones que resuelve el compositor.
 
-   🔴 El estado inicial cuelga de `[data-animando]`, que solo existe si el script
+   El estado inicial cuelga de `[data-animando]`, que solo existe si el script
    corrió. Sin JS, sin observador o con la pestaña oculta no se marca nada y todo
    se ve normal. Si el estado escondido viviera suelto en el CSS, un documento
    oculto —que no dispara el observador— dejaría las fotos recortadas y las listas
    transparentes DE FORMA PERMANENTE.
 
-   ⚠️ Un elemento lleva UN efecto, nunca dos. Es lo que evita que el conjunto se
+   Un elemento lleva UN efecto, nunca dos. Es lo que evita que el conjunto se
    sature: descifrado para los titulares, revelado para las fotos, cascada para las
    listas, barrido para las cabeceras de sección.
    ============================================================ */
@@ -1262,7 +1262,7 @@ body {
   content: '';
   position: absolute;
   /*
-    🔴 `inset: 0` y el movimiento por FONDO, no por `transform`.
+    `inset: 0` y el movimiento por FONDO, no por `transform`.
 
     La primera versión movía la franja con `translateX(±130%)` y la sacaba 1859px
     fuera del contenedor. Como la cabecera no recorta, eso le daba a la página
@@ -1356,7 +1356,7 @@ body {
     del cursor, solo que hay hover—. Esto responde a DÓNDE está el puntero, así que
     la tarjeta se siente como un objeto que estás tocando.
 
-    🔴 Tres propiedades distintas, y no es capricho: `transform` para la
+    Tres propiedades distintas, y no es capricho: `transform` para la
     inclinación de la tarjeta, `transform` para el desplazamiento de la foto (que
     es otro elemento), `translate` reservado al parallax del scroll y `scale` al
     aire que necesita el desplazamiento. Si dos de estos compartieran propiedad,
@@ -1364,7 +1364,7 @@ body {
     animación. Ya pasó una vez.
   */
   /*
-    🔴 La inclinación va SOLO donde la tarjeta no usa ya su propio `transform`.
+    La inclinación va SOLO donde la tarjeta no usa ya su propio `transform`.
     `.pila-carta` queda fuera: el apilado le escribe un `scale()` que depende de su
     posición en la pila, y una inclinación se lo comería. Su foto sí se mueve —eso
     va sobre la imagen y no toca el apilado—.
@@ -1422,7 +1422,7 @@ body {
   [data-flecha] svg {
     transition: transform var(--dur-2) var(--ease-out);
   }
-  /* 🔴 El hover se toma del ENLACE, no del `span` de la flecha: la flecha vive
+  /* El hover se toma del ENLACE, no del `span` de la flecha: la flecha vive
      dentro de la tarjeta, así que apuntando al `span` solo reaccionaría si el
      cursor cayera justo encima de ella — que es casi nunca. */
   [data-luz]:hover [data-flecha] svg,
@@ -1495,65 +1495,26 @@ body {
   }
 }
 
-/* ── 2. Parallax ligado al scroll ──
-   🔴 `animation-timeline: view()` ata el avance de la animación a la posición del
-   elemento en la pantalla. No es un efecto que se dispare: es el scroll moviendo
-   la imagen directamente, fotograma a fotograma, y responde igual al subir que al
-   bajar. Eso es lo que se siente distinto.
+/* ── 2. La foto va QUIETA ──
+   Aquí vivía un parallax ligado al scroll (`animation-timeline: view()`, ±4% de
+   `translate`). Se retiró el 2026-09-14 a petición de Carlos.
 
-   ⚠️ Va dentro de `@supports` porque Firefox todavía no lo trae. Donde no está,
-   no pasa nada: la foto se queda quieta, que es exactamente como está hoy. Nunca
-   se esconde nada — la lección de siempre.
+   El motivo no fue el movimiento sino su PRECIO: para que el desplazamiento no
+   dejara asomar los bordes, la imagen tenía que ir permanentemente al **109%**
+   (`--foto-base: 1.09`). O sea que toda foto de tarjeta, mosaico y hero se veía
+   recortada un 9% **estuviera o no en movimiento**, y eso se leía como un zoom
+   aplicado a todas las fotos del sitio. El efecto costaba más de lo que daba.
 
-   El recorrido es corto (4%) a propósito: en una foto de nota, más que eso se lee
-   como que la imagen "resbala" dentro de su marco. */
+   `--foto-base` se queda, y en 1. No es residuo: el hover de `.at-numero-caja`
+   lo multiplica por 1.06 para darse el aire que necesita su desplazamiento hacia
+   el cursor, y el bloque de `prefers-reduced-motion` lo usa para devolver la foto
+   a su tamaño. Ponerlo a otra cosa que no sea 1 vuelve a recortar todas las fotos. */
 .tarjeta-foto img,
 .mosaico-foto img,
 .nt-hero img {
   --foto-base: 1;
   scale: var(--foto-base);
   transition: scale var(--dur-4) var(--ease-out);
-}
-
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    /*
-      🔴 La línea de tiempo se NOMBRA en el contenedor. `view()` a secas se resuelve
-      contra el contenedor de scroll más cercano, y `.tarjeta-foto` lleva
-      `overflow: hidden` — que en CSS ya la convierte en uno. O sea que el parallax
-      medía el avance de la imagen dentro de un marco donde no se mueve jamás:
-      progreso cero y `transform: none` a cualquier altura de la página. Medido.
-
-      Nombrándola aquí, el sujeto es el contenedor y la referencia es la página, que
-      es lo que se quiere. Los descendientes la encuentran por nombre.
-    */
-    .tarjeta-foto,
-    .mosaico-foto,
-    .nt-hero {
-      view-timeline: --beat-foto block;
-    }
-    .tarjeta-foto img,
-    .mosaico-foto img,
-    .nt-hero img {
-      /* Con el recorrido de ±4% hace falta algo de escala, o asomarían los bordes. */
-      --foto-base: 1.09;
-      animation: beat-parallax linear both;
-      animation-timeline: --beat-foto;
-      animation-range: cover 0% cover 100%;
-    }
-  }
-}
-
-/* Anima `translate`, no `transform`: así el zoom del hover se compone encima en
-   vez de competir. El recorrido es corto a propósito — más que esto, en una foto
-   de nota, se lee como que la imagen resbala dentro de su marco. */
-@keyframes beat-parallax {
-  from {
-    translate: 0 -4%;
-  }
-  to {
-    translate: 0 4%;
-  }
 }
 
 
@@ -1577,7 +1538,7 @@ body {
    `data-cursor` no aparece nunca y la capa no se pinta. Cero riesgo de tapar nada.
    ============================================================ */
 /*
-  🔴 Una CAJA que se mueve, y no un degradado a pantalla completa que se recentra.
+  Una CAJA que se mueve, y no un degradado a pantalla completa que se recentra.
 
   La primera versión era `body::after` con `inset: 0` y el centro del degradado en
   `var(--cursor-x)`, que `cursor.ts` escribía en `<html>`. Dos costes por cada
@@ -1632,7 +1593,7 @@ body {
 /*
   Se enciende con el primer movimiento del ratón y se apaga al salir de la ventana.
 
-  🔴 El `z-index: 40` lo deja por encima del contenido pero DEBAJO de la cabecera
+  El `z-index: 40` lo deja por encima del contenido pero DEBAJO de la cabecera
   persistente y del modal del pre-roll. Una capa de luz cruzando por encima del
   player o de un anuncio VAST sería un problema: lo primero se vería sucio y lo
   segundo puede tener consecuencias de facturación.
@@ -1661,7 +1622,7 @@ html[data-cursor] .cursor-halo {
   pointer-events: none;
   overflow: hidden;
   /*
-    🔴 `-1` es lo que cumple el «no en todo». Deja la capa ENCIMA de la trama del
+    `-1` es lo que cumple el «no en todo». Deja la capa ENCIMA de la trama del
     `body` —que se pinta en el lienzo— y DEBAJO de cualquier bloque con fondo
     propio. La luz asoma por los huecos y desaparece tras las secciones, así que se
     lee como algo que pasa por DETRÁS del sitio en vez de por encima.
@@ -1688,7 +1649,7 @@ html[data-cursor] .cursor-halo {
   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
   animation-fill-mode: both;
   /*
-    🔴 El sentido se invierte con `reverse`, no multiplicando por -1.
+    El sentido se invierte con `reverse`, no multiplicando por -1.
     Con el signo, el punto de PARTIDA se convertía en `+260px` —dentro de la
     pantalla— en vez de en el borde opuesto: la luz aparecía de la nada a un
     palmo del borde. Invertir la reproducción intercambia inicio y fin, que es lo
@@ -1762,7 +1723,7 @@ html[data-cursor] .cursor-halo {
    Lo pidió Carlos al ver que las estelas de la portada estaban quietas: «o
    deberían igual tener movimiento o ser blancas que salgan de vez en cuando».
 
-   🔴 Se hace lo primero y NO lo segundo, a propósito. El naranja de la estela es
+   Se hace lo primero y NO lo segundo, a propósito. El naranja de la estela es
    el motivo de marca del design system; volverla blanca la dejaría indistinguible
    de las luces de la cuadrícula y el sitio perdería una de sus dos firmas. Lo que
    pasa por ella sí es blanco: la estela conserva su color como base y la luz que la
@@ -1818,7 +1779,7 @@ html[data-cursor] .cursor-halo {
 /* ============================================================
    Remate de sección — el enlace de «ver más»
    ------------------------------------------------------------
-   🔴 Lleva TEXTO, no una flecha sola. Un enlace necesita nombre accesible de
+   Lleva TEXTO, no una flecha sola. Un enlace necesita nombre accesible de
    todas formas, así que el texto hay que escribirlo igual: poner solo la flecha no
    ahorra la decisión, únicamente se la esconde a quien ve, y esa persona tiene que
    adivinar a dónde lleva. En un sitio de ocho secciones, «→» no dice nada. La
@@ -1866,7 +1827,7 @@ html[data-cursor] .cursor-halo {
   La flecha: dos copias en la misma casilla de una rejilla. Al pasar, la de dentro
   sale por la derecha y la de fuera entra por la izquierda.
 
-  🔴 Se necesitan DOS. Con una sola, o vuelve de golpe a su sitio al terminar —un
+  Se necesitan DOS. Con una sola, o vuelve de golpe a su sitio al terminar —un
   salto— o se queda fuera de la caja. Dos hacen que el movimiento sea continuo sin
   que nada retroceda a la vista.
 */
@@ -1913,7 +1874,7 @@ html[data-cursor] .cursor-halo {
    `cabecera.ts` solo pone y quita `data-compacta`; lo demás es CSS.
    ============================================================ */
 
-/* ⚠️ El plegado de la barra oscura NO vive aquí, vive en `Cabecera.astro`.
+/* El plegado de la barra oscura NO vive aquí, vive en `Cabecera.astro`.
    Su alto lo pone una utilidad de Tailwind (`h-header-movil`), y las utilidades van
    en una capa POSTERIOR a `proyecto`: desde aquí el `height: 0` no puede ganar por
    mucha especificidad que se le eche, porque las capas mandan sobre la
@@ -1947,7 +1908,7 @@ html[data-cursor] .cursor-halo {
 }
 
 /*
-  🔴 En MÓVIL van encendidos SIEMPRE, con o sin el atributo.
+  En MÓVIL van encendidos SIEMPRE, con o sin el atributo.
 
   Ahí solo existe una barra —la clara— así que el logo y la hamburguesa no son un
   estado al que se llega haciendo scroll: son el chrome. Y va en CSS además de en
@@ -1964,16 +1925,16 @@ html[data-cursor] .cursor-halo {
   }
 }
 
-/* 🔴 El ancho se reserva SIEMPRE, esté visible o no. Si el logo apareciera con su
+/* El ancho se reserva SIEMPRE, esté visible o no. Si el logo apareciera con su
    ancho al hacer scroll, empujaría todo lo demás de la barra y el título saltaría
    de sitio en el momento justo en que el lector está leyendo.
 
-   ⚠️ En móvil se reserva MENOS. El ancho es el mismo dato en las dos medidas, pero
+   En móvil se reserva MENOS. El ancho es el mismo dato en las dos medidas, pero
    96px de una barra de 343 no es lo mismo que de una de 1280: allí se los quitaba
    al título de lo que suena, que es el contenido. A 72px el logo sigue leyéndose y
    la reserva sigue evitando el salto. */
 /*
-   🔴 CORREGIDO (Carlos, 2026-09-03). Antes el ancho se reservaba SIEMPRE, visible
+   CORREGIDO (Carlos, 2026-09-03). Antes el ancho se reservaba SIEMPRE, visible
    o no, para que el título no saltara al aparecer el logo. El precio se pagaba
    siempre y el beneficio se cobraba solo en el instante del scroll: con las dos
    barras a la vista quedaba un hueco vacío a la izquierda del player que se veía
@@ -1997,7 +1958,7 @@ html[data-cursor] .cursor-halo {
     margin-right var(--dur-3) var(--ease-out);
 }
 /*
-  🔴 100px, y este es el valor que MANDA en móvil. Era 72 y con él el logo se
+  100px, y este es el valor que MANDA en móvil. Era 72 y con él el logo se
   recortaba: se leía «BEA / 100» en vez de «BEAT / 100.9».
 
   El fallo es de cascada y vale escribirlo. Al subir la barra a 60px se creció el
@@ -2007,7 +1968,7 @@ html[data-cursor] .cursor-halo {
   la CAJA se quedaba en 72 mientras la imagen medía 100, y como la caja es
   `overflow: hidden` —es un recorte, no una escala— cortaba el 28% del logotipo.
 
-  ⚠️ Y no lo cacé en local porque **en `astro dev` medía 100 y en el build 72**.
+  Y no lo cacé en local porque **en `astro dev` medía 100 y en el build 72**.
   `beat.css` entra en `layer(proyecto)`, y lo que sirve el navegador es la hoja
   compilada. Para cualquier cosa de cascada en este archivo, la prueba válida es
   `astro preview` sobre un build, no el servidor de desarrollo.
@@ -2023,7 +1984,7 @@ html[data-cursor] .cursor-halo {
 }
 
 /*
-  🔴 En móvil, el ancho va puesto SIN depender del atributo — y esta regla tiene
+  En móvil, el ancho va puesto SIN depender del atributo — y esta regla tiene
   que ir DESPUÉS de `.cabecera-logo-claro { width: 0 }`, no antes.
 
   Estaba arriba, junto a la opacidad, y ahí no servía: misma especificidad, y en
@@ -2032,17 +1993,17 @@ html[data-cursor] .cursor-halo {
   para evitar. Lo cazó una medición en el navegador que daba 0px con el logo
   visible en pantalla.
 
-  ⚠️ Una media query NO añade especificidad. Es de las cosas que uno cree recordar
+  Una media query NO añade especificidad. Es de las cosas que uno cree recordar
   al revés justo cuando importa.
 */
 /*
-  ⚠️ Y con la barra a 60px, el logo crece: 72 → 100px de ancho, que a la proporción
+  Y con la barra a 60px, el logo crece: 72 → 100px de ancho, que a la proporción
   del wordmark (2.943) son 34px de alto en vez de 24. Lo pidió Carlos con la barra
   («el logo debe crecer también, al menos el de la estación») y es lo que evita que
   subir la barra solo añada hueco: si el logo se quedaba igual, la marca se veía
   MÁS pequeña dentro de una barra más grande.
 
-  🔴 Se toca el ANCHO y no el alto porque esta caja es un recorte, no una escala:
+  Se toca el ANCHO y no el alto porque esta caja es un recorte, no una escala:
   el `<a>` revela el logo asomándolo. Ver el comentario de abajo.
 */
 @media (max-width: 899px) {
@@ -2083,18 +2044,18 @@ html[data-cursor] .cursor-halo {
    Responde al toque durante la espera ciega del `ClientRouter`. El porqué, el
    retardo y el tope están en `src/scripts/progreso.ts`; aquí solo está la pintura.
 
-   🔴 Nace INVISIBLE y sin ocupar sitio, y solo el script la enciende. Es la regla
+   Nace INVISIBLE y sin ocupar sitio, y solo el script la enciende. Es la regla
    de oro de `revelar.ts` aplicada aquí: si el JavaScript no corre, esto no se ve
    nunca en vez de quedarse una franja muerta cruzando la coronilla del sitio.
    ============================================================ */
 .progreso {
   position: fixed;
   /*
-    🔴 Cuelga del BORDE INFERIOR de la barra del player, no del alto del cromo
+    Cuelga del BORDE INFERIOR de la barra del player, no del alto del cromo
     (Carlos, 2026-09-08: «ponla debajo del player»). Antes iba en `top: 0`, o sea
     ENCIMA de la barra clara, tapándole el primer par de píxeles.
 
-    ⚠️ Y es `--player-h` a propósito, no `--chrome-h`. En escritorio `--chrome-h`
+    Y es `--player-h` a propósito, no `--chrome-h`. En escritorio `--chrome-h`
     suma la barra oscura, que se PLIEGA a cero al hacer scroll: anclada a esa suma,
     la línea habría quedado flotando en medio del contenido justo en el estado en
     que se navega —con la página ya bajada—. La barra clara nunca se pliega, así
@@ -2113,7 +2074,7 @@ html[data-cursor] .cursor-halo {
   opacity: 1;
 }
 /* Al completarse se desvanece; el retardo deja ver el 100% un instante antes de
-   irse, que es lo que cierra el gesto. ⚠️ Los 260ms tienen que coincidir con
+   irse, que es lo que cierra el gesto. Los 260ms tienen que coincidir con
    `SALIDA_MS` del script. */
 .progreso[data-listo] {
   opacity: 0;
@@ -2129,14 +2090,14 @@ html[data-cursor] .cursor-halo {
      página. */
   transform-origin: 0 50%;
   /*
-    🔴 La LUZ, en tres capas y no en una (Carlos, 2026-09-08: «con más luz»).
+    La LUZ, en tres capas y no en una (Carlos, 2026-09-08: «con más luz»).
 
     Una sola sombra de 8px daba un halo tan corto que sobre el fondo oscuro se leía
     como un borde gris, no como algo encendido. Las tres capas hacen el degradado
     que hace un objeto luminoso de verdad: un núcleo intenso y pegado, un cuerpo
     medio, y un derrame amplio y tenue que es el que se percibe como brillo.
 
-    ⚠️ La tercera va desplazada 1px hacia ABAJO y no centrada: la línea vive contra
+    La tercera va desplazada 1px hacia ABAJO y no centrada: la línea vive contra
     el borde inferior de la barra clara, así que el derrame tiene que caer sobre el
     contenido oscuro —donde se ve— y no hacia arriba contra la barra, donde se
     perdería.
@@ -2147,13 +2108,13 @@ html[data-cursor] .cursor-halo {
     0 1px 28px rgb(250 251 250 / 0.3);
 }
 /*
-  🔴 El reptado vive AQUÍ y no en el JavaScript.
+  El reptado vive AQUÍ y no en el JavaScript.
 
   Avanza mucho al principio y se va frenando —eso lo da el `--ease-out` sobre una
   duración larga— y nunca llega al 100% sola: se detiene en 0.9. Llegar al final y
   seguir esperando es la única forma de que un indicador mienta de verdad.
 
-  ⚠️ Los 8s no son «lo que tarda»: son la rampa. Una navegación normal se completa
+  Los 8s no son «lo que tarda»: son la rampa. Una navegación normal se completa
   en el primer tercio y `[data-listo]` la corta; los 8s solo existen para que una
   espera anormalmente larga siga pareciendo que avanza.
 */
@@ -2175,7 +2136,7 @@ html[data-cursor] .cursor-halo {
   transition: transform 160ms var(--ease-out);
 }
 /*
-  ⚠️ Con `prefers-reduced-motion` la barra sigue existiendo, pero no repta: aparece
+  Con `prefers-reduced-motion` la barra sigue existiendo, pero no repta: aparece
   entera y quieta mientras se espera. El aviso es INFORMACIÓN —el lector necesita
   saber que su toque registró— y lo que esa preferencia pide quitar es el
   movimiento, no el aviso.
@@ -2197,7 +2158,7 @@ html[data-cursor] .cursor-halo {
   El acuse del toque: el enlace que se acaba de pulsar mientras la página nueva
   viene en camino. El porqué está en `src/scripts/progreso.ts`.
 
-  🔴 Se APAGA en vez de encenderse, y va contra el idioma del resto del sitio
+  Se APAGA en vez de encenderse, y va contra el idioma del resto del sitio
   —donde lo que importa se ilumina— a propósito: esta tarjeta ya no es lo que
   importa, es lo que estás dejando atrás. Apagarla lee como «tomado, en camino»;
   encenderla leería como «aquí sigues».
@@ -2205,7 +2166,7 @@ html[data-cursor] .cursor-halo {
 [data-navegando] {
   opacity: 0.5;
   /*
-    🔴 Y deja de aceptar clics, que es la otra mitad del problema. El lector que no
+    Y deja de aceptar clics, que es la otra mitad del problema. El lector que no
     ve respuesta vuelve a tocar —es lo que Carlos describió— y ese segundo toque
     encola otra navegación al mismo sitio. Aquí el primer toque cierra la puerta.
   */
@@ -2232,13 +2193,13 @@ html[data-cursor] .cursor-halo {
    YouTube —ninguna trae mp3, medido contra el CMS—, así que suenan desde aquí y las
    maneja la barra de arriba: título, play/pausa y progreso.
 
-   🔴 `min-height: 202px` NO es una medida de gusto. Las políticas del reproductor
+   `min-height: 202px` NO es una medida de gusto. Las políticas del reproductor
    incrustado de YouTube piden un reproductor visible, de al menos 200×200 y sin
    obstruir, y prohíben separar el audio del video. Bajar de ahí —o esconderlo, que
    sería una línea— es salirse de la regla con la cuenta de la estación de por
    medio. El ancho se calcula para que a 16/9 el alto quede por encima del mínimo.
 
-   ⚠️ Va abajo a la DERECHA, que es lo que pidió Carlos, y por debajo del cromo en
+   Va abajo a la DERECHA, que es lo que pidió Carlos, y por debajo del cromo en
    `z-index`: la barra del player es quien lo manda, así que no puede quedar tapada
    por él.
    ============================================================ */
@@ -2263,7 +2224,7 @@ html[data-cursor] .cursor-halo {
 /*
   La X, encima del reproductor.
 
-  ⚠️ Por encima de los controles de Plyr en `z-index` y con su propio fondo: sobre
+  Por encima de los controles de Plyr en `z-index` y con su propio fondo: sobre
   un fotograma claro, una X blanca sin respaldo desaparece.
 */
 .pista-visor-cerrar {
@@ -2292,7 +2253,7 @@ html[data-cursor] .cursor-halo {
     filo—. La regla de YouTube no cambia con el ancho de la pantalla, así que el
     mínimo tampoco.
 
-    ⚠️ El `env(safe-area-inset-bottom)` es por el indicador de inicio del iPhone,
+    El `env(safe-area-inset-bottom)` es por el indicador de inicio del iPhone,
     no por la barra del player: esa es `sticky top-0` y vive ARRIBA en las dos
     anchuras. Comprobado que el visor no la tapa.
   */

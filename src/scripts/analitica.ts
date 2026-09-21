@@ -2,7 +2,7 @@
  * Analítica del player. Port de `src/js/analytics.js` (29 líneas), ahora como
  * módulo en vez de dos funciones colgadas de `window`.
  *
- * 🔴 El doble envío se conserva tal cual, y no es redundancia: `gtag` puede no
+ * El doble envío se conserva tal cual, y no es redundancia: `gtag` puede no
  * existir todavía cuando el player emite su primer evento —depende del orden en
  * que carguen GTM y el SDK de Triton, que no controlamos—, y `dataLayer.push` sí
  * funciona desde el primer momento porque GTM lo crea antes de cargar nada.

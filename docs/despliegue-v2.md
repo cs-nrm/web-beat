@@ -23,7 +23,7 @@ Sí existe un WordPress, pero **en otro dominio** (`beatdigital.com.mx`), y el v
 lo consume por REST. El día del corte se apaga el front Astro; ese WordPress
 sigue en pie sirviendo a otras cosas. Son dos apagados distintos.
 
-🔴 **`/var/www/web-beat` es del cron y está clavado en `main`.** No es sitio para
+**`/var/www/web-beat` es del cron y está clavado en `main`.** No es sitio para
 probar nada: un `git checkout` ahí lo deshace el cron en menos de 15 minutos. Por
 eso v2 vive en un directorio aparte. Y ojo con `/var/www/buildfull.sh`, hoy
 comentado en el crontab: empieza con `git reset --hard` y `git clean -fd`.
@@ -83,10 +83,10 @@ v2 se construye con la URL **canónica** horneada
 | `/robots.txt` | `Disallow: /` | `Allow: /` |
 | `/sitemap.xml` | 404 | 200 |
 
-🔴 **Esa es la razón de que el corte no necesite reconstruir**: el mismo binario
+**Esa es la razón de que el corte no necesite reconstruir**: el mismo binario
 sirve preproducción protegida o sitio real, según quién le entregue el `Host`.
 
-⚠️ **Corolario:** no meter delante un proxy que reescriba el `Host`. Las cuatro
+**Corolario:** no meter delante un proxy que reescriba el `Host`. Las cuatro
 capas leen la misma señal y se abrirían todas a la vez, convirtiendo v2 en un
 duplicado indexable del sitio real. Con vhosts por nombre esto no pasa, porque el
 `Host` **es** lo que selecciona el vhost.
@@ -95,7 +95,7 @@ duplicado indexable del sitio real. Con vhosts por nombre esto no pasa, porque e
 
 ## Actualizar v2
 
-🔴 **Esto se corre EN EL SERVIDOR, no en la Mac.** Parece obvio escrito, y no lo
+**Esto se corre EN EL SERVIDOR, no en la Mac.** Parece obvio escrito, y no lo
 es leyendo solo el bloque de abajo: pegado en la terminal del proyecto falla con
 `cd: no such file or directory: /var/www/web-beat-v2`, que no dice en ningún
 momento que el problema sea la máquina. Pasó (2026-09-07, dos veces seguidas).
@@ -118,17 +118,17 @@ cd /var/www/web-beat-v2 && git pull --ff-only origin beat \
 Encadenado con `&&` **a propósito**: si el build falla no se reinicia el
 servicio, y v2 sigue sirviendo la versión anterior desde memoria.
 
-⚠️ `sudo` solo en el `systemctl`: el servicio corre como `www-data` y reiniciarlo
+`sudo` solo en el `systemctl`: el servicio corre como `www-data` y reiniciarlo
 necesita root. Si entraste como root, sobra. Y si prefieres no entrar, `ssh -t
 beat '…'` con el comando entre comillas funciona igual — el `-t` es lo que le deja
 a `sudo` pedir la contraseña.
 
-⚠️ **`corepack` a secas NO sirve**, y falla con un error que habla de firmas y no
+**`corepack` a secas NO sirve**, y falla con un error que habla de firmas y no
 de rutas (`Cannot find matching keyid`). Por eso el comando lleva
 `/usr/bin/corepack` con ruta absoluta — está explicado arriba, en los detalles del
 montaje. Lo mismo vale para cualquier `corepack prepare …` que se teclee a mano.
 
-⚠️ El aviso **«Update available! 9.0.0 → 12.3.4»** que imprime pnpm es cosmético y
+El aviso **«Update available! 9.0.0 → 12.3.4»** que imprime pnpm es cosmético y
 NO hay que hacerle caso: `package.json` fija `packageManager: "pnpm@9.0.0"` y
 corepack respeta ese pin. Si algún día se sube, se sube en la Mac —cambiando el
 pin, regenerando el lockfile y verificando el build— y el servidor lo recoge en el
@@ -179,7 +179,7 @@ hoy el vhost estático del v1, después el proxy al 4322.
 4. `/var/www/html/dist` acumula 482 directorios con HTML de mayo de 2025, porque
    el `cp -Rf` del v1 nunca borra. Si ese directorio se sigue sirviendo para
    algo, necesita limpieza y no otro `cp`.
-5. 🔴 **Comprobar que las redirecciones de `/scanner` llegan vivas al corte.** La
+5. **Comprobar que las redirecciones de `/scanner` llegan vivas al corte.** La
    sección editorial se mudó a `/beat-scanner` el 2026-09-07 y se partió en dos
    (`/beat-scanner` y `/editorial`). Las rutas viejas responden 301 desde
    `astro.config.mjs`, y de eso dependen la migaja de cada nota ya publicada y todo
@@ -194,7 +194,7 @@ hoy el vhost estático del v1, después el proxy al 4322.
 En el `.env` de preproducción van vacías **a propósito**:
 
 - `PUBLIC_GA_ID`, `PUBLIC_GTM_ID`, `PUBLIC_COMSCORE_C2`, `PUBLIC_HOTJAR_ID`.
-  🔴 comScore es lo que NRM le reporta a los anunciantes para justificar CPMs:
+  comScore es lo que NRM le reporta a los anunciantes para justificar CPMs:
   dispararlo desde un sitio de revisión inflaría una cifra de audiencia
   certificada con tráfico que no es audiencia.
 - `PUBLICIDAD_TOKEN`. Con token, cada visita de revisión sumaría impresiones y
@@ -213,7 +213,7 @@ Cambiar cualquiera de las `PUBLIC_*` exige reconstruir.
 - Tres repos de apt roídos: `bullseye-backports` en 404 (movido al archivo) y
   MySQL y sury.org con llaves expiradas. `unattended-upgrades` corre, así que no
   está aplicando todo lo que cree aplicar.
-- 🔴 **`pnpm audit` / `npm audit` no funcionan desde esta VM.**
+- **`pnpm audit` / `npm audit` no funcionan desde esta VM.**
   `POST registry.npmjs.org/-/npm/v1/security/audits` → `ERR_SOCKET_TIMEOUT`,
   mientras `pnpm install` resuelve en 12 s. Los `GET` pasan y el `POST` no:
   apunta a filtrado de egreso sobre POST. Va a morder a cualquier herramienta que

@@ -34,7 +34,7 @@ interface:
       vacío: un slot con medida no dada de alta nunca se llena y se ve igual que uno
       sin demanda
     - respetar View Transitions y no duplicar oyentes ni slots entre navegaciones.
-      🔴 El oyente de `slotRenderEnded` se registra UNA vez por contexto, no por
+      El oyente de `slotRenderEnded` se registra UNA vez por contexto, no por
       vista: GPT los ACUMULA y una navegación de Astro no recarga el contexto
     - en el takeover, decidir por `fuente` y NUNCA por «si viene imagen, píntala»:
       una campaña que pasó de creatividad propia a Ad Manager conserva su `imagen` y
@@ -46,7 +46,7 @@ interface:
     - NO hay un componente por hueco. Un hueco es `<Anuncio formato="…" nombre="…" />`
       y el motor lo descubre por sus `data-*`
     - `src/js/ads.js`, `dynamicAds.md` y `showheroes-videonota.md` son del v1 y NO
-      se usan. ⚠️ El de ShowHeroes además apunta al ad unit de OTRA estación
+      se usan. El de ShowHeroes además apunta al ad unit de OTRA estación
       (`StereoCien`): no lo copies
     - la colocación de los huecos del INICIO sale del artboard `publicidad` del
       lienzo (dirección 5a). Para cualquier otra página el lienzo no dice nada, así

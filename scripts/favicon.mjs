@@ -2,7 +2,7 @@
  * Genera el juego de iconos del sitio —y las tarjetas de compartir— a partir del
  * logotipo de marca.
  *
- * 🔴 Existe porque los que había eran de la marca ANTERIOR: una abeja amarilla
+ * Existe porque los que había eran de la marca ANTERIOR: una abeja amarilla
  * fechada en marzo de 2025, que seguía saliendo en la pestaña de un sitio que
  * lleva meses siendo blanco y negro. Un icono no se revisa nunca, así que la
  * única forma de que no vuelva a quedarse viejo es que se REGENERE desde el
@@ -10,12 +10,12 @@
  *
  *   pnpm favicon
  *
- * ⚠️ Se corre A MANO y lo que produce se COMMITEA. `sharp` es `devDependency`, así
+ * Se corre A MANO y lo que produce se COMMITEA. `sharp` es `devDependency`, así
  * que nada de este archivo existe en producción: lo que se sirve son PNG estáticos
  * de `public/`, igual que el favicon. Compilar no los regenera — si el logotipo o
  * el nombre de una sección cambian, hay que acordarse de correr esto.
  *
- * ⚠️ La marca del icono es la **B** del logotipo, no el logotipo entero. A 16px
+ * La marca del icono es la **B** del logotipo, no el logotipo entero. A 16px
  * un wordmark de cinco letras y un «100.9» es una mancha gris: lo que sobrevive
  * a esa medida es una sola forma. Se recorta del propio SVG —no es un archivo
  * aparte— porque dos archivos que tienen que decir lo mismo acaban no
@@ -40,7 +40,7 @@ const MARGEN = 0.17;
 /**
  * La medida de TODAS las tarjetas de compartir, la de respaldo y las de sección.
  *
- * ⚠️ Es la misma que `TARJETA_COMPARTIR` en `src/config/site.ts`, de donde las
+ * Es la misma que `TARJETA_COMPARTIR` en `src/config/site.ts`, de donde las
  * páginas sacan el `og:image:width/height`. Si cambia aquí, cambia allá: unas
  * medidas que no correspondan al archivo se ven como un recorte raro en la
  * publicación y no se notan desde el sitio.
@@ -146,7 +146,7 @@ function mascaraSafari() {
 }
 
 /**
- * 🔴 La tarjeta de RESPALDO para compartir: 1200×630, el wordmark sobre el negro
+ * La tarjeta de RESPALDO para compartir: 1200×630, el wordmark sobre el negro
  * del sitio.
  *
  * Se usa cuando la página que se comparte no tiene imagen propia: el Inicio, los
@@ -157,11 +157,11 @@ function mascaraSafari() {
  * `beat-blanco.svg`, así que no puede quedarse en una marca anterior sin que nadie
  * lo note. Es exactamente lo que había pasado con el favicon.
  *
- * ⚠️ 1200×630 es la medida que piden Facebook y X para la tarjeta grande, y es
+ * 1200×630 es la medida que piden Facebook y X para la tarjeta grande, y es
  * 1.91:1 — no cuadrada. Reutilizar el logo de 1024×768 que ya estaba en `public/`
  * habría hecho que las dos lo recortaran por su cuenta, cada una a su manera.
  *
- * ⚠️ Y es PNG, no SVG: ninguna de las dos plataformas acepta SVG en `og:image`.
+ * Y es PNG, no SVG: ninguna de las dos plataformas acepta SVG en `og:image`.
  */
 async function tarjetaCompartir() {
   const svg = readFileSync(ORIGEN, 'utf8');
@@ -180,7 +180,7 @@ async function tarjetaCompartir() {
 }
 
 /**
- * 🔴 UNA TARJETA POR SECCIÓN: el nombre de la sección sobre el negro de la marca.
+ * UNA TARJETA POR SECCIÓN: el nombre de la sección sobre el negro de la marca.
  *
  * Hasta ahora las seis secciones compartían `og-beat.png` con el Inicio y los
  * legales, así que compartir `/editorial` y compartir `/programacion` llegaba a
@@ -188,7 +188,7 @@ async function tarjetaCompartir() {
  * decía, y en un feed la imagen se ve antes que el texto. El Inicio y los legales
  * sí se quedan con el respaldo — son las páginas que se comparten como «la casa».
  *
- * 🔴 El wordmark SE QUEDA, junto al nombre y más chico que él. Una tarjeta que
+ * El wordmark SE QUEDA, junto al nombre y más chico que él. Una tarjeta que
  * solo dijera «EDITORIAL» sobre negro no identifica a nadie —el dominio va en gris
  * pequeño y en WhatsApp puede no verse—, y el nombre de la sección no lo sostiene
  * solo: «Agenda» o «Editorial» son palabras de cualquier medio. Además el wordmark
@@ -196,7 +196,7 @@ async function tarjetaCompartir() {
  * mientras que el nombre se compone con la tipografía que preste el sistema. En el
  * respaldo el wordmark ES el asunto y va a 460px; aquí es la firma y va a 300.
  *
- * ⚠️ El nombre NO va en Archivo, la tipografía de display del sitio, y no hay
+ * El nombre NO va en Archivo, la tipografía de display del sitio, y no hay
  * forma limpia de que vaya: librsvg compone el texto con las tipografías del
  * SISTEMA, y las del front son `.woff2` de `public/fuentes/`, un formato que
  * fontconfig no indexa. Se pide una pila grotesca y en la Mac donde esto se corre
@@ -219,22 +219,22 @@ const AIRE = 52;
 const LIENZO = 6000;
 
 /**
- * ⚠️ La lista vive AQUÍ, escrita a mano, y hay que mantenerla en sintonía con
+ * La lista vive AQUÍ, escrita a mano, y hay que mantenerla en sintonía con
  * `SECCIONES` de `src/config/navegacion.ts` —y con `tipos-de-lista` del CMS, de
  * donde sale `/bonus-beat`—. Este script es `.mjs` y no puede importar el `.ts` del
  * front, así que no hay forma de derivarla. Lo que sí es inofensivo es olvidarse:
  * una sección sin tarjeta cae a `og-beat.png`, que es lo que tenían todas.
  *
- * 🔴 El texto es el del `h1` de cada sección, no el del `<title>` ni el de la nav:
+ * El texto es el del `h1` de cada sección, no el del `<title>` ni el de la nav:
  * la tarjeta es la puerta de esa página y tiene que decir lo que la página dice al
  * abrirla. Por eso «EL FENÓMENO RESIDENTE» con su artículo y «AGENDA» y no
  * «EVENTOS» (ver `CabezaSeccion` en cada `index.astro`).
  *
- * ⚠️ El ARCHIVO se nombra por la ruta y el TEXTO por el rótulo, que en `/eventos`
+ * El ARCHIVO se nombra por la ruta y el TEXTO por el rótulo, que en `/eventos`
  * no coinciden. Por la ruta porque es lo que la página escribe al lado de su
  * `imagen=`, y es lo que se busca cuando algo no cuadra.
  *
- * ⚠️ Y aquí las mayúsculas SÍ van dentro del dato, al contrario que en la migaja
+ * Y aquí las mayúsculas SÍ van dentro del dato, al contrario que en la migaja
  * del JSON-LD (ver `SeccionEditorial` en `config/navegacion.ts`): esto es un
  * dibujo, no texto que una máquina vaya a citar. Lo que un rastreador lee de esta
  * imagen es el `og:image:alt`, y ese lo escribe la página.
@@ -282,7 +282,7 @@ function svgNombre(lineas, cuerpo) {
  * otra —el ancho de cada glifo lo decide una tipografía que este archivo no
  * elige—, y es lo que permite garantizar que nada se sale.
  *
- * 🔴 El lienzo va holgado y se comprueba: si el texto tocara el borde, `trim()`
+ * El lienzo va holgado y se comprueba: si el texto tocara el borde, `trim()`
  * devolvería una caja recortada, el cálculo de abajo saldría optimista y la
  * tarjeta se generaría con el nombre cortado. Es justo el fallo que nadie ve hasta
  * que la imagen está publicada.
@@ -311,7 +311,7 @@ function cuerpoQueCabe(medida) {
  * Cómo se reparte el nombre: una línea, o dos si en una sola la letra se queda
  * chica.
  *
- * ⚠️ El caso que obliga a esto es real y es el más largo que hay: «EL FENÓMENO
+ * El caso que obliga a esto es real y es el más largo que hay: «EL FENÓMENO
  * RESIDENTE» pide un cuerpo de 79px en una línea —la mitad de lo que piden los
  * demás— y partido en «EL FENÓMENO / RESIDENTE» sube a 138. Se prueban todos los
  * cortes por palabra y gana el que deja la letra más grande, así que la decisión
@@ -446,6 +446,6 @@ async function main() {
 }
 
 main().catch((e) => {
-  console.error('🔴 No se pudieron generar los iconos:', e.message);
+  console.error('No se pudieron generar los iconos:', e.message);
   process.exit(1);
 });

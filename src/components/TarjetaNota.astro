@@ -9,13 +9,13 @@
  *   `mosaico`  13a/14a — las laterales del mosaico: rejilla en escritorio y FILA
  *              en móvil, porque ahí la comparación con la portada es el problema
  *
- * 🔴 `mosaico` existe como variante de ESTE archivo y no como unas reglas
+ * `mosaico` existe como variante de ESTE archivo y no como unas reglas
  * `:global()` dentro de `Mosaico.astro`, y es justo la razón por la que este
  * componente existe: la medida de una tarjeta vive en UN sitio. Escribir la fila
  * allá habría partido las medidas de la tarjeta en dos archivos, que es lo que la
  * cabecera de arriba dice que no debe pasar.
  *
- * 🔴 La cuadrícula NO lleva `gap` de color: el diseño pone `gap:2px` con el fondo
+ * La cuadrícula NO lleva `gap` de color: el diseño pone `gap:2px` con el fondo
  * en `--border-hairline` y `padding:2px`, así que la línea que separa las tarjetas
  * ES el fondo del contenedor asomando. Por eso cada tarjeta necesita su propio
  * fondo opaco (`--noche-1`); si fuera transparente, se vería la rejilla completa.
@@ -36,7 +36,7 @@ const { nota, variante = 'rejilla', prioridad = false } = Astro.props;
 
 const href = `/noticias/${nota.slug}`;
 /**
- * 🔴 La FECHA, no el tiempo de lectura (decisión de Carlos, 2026-09-07).
+ * La FECHA, no el tiempo de lectura (decisión de Carlos, 2026-09-07).
  *
  * El «3 MIN» era una estimación nuestra —200 palabras por minuto sobre el árbol
  * Lexical— y con notas cortas todas salían iguales: cuatro tarjetas seguidas
@@ -53,7 +53,7 @@ const foto = urlMedia(nota.imagen, variante === 'fila' ? 'card' : 'card');
 
 <a href={href} data-luz class:list={['tarjeta', `es-${variante}`]}>
   {/*
-    🔴 `transition:name` es lo que hace que la foto de esta tarjeta CREZCA hasta
+    `transition:name` es lo que hace que la foto de esta tarjeta CREZCA hasta
     convertirse en el hero de la nota, en vez de que la página corte en seco. El
     navegador interpola entre las dos posiciones porque las dos comparten nombre.
 
@@ -163,7 +163,7 @@ const foto = urlMedia(nota.imagen, variante === 'fila' ? 'card' : 'card');
   }
 
   /*
-    🔴 UNA proporción para todas las fotos del sitio, y hoy es 16:9.
+    UNA proporción para todas las fotos del sitio, y hoy es 16:9.
 
     El porqué del número —y el porqué de que sea la misma en todas partes— está
     escrito una sola vez, junto al token, en `src/styles/beat.css`. Aquí no se pone
@@ -307,7 +307,7 @@ const foto = urlMedia(nota.imagen, variante === 'fila' ? 'card' : 'card');
     }
 
     /*
-      🔴 En MÓVIL la lateral del mosaico deja de ser tarjeta y pasa a FILA
+      En MÓVIL la lateral del mosaico deja de ser tarjeta y pasa a FILA
       (Carlos, 2026-09-08).
 
       El problema medido no era que la portada fuese grande, era que era 2.08×
@@ -320,7 +320,7 @@ const foto = urlMedia(nota.imagen, variante === 'fila' ? 'card' : 'card');
       rompe la rejilla de cuatro tarjetas idénticas, que es el otro defecto que
       tenía esta pantalla.
 
-      ⚠️ Reusa la medida de `es-fila` —miniatura de 108px, hueco de 14— para que el
+      Reusa la medida de `es-fila` —miniatura de 108px, hueco de 14— para que el
       móvil no invente una tercera fila con otras proporciones. La única diferencia
       es que aquí SÍ lleva su filete abajo: en el mosaico las dos columnas laterales
       son dos contenedores distintos, así que la línea no puede venir del `gap` del
@@ -361,7 +361,7 @@ const foto = urlMedia(nota.imagen, variante === 'fila' ? 'card' : 'card');
       font: 600 15.5px / 1.26 var(--font-text);
       padding: 6px 0 0;
       /*
-        🔴 TRES líneas y lo que sobre se corta (Carlos, 2026-09-08).
+        TRES líneas y lo que sobre se corta (Carlos, 2026-09-08).
 
         Con la miniatura en 108px, al titular le quedan 221px de ancho — y los
         titulares de esta redacción son largos: «Sub Focus convierte sus próximos
@@ -369,11 +369,11 @@ const foto = urlMedia(nota.imagen, variante === 'fila' ? 'card' : 'card');
         líneas y hacía crecer la fila hasta desarmar la retícula que la fila viene
         a crear.
 
-        ⚠️ Tres y no dos: en 221px, tres líneas son ~40 palabras, suficiente para
+        Tres y no dos: en 221px, tres líneas son ~40 palabras, suficiente para
         que un titular recortado siga diciendo de qué es la nota. A dos se perdía
         el sujeto en los titulares que empiezan con el nombre del artista.
 
-        ⚠️ `-webkit-box` es obligatorio para que `line-clamp` actúe, y no rompe el
+        `-webkit-box` es obligatorio para que `line-clamp` actúe, y no rompe el
         `grid` de la fila porque esto es el HIJO, no el contenedor. Se declara la
         propiedad estándar además de la prefijada: la prefijada la entienden todos
         los navegadores hoy, y la estándar es la que va a quedar.

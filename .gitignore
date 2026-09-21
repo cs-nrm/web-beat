@@ -12,7 +12,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# 🔴 Variables de entorno. En el v1 solo `.env.production` estaba ignorado, y el
+# Variables de entorno. En el v1 solo `.env.production` estaba ignorado, y el
 # `.env` de la raíz estaba VERSIONADO. Ahí solo había un PUBLIC_API_URL (la URL
 # pública del WordPress, no un secreto), así que no hubo fuga — pero este repo va
 # a llevar config de servidor de verdad (CMS_URL con una IP privada de la VPC, y
@@ -28,7 +28,7 @@ pnpm-debug.log*
 # de descarga). Sí se versiona la carpeta extraída del lienzo.
 design/*.zip
 
-# 🔴 Capturas del canal de metadata de Triton (SBM). NO se versionan.
+# Capturas del canal de metadata de Triton (SBM). NO se versionan.
 #
 # No es por peso: ese canal emite cue points de `name: "ad"` con los nombres de los
 # anunciantes al aire y su duración —RENAULT, BANXICO, BANCO NU…—, o sea que una

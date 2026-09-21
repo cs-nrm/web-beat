@@ -49,14 +49,14 @@ const vecinos = await obtenerEspeciales(serieSlug ?? SERIE_FENOMENO, 8);
 const otros = vecinos.filter((t) => t.id !== especial.id);
 
 /*
-  ⚠️ Aquí se armaba el rótulo del encabezado —«TEMA 03 · 1 SEP 2026 — 7 SEP 2026»—
+  Aquí se armaba el rótulo del encabezado —«TEMA 03 · 1 SEP 2026 — 7 SEP 2026»—
   y se retiró con el rótulo (2026-09-07). El número y el rango del tema siguen
   visibles donde importan: los pinta `Fenomeno.astro` en el bloque del tema.
 */
 ---
 
 {/*
-  🔴 El respaldo de la descripción YA NO es `etiquetaPublica`.
+  El respaldo de la descripción YA NO es `etiquetaPublica`.
 
   Ese campo es un RÓTULO, no una frase: en el único tema capturado vale
   «Kraftwerk», nueve caracteres, y eso era la `<meta description>` y la bajada de
@@ -83,7 +83,7 @@ const otros = vecinos.filter((t) => t.id !== especial.id);
       playlist— con nombre propio: son dos superficies distintas para quien compra,
       y con un solo nombre no se podría saber cuál de las dos entregó.
 
-      ⚠️ En móvil esta columna baja y el box queda 32px por encima del leaderboard
+      En móvil esta columna baja y el box queda 32px por encima del leaderboard
       de esta página. Les pasa a las cuatro páginas de detalle con riel y está
       anotado en `agents/ads.md`: la salida sería mover el leaderboard debajo de
       «OTROS TEMAS», y mover un hueco que ya se vendió no es decisión de aquí.

@@ -4,7 +4,7 @@ interface:
   default_prompt: |
     Trabaja como el agente de analytics de este proyecto Beat 100.9.
 
-    🔴 Antes que nada, el estado real (comprobado el 2026-09-08): en v2 **NO hay
+    Antes que nada, el estado real (comprobado el 2026-09-08): en v2 **NO hay
     ningún contenedor de medición cargado**. Ni GTM, ni comScore, ni Hotjar, ni
     Metricool, en ningún archivo de `src/`, `public/` ni `scripts/`. Hay emisor y
     no hay receptor: `ga4()` busca `window.gtag` y `window.dataLayer`, no
@@ -45,7 +45,7 @@ interface:
       existió: era una casilla del `ROADMAP.md`, que es del sitio v1 y no se sigue
     - `src/js/analytics.js` es LEGADO y no lo importa nadie (comprobado con grep);
       su port vivo es `src/scripts/analitica.ts`. Editarlo no tiene efecto
-    - ⚠️ GA4 cuenta el DOBLE con View Transitions: hay que DESMARCAR en el panel
+    - GA4 cuenta el DOBLE con View Transitions: hay que DESMARCAR en el panel
       «Medición mejorada → Cambios de página basados en eventos del historial del
       navegador», que viene encendido y se dispara con el pushState del
       ClientRouter. Ese arreglo NO está en este repo

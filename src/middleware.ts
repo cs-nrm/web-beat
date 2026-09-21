@@ -6,7 +6,7 @@ import { defineMiddleware } from 'astro:middleware';
 import { NOINDEX_SITIO, noIndexarHost } from '@/config/site';
 
 /**
- * 🔴 Rutas que NUNCA se cachean, ni en el borde ni en el navegador.
+ * Rutas que NUNCA se cachean, ni en el borde ni en el navegador.
  *
  * - `/api/`: los proxies server-side. Cachearlos serviría datos viejos a quien
  *   acaba de pedirlos.
@@ -29,7 +29,7 @@ const SIN_CACHE = [/^\/api\//, /^\/mi(\/|$)/, /^\/buscar/];
  * TTL vence, el borde sirve la copia vieja de inmediato y refresca por detrás, en
  * vez de mandar a todo el mundo al SSR a la vez.
  *
- * ⚠️ Esto por sí solo NO hace que Cloudflare cachee el HTML: por defecto no cachea
+ * Esto por sí solo NO hace que Cloudflare cachee el HTML: por defecto no cachea
  * documentos aunque lo pidan las cabeceras. Hace falta la Cache Rule (Cache
  * Everything) del panel. Y esa regla NO se enciende mientras la purga al publicar
  * no esté cableada — el CMS todavía no tiene webhook de revalidación.
@@ -38,7 +38,7 @@ const CACHE_HTML = 'public, max-age=0, s-maxage=60, stale-while-revalidate=300';
 const CACHE_404 = 'public, max-age=0, s-maxage=60, stale-while-revalidate=600';
 
 /**
- * 🔴 LAS URLS DEL V1.
+ * LAS URLS DEL V1.
  *
  * El v2 no es una migración: es otro sitio con otra estructura. De las **22
  * secciones de primer nivel** del v1 —sacadas de su propio marcado, no de una
@@ -46,7 +46,7 @@ const CACHE_404 = 'public, max-age=0, s-maxage=60, stale-while-revalidate=600';
  * día del corte de dominio cada enlace compartido, cada marcador y todo lo que
  * Google tiene indexado cae en 404.
  *
- * ⚠️ `/avisodeprivacidad` y `/terminosycondiciones` NO están aquí, y es a
+ * `/avisodeprivacidad` y `/terminosycondiciones` NO están aquí, y es a
  * propósito: desde el 2026-09-09 las páginas legales del v2 se llaman igual que
  * las del v1 —sin guiones, decisión de Carlos— así que la URL vieja YA es la
  * buena y no hay nada que redirigir. Antes estaban en la tabla apuntando a
@@ -56,14 +56,14 @@ const CACHE_404 = 'public, max-age=0, s-maxage=60, stale-while-revalidate=600';
  * Destinos aprobados por Carlos (2026-09-09): lo que tiene equivalente va a su
  * equivalente, y lo que ya no existe va al Inicio.
  *
- * ⚠️ Son **301**, o sea permanentes y cacheadas con fuerza por el navegador. Un
+ * Son **301**, o sea permanentes y cacheadas con fuerza por el navegador. Un
  * destino equivocado aquí se queda pegado en la máquina de quien lo visite, así
  * que la tabla se corrige ANTES del corte, no después.
  *
- * ⚠️ El orden importa: se recorre de arriba abajo y gana la primera que coincide.
+ * El orden importa: se recorre de arriba abajo y gana la primera que coincide.
  * Lo específico va arriba para que no se lo coma una regla más ancha.
  *
- * ⚠️ Y lo que NO entra aquí: `/_astro/`, `/fonts/` y `/favicon/` son rutas de
+ * Y lo que NO entra aquí: `/_astro/`, `/fonts/` y `/favicon/` son rutas de
  * activos del v1. Redirigirlas al Inicio devolvería HTML donde el navegador espera
  * un CSS o una fuente. No están en la tabla a propósito.
  */
@@ -95,10 +95,10 @@ const DEL_V1: Array<[RegExp, string]> = [
     porque es lo único honesto: no hay sección equivalente y un 404 en día de
     lanzamiento es peor que la portada.
 
-    ⚠️ `beatzilla`, `podcast` y `promociones` tenían páginas DENTRO, así que la
+    `beatzilla`, `podcast` y `promociones` tenían páginas DENTRO, así que la
     regla cubre también sus rutas profundas — de ahí el `(\/|$)` y no un igual.
 
-    ⚠️ `tomorrowland`, `mejores-tracks-2025` y `pruebas` faltaban desde el
+    `tomorrowland`, `mejores-tracks-2025` y `pruebas` faltaban desde el
     principio y se encontraron el 10 sep, horas antes del corte, enumerando las
     rutas reales de `main` en vez de fiarse de la lista de secciones del plan.
     Las tres responden 200 en el v1 de HOY —comprobado con curl contra
@@ -118,7 +118,7 @@ const DEL_V1: Array<[RegExp, string]> = [
 /**
  * El destino del v1 para esta ruta, o `null` si no es una URL del v1.
  *
- * ⚠️ Se comprueba que el destino NO sea la propia ruta antes de devolverlo: una
+ * Se comprueba que el destino NO sea la propia ruta antes de devolverlo: una
  * regla que apuntara a algo que ella misma captura daría un bucle de redirección
  * infinito, y eso en el navegador es `ERR_TOO_MANY_REDIRECTS` — el sitio caído
  * para esa URL. Hoy ninguna lo hace, pero la guarda cuesta una línea y el fallo
@@ -136,14 +136,14 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const ruta = context.url.pathname;
 
   /*
-    🔴 Las redirecciones del v1 van PRIMERO y devuelven sin llamar a `next()`.
+    Las redirecciones del v1 van PRIMERO y devuelven sin llamar a `next()`.
 
     Dos razones: no tiene sentido renderizar una página para tirarla, y sobre todo
     el 404 del v2 es una página completa —con su consulta al CMS— así que dejar
     pasar estas rutas costaría un render y una petición al CMS por cada enlace
     viejo que llegue. El día del corte eso es tráfico de verdad.
 
-    ⚠️ La query se conserva. Una URL del v1 con `?utm_source=…` viene de una
+    La query se conserva. Una URL del v1 con `?utm_source=…` viene de una
     campaña, y perder los parámetros al redirigir es perder la atribución de esa
     campaña justo el día que más importa.
   */
@@ -173,7 +173,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   /**
-   * 🔴 Despliegue que no es el dominio canónico: se marca `noindex` por cabecera.
+   * Despliegue que no es el dominio canónico: se marca `noindex` por cabecera.
    *
    * La cabecera es la que de verdad protege: aplica a TODO lo que sale (páginas,
    * JSON de los proxies, RSS), no solo al HTML, y Google la respeta incluso donde
@@ -185,7 +185,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
    *   misma imagen de producción servida por otro nombre sería un duplicado
    *   indexable del sitio real.
    *
-   * ⚠️ Depende de `security.allowedDomains` en `astro.config.mjs`. Sin esa lista
+   * Depende de `security.allowedDomains` en `astro.config.mjs`. Sin esa lista
    * `context.url.hostname` es SIEMPRE `localhost` y esto dejaría el sitio real
    * fuera de Google.
    */

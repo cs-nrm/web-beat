@@ -35,13 +35,13 @@ interface CampoVideo {
  * `/embed/`. Los Shorts importan aquí: la serie es vertical y es la forma en que
  * llega la mitad del material.
  *
- * 🔴 Se EXPORTA porque las canciones lo necesitan igual que las cápsulas, y por un
+ * Se EXPORTA porque las canciones lo necesitan igual que las cápsulas, y por un
  * detalle medido: los `embedUrl` que guarda el CMS llegan como
  * `watch?v=ID&list=RD…&start_radio=1`, o sea la radio de YouTube de esa pista. Leer
  * el parámetro `v` se queda con la pista y descarta la cola — que es lo correcto
  * aquí, porque la cola la pone Bonus Beat.
  *
- * ⚠️ La validación de 11 caracteres no es cosmética: es lo que impide que una URL
+ * La validación de 11 caracteres no es cosmética: es lo que impide que una URL
  * mal pegada se convierta en un `src` de iframe hacia cualquier sitio.
  */
 export function idYoutube(crudo: string): string | null {

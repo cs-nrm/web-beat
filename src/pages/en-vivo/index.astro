@@ -2,7 +2,7 @@
 /**
  * §2 del mapa de sitio — «Escuchar en vivo».
  *
- * 🔴 REHECHA el 2026-09-09. Era una página mínima —un titular, una frase sobre el
+ * REHECHA el 2026-09-09. Era una página mínima —un titular, una frase sobre el
  * player y dos listas— y ahora encabeza con **AL AIRE AHORA**, que se trajo entero
  * desde `/programacion` (Carlos, 2026-09-09): «la primera, que dice Al aire ahora,
  * que se convierta en lo que lleva en-vivo».
@@ -16,22 +16,22 @@
  *   1. AL AIRE AHORA + LO QUE SIGUE HOY   — la señal
  *   2. LO QUE HA SONADO                   — la bitácora del playout
  *
- * ⚠️ Entre las dos hubo una tercera, «TAMBIÉN ESCUCHA EN», con los agregadores de
+ * Entre las dos hubo una tercera, «TAMBIÉN ESCUCHA EN», con los agregadores de
  * terceros. Se fue el 2026-09-11 al retirar iHeart, que era el único que había.
  *
- * ⚠️ NO lleva publicidad, y es una decisión tomada (Carlos, 2026-09-08): es la
+ * NO lleva publicidad, y es una decisión tomada (Carlos, 2026-09-08): es la
  * página a la que alguien viene a ESCUCHAR, y un anuncio al lado de la señal hace
  * que un sitio de radio se sienta barato. Ver `agents/ads.md`. Por eso el box que
  * acompañaba a este panel en `/programacion` no se mudó con él.
  *
- * ⚠️ El `<h1>` va para lectores de pantalla y no a la vista, y es el mismo
+ * El `<h1>` va para lectores de pantalla y no a la vista, y es el mismo
  * razonamiento que apartó a `/programacion` de `CabezaSeccion`: un display de 64px
  * que repita «EN VIVO» encima de un panel que ya dice «AL AIRE AHORA · CLAPTONE»
  * empuja la señal abajo del pliegue en la única página donde la señal ES el
  * contenido. El otro candidato —el nombre del programa— cambia cada hora, o sea un
  * `<h1>` distinto en cada visita y ninguno describiendo la página.
  *
- * ⚠️ Su entrada de menú VOLVIÓ el 2026-09-09, el mismo día y por esto mismo: estaba
+ * Su entrada de menú VOLVIÓ el 2026-09-09, el mismo día y por esto mismo: estaba
  * oculta «hasta que hagamos bien la página» y con el panel encima dejó de
  * desmerecer. Va la primera de `SECCIONES` en `config/navegacion.ts`, o sea en la
  * cabecera, el menú lleno, la tira de los interiores y el pie.
@@ -68,7 +68,7 @@ const siguientes = hoy.slice(desdeIndice, desdeIndice + 3);
 
 const fotoHero = alAire ? urlMedia(alAire.programa.imagen, 'large') : null;
 /*
-  🔴 El recorte del hero se guía por el punto focal que capturó la estación.
+  El recorte del hero se guía por el punto focal que capturó la estación.
 
   El CMS **no recorta**: sus tres variantes son de ancho y conservan la proporción
   del original (confirmado por la sesión del CMS el 2026-09-09). El hero es una
@@ -133,7 +133,7 @@ const altHero =
           <div class="vivo-hero-texto">
             <p class="beat-label vivo-hero-rotulo">
               {/*
-                🔴 El único color de la interfaz, y significa algo: es la luz de
+                El único color de la interfaz, y significa algo: es la luz de
                 tally de un estudio (movimiento.md §8). Cuando el bloque termina,
                 `senal.ts` retira `es-aire` y el punto se apaga solo — el hero deja
                 de afirmar «ahora» en vez de quedarse mintiendo.
@@ -162,7 +162,7 @@ const altHero =
             )}
 
             {/*
-              🔴 UN solo botón. Al lado vivía «Ver el show», que llevaba a la ficha
+              UN solo botón. Al lado vivía «Ver el show», que llevaba a la ficha
               del programa, y se retiró (Carlos, 2026-09-09): «quitar el botón ver
               show». Dos botones del mismo tamaño repartían la atención entre
               escuchar la señal —lo único que se viene a hacer aquí— y leer sobre
@@ -171,12 +171,12 @@ const altHero =
             */}
             <div class="vivo-hero-acciones">
               {/*
-                🔴 NO es un segundo reproductor: reenvía la pulsación al botón del
+                NO es un segundo reproductor: reenvía la pulsación al botón del
                 player de la cabecera, que es el único que habla con Triton. Lo
                 cablea `parrilla.ts`, que además copia su estado aquí para que este
                 botón no diga «Escuchar en vivo» mientras la radio ya suena.
 
-                ⚠️ Los tres rótulos van en el marcado y los reparte el CSS. Sin
+                Los tres rótulos van en el marcado y los reparte el CSS. Sin
                 JavaScript se ve el primero, que es el estado correcto de una
                 página recién cargada.
               */}
@@ -200,7 +200,7 @@ const altHero =
               recargar — y sin recargar es lo que importa, porque una recarga
               completa corta la señal que el oyente tiene puesta.
 
-              ⚠️ Apuntaba a `/programacion` cuando el panel vivía allá. Al mudarse
+              Apuntaba a `/programacion` cuando el panel vivía allá. Al mudarse
               tuvo que mudarse el destino: un enlace a la otra página refresca la
               otra página y deja este hero exactamente igual de caduco.
             */}
@@ -239,7 +239,7 @@ const altHero =
     }
 
     {/*
-      ⚠️ Aquí iba «TAMBIÉN ESCUCHA EN», con la ficha de iHeartRadio. Salió el
+      Aquí iba «TAMBIÉN ESCUCHA EN», con la ficha de iHeartRadio. Salió el
       2026-09-11 con todo lo de iHeart (Carlos), y como era la única plataforma
       de `PLATAFORMAS_RADIO` no quedó lista que recorrer: se va la sección
       completa, rótulo incluido, y el CSS `.vivo-plataforma*` con ella. Una zona
@@ -249,7 +249,7 @@ const altHero =
     {/* ═══ 2. LO QUE HA SONADO ═══ */}
     {
       /*
-        🔴 Sin bitácora no hay sección, ni rótulo, ni explicación.
+        Sin bitácora no hay sección, ni rótulo, ni explicación.
 
         Aquí había un párrafo que le contaba al oyente que la ingesta «falla
         cerrado» y que falta cargar `categoriasMusicales` en el CMS. Eso es una
@@ -257,7 +257,7 @@ const altHero =
         radio no sabe qué es una lista blanca, y lo único que lee es que algo del
         sitio no funciona. Una zona sin contenido se deja vacía y sin rótulo.
 
-        ⚠️ El estado de la ingesta no se pierde: sigue documentado en
+        El estado de la ingesta no se pierde: sigue documentado en
         `lib/cms/aire.ts`, que es donde lo busca quien lo tenga que arreglar.
       */
       sono.length > 0 && (
@@ -330,7 +330,7 @@ const altHero =
     arriba-derecha, así que la cara del DJ se sigue viendo.
   */
   /*
-    🔴 EL VELO TIENE UN SUELO PLANO, y esto salió de medirlo, no de mirarlo.
+    EL VELO TIENE UN SUELO PLANO, y esto salió de medirlo, no de mirarlo.
 
     La foto la elige la estación y puede ser cualquier cosa, incluida una foto
     clara. Con el velo que había —un degradado que se abría hasta 0.15 arriba y
@@ -352,11 +352,11 @@ const altHero =
         rótulo (--mist-0, suelo 0.72) .................. 8.96:1  ✅
         bajada (--mist-2, suelo 0.72) .................. 7.72:1  ✅
 
-    ⚠️ Lo que el suelo NO rescata es `--text-faint`: 2.98:1 incluso con él. Por eso
+    Lo que el suelo NO rescata es `--text-faint`: 2.98:1 incluso con él. Por eso
     «LO QUE SIGUE HOY» —cuyas horas van en ese token— se bajó de la foto y tiene su
     propia superficie opaca. Ver `.vivo-sigue`.
 
-    ⚠️ El suelo va como ÚLTIMA capa del `background` y por tanto aterriza en
+    El suelo va como ÚLTIMA capa del `background` y por tanto aterriza en
     `background-color`, no en `background-image` —el computado dice `..., none` y
     parece un error—. Es lo que se quiere: el color de fondo se pinta DEBAJO de los
     degradados de este mismo elemento y ENCIMA de la foto, que está en otro. Si
@@ -517,7 +517,7 @@ const altHero =
 
   /* ── LO QUE SIGUE HOY ── */
   /*
-    🔴 Superficie PROPIA y opaca, y no es decoración: sus horas van en
+    Superficie PROPIA y opaca, y no es decoración: sus horas van en
     `--text-faint`, que sobre una foto clara da 2.9:1 incluso con el suelo del
     velo puesto. Sobre `--noche-1` da 6.23:1, medido. Un panel opaco es la única
     forma de que el número de la hora no dependa de qué foto subió la estación.
@@ -627,7 +627,7 @@ const altHero =
       padding: 28px 20px 24px;
     }
     /*
-      🔴 Fluido, no fijo — es la misma trampa que ya midió `CabezaSeccion`: un
+      Fluido, no fijo — es la misma trampa que ya midió `CabezaSeccion`: un
       nombre de programa de una sola palabra no puede partirse, y a 38px se sale
       de una caja de 343px.
     */

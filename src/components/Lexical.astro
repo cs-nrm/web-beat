@@ -9,7 +9,7 @@
  * Los de lista y cita se cubren porque el editor los ofrece aunque todavía no se
  * hayan usado.
  *
- * 🔴 Nada de `set:html` con contenido del CMS. El texto sale como texto y el
+ * Nada de `set:html` con contenido del CMS. El texto sale como texto y el
  * formato como etiquetas, así que un `<script>` escrito en el editor se ve como
  * las letras que es. `web-enfoque` sí usa `set:html` y por eso tiene una guarda de
  * grep en CI; aquí el problema no existe.
@@ -96,7 +96,7 @@ function esExterno(href: string): boolean {
     switch (n.type) {
       case 'heading': {
         /*
-          🔴 ESTRUCTURA y ESTILO se deciden por separado, y no es rebuscado:
+          ESTRUCTURA y ESTILO se deciden por separado, y no es rebuscado:
           apuntan a cosas distintas.
 
           La ESTRUCTURA baja un nivel, porque el titular de la nota ya es el `h1`
@@ -212,7 +212,7 @@ function esExterno(href: string): boolean {
               const etiquetas = marcas(h.format);
               if (!etiquetas.length) return <Fragment set:text={texto} />;
               // De dentro hacia fuera: la primera marca queda más pegada al texto.
-              // ⚠️ Los `as` aquí NO pueden llevar una unión: un cast con `|` dentro
+              // Los `as` aquí NO pueden llevar una unión: un cast con `|` dentro
               // de una expresión de plantilla no lo parsea el compilador de Astro.
               const Primera = etiquetas[0] as 'strong';
               let salida = <Primera set:text={texto} />;

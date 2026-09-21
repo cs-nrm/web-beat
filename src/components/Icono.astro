@@ -10,7 +10,7 @@
  * Inline y no un paquete: así no hay una petición más ni una dependencia que
  * actualizar. Es el mismo criterio de `web-enfoque`.
  *
- * ⚠️ `x` es la CRUZ de cerrar (Lucide). La marca de la red se llama `x-marca`,
+ * `x` es la CRUZ de cerrar (Lucide). La marca de la red se llama `x-marca`,
  * para que no se confundan: uno cierra un menú y el otro comparte una nota.
  *
  * guarda-ok set:html: `TRAZOS` son constantes de ESTE archivo (trazos de Lucide).
@@ -42,14 +42,14 @@ const TRAZOS: Record<Props['nombre'], string> = {
   pause: '<rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/>',
   'volume-2':
     '<path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.364 18.364a9 9 0 0 0 0-12.728"/>',
-  /* ⚠️ Y aquí `chevron-down`, la flecha del botón de «ampliar el reproductor» de
+  /* Y aquí `chevron-down`, la flecha del botón de «ampliar el reproductor» de
      la barra. El botón se retiró el 2026-09-07 porque no hacía nada; cuando el
      player ampliado exista de verdad, vuelven los dos —el trazo es
      `<path d="m6 9 6 6 6-6"/>`—. Ver `Cabecera.astro`. */
   menu: '<path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/>',
   search: '<path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/>',
   x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
-  /* ⚠️ Aquí estaba `clock`, el reloj del «3 MIN». Se fue con el tiempo de lectura
+  /* Aquí estaba `clock`, el reloj del «3 MIN». Se fue con el tiempo de lectura
      (2026-09-07): las tarjetas, la portada y la firma llevan la fecha, y una fecha
      no lleva reloj. Se quita del mapa en vez de dejarlo huérfano — un icono que
      nadie pide es un icono que alguien vuelve a usar por costumbre. */

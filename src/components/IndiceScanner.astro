@@ -8,7 +8,7 @@
  * cuatro archivos, que es exactamente como el sitio viejo terminó con los tokens
  * de marca repartidos.
  *
- * 🔴 Desde el 2026-09-07 recibe la SECCIÓN, y con ella filtra. Antes `/scanner`
+ * Desde el 2026-09-07 recibe la SECCIÓN, y con ella filtra. Antes `/scanner`
  * lo usaba sin nada y traía todas las notas del sitio; ahora Beat Scanner (el día
  * a día) y Editorial (las elaboradas) son dos secciones distintas, cada una con su
  * categoría del CMS. Ver `SECCIONES_EDITORIALES` en `config/navegacion.ts`.
@@ -48,7 +48,7 @@ interface Props {
 const { seccion = null, filtro = null, pagina = 1 } = Astro.props;
 
 /*
-  🔴 Si no hay un filtro más estrecho, filtra la SECCIÓN por su categoría.
+  Si no hay un filtro más estrecho, filtra la SECCIÓN por su categoría.
 
   Y si esa categoría no existe en el CMS, `filtroDeCategoria` devuelve `null` — que
   NO se puede pasar tal cual a `obtenerScanner`, porque ahí `null` significa «sin
@@ -76,7 +76,7 @@ const { destacada, rejilla, paginas } = categoriaPerdida
   filas—, para que la sección no cambie de forma al pasar de página y el
   leaderboard no se mueva de sitio.
 
-  ⚠️ `slice(6)` y no `slice(6, 10)`: en la página 1 son diez (la destacada salió
+  `slice(6)` y no `slice(6, 10)`: en la página 1 son diez (la destacada salió
   de la tanda) y da lo mismo, pero de la 2 en adelante son ONCE, y el tope de 10
   se habría comido una nota por página sin decir nada. Es justo el fallo que este
   componente venía a arreglar, escrito en pequeño.
@@ -96,7 +96,7 @@ const rutaAqui = Astro.url.pathname;
  * La fecha de la nota principal — el sello que sustituyó a sus minutos de lectura
  * (ver `TarjetaNota.astro`).
  *
- * ⚠️ Con este dato se rotulaba también «ACTUALIZADO <fecha>» encima del titular,
+ * Con este dato se rotulaba también «ACTUALIZADO <fecha>» encima del titular,
  * y ese rótulo se retiró el 2026-09-07: contaba el estado de la página que el
  * lector ya tiene delante. Ver `CabezaSeccion.astro`.
  */
@@ -128,7 +128,7 @@ const nombreAqui = filtro ? filtro.nombre : (seccion?.rotulo ?? 'esta sección')
           {/*
             ── La nota principal, a dos columnas ──
 
-            🔴 Solo en la PÁGINA 1. Antes toda esta rama colgaba de `destacada`, y
+            Solo en la PÁGINA 1. Antes toda esta rama colgaba de `destacada`, y
             con el paginador eso habría dejado la página 2 en blanco: `obtenerScanner`
             devuelve `destacada: null` de la segunda en adelante a propósito —no hay
             ninguna nota que sea «la principal» entre las once más viejas—. Lo que
@@ -176,7 +176,7 @@ const nombreAqui = filtro ? filtro.nombre : (seccion?.rotulo ?? 'esta sección')
           {enRejilla.length > 0 && (
             <div class:list={['sc-rejilla', { 'es-cabeza': !destacada }]}>
               {/*
-                ⚠️ Sin destacada —página 2 en adelante— la primera fila de la
+                Sin destacada —página 2 en adelante— la primera fila de la
                 cuadrícula es lo que está sobre el pliegue, así que le toca a ella
                 el `fetchpriority` que en la página 1 lleva la foto del lead. Sin
                 esto la página 2 empieza con tres huecos en degradado.
@@ -349,7 +349,7 @@ const nombreAqui = filtro ? filtro.nombre : (seccion?.rotulo ?? 'esta sección')
   /* ── rejilla: la línea entre tarjetas ES el fondo asomando ── */
   .sc-rejilla {
     display: grid;
-    /* 🔴 `minmax(0, 1fr)` y no `1fr`: `1fr` es `minmax(auto, 1fr)`, así que un
+    /* `minmax(0, 1fr)` y no `1fr`: `1fr` es `minmax(auto, 1fr)`, así que un
        hijo indivisible ensancha SU columna y las demás se encogen. Medido: la
        tarjeta de «Fenómeno Residente» pedía 191px de mínimo por el rótulo con
        `nowrap`, y dejaba a su vecina en 178. */
@@ -395,7 +395,7 @@ const nombreAqui = filtro ? filtro.nombre : (seccion?.rotulo ?? 'esta sección')
     color: var(--mist-2);
   }
   .sc-riel {
-    /* 🔴 Fijo en SU columna: cuando no hay segunda tanda el riel es el único hijo
+    /* Fijo en SU columna: cuando no hay segunda tanda el riel es el único hijo
        de `.sc-abajo`, y sin esto caería en la de `1fr` y estiraría el box a 700px.
        Se reinicia en 14e, donde la retícula es de una sola columna. */
     grid-column: 2;
@@ -465,7 +465,7 @@ const nombreAqui = filtro ? filtro.nombre : (seccion?.rotulo ?? 'esta sección')
       marcado de anuncio; hoy usa `<Anuncio formato="leaderboard" …>`, que trae su
       marco y sus medidas.
 
-      ⚠️ Y no eran inocuas: `.sc-anuncio-leader` reservaba `320 / 100`, o sea que
+      Y no eran inocuas: `.sc-anuncio-leader` reservaba `320 / 100`, o sea que
       guardaba una copia MUERTA de una medida equivocada. El día que alguien
       volviera a usar esa clase habría heredado el fallo, y buscando «320 × 100»
       para corregirlo aparecía aquí sin que este archivo tuviera nada que ver.

@@ -6,7 +6,7 @@ La capa de datos y el contrato de URLs: cómo este front le pregunta al CMS, qu�
 rutas existen, y cómo un documento de Payload se convierte en algo que se lee en
 pantalla.
 
-🔴 **Este documento se reescribió por completo el 2026-09-08.** El anterior
+**Este documento se reescribió por completo el 2026-09-08.** El anterior
 describía un sitio distinto —no una versión anterior de este, **otro sitio**— y
 seguirlo hoy no rompe una cosa: rompe el punto de partida.
 
@@ -53,10 +53,10 @@ perder una tarde y luego hace dudar del resto de la documentación.
 | `src/config/navegacion.ts` | Qué secciones existen, y qué categoría del CMS llena a cada una |
 | `src/pages/**` | Las 24 rutas: qué consulta cada una y cómo degrada si viene vacía |
 
-⚠️ **`src/lib/cms/publicidad.ts` NO es de este agente**, aunque viva en la misma
+**`src/lib/cms/publicidad.ts` NO es de este agente**, aunque viva en la misma
 carpeta: es la venta directa y es de `agents/ads.md`.
 
-⚠️ **`src/js/` entero es LEGADO.** Comprobado con `grep`: ningún archivo de `src/`
+**`src/js/` entero es LEGADO.** Comprobado con `grep`: ningún archivo de `src/`
 importa `src/js/ads.js`, `analytics.js`, `player.js` ni `votes.js`, y
 `scripts/guardas.mjs` los excluye a propósito. `src/js/README.md` explica qué se
 portó de cada uno y qué se reescribió. Editarlos no tiene ningún efecto.
@@ -67,7 +67,7 @@ portó de cada uno y qué se reescribió. Editarlos no tiene ningún efecto.
 
 Son las que más caro se pagan si se rompen, y las tres tienen un incidente detrás.
 
-### 🔴 1. El navegador NUNCA habla con el CMS
+### 1. El navegador NUNCA habla con el CMS
 
 `src/lib/cms/client.ts` tiene un guard que revienta si alguien lo arrastra a un
 bundle de cliente. Se importa solo en frontmatter de `.astro` (SSR) o en
@@ -78,7 +78,7 @@ No es una preferencia arquitectónica: el `CMS_URL` de producción es una **IP p
 de la VPC** y el 3000 no se expone a internet. Un import mal puesto no falla en
 local —donde el CMS es alcanzable— y falla en producción.
 
-### 🔴 2. Nada que varíe por PETICIÓN entra en un `where`
+### 2. Nada que varíe por PETICIÓN entra en un `where`
 
 La clave de caché es la consulta entera, así que un parámetro que cambia en cada
 visita **genera una entrada por visita y ninguna acierta nunca.** La lección está
@@ -94,11 +94,11 @@ De ahí dos patrones que parecen rodeos y no lo son:
 - El especial vigente se resuelve con `sort: '-numero'` y `limit: 1`, no filtrando
   por `inicio <= hoy <= fin`. Y de paso nunca deja la sección vacía.
 
-⚠️ Y la misma regla vale en el BORDE: `src/lib/feeds.ts` tiene un conjunto CERRADO
+Y la misma regla vale en el BORDE: `src/lib/feeds.ts` tiene un conjunto CERRADO
 de secciones y un tope de páginas por lo mismo — `?seccion=<lo que sea>` es una
 clave de caché regalada.
 
-### 🔴 3. Todo degrada, nada tumba la página
+### 3. Todo degrada, nada tumba la página
 
 Cada función del CMS devuelve `null` o `[]` en el `catch`, y cada componente decide
 no pintarse. El Inicio se ACORTA cuando una colección está vacía; no enseña un
@@ -106,7 +106,7 @@ encabezado con nada debajo. `Base.astro` cae a un objeto de marca mínimo si
 `estaciones` no responde, y el sitio se sirve igual.
 
 Es la regla de la casa y viene de `web-enfoque`, que responde 200 con cero notas
-cuando su CMS no está. ⚠️ Hay colecciones **hoy vacías en producción** —`programas`,
+cuando su CMS no está. Hay colecciones **hoy vacías en producción** —`programas`,
 `bitacora`, `transmisiones`, `paginas`— así que estos caminos no son teóricos: son
 lo que se ve en pantalla ahora mismo.
 
@@ -114,7 +114,7 @@ lo que se ve en pantalla ahora mismo.
 
 ## Rutas: una por COLECCIÓN, no por sección
 
-🔴 Es la decisión 10 del plan, y explica casi todo el mapa de URLs:
+Es la decisión 10 del plan, y explica casi todo el mapa de URLs:
 
 | Ruta | Archivo | De dónde sale |
 |---|---|---|
@@ -122,7 +122,7 @@ lo que se ve en pantalla ahora mismo.
 | `/noticias/<slug>` | `src/pages/noticias/[slug].astro` | `noticias` |
 | `/beat-scanner` y `/beat-scanner/<categoria>` | `src/pages/beat-scanner.astro`, `src/pages/beat-scanner/[categoria].astro` | `noticias` filtradas por categoría |
 | `/editorial` | `src/pages/editorial.astro` | igual, con la otra categoría |
-| `/microambiente` | `src/pages/microambiente.astro` | igual, con la tercera. ⚠️ Interior PROPIO: una lista, no `IndiceScanner` |
+| `/microambiente` | `src/pages/microambiente.astro` | igual, con la tercera. Interior PROPIO: una lista, no `IndiceScanner` |
 | `/etiqueta/<slug>` | `src/pages/etiqueta/[slug].astro` | `etiquetas` |
 | `/especiales/<slug>` y `/fenomeno-residente` | `src/pages/especiales/[slug].astro`, `src/pages/fenomeno-residente/index.astro` | `especiales` |
 | `/<tipoLista>` y `/<tipoLista>/<slug>` | `src/pages/[tipoLista]/index.astro`, `src/pages/[tipoLista]/[lista].astro` | `tipos-de-lista` + `listas` |
@@ -131,30 +131,30 @@ lo que se ve en pantalla ahora mismo.
 | `/en-vivo` | `src/pages/en-vivo/index.astro` | `programas` + `bitacora` |
 | `/alexa`, `/avisodeprivacidad`, `/terminosycondiciones` | páginas estáticas | texto escrito en el repo |
 
-🔴 **Una nota va en `/noticias/<slug>` y no en `/<seccion>/<slug>`** porque
+**Una nota va en `/noticias/<slug>` y no en `/<seccion>/<slug>`** porque
 `noticias.categorias` es `hasMany` **sin categoría primaria**: derivar el path de
 `categorias[0]` haría que reordenar un array en el admin cambiara una URL viva en
 silencio. Para PINTAR sí se elige la primera (`nombreCategoria` en `src/lib/nota.ts`)
 y ahí es aceptable, porque reordenar cambia una etiqueta y no una URL.
 
-🔴 **`/bonus-beat` es una ruta DINÁMICA y eso no es un descuido.** El primer segmento
+**`/bonus-beat` es una ruta DINÁMICA y eso no es un descuido.** El primer segmento
 es el `slug` de un documento de `tipos-de-lista`, que es dato editorial: la estación
 crea «Bonus Beat» hoy y «Beat Ten» mañana, y las dos secciones tienen que existir sin
 que nadie despliegue.
 
-⚠️ **Por eso `bonus-beat` es el ÚNICO segmento que NO va en `SEGMENTOS_RESERVADOS`**,
+**Por eso `bonus-beat` es el ÚNICO segmento que NO va en `SEGMENTOS_RESERVADOS`**,
 y está explicado allí: esa lista se comprueba antes que nada, así que reservarlo lo
 bloquearía justamente a él y `/bonus-beat` respondería 404 con el contenido cargado y
 todo en su sitio.
 
-⚠️ **Y todo lo demás SÍ va en la lista.** Sin eso, `[tipoLista]` reclama el segmento,
+**Y todo lo demás SÍ va en la lista.** Sin eso, `[tipoLista]` reclama el segmento,
 dispara una consulta al CMS en cada visita y responde 404. La lección está pagada en
 `web-enfoque`: a su lista equivalente le faltaba una entrada y provocó
 `ERR_TOO_MANY_REDIRECTS` en una sección del menú. `SEGMENTOS_RESERVADOS` se mantiene
 **en sintonía con `src/pages/`** — es la regla, y es lo que hay que revisar al añadir
 una ruta.
 
-⚠️ **Una sección que se muda deja 301 detrás.** `/scanner` → `/beat-scanner` vive en
+**Una sección que se muda deja 301 detrás.** `/scanner` → `/beat-scanner` vive en
 los `redirects` de `astro.config.mjs`, con dos entradas extra escritas a mano para
 que no haya CADENA de redirecciones. De esos 301 dependen la migaja de cada nota ya
 publicada, el sitemap que emite el CMS y lo que la estación haya compartido.
@@ -163,7 +163,7 @@ publicada, el sitemap que emite el CMS y lo que la estación haya compartido.
 
 ## `noticias.audio`: un campo que estaba y no se leía
 
-🔴 **Desde el 2026-09-15 el front lee `noticias.audio`**, que el CMS tenía desde su
+**Desde el 2026-09-15 el front lee `noticias.audio`**, que el CMS tenía desde su
 reestructura y que ninguna plantilla tocaba. Lo resuelve `src/lib/audio.ts` y lo
 pinta `src/components/AudioNota.astro`, pegado bajo la foto de la nota.
 
@@ -179,12 +179,12 @@ valor por omisión, así que las 43 notas capturadas antes de ese día traían
    host está en la lista blanca** de `src/lib/audio.ts`. Si no, se degrada a un
    enlace; nunca un iframe a una URL que no supimos leer.
 
-⚠️ **El `depth` importa aquí como en todo lo demás.** `audio.archivo` es una
+**El `depth` importa aquí como en todo lo demás.** `audio.archivo` es una
 relación a `media`: con el `depth: 1` de los índices llega como id y `urlArchivo`
 devuelve `null`. Llega poblado en `obtenerNota`, que pide `depth: 2` — y es la
 única consulta que lo necesita, porque el audio solo se pinta en el detalle.
 
-⚠️ **`noticias.formato` sigue sin leerse.** La nota de Microambiente capturada trae
+**`noticias.formato` sigue sin leerse.** La nota de Microambiente capturada trae
 `formato: "audio"`, pero el front no lo mira: pinta el audio si hay audio. Un
 formato que dijera «audio» sin archivo capturado dejaría una plantilla prometiendo
 algo que no está, y al revés —un archivo capturado con el formato en «estándar»—
@@ -194,7 +194,7 @@ perdería el audio. El dato manda sobre la etiqueta.
 
 ## La paginación de los índices (2026-09-17)
 
-🔴 **Nació con un número: Beat Scanner tenía 53 notas publicadas y 11
+**Nació con un número: Beat Scanner tenía 53 notas publicadas y 11
 alcanzables.** Las otras 42 respondían por su URL y estaban en el sitemap que emite
 el CMS, pero desde el sitio no había forma de llegar a ellas. Medido contra el CMS
 ese día: Beat Scanner 53, Editorial 5, Microambiente 1, y la etiqueta más poblada
@@ -205,41 +205,41 @@ Paginan cinco vistas: `/beat-scanner`, `/editorial`, `/beat-scanner/<categoria>`
 `/etiqueta/<slug>` (las cuatro por `IndiceScanner`) y `/microambiente`, que tiene
 lista propia. La Agenda y `/<tipoLista>` **no**: 1 evento y 1 edición en el CMS.
 
-🔴 **`SIN_PAGINACION` se queda PUESTO, y aun así se pagina.** Parece contradecir lo
+**`SIN_PAGINACION` se queda PUESTO, y aun así se pagina.** Parece contradecir lo
 que dice `client.ts` y no lo hace. Comprobado contra el CMS el 2026-09-17: con
 `pagination=false` Payload **sí respeta `page`** y devuelve la tanda correcta; lo
 único que deja de servir es su `totalDocs`, que pasa a contar los documentos
 devueltos. Así que el contenido no paga el `COUNT`.
 
-🔴 **El total lo trae `cmsContarEstacion`, en la consulta APARTE que anuncia
+**El total lo trae `cmsContarEstacion`, en la consulta APARTE que anuncia
 `client.ts`**, contra el endpoint `/api/<coleccion>/count` de Payload. No lleva
 `page`, ni `limit`, ni `sort`, ni `depth` — solo el `where`—, así que **las cinco
 páginas de una sección comparten un solo `COUNT`** en vez de pagar uno cada una.
 Timeout corto (2.5 s contra los 8 de una consulta normal) y `catch` total: sin total
 no hay tira de números, que es una vista con menos navegación y no una vista rota.
 
-🔴 **El tamaño de página es CONSTANTE entre páginas** (11 en `IndiceScanner`, 21 en
+**El tamaño de página es CONSTANTE entre páginas** (11 en `IndiceScanner`, 21 en
 Microambiente). Tiene que serlo: el desplazamiento lo calcula Payload como
 `(page - 1) * limit`, así que un `limit` distinto en la página 2 —por ejemplo, por
 no tener destacada— se saltaría una nota en cada salto. La destacada sale de la
 tanda, y de la página 2 en adelante **no hay destacada**: no hay ninguna nota que
 sea «la principal» entre las once más viejas.
 
-⚠️ **`?pagina=N` va validado contra un rango CERRADO** (`TOPE_PAGINA`, 200). Es la
+**`?pagina=N` va validado contra un rango CERRADO** (`TOPE_PAGINA`, 200). Es la
 regla de oro de este cliente aplicada a la URL: la clave de caché es la consulta
 entera, así que `?pagina=999999999` es una entrada de caché regalada y hay tantas
 como números quiera teclear alguien. Mismo motivo y misma forma que el `PAGINA_MAX`
 de `src/lib/feeds.ts`. Lo que no sea un entero dentro del rango cae a la página 1.
 
-⚠️ **La página va en el QUERY y no en la ruta.** Dos de las cuatro vistas de
+**La página va en el QUERY y no en la ruta.** Dos de las cuatro vistas de
 `IndiceScanner` ya son rutas dinámicas, así que con segmento habría cuatro archivos
 de ruta más — y un `/pagina/` de primer nivel chocaría con `[tipoLista]`, que reclama
 cualquier primer segmento que no esté reservado.
 
-⚠️ **La página 1 va SIN parámetro.** Sin eso, `/beat-scanner` y
+**La página 1 va SIN parámetro.** Sin eso, `/beat-scanner` y
 `/beat-scanner?pagina=1` son dos URLs con el mismo contenido.
 
-⚠️ **Una página fuera de rango no es un 404**, porque `IndiceScanner` es un
+**Una página fuera de rango no es un 404**, porque `IndiceScanner` es un
 componente y no puede hacer `Astro.rewrite`. Sirve una vista vacía, y para que no
 sea un callejón sin salida el «Anterior» del paginador se **acota a la última página
 real**: `?pagina=9` en una sección de cinco lleva de vuelta a la 5 en un clic, no a
@@ -255,12 +255,12 @@ La canónica y el `<title>` de una página paginada son de `agents/metadata.md`.
 de `cms-estaciones` corresponde. Se re-sincroniza a propósito con `pnpm sync:types`,
 nunca solo.
 
-🔴 **Eso es lo que hace que un cambio en el CMS no rompa el front hasta que alguien
+**Eso es lo que hace que un cambio en el CMS no rompa el front hasta que alguien
 lo decida.** El precio es que hay colecciones **más nuevas que el lock**, y su tipo
 se declara a mano en el módulo que las usa: `Banner` en `src/lib/cms/publicidad.ts` y
 `EntradaBitacora` en `src/lib/cms/aire.ts`. Los dos archivos lo dicen en su cabecera.
 
-⚠️ **`pnpm sync:types:check` está en el `check`, no es opcional.** Un tipo
+**`pnpm sync:types:check` está en el `check`, no es opcional.** Un tipo
 desincronizado no se ve en pantalla: se ve como un campo que llega `undefined` en una
 sola ruta.
 
@@ -268,18 +268,18 @@ sola ruta.
 
 ## Dos trampas de Payload que ya mordieron aquí
 
-- ⚠️ **`!= 'pieza'` NO devuelve las filas con NULL en Postgres.** Por eso el filtro de
+- **`!= 'pieza'` NO devuelve las filas con NULL en Postgres.** Por eso el filtro de
   `noticias.ts` es un `or` con `exists: false` al lado: sin él se perderían todas las
   notas que nunca tocaron el campo `distribucion`. Está documentado igual del lado
   del CMS.
-- ⚠️ **Los campos vacíos del admin llegan como cadena vacía, no como `null`.** Por eso
+- **Los campos vacíos del admin llegan como cadena vacía, no como `null`.** Por eso
   el grupo `meta` se lee con `?.trim() ||` y **nunca con `??`**: con `??` una cadena
   vacía ganaría y la nota se compartiría sin titular. Vale para cualquier campo de
   texto opcional del CMS, no solo para `meta`.
 
 Y una de `depth`, que es la que más tiempo cuesta:
 
-⚠️ **El `depth` insuficiente no da error: da un número.** Una relación sin poblar
+**El `depth` insuficiente no da error: da un número.** Una relación sin poblar
 llega como `id`, así que `imagen.url` es `undefined` y la foto no se pinta. De ahí que
 cada consulta declare su `depth` con la razón al lado —`depth: 2` en `listas` para que
 la portada de cada canción llegue, `depth: 1` en los índices— y que
@@ -291,13 +291,13 @@ pintar una cápsula que no se puede enlazar.
 ## Lo que este agente NO hace
 
 - **El `<head>`: título, descripción, canónica, Open Graph, JSON-LD, indexación,
-  sitemaps y el grupo `noticias.meta`** — todo eso es de `agents/metadata.md`. ⚠️ Es
+  sitemaps y el grupo `noticias.meta`** — todo eso es de `agents/metadata.md`. Es
   el reparto que más se confunde, porque el acta vieja de este agente reclamaba el
   SEO entero.
 - **La maqueta**: componentes, estilos, design system y las animaciones — son de
   `agents/frontend.md`. Este agente decide qué DATO baja; el otro, cómo se ve.
 - **El player, el SDK de Triton y el «qué suena»** — son de `agents/streaming.md`.
-  ⚠️ Se cruzan en `src/lib/cms/aire.ts`: la bitácora ya **no** alimenta la barra del
+  Se cruzan en `src/lib/cms/aire.ts`: la bitácora ya **no** alimenta la barra del
   player (lo hace el SDK, en banda), y solo queda como HISTORIAL para el Inicio y
   `/en-vivo`.
 - **La publicidad**, programática y vendida — es de `agents/ads.md`, incluido
@@ -306,7 +306,7 @@ pintar una cápsula que no se puede enlazar.
   excepciones previstas son las escrituras de oyente (Comunidad, que no existe) y el
   conteo de publicidad, que va por proxy de servidor.
 - **Pedirle campos nuevos al CMS.** Eso se escribe en
-  `docs/lo-que-el-front-necesita-del-cms.md`, que es el documento de traspaso, y ⚠️ su
+  `docs/lo-que-el-front-necesita-del-cms.md`, que es el documento de traspaso, y su
   regla de oro aplica aquí: **el lienzo es un mockup de diseño, no una especificación
   de datos.** Ya pasó una vez —el «4 218 escuchando» se leyó como requisito y era
   decoración.
@@ -315,7 +315,7 @@ pintar una cápsula que no se puede enlazar.
 
 ## Cómo se verifica
 
-🔴 **La comprobación que importa es que la ruta responda y degrade bien**, y eso no se
+**La comprobación que importa es que la ruta responda y degrade bien**, y eso no se
 ve mirando una sola página con contenido: las colecciones vacías son el estado real de
 varias secciones.
 
@@ -335,7 +335,7 @@ curl -sI http://localhost:4321/scanner/editorial | grep -i '^location\|^HTTP'
 curl -s -o /dev/null -w '%{http_code}\n' http://localhost:4321/noticias/no-existe
 ```
 
-⚠️ **Sin `CMS_URL` el sitio responde 200 con TODO vacío**, y eso es correcto por
+**Sin `CMS_URL` el sitio responde 200 con TODO vacío**, y eso es correcto por
 diseño — pero significa que un 200 no demuestra que la consulta funcione. Para eso se
 mira el contenido:
 
@@ -344,7 +344,7 @@ mira el contenido:
 curl -s http://localhost:4321/beat-scanner | grep -c 'href="/noticias/'
 ```
 
-🔴 **Y de una vista paginada se comprueba que el archivo ENTERO es alcanzable**, no
+**Y de una vista paginada se comprueba que el archivo ENTERO es alcanzable**, no
 que la página 2 responda: el fallo que esto vino a arreglar no era un 500, era una
 sección que se veía completa. Lo que delata un `limit` mal repartido es una nota
 repetida entre páginas o una que no sale en ninguna.
@@ -362,7 +362,7 @@ curl -s 'http://localhost:4322/beat-scanner?pagina=3' | grep -E 'canonical|<titl
 curl -s 'http://localhost:4322/alexa?pagina=7'        | grep -E 'canonical|<title>'
 ```
 
-🔴 **Y toda ruta nueva se prueba con Inicio → nota → atrás.** No es ceremonia: es
+**Y toda ruta nueva se prueba con Inicio → nota → atrás.** No es ceremonia: es
 donde se han roto tres cosas en este repo, porque con View Transitions el `body` se
 reemplaza y el estado que vivía ahí desaparece. Un enlace que funciona al recargar
 puede estar roto al navegar.

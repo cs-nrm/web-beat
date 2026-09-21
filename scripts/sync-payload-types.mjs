@@ -63,7 +63,7 @@ const contenidoSinAugment = contenidoUpstream.replace(
 );
 
 const encabezado = [
-  '/* ⚠️ GENERADO — NO EDITAR A MANO.',
+  '/* GENERADO — NO EDITAR A MANO.',
   ` * Vendorizado desde ${lock.repo}:${sourcePath} en el ref ${ref}.`,
   ' * Regenerar con: pnpm sync:types  (el pin vive en payload-types.lock.json).',
   " * Nota: se quita la augmentation `declare module 'payload'` del upstream",

@@ -18,7 +18,7 @@ import { duenoAudio, FUENTES, reclamarAudio, registrarAudio } from './audio';
 /**
  * Los códigos que emite `stream-status`.
  *
- * ⚠️ Aquí decía «los 6 códigos» y eran menos de los que llegan: faltaban los tres
+ * Aquí decía «los 6 códigos» y eran menos de los que llegan: faltaban los tres
  * de abajo, que caían todos en el `else` final de `alCambiarEstado` y pintaban
  * 'pausa'. O sea que un corte de red se veía EXACTAMENTE igual que una pausa
  * pedida por el oyente, y de ahí venía el «se cae y no vuelve»: la barra enseñaba
@@ -69,7 +69,7 @@ let yaSonoElAnuncio = false;
  *  volver a evaluarse, y dos instancias de TDSdk significan audio duplicado. */
 let iniciado = false;
 /**
- * 🔴 El SDK ignora `play()` y `playAd()` hasta que dispara `playerReady`. En el v1
+ * El SDK ignora `play()` y `playAd()` hasta que dispara `playerReady`. En el v1
  * eso estaba implícito: el botón nacía oculto y `onPlayerReady` lo revelaba. Si no
  * se espera, el primer clic no hace nada y no da ningún error — cuesta un rato
  * entender por qué.
@@ -77,7 +77,7 @@ let iniciado = false;
 let listo = false;
 
 /**
- * 🔴 Intención de arranque pendiente.
+ * Intención de arranque pendiente.
  *
  * `iniciarPlayer()` solo CONSTRUYE el SDK; `playerReady` llega después, asíncrono.
  * El clic hacía `cargarSdk().then(() => { iniciarPlayer(); arrancar(); })`, así que
@@ -124,7 +124,7 @@ const MS_TOPE_CONEXION = 20000;
 /**
  * Tope del PRE-ROLL. Es otro, y no sustituye al de arriba.
  *
- * 🔴 Existe por un fallo medido el 2026-09-10 en un iPhone con buena wifi: el
+ * Existe por un fallo medido el 2026-09-10 en un iPhone con buena wifi: el
  * PRIMER play de la sesión se quedaba 20 s en «Conectando…» y terminaba en «No se
  * pudo conectar»; el segundo sonaba en 3 s. La única diferencia entre los dos es
  * este pre-roll, que va una vez por sesión — así que el anuncio se estaba llevando
@@ -135,7 +135,7 @@ const MS_TOPE_CONEXION = 20000;
  * que no es un reintento: llama a `fallo()`, que hace `sdk.stop()` y pinta el
  * error. Un anuncio que se cuelga no debe poder apagar la señal.
  *
- * ⚠️ Y ese anuncio hoy NO EXISTE: medido el mismo día contra el ad unit de la
+ * Y ese anuncio hoy NO EXISTE: medido el mismo día contra el ad unit de la
  * config, GAM devuelve un VAST vacío —`<VAST version="3.0"/>`, 156 bytes, sin un
  * solo `<Ad>`— en 0.3 s. O sea que ese camino no está dando ingresos y sí está
  * costando el arranque.
@@ -149,7 +149,7 @@ let topePreroll: number | null = null;
 const MS_TOPE_PREROLL = 6000;
 
 /**
- * 🔴 El arranque en curso salió de una INTENCIÓN GUARDADA, no del dedo.
+ * El arranque en curso salió de una INTENCIÓN GUARDADA, no del dedo.
  *
  * Es la distinción que explica el fallo de iOS, medido el 2026-09-11 en un iPhone
  * 17 Pro con iOS 26.5: WebKit exige que `play()` salga DENTRO del gesto del
@@ -163,7 +163,7 @@ const MS_TOPE_PREROLL = 6000;
  * 2 sonaron y 2 se quedaron mudos hasta el tope. Con el SDK ya construido, 2 de 2
  * sonaron en 2-3 s.
  *
- * ⚠️ Y por eso el sitio viejo NO tenía este fallo: `web-stereocien` y el Beat v1
+ * Y por eso el sitio viejo NO tenía este fallo: `web-stereocien` y el Beat v1
  * cargan el SDK con la página (`<script src="//sdk.listenlive.co/…">` en el
  * marcado) y construyen al cargar, así que el botón siempre encontraba todo listo.
  * Lo rompió la carga a demanda de los 854 KB, que es una mejora real en datos. Las
@@ -191,7 +191,7 @@ const MS_TOPE_SIN_GESTO = 8000;
  * cargados al llegar, con lo que su `play()` sale dentro del gesto y iOS no tiene
  * nada que objetar.
  *
- * ⚠️ Va en `localStorage` con try/catch: en modo privado lanza, y un player que se
+ * Va en `localStorage` con try/catch: en modo privado lanza, y un player que se
  * cae por no poder escribir una marca de conveniencia sería un arreglo peor que el
  * problema. Sin marca, el comportamiento es el de hoy.
  */
@@ -220,13 +220,13 @@ function cancelarTopePreroll(): void {
 
 /* ───────── Reconexión: un corte que el front no pidió se reintenta ─────────
  *
- * 🔴 El fallo que esto arregla, medido el 2026-09-12 contra producción: cuando la
+ * El fallo que esto arregla, medido el 2026-09-12 contra producción: cuando la
  * señal se caía, `alCambiarEstado` pintaba 'pausa' y NADIE reintentaba. El oyente
  * se quedaba con un botón de play que él no había pulsado, y tenía que darse
  * cuenta y volver a tocarlo. En una red móvil que parpadea, eso se vive como «el
  * streaming se cae cada cinco minutos», que es exactamente lo que reportaron.
  *
- * ⚠️ Y el peor resultado posible de arreglarlo sería reencender la radio encima
+ * Y el peor resultado posible de arreglarlo sería reencender la radio encima
  * de alguien que acaba de pulsar pausa, o encima del video que acaba de abrir. De
  * ahí las dos guardas: la marca de parada propia y la pregunta por el dueño del
  * canal. Ninguna reconexión ocurre sin las dos.
@@ -235,7 +235,7 @@ function cancelarTopePreroll(): void {
 /**
  * Ventana en la que un corte se atribuye a un `stop()` NUESTRO.
  *
- * 🔴 Es un RELOJ y no una bandera a propósito. Una bandera que se pone antes del
+ * Es un RELOJ y no una bandera a propósito. Una bandera que se pone antes del
  * `stop()` y se consume en el manejador se queda echada para siempre si ese
  * `stop()` no llega a emitir nada —y no siempre emite: el evento sale del `pause`
  * del elemento, así que si ya estaba parado no hay evento—, y entonces se tragaría
@@ -257,11 +257,11 @@ const MS_PLAZO_INTENTO = 8000;
 const MS_GRACIA_SDK = 10000;
 
 /**
- * 🔴 Techo ABSOLUTO del episodio. Se arma una vez y no lo cancela nadie más que
+ * Techo ABSOLUTO del episodio. Se arma una vez y no lo cancela nadie más que
  * `cerrarEpisodio()`: pase lo que pase, a los 60 s esto acaba en una barra con el
  * nombre de la estación y un botón de play. Es lo que hace imposible el cuelgue.
  *
- * ⚠️ Las esperas son 2/6/15 y no 2/5/10 para que el peor caso quepa debajo:
+ * Las esperas son 2/6/15 y no 2/5/10 para que el peor caso quepa debajo:
  * (2+8) + (6+8) + (15+8) = 47 s.
  */
 const MS_PRESUPUESTO = 60000;
@@ -281,7 +281,7 @@ const el = <T extends HTMLElement>(sel: string): T | null =>
   document.querySelector<T>(sel);
 
 /**
- * 🔴 ¿Manda otro modo en la barra?
+ * ¿Manda otro modo en la barra?
  *
  * El botón de play lo comparten el directo y las pistas a demanda de Bonus Beat
  * (`pista.ts`). Los dos módulos escuchan el MISMO nodo —la barra es persistente—,
@@ -297,7 +297,7 @@ function mandaLaPista(): boolean {
 }
 
 /**
- * 🔴 Se llama JUSTO ANTES de cada `sdk.stop()` del front. Son tres, y solo tres:
+ * Se llama JUSTO ANTES de cada `sdk.stop()` del front. Son tres, y solo tres:
  * `fallo()`, la devolución del árbitro y la rama de parar del botón.
  *
  * Se marca ANTES y no después porque el orden de despacho del SDK no está
@@ -316,12 +316,12 @@ function paradaEsNuestra(): boolean {
 /**
  * ¿Sigue siendo del oyente la intención de oír el DIRECTO?
  *
- * 🔴 Las dos mitades hacen falta. `mandaLaPista()` cubre Bonus Beat, que comparte
+ * Las dos mitades hacen falta. `mandaLaPista()` cubre Bonus Beat, que comparte
  * el nodo del botón y se ve en `data-modo`; el dueño del canal cubre lo que la
  * barra NO ve —un video de una nota, una cápsula—, porque `data-modo` solo
  * distingue 'directo' de 'pista'.
  *
- * ⚠️ Y no se lee `data-status` para esto: `pista.ts` lo escribe a mano sin pasar
+ * Y no se lee `data-status` para esto: `pista.ts` lo escribe a mano sin pasar
  * por `pintarEstado`, así que el DOM no es fuente de verdad para el dueño.
  */
 function laSenalSigueSiendoSuya(): boolean {
@@ -332,7 +332,7 @@ function laSenalSigueSiendoSuya(): boolean {
  * ¿Hay campaña de preroll? Lo decide el CMS por fechas y lo resuelve el SERVIDOR;
  * aquí solo se lee. Ver `hayPrerollAhora()` en `src/lib/cms/estacion.ts`.
  *
- * ⚠️ El atributo lleva valor —`si`/`no`— y no es palabrería: un atributo SIN valor
+ * El atributo lleva valor —`si`/`no`— y no es palabrería: un atributo SIN valor
  * vale la cadena vacía, y `!!''` es `false`. Ese descuido exacto dejó la barra del
  * menú plegada al volver al Inicio (`data-compacta` leído con `!!`). Con un valor
  * explícito no hay forma de equivocarse, y además se lee en el inspector.
@@ -356,7 +356,7 @@ function ctxAnalitica(): { station: string; dist: string } {
 /**
  * ── Diagnóstico del player ──
  *
- * 🔴 Existe porque el «qué suena» falla EN SILENCIO: si el cue point no llega, o
+ * Existe porque el «qué suena» falla EN SILENCIO: si el cue point no llega, o
  * llega y se descarta, la barra simplemente se queda con el nombre de la estación
  * y no hay forma de distinguir las dos cosas mirando la pantalla. Ya nos costó dos
  * arreglos a ciegas.
@@ -367,7 +367,7 @@ function ctxAnalitica(): { station: string; dist: string } {
  *   · o `sessionStorage.beatDepurar = '1'` desde la consola.
  * Se apaga con `?depurar=no`.
  *
- * ⚠️ NO va detrás de `import.meta.env.DEV` a secas, que es lo que había: el sitio
+ * NO va detrás de `import.meta.env.DEV` a secas, que es lo que había: el sitio
  * que se mira es el compilado, y ahí ese log no existe. Un diagnóstico que solo
  * funciona donde no está el problema no sirve de nada.
  */
@@ -417,7 +417,7 @@ function fallo(mensaje: string): void {
   if (topeConexion !== null) window.clearTimeout(topeConexion);
   topeConexion = null;
   try {
-    // 🔴 Marcado: sin esto, el LIVE_STOP de este `stop()` abriría otro episodio
+    // Marcado: sin esto, el LIVE_STOP de este `stop()` abriría otro episodio
     // de reconexión, y `rendirse()` —que termina aquí— se realimentaría sin fin.
     pedirParada();
     sdk?.stop();
@@ -442,7 +442,7 @@ function pintarEstado(estado: EstadoUI): void {
   }
   if (estado === 'cargando') {
     /*
-      🔴 Durante un episodio de reconexión este tope NO se arma: el plazo lo pone
+      Durante un episodio de reconexión este tope NO se arma: el plazo lo pone
       la escalera y el techo lo pone `topeEpisodio`. Armarlo aquí sería poner DOS
       vigilantes sobre la misma espera, y el de 8/20 s llamaría a `fallo()` —que
       hace `sdk.stop()`— en mitad de un intento sano, matando el ciclo en el primer
@@ -470,7 +470,7 @@ function pintarEstado(estado: EstadoUI): void {
       ('init'). Va aquí y no en cada manejador para que no haya un camino de
       salida que se olvide de desarmarlo y arranque la señal por detrás.
 
-      ⚠️ En 'cargando' NO se toca: el SDK emite LIVE_CONNECTING y LIVE_BUFFERING
+      En 'cargando' NO se toca: el SDK emite LIVE_CONNECTING y LIVE_BUFFERING
       varias veces mientras el pre-roll sigue en marcha, y desarmarlo ahí sería
       desarmarlo siempre.
     */
@@ -478,7 +478,7 @@ function pintarEstado(estado: EstadoUI): void {
   }
 
   /*
-    🔴 Al PARAR se deja de anunciar la canción. Si el oyente pausó, la barra no
+    Al PARAR se deja de anunciar la canción. Si el oyente pausó, la barra no
     puede seguir diciendo qué suena: para él no suena nada, y la señal sigue
     corriendo sin él, así que al reanudar ya será otra.
 
@@ -517,14 +517,14 @@ function pintarEstado(estado: EstadoUI): void {
   }
 
   // El texto acompaña, porque el spinner solo no dice QUÉ está pasando.
-  // ⚠️ Durante un episodio dice «Reconectando…», que es lo honesto: el oyente no
+  // Durante un episodio dice «Reconectando…», que es lo honesto: el oyente no
   // está conectando por primera vez, se le cortó algo que ya estaba sonando.
   if (estado === 'cargando') pintarSonando(textoEspera);
   else if (estado === 'sonando' || estado === 'init') restaurarSonando();
 }
 
 /**
- * 🔴 El texto durante un corte comercial dice `PAUSA COMERCIAL`, no el nombre de
+ * El texto durante un corte comercial dice `PAUSA COMERCIAL`, no el nombre de
  * la canción: es el comportamiento del v1 y es correcto, porque durante el audio
  * ad la bitácora sigue anunciando la última canción y mentiría.
  */
@@ -541,7 +541,7 @@ function pintarSonando(texto: string): void {
 /**
  * Deja de anunciar una canción y vuelve a la frecuencia.
  *
- * 🔴 Se usa en DOS momentos, y los dos son casos de «ya no sé qué suena»:
+ * Se usa en DOS momentos, y los dos son casos de «ya no sé qué suena»:
  *
  *   · al PAUSAR — decisión de Carlos, 2026-09-03. Si el oyente paró, la barra no
  *     puede seguir afirmando qué está sonando: para él no suena nada. Y la señal
@@ -559,7 +559,7 @@ function volverALaFrecuencia(): void {
 }
 
 /**
- * 🔴 Una canción deja de anunciarse cuando termina, aunque no llegue nada nuevo.
+ * Una canción deja de anunciarse cuando termina, aunque no llegue nada nuevo.
  *
  * Esto resuelve algo que se ve en la señal real: **cuando los locutores hablan en
  * vivo, Triton no manda NADA**. Medido en una captura de 2h44 del canal SBM — los
@@ -572,7 +572,7 @@ function volverALaFrecuencia(): void {
  * frecuencia. Si llega un cue point nuevo antes, este temporizador se cancela y
  * empieza el suyo.
  *
- * ⚠️ `cue_time_duration` viene en DÉCIMAS de segundo (`'2790'` = 4:39), medido en
+ * `cue_time_duration` viene en DÉCIMAS de segundo (`'2790'` = 4:39), medido en
  * la captura. NO en milisegundos — leerlo como ms daría 46 minutos para una
  * canción de cuatro. (Los eventos VAST sí lo mandan en ms, pero esos llegan por
  * `ad-break-cue-point` y no por aquí.)
@@ -609,7 +609,7 @@ function restaurarSonando(): void {
 /**
  * Decide si el título tiene que desplazarse, midiendo si cabe.
  *
- * 🔴 Se mide, no se adivina por número de caracteres: una `W` y una `i` no ocupan
+ * Se mide, no se adivina por número de caracteres: una `W` y una `i` no ocupan
  * lo mismo, y el ancho disponible cambia entre móvil y escritorio. Se compara el
  * ancho real del texto contra el de su ventana.
  *
@@ -666,7 +666,7 @@ function cerrarEpisodio(): void {
   reconectando = false;
   // Si no se restaura, el siguiente arranque en frío diría «Reconectando…».
   textoEspera = 'Conectando…';
-  /* ⚠️ `intentos` NO se toca aquí: el crédito solo se renueva con señal sana o
+  /* `intentos` NO se toca aquí: el crédito solo se renueva con señal sana o
      con el dedo del oyente. Si se reiniciara al volver la señal, una red que
      parpadea cada 20 s reintentaría para siempre. */
 }
@@ -681,17 +681,17 @@ function abrirEpisodio(motivo: string): void {
   reconectando = true;
   if (sonandoDesde !== 0 && Date.now() - sonandoDesde >= MS_SANO) intentos = 0;
   sonandoDesde = 0;
-  /* ⚠️ El rescate del pre-roll no puede competir con la escalera: si el corte
+  /* El rescate del pre-roll no puede competir con la escalera: si el corte
      pilla el VAST en marcha, su tope llamaría a `reproducir()` por su cuenta y
      habría dos intentos sobre la misma conexión. */
   cancelarTopePreroll();
   textoEspera = 'Reconectando…';
-  /* 🔴 Deja de anunciar una canción que ya no suena. Es la regla de «al PARAR se
+  /* Deja de anunciar una canción que ya no suena. Es la regla de «al PARAR se
      deja de anunciar», que hasta ahora NO se cumplía tras un corte porque está
      atada a 'init' y el corte pintaba 'pausa'. */
   volverALaFrecuencia();
   pintarEstado('cargando');
-  /* 🔴 El techo ABSOLUTO. Sustituye al tope de conexión —que durante el episodio
+  /* El techo ABSOLUTO. Sustituye al tope de conexión —que durante el episodio
      no se arma— y es lo que hace imposible el estado muerto sin salida. */
   topeEpisodio = window.setTimeout(() => rendirse(), MS_PRESUPUESTO);
   traza(`${motivo} → episodio de reconexión (intentos ya gastados: ${intentos})`);
@@ -722,7 +722,7 @@ function intentar(): void {
   intentos += 1;
   traza(`reconexión: intento ${intentos}/${ESPERAS_RECONEXION.length}`);
   pintarEstado('cargando');
-  /* 🔴 `reproducir()` y NUNCA `arrancar()`: `arrancar()` es el camino del pre-roll
+  /* `reproducir()` y NUNCA `arrancar()`: `arrancar()` es el camino del pre-roll
      VAST, y metería una petición a GAM —y su tope— tras cada microcorte. */
   reproducir();
   /* El plazo del intento es el mismo temporizador de paso: si la señal no entra,
@@ -742,7 +742,7 @@ function abandonar(razon: string): void {
 }
 
 function rendirse(): void {
-  /* ⚠️ `navigator.onLine` solo se cree en NEGATIVO: un `true` no promete internet,
+  /* `navigator.onLine` solo se cree en NEGATIVO: un `true` no promete internet,
      pero un `false` sí promete que no lo hay. */
   const texto = navigator.onLine ? 'Se cortó · toca para volver' : 'Sin conexión';
   traza(`reconexión agotada tras ${intentos} intento(s) → «${texto}»`);
@@ -750,7 +750,7 @@ function rendirse(): void {
   /* `fallo()` ya es el desenlace escrito de la casa: apaga el SDK, pinta 'init',
      enseña el mensaje y lo retira a los 4 s. Su `stop()` va marcado, así que no
      puede realimentar otro episodio.
-     ⚠️ El mensaje NO es «No se pudo conectar»: ese es el diagnóstico de un primer
+     El mensaje NO es «No se pudo conectar»: ese es el diagnóstico de un primer
      play fallido, no el de alguien que ESTABA escuchando y se quedó sin señal. */
   fallo(texto);
 }
@@ -782,7 +782,7 @@ function alCambiarEstado(e: { data?: { code?: string } }): void {
   }
 
   if (estado === 'PLAY_NOT_ALLOWED') {
-    /* 🔴 WebKit rechazó el `play()` por no salir de un gesto. Contra eso no se
+    /* WebKit rechazó el `play()` por no salir de un gesto. Contra eso no se
        insiste: gastar la escalera entera sería silencio para el oyente, y el
        remedio real es otro toque — que funciona siempre, porque a estas alturas
        el SDK ya está construido. Es el mismo diagnóstico de iOS que ya está
@@ -794,7 +794,7 @@ function alCambiarEstado(e: { data?: { code?: string } }): void {
   }
 
   if (estado === 'LIVE_RECONNECTING') {
-    /* ⚠️ Reconecta el SDK, no nosotros. Un `play()` nuestro encima podría abrir
+    /* Reconecta el SDK, no nosotros. Un `play()` nuestro encima podría abrir
        una segunda conexión al mount, así que se le da gracia; el presupuesto del
        episodio sigue corriendo igual, o sea que su lentitud no nos cuelga. */
     if (!reconectando) abrirEpisodio('el SDK avisa que está reconectando');
@@ -804,7 +804,7 @@ function alCambiarEstado(e: { data?: { code?: string } }): void {
   }
 
   if (estado === 'LIVE_PAUSE') {
-    /* ⚠️ Se marca como parada propia. Nadie en este front llama a `pause()`: este
+    /* Se marca como parada propia. Nadie en este front llama a `pause()`: este
        código solo puede venir de FUERA —los mandos del sistema, los auriculares,
        una llamada entrante—, y reconectar encima de una llamada entrante sería el
        peor resultado posible. Medido el 2026-09-12: pausar el elemento por fuera
@@ -821,18 +821,18 @@ function alCambiarEstado(e: { data?: { code?: string } }): void {
       return;
     }
     if (reconectando) {
-      /* ⚠️ Dentro de un episodio, un corte más NO es un episodio nuevo. Sin esto,
+      /* Dentro de un episodio, un corte más NO es un episodio nuevo. Sin esto,
          una red que parpadea reiniciaría la escalera en cada rebote y nunca
          llegaría al final. */
       traza('otro corte dentro del episodio — la escalera sigue, no se reinicia');
-      /* ⚠️ Y se REPINTA 'cargando'. Medido con el mount inalcanzable: el intento
+      /* Y se REPINTA 'cargando'. Medido con el mount inalcanzable: el intento
          fallido dejaba la barra en 'pausa' mientras la escalera seguía corriendo,
          o sea un botón de play con el texto «Reconectando…» al lado. Mientras algo
          siga intentándose, el oyente tiene que ver que se está intentando. */
       pintarEstado('cargando');
       return;
     }
-    /* ⚠️ Aquí NO se le da gracia al SDK, y es deliberado. El bundle tiene su
+    /* Aquí NO se le da gracia al SDK, y es deliberado. El bundle tiene su
        propio `__reconnect`, así que la tentación es esperarlo antes del primer
        intento; pero medido el 2026-09-12 con el mount inalcanzable, tras
        LIVE_FAILED el SDK se quedó quieto 15 s sin emitir LIVE_RECONNECTING ni
@@ -908,7 +908,7 @@ let promesaSdk: Promise<void> | null = null;
 /**
  * Carga el SDK de Triton a demanda.
  *
- * 🔴 Por qué a demanda y no en el `<head>`: medido en el cable, `td-sdk.min.js`
+ * Por qué a demanda y no en el `<head>`: medido en el cable, `td-sdk.min.js`
  * son **363 KB** (gzip, 1.5 MB sin comprimir) y al construirse con el plugin
  * `vastAd` arrastra el IMA de Google, que son **491 KB más y viajan SIN
  * comprimir** —el CDN de Google no lo gzipea—. Total: **854 KB**.
@@ -936,7 +936,7 @@ function cargarSdk(): Promise<void> {
     document.head.appendChild(et);
   }).catch((err: unknown) => {
     /*
-     * 🔴 El fallo NO se memoriza, y esto es lo más serio de todo el archivo.
+     * El fallo NO se memoriza, y esto es lo más serio de todo el archivo.
      *
      * Antes se guardaba la promesa tal cual, así que un fallo de carga —red
      * inestable, CDN bloqueado, un bloqueador de anuncios— quedaba memorizado como
@@ -979,12 +979,12 @@ function cargarSdk(): Promise<void> {
  * teléfono ese solapamiento es lo único que hay que ganar: el aire no empieza
  * hasta el tercero, y cada origen nuevo son un DNS y un handshake.
  *
- * ⚠️ Honestidad sobre el tamaño del arreglo: medido contra producción desde un Mac
+ * Honestidad sobre el tamaño del arreglo: medido contra producción desde un Mac
  * con el DNS caliente, esto ahorra unos 40 ms — casi nada. No está medido en un
  * teléfono con datos, que es donde debería valer. Si alguien lo mide ahí y sale
  * cero, esto sobra y se quita sin discusión.
  *
- * 🔴 Van AQUÍ y no en el `<head>` por lo mismo que el SDK se carga a demanda: en el
+ * Van AQUÍ y no en el `<head>` por lo mismo que el SDK se carga a demanda: en el
  * `<head>` abriría tres conexiones en CADA visita, incluida la de quien solo viene
  * a leer una nota. Lo de `imasdk` no añade exposición a Google —`gpt.js` ya se
  * carga en todas las páginas para los banners—, pero abrir lo que nadie va a usar
@@ -1058,7 +1058,7 @@ export function prepararPlayer(): void {
 
   const boton = el<HTMLButtonElement>('[data-accion="play"]');
   /**
-   * 🔴 Guarda contra listeners DUPLICADOS. Con View Transitions este script puede
+   * Guarda contra listeners DUPLICADOS. Con View Transitions este script puede
    * volver a evaluarse en cada navegación, y como el botón vive en un bloque
    * `transition:persist` es el MISMO nodo: sin esta marca acumularía un listener
    * por página visitada, y a la quinta el clic dispararía cinco veces.
@@ -1070,7 +1070,7 @@ export function prepararPlayer(): void {
     'click',
     () => {
       if (mandaLaPista()) return; // el clic es de la pista, no del directo
-      /* 🔴 Antes del `return` de abajo, y esa es la gracia: ESTE es el camino frío
+      /* Antes del `return` de abajo, y esa es la gracia: ESTE es el camino frío
          —nadie rozó la barra, el SDK no está— y por tanto el único donde precalentar
          de verdad sirve. Ponerlo solo en el handler de `iniciarPlayer()` lo dejaba
          sin efecto justo aquí: comprobado, un clic en frío abría cero conexiones. */
@@ -1081,7 +1081,7 @@ export function prepararPlayer(): void {
       marcarOyente();
       if (iniciado) return; // ya hay SDK: el handler de iniciarPlayer se encarga
       /**
-       * 🔴 Se pinta `cargando` AQUÍ, no al recibir el primer `stream-status`.
+       * Se pinta `cargando` AQUÍ, no al recibir el primer `stream-status`.
        *
        * Lo que el oyente percibe como una sola espera son dos apiladas: la
        * descarga del SDK (854 KB) y después la conexión de Triton
@@ -1090,7 +1090,7 @@ export function prepararPlayer(): void {
        * lenta— pasaría sin ninguna señal y el botón parecería no responder.
        */
       /**
-       * 🔴 Se reclama el canal AQUÍ, en la intención, y no en `reproducir()`.
+       * Se reclama el canal AQUÍ, en la intención, y no en `reproducir()`.
        *
        * `reproducir()` solo corre cuando el SDK está listo, así que reclamar ahí
        * dejaba una ventana de varios segundos —la descarga del SDK más el VAST— en
@@ -1140,13 +1140,13 @@ export function prepararPlayer(): void {
    * implícita, y esas son las que muerden cuando alguien agregue una fuente nueva.
    */
   registrarAudio(FUENTES.radio, () => {
-    /* ⚠️ FUERA del `if`, y esa es la gracia. Tras un corte el estado es 'cargando'
+    /* FUERA del `if`, y esa es la gracia. Tras un corte el estado es 'cargando'
        o 'pausa', así que la condición de abajo puede no entrar — pero el canal YA
        no es mío. Sin esta línea, el intento programado saltaría segundos después,
        `reproducir()` reclamaría el canal y el video que el oyente acaba de poner
        se pausaría solo, sin que él hubiera tocado nada. «El canal ya no es mío»
        vale aunque yo no esté sonando. */
-    /* 🔴 El estado se lee ANTES de abandonar, y el `stop()` es incondicional si
+    /* El estado se lee ANTES de abandonar, y el `stop()` es incondicional si
        había episodio. Medido el 2026-09-12, con la prueba del robo de canal: un
        intento ya había llamado a `reproducir()`, o sea que había un `play()` EN
        VUELO; `abandonar()` pintaba 'init', y entonces la condición de abajo ya no
@@ -1170,7 +1170,7 @@ export function prepararPlayer(): void {
   }
 
   /**
-   * 🔴 El reparto: el lector no paga, el oyente no espera.
+   * El reparto: el lector no paga, el oyente no espera.
    *
    * Quien ya dio play en este dispositivo se lleva el contrato del sitio viejo —el
    * SDK cargado y construido con la página—, y con él la garantía de que su toque
@@ -1197,7 +1197,7 @@ export function iniciarPlayer(): void {
   iniciado = true;
 
   /*
-   * 🔴 El `try` no es decorativo: `iniciado` se pone ANTES de construir, para
+   * El `try` no es decorativo: `iniciado` se pone ANTES de construir, para
    * evitar reentradas, así que si el constructor lanzara la bandera se quedaría
    * echada con `sdk` en null — y el player no volvería a inicializarse EN TODA LA
    * SESIÓN. Sin error visible, sin salida, y con el pre-roll VAST de por medio,
@@ -1214,7 +1214,7 @@ export function iniciarPlayer(): void {
           id: 'MediaPlayer',
           playerId: 'td_container',
           /**
-           * 🔴 ESTE es el `audioAdaptive` que el SDK lee de verdad — el del módulo
+           * ESTE es el `audioAdaptive` que el SDK lee de verdad — el del módulo
            * MediaPlayer. Verificado en el bundle 2.9:
            *   `this.audioAdaptive = config.audioAdaptive != void 0 && config.audioAdaptive`
            * y la config del módulo solo acepta diez claves: audioAdaptive, hls,
@@ -1230,14 +1230,14 @@ export function iniciarPlayer(): void {
            * caer. Es sospechoso de ser la causa de los cortes que reportan los
            * oyentes — ver la nota de abajo.
            *
-           * ⚠️ CORRECCIÓN de lo que este comentario decía antes: afirmaba que el
+           * CORRECCIÓN de lo que este comentario decía antes: afirmaba que el
            * `false` aquí y el `true` de abajo eran una pareja deliberada. No lo son.
            * El de abajo NO ESTÁ en la config del módulo, así que no lo lee nadie: es
            * decorativo. El único que cuenta es este.
            */
           audioAdaptive: false,
           /**
-           * ⚠️ NO se toca esta lista para ahorrar la descarga del IMA. Se probó, y
+           * NO se toca esta lista para ahorrar la descarga del IMA. Se probó, y
            * NO funciona — queda escrito para que nadie lo vuelva a intentar.
            *
            * La idea era: el módulo de anuncios del SDK hace
@@ -1258,7 +1258,7 @@ export function iniciarPlayer(): void {
         },
       ],
       /**
-       * ⚠️ Decorativo: `audioAdaptive` a nivel raíz NO está en la config que lee el
+       * Decorativo: `audioAdaptive` a nivel raíz NO está en la config que lee el
        * SDK (solo lo lee el módulo MediaPlayer, arriba). Se conserva porque los
        * cuatro repos hermanos lo tienen y quitarlo invita a que alguien "arregle" el
        * de arriba por simetría. No cambia nada.
@@ -1281,7 +1281,7 @@ export function iniciarPlayer(): void {
         const actual = sdk?.getVolume?.();
         if (volumen && typeof actual === 'number') {
           /*
-            🔴 El piso del control se respeta EN LOS DOS SENTIDOS.
+            El piso del control se respeta EN LOS DOS SENTIDOS.
 
             El `min="1"` del marcado impide llegar a 0 arrastrando, pero no impide
             que el SDK llegue con un 0 recordado de otra sesión. Y asignar `"0"` a
@@ -1301,7 +1301,7 @@ export function iniciarPlayer(): void {
         // que el PRIMER clic de la sesión reproduzca.
         if (arranquePendiente) {
           arranquePendiente = false;
-          /* 🔴 Aquí el gesto ya caducó — pasaron los segundos de la descarga. Se
+          /* Aquí el gesto ya caducó — pasaron los segundos de la descarga. Se
              marca para que el tope sea el corto y el mensaje invite a otro toque
              en vez de declarar una avería de red que no ocurrió. */
           arranqueSinGesto = true;
@@ -1339,7 +1339,7 @@ export function iniciarPlayer(): void {
 
   sdk.addEventListener('stream-status', alCambiarEstado);
 
-  /* 🔴 Único listener de ventana que añade la reconexión, y va AQUÍ porque
+  /* Único listener de ventana que añade la reconexión, y va AQUÍ porque
      `iniciarPlayer()` está guardada por `if (iniciado) return` y corre una sola
      vez por documento. NO en `prepararPlayer()`, cuya guarda `data-cableado` es un
      `return` temprano; y NO colgado de `astro:page-load`, que lo multiplicaría por
@@ -1348,7 +1348,7 @@ export function iniciarPlayer(): void {
      Sin esto, un intento puede resolver mientras la pestaña se vacía y dejar audio
      sonando sobre una página que el oyente ya abandonó; y al volver del bfcache la
      barra se encontraría el anillo girando sin ningún temporizador vivo detrás.
-     ⚠️ `abandonar()` y no `cerrarEpisodio()` a secas: cerrar sin pintar dejaría
+     `abandonar()` y no `cerrarEpisodio()` a secas: cerrar sin pintar dejaría
      `data-status='cargando'` congelado, que es el estado muerto sin salida que
      esta guarda existe justamente para evitar. */
   window.addEventListener('pagehide', () => {
@@ -1358,7 +1358,7 @@ export function iniciarPlayer(): void {
   /**
    * ───────── Metadata en banda (cue points de Triton) ─────────
    *
-   * 🔴 Esta es la fuente correcta del "qué suena", y no un JSON encuestado.
+   * Esta es la fuente correcta del "qué suena", y no un JSON encuestado.
    *
    * El sitio viejo consulta `cdn.nrm.com.mx/.../cancion.json` cada 15-60 s y de
    * paso adivina los cortes comerciales revisando si `categoria` está en una lista
@@ -1384,7 +1384,7 @@ export function iniciarPlayer(): void {
    *     "parameters": {
    *       "cue_title": "LIFT ME UP (MATHAME REMIX)",
    *       "track_artist_name": "MOBY",
-   *       "cue_time_duration": "4010",     // ⚠️ décimas de segundo (401.0 s), inferido
+   *       "cue_time_duration": "4010",     // décimas de segundo (401.0 s), inferido
    *       "cue_time_start": "1787325103373",
    *       "cue_id": "87183538-...",
    *       "program_id": "554372:1000217683:8826810",
@@ -1418,7 +1418,7 @@ export function iniciarPlayer(): void {
     const bruto = data as Sobre;
 
     /**
-     * 🔴 TODO evento del SDK llega envuelto en `.data`. Esto faltaba, y era el
+     * TODO evento del SDK llega envuelto en `.data`. Esto faltaba, y era el
      * primero de los dos motivos por los que la barra nunca decía la canción.
      *
      * Leído del bundle 2.9, el emisor común de todos los módulos:
@@ -1431,7 +1431,7 @@ export function iniciarPlayer(): void {
      * `track-cue-point` el módulo emite `{ cuePoint: … }`, así que lo nuestro está
      * en `e.data.cuePoint` — y aquí se leía `e.cuePoint`, que es `undefined`.
      *
-     * ⚠️ El resto del archivo ya lo sabía: `alCambiarEstado` lee `e.data?.code` y
+     * El resto del archivo ya lo sabía: `alCambiarEstado` lee `e.data?.code` y
      * por eso la máquina de estados SÍ funcionaba. El error estaba solo aquí, y la
      * pista llevaba todo el tiempo veinte líneas más arriba.
      */
@@ -1447,7 +1447,7 @@ export function iniciarPlayer(): void {
     ];
 
     /**
-     * 🔴 EL TIPO DEL CUE POINT SE LLAMA `type`, NO `name`.
+     * EL TIPO DEL CUE POINT SE LLAMA `type`, NO `name`.
      *
      * Aquí decía `d?.name ?? cp.name`, y NINGUNO DE LOS DOS EXISTE. Leído del
      * propio bundle del SDK 2.9 (`sdk.listenlive.co/web/2.9/td-sdk.min.js`), que
@@ -1469,7 +1469,7 @@ export function iniciarPlayer(): void {
      * lista blanca lo tomaba por «no es canción» y **se descartaban el 100% de los
      * cue points**. La barra se quedaba en «Beat 100.9» para siempre.
      *
-     * ⚠️ Y lo que lo destapó del todo: este agujero lo ABRIÓ un endurecimiento
+     * Y lo que lo destapó del todo: este agujero lo ABRIÓ un endurecimiento
      * anterior. Antes la condición era `nombre === '' || nombre === 'track'`, y ese
      * `''` —que se quitó por ser un riesgo real, y con razón— era lo único que
      * dejaba pasar los cue points. O sea que la lista blanca estaba bien y el campo
@@ -1500,7 +1500,7 @@ export function iniciarPlayer(): void {
      * no supuesto— y llega como texto. Se valida antes de formatear: un número
      * absurdo pintaría una hora absurda en la barra, y más vale no pintar nada.
      *
-     * ⚠️ La zona va fija a `America/Mexico_City` y no al reloj del visitante: es
+     * La zona va fija a `America/Mexico_City` y no al reloj del visitante: es
      * la hora a la que la estación lo puso al aire. Para quien escuche desde
      * Madrid, «03:12» de su reloj no significa nada.
      */
@@ -1534,7 +1534,7 @@ export function iniciarPlayer(): void {
       titulo: tomar('cueTitle', 'cue_title', 'title'),
       artista: tomar('artistName', 'track_artist_name', 'artist', 'trackArtist'),
       /**
-       * 🔴 LISTA BLANCA ESTRICTA: solo `track` se pinta. Nada más.
+       * LISTA BLANCA ESTRICTA: solo `track` se pinta. Nada más.
        *
        * Antes esto decía `nombre === '' || nombre === 'track'`, y ese `''` era un
        * agujero: un cue point SIN nombre se habría tratado como canción y su
@@ -1561,7 +1561,7 @@ export function iniciarPlayer(): void {
     const { titulo, artista, hora, duracion, esCancion } = leerCue(e);
 
     /*
-      🔴 Se traza ANTES de los filtros y con el motivo del descarte. Trazar
+      Se traza ANTES de los filtros y con el motivo del descarte. Trazar
       después solo enseña los que ya pasaron, que son justo los que no dan
       problema — y era el error del log anterior.
     */
@@ -1581,7 +1581,7 @@ export function iniciarPlayer(): void {
 
     if (!titulo) return; // sin título no se pisa lo que ya está
     /**
-     * 🔴 Las cortinillas NO se muestran. La señal de Beat manda cue points de
+     * Las cortinillas NO se muestran. La señal de Beat manda cue points de
      * `name: "ad"` con títulos como «FRASE APP» o «FRASE BEAT 100.9 FM
      * (ROMPECORTE)-01» — son elementos de continuidad de la estación, no música, y
      * pintarlos en la barra sería peor que no pintar nada: el oyente vería el
@@ -1596,7 +1596,7 @@ export function iniciarPlayer(): void {
   });
 
   /*
-    🔴 Los OTROS canales de metadata, solo para el diagnóstico.
+    Los OTROS canales de metadata, solo para el diagnóstico.
     Si `track-cue-point` no llega pero estos sí, el problema no es la conexión al
     canal sino cómo está configurada la estación en Triton — y eso se resuelve en
     otro sitio, no en este archivo. No cambian ningún comportamiento.
@@ -1631,7 +1631,7 @@ export function iniciarPlayer(): void {
   /**
    * Abre o cierra el modal del anuncio.
    *
-   * 🔴 Esto FALTABA, y era una regresión respecto al v1: el estado y la analítica
+   * Esto FALTABA, y era una regresión respecto al v1: el estado y la analítica
    * del ad estaban bien, pero nadie mostraba `#td_container`, así que el IMA
    * montaba el `<lima-video>` dentro de una caja de 1×1 y **el video ad no se veía**.
    *
@@ -1698,7 +1698,7 @@ export function iniciarPlayer(): void {
     marcarOyente();
     const estado = contenedor()?.dataset.status;
     if (estado === 'sonando' || estado === 'cargando' || estado === 'anuncio') {
-      /* 🔴 El oyente debe poder cancelar en cualquier momento, incluida una
+      /* El oyente debe poder cancelar en cualquier momento, incluida una
          reconexión en marcha. Durante el episodio el estado es 'cargando', así que
          el clic cae aquí; y el botón sigue pulsable porque `pintarEstado` usa
          `aria-busy` y no `disabled`. */
@@ -1710,7 +1710,7 @@ export function iniciarPlayer(): void {
       sdk?.stop();
       pintarEstado('init');
     } else {
-      /* 🔴 El dedo siempre renueva el crédito: si el oyente vuelve a pedir la
+      /* El dedo siempre renueva el crédito: si el oyente vuelve a pedir la
          señal, empieza de cero por muchos intentos que se hubieran gastado. */
       cerrarEpisodio();
       intentos = 0;
@@ -1729,7 +1729,7 @@ export function iniciarPlayer(): void {
   });
 
   /**
-   * 🔴 Solo se pinta `init` si NO hay nada en curso.
+   * Solo se pinta `init` si NO hay nada en curso.
    *
    * En el camino frío —clic, descarga del SDK, inicializar, arrancar— el clic ya
    * dejó el estado en `cargando`, y pintar `init` aquí lo borraba: el usuario veía

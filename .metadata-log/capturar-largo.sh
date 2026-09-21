@@ -5,7 +5,7 @@
 set -u
 MIN="${1:-170}"
 
-# 🔴 Sin esto una captura larga NO SIRVE en una laptop.
+# Sin esto una captura larga NO SIRVE en una laptop.
 # Medido el 2026-08-21: una captura de 420 min murió a los 111 porque se cerró la
 # tapa («Entering Sleep state due to Clamshell Sleep», 17:06). Los cue points se
 # cortan de golpe y el archivo PARECE el fallo del emisor que estamos buscando —
@@ -21,11 +21,11 @@ BITACORA="$DIR/largo-$STAMP.log"
 FIN=$(( $(date +%s) + MIN*60 ))
 B="https://14023.live.streamtheworld.com"
 
-# 🔴 UN solo sbmid y UNA sola conexión de audio que lo sostenga: la sesión la
+# UN solo sbmid y UNA sola conexión de audio que lo sostenga: la sesión la
 # registra el audio. Un sbmid nuevo por reconexión da 404 "Invalid or expired
 # Session ID"; dos canales SBM con el mismo sbmid dan 409 Conflict.
 #
-# ⚠️ PERO si la conexión de AUDIO se cae, ese sbmid muere con ella. Medido el
+# PERO si la conexión de AUDIO se cae, ese sbmid muere con ella. Medido el
 # 2026-08-24: la red se fue 44 s, el audio reconectó solo, y el canal SBM se quedó
 # reintentando con un sbmid ya inválido — 35 fallos seguidos en 60 s hasta rendirse.
 # La captura murió 50 minutos antes de su hora. Por eso el bucle de abajo detecta
@@ -45,7 +45,7 @@ while [ "$(date +%s)" -lt "$FIN" ]; do
   N=$((N+1)); RESTA=$(( FIN - $(date +%s) ))
   [ "$RESTA" -le 5 ] && break
   echo "### $(date -u +%FT%TZ) conexion=$N" >> "$SALIDA"
-  # 🔴 Se escribe DIRECTO al archivo, sin temporal. La versión anterior bufferizaba
+  # Se escribe DIRECTO al archivo, sin temporal. La versión anterior bufferizaba
   # en un temporal y volcaba al cerrar, "para no contaminar el archivo de datos" —
   # y con eso una conexión larga no mostraba NADA hasta terminar. El requisito es
   # ver todo en el momento; los cuerpos de error los descarta el analizador.

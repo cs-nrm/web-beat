@@ -5,19 +5,19 @@
  * El wordmark entra en movimiento sobre negro, se detiene, y un superzoom atraviesa
  * la contraforma del primer `0` de `100.9` hasta abrir el inicio.
  *
- * 🔴 CORRE UNA SOLA VEZ POR SESIÓN, y solo en el inicio. Un intro de 4.1s que se
+ * CORRE UNA SOLA VEZ POR SESIÓN, y solo en el inicio. Un intro de 4.1s que se
  * repite en cada visita deja de ser una entrada y pasa a ser un peaje. Lo controla
  * `sessionStorage`, no una cookie: una cookie haría que la respuesta variara por
  * visitante y eso rompería la caché de borde del HTML, que es de las pocas cosas que
  * el plan da por decididas.
  *
- * 🔴 SE RETIRA SOLO, SIN JAVASCRIPT. La animación de salida termina en opacidad 0 y
+ * SE RETIRA SOLO, SIN JAVASCRIPT. La animación de salida termina en opacidad 0 y
  * `pointer-events: none`, así que aunque el script no corra —falle, esté bloqueado,
  * lo que sea— el overlay deja de tapar el sitio. Es la regla §3 del contrato: ningún
  * efecto puede dejar el contenido inalcanzable. El script solo apunta que ya se vio y
  * limpia el nodo.
  *
- * ⚠️ NO se porta la animación `site-in` del handoff, y el propio handoff explica por
+ * NO se porta la animación `site-in` del handoff, y el propio handoff explica por
  * qué: deja un `transform` sobre el contenedor del sitio, y un elemento transformado
  * se convierte en bloque contenedor de sus hijos `position: fixed`. Aquí eso
  * desanclaría el halo del cursor, el modal del pre-roll VAST y la cabecera. El
@@ -26,7 +26,7 @@
 ---
 
 {/*
-  🔴 Esta decisión se toma AQUÍ, en línea y de forma síncrona, no en el módulo de
+  Esta decisión se toma AQUÍ, en línea y de forma síncrona, no en el módulo de
   abajo. Dos razones:
 
   · El módulo va diferido: corre después de analizar el DOM, y para entonces el
@@ -70,7 +70,7 @@
   </div>
 
   {/*
-    🔴 Un BOTÓN, no «clic en cualquier parte».
+    Un BOTÓN, no «clic en cualquier parte».
     Con la superficie entera escuchando, un clic suelto mientras carga la página
     —o el que dispara un navegador al enfocar— se lleva el intro sin que nadie lo
     pidiera. Pasó al probarlo: desaparecía al instante. Un botón se pulsa a
@@ -81,7 +81,7 @@
 
 <style>
   /*
-    🔴 El overlay NO EXISTE salvo que el script en línea de arriba lo autorice.
+    El overlay NO EXISTE salvo que el script en línea de arriba lo autorice.
 
     Antes estaba visible por defecto y el JS lo quitaba, y eso producía justo el
     comportamiento invertido que vio Carlos: no salía en la primera carga —el módulo
@@ -99,7 +99,7 @@
 
   :global(html[data-intro='corre']) .beat-intro {
     /*
-      🔴 2.5s en total —entrada + pausa + zoom—, que es lo que Carlos le pidió a
+      2.5s en total —entrada + pausa + zoom—, que es lo que Carlos le pidió a
       Claude Design. El handoff llegó con 4.1s, así que los tres tiempos se escalan
       por el MISMO factor (0.61) en vez de recortar uno.
       Recortar solo la pausa, por ejemplo, mataría el compás: la pausa es el silencio
@@ -250,7 +250,7 @@
     }
   }
   /*
-    🔴 La salida termina en `pointer-events: none` y `visibility: hidden`, no solo en
+    La salida termina en `pointer-events: none` y `visibility: hidden`, no solo en
     opacidad 0. Con la opacidad sola, el overlay seguiría capturando los clics de todo
     el sitio: invisible y bloqueando. Y así es el CSS quien libera la página, no el
     script.

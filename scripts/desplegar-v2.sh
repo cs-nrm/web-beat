@@ -2,13 +2,13 @@
 #
 # Despliegue del SITIO (beatdigital.mx). Se ejecuta EN LA VM.
 #
-# 🔴 Desde el 10 sep 2026 esto despliega el sitio real, no una preproducción. Antes
+# Desde el 10 sep 2026 esto despliega el sitio real, no una preproducción. Antes
 # apuntaba a `v2.beatdigital.mx`, que era el mismo proceso con otro nombre; ese
 # nombre se apagó el día del corte. El script conserva su nombre de archivo a
 # propósito —renombrarlo rompería la memoria muscular y los documentos que lo
 # citan—, pero ya no hay ningún «v2» al que desplegar.
 #
-# 🔴 Por qué existe: el despliegue se hacía a mano y ya falló de tres formas
+# Por qué existe: el despliegue se hacía a mano y ya falló de tres formas
 # distintas, todas silenciosas o confusas:
 #
 #   1. `pnpm build` reventando en corepack —«Cannot find matching keyid»— porque
@@ -20,12 +20,12 @@
 #      DESPUÉS de reiniciar, que es el único momento en que se puede saber.
 #   3. Un reinicio que no levanta y nadie mirando `systemctl`.
 #
-# ⚠️ Y por eso ahora ESTO SÍ TOCA EL AIRE. Cada corrida reinicia el servicio que
+# Y por eso ahora ESTO SÍ TOCA EL AIRE. Cada corrida reinicia el servicio que
 # sirve beatdigital.mx: son unos segundos de 502 para quien esté navegando. No es
 # un despliegue de prueba y no hay red debajo —hoy no existe un entorno donde
 # ensayar, ver `deploy/PENDIENTES.md`—.
 #
-# ⚠️ `main` sigue siendo el sitio VIEJO, estático, que un cron reconstruye cada 15
+# `main` sigue siendo el sitio VIEJO, estático, que un cron reconstruye cada 15
 # minutos en `/var/www/web-beat`. No es el destino de nada de esto.
 #
 # Uso:   sudo ./scripts/desplegar-v2.sh
@@ -36,7 +36,7 @@ set -euo pipefail
 RUTA="${RUTA:-/var/www/web-beat-v2}"
 RAMA="${RAMA:-beat}"
 SERVICIO="${SERVICIO:-web-beat-v2}"
-# 🔴 El destino contra el que se COMPRUEBA. Era v2.beatdigital.mx; desde el corte
+# El destino contra el que se COMPRUEBA. Era v2.beatdigital.mx; desde el corte
 # es el dominio real, porque es el único nombre que sirve este proceso.
 URL="${URL:-https://beatdigital.mx}"
 COREPACK="${COREPACK:-/usr/bin/corepack}"
@@ -82,11 +82,11 @@ fi
 
 # ── 2. Dependencias ───────────────────────────────────────────────────────────
 paso "Dependencias"
-# 🔴 `COREPACK_ENABLE_DOWNLOAD_PROMPT=0` y la versión FIJADA en la invocación.
+# `COREPACK_ENABLE_DOWNLOAD_PROMPT=0` y la versión FIJADA en la invocación.
 # Sin fijarla, corepack entra por `getDefaultVersion` → `fetchLatestStableVersion`
 # y muere verificando la firma del registro. Con ella, ni consulta.
 #
-# ⚠️ `--frozen-lockfile`: si el lock y el `package.json` no cuadran, que falle. Un
+# `--frozen-lockfile`: si el lock y el `package.json` no cuadran, que falle. Un
 # despliegue no es el sitio donde resolver un árbol de dependencias.
 COREPACK_ENABLE_DOWNLOAD_PROMPT=0 "$COREPACK" "$PNPM" install --frozen-lockfile
 
@@ -107,11 +107,11 @@ fi
 bien "servicio activo"
 
 # ── 5. Comprobar lo que no se ve ──────────────────────────────────────────────
-# 🔴 Aquí está el valor del script. Un despliegue "correcto" puede dejar el sitio
+# Aquí está el valor del script. Un despliegue "correcto" puede dejar el sitio
 # respondiendo 200 y completamente vacío, y eso no sale en ningún log.
 paso "Comprobando el sitio servido"
 
-# ⚠️ El `|| echo 000` no es adorno. Sin él, si el sitio no responde —Node todavía
+# El `|| echo 000` no es adorno. Sin él, si el sitio no responde —Node todavía
 # arrancando, TLS caído, el host apagado— `curl` sale distinto de cero, la
 # ASIGNACIÓN hereda ese estado y `set -e` mata el script AQUÍ, antes del `fallo`.
 # O sea: el peor momento posible es el único en que no imprime el diagnóstico.
@@ -122,7 +122,7 @@ bien "portada 200"
 # El contenido del CMS: con `CMS_URL` puesto, la portada enlaza varias notas. Sin
 # él, el sitio se pinta entero SIN una sola. Es la señal más barata y la que
 # distingue "desplegado" de "desplegado y vacío".
-# ⚠️ Mismo motivo que arriba, y aquí muerde más: con `pipefail`, un `grep` que no
+# Mismo motivo que arriba, y aquí muerde más: con `pipefail`, un `grep` que no
 # encuentra nada devuelve 1, la tubería entera devuelve 1 y `set -e` mata el
 # script. Es decir, el caso «cero notas» —justo el fallo que este bloque existe
 # para cazar— salía mudo en vez de con su diagnóstico.
@@ -137,7 +137,7 @@ if [ "$notas" -lt 1 ]; then
 fi
 bien "$notas notas enlazadas en la portada"
 
-# 🔴 Las dos capas de indexación, y desde el corte se comprueban AL REVÉS.
+# Las dos capas de indexación, y desde el corte se comprueban AL REVÉS.
 #
 # Hasta el 10 sep 2026 este script desplegaba la preproducción y exigía que el
 # `noindex` ESTUVIERA. Ahora despliega el sitio real, así que exige lo contrario:

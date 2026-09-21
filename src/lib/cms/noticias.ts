@@ -24,14 +24,14 @@ import type { Noticia } from '@/types/payload';
 const BASE_INDICE: ParamsCms = { depth: 1, ...SIN_PAGINACION };
 
 /**
- * 🔴 Una `pieza` no se distribuye como noticia.
+ * Una `pieza` no se distribuye como noticia.
  *
  * `noticias.distribucion` separa QUÉ es una pieza de DÓNDE se coloca: una cápsula
  * del Fenómeno Residente conserva su URL y su entrada en el sitemap —se comparte
  * suelta, tiene que poder encontrarse— pero no aparece en los listados
  * editoriales, porque su lugar es dentro de su especial.
  *
- * ⚠️ El `or` con `exists: false` NO es decorativo: en Postgres un `!= 'pieza'`
+ * El `or` con `exists: false` NO es decorativo: en Postgres un `!= 'pieza'`
  * **no devuelve las filas con NULL**, así que sin él se perderían todas las notas
  * que nunca tocaron el campo. Está documentado igual en el CMS.
  */
@@ -59,7 +59,7 @@ export interface FiltroScanner {
  * id acierta la misma entrada de caché para todas las notas de esa categoría. El
  * slug obligaría a `where[categorias.slug]`, que en Payload es un join y cuesta.
  *
- * ⚠️ Lo que NO se hace es meter algo que varíe por DOCUMENTO en el `where` — esa
+ * Lo que NO se hace es meter algo que varíe por DOCUMENTO en el `where` — esa
  * es la regla de oro del cliente, y es distinta: aquí varía por vista, y hay tantas
  * vistas como categorías, no como notas. `excluir` es una categoría, no una nota,
  * así que sigue siendo una sola entrada de caché por vista.
@@ -79,7 +79,7 @@ function acotar(filtro?: FiltroScanner | null, excluir?: FiltroScanner | null): 
 /**
  * El filtro de una sección editorial, resuelto desde el SLUG de su categoría.
  *
- * 🔴 Existe para que las cuatro superficies que necesitan una sección editorial
+ * Existe para que las cuatro superficies que necesitan una sección editorial
  * —`/scanner`, `/editorial`, el mosaico del Inicio y su pila— no repitan cada una
  * el mapeo «categoría del CMS → `FiltroScanner`». Cuando se repite en cuatro
  * sitios, el quinto se escribe distinto.
@@ -112,16 +112,16 @@ export async function filtroDeCategoria(slug: string): Promise<FiltroScanner | n
  * independientes y podrían quedar desfasadas —la destacada vieja con la rejilla
  * nueva—. Le pasó a `web-enfoque` y se arregló exactamente así.
  *
- * 🔴 Pagina desde el 2026-09-17, y la razón es un número: Beat Scanner tenía **53
+ * Pagina desde el 2026-09-17, y la razón es un número: Beat Scanner tenía **53
  * notas y 11 alcanzables**. Ver `src/lib/paginacion.ts` para el contrato de la URL.
  *
- * 🔴 El tamaño de página es `cuantas + 1` y es CONSTANTE entre páginas. Tiene que
+ * El tamaño de página es `cuantas + 1` y es CONSTANTE entre páginas. Tiene que
  * serlo: el desplazamiento lo calcula Payload como `(page - 1) * limit`, así que un
  * `limit` distinto en la página 2 —por ejemplo, 11 en la primera y 10 en las demás
  * por no tener destacada— se saltaría una nota en cada salto. La destacada sale de
  * la tanda, no de una consulta aparte.
  *
- * ⚠️ `SIN_PAGINACION` se queda PUESTO aunque esto pagine, y no es una contradicción
+ * `SIN_PAGINACION` se queda PUESTO aunque esto pagine, y no es una contradicción
  * con lo que dice `client.ts`. Comprobado contra el CMS el 2026-09-17: con
  * `pagination=false` Payload respeta `page` y devuelve la tanda correcta; lo único
  * que deja de servir es su `totalDocs`. El total lo trae `cmsContarEstacion` en una
@@ -192,7 +192,7 @@ export async function obtenerNota(slug: string): Promise<Noticia | null> {
 /**
  * Las tres relacionadas del pie de la nota (14c: "tres notas relacionadas").
  *
- * 🔴 La nota actual se excluye EN MEMORIA, no en el `where`.
+ * La nota actual se excluye EN MEMORIA, no en el `where`.
  *
  * Es la regla de oro de la caché de este cliente, y viene de un incidente medido:
  * en `web-enfoque` esta misma función usaba `where[id][not_equals]=<id>`, así que
@@ -224,7 +224,7 @@ export async function obtenerRelacionadas(nota: Noticia, cuantas = 3): Promise<N
 }
 
 /*
-  🔴 Aquí vivía `minutosDeLectura()`, y se borró el 2026-09-07 con su último
+  Aquí vivía `minutosDeLectura()`, y se borró el 2026-09-07 con su último
   llamador.
 
   Pintaba el «3 MIN» de cada tarjeta estimando 200 palabras por minuto sobre el

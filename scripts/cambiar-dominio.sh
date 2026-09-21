@@ -5,7 +5,7 @@
 # Se ejecuta EN LA VM. Por defecto NO toca nada: enseña lo que encontró y lo que
 # haría. Solo actúa con CONFIRMAR=1.
 #
-# 🔴 Lo que este script SÍ resuelve, y por qué basta con Apache:
+# Lo que este script SÍ resuelve, y por qué basta con Apache:
 #
 #   · El build del v2 ya lleva horneado `PUBLIC_SITE_URL=https://beatdigital.mx`
 #     —comprobado en lo servido: el canonical de v2 ya dice `beatdigital.mx`—, así
@@ -17,7 +17,7 @@
 #     no hay DNS que cambiar ni propagación que esperar. El corte es instantáneo y
 #     la vuelta atrás también.
 #
-# ⚠️ Lo que este script NO resuelve, y hay que decidir aparte:
+# Lo que este script NO resuelve, y hay que decidir aparte:
 #
 #   · Las URLs del v1 (`/news/…`, `/podcast/`, `/playlist/` y nueve secciones más)
 #     NO existen en el v2 y van a dar 404. Eso no lo arregla un vhost.
@@ -46,7 +46,7 @@ fallos=0
 exigir() { if [ "$1" = "0" ]; then bien "$2"; else mal "$2"; fallos=$((fallos+1)); fi; }
 
 # ── 1. ¿El v2 está sano AHORA? ────────────────────────────────────────────────
-# 🔴 Primero esto y no el vhost: cortar hacia un servicio roto cambia un sitio que
+# Primero esto y no el vhost: cortar hacia un servicio roto cambia un sitio que
 # funciona por uno que no, y en un lanzamiento eso se nota en minutos.
 paso "El v2, antes de tocar nada"
 
@@ -79,7 +79,7 @@ fi
 
 [ -f "$SITIOS/$VHOST_NUEVO" ]; exigir $? "existe $SITIOS/$VHOST_NUEVO"
 
-# 🔴 `ProxyPreserveHost On` es la pieza de la que cuelga TODO el corte. Sin ella
+# `ProxyPreserveHost On` es la pieza de la que cuelga TODO el corte. Sin ella
 # Apache reescribe el Host hacia el backend, Node recibe `Host: localhost` y:
 #   · el sitio NO se abre a Google (localhost tampoco es el canónico), y
 #   · `checkOrigin` compara localhost contra el dominio real y responde 403 a todo
@@ -90,7 +90,7 @@ exigir $? "el vhost nuevo lleva ProxyPreserveHost On"
 grep -qi "ServerName[[:space:]]\+$DOMINIO" "$SITIOS/$VHOST_NUEVO" 2>/dev/null
 exigir $? "el vhost nuevo declara ServerName $DOMINIO"
 
-# ⚠️ Esto valida la configuración VIGENTE, no el archivo nuevo: Apache solo analiza
+# Esto valida la configuración VIGENTE, no el archivo nuevo: Apache solo analiza
 # lo que está enlazado en `sites-enabled`, y el vhost nuevo todavía no lo está. Sirve
 # para saber que no partimos de una configuración rota; no dice nada del archivo que
 # vamos a habilitar. Para eso está VALIDAR_NUEVO=1, abajo.
@@ -99,12 +99,12 @@ exigir $? "la configuración vigente de Apache es válida"
 
 # ── Validación REAL del vhost nuevo, opcional ─────────────────────────────────
 #
-# 🔴 Es opcional por un motivo concreto y no por pereza. La única forma de que
+# Es opcional por un motivo concreto y no por pereza. La única forma de que
 # Apache analice un vhost es que esté enlazado, así que esto lo enlaza, corre
 # `configtest` y lo desenlaza — **sin recargar en ningún momento**. Apache sigue
 # sirviendo la configuración vieja todo el rato, así que el sitio NO se libera.
 #
-# ⚠️ Pero abre una ventana de menos de un segundo en la que el enlace existe. Si
+# Pero abre una ventana de menos de un segundo en la que el enlace existe. Si
 # justo ahí otra cosa recargara Apache —la renovación de certbot, un logrotate—, el
 # sitio se liberaría antes de tiempo. Por eso no va por defecto la víspera de un
 # lanzamiento, y por eso el `trap` quita el enlace pase lo que pase.
@@ -138,7 +138,7 @@ else
   mal "no pude leer el certificado de $DOMINIO"; fallos=$((fallos+1))
 fi
 
-# ⚠️ `www` es un aviso y no un bloqueo: hoy tampoco funciona, así que el corte no
+# `www` es un aviso y no un bloqueo: hoy tampoco funciona, así que el corte no
 # lo empeora. Pero quien escriba www en la barra verá un error de seguridad.
 if echo | openssl s_client -connect "www.$DOMINIO:443" -servername "www.$DOMINIO" 2>/dev/null \
    | openssl x509 -noout -text 2>/dev/null | grep -q "DNS:www.$DOMINIO"; then
@@ -181,7 +181,7 @@ paso "Cambiando el vhost"
 [ -n "$VHOST_VIEJO" ] && $SUDO a2dissite "$VHOST_VIEJO" >/dev/null
 $SUDO a2ensite "$VHOST_NUEVO" >/dev/null
 
-# 🔴 `configtest` ANTES de recargar, y si falla se DESHACE el enlace.
+# `configtest` ANTES de recargar, y si falla se DESHACE el enlace.
 #
 # Sin el `a2dissite` del fallo, un error de sintaxis dejaba el enlace puesto y
 # Apache sin recargar: el sitio seguía en el v1 —bien— pero la siguiente recarga
@@ -210,7 +210,7 @@ else
   mal "responde, pero NO parece el v2 (no encuentro el lema del cintillo)"; exit 1
 fi
 
-# 🔴 LA comprobación del corte. Todo lo demás es fontanería; esto es el objetivo.
+# LA comprobación del corte. Todo lo demás es fontanería; esto es el objetivo.
 if grep -q '<meta name="robots" content="index, follow"' /tmp/corte-nuevo.html; then
   bien "INDEXABLE: <meta robots> dice index, follow"
 else

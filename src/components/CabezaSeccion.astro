@@ -2,26 +2,26 @@
 /**
  * La cabecera de un interior. Una sola, para las cinco secciones.
  *
- * 🔴 Existe para que no vuelva a haber cinco cabeceras distintas. Antes cada
+ * Existe para que no vuelva a haber cinco cabeceras distintas. Antes cada
  * sección se maquetaba en su archivo, y así fue como acabamos con tres tamaños de
  * titular, dos alturas de tira y una bajada que decía «Notas, entrevistas y
  * reportajes de…» en secciones donde no hay notas ni entrevistas ni reportajes.
  *
- * ⚠️ NO lleva bajada, y es decisión: esas líneas eran relleno («Notas,
+ * NO lleva bajada, y es decisión: esas líneas eran relleno («Notas,
  * entrevistas y reportajes…», «Se actualiza todos los días»), prometían cosas que
  * el sitio no sostiene y empujaban el contenido real media pantalla hacia abajo.
  * Lo que describe la sección sigue estando donde sirve —la `<meta description>`,
  * que es lo que lee un buscador—, no en pantalla repitiéndole al lector dónde
  * acaba de entrar.
  *
- * 🔴 Y desde el 2026-09-07 tampoco lleva RÓTULO. Existía para lo que sí era un
+ * Y desde el 2026-09-07 tampoco lleva RÓTULO. Existía para lo que sí era un
  * dato —«ACTUALIZADO 28 AGO», «7 TEMAS», «2 EDICIONES»— y la distinción parecía
  * sólida, pero Carlos la tumbó con el caso concreto: «1 TEMA» encima de «EL
  * FENÓMENO RESIDENTE» no informa de nada, cuenta el inventario de la página que ya
  * estás viendo. Y en las páginas de detalle repetía lo que el cuerpo dice mejor: el
  * «CUÁNDO» de un evento, los horarios de un programa, la fecha de una edición.
  *
- * ⚠️ Los datos NO se perdieron, salvo uno: la fecha de actualización de las dos
+ * Los datos NO se perdieron, salvo uno: la fecha de actualización de las dos
  * secciones editoriales, que solo vivía ahí. Todo lo demás sigue en el cuerpo de su
  * página. Si algún día hace falta volver a poner algo encima del titular, que sea
  * porque el lector no lo puede saber de otra forma.
@@ -57,7 +57,7 @@ const { titulo, activa = null } = Astro.props;
     que ocupa el sitio donde el lector busca un menú. Debajo del titular se leería
     como un filtro de esta sección, que es justo lo que dejó de ser.
 
-    🔴 Su aire y su filete NO se declaran aquí. Estaban, en un `.cs-nav`, y no
+    Su aire y su filete NO se declaran aquí. Estaban, en un `.cs-nav`, y no
     aplicaban nunca: una clase pasada como prop aterriza en la raíz del componente
     hijo, que solo lleva el cid del hijo, así que la regla quedaba sin dueño y el
     titular salía pegado a la tira en las ocho secciones. Ahora la medida vive en
@@ -84,7 +84,7 @@ const { titulo, activa = null } = Astro.props;
       padding-top: 20px;
     }
     /*
-      🔴 Fluido, no fijo. «PROGRAMACIÓN» es una sola palabra que no puede partirse:
+      Fluido, no fijo. «PROGRAMACIÓN» es una sola palabra que no puede partirse:
       a 38px medía 406px dentro de una caja de 343 y se salía por la derecha.
       Medido en un teléfono de 375px.
 

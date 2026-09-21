@@ -141,7 +141,7 @@ const contactos = (
           {
             contactos.map(([etiqueta, valor, href]) => (
               /*
-                🔴 `rel="noopener"` en el de WhatsApp: sale a un tercero. El de
+                `rel="noopener"` en el de WhatsApp: sale a un tercero. El de
                 teléfono es un `tel:` y no abre pestaña, pero comparten marcado y
                 ponerlo en los dos cuesta menos que acordarse de la diferencia.
               */
@@ -236,7 +236,7 @@ const contactos = (
   }
 
   /*
-    🔴 El `sticky` pasó de la ficha a la columna: si se quedara en la ficha, el box
+    El `sticky` pasó de la ficha a la columna: si se quedara en la ficha, el box
     de abajo se iría con el scroll y la mitad del riel dejaría de acompañar. Cuelga
     de `--chrome-h`, lo que mide la barra pegada de arriba — igual que `.nt-riel`
     en `noticias/[slug].astro`.
@@ -353,7 +353,7 @@ const contactos = (
       grid-template-columns: 1fr;
       gap: 24px;
     }
-    /* 🔴 Una columna: el riel deja de ser riel. Y `static`, porque un `sticky` sin
+    /* Una columna: el riel deja de ser riel. Y `static`, porque un `sticky` sin
        columna al lado se queda pegado al viewport tapando lo que se lee. El box
        cae tras la ficha, que es donde los datos del programa terminan. */
     .pg-riel {

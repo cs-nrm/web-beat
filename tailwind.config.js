@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 
-// 🔴 Regla del design system: este archivo NO contiene ni un valor literal — solo
+// Regla del design system: este archivo NO contiene ni un valor literal — solo
 // MAPEA las CSS vars del DS a utilidades de Tailwind. La fuente de verdad son los
 // tokens en `src/styles/ds/tokens/`, copiados del lienzo de Claude Design
 // (`design/Nuevo sitio de beat full/_ds/copy-of-beat-100-9-design-system-d47698bf-a64c-44d3-8ece-771863d80f6f/`).
@@ -9,7 +9,7 @@
 // Es la diferencia deliberada respecto a los repos hermanos SSG, que tienen este
 // archivo VACÍO y los tokens de marca mezclados con sobras del starter de Astro.
 //
-// ⚠️ Al usar `var()` en `colors`, los modificadores de opacidad de Tailwind
+// Al usar `var()` en `colors`, los modificadores de opacidad de Tailwind
 // (`bg-surface-card/50`) NO funcionan. Es el precio de tener una sola fuente de
 // verdad, y varios tokens del DS ya son rgba de por sí. Para transparencias, usar
 // el token que corresponda en vez de un modificador.
@@ -65,7 +65,7 @@ export default {
           primary: 'var(--text-primary)',
           body: 'var(--text-body)',
           muted: 'var(--text-muted)',
-          // ⚠️ En tema claro da 4.00:1 → solo texto grande. Ver src/styles/beat.css.
+          // En tema claro da 4.00:1 → solo texto grande. Ver src/styles/beat.css.
           faint: 'var(--text-faint)',
           accent: 'var(--text-accent)',
           live: 'var(--text-live)',
@@ -103,7 +103,7 @@ export default {
       },
 
       // Tamaños fijos en px, calzados a la retícula de 1240px del DS.
-      // ⚠️ El DS no define escala responsiva: hay que resolverlo contra el
+      // El DS no define escala responsiva: hay que resolverlo contra el
       // artboard móvil (`Sitio Beat 2026 móvil.dc.html`).
       fontSize: {
         'display-1': ['var(--size-display-1)', { lineHeight: 'var(--lh-display)' }],
@@ -148,7 +148,7 @@ export default {
         mono: 'var(--track-mono)',
       },
 
-      // 🔴 La escala numérica de Tailwind NO se toca, y es a propósito.
+      // La escala numérica de Tailwind NO se toca, y es a propósito.
       //
       // Al principio se mapeó `1..15` a los pasos `--s-N` del DS, y fue un error
       // que costó una vuelta: `h-12` dejó de ser 3rem y pasó a ser `--s-12` =
@@ -208,7 +208,7 @@ export default {
         grid: 'var(--grid-max)',
       },
 
-      // ⚠️ Los valores del ARTBOARD ganan sobre los del DS, que no coinciden: el
+      // Los valores del ARTBOARD ganan sobre los del DS, que no coinciden: el
       // DS declara `--header-h: 64px` y `--player-h: 76px`, pero `Cabecera-Beat`
       // dibuja el header a 68px en escritorio y 56 en móvil, y la barra del player
       // a 48px en los dos. Se redefinen los tokens en `beat.css`.

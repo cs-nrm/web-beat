@@ -8,7 +8,7 @@ Por qué existe: el .sse crudo es un event-stream y no se puede leer de corrido.
 Esto lo vuelve una tabla con TODO lo que mandó Triton, marcando qué se mostraría
 en el sitio (name == 'track') y qué se descarta.
 
-🔴 La salida queda FUERA de git igual que el .sse: la captura es un registro de
+La salida queda FUERA de git igual que el .sse: la captura es un registro de
 qué anunciantes están al aire y con qué frecuencia.
 """
 import json, re, sys, html, glob, datetime as dt
@@ -206,7 +206,7 @@ border-radius:8px;padding:14px 18px;color:var(--mut);max-width:74ch}}
 <h2>Los {len(nombres)} tipos que existen, y con qué campos</h2>
 <div class=invs>{inv}</div>
 
-<h2>🔴 Qué hay dentro de «ad» — y por qué el filtro es estricto</h2>
+<h2>Qué hay dentro de «ad» — y por qué el filtro es estricto</h2>
 <div class=note style="margin-bottom:14px">
 <code class=mono>ad</code> no significa «anuncio»: es <b>todo lo que no es música</b>, con el
 nombre con el que existe en el playout. De los {len(ads)} eventos, solo

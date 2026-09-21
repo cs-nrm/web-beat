@@ -16,7 +16,7 @@ Use this skill when making Node.js architecture decisions, choosing frameworks, 
 
 ---
 
-## ⚠️ How to Use This Skill
+## How to Use This Skill
 
 This skill teaches **decision-making principles**, not fixed code to copy.
 

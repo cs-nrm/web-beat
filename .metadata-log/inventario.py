@@ -51,9 +51,9 @@ print(f"╠══ type:  {dict(tipos)}")
 print(f"╚══ name:  {dict(nombres)}\n")
 
 if sinParsear:
-    print(f"⚠️  {len(sinParsear)} bloques sin parsear (primeros 2): {sinParsear[:2]}\n")
+    print(f" {len(sinParsear)} bloques sin parsear (primeros 2): {sinParsear[:2]}\n")
 if sinNombre:
-    print(f"🔴 {len(sinNombre)} eventos SIN `name` — con lista blanca estricta NO se pintan.")
+    print(f"{len(sinNombre)} eventos SIN `name` — con lista blanca estricta NO se pintan.")
     print(f"   ejemplo: {sinNombre[0]}\n")
 
 for n in nombres:

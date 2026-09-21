@@ -22,7 +22,7 @@ interface Props {
    * Dónde se está pintando este bloque. Solo cambia cuánta presentación lleva
    * encima; el tema —visor, cápsulas y playlist— es idéntico en los tres.
    *
-   * 🔴 Es UN parámetro y no dos booleanos sueltos, porque los tres casos son
+   * Es UN parámetro y no dos booleanos sueltos, porque los tres casos son
    * excluyentes y con dos banderas habría cuatro combinaciones, una de ellas sin
    * sentido. Un enum de tres valores no se puede poner en un estado imposible.
    *
@@ -39,13 +39,13 @@ interface Props {
    * El `nombre` del box de 300×250 que va bajo el panel de la playlist, o nada si
    * esta superficie no lleva uno.
    *
-   * 🔴 Lo pasa la PÁGINA y no se deduce del `contexto`. El nombre es la llave con
+   * Lo pasa la PÁGINA y no se deduce del `contexto`. El nombre es la llave con
    * la que GAM reporta el hueco y con la que se factura, así que se escribe donde
    * se decidió la colocación —`/fenomeno-residente` y `/especiales/<slug>`, dos
    * superficies distintas para el anunciante— y no en un componente del Inicio,
    * donde nadie que revise el inventario lo iría a buscar.
    *
-   * ⚠️ En el Inicio va vacío A PROPÓSITO: ahí el box vive «de riel junto al
+   * En el Inicio va vacío A PROPÓSITO: ahí el box vive «de riel junto al
    * archivo», que es donde lo pone el lienzo (`ArchivoTemas.astro`). Dos boxes en
    * la portada serían dos peticiones a GAM compitiendo por la misma pantalla.
    */
@@ -151,7 +151,7 @@ const tiendas = (
             */}
             <div class="fr-visor-marco" data-visor-marco>
             {/*
-              🔴 Un `<video>`, no un `<div>` vacío. Plyr necesita un elemento de
+              Un `<video>`, no un `<div>` vacío. Plyr necesita un elemento de
               MEDIOS para construirse; sobre un div sin `data-plyr-provider` se
               instancia a medias y no monta nada — el estado decía «sonando» y no
               había ni reproductor ni iframe. Al asignarle una fuente de YouTube,
@@ -290,7 +290,7 @@ const tiendas = (
         {/* ── la playlist y, debajo, el box ── */}
         <div class="fr-lateral">
           {/*
-            🔴 `data-pistas` es el CONTRATO de la cola de `pista.ts`: el módulo sube
+            `data-pistas` es el CONTRATO de la cola de `pista.ts`: el módulo sube
             desde la fila pulsada hasta este atributo para saber qué canciones van
             detrás. Sin él —y estuvo sin él hasta el 2026-09-10— cada fila era una
             lista de UNA, así que las dos canciones ocupaban la posición 0 de su
@@ -316,15 +316,15 @@ const tiendas = (
                   const cancion = typeof c.cancion === 'object' ? c.cancion : null;
                   const fuente = fuenteDeCancion(cancion);
                   /*
-                    🔴 La fila es un BOTÓN cuando hay algo que reproducir, y era un
+                    La fila es un BOTÓN cuando hay algo que reproducir, y era un
                     `<div>` inerte hasta el 2026-09-09: sin cursor, sin foco, sin
                     nada que pulsar. Se leía como una lista de nombres cuando lo que
                     hay detrás es música.
 
-                    ⚠️ Y sigue degradando a `<div>` sin fuente. Un botón que no
+                    Y sigue degradando a `<div>` sin fuente. Un botón que no
                     reproduce es peor que un texto: promete y no cumple.
 
-                    ⚠️ `Etiqueta` en vez de duplicar la fila entera en las dos ramas
+                    `Etiqueta` en vez de duplicar la fila entera en las dos ramas
                     —el contenido es idéntico y solo cambia el envoltorio—. Duplicarla
                     sería mantener dos veces el mismo marcado.
                   */
@@ -395,7 +395,7 @@ const tiendas = (
             El box CIERRA la columna, no la abre: la playlist es contenido del tema
             y el anuncio es lo que viene después de haberlo leído.
 
-            🔴 Y va en el DOM donde se ve, sin `order`. En móvil esta columna baja
+            Y va en el DOM donde se ve, sin `order`. En móvil esta columna baja
             entera y el orden visual es el de lectura, así que quien navegue con
             teclado se encuentra el hueco en el mismo sitio que quien lo ve. Un
             reordenado por CSS habría puesto el anuncio antes de la playlist para la
@@ -423,7 +423,7 @@ const tiendas = (
     marco de 360. La prueba de que estaba escopada son los `:global(.plyr …)` de
     más abajo, que existen justo para atravesar ese ámbito.
 
-    ⚠️ El coste conocido: la piel de Plyr pasa a bajar en TODAS las páginas y no
+    El coste conocido: la piel de Plyr pasa a bajar en TODAS las páginas y no
     solo en las que tienen visor. Es inevitable en cuanto el reproductor vive en el
     cromo — tiene que seguir sonando al navegar—, así que se asume a la vista.
   */
@@ -498,7 +498,7 @@ const tiendas = (
     position: relative;
     display: block;
     /*
-      🔴 9:16 SIEMPRE. Las cápsulas se publican como reels, así que el formato es
+      9:16 SIEMPRE. Las cápsulas se publican como reels, así que el formato es
       del formato de la serie, no de cada archivo.
 
       Antes la caja seguía `video.orientacion` del CMS. Se quitó por decisión de
@@ -530,7 +530,7 @@ const tiendas = (
   /*
     Plyr tiene que LLENAR la caja del visor.
 
-    ⚠️ Los selectores cuelgan de `.fr-video` y no de `.fr-visor-montaje`: al
+    Los selectores cuelgan de `.fr-video` y no de `.fr-visor-montaje`: al
     construirse, Plyr REEMPLAZA el `<video>` que llevaba esa clase por su propio
     marcado, así que cualquier regla anclada ahí deja de aplicar. Se vio como un
     iframe de 640×360 dentro de un panel de 296×526.
@@ -542,7 +542,7 @@ const tiendas = (
   .fr-video :global(.plyr) {
     width: 100%;
     height: 100%;
-    /* 🔴 Blanco, no coral. Es la barra de progreso y el realce de los controles
+    /* Blanco, no coral. Es la barra de progreso y el realce de los controles
        del visor: naranja a pantalla completa era el otro sitio donde sobrevivía
        el acento cálido. movimiento.md §8. */
     --plyr-color-main: var(--mist-0);
@@ -763,7 +763,7 @@ const tiendas = (
   .fr-track {
     display: grid;
     /*
-      ⚠️ Cuatro columnas y no tres: entró la del icono. La `auto` de la duración
+      Cuatro columnas y no tres: entró la del icono. La `auto` de la duración
       se queda a cero cuando no hay duración capturada —que es el caso de las 8
       canciones del CMS— y por eso el icono necesita la suya propia.
     */
@@ -774,7 +774,7 @@ const tiendas = (
     border-bottom: 1px solid var(--border-hairline);
   }
   /*
-    🔴 Lo que la vuelve pulsable de verdad. La fila era un `<div>` y ahora puede ser
+    Lo que la vuelve pulsable de verdad. La fila era un `<div>` y ahora puede ser
     un `<button>`, así que hay que deshacer todo lo que el navegador le pone a un
     botón —fondo, borde, tipografía propia, texto centrado— y darle el cursor de
     mano. Sin esto la fila se veía como un control del sistema en medio del panel.
@@ -795,7 +795,7 @@ const tiendas = (
     criterio que las cápsulas y que Bonus Beat: seis iconos de play en reposo son
     ruido, no información.
 
-    ⚠️ `[data-sonando]` lo pone `pista.ts` sobre la fila que está al aire, y es lo
+    `[data-sonando]` lo pone `pista.ts` sobre la fila que está al aire, y es lo
     que hace que el icono siga a la canción cuando la cola avanza sola.
   */
   .fr-track-icono {
@@ -977,7 +977,7 @@ const tiendas = (
       gap: 18px;
       margin-top: 18px;
     }
-    /* 🔴 En móvil el visor NO cambia de proporción: el formato de la serie manda.
+    /* En móvil el visor NO cambia de proporción: el formato de la serie manda.
        Lo que se limita es su ALTO, para que un 9:16 a lo ancho de 390px no ocupe
        dos pantallas y empuje todo lo demás fuera del pliegue. */
     .fr-video {

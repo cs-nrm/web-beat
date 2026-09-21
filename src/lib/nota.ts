@@ -13,7 +13,7 @@ import type { Noticia } from '@/types/payload';
 /**
  * El nombre de categoría que se pinta en la tarjeta.
  *
- * ⚠️ `noticias.categorias` es `hasMany` y NO hay categoría primaria — es
+ * `noticias.categorias` es `hasMany` y NO hay categoría primaria — es
  * justamente la razón por la que la URL de una nota es plana (decisión 10 del
  * plan). Para PINTAR sí hace falta elegir una, y se toma la primera: aquí sí es
  * aceptable, porque reordenar el array cambia una etiqueta, no una URL.
@@ -25,19 +25,19 @@ export function nombreCategoria(nota: Noticia): string | null {
 }
 
 /**
- * 🔴 A QUÉ SECCIÓN pertenece una nota: Beat Scanner o Editorial.
+ * A QUÉ SECCIÓN pertenece una nota: Beat Scanner o Editorial.
  *
  * Lo decide la categoría, porque desde el 2026-09-07 eso es lo que separa las dos
  * secciones editoriales (ver `SECCIONES_EDITORIALES`). De aquí salen la migaja de
  * la nota y la pastilla encendida de su tira: antes las dos decían «BEAT SCANNER»
  * fijo, y con dos secciones eso convertía a la mitad de las notas en una mentira.
  *
- * ⚠️ Se recorren las categorías EN EL ORDEN DE LA NOTA y gana la primera que sea
+ * Se recorren las categorías EN EL ORDEN DE LA NOTA y gana la primera que sea
  * una sección — el mismo criterio que `nombreCategoria`. Es coherente y es lo menos
  * sorprendente: quien captura decide cuál va primero, y reordenar el array cambia
  * una etiqueta, no una URL.
  *
- * ⚠️ Cae a Beat Scanner cuando la nota no está en ninguna de las dos —una cápsula
+ * Cae a Beat Scanner cuando la nota no está en ninguna de las dos —una cápsula
  * del Fenómeno Residente, por ejemplo—. No es exacto, pero es lo que el sitio ya
  * hacía para TODAS las notas, y la alternativa —una migaja sin sección— dejaría a
  * esas notas sin salida hacia arriba.
@@ -75,13 +75,13 @@ export interface Firma {
 }
 
 /**
- * 🔴 Las INICIALES con las que se rellena el hueco de la foto.
+ * Las INICIALES con las que se rellena el hueco de la foto.
  *
  * Antes ese hueco era un círculo con degradado y nada dentro, y a simple vista se
  * leía como una imagen que no cargó. Un monograma dice «no hay retrato de esta
  * persona», que es la verdad.
  *
- * ⚠️ El caso raro está medido, no imaginado: el contenido capturado usa el texto
+ * El caso raro está medido, no imaginado: el contenido capturado usa el texto
  * libre y ahí la misma persona aparece como «FO», «Fernanda Ortíz» y «Fernanda
  * Ortiz». Una firma que YA son iniciales —una sola palabra, en mayúsculas, corta—
  * se deja tal cual; partirla daría «F».
@@ -103,14 +103,14 @@ function monogramaDe(nombre: string): string {
 /**
  * La firma.
  *
- * 🔴 Hay DOS campos y no dicen lo mismo: `autores` es una relación a la colección
+ * Hay DOS campos y no dicen lo mismo: `autores` es una relación a la colección
  * `autores` y `autor` es texto libre. El contenido capturado usa solo el texto
  * libre, y ahí ya aparece la misma persona escrita de tres formas —«FO»,
  * «Fernanda Ortíz», «Fernanda Ortiz»—. Se prefiere la relación cuando existe,
  * porque es la única que puede dar una firma estable, una foto y una página de
  * autor.
  *
- * ⚠️ La foto solo llega si quien consulta pidió `depth: 2`: con 1 el autor viene
+ * La foto solo llega si quien consulta pidió `depth: 2`: con 1 el autor viene
  * poblado pero su `foto` sigue siendo un id. `obtenerNota` ya lo hace, y es la
  * única que necesita la ficha. Si llegara como id, `urlMedia` devuelve `null` y se
  * pinta el monograma — degrada, no truena.

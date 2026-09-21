@@ -23,7 +23,7 @@ interface:
     - en un índice paginado, canonizar la página 2 a SÍ MISMA con su `?pagina=2` y
       añadir ` — Página N` al `<title>`: sin lo primero Google la lee como
       duplicado de la 1 y las 42 notas que solo viven ahí se quedan sin indexar;
-      sin lo segundo las cinco páginas comparten título. ⚠️ `Base.astro` NO lee el
+      sin lo segundo las cinco páginas comparten título. `Base.astro` NO lee el
       parámetro de la URL: lo pasa la PÁGINA, y por eso `/alexa?pagina=7` no puede
       inventarse una canónica. Es el ÚNICO parámetro que entra en la canónica
     - que `og:image` sea siempre ABSOLUTA y nunca un SVG: las plataformas descartan

@@ -4,7 +4,7 @@ interface:
   default_prompt: |
     Trabaja como el agente de contenido de este proyecto Beat 100.9.
 
-    🔴 El backend es **Payload** (`cms-estaciones`), por su API REST y SOLO desde
+    El backend es **Payload** (`cms-estaciones`), por su API REST y SOLO desde
     el servidor. No es WordPress: el acta vieja de este agente describía un
     WordPress headless en `beatdigital.com.mx/wp-json/wp/v2`, con `src/lib/api.js`,
     `src/lib/formatters.js`, `src/consts.ts` y colecciones de contenido de Astro
@@ -15,7 +15,7 @@ interface:
     Tu alcance principal incluye:
     - `src/lib/cms/` — el transporte (`client.ts`) y un módulo por dominio:
       `noticias`, `categorias`, `listas`, `especiales`, `eventos`, `programacion`,
-      `aire`, `estacion`. ⚠️ `publicidad.ts` NO es tuyo: es de ads
+      `aire`, `estacion`. `publicidad.ts` NO es tuyo: es de ads
     - `src/lib/paginacion.ts` — el contrato de `?pagina=N`: el tope, la
       validación y la ventana de números de la tira
     - `src/lib/nota.ts`, `src/lib/video.ts` y `src/lib/audio.ts` — presentación
@@ -63,14 +63,14 @@ interface:
       que un cambio en el CMS no rompe el front hasta que alguien corra
       `pnpm sync:types`. El precio: hay colecciones más nuevas que el lock y su
       tipo se declara a mano (`Banner`, `EntradaBitacora`)
-    - ⚠️ en Postgres un `!= 'pieza'` NO devuelve las filas con NULL — de ahí el
+    - en Postgres un `!= 'pieza'` NO devuelve las filas con NULL — de ahí el
       `or` con `exists: false` en `noticias.ts`
-    - ⚠️ un campo vacío del admin llega como cadena vacía, no `null`: se lee con
+    - un campo vacío del admin llega como cadena vacía, no `null`: se lee con
       `?.trim() ||` y NUNCA con `??`
-    - ⚠️ un `depth` insuficiente no da error: da un id. `imagen.url` sale
+    - un `depth` insuficiente no da error: da un id. `imagen.url` sale
       `undefined` y la foto no se pinta. Vale igual para `audio.archivo`, que solo
       llega poblado en `obtenerNota` (`depth: 2`)
-    - ⚠️ `noticias.audio.fuente` es un desplegable CON valor por omisión, así que
+    - `noticias.audio.fuente` es un desplegable CON valor por omisión, así que
       «embed» significa «nadie tocó este campo» en las 43 notas anteriores al
       2026-09-15. No decide nada: decide qué hay capturado, y el archivo gana
     - el SEO entero —título, canónica, Open Graph, JSON-LD, sitemaps y el grupo
@@ -82,7 +82,7 @@ interface:
       queda PUESTO: Payload respeta `page` con `pagination=false` (comprobado), y
       el total lo trae `cmsContarEstacion` en una consulta aparte sin `page`, con
       timeout corto y `catch` total, que las cinco páginas comparten
-    - ⚠️ el tamaño de página es CONSTANTE entre páginas: el desplazamiento es
+    - el tamaño de página es CONSTANTE entre páginas: el desplazamiento es
       `(page - 1) * limit`, así que un `limit` distinto en la 2 se salta una nota
       por salto. La destacada sale de la tanda y solo existe en la página 1
     - el front es cliente de SOLO LECTURA

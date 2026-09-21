@@ -2,43 +2,43 @@
 /**
  * La parrilla — §9 del mapa de sitio.
  *
- * 🔴 PARTIDA EN DOS el 2026-09-09 (Carlos): «vamos a aprovechar para sacar dos
+ * PARTIDA EN DOS el 2026-09-09 (Carlos): «vamos a aprovechar para sacar dos
  * páginas de ahí». Esta página encabezaba con **AL AIRE AHORA** y seguía con la
  * rejilla de la semana; el panel se mudó entero a `/en-vivo`, que es donde alguien
  * pregunta «¿qué estoy oyendo?». Aquí queda la rejilla, que contesta la otra
  * pregunta —«¿qué suena el sábado a las nueve?»— y es la que trae a esta página.
  *
- * ⚠️ Con el panel se fue el `programacion-box`, y NO se reubicó. Colgaba de él
+ * Con el panel se fue el `programacion-box`, y NO se reubicó. Colgaba de él
  * («tras AL AIRE AHORA, antes de la parrilla — el único punto de corte que
  * tiene», `agents/ads.md`) y sin ese corte los dos sitios que quedan son peores:
  * arriba sería un anuncio antes de cualquier contenido, y abajo quedaría pegado
  * al leaderboard. Decisión pendiente de Carlos; no se rellena por rellenar.
  *
- * ⚠️ El lienzo trae además tres casillas de filtro sobre la parrilla y una rejilla
+ * El lienzo trae además tres casillas de filtro sobre la parrilla y una rejilla
  * «SHOWS INTERNACIONALES» con su conteo, y no están, por decisión de Carlos
  * (2026-09-09): «no lo necesitamos, el diseño se lo inventó». Internacional /
  * sindicado / propio no es una distinción que la estación lleve en la operación.
  * Se construyeron, se acordó el campo con el CMS y se retiraron sin desplegarlo.
  * El porqué completo y qué haría falta para que vuelvan, en `lib/cms/programacion.ts`.
  *
- * 🔴 Y con el panel se fue lo último que apartaba a esta página de las demás: YA
+ * Y con el panel se fue lo último que apartaba a esta página de las demás: YA
  * LLEVA `CabezaSeccion`, como las otras siete. Era la única excepción del sitio, y
  * su motivo era el hero —un display de 64px repitiendo el nombre de la sección
  * encima de un panel que ya decía «AL AIRE AHORA · RUSH HOUR» empujaba la señal
  * abajo del pliegue—. Sin hero, la excepción no tenía de qué colgar.
  *
- * ⚠️ El titular es «PROGRAMACIÓN» a secas, en grande, sin kicker (Carlos,
+ * El titular es «PROGRAMACIÓN» a secas, en grande, sin kicker (Carlos,
  * 2026-09-09): «quita lo de LA SEMANA COMPLETA, solo ponle PROGRAMACIÓN en grande,
  * no en chiquito». El lienzo pone «PARRILLA 2026» chiquito sobre otro titular
  * grande, y las tres piezas se cayeron el mismo día —el año, el kicker y «LA
  * SEMANA COMPLETA»—. «Parrilla» es como le decimos en la casa; «Programación» es
  * como se enlaza y como la busca la gente.
  *
- * ⚠️ Se pierde lo único que anunciaba que la rejilla es de SIETE días y no la de
+ * Se pierde lo único que anunciaba que la rejilla es de SIETE días y no la de
  * hoy. Se acepta: la propia rejilla lo enseña con sus siete columnas rotuladas,
  * que convence más que prometerlo en un titular.
  *
- * ⚠️ Y la tira de secciones ahora marca `/programacion` como activa, que antes no
+ * Y la tira de secciones ahora marca `/programacion` como activa, que antes no
  * podía: la entrada no estaba en `SECCIONES` hasta ese mismo día.
  */
 import Base from '@/layouts/Base.astro';
@@ -80,7 +80,7 @@ const HORAS = Array.from({ length: 24 }, (_, h) => comoHora(h * 60));
       semana.some((d) => d.segmentos.length > 0) && (
         <section class="pr-semana">
           {/*
-            🔴 La rejilla: UN solo DOM para las dos maquetaciones.
+            La rejilla: UN solo DOM para las dos maquetaciones.
 
             En escritorio es una tabla de 7 columnas × 24 horas y cada celda está
             colocada al MINUTO —`top` y `height` salen de la hora capturada, no de
@@ -93,7 +93,7 @@ const HORAS = Array.from({ length: 24 }, (_, h) => comoHora(h * 60));
             arrastrando — es la misma razón por la que la tira de secciones se
             envuelve en vez de hacerse carrusel.
 
-            ⚠️ Y por eso el marcado va INTERLEAVADO (`.pa-dia` envuelve su rótulo y
+            Y por eso el marcado va INTERLEAVADO (`.pa-dia` envuelve su rótulo y
             su columna) en vez de una fila de rótulos y luego una de columnas: así
             el orden del DOM ya es el correcto para móvil, y no hace falta reordenar
             con `grid-row`, que es lo que deja a un lector de pantalla leyendo los
@@ -117,7 +117,7 @@ const HORAS = Array.from({ length: 24 }, (_, h) => comoHora(h * 60));
                     const dur = s.hasta - s.desde;
                     const rango = `${comoHora(s.desde)} — ${comoHora(s.hasta)}`;
                     /*
-                      🔴 El rango se pinta SIEMPRE y quien lo esconde es el CSS, no
+                      El rango se pinta SIEMPRE y quien lo esconde es el CSS, no
                       esta condición. Empezó al revés —se omitía cuando la celda no
                       tenía alto— y eso dejaba la lista de MÓVIL sin horas: ahí no
                       hay rejilla que las diga, la hora es el dato. Lo que no cabe
@@ -148,14 +148,14 @@ const HORAS = Array.from({ length: 24 }, (_, h) => comoHora(h * 60));
                         title={`${s.programa.nombre} · ${ROTULO_DIA[s.dia]} ${rango}`}
                       >
                         {/*
-                          🔴 El punto de tally, el mismo de `/en-vivo` y el único
+                          El punto de tally, el mismo de `/en-vivo` y el único
                           color de la interfaz (movimiento.md §8). Va en el marcado
                           de TODAS las celdas y lo enciende el CSS con `es-aire`,
                           que es la clase que conmuta `senal.ts`: así la celda que
                           se enciende a las 21:00 en una pestaña abierta desde las
                           20:00 no necesita que el servidor vuelva a pintar nada.
 
-                          ⚠️ Elemento propio y no un `::before` de `.pa-nombre`: ahí
+                          Elemento propio y no un `::before` de `.pa-nombre`: ahí
                           ya vive la flecha de `es-continua`, y un bloque que empezó
                           ayer y sigue al aire es las dos cosas a la vez. Dos reglas
                           peleándose el mismo pseudo-elemento las gana una sola, y
@@ -190,7 +190,7 @@ const HORAS = Array.from({ length: 24 }, (_, h) => comoHora(h * 60));
      La página
      ============================================================ */
   /*
-    🔴 SIN padding. Lo pone cada bloque, porque desde el 2026-09-09 el primero es
+    SIN padding. Lo pone cada bloque, porque desde el 2026-09-09 el primero es
     `CabezaSeccion` y ese componente trae el suyo (`28px 24px 0`): sumarle el de
     aquí metía la tira de secciones 48px adentro. Es la misma forma que
     `eventos/[slug].astro`, que también abre con la cabecera compartida.
@@ -300,7 +300,7 @@ const HORAS = Array.from({ length: 24 }, (_, h) => comoHora(h * 60));
       box-shadow var(--dur-2) var(--ease-out);
   }
   /*
-    ⚠️ El hover se salta la celda al aire: es blanca con texto negro, así que
+    El hover se salta la celda al aire: es blanca con texto negro, así que
     aclararle el fondo y pintarle el nombre en `--mist-0` la dejaba en blanco
     sobre blanco. Su propio hover va debajo, con la celda invertida.
   */
@@ -369,7 +369,7 @@ const HORAS = Array.from({ length: 24 }, (_, h) => comoHora(h * 60));
     font-weight: 700;
   }
   /*
-    ⚠️ El secundario NO puede ser `--text-faint`: los tokens de texto del DS están
+    El secundario NO puede ser `--text-faint`: los tokens de texto del DS están
     calculados sobre negro y sobre blanco desaparecen — es lo mismo que le pasa a
     la barra del player, la otra superficie clara del sitio. `--graphite-3` es el
     gris que sí se lee. Va también en la flecha de `es-continua`, que es un
@@ -385,7 +385,7 @@ const HORAS = Array.from({ length: 24 }, (_, h) => comoHora(h * 60));
     mismo reparto que los rótulos del hero de `/en-vivo`: el marcado lo trae y la
     clase lo enciende, así que ninguna cadena de estado vive en JavaScript.
 
-    ⚠️ `inline-block` y no `absolute` en la esquina: la celda de una hora mide 32px
+    `inline-block` y no `absolute` en la esquina: la celda de una hora mide 32px
     de alto y el nombre le ocupa dos líneas, así que un punto flotando arriba a la
     derecha se le monta encima al texto. Delante del nombre nunca lo tapa, y en
     móvil —donde la celda es una fila de lista— cae en el mismo sitio sin una sola
@@ -420,7 +420,7 @@ const HORAS = Array.from({ length: 24 }, (_, h) => comoHora(h * 60));
      ============================================================ */
   @media (max-width: 899px) {
     /*
-      ⚠️ Aquí vivía un `clamp` para el titular. Se fue con él: el de
+      Aquí vivía un `clamp` para el titular. Se fue con él: el de
       `CabezaSeccion` está medido contra esta palabra exacta —«PROGRAMACIÓN» a 38px
       medía 406px en una caja de 343— así que el caso ya estaba resuelto en el
       componente y tenerlo dos veces era esperar a que divergieran.
@@ -430,7 +430,7 @@ const HORAS = Array.from({ length: 24 }, (_, h) => comoHora(h * 60));
     }
 
     /*
-      🔴 La rejilla se SUELTA a lista: un día debajo de otro, cada celda como una
+      La rejilla se SUELTA a lista: un día debajo de otro, cada celda como una
       fila con su hora. Siete columnas en 375px dan 47px por día y ahí no cabe el
       nombre de un programa.
 
@@ -453,7 +453,7 @@ const HORAS = Array.from({ length: 24 }, (_, h) => comoHora(h * 60));
       margin-top: 26px;
     }
     /*
-      ⚠️ `:first-of-type` NO sirve aquí: los hermanos son todos `div`, así que el
+      `:first-of-type` NO sirve aquí: los hermanos son todos `div`, así que el
       primero de su tipo es el canal de horas, no el lunes. Se apunta al lunes por
       su posición REAL —el `div` que va justo detrás del canal—, que es lo que se
       quería decir.
@@ -478,7 +478,7 @@ const HORAS = Array.from({ length: 24 }, (_, h) => comoHora(h * 60));
     .pa-celda {
       position: static;
       height: auto;
-      /* 🔴 El ancho del carril se anula: aquí la celda es una fila de lista, y
+      /* El ancho del carril se anula: aquí la celda es una fila de lista, y
          `width: calc(100% / 2)` dejaría media fila en cuanto hubiera un solape. */
       left: auto;
       width: auto;
@@ -502,7 +502,7 @@ const HORAS = Array.from({ length: 24 }, (_, h) => comoHora(h * 60));
       font-size: 8.5px;
     }
     /*
-      🔴 Aquí el rango vuelve, incluidas las celdas que en escritorio no tenían
+      Aquí el rango vuelve, incluidas las celdas que en escritorio no tenían
       alto para él: en una lista la hora es el dato, no un adorno.
     */
     .pa-celda[data-corto] .pa-rango,

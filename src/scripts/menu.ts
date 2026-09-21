@@ -1,7 +1,7 @@
 /**
  * El menú a pantalla completa: abrir, cerrar y dejar el foco donde debe.
  *
- * 🔴 El estado vive en el OVERLAY (`#beat-menu[data-abierto]`), que se pinta por
+ * El estado vive en el OVERLAY (`#beat-menu[data-abierto]`), que se pinta por
  * página, y no en la cabecera, que es persistente. Así una navegación lo cierra
  * sola —el nodo se reemplaza— y no hay que acordarse de nada. Lo único que hay
  * que sincronizar es el `aria-expanded` de las hamburguesas, que sí sobreviven.
@@ -30,12 +30,12 @@ function estaAbierto(): boolean {
 /**
  * Lo que hay DETRÁS del menú se apaga.
  *
- * 🔴 `inert` y no solo `aria-hidden`: el overlay tapa el contenido pero sus
+ * `inert` y no solo `aria-hidden`: el overlay tapa el contenido pero sus
  * enlaces siguen siendo enfocables con el tabulador, así que sin esto el foco se
  * va a pasear por una página invisible. `inert` los saca del orden de foco y del
  * árbol de accesibilidad de una vez.
  *
- * ⚠️ El CHROME se queda fuera a propósito: la barra del player sigue usable con el
+ * El CHROME se queda fuera a propósito: la barra del player sigue usable con el
  * menú abierto, que es la razón por la que el overlay va por debajo de ella.
  */
 function apagarFondo(apagar: boolean): void {
@@ -111,7 +111,7 @@ function abrirMenu(desde: HTMLElement | null): void {
   /*
     Y los rótulos se descifran, como los titulares del Inicio.
 
-    🔴 Hace falta pedirlo a mano: el observador que dirige ese efecto ya dio por
+    Hace falta pedirlo a mano: el observador que dirige ese efecto ya dio por
     vistos estos enlaces en la carga —el overlay se oculta con `visibility`, que
     no cambia su geometría— así que para cuando alguien abre el menú el efecto ya
     se había gastado sin que nadie lo viera.
@@ -119,7 +119,7 @@ function abrirMenu(desde: HTMLElement | null): void {
   for (const t of o.querySelectorAll<HTMLElement>('[data-escribir]')) descifrarAhora(t);
 
   /*
-    🔴 El foco entra al CONTENEDOR, no al primer enlace.
+    El foco entra al CONTENEDOR, no al primer enlace.
 
     Estaba en `querySelector('a').focus()` y eso pintaba el anillo de foco sobre
     «Fenómeno Residente» cada vez que se abría el menú, en cualquier sección — lo
@@ -128,7 +128,7 @@ function abrirMenu(desde: HTMLElement | null): void {
     curso, con `aria-current` y `.es-activo`, así que dos entradas resaltadas a la
     vez —una por estar activa y otra por tener el foco— se contradicen.
 
-    ⚠️ Enfocar el contenedor sigue cumpliendo lo que hacía falta: un lector de
+    Enfocar el contenedor sigue cumpliendo lo que hacía falta: un lector de
     pantalla anuncia que entró al menú. Y quien navegue con teclado tabula desde
     ahí al primer enlace, que entonces sí muestra su anillo — porque ese foco lo
     pidió él. Es el patrón estándar de un diálogo: se enfoca el contenedor, no su

@@ -35,7 +35,7 @@ const otros = proximos.filter((e) => e.id !== evento.id).slice(0, 3);
 /**
  * Las partes de la fecha, en hora de MÉXICO.
  *
- * 🔴 La zona va fija y no se deja al reloj del visitante: un evento a las 21:00 en
+ * La zona va fija y no se deja al reloj del visitante: un evento a las 21:00 en
  * la Ciudad de México es a las 21:00, lo mire alguien desde Tijuana o desde
  * Madrid. Formatear en la zona del lector convertiría el dato en una hora a la que
  * nadie va a poder ir.
@@ -58,7 +58,7 @@ const inicio = partes(evento.inicio);
 const fin = partes(evento.fin);
 
 /**
- * 🔴 UNA sola fecha cuando el evento empieza y termina el mismo día.
+ * UNA sola fecha cuando el evento empieza y termina el mismo día.
  *
  * La ficha decía «SÁBADO, 14 DE NOVIEMBRE · 00:00 / hasta SÁBADO, 14 DE NOVIEMBRE
  * · 23:30» — la misma fecha dos veces, y con el peso tipográfico de un dato nuevo
@@ -71,14 +71,14 @@ const fin = partes(evento.fin);
  * solo sobrevive cuando el evento cruza de día —un festival de tres— que es donde
  * la fecha de cierre dice algo que la de apertura no.
  *
- * ⚠️ Y si las dos horas coinciden no hay rango que pintar: hay eventos capturados
+ * Y si las dos horas coinciden no hay rango que pintar: hay eventos capturados
  * con `fin` igual al `inicio`, y «00:00 — 00:00» es peor que no decir nada.
  */
 const cierraOtroDia = !!(inicio && fin && !mismoDiaEnMexico(inicio.fecha, fin.fecha));
 const cierraElMismoDia = !!(inicio && fin && !cierraOtroDia && fin.hora !== inicio.hora);
 
 /*
-  🔴 El lugar y la ciudad, sin repetir: llegaban los dos con «Próximamente» y la
+  El lugar y la ciudad, sin repetir: llegaban los dos con «Próximamente» y la
   ficha decía `PRÓXIMAMENTE · PRÓXIMAMENTE`. Ver `lib/evento.ts`.
 */
 const lugar = donde(evento);
@@ -132,7 +132,7 @@ const foto = urlMedia(evento.portada, 'large');
               inicio ? (
                 <span class="ev-dato-valor">
                   {/*
-                    ⚠️ El `<time>` envuelve SOLO el inicio: el atributo `datetime`
+                    El `<time>` envuelve SOLO el inicio: el atributo `datetime`
                     declara un instante, y meter «— 23:30» dentro haría que el
                     marcado dijera una cosa y el texto otra. La hora de cierre
                     lleva su propio `<time>`.
@@ -168,7 +168,7 @@ const foto = urlMedia(evento.portada, 'large');
           }
 
           {/*
-            🔴 Aquí estaba la fila «QUÉ ES» con el tipo del evento, y se retiró
+            Aquí estaba la fila «QUÉ ES» con el tipo del evento, y se retiró
             (Carlos, 2026-09-08): «eso de propio suena raro/feo».
 
             Decía «QUÉ ES · PROPIOS» —en PLURAL para un solo evento, porque reusaba
@@ -183,7 +183,7 @@ const foto = urlMedia(evento.portada, 'large');
           {
             accion && (
               /*
-                🔴 `rel="noopener"` porque el destino es de un tercero —una
+                `rel="noopener"` porque el destino es de un tercero —una
                 boletera— y sin él esa página puede tocar `window.opener`.
               */
               <a
@@ -238,7 +238,7 @@ const foto = urlMedia(evento.portada, 'large');
     padding: 30px 24px 0;
   }
   /*
-    🔴 Cuadrado, como en la Agenda: el evento trae un banner diseñado, no una foto.
+    Cuadrado, como en la Agenda: el evento trae un banner diseñado, no una foto.
     Con un tope de ancho para que en una pantalla grande no ocupe media página —un
     cuadrado a 900px de ancho son 900 de alto— y centrado en su columna.
   */
@@ -279,7 +279,7 @@ const foto = urlMedia(evento.portada, 'large');
   }
 
   /*
-    🔴 El `sticky` es de la COLUMNA, no de la ficha. Si se quedara en la ficha, el
+    El `sticky` es de la COLUMNA, no de la ficha. Si se quedara en la ficha, el
     box se iría con el scroll y el riel acompañaría a medias. Cuelga de
     `--chrome-h`, lo que mide la barra pegada de arriba — igual que `.nt-riel` en
     `noticias/[slug].astro`.
@@ -369,7 +369,7 @@ const foto = urlMedia(evento.portada, 'large');
       grid-template-columns: 1fr;
       gap: 24px;
     }
-    /* 🔴 Una columna: el riel deja de ser riel. `static`, porque un `sticky` sin
+    /* Una columna: el riel deja de ser riel. `static`, porque un `sticky` sin
        columna al lado se queda pegado al viewport tapando lo que se lee; y el box
        cae tras la ficha, cuando ya se sabe cuándo y dónde es. */
     .ev-riel {

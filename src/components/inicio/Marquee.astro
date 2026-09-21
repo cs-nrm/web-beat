@@ -2,20 +2,20 @@
 /**
  * El cintillo de la marca.
  *
- * 🔴 Lleva el LEMA en texto, y vuelve a llevarlo (Carlos, 2026-09-08). El
+ * Lleva el LEMA en texto, y vuelve a llevarlo (Carlos, 2026-09-08). El
  * recorrido de este archivo importa para no deshacerlo por tercera vez: decía
  * «BEAT 100.9 · TOTAL MUSIC» heredado del v1, el 2026-09-07 se cambió por el
  * wordmark porque «Total Music» sale del sitio, y ahora regresa a texto con el
  * lema nuevo. Lo que se retiró era la MARCA VIEJA, no la idea de un lema.
  *
- * ⚠️ El texto lo pasa la página y no se escribe aquí: es el mismo del `<title>`
+ * El texto lo pasa la página y no se escribe aquí: es el mismo del `<title>`
  * del Inicio, y tenerlo en dos sitios es como se llega a que la pestaña diga una
  * cosa y el cintillo otra.
  *
- * 🔴 Se repite en dos GRUPOS iguales y la animación recorre exactamente la mitad:
+ * Se repite en dos GRUPOS iguales y la animación recorre exactamente la mitad:
  * el segundo grupo entra por donde sale el primero y el bucle no tiene costura.
  *
- * ⚠️ Lo que hace falta y antes faltaba: **un grupo tiene que ser más ancho que la
+ * Lo que hace falta y antes faltaba: **un grupo tiene que ser más ancho que la
  * pantalla**. La versión más vieja repetía su contenido solo dos veces —un ejemplar
  * por grupo— y medía 998px de pista en una ventana de 1440. O sea que tras recorrer
  * sus 499px quedaban 941px de VACÍO a la derecha, y el bucle reiniciaba a la
@@ -32,7 +32,7 @@ const { texto } = Astro.props;
 /**
  * Ejemplares por grupo.
  *
- * 🔴 Este número se RECALCULA cada vez que cambia el contenido, y no es opcional:
+ * Este número se RECALCULA cada vez que cambia el contenido, y no es opcional:
  * de él depende que el grupo sea más ancho que la pantalla. El historial del
  * archivo es la prueba —con el lema viejo eran 8 ejemplares de ~499px, con el
  * wordmark hubo que subirlos a 28 porque cada uno medía 144—.
@@ -42,11 +42,11 @@ const { texto } = Astro.props;
  * sobre el build a 1440—, que cubre incluso una pantalla 5K y queda muy por encima
  * de los ~4030px del wordmark.
  *
- * ⚠️ Medirlo importó: a ojo lo puse en 623px y sobreestimé por 118. La estimación
+ * Medirlo importó: a ojo lo puse en 623px y sobreestimé por 118. La estimación
  * habría dejado la velocidad un 16% baja, que es de las cosas que no se ven mal —
  * solo se ven lentas.
  *
- * ⚠️ Sube este número si aparece hueco en una ultrapanorámica — la velocidad se
+ * Sube este número si aparece hueco en una ultrapanorámica — la velocidad se
  * ajusta sola, ver `--marquee-dur`.
  */
 const COPIAS = 8;
@@ -84,14 +84,14 @@ const ejemplares = Array.from({ length: COPIAS });
     display: flex;
     width: max-content;
     /*
-      🔴 La duración cuelga del NÚMERO DE COPIAS, no es un número suelto.
+      La duración cuelga del NÚMERO DE COPIAS, no es un número suelto.
 
       Lo que se mantiene constante son los ~75 px/s; el segundo por ejemplar sale
       de dividir su ancho entre esa velocidad. Con un número fijo, cambiar la
       cantidad de copias cambiaría la velocidad en silencio — más copias, misma
       duración, más rápido.
 
-      🔴 10s por ejemplar = 741px / 75 px/s. El historial del archivo es la
+      10s por ejemplar = 741px / 75 px/s. El historial del archivo es la
       advertencia: con el lema viejo eran 6.6s para 499px, y al pasar al wordmark
       hubo que bajarlos a 1.9s porque el ejemplar cayó a 144px. Copiar el número
       sin recalcular deja el cintillo casi parado o disparado.
@@ -110,7 +110,7 @@ const ejemplares = Array.from({ length: COPIAS });
     font-weight: 800;
     white-space: nowrap;
     /*
-      🔴 No va a blanco puro, va en `--mist-2` como iba el lema original. Con ocho
+      No va a blanco puro, va en `--mist-2` como iba el lema original. Con ocho
       ejemplares seguidos la diferencia deja de ser un matiz: la franja se
       convertiría en lo más brillante del Inicio y le competiría al mosaico que
       está justo arriba.
@@ -135,7 +135,7 @@ const ejemplares = Array.from({ length: COPIAS });
       font-size: 20px;
     }
     /*
-      🔴 La duración también baja, y esto es NUEVO respecto a la versión anterior.
+      La duración también baja, y esto es NUEVO respecto a la versión anterior.
 
       Lo que este archivo declara constante son los ~75 px/s, pero la duración
       vivía solo en el bloque de escritorio: con el ejemplar de móvil a 536px

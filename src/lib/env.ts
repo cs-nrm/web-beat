@@ -1,7 +1,7 @@
 /**
  * Lectura de variables de entorno de SERVIDOR en tiempo de EJECUCIÓN.
  *
- * 🔴 Por qué existe este archivo: `import.meta.env.FOO` **se sustituye por su
+ * Por qué existe este archivo: `import.meta.env.FOO` **se sustituye por su
  * valor al compilar**, no se lee al arrancar. Con `pnpm build` en local eso pasa
  * desapercibido, porque Vite carga el `.env` durante el build y el valor queda
  * horneado con el dato correcto. Pero en Docker la imagen se construye SIN
@@ -14,7 +14,7 @@
  * servidor: la MISMA imagen sirve para beta y para producción, cambiando solo el
  * entorno.
  *
- * ⚠️ Esto vale solo para variables **sin** prefijo `PUBLIC_`. Las `PUBLIC_*` van
+ * Esto vale solo para variables **sin** prefijo `PUBLIC_`. Las `PUBLIC_*` van
  * también al JavaScript del navegador, donde `process.env` no existe: esas tienen
  * que seguir siendo de build (se pasan como `--build-arg`, ver Dockerfile).
  */

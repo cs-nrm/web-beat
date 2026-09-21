@@ -1,12 +1,12 @@
 /**
  * `robots.txt` — la TERCERA capa de la política de indexación.
  *
- * 🔴 No existía, y era un agujero real. El plan pide tres capas y solo había dos:
+ * No existía, y era un agujero real. El plan pide tres capas y solo había dos:
  * el `X-Robots-Tag` del middleware y el `<meta robots>` del layout. Faltaba
  * justamente la que un rastreador lee ANTES de pedir nada — las otras dos solo
  * actúan sobre una respuesta que ya se sirvió.
  *
- * ⚠️ Y es una RUTA, no un archivo en `public/`. Tiene que serlo: la decisión
+ * Y es una RUTA, no un archivo en `public/`. Tiene que serlo: la decisión
  * depende del `Host` de cada petición, porque la beta y el sitio real son la MISMA
  * imagen de Docker. Un archivo estático diría lo mismo en los dos, y entonces o
  * la beta invita a rastrear, o el sitio real se cierra a sí mismo. Es el mismo
@@ -20,7 +20,7 @@ export const prerender = false;
 
 export const GET: APIRoute = ({ url }) => {
   /*
-    🔴 Las DOS reglas, como el middleware y el `<meta robots>`: la del dominio con
+    Las DOS reglas, como el middleware y el `<meta robots>`: la del dominio con
     el que se compiló y la del `Host` de esta petición. Basta con que una cierre.
     Con una sola, este archivo podía invitar a rastrear un despliegue que las
     otras dos capas estaban marcando `noindex`.

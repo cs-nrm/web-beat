@@ -2,21 +2,21 @@
 /**
  * La tira de páginas de una vista de índice.
  *
- * 🔴 Nace el 2026-09-17 con un número detrás: Beat Scanner tenía **53 notas
+ * Nace el 2026-09-17 con un número detrás: Beat Scanner tenía **53 notas
  * publicadas y 11 alcanzables**. Las otras 42 respondían por URL y estaban en el
  * sitemap, pero desde el sitio no había manera de llegar a ellas. El contrato de la
  * URL —`?pagina=N`, el tope y la ventana de números— vive en `src/lib/paginacion.ts`.
  *
- * 🔴 Es SERVIDOR, no JavaScript: cada página tiene su enlace, se puede compartir,
+ * Es SERVIDOR, no JavaScript: cada página tiene su enlace, se puede compartir,
  * el buscador la recorre y funciona sin JS. Es el mismo criterio con el que la
  * Agenda resolvía su filtro en el servidor en vez de esconder filas en el cliente.
  *
- * ⚠️ Con una sola página no se pinta NADA. Es la regla de la casa —una zona sin
+ * Con una sola página no se pinta NADA. Es la regla de la casa —una zona sin
  * contenido se deja vacía y sin rótulo—: una tira que solo dice «1» cuenta el
  * inventario de la página que el lector ya tiene delante, que es exactamente lo
  * que tumbó el rótulo de `CabezaSeccion`.
  *
- * 🔴 Salvo si la página pedida NO EXISTE, y ahí sí se pinta. `?pagina=9` tecleado a
+ * Salvo si la página pedida NO EXISTE, y ahí sí se pinta. `?pagina=9` tecleado a
  * mano en una sección de cinco sirve una vista vacía, y sin tira era un callejón
  * sin salida: nada en pantalla llevaba de vuelta al contenido. Peor todavía con un
  * «Anterior» ingenuo —9 → 8 → 7—, que son tres vistas vacías más antes de llegar a

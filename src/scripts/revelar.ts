@@ -9,7 +9,7 @@
  *
  * El cuarto, el conteo de cifras, sí necesita JavaScript porque cambia texto.
  *
- * 🔴 REGLA DE ORO: el contenido nunca depende de esto para verse.
+ * REGLA DE ORO: el contenido nunca depende de esto para verse.
  *
  * El estado inicial —una foto recortada, un ítem de lista transparente— solo se
  * aplica cuando este script ya marcó el elemento con `data-animando`. Sin JS, sin
@@ -37,7 +37,7 @@ const DURACION_CONTEO = 900;
 const LIMPIEZA_MS = 1400;
 
 /*
- * ⚠️ Aquí VIVÍA `[data-revelar]`: una máscara que subía desde abajo sobre cada
+ * Aquí VIVÍA `[data-revelar]`: una máscara que subía desde abajo sobre cada
  * foto. Se retiró a petición de Carlos —«una cortinilla que se abre hacia arriba»,
  * y no convencía—. El mecanismo se queda porque lo usan los otros tres efectos.
  */
@@ -48,7 +48,7 @@ let vigia: IntersectionObserver | null = null;
 /**
  * El oyente de scroll de la repesca actual.
  *
- * 🔴 Hay que guardarlo para poder RETIRARLO. Se crea dentro de `iniciar()`, así que
+ * Hay que guardarlo para poder RETIRARLO. Se crea dentro de `iniciar()`, así que
  * es un cierre distinto en cada navegación y `removeEventListener` con una función
  * nueva no quita la vieja. Sin esto, cada visita dejaba otro oyente de scroll
  * recorriendo una lista de elementos que ya no están en la página: no se ve, no da
@@ -59,11 +59,11 @@ let repescaEnCurso: (() => void) | null = null;
 /**
  * Sube una cifra desde cero hasta su valor real.
  *
- * 🔴 Se conserva el texto alrededor del número. Estas cifras no son números
+ * Se conserva el texto alrededor del número. Estas cifras no son números
  * pelados: son "2 PUBLICADAS", "12 MIN". Reemplazar el nodo entero borraría la
  * unidad, que es justo lo que le da sentido al dato.
  *
- * 🔴 Y el rescate no es opcional aquí, a diferencia de los otros tres efectos: si
+ * Y el rescate no es opcional aquí, a diferencia de los otros tres efectos: si
  * la animación se queda a medias, la pantalla no muestra un adorno incompleto,
  * muestra un DATO FALSO. "0 PUBLICADAS" cuando hay dos es peor que no animar nada.
  */
@@ -128,7 +128,7 @@ function iniciar(): void {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   /*
-   * 🔴 Se barre cualquier resto del efecto ANTES de decidir nada.
+   * Se barre cualquier resto del efecto ANTES de decidir nada.
    *
    * El estado escondido vive en un atributo del DOM, y el DOM SOBREVIVE a la
    * navegación: al volver al Home desde una nota, las fotos volvían con su
@@ -159,7 +159,7 @@ function iniciar(): void {
   }
 
   /*
-   * 🔴 EL ORDEN IMPORTA, y es la corrección más importante de este archivo.
+   * EL ORDEN IMPORTA, y es la corrección más importante de este archivo.
    *
    * La versión anterior escondía todo al arrancar y esperaba que el observador lo
    * devolviera. Resultado real, no hipotético: 13 elementos escondidos y 0
@@ -178,7 +178,7 @@ function iniciar(): void {
   let primeraTanda = true;
 
   /*
-   * 🔴 En la primera tanda NO se cree lo que dice el observador sobre qué está en
+   * En la primera tanda NO se cree lo que dice el observador sobre qué está en
    * pantalla: se mide.
    *
    * Al volver al Home desde una nota, el observador entrega su primera tanda
@@ -200,7 +200,7 @@ function iniciar(): void {
     vigia?.unobserve(el);
 
     /*
-     * 🔴 Al terminar se RETIRA el andamiaje, y esto es lo que garantiza el
+     * Al terminar se RETIRA el andamiaje, y esto es lo que garantiza el
      * resultado.
      *
      * Hasta aquí el estado final dependía de que una transición CSS llegara a su
@@ -222,7 +222,7 @@ function iniciar(): void {
   };
 
   /*
-   * 🔴 La red de seguridad: una repesca por GEOMETRÍA, atada al scroll.
+   * La red de seguridad: una repesca por GEOMETRÍA, atada al scroll.
    *
    * El observador es el camino principal y funciona. Pero mientras el único modo
    * de volver a mostrar algo dependa de que él avise, existe la posibilidad de que

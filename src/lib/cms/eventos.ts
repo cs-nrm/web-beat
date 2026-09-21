@@ -15,7 +15,7 @@ export const TIPOS_EVENTO = [
  * El corte «desde cuándo» de la Agenda, redondeado al INICIO DEL DÍA en hora de
  * México.
  *
- * 🔴 Esto es la regla de oro del cliente aplicada a un caso nuevo. Lo natural sería
+ * Esto es la regla de oro del cliente aplicada a un caso nuevo. Lo natural sería
  * `where[inicio][greater_than_equal]=<ahora>`, y sería un error medido: el valor
  * cambia en cada petición, así que **cada visita generaría su propia entrada de
  * caché y ninguna acertaría nunca**. Es exactamente el bug que en `web-enfoque`
@@ -42,7 +42,7 @@ function desdeHoy(): string {
 /**
  * Los próximos eventos, del más cercano al más lejano.
  *
- * ⚠️ El orden es ASCENDENTE, al contrario que todo lo editorial: en una agenda lo
+ * El orden es ASCENDENTE, al contrario que todo lo editorial: en una agenda lo
  * relevante es lo que está por pasar, no lo último capturado.
  */
 export async function obtenerAgenda(cuantos = 4, tipo?: string | null): Promise<Evento[]> {

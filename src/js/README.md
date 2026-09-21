@@ -1,6 +1,6 @@
 # `src/js` — runtime de cliente heredado
 
-⚠️ **Estos archivos vienen del web-beat v1 (WordPress/SSG) y todavía NO están
+**Estos archivos vienen del web-beat v1 (WordPress/SSG) y todavía NO están
 cableados en el sitio nuevo.** Están aquí como material de port, no como código
 vivo. Ver decisión 7 y B6 del plan.
 
@@ -27,14 +27,14 @@ Es el activo irreemplazable: son ingresos, y no toca datos de WordPress.
 - **Un slot por formato**, con `sizeMapping`. Nunca pares desktop/mobile: causaban
   doble impresión porque los dos pedían anuncio aunque solo uno fuera visible.
 - El player sobrevive la navegación con `transition:persist`, con los listeners
-  limpiados en `astro:before-preparation`. 🔴 Esto es **requisito de producto**, no
+  limpiados en `astro:before-preparation`. Esto es **requisito de producto**, no
   detalle técnico: el §4.1 del mapa de sitio dice que el reproductor persistente
   "es la afirmación de que Beat sigue siendo una estación de radio en vivo".
-- 🔴 **El ad unit se lee del env, jamás se hardcodea.** Es una línea roja de la casa
+- **El ad unit se lee del env, jamás se hardcodea.** Es una línea roja de la casa
   por una razón de facturación: en los repos hermanos está pegado por copy-paste
   como `/<network>/StereoCien`, y servir impresiones de una estación a la cuenta de
   otra es un bug de dinero. Hay un grep en CI que lo vigila.
-- ⚠️ `agents/ads.md` publica el network ID **equivocado** (`21799830913`). El real,
+- `agents/ads.md` publica el network ID **equivocado** (`21799830913`). El real,
   el que usa `ads.js`, es **`23349147378`**. Corregir el doc al portar.
 
 ## Qué se REESCRIBE (no se hereda)
@@ -45,7 +45,7 @@ ni posible:
 - **`getInfoProg()`** ("al aire ahora / a continuación"): lee 7 booleanos ACF
   `lunes`…`domingo` y compara `acf.hora_inicio`/`hora_fin` como strings, con un
   `setInterval` de 5 min en el cliente. Con `programas.horarios[]` esto pasa a
-  **SSR**. ⚠️ Cuidado con el bloque que cruza medianoche (`horaFin <= horaInicio`).
+  **SSR**. Cuidado con el bloque que cruza medianoche (`horaFin <= horaInicio`).
 - **El player de podcast**: parsea `acf.ds` con `split('src="')` para sacar el `src`
   de un iframe crudo. En Payload es `podcasts.embedUrl`, ya normalizado por el hook
   `normalizarEmbedAudio` del CMS, que además valida contra una allow-list de 17
@@ -53,7 +53,7 @@ ni posible:
 - **El video de nota**: Plyr envuelve `.wp-block-embed-youtube` — clase de
   **Gutenberg**. En Payload el video es `noticias.video.{plataforma,url}` y el
   bloque `Embed` de Lexical, que guarda **solo la URL, nunca HTML crudo**.
-- 🔴 **Plyr y Toastify NO se heredan.** Hoy se cargan por página desde el CDN de
+- **Plyr y Toastify NO se heredan.** Hoy se cargan por página desde el CDN de
   NRM (`storage.googleapis.com/nrm-web/nrm/lib/`), `player.js:952` hace
   `new Plyr(...)` **sin guard** —así que truena en cualquier página donde el CDN no
   se haya cargado— y `votes.js` guardea `window.Toastify` y cae a `console.log`, o

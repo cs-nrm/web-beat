@@ -2,13 +2,13 @@
 /**
  * El audio PRINCIPAL de una nota, pegado bajo la foto.
  *
- * 🔴 Nace con **Microambiente** (Carlos, 2026-09-15): son notas como las demás,
+ * Nace con **Microambiente** (Carlos, 2026-09-15): son notas como las demás,
  * salvo que lo que las justifica es un audio. De ahí su sitio —arriba, contra la
  * foto, antes del cuerpo— y no dentro del texto: un reproductor a media nota se
  * encuentra cuando ya decidiste leerla, y aquí es lo primero que hay que poder
  * pulsar.
  *
- * ⚠️ No es exclusivo de esa sección. Cualquier nota con `audio` capturado lo pinta,
+ * No es exclusivo de esa sección. Cualquier nota con `audio` capturado lo pinta,
  * porque el campo es de `noticias` entero y esconderlo en las demás secciones sería
  * un dato capturado que no llega a ninguna parte — justo lo que pasaba con el grupo
  * `meta` antes del 2026-09-07.
@@ -20,7 +20,7 @@
  *   · `embed`   — el reproductor de la plataforma en un iframe. Se pinta tal cual
  *     llega: ni se estiliza ni se controla, porque es de otro dominio.
  *
- * 🔴 Y un tercero que no es un camino sino una salida: si el `embedUrl` apunta a
+ * Y un tercero que no es un camino sino una salida: si el `embedUrl` apunta a
  * una plataforma que no está en la lista de `src/lib/audio.ts`, se pinta un ENLACE.
  * Una nota de Microambiente sin su audio es una nota sin lo único que la hace de
  * Microambiente, así que el peor resultado posible aquí es el silencio.
@@ -49,12 +49,12 @@ const respaldo = fuente ? null : enlaceDeAudio(nota.audio);
       data-audio-id={String(nota.id)}
     >
       {/*
-        🔴 El botón es un `<button>` y no un `<div>`: entra con el tabulador, se
+        El botón es un `<button>` y no un `<div>`: entra con el tabulador, se
         anuncia como control y responde a la barra espaciadora sin una línea de
         JavaScript. El `aria-label` lo cambia el script al alternar, porque el
         nombre de un control tiene que decir lo que hace AHORA.
 
-        ⚠️ `cursor: pointer` va escrito abajo: Tailwind 4 lo quitó de su preflight y
+        `cursor: pointer` va escrito abajo: Tailwind 4 lo quitó de su preflight y
         un `<button>` se comporta como texto.
       */}
       <button
@@ -93,7 +93,7 @@ const respaldo = fuente ? null : enlaceDeAudio(nota.audio);
       />
 
       {/*
-        ⚠️ `--:--` y no `00:00` mientras no se sepa: un cero es un dato y esto es la
+        `--:--` y no `00:00` mientras no se sepa: un cero es un dato y esto es la
         ausencia de uno. Lo escribe el script en cuanto llegan los metadatos.
       */}
       <span class="beat-label au-tiempo">
@@ -111,13 +111,13 @@ const respaldo = fuente ? null : enlaceDeAudio(nota.audio);
       <span class="au-fallo" role="status">El audio de esta nota no se pudo cargar.</span>
 
       {/*
-        🔴 Sin JavaScript la barra de arriba es un control que no hace nada, y eso
+        Sin JavaScript la barra de arriba es un control que no hace nada, y eso
         el sitio no lo deja pasar. `<noscript>` la esconde y pone en su lugar el
         reproductor del navegador, que es feo y funciona.
       */}
       <noscript>
         {/*
-          🔴 `is:inline` NO es opcional: Astro IZA todo `<style>` de la plantilla al
+          `is:inline` NO es opcional: Astro IZA todo `<style>` de la plantilla al
           `<head>` y lo escopa. Sin la directiva, esta regla se aplicaría SIEMPRE y
           la barra quedaría invisible para todo el mundo — el fallo se vería como
           «el audio desapareció», no como un problema de noscript.
@@ -165,7 +165,7 @@ const respaldo = fuente ? null : enlaceDeAudio(nota.audio);
     Va PEGADO a la foto: 10px de separación y el mismo radio de media, para que se
     lea como una pieza del mismo bloque y no como el primer párrafo de la nota.
 
-    🔴 El margen LATERAL lo pone este archivo y no la página, y es lo que permite
+    El margen LATERAL lo pone este archivo y no la página, y es lo que permite
     que sin audio no quede nada: la nota inserta el componente sin envoltura, así
     que cuando no hay fuente no se emite ni un `<div>` con márgenes. Es el mismo
     valor que `.nt-hero-caja` —24px, y 16 en móvil, donde el hero va a sangre y el

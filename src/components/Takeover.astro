@@ -12,20 +12,20 @@
  *   · `propia` con imagen — imagen del anunciante con su enlace.
  *   · `propia` con video — un mp4 corto, con la imagen de respaldo detrás.
  *
- * 🔴 SIN CAMPAÑA NO SE EMITE NADA. Ni overlay, ni slot, ni marco vacío. Es la
+ * SIN CAMPAÑA NO SE EMITE NADA. Ni overlay, ni slot, ni marco vacío. Es la
  * diferencia con `Anuncio.astro`, que sí reserva su hueco: una franja vacía en el
  * Inicio es fea, pero un rectángulo vacío TAPANDO el Inicio es el sitio roto.
  *
- * 🔴 Y NO SE PINTA CON `Anuncio.astro` a propósito. Aquel reserva alto, escribe el
+ * Y NO SE PINTA CON `Anuncio.astro` a propósito. Aquel reserva alto, escribe el
  * rótulo «PUBLICIDAD» y colapsa su marco cuando GAM no tiene: dentro de un overlay
  * eso sería la peor versión de todas, una pantalla completa que dice «PUBLICIDAD ·
  * 600×800». Aquí el slot se declara a mano y quien decide si el overlay se ve es el
  * creativo, no el reloj.
  *
- * ⚠️ Solo en el Inicio (`src/pages/index.astro`). Un modal encima de una nota que
+ * Solo en el Inicio (`src/pages/index.astro`). Un modal encima de una nota que
  * alguien vino a LEER es otra conversación, y no está tenida.
  *
- * ⚠️ Este formato SÍ afecta el LCP mientras hay campaña, y no hay forma de que no:
+ * Este formato SÍ afecta el LCP mientras hay campaña, y no hay forma de que no:
  * un overlay que tapa la pantalla es lo que el lector ve, así que su imagen pasa a
  * ser el elemento de LCP del Inicio. Lo que se hace es que llegue rápido, no fingir
  * que no está.
@@ -46,7 +46,7 @@ interface Props {
 const { takeover } = Astro.props;
 
 /**
- * 🔴 Id FIJO, no generado por render. Enfoque lo generaba con un `randomUUID` por
+ * Id FIJO, no generado por render. Enfoque lo generaba con un `randomUUID` por
  * render y le costó una tarde: su oyente de `slotRenderEnded` quedaba capturado
  * sobre el id de la primera vista, así que en la segunda navegación no volvía a
  * dispararse nunca y el modal no se abría. Aquí no hace falta ninguna unicidad
@@ -58,23 +58,23 @@ const ID_SLOT = 'beat-takeover-slot';
 /**
  * Las medidas del takeover en Ad Manager.
  *
- * 🔴 Salen del sitio viejo, no del lienzo: `src/js/ads.js` declaraba el
+ * Salen del sitio viejo, no del lienzo: `src/js/ads.js` declaraba el
  * `ad-slot14` con estas dos mismas medidas, y es el slot del modal de siempre. El
  * lienzo `publicidad` no dice nada de este formato.
  *
- * 🔴 Y el corte mira el ALTO del viewport, no solo el ancho — es el único formato
+ * Y el corte mira el ALTO del viewport, no solo el ancho — es el único formato
  * del sitio que lo hace, y por una razón medida en Enfoque el 2026-09-08: un
  * creativo de 600×800 en una laptop de 720px de alto NO CABE, así que el lector
  * tendría que hacer scroll dentro del overlay para ver el final del anuncio. Se
  * pide la pieza grande solo cuando de verdad entra: ≥768 de ancho **y** ≥860 de
  * alto (los 800 del creativo más el rótulo, la cruz y el aire de la caja).
  *
- * ⚠️ `addSize` recibe el viewport como `[ancho, alto]`. Los 860 tienen que coincidir
+ * `addSize` recibe el viewport como `[ancho, alto]`. Los 860 tienen que coincidir
  * con el `@media (min-height:)` de `.tk-slot` de abajo, que es quien reserva el
  * hueco: si el CSS reservara 320×480 y GPT pidiera 600×800, el creativo llegaría a
  * un hueco que no lo espera.
  *
- * ⚠️ Y la advertencia de siempre de `agents/ads.md`: una medida que no está dada de
+ * Y la advertencia de siempre de `agents/ads.md`: una medida que no está dada de
  * alta en el ad unit NUNCA se llena, y desde el sitio se ve igual que «no había
  * demanda». Antes de dar por muerto un takeover que no sale, confirmar 600×800 y
  * 320×480 en GAM.
@@ -92,7 +92,7 @@ const MAPPING: Array<[[number, number], Array<[number, number]>]> = [
 /**
  * La sub-unidad de Ad Manager.
  *
- * ⚠️ **Hoy NO existe bajo el ad unit de Beat** (verificado por la sesión de Enfoque
+ * **Hoy NO existe bajo el ad unit de Beat** (verificado por la sesión de Enfoque
  * el 2026-09-09 en la consola de GAM, donde sí la crearon para el suyo). Pedir una
  * ruta que no existe no falla: GAM atiende la petición contra el padre y el modal
  * se llena igual. Lo que se pierde mientras tanto es el REPORTE —el takeover cae en
@@ -100,7 +100,7 @@ const MAPPING: Array<[[number, number], Array<[number, number]>]> = [
  * que se pide desde ya: el día que ad ops cree el bloque, empieza a reportarse solo
  * y sin desplegar.
  *
- * 🔴 Y el aviso que va con esto, porque es dinero: si alguien va a poner en GAM una
+ * Y el aviso que va con esto, porque es dinero: si alguien va a poner en GAM una
  * protección para bloquearle la programática al takeover, **el bloque hijo tiene que
  * existir primero**. Aplicada sobre el padre, esa protección apaga la programática
  * de TODO el sitio.
@@ -192,7 +192,7 @@ const enlaceProxy = takeover ? `/api/anuncio/${takeover.id}` : '';
               agrupada (`singleRequest`) que los demás huecos de la página. Eso es lo
               que hace posible un roadblock y la exclusión competitiva de verdad.
 
-              🔴 Y NO va envuelto en `.anuncio`: el motor colapsa el marco de un
+              Y NO va envuelto en `.anuncio`: el motor colapsa el marco de un
               hueco vacío buscando ese ancestro, y aquí colapsar el marco sería
               esconder la caja dejando el overlay puesto. Quien abre y cierra este
               overlay es el script de abajo.
@@ -208,7 +208,7 @@ const enlaceProxy = takeover ? `/api/anuncio/${takeover.id}` : '';
           ) : creatividad?.video ? (
             <>
               {/*
-                🔴 Arranca SILENCIADO, y no es una preferencia: es la única forma de
+                Arranca SILENCIADO, y no es una preferencia: es la única forma de
                 que el navegador deje auto-reproducir. Y además el radio puede estar
                 sonando — si el lector le sube el volumen al spot, el árbitro de
                 audio para el radio (lo engancha el script de abajo).
@@ -263,7 +263,7 @@ const enlaceProxy = takeover ? `/api/anuncio/${takeover.id}` : '';
 }
 
 {/*
-  🔴 EN LÍNEA Y SÍNCRONO, y es lo único de este archivo que no puede ser un módulo.
+  EN LÍNEA Y SÍNCRONO, y es lo único de este archivo que no puede ser un módulo.
 
   Si el lector ya vio esta campaña en esta sesión, el nodo se va del DOM AQUÍ MISMO,
   mientras el navegador todavía está leyendo el `<body>` — antes de que corra ningún
@@ -276,7 +276,7 @@ const enlaceProxy = takeover ? `/api/anuncio/${takeover.id}` : '';
   cómo empaquete el bundler. Esto no depende de nada. Es el mismo reparto que
   `Intro.astro`, por la misma razón y con el mismo resultado.
 
-  ⚠️ Sin `sessionStorage` (navegación privada, cookies bloqueadas, un iframe) se
+  Sin `sessionStorage` (navegación privada, cookies bloqueadas, un iframe) se
   muestra: es el lado seguro para lo que está vendido.
 */}
 <script is:inline>
@@ -316,12 +316,12 @@ const enlaceProxy = takeover ? `/api/anuncio/${takeover.id}` : '';
   /**
    * Lo que se espera a que Ad Manager conteste antes de retirar el overlay.
    *
-   * 🔴 10 s y no 3. Medido en producción por la sesión de Enfoque el 2026-09-09: GAM
+   * 10 s y no 3. Medido en producción por la sesión de Enfoque el 2026-09-09: GAM
    * contestó entre **1700 y 2659 ms** con red de cable. Con un plazo de 3 s, un
    * teléfono en 3G se pasa y se cierra en firme una impresión que venía en camino.
    * Y esperar no le cuesta nada al lector, porque mientras espera NO SE VE NADA.
    *
-   * 🔴 Existe por el BLOQUEADOR DE ANUNCIOS, que es uno de cada cuatro o cinco
+   * Existe por el BLOQUEADOR DE ANUNCIOS, que es uno de cada cuatro o cinco
    * lectores: con `gpt.js` bloqueado el evento de GAM no llega nunca y sin este
    * plazo el nodo se quedaría montado para siempre. Es el mismo patrón de «bandera
    * que solo se suelta en el callback» que ya costó una radio entera.
@@ -334,13 +334,13 @@ const enlaceProxy = takeover ? `/api/anuncio/${takeover.id}` : '';
   /**
    * Hace algo cuando el intro haya terminado, o ya mismo si no está corriendo.
    *
-   * 🔴 Los dos tapan la pantalla, los dos salen una vez por sesión y los dos viven
+   * Los dos tapan la pantalla, los dos salen una vez por sesión y los dos viven
    * en el Inicio, así que en la primera visita de una sesión coinciden. Van EN FILA
    * y no a la vez: el intro hace su entrada, se va, y ahí arranca el takeover con
    * sus diez segundos. Revelarlo debajo del intro sería regalarle al anunciante los
    * primeros 2.5 s de su campaña contra una pantalla negra.
    *
-   * ⚠️ En la variante de Ad Manager esto casi nunca cuesta tiempo: los 1700-2659 ms
+   * En la variante de Ad Manager esto casi nunca cuesta tiempo: los 1700-2659 ms
    * que tarda GAM en contestar transcurren MIENTRAS el intro corre.
    *
    * El respaldo por tiempo no es adorno: si el módulo del intro no llegara a correr,
@@ -394,14 +394,14 @@ const enlaceProxy = takeover ? `/api/anuncio/${takeover.id}` : '';
     /**
      * De «montado pero invisible» a visible.
      *
-     * 🔴 Existe SEPARADO del montaje por la variante de Ad Manager. Enfoque la
+     * Existe SEPARADO del montaje por la variante de Ad Manager. Enfoque la
      * revelaba de inmediato y la cerraba al recibir «vacío», así que en una carga en
      * frío el lector veía **una caja vacía durante ~1.5 s** antes de que
      * desapareciera — y con `frecuencia: siempre`, en cada visita. Aquí ese caso
      * espera invisible y solo se revela cuando hay creativo de verdad: o se ve un
      * anuncio, o no se ve nada.
      *
-     * 🔴 La llave de sesión se escribe AL MOSTRAR, no al cerrar. Al cerrar, un
+     * La llave de sesión se escribe AL MOSTRAR, no al cerrar. Al cerrar, un
      * recargar a media pantalla lo vuelve a abrir y quien se va sin cerrarlo lo
      * recibe en cada página. Y un takeover que nunca llegó a verse no debe gastarle
      * la sesión al lector.
@@ -421,7 +421,7 @@ const enlaceProxy = takeover ? `/api/anuncio/${takeover.id}` : '';
       }
 
       /*
-        🔴 La impresión se cuenta AQUÍ, y es lo que distingue a este formato del
+        La impresión se cuenta AQUÍ, y es lo que distingue a este formato del
         banner de portada —que la cuenta en el render del servidor—. El takeover sale
         una vez por sesión, así que contar renders multiplicaría por cinco lo que se
         le factura a quien abre el Inicio cinco veces.
@@ -439,7 +439,7 @@ const enlaceProxy = takeover ? `/api/anuncio/${takeover.id}` : '';
       }
 
       /*
-        🔴 El plazo cuenta desde que SE VE, no desde que se monta. Con Ad Manager la
+        El plazo cuenta desde que SE VE, no desde que se monta. Con Ad Manager la
         espera invisible puede ser de 2.5 s, y esos no son segundos de anuncio.
 
         Se decide UNA vez, al revelar, y no se sondea:
@@ -448,7 +448,7 @@ const enlaceProxy = takeover ? `/api/anuncio/${takeover.id}` : '';
             `TOPE_VIDEO_MS`), y si termina antes lo cierra su propio `ended`;
           · video que aún no sabe cuánto dura → 10 s, como una imagen.
 
-        ⚠️ Enfoque sondeaba `video.paused` cada segundo para «dejarlo terminar» y era
+        Enfoque sondeaba `video.paused` cada segundo para «dejarlo terminar» y era
         frágil por los dos lados: si el lector PAUSA el spot (tiene controles) el
         overlay se cerraba un segundo después, y en una pestaña que el navegador no
         está pintando Chrome pausa el video solo, así que el plazo saltaba a mitad del
@@ -559,7 +559,7 @@ const enlaceProxy = takeover ? `/api/anuncio/${takeover.id}` : '';
         2. render vacío → se retira sin que el lector vea nada;
         3. el plazo → la red del bloqueador de anuncios. Ver `PLAZO_GAM`.
 
-      ⚠️ El evento lo reemite `anuncios.ts`, que es quien tiene el oyente de GPT
+      El evento lo reemite `anuncios.ts`, que es quien tiene el oyente de GPT
       registrado ANTES de `enableServices()`. Enganchar aquí un segundo
       `addEventListener` de `googletag` significaría hacerlo DESPUÉS —este módulo se
       evalúa después del `cmd.push` del layout— y el primer render, que es el que
@@ -567,7 +567,7 @@ const enlaceProxy = takeover ? `/api/anuncio/${takeover.id}` : '';
     */
     plazoGam = window.setTimeout(cerrar, PLAZO_GAM);
     /*
-      🔴 Se desmonta con la PRIMERA respuesta de este slot, y las dos mitades hacen
+      Se desmonta con la PRIMERA respuesta de este slot, y las dos mitades hacen
       falta:
 
       · Un render posterior ya no manda. GPT puede volver a emitir sobre el mismo
@@ -608,16 +608,16 @@ const enlaceProxy = takeover ? `/api/anuncio/${takeover.id}` : '';
     position: fixed;
     inset: 0;
     /*
-      🔴 Por encima de todo lo del sitio menos el intro, y el número sale de la
+      Por encima de todo lo del sitio menos el intro, y el número sale de la
       escala del design system (`ds/tokens/layout.css`): cabecera 200, player 300,
       overlay 400, diálogo 500, toast 600. El takeover va arriba de los seis.
 
-      ⚠️ Se queda DEBAJO del intro (9999) a propósito, que es lo que hace visible el
+      Se queda DEBAJO del intro (9999) a propósito, que es lo que hace visible el
       orden: primero la entrada de marca, después el anuncio. Y por debajo también
       del modal del pre-roll VAST del player, que solo puede aparecer si alguien le
       dio play — y para darle play, este overlay ya se fue.
 
-      ⚠️ Enfoque puso 500 aquí creyendo que el máximo del sitio era 100, y su barra
+      Enfoque puso 500 aquí creyendo que el máximo del sitio era 100, y su barra
       de radio (9999) se pintaba ENCIMA del modal y seguía siendo clickeable a través
       del velo. Lo cazaron con `elementFromPoint`, no a ojo. En Beat el player va en
       `--z-player` y respeta la escala, pero la lección se queda escrita: esto se
@@ -630,7 +630,7 @@ const enlaceProxy = takeover ? `/api/anuncio/${takeover.id}` : '';
     padding: 16px;
     overflow-y: auto;
     /*
-      🔴 **Sin animación de entrada, a propósito**, y esto es una trampa medida, no
+      **Sin animación de entrada, a propósito**, y esto es una trampa medida, no
       una preferencia estética. Con `animation: … both`, el fotograma inicial
       (`opacity: 0`) se aplica ANTES de que la animación arranque, y en una pestaña
       que el navegador no está pintando Chrome la deja pausada justo ahí: la capa
@@ -650,7 +650,7 @@ const enlaceProxy = takeover ? `/api/anuncio/${takeover.id}` : '';
     —GPT necesita eso para pintar dentro— pero no se ve ni intercepta clics. Es el
     estado con el que llega del servidor; revelarlo es quitar esta clase.
 
-    ⚠️ `opacity: 0` y no `display: none` ni `hidden`: los dos dejarían el slot en
+    `opacity: 0` y no `display: none` ni `hidden`: los dos dejarían el slot en
     0×0 y GPT no tendría dónde pintar.
   */
   .tk-capa.tk-esperando {
@@ -747,7 +747,7 @@ const enlaceProxy = takeover ? `/api/anuncio/${takeover.id}` : '';
   }
 
   /*
-    🔴 El hueco del slot se reserva con las MISMAS medidas que pide el `sizeMapping`
+    El hueco del slot se reserva con las MISMAS medidas que pide el `sizeMapping`
     de arriba, y el corte por alto tiene que ser el mismo par (768 × 860). Si el CSS
     reservara 320×480 donde GPT pide 600×800, el creativo llegaría a un hueco que no
     lo espera.

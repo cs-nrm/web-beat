@@ -2,7 +2,7 @@
 /**
  * El Fenómeno Residente — §3 del mapa de sitio.
  *
- * 🔴 Es DELIBERADAMENTE la misma maqueta que el bloque del Inicio, no una
+ * Es DELIBERADAMENTE la misma maqueta que el bloque del Inicio, no una
  * pantalla nueva. Es lo que pidió Carlos («puede ser muy similar a lo que tenemos
  * en el home»), y coincide con lo correcto: el tema de la semana es el mismo
  * objeto en los dos sitios, y mantener dos maquetas para un solo dato es cómo se
@@ -13,7 +13,7 @@
  *   · el archivo va COMPLETO y sin el box al costado, porque aquí no es un
  *     adelanto: es la mitad de la razón de existir de la página.
  *
- * ⚠️ Que el archivo vaya sin box no significa que la página no lleve: el box de
+ * Que el archivo vaya sin box no significa que la página no lleve: el box de
  * esta superficie es `fenomeno-box` y vive en la tercera columna del bloque del
  * tema, bajo la playlist. Ahí no le quita ancho a la rejilla del archivo, que es
  * la razón por la que se le había quitado el riel a `ArchivoTemas`.
@@ -46,7 +46,7 @@ const anteriores = vigente ? todos.filter((t) => t.id !== vigente.id) : todos;
   sección encima. El `alt` describe el texto que el script horneó en el PNG, así que
   se cambia con él. El por qué completo, en `scripts/favicon.mjs`.
 
-  ⚠️ Es el nombre más largo del sitio y el único que la tarjeta parte en DOS líneas
+  Es el nombre más largo del sitio y el único que la tarjeta parte en DOS líneas
   —«EL FENÓMENO / RESIDENTE»—. El reparto lo calcula el script midiendo el texto, no
   está escrito a mano; el `alt` lo dice en una sola frase porque quien lo oye no ve
   dónde corta la línea.
@@ -61,7 +61,7 @@ const anteriores = vigente ? todos.filter((t) => t.id !== vigente.id) : todos;
 >
   <div class="fr-pagina">
 {/*
-      🔴 Sin rótulo encima del titular (Carlos, 2026-09-07).
+      Sin rótulo encima del titular (Carlos, 2026-09-07).
 
       Eran datos ciertos —«1 TEMA», «2 EDICIONES», «ACTUALIZADO 7 SEP»— y ahí está
       el problema: contaban el inventario de la página que ya tienes delante. El

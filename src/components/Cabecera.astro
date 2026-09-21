@@ -2,7 +2,7 @@
 /**
  * Cabecera: barra del player + navegación. Del artboard `Cabecera-Beat`.
  *
- * 🔴 El player va AQUÍ y es PERSISTENTE, y eso es requisito de producto, no
+ * El player va AQUÍ y es PERSISTENTE, y eso es requisito de producto, no
  * decisión técnica. El §4.1 del `Mapa de sitio Beat 2026.pdf` lo dice así: "la
  * decisión de producto más importante del sitio es esta: el reproductor en vivo es
  * persistente… no es un detalle técnico, es la afirmación, en la propia
@@ -30,7 +30,7 @@ interface Props {
   /**
    * Nace con la barra oscura recogida. Lo pone `Base.astro` en los interiores.
    *
-   * ⚠️ Solo vale para la PRIMERA carga. Este bloque lleva `transition:persist`, o
+   * Solo vale para la PRIMERA carga. Este bloque lleva `transition:persist`, o
    * sea que al navegar el navegador conserva el nodo vivo y descarta el marcado
    * que manda el servidor — si la señal se cortara al cambiar de página no habría
    * radio persistente. De la reconciliación en cada navegación se encarga
@@ -45,7 +45,7 @@ const ruta = Astro.url.pathname;
 /**
  * El texto de partida, antes de que exista una conexión.
  *
- * 🔴 Ya NO sale del CMS. Lo que suena lo manda el SDK de Triton por el canal de
+ * Ya NO sale del CMS. Lo que suena lo manda el SDK de Triton por el canal de
  * cue points, dentro del propio stream, así que llega alineado con lo que el
  * oyente escucha — la bitácora es la hora del playout y va 5 s por delante
  * (medido). Y consultarla costaba una petición al CMS en cada página del sitio,
@@ -99,23 +99,23 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     BARRA DEL PLAYER — clara sobre un sitio oscuro. Es la única inversión de la
     paleta en todo el sitio, y es deliberada: lo que está al aire es lo que brilla.
 
-    ⚠️ El relleno IZQUIERDO es menor que el derecho a propósito (Carlos,
+    El relleno IZQUIERDO es menor que el derecho a propósito (Carlos,
     2026-09-08): «el logo de la barra podemos echarlo tantito más a la izquierda,
     que quede pegado casi». El logotipo lleva su propio aire dentro del SVG, así
     que con los 16px de `px-4` se veía flotando lejos del borde mientras la
     hamburguesa de la derecha sí lo tocaba. A 8px el bloque de marca arranca donde
     arranca la pantalla.
 
-    🔴 Y solo a la izquierda: el lado derecho conserva su relleno porque ahí vive
+    Y solo a la izquierda: el lado derecho conserva su relleno porque ahí vive
     un botón táctil, y un control pegado al canto de un teléfono se pulsa mal —y en
     un iPhone compite con el gesto de volver.
 
-    🔴 Y el comentario va AQUÍ, antes de la etiqueta. Astro NO admite un comentario
+    Y el comentario va AQUÍ, antes de la etiqueta. Astro NO admite un comentario
     de llaves dentro de la lista de atributos: los parsea como atributos sueltos y
     rompe el build con errores que no lo mencionan. Van cinco tropiezos iguales en
     este repo, dos en la misma sesión.
 
-    ⚠️ Y al escribir ESTE aviso caí en el de al lado: no se puede citar la sintaxis
+    Y al escribir ESTE aviso caí en el de al lado: no se puede citar la sintaxis
     del comentario dentro de un comentario, porque el cierre lo cierra antes de
     tiempo. Lo peor es que `astro check` daba 0 errores y solo tronó el compilador
     del build — o sea que `pnpm check` no basta como puerta.
@@ -133,7 +133,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
       así que las dos nunca lo enseñan a la vez: se lee como que el logo pasa de una
       a la otra.
 
-      🔴 `filter: invert(1)` y no un archivo aparte. El SVG es blanco y esta barra
+      `filter: invert(1)` y no un archivo aparte. El SVG es blanco y esta barra
       también, así que hay que darle la vuelta — pero mantener dos archivos que
       tienen que decir exactamente lo mismo es garantía de que un día dejen de
       decirlo. Un filtro no puede desincronizarse del original.
@@ -149,7 +149,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
 
     <span class="solo-directo flex flex-none items-center gap-2">
       {/*
-        🔴 ROJO, y es el único color de la interfaz. Es la luz de tally de un
+        ROJO, y es el único color de la interfaz. Es la luz de tally de un
         estudio: la convención dice «estamos emitiendo», que es exactamente lo que
         esta barra afirma. Ver el token `--rojo-aire` en `beat.css`.
 
@@ -165,7 +165,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     </span>
 
     {/*
-      🔴 La puerta de vuelta, y no es un adorno: mientras suena una pista a
+      La puerta de vuelta, y no es un adorno: mientras suena una pista a
       demanda, el oyente está FUERA de la señal. Este sitio afirma ser una radio en
       vivo —§4.1 del mapa de sitio— así que sacar a alguien del directo sin una
       salida visible sería una trampa, no una función.
@@ -183,7 +183,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
         class="h-[7px] w-[7px] flex-none rounded-pill bg-[var(--rojo-aire)] motion-safe:animate-pulse"
       ></span>
       {/*
-        ⚠️ Dice «EN VIVO», no «volver al directo». «Directo» es español de España;
+        Dice «EN VIVO», no «volver al directo». «Directo» es español de España;
         acá se dice en vivo, y es además la palabra que ya usa la sección
         `/en-vivo` y la que dice la propia barra cuando está al aire. Decisión de
         Carlos, 2026-09-03.
@@ -229,13 +229,13 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     </button>
 
     {/*
-      🔴 En ROJO, el mismo `--rojo-aire` del punto que parpadea. Decisión de
+      En ROJO, el mismo `--rojo-aire` del punto que parpadea. Decisión de
       Carlos (2026-09-03) y es coherente: el punto y este texto dicen lo mismo —
       esto es lo que está sonando AHORA— así que comparten color. Es la única
       excepción al blanco y negro y no se abre una segunda; ver movimiento.md §8.
     */}
     {/*
-      🔴 Ancho FIJO, y es lo que estabiliza la barra entera. Antes este bloque
+      Ancho FIJO, y es lo que estabiliza la barra entera. Antes este bloque
       crecía con el largo del título, así que la onda y el volumen cambiaban de
       sitio en cada canción — la barra se reacomodaba sola cada tres minutos.
 
@@ -259,7 +259,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     </span>
 
     {/*
-      🔴 El título de la pista va en SU PROPIO elemento, no reutilizando el de
+      El título de la pista va en SU PROPIO elemento, no reutilizando el de
       arriba. `player.ts` guarda el texto original de `[data-campo="sonando"]` para
       poder restaurarlo tras un corte comercial; si la pista escribiera ahí, ese
       «original» pasaría a ser el nombre de una canción de Bonus Beat y el radio
@@ -274,7 +274,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     {/*
       Waveform. Decorativa: el dato real es el texto de al lado.
 
-      🔴 En MÓVIL no va. Ocupaba 52px de una barra de 343, y con eso el título de
+      En MÓVIL no va. Ocupaba 52px de una barra de 343, y con eso el título de
       lo que suena se quedaba en **5 píxeles** —medido a 375px, con «Beat 100.9»
       reducido a una letra—. Es el peor reparto posible: la barra existe para
       decir qué suena, y lo que sobrevivía era el adorno. La onda vuelve a partir
@@ -314,14 +314,14 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
       <Icono nombre="volume-2" tamano={16} />
       <label class="sr-only" for="beat-volumen">Volumen</label>
       {/*
-        🔴 El mínimo es 1 y no 0 (Carlos, 2026-09-08). Reportado por él: al llegar
+        El mínimo es 1 y no 0 (Carlos, 2026-09-08). Reportado por él: al llegar
         a 0 la transmisión se DETIENE, y no es un volumen bajo del que se pueda
         volver subiendo el deslizador. O sea que el extremo izquierdo del control
         era una trampa: parecía «sin volumen» y era «se acabó». No está medido de
         este lado —hace falta el SDK de Triton en vivo—, así que el arreglo es
         quitar el extremo, no confiar en interpretar por qué lo hace.
 
-        ⚠️ Con 1 el volumen efectivo es 0.01, inaudible en la práctica, y la
+        Con 1 el volumen efectivo es 0.01, inaudible en la práctica, y la
         conexión sigue viva. Quien quiera silencio de verdad lo tiene en el botón de
         pausa, que es donde debe estar.
       */}
@@ -337,7 +337,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     </span>
 
     {/*
-      🔴 Aquí estaba el botón de «ampliar el reproductor» —la flecha hacia abajo
+      Aquí estaba el botón de «ampliar el reproductor» —la flecha hacia abajo
       después del volumen— y se retira (Carlos, 2026-09-07).
 
       No hacía NADA: `data-accion="expandir"` no lo escuchaba ningún script, y el
@@ -361,7 +361,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
       tabindex={compacta ? undefined : '-1'}
     >
       {/*
-        🔴 Tres barras y no un icono, para que se CONVIERTA en X en vez de
+        Tres barras y no un icono, para que se CONVIERTA en X en vez de
         cambiarse por otro dibujo. El demo que trajo Carlos lo hace así y tiene
         razón: el cambio de estado se lee como un solo objeto que se transforma,
         no como dos iconos que se turnan. La forma la decide el CSS mirando
@@ -373,7 +373,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
 
   {/* NAVEGACIÓN */}
   {/*
-    🔴 `inert={compacta}` y NO `inert={compacta ? '' : undefined}`. `inert` es un
+    `inert={compacta}` y NO `inert={compacta ? '' : undefined}`. `inert` es un
     atributo booleano y Astro lo pinta cuando el valor es CIERTO; una cadena vacía
     es falsa, así que la versión «correcta en HTML» no se emitía nunca. Comprobado
     en el HTML servido: cero apariciones de `inert`, y la barra plegada seguía
@@ -398,7 +398,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
         Los enlaces van en BLANCO y NEGRITA (decisión de Carlos, 2026-08-24). Antes
         el activo iba en el ámbar de marca y el resto en gris.
 
-        🔴 La sección en curso se marca en BLANCO Y NEGRITA, y el resto en gris sin
+        La sección en curso se marca en BLANCO Y NEGRITA, y el resto en gris sin
         negrita. Antes llevaba una línea coral debajo, que era el último naranja que
         quedaba en la interfaz.
 
@@ -406,13 +406,13 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
         sea el único portador, y la negrita no es color — es una diferencia
         tipográfica, visible también para quien no distingue tonos.
 
-        ⚠️ Ni el color ni el peso van como utilidades de Tailwind aquí. Las
+        Ni el color ni el peso van como utilidades de Tailwind aquí. Las
         utilidades viven en una capa POSTERIOR a `proyecto`, así que desde `beat.css`
         no habría forma de cambiarlos: `font-bold text-mist-0` en esta línea dejaba
         los cinco enlaces idénticos y sin manera de distinguir el activo salvo
         añadiéndole algo encima. Que es exactamente de dónde salió la línea coral.
 
-        ⚠️ Y el comentario va AQUÍ, no entre los atributos del `<a>`. Astro no admite
+        Y el comentario va AQUÍ, no entre los atributos del `<a>`. Astro no admite
         comentarios dentro de la lista de atributos: los parsea como atributos
         sueltos, y en este archivo eso produjo dos errores de tipo sobre la palabra
         «color» que estuvieron commiteados sin que nadie los viera. Es el cuarto
@@ -460,12 +460,12 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
   </header>
 
   {/*
-    🔴 `#td_container` lo exige el SDK: es el `playerId` de su módulo MediaPlayer,
+    `#td_container` lo exige el SDK: es el `playerId` de su módulo MediaPlayer,
     y ahí monta el elemento de audio y el pre-roll VAST. Tiene que estar DENTRO
     del bloque con `transition:persist`, porque si el elemento de audio se
     destruye al navegar, la señal se corta.
 
-    ⚠️ Estuvo FUERA por un `</div>` mal puesto: el comentario decía «va dentro del
+    Estuvo FUERA por un `</div>` mal puesto: el comentario decía «va dentro del
     bloque persistente» y el div quedaba después del cierre. El efecto era el
     exacto contrario del que se buscaba —Astro lo reemplazaba por un div vacío en
     cada navegación—, y no se notaba porque la cabecera sí persistía: lo visible
@@ -497,7 +497,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     correcto — así no hay una clase que pueda desincronizarse de la accesibilidad.
   */
   /*
-    ⚠️ `cursor: pointer` a mano. Tailwind 4 ya NO lo pone en los `<button>` —lo
+    `cursor: pointer` a mano. Tailwind 4 ya NO lo pone en los `<button>` —lo
     quitó de su preflight en la v4— así que un botón se comporta como texto: el
     puntero no cambia y el control no se anuncia como pulsable. Vale para las dos
     hamburguesas y para cualquier botón del chrome que se añada después.
@@ -531,7 +531,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
   .hb i:nth-child(3) { bottom: 0; }
 
   /*
-    🔴 Las barras se mueven con `translate` y `rotate` INDEPENDIENTES, no con un
+    Las barras se mueven con `translate` y `rotate` INDEPENDIENTES, no con un
     `transform` compuesto. Es la regla de movimiento.md §1: dos gestos sobre el
     mismo elemento van en propiedades distintas, así ninguno pisa al otro y cada
     uno puede animarse por su cuenta.
@@ -581,7 +581,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
   /*
     La marquesina.
 
-    🔴 Solo corre cuando el texto NO CABE — lo marca `player.ts` tras medir— y
+    Solo corre cuando el texto NO CABE — lo marca `player.ts` tras medir— y
     lleva una pausa de dos segundos en cada extremo: un texto en movimiento
     perpetuo es imposible de leer y es exactamente lo que WCAG 2.2.2 pide poder
     detener. Con las pausas, el título está quieto y legible la mayor parte del
@@ -606,7 +606,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
   }
 
   /*
-    🔴 Menos movimiento: no hay marquesina, hay puntos suspensivos. Se pierde el
+    Menos movimiento: no hay marquesina, hay puntos suspensivos. Se pierde el
     final del título, que es peor — pero un texto que se mueve solo, sin forma de
     pararlo, es justo lo que esa preferencia existe para quitar.
   */
@@ -639,7 +639,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
   /*
     ── Los dos modos de la barra ──
 
-    🔴 Vive AQUÍ y no en `beat.css` por la misma razón que el plegado: los anchos
+    Vive AQUÍ y no en `beat.css` por la misma razón que el plegado: los anchos
     y los `display` de esta barra los ponen utilidades de Tailwind, que van en una
     capa POSTERIOR a `proyecto`. Desde allí un `display: none` no gana ni con toda
     la especificidad del mundo. Los estilos de un componente Astro no llevan capa,
@@ -722,7 +722,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
   /*
     ── El plegado de la barra de navegación ──
 
-    🔴 Vive AQUÍ y no en `beat.css`, y no es preferencia. El alto de esta barra lo
+    Vive AQUÍ y no en `beat.css`, y no es preferencia. El alto de esta barra lo
     pone una utilidad de Tailwind (`h-header-movil` / `md:h-header`), y las
     utilidades van en una capa posterior a `proyecto`: desde allí un `height: 0` no
     gana ni con toda la especificidad del mundo, porque las capas mandan sobre la
@@ -741,7 +741,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
   }
 
   /*
-    🔴 Y en MÓVIL, plegada SIEMPRE — decisión de Carlos (2026-09-03): ahí el sitio
+    Y en MÓVIL, plegada SIEMPRE — decisión de Carlos (2026-09-03): ahí el sitio
     enseña una sola barra, la clara del player con su hamburguesa.
 
     Va en CSS y no solo en el script porque el servidor no puede saber el ancho de

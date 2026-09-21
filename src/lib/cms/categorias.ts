@@ -1,12 +1,12 @@
 /**
  * Las categorías y las etiquetas de la estación.
  *
- * ⚠️ Se filtra por `slug`, nunca por id. El sitio viejo tiene **IDs de categoría
+ * Se filtra por `slug`, nunca por id. El sitio viejo tiene **IDs de categoría
  * hardcodeados en 55 URLs** porque su WordPress no exponía el slug;
  * `cms-estaciones` sí lo trae, con único compuesto `(estacion, slug)`. Es la
  * decisión 5 del plan.
  *
- * ⚠️ Ya no existe un `obtenerCategorias()` que las liste todas. Servía a la tira
+ * Ya no existe un `obtenerCategorias()` que las liste todas. Servía a la tira
  * de pastillas del Scanner, que se retiró: esa tira ahora son las SECCIONES del
  * sitio (`NavSecciones.astro`), no las categorías. Las categorías siguen teniendo
  * su ruta —`/beat-scanner/<slug>`— y se llega a ellas desde la migaja de cada nota.

@@ -19,7 +19,7 @@ El primer intento del corte **no cambió nada** y el script lo reportó como
 «responde, pero NO parece el v2». La causa no estaba en el vhost nuevo ni en el
 script:
 
-🔴 **`beatdigital.mx` era un `ServerAlias` del vhost de `oyedigital.mx`**, en
+**`beatdigital.mx` era un `ServerAlias` del vhost de `oyedigital.mx`**, en
 `000-default-le-ssl.conf`, en el puerto 443. Ese archivo se carga antes que el
 `020`, y Apache se queda con el PRIMER vhost que reclama un nombre. El `a2ensite`
 del 020 no le quitaba el dominio a nadie: el 020 simplemente no recibía peticiones.
@@ -28,7 +28,7 @@ Se quitó ese alias **a mano en la VM**, y es el único cambio del lanzamiento q
 **no está versionado en este repo**. Está respaldado en
 `/root/respaldo-000-default-le-ssl.conf.bak`.
 
-⚠️ La premisa del `020` —«este archivo SUMA, no reemplaza»— es verdad solo cuando
+La premisa del `020` —«este archivo SUMA, no reemplaza»— es verdad solo cuando
 nadie más reclama el nombre. Antes de dar por bueno un corte por vhost, la
 comprobación que faltaba es `apachectl -S | grep -i <dominio>`, que enseña los
 alias; `apachectl configtest` **no** avisa de un nombre duplicado entre vhosts.
@@ -51,16 +51,16 @@ un panel.
 **Se apagó el 10 sep 2026** (`a2dissite 010-v2-beatdigital`). Comprobado después:
 `v2.beatdigital.mx` ya no sirve el sitio ni el contenedor de medición.
 
-🔴 **Y con eso el nombre «v2» se retira del vocabulario** (Carlos, 10 sep): era el
+**Y con eso el nombre «v2» se retira del vocabulario** (Carlos, 10 sep): era el
 entorno de prueba que se convirtió en el sitio. A partir de aquí es **el sitio**, y
 lo anterior es **el sitio viejo**.
 
-⚠️ El nombre sigue vivo donde no es texto: `/var/www/web-beat-v2`, el servicio de
+El nombre sigue vivo donde no es texto: `/var/www/web-beat-v2`, el servicio de
 systemd `web-beat-v2`, `scripts/desplegar-v2.sh`, `docs/despliegue-v2.md`, el vhost
 `010-v2-beatdigital.conf`. Renombrarlos es tocar systemd y rutas del servidor, no un
 buscar-y-reemplazar; queda para un día tranquilo.
 
-⚠️ **Lo que esto deja al descubierto: ya no hay dónde probar.** Y tampoco lo había
+**Lo que esto deja al descubierto: ya no hay dónde probar.** Y tampoco lo había
 antes: los dos vhosts apuntaban al MISMO proceso en el MISMO puerto (`127.0.0.1:4322`),
 o sea un sitio con dos nombres. Lo que se «probara» en v2 ERA el sitio. Un entorno de
 pruebas de verdad —proceso, puerto y build propios— está por hacer, y es la pieza que

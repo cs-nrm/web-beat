@@ -55,7 +55,7 @@ const catSlug = slugCategoria(nota);
 */
 const seccion = seccionDeNota(nota);
 /*
-  ⚠️ La categoría se repite en la migaja SOLO si no es la de la sección. Si no,
+  La categoría se repite en la migaja SOLO si no es la de la sección. Si no,
   una nota de Editorial pintaba «EDITORIAL · Editorial»: la misma palabra dos veces
   separadas por un punto, y el segundo enlace llevando al mismo sitio que el
   primero.
@@ -74,7 +74,7 @@ const pieDeFoto =
 /*
   Las medidas de la foto, para la tarjeta de compartir y para el JSON-LD.
 
-  🔴 Se piden POR LA URL que `urlMedia` acabó eligiendo, no por la variante que le
+  Se piden POR LA URL que `urlMedia` acabó eligiendo, no por la variante que le
   pedimos: `large` puede no existir —las variantes se generan sin ampliar— y
   entonces `hero` es en realidad `card`. Ver `medidaMedia`. Si el CMS no trae las
   dos medidas, `null`, y las etiquetas no se emiten: mejor sin dato que con uno
@@ -83,14 +83,14 @@ const pieDeFoto =
 const heroMedida = medidaMedia(nota.imagen, hero);
 
 /*
-  ⚠️ `updatedAt` lo mueve el CMS en cada guardado, así que esta fecha puede ser
+  `updatedAt` lo mueve el CMS en cada guardado, así que esta fecha puede ser
   posterior a la que se ve en pantalla. No es una contradicción: la visible es
   cuándo se publicó y esta es cuándo se tocó por última vez. Google usa las dos.
 */
 const modificadaIso = fechaIso(nota.updatedAt);
 
 /**
- * 🔴 EL GRUPO `meta` DEL CMS. Estaba poblado y el front lo ignoraba entero
+ * EL GRUPO `meta` DEL CMS. Estaba poblado y el front lo ignoraba entero
  * (decisiones de Carlos, 2026-09-07).
  *
  * Es la ficha que la redacción captura para los buscadores y para lo que se
@@ -99,11 +99,11 @@ const modificadaIso = fechaIso(nota.updatedAt);
  * `admin.nrm.com.mx`, había un titular de 94 caracteres acortado a mano a 82 que
  * nadie estaba usando.
  *
- * ⚠️ Cada campo se toma solo si trae algo —`?.trim() ||`, no `??`—: un campo del
+ * Cada campo se toma solo si trae algo —`?.trim() ||`, no `??`—: un campo del
  * admin que se abrió y se dejó en blanco llega como cadena vacía, y con `??` eso
  * ganaría y la nota se compartiría sin titular.
  *
- * 🔴 Lo que NO cambia es el `h1` ni la bajada de la página. Para eso existe el
+ * Lo que NO cambia es el `h1` ni la bajada de la página. Para eso existe el
  * grupo: el titular del buscador puede ser más corto que el que lee quien ya
  * entró. Y por la misma razón tampoco cambia el JSON-LD — ver más abajo.
  */
@@ -115,14 +115,14 @@ const tituloMeta = meta.title?.trim() || nota.titulo;
 /**
  * Y gana `meta.description` en la `<meta description>` y en `og:description`.
  *
- * ⚠️ Es el mismo grupo y el mismo propósito que `meta.title`, así que honrar uno
+ * Es el mismo grupo y el mismo propósito que `meta.title`, así que honrar uno
  * e ignorar el otro dejaría media ficha capturada sin efecto. Hoy solo una nota de
  * las 11 los tiene distintos.
  */
 const resumenMeta = meta.description?.trim() || nota.resumen;
 
 /**
- * 🔴 `meta.canonicalUrl` se IGNORA. No es un olvido.
+ * `meta.canonicalUrl` se IGNORA. No es un olvido.
  *
  * Sirve para contenido SINDICADO —una nota que se publicó primero en otro sitio y
  * cuya autoridad le pertenece a ese otro—, y aquí choca de frente con la doctrina
@@ -132,7 +132,7 @@ const resumenMeta = meta.description?.trim() || nota.resumen;
  * dominio sin que se note en ninguna pantalla — el fallo silencioso más caro de
  * los que este archivo puede producir.
  *
- * ⚠️ Hoy está vacío en las 11 notas, así que no hay nada que se esté perdiendo. El
+ * Hoy está vacío en las 11 notas, así que no hay nada que se esté perdiendo. El
  * día que la estación empiece a republicar contenido de terceros, esto es una
  * decisión que hay que tomar de nuevo, no un pendiente que se arregla.
  */
@@ -140,13 +140,13 @@ const resumenMeta = meta.description?.trim() || nota.resumen;
 /**
  * La foto con la que se COMPARTE la nota: `meta.image` si existe, y si no el hero.
  *
- * 🔴 El hero sigue siendo lo que se ve EN la página; lo único que cambia aquí es
+ * El hero sigue siendo lo que se ve EN la página; lo único que cambia aquí es
  * lo que se publica. Son dos trabajos distintos y la redacción los captura por
  * separado: en la nota de Amelie Lens el hero es un 3:2 recortado para la página y
  * `meta.image` es la foto de prensa del artista, que es la que funciona dentro de
  * una tarjeta de Facebook.
  *
- * ⚠️ El `alt` y las medidas viajan CON la foto que se eligió, nunca mezclados. Son
+ * El `alt` y las medidas viajan CON la foto que se eligió, nunca mezclados. Son
  * documentos de media distintos, con su propio `alt` escrito por la redacción y su
  * propio juego de variantes; usar el `alt` del hero para la foto de prensa
  * describiría una imagen que nadie miró. Ver `medidaMedia`: la medida se busca por
@@ -160,7 +160,7 @@ const compartidaAlt = social ? socialAlt : pieDeFoto;
 const compartidaMedida = social ? medidaMedia(meta.image, social) : heroMedida;
 
 /**
- * 🔴 `meta.noIndex` se HONRA, y en las DOS capas que pueden saberlo.
+ * `meta.noIndex` se HONRA, y en las DOS capas que pueden saberlo.
  *
  * Aquí va la cabecera; el `<meta robots>` lo pone `Base.astro` con la prop
  * `noIndex`. No es redundancia, son dos alcances distintos:
@@ -171,34 +171,34 @@ const compartidaMedida = social ? medidaMedia(meta.image, social) : heroMedida;
  *     esta URL sin analizar el documento — y es la única de las dos que sirve si
  *     algún día esta ruta responde algo que no sea HTML.
  *
- * 🔴 Y por eso NO lo puede hacer el middleware, que es donde vive el resto de la
+ * Y por eso NO lo puede hacer el middleware, que es donde vive el resto de la
  * política: cuando el middleware corre no sabe qué documento se va a servir, ni si
  * existe. Es la única regla de indexación del sitio que depende del CONTENIDO, y
  * el único sitio donde el contenido ya se conoce es este.
  *
- * ⚠️ `Astro.response.headers` se escribe en el frontmatter de la PÁGINA, antes de
+ * `Astro.response.headers` se escribe en el frontmatter de la PÁGINA, antes de
  * que empiece a salir HTML. Desde el layout no serviría: cuando su frontmatter
  * corre, la respuesta ya está en camino y las cabeceras están decididas.
  *
- * ⚠️ Sin datos que lo prueben — está en `false` en las 11 notas del CMS—, así que
+ * Sin datos que lo prueben — está en `false` en las 11 notas del CMS—, así que
  * se comprobó forzando el valor en local.
  */
 const noIndex = meta.noIndex === true;
 if (noIndex) Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
 
 /**
- * 🔴 Los datos estructurados de la nota: `NewsArticle` + la migaja.
+ * Los datos estructurados de la nota: `NewsArticle` + la migaja.
  *
  * Van en un solo `@graph` y no en dos bloques por lo de siempre: dos bloques son
  * dos sitios donde puede quedarse uno viejo.
  *
- * 🔴 Y cada valor es EL MISMO que ya pinta la página —el titular, la bajada, el
+ * Y cada valor es EL MISMO que ya pinta la página —el titular, la bajada, el
  * ISO del `<time>` visible, la firma de la ficha, la variante de foto que carga el
  * `<img>`, los eslabones de la migaja—. No hay ni un dato que se calcule aparte
  * para el buscador: si la nota cambia, cambian los dos a la vez o no cambia
  * ninguno.
  *
- * 🔴 AQUÍ NO ENTRA EL GRUPO `meta`, y es la regla que decide el caso: `headline`
+ * AQUÍ NO ENTRA EL GRUPO `meta`, y es la regla que decide el caso: `headline`
  * lleva `nota.titulo` —el `h1` visible— aunque el `<title>` de arriba use
  * `meta.title`, y `image` lleva el hero aunque `og:image` use `meta.image`.
  *
@@ -209,14 +209,14 @@ if (noIndex) Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
  * `fenomeno-residente-capsula-1-2` es el caso vivo — su `meta.title` es «Fenómeno
  * Residente Cápsula 1» y su `h1` dice «Kraftwerk Parte 1».
  *
- * ⚠️ Lo mismo con `description`: va el `resumen`, que es la bajada que se lee bajo
+ * Lo mismo con `description`: va el `resumen`, que es la bajada que se lee bajo
  * el titular, no `meta.description`.
  *
- * ⚠️ `author` se OMITE cuando no hay firma, y hoy pasa: `autores` está vacío en el
+ * `author` se OMITE cuando no hay firma, y hoy pasa: `autores` está vacío en el
  * CMS y la firma sale del campo de texto libre, así que hay notas sin ninguna. Un
  * autor de relleno («Redacción Beat») sería un dato que la página no dice.
  *
- * ⚠️ La migaja repite los eslabones VISIBLES —sección, y la categoría solo cuando
+ * La migaja repite los eslabones VISIBLES —sección, y la categoría solo cuando
  * la nota la pinta— y cierra con la nota. Si la migaja de arriba cambia, esta
  * cambia con ella; son la misma lista leída dos veces.
  */
@@ -260,11 +260,11 @@ const etiquetas = (nota.etiquetas ?? []).filter(
   de media ya vienen absolutas —`urlMedia` les pone el host público del CMS—, que
   es lo que Facebook exige.
 
-  🔴 Los cuatro primeros valores salen del grupo `meta` del CMS cuando la redacción
+  Los cuatro primeros valores salen del grupo `meta` del CMS cuando la redacción
   lo capturó, y del contenido visible cuando no. Ver el bloque del frontmatter: el
   titular y la bajada de la PÁGINA no se tocan, y tampoco el JSON-LD.
 
-  ⚠️ `imagenAlt` es el `alt` que capturó la redacción para ESA foto —el del pie
+  `imagenAlt` es el `alt` que capturó la redacción para ESA foto —el del pie
   cuando se comparte el hero, el suyo propio cuando se comparte `meta.image`—. Si
   la foto no lo trae no se manda nada: describirla desde aquí sería inventar lo que
   hay dentro de una imagen que este archivo no ve.
@@ -293,7 +293,7 @@ const etiquetas = (nota.etiquetas ?? []).filter(
     {/* ── Migaja: sección · tipo ── */}
     <div class="nt-cabeza">
       {/*
-        🔴 La tira de secciones también AQUÍ (decisión de Carlos, 2026-09-07).
+        La tira de secciones también AQUÍ (decisión de Carlos, 2026-09-07).
 
         Faltaba, y era el único interior sin ella. En un interior la barra oscura
         va recogida a propósito (`Base.astro`), y quien carga con ese trabajo es
@@ -331,7 +331,7 @@ const etiquetas = (nota.etiquetas ?? []).filter(
         SIN empujar el titular hacia abajo: ver `.nt-leader-franja` en el
         `<style>` de abajo para el porqué del `margin-bottom` negativo.
 
-        ⚠️ `/noticias` no tenía leaderboard en la tabla de colocaciones de
+        `/noticias` no tenía leaderboard en la tabla de colocaciones de
         `agents/ads.md` —solo `nota-box`—. Este hueco (`nota-leader`) queda
         fuera de esa tabla; si se confirma, hay que sumarlo ahí.
       */}
@@ -345,7 +345,7 @@ const etiquetas = (nota.etiquetas ?? []).filter(
         {nota.resumen && <p class="nt-bajada">{nota.resumen}</p>}
 
         {/*
-          🔴 Aquí NO va el nombre del autor (decisión de Carlos, 2026-09-07).
+          Aquí NO va el nombre del autor (decisión de Carlos, 2026-09-07).
 
           Estaba en los dos sitios: aquí suelto, y otra vez abajo en la ficha con
           su foto y su línea. La misma firma dos veces en una nota no añade
@@ -419,22 +419,22 @@ const etiquetas = (nota.etiquetas ?? []).filter(
     {/*
       ── El audio principal, pegado bajo la foto ──
 
-      🔴 Va AQUÍ y no dentro del cuerpo (Carlos, 2026-09-15): «como tiene audio
+      Va AQUÍ y no dentro del cuerpo (Carlos, 2026-09-15): «como tiene audio
       principal, sería bueno que en el detalle aparezca en buena posición, hasta
       arriba». Es lo que justifica una nota de Microambiente, así que tiene que ser
       lo primero que se pueda pulsar — un reproductor a media nota se encuentra
       cuando ya decidiste leerla.
 
-      ⚠️ Y comparte el margen del hero —lo pone el propio componente—, no el ancho
+      Y comparte el margen del hero —lo pone el propio componente—, no el ancho
       de lectura de 680px: pegado debajo de la foto y a su misma medida se lee como
       una pieza del mismo bloque. Centrado y estrecho se leería como el primer
       párrafo.
 
-      ⚠️ Va SIN envoltura, y es a propósito: si la nota no trae audio el componente
+      Va SIN envoltura, y es a propósito: si la nota no trae audio el componente
       no emite nada, y un `<div>` vacío con márgenes puestos aquí sería el hueco que
       alguien rellena por error dentro de seis meses.
 
-      ⚠️ El componente no se pinta si no hay audio capturado, así que esto NO es una
+      El componente no se pinta si no hay audio capturado, así que esto NO es una
       excepción de Microambiente: cualquier nota con `audio` lo trae, y las 43 del
       CMS —ninguna con el campo lleno el 2026-09-15— siguen viéndose igual que ayer.
     */}
@@ -551,7 +551,7 @@ const etiquetas = (nota.etiquetas ?? []).filter(
     padding: 30px 24px 0;
   }
   /*
-    ⚠️ El aire que separa la migaja de la tira va AQUÍ, en la migaja, y no en la
+    El aire que separa la migaja de la tira va AQUÍ, en la migaja, y no en la
     tira. No es capricho: una clase pasada como prop a `NavSecciones` no recibe el
     ámbito de esta página, así que un `.nt-nav { margin-bottom }` escrito aquí no
     aplicaría — es el mismo fallo que tenía `CabezaSeccion` y que se veía como el
@@ -591,7 +591,7 @@ const etiquetas = (nota.etiquetas ?? []).filter(
     pixel, así que nada de lo que sigue se desplaza. Lo que crece se PINTA
     por encima —`position: relative` + `z-index`— en vez de empujar.
 
-    🔴 Solo aplica al hueco de GPT (`.anuncio-hueco`): el formato
+    Solo aplica al hueco de GPT (`.anuncio-hueco`): el formato
     `leaderboard` nunca renderiza `.anuncio-creatividad` —esa venía solo para
     `portada`, ver `Anuncio.astro`—, así que no hace falta cubrirla aquí.
   */
@@ -690,7 +690,7 @@ const etiquetas = (nota.etiquetas ?? []).filter(
   .nt-hero {
     position: relative;
     /*
-      🔴 La proporción del sitio, y es la MISMA que la de la tarjeta a propósito:
+      La proporción del sitio, y es la MISMA que la de la tarjeta a propósito:
       esta foto y la de la tarjeta comparten `transition:name`, así que dos cajas
       distintas se verían cambiar de encuadre durante la transición. El porqué del
       número está en `src/styles/beat.css`.
@@ -733,7 +733,7 @@ const etiquetas = (nota.etiquetas ?? []).filter(
   }
   .nt-cuerpo {
     /*
-      🔴 `width` explícito, no solo `max-width`.
+      `width` explícito, no solo `max-width`.
       Con `max-width` + `margin: 0 auto` en un ítem de rejilla, los márgenes
       automáticos ganan sobre el estirado y la caja se encoge a su CONTENIDO: una
       nota de un párrafo salía a 521px y una larga a 680, o sea que la medida de

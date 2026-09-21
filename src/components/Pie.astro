@@ -22,7 +22,7 @@ interface Props {
 const { estacion, redes } = Astro.props;
 const anio = new Date().getFullYear();
 /*
-  🔴 El nav del pie es EL MISMO que el del sitio (Carlos, 2026-09-07). Exactamente
+  El nav del pie es EL MISMO que el del sitio (Carlos, 2026-09-07). Exactamente
   lo que pinta el menú a pantalla completa: las secciones vivas más Programación.
 
   Antes era el «mapa completo» y añadía Comunidad, Tienda y Marcas en gris. La idea
@@ -32,7 +32,7 @@ const anio = new Date().getFullYear();
   distintas, que es justo lo que este archivo existe para evitar.
 */
 /*
-  ⚠️ Antes era `[...SECCIONES, ...SECCIONES_PIE]`, para colar «Programación» que
+  Antes era `[...SECCIONES, ...SECCIONES_PIE]`, para colar «Programación» que
   solo vivía en el pie. Desde el 2026-09-09 está en `SECCIONES` con «En vivo», así
   que la lista de arriba y la del pie vuelven a ser LA MISMA — que es lo que este
   archivo existe para garantizar.
@@ -71,7 +71,7 @@ const todasLasSecciones = SECCIONES;
       <div>
         <h2 class="t-label mb-6 font-bold text-text-primary">Radio en vivo</h2>
         {/*
-          ⚠️ Aquí iba «También escucha en» con la ficha de iHeartRadio. Salió el
+          Aquí iba «También escucha en» con la ficha de iHeartRadio. Salió el
           2026-09-11 con todo lo de iHeart, y como era la única plataforma de la
           lista se fue también el rótulo: una zona sin contenido se deja vacía y
           sin rótulo. La columna se queda con el enlace a la señal, que es lo que
@@ -154,7 +154,7 @@ const todasLasSecciones = SECCIONES;
           class="marca-nrm"
         >
           {/*
-            🔴 `loading="lazy"` y con medidas: el pie está al final de la página, así
+            `loading="lazy"` y con medidas: el pie está al final de la página, así
             que estos cinco logos no tienen por qué competir por el ancho de banda con
             lo que el lector está mirando. Y sin `width`/`height` cada uno provocaría
             un salto de maquetado al llegar.
@@ -172,13 +172,13 @@ const todasLasSecciones = SECCIONES;
   <div class="border-t-hairline border-borde-hairline">
     <div class="flex flex-wrap items-center gap-x-8 gap-y-4 px-pie py-6">
       {/*
-        🔴 Aquí había un `<a href="/marcas">Ventas</a>` escrito a mano, y era un
+        Aquí había un `<a href="/marcas">Ventas</a>` escrito a mano, y era un
         bug doble: `/marcas` no existe todavía —está en `SECCIONES_FUTURAS` con
         `pendiente: true`, precisamente para que nadie la enlace— y además
         `LEGALES` YA trae «Ventas», apuntando al contacto de NRM. O sea que el pie
         pintaba la palabra dos veces: una a un 404 y otra al sitio correcto.
 
-        ⚠️ La lección no es el enlace, es el atajo: la config marca lo que no
+        La lección no es el enlace, es el atajo: la config marca lo que no
         existe y el bucle de abajo lo respeta, pero un `<a>` a mano se salta el
         mecanismo entero. Lo que va al pie sale de `navegacion.ts` o no va.
       */}
@@ -205,13 +205,13 @@ const todasLasSecciones = SECCIONES;
     display: block;
     width: auto;
     /*
-      🔴 56px de caja, no 26. Los cinco archivos son lienzos CUADRADOS de 150x150
+      56px de caja, no 26. Los cinco archivos son lienzos CUADRADOS de 150x150
       con el logo dentro y aire alrededor: a 26px de alto, el trazo real quedaba en
       unos 13 y la tira parecía una fila de motas. Medido antes de subirlo.
     */
     height: 56px;
     /*
-      🔴 A escala de grises, y no por capricho: el sitio va en blanco y negro
+      A escala de grises, y no por capricho: el sitio va en blanco y negro
       (movimiento.md §8) y estos son cinco logos de marcas distintas, cada uno con
       su color. Puestos tal cual, la tira sería la única mancha de color del sitio
       — y además la más ruidosa, porque son cinco paletas que no conversan entre sí.
@@ -236,15 +236,15 @@ const todasLasSecciones = SECCIONES;
     Del pie de v1, donde era el wordmark al 2% abajo a la derecha. Se conserva la
     idea y sube a 3.5%: aquí el fondo es más oscuro y al 2% no se distinguía.
 
-    ⚠️ `z-index: -1` la deja DETRÁS del contenido del pie, y `pointer-events: none`
+    `z-index: -1` la deja DETRÁS del contenido del pie, y `pointer-events: none`
     evita que capture clics. Es textura, no contenido: no debe estorbar ni al ratón
     ni a un lector de pantalla —por eso es un pseudo-elemento y no un `<img>`—.
 
-    ⚠️ Y el `isolation: isolate` del pie es lo que impide que ese `z-index: -1` se
+    Y el `isolation: isolate` del pie es lo que impide que ese `z-index: -1` se
     escape del pie y acabe detrás del fondo de la página, donde no se vería.
   */
   /*
-    ⚠️ La marca de agua va en el bloque del MENÚ, no en el pie entero.
+    La marca de agua va en el bloque del MENÚ, no en el pie entero.
     Puesta en el pie, caía sobre el bloque legal —el texto más pequeño y menos
     contrastado de la página— y competía justo donde peor. Aquí queda detrás de las
     cuatro columnas, que es el bloque con aire para sostenerla.

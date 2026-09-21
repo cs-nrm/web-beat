@@ -5,7 +5,7 @@
 La señal: el player de radio en vivo, el SDK de Triton, los audio ads del pre-roll,
 el «qué suena», y el árbitro que garantiza que solo suene una fuente a la vez.
 
-🔴 **Este documento se reescribió por completo el 2026-09-08.** El anterior
+**Este documento se reescribió por completo el 2026-09-08.** El anterior
 describía el v1 y los cuatro archivos que reclamaba están muertos o son legado:
 
 - `src/components/Player.astro` — **no existe.** El player vive en la cabecera:
@@ -22,7 +22,7 @@ Y describía una arquitectura que ya no es esta:
 |---|---|
 | El player flota abajo a la derecha (izquierda en móvil) | Va **en la CABECERA**, y es requisito de producto |
 | Polling de `cdn.nrm.com.mx/…/cancion.json` a 15/30/60s | **Cero polling.** Los cue points vienen DENTRO del stream, por el canal SBM |
-| Cover art desde Last.fm | No existe. ⚠️ Había una API key en claro en `player.js` que **nunca se usaba** |
+| Cover art desde Last.fm | No existe. Había una API key en claro en `player.js` que **nunca se usaba** |
 | jQuery, Day.js, Flickity y `player-0.1.0.min.js` del CDN de NRM | Ninguno. La única dependencia externa es el SDK de Triton |
 | El SDK cargado con la página | **A demanda**, al primer indicio de intención |
 | `station: 'XHSONFM'` en la config | Sale del CMS (`estaciones.tritonMount`) y baja por `data-mount` |
@@ -38,7 +38,7 @@ perder una tarde y luego hace dudar del resto de la documentación.
 | Archivo | Qué le toca |
 |---|---|
 | `src/scripts/player.ts` | El núcleo: construir el SDK, la máquina de 6 estados, los cue points, el pre-roll VAST, el modal del anuncio, el volumen y la marquesina |
-| `src/scripts/audio.ts` | 🔴 El **árbitro**: solo una fuente suena a la vez. Lo comparten radio, video, podcast y pista |
+| `src/scripts/audio.ts` | El **árbitro**: solo una fuente suena a la vez. Lo comparten radio, video, podcast y pista |
 | `src/scripts/pista.ts` | Las pistas a demanda de Bonus Beat, en la MISMA barra. Un `<audio>` nativo, no Plyr |
 | `src/scripts/senal.ts` | Que la parrilla de `/programacion` avance sola, sin pedirle nada al servidor |
 | `src/scripts/video.ts` | El visor de las cápsulas (Plyr a demanda). Entra aquí por el árbitro de audio |
@@ -56,7 +56,7 @@ perder una tarde y luego hace dudar del resto de la documentación.
 
 ---
 
-## 🔴 El «qué suena» viene DENTRO del stream, no de un JSON encuestado
+## El «qué suena» viene DENTRO del stream, no de un JSON encuestado
 
 Es el cambio de fondo respecto al v1 y conviene entenderlo antes de tocar nada.
 
@@ -73,13 +73,13 @@ Los cue points llegan por el canal **SBM** (el `_SBM` que se ve como `eventsourc
 la red), así que vienen **alineados con el audio** y solo cuando algo cambia. El SDK
 ya tiene ese canal abierto: el sitio viejo lo tiene conectado y no lo usa.
 
-🔴 **Y por eso `Base.astro` ya NO consulta la bitácora** (Carlos, 2026-09-03). Esa
+**Y por eso `Base.astro` ya NO consulta la bitácora** (Carlos, 2026-09-03). Esa
 consulta corría en CADA página del sitio para un dato que solo es cierto si alguien
-está escuchando. ⚠️ El efecto visible: hasta que alguien pulsa play, la barra dice el
+está escuchando. El efecto visible: hasta que alguien pulsa play, la barra dice el
 nombre de la estación en vez de una canción. **Eso es MÁS honesto, no menos** — antes
 afirmaba saber qué sonaba para un oyente que no estaba oyendo nada.
 
-⚠️ **Lo que NO se puede mover al SDK es el HISTORIAL** —«LO QUE SONÓ», hoy solo en
+**Lo que NO se puede mover al SDK es el HISTORIAL** —«LO QUE SONÓ», hoy solo en
 `/en-vivo`—: los cue points solo cuentan el presente, y solo mientras haya una
 conexión abierta. Eso sigue saliendo de `bitacora`, y por eso `src/lib/cms/aire.ts`
 sigue vivo.
@@ -89,31 +89,31 @@ sigue vivo.
 Verificados el 2026-08-21 conectando al canal SBM directo (`XHSONFMAAC_SBM`) sobre la
 señal real. Tres cosas de las que depende todo, y cada una ya rompió el «qué suena»:
 
-- 🔴 **El tipo del cue point se llama `type`, NO `name`.** El canal manda `name:
+- **El tipo del cue point se llama `type`, NO `name`.** El canal manda `name:
   "track"`, el SDK lo renombra a `type` al construir el objeto, y el código
   preguntaba por `name`: **se descartaba el 100% de los cue points** y la barra se
-  quedaba en «Beat 100.9» para siempre. ⚠️ Y lo destapó un endurecimiento anterior —
+  quedaba en «Beat 100.9» para siempre. Y lo destapó un endurecimiento anterior —
   la condición aceptaba también la cadena vacía, y ese hueco (que se cerró con razón)
   era lo único que dejaba pasar los cue points. **Cerrar un agujero sin comprobar qué
   pasaba por él es cómo se rompe algo arreglándolo.**
-- 🔴 **TODO evento del SDK llega envuelto en `.data`.** El emisor común de los módulos
+- **TODO evento del SDK llega envuelto en `.data`.** El emisor común de los módulos
   entrega `{ data: <lo que el módulo emitió> }`, así que lo nuestro está en
-  `e.data.cuePoint` y se leía `e.cuePoint`. ⚠️ La pista llevaba todo el tiempo veinte
+  `e.data.cuePoint` y se leía `e.cuePoint`. La pista llevaba todo el tiempo veinte
   líneas más arriba: `alCambiarEstado` ya leía `e.data?.code`, y por eso la máquina de
   estados SÍ funcionaba.
-- ⚠️ **`cue_time_duration` viene en DÉCIMAS de segundo**, no en milisegundos.
+- **`cue_time_duration` viene en DÉCIMAS de segundo**, no en milisegundos.
   Leerlo como ms daría 46 minutos para una canción de cuatro. (Los eventos VAST sí lo
   mandan en ms, pero llegan por otro evento.)
 
 Y dos que parecen paranoia y no lo son:
 
-- 🔴 **LISTA BLANCA ESTRICTA: solo `track` se pinta.** El SDK conoce siete tipos
+- **LISTA BLANCA ESTRICTA: solo `track` se pinta.** El SDK conoce siete tipos
   —`track`, `ad-break`, `custom`, `hls`, `metadata`, `speech`, `empty`— y el de
   `custom` es lo que cada estación configure, así que puede traer códigos internos. Ya
   se vieron cue points de `ad` con títulos como «FRASE BEAT 100.9 FM
   (ROMPECORTE)-01» y anunciantes como «RDF1382026 \ BANXICO CONTIGO 2026». Con lista
   negra, un tipo nuevo entra solo y aparece en la barra sin que nadie se entere.
-- 🔴 **Una canción CADUCA sola, aunque no llegue nada nuevo.** Cuando los locutores
+- **Una canción CADUCA sola, aunque no llegue nada nuevo.** Cuando los locutores
   hablan en vivo, **Triton no manda NADA** (medido en una captura de 2h44 del canal:
   los únicos tipos que existen son `track` y `ad`). Sin la caducidad, la barra se
   queda enseñando la última canción mientras alguien habla encima — que es
@@ -124,68 +124,68 @@ Y dos que parecen paranoia y no lo son:
 
 ## Las reglas del player, y por qué
 
-- 🔴 **El player es PERSISTENTE, y es requisito de producto.** El §4.1 del mapa de
+- **El player es PERSISTENTE, y es requisito de producto.** El §4.1 del mapa de
   sitio lo dice: «el reproductor en vivo es persistente… es la afirmación, en la
   propia experiencia de usuario, de que Beat sigue siendo, antes que cualquier otra
   cosa, una estación de radio en vivo». De ahí `transition:persist` en la cabecera —
-  sin él la señal se cortaría al cambiar de página. ⚠️ Y necesita el `<ClientRouter />`
+  sin él la señal se cortaría al cambiar de página. Y necesita el `<ClientRouter />`
   de `Base.astro`: estuvo faltando, así que el atributo estaba puesto y no servía de
   nada.
-- 🔴 **`#td_container` y `#td-telon` van DENTRO del bloque persistente.** Es el
+- **`#td_container` y `#td-telon` van DENTRO del bloque persistente.** Es el
   `playerId` del módulo MediaPlayer, donde el SDK monta el elemento de audio y el
-  pre-roll. ⚠️ Estuvo FUERA por un `</div>` mal puesto, y no se notaba porque la
+  pre-roll. Estuvo FUERA por un `</div>` mal puesto, y no se notaba porque la
   cabecera sí persistía: **lo visible seguía ahí y solo se iba el audio.**
-- 🔴 **El SDK se carga A DEMANDA.** Medido en el cable: `td-sdk.min.js` son 363 KB
+- **El SDK se carga A DEMANDA.** Medido en el cable: `td-sdk.min.js` son 363 KB
   gzip, y con el plugin `vastAd` arrastra el IMA de Google, que son 491 KB más y
   viajan **sin comprimir**. Total **854 KB**. Como el player vive en la cabecera, eso
   se bajaba en TODAS las páginas aunque nadie le diera play. Para comparar: el CSS del
   sitio entero son 10 KB gzip.
-- 🔴 **Y se precarga al primer indicio de INTENCIÓN**, no cuando el navegador esté
+- **Y se precarga al primer indicio de INTENCIÓN**, no cuando el navegador esté
   ocioso. Con `requestIdleCallback` los 854 KB salían de la ruta crítica pero se
   descargaban igual en cada visita: quien nunca da play pagaba los datos completos, y
   en datos móviles en México eso no es un detalle. «Intención» es acercar el puntero a
   la barra, enfocarla con el teclado o tocarla.
-- 🔴 **Un fallo de carga NO se memoriza.** Antes se guardaba la promesa tal cual, así
+- **Un fallo de carga NO se memoriza.** Antes se guardaba la promesa tal cual, así
   que un fallo —red inestable, CDN bloqueado, un bloqueador— quedaba memorizado como
   promesa RECHAZADA y **la radio no volvía a arrancar EN TODA LA SESIÓN** aunque la
   red se recuperara. El oyente da play, no pasa nada; da play otra vez, nada. Sin
   error visible y sin salida. Y siendo el player, los audio ads del pre-roll son
   ingresos.
-- 🔴 **El mismo patrón en `iniciarPlayer()`**: la bandera `iniciado` se pone ANTES de
+- **El mismo patrón en `iniciarPlayer()`**: la bandera `iniciado` se pone ANTES de
   construir para evitar reentradas, así que si el constructor lanzara se quedaría
   echada con `sdk` en null. Por eso hay un `try` que deshace lo andado. Es el patrón
   de «estado muerto sin salida» que `movimiento.md` §3 prohíbe, aplicado al audio.
-- 🔴 **La intención de arranque se GUARDA hasta `playerReady`.** El SDK ignora
+- **La intención de arranque se GUARDA hasta `playerReady`.** El SDK ignora
   `play()` hasta que dispara ese evento, así que el PRIMER clic de la sesión no
   reproducía nada y el segundo sí. Era el camino que toma **todo visitante nuevo**, y
   era silencioso: sin error, sin nada raro, solo un botón que parece no hacer caso.
-- 🔴 **Hay un TOPE de conexión de 20 s.** Sin él, si Triton no llega nunca a
+- **Hay un TOPE de conexión de 20 s.** Sin él, si Triton no llega nunca a
   `LIVE_PLAYING` —mount caído, un VAST que se cuelga sin emitir evento— el oyente se
   queda mirando «Conectando…» indefinidamente. 20 s es holgado a propósito: la cadena
   real son la descarga del SDK, el pre-roll y después la conexión al stream.
-- 🔴 **El modal del anuncio se cierra solo a los 45 s.** Si `ad-playback-complete` no
+- **El modal del anuncio se cierra solo a los 45 s.** Si `ad-playback-complete` no
   llega nunca, el telón se queda a pantalla completa y el sitio queda inservible. El
   v1 tiene ese riesgo abierto.
-- 🔴 **Al PARAR se deja de anunciar la canción.** Si el oyente pausó, la barra no puede
+- **Al PARAR se deja de anunciar la canción.** Si el oyente pausó, la barra no puede
   seguir diciendo qué suena: para él no suena nada, y la señal sigue corriendo sin él,
   así que al reanudar ya será otra.
-- ⚠️ **`aria-busy` y no `disabled`** mientras conecta: deshabilitar el botón le
+- **`aria-busy` y no `disabled`** mientras conecta: deshabilitar el botón le
   quitaría el foco a quien navega con teclado, y el oyente debe poder cancelar una
   conexión que tarda.
-- ⚠️ **Guarda contra listeners DUPLICADOS.** Con View Transitions este módulo puede
+- **Guarda contra listeners DUPLICADOS.** Con View Transitions este módulo puede
   volver a evaluarse en cada navegación, y como el botón vive en un bloque persistente
   **es el MISMO nodo**: sin la marca `data-cableado` acumularía un listener por página
   visitada, y a la quinta el clic dispararía cinco veces.
-- ⚠️ **`audioAdaptive` solo cuenta dentro del módulo MediaPlayer.** El de nivel raíz es
+- **`audioAdaptive` solo cuenta dentro del módulo MediaPlayer.** El de nivel raíz es
   decorativo —no está en la config que el SDK lee— y se conserva porque los cuatro
   repos hermanos lo tienen y quitarlo invita a que alguien «arregle» el de arriba por
   simetría. Hoy el del módulo está en `false`.
 
-- 🔴 **El mount que suena NO es el del CMS.** `estaciones.tritonMount` vale `XHSONFM`
+- **El mount que suena NO es el del CMS.** `estaciones.tritonMount` vale `XHSONFM`
   (MP3) y eso baja por `data-mount`, pero el SDK pide la config con
   `transports=http,hls` y acaba reproduciendo **`XHSONFMAAC.aac`, HE-AAC v2 a
   48 kbps**. Verificado el 2026-09-12 leyendo `currentSrc` del elemento que el SDK
-  crea en producción. ⚠️ Quien diagnostique leyendo el CMS medirá el mount
+  crea en producción. Quien diagnostique leyendo el CMS medirá el mount
   equivocado — ya pasó al montar el monitor de esa fecha.
 
 - ✅ **`audioAdaptive: true` NO es el arreglo de los cortes. Esa sospecha está
@@ -204,7 +204,7 @@ Y dos que parecen paranoia y no lo son:
   móviles en México es peor, no mejor. **La causa de los cortes era otra**, y está
   abajo.
 
-- 🔴 **Un corte que el front NO pidió se reintenta; uno que pidió el front, no.**
+- **Un corte que el front NO pidió se reintenta; uno que pidió el front, no.**
   Es la regla que cierra el fallo medido el 2026-09-12: `alCambiarEstado` conocía
   seis códigos y llegan nueve, así que **`LIVE_FAILED` —la caída de red— caía en el
   `else` final y pintaba `'pausa'`, idéntico a una pausa deliberada.** El oyente se
@@ -222,31 +222,31 @@ Y dos que parecen paranoia y no lo son:
   | El SDK reconecta él | `LIVE_RECONNECTING` | — | se le da gracia |
   | WebKit rechazó el `play()` | `PLAY_NOT_ALLOWED` | — | pide otro toque |
 
-  ⚠️ **La parada propia se marca, no se deduce.** Hay TRES `sdk.stop()` en el front
+  **La parada propia se marca, no se deduce.** Hay TRES `sdk.stop()` en el front
   —`fallo()`, la devolución del árbitro y la rama de parar del botón— y los tres
   llaman a `pedirParada()` justo antes. Se marca ANTES porque el botón hace `stop()`
   y *después* `pintarEstado`, así que leer el DOM dentro del manejador leería un
   estado viejo. Y es un RELOJ de 2 s, no una bandera: una bandera que no se consume
   —el `stop()` no siempre emite evento— se tragaría el siguiente corte de verdad.
 
-  🔴 **Ninguna reconexión ocurre sin preguntar por el DUEÑO del canal**
+  **Ninguna reconexión ocurre sin preguntar por el DUEÑO del canal**
   (`duenoAudio()` en `src/scripts/audio.ts`). Si mientras el radio estaba caído el
   oyente puso un video o una pista, reconectar le robaría el canal a algo que él
   acaba de elegir: dos audios a la vez, que es el peor bug de audio posible.
 
-  ⚠️ **El SDK no siempre se recupera solo.** Tiene su propio `__reconnect`, pero
+  **El SDK no siempre se recupera solo.** Tiene su propio `__reconnect`, pero
   medido con el mount inalcanzable se quedó quieto 15 s sin emitir nada. Por eso la
   gracia se le da **solo** cuando manda `LIVE_RECONNECTING`, no a ciegas tras un
   `LIVE_FAILED`.
 
-  ⚠️ **Esto NO se puede medir con reproducciones de GA4.** Cada reconexión con éxito
+  **Esto NO se puede medir con reproducciones de GA4.** Cada reconexión con éxito
   emite un `stop` y luego un `play` (no un `resume`), porque `estadoPrevio` queda en
   `LIVE_STOP`. Mentirle a la analítica para que saliera `resume` escondería justo el
   evento con el que se querría medir el arreglo.
 
 ---
 
-## 🔴 El árbitro de audio: solo una fuente a la vez
+## El árbitro de audio: solo una fuente a la vez
 
 `src/scripts/audio.ts` es pequeño y es el archivo que evita el peor bug de audio
 posible. Cinco fuentes pueden sonar en Beat: el radio (Triton), el video de una nota
@@ -258,25 +258,25 @@ Cada una se **registra** con una forma de pausarse y **reclama** el canal al emp
 Funciona en los DOS sentidos, que es donde estaba el bug del sitio viejo: ahí el
 player paraba el radio al abrir un video, **pero no al revés**.
 
-- 🔴 **El registro vive en `window` a propósito.** El player y el media de una nota se
+- **El registro vive en `window` a propósito.** El player y el media de una nota se
   cargan en módulos distintos y el bundler puede separarlos en chunks: sin un punto
   común compartirían la interfaz pero no la instancia, y cada uno tendría su propio
   registro vacío.
-- 🔴 **El radio reclama el canal en el CLIC, no en `reproducir()`.** `reproducir()`
+- **El radio reclama el canal en el CLIC, no en `reproducir()`.** `reproducir()`
   solo corre cuando el SDK está listo, así que reclamar ahí dejaba una ventana de
   varios segundos —la descarga del SDK más el VAST— en la que el radio ya estaba
   «conectando» y el video de la nota **seguía sonando**. Los dos a la vez, que es
   exactamente lo que el árbitro existe para evitar.
-- ⚠️ **Registrar REEMPLAZA, no acumula.** Con View Transitions una nota puede montarse
+- **Registrar REEMPLAZA, no acumula.** Con View Transitions una nota puede montarse
   varias veces en la misma sesión, y dos entradas con el mismo id dejarían una
   apuntando a un elemento que ya no está en el DOM.
-- 🔴 **Un `<audio>` que sale del DOM SIGUE SONANDO.** Por eso `audio-nota.ts` se
+- **Un `<audio>` que sale del DOM SIGUE SONANDO.** Por eso `audio-nota.ts` se
   engancha a `astro:before-swap` y no solo a `astro:page-load`: pausa y olvida la
   fuente en el instante en que la nota que la contenía deja de existir. Sin eso,
   salir de la nota dejaba una voz sin página y sin botón con el que pararla.
   Comprobado el 2026-09-15 en el flujo Inicio → nota → atrás: al volver, el registro
   queda en `['radio', 'pista']`.
-- ⚠️ **Un EMBED no se puede arbitrar, y es una limitación real.** El otro camino de
+- **Un EMBED no se puede arbitrar, y es una limitación real.** El otro camino de
   `noticias.audio` es el reproductor de una plataforma dentro de un iframe de otro
   dominio: no hay forma de pausarlo desde aquí ni de enterarse de que empezó a
   sonar. Con un embed pueden acabar sonando la radio y el audio a la vez, que es
@@ -290,14 +290,14 @@ módulos —la barra es persistente y es el mismo nodo— así que **cada uno ig
 clics que no son suyos** (`mandaLaPista()`). Sin eso, pulsar pausa sobre una pista
 arrancaría además el radio.
 
-- 🔴 **El título de la pista va en SU PROPIO elemento**, no reutilizando el del
+- **El título de la pista va en SU PROPIO elemento**, no reutilizando el del
   directo. `player.ts` guarda el texto original de `[data-campo="sonando"]` para
   restaurarlo tras un corte comercial; si la pista escribiera ahí, ese «original»
   pasaría a ser una canción de Bonus Beat y **el radio volvería del anuncio anunciando
   la pista**. Dos modos, dos elementos, cero estado compartido.
-- 🔴 **Y hay una puerta de vuelta visible al directo.** Mientras suena una pista el
+- **Y hay una puerta de vuelta visible al directo.** Mientras suena una pista el
   oyente está FUERA de la señal, y este sitio afirma ser una radio en vivo: sacar a
-  alguien del directo sin una salida visible sería una trampa, no una función. ⚠️ Dice
+  alguien del directo sin una salida visible sería una trampa, no una función. Dice
   «EN VIVO», no «volver al directo» — «directo» es español de España (Carlos,
   2026-09-03).
 
@@ -305,7 +305,7 @@ arrancaría además el radio.
 
 ## Diagnóstico: ya existe, úsalo
 
-🔴 El «qué suena» falla EN SILENCIO: si el cue point no llega, o llega y se descarta,
+El «qué suena» falla EN SILENCIO: si el cue point no llega, o llega y se descarta,
 la barra se queda con el nombre de la estación y **no hay forma de distinguir las dos
 cosas mirando la pantalla.** Ya costó dos arreglos a ciegas, así que hay una traza:
 
@@ -320,7 +320,7 @@ Enseña cada `stream-status`, cada cue point **con el motivo de su descarte**, y
 diagnósticos: cero cue points apunta al canal SBM y a cómo está configurada la
 estación en Triton, no a este código.
 
-⚠️ **No va detrás de `import.meta.env.DEV` a secas**, que es lo que había: el sitio
+**No va detrás de `import.meta.env.DEV` a secas**, que es lo que había: el sitio
 que se mira es el compilado, y ahí ese log no existiría. **Un diagnóstico que solo
 funciona donde no está el problema no sirve de nada.**
 
@@ -332,13 +332,13 @@ funciona donde no está el problema no sirve de nada.**
   modos— son de `agents/frontend.md`. Este agente pone el comportamiento; los `data-*`
   son la frontera.
 - **La publicidad de DISPLAY** (GPT, los huecos, las medidas) es de `agents/ads.md`.
-  ⚠️ Se cruzan en el ad unit: el VAST del pre-roll lo arma `player.ts` con
-  `PUBLIC_GAM_NETWORK_ID` / `PUBLIC_GAM_AD_UNIT`. 🔴 **Jamás se hardcodea** — en los
+  Se cruzan en el ad unit: el VAST del pre-roll lo arma `player.ts` con
+  `PUBLIC_GAM_NETWORK_ID` / `PUBLIC_GAM_AD_UNIT`. **Jamás se hardcodea** — en los
   repos hermanos está pegado por copy-paste como `/<network>/StereoCien`, y servir
   impresiones de una estación a la cuenta de otra es un bug de dinero. Hay un grep en
   CI (`scripts/guardas.mjs`) que lo vigila.
 - **A dónde llegan los eventos** — es de `agents/analytics.md`. Este agente los EMITE
-  con `eventoTriton()`. ⚠️ Y hoy no llegan a ninguna parte: no hay contenedor de
+  con `eventoTriton()`. Y hoy no llegan a ninguna parte: no hay contenedor de
   medición cargado en v2. Está documentado allí; no se arregla desde aquí.
 - **Las consultas al CMS** — son de `agents/content.md`, incluidos
   `src/lib/cms/estacion.ts` y `aire.ts`. Este agente solo consume `tritonMount` y el
@@ -354,7 +354,7 @@ funciona donde no está el problema no sirve de nada.**
 
 ## Cómo se verifica
 
-🔴 **Con la traza encendida, y navegando.** Los dos fallos históricos de este agente
+**Con la traza encendida, y navegando.** Los dos fallos históricos de este agente
 —el audio que se corta al navegar y el cue point que se descarta— son invisibles en
 una sola página recargada.
 
@@ -384,9 +384,9 @@ grep -rn "XHSONFM" src/scripts/ src/components/    # solo debe salir en comentar
 pnpm check
 ```
 
-⚠️ **Un `vastAd` bloqueado por un adblocker NO es un bug**: el stream funciona igual y
+**Un `vastAd` bloqueado por un adblocker NO es un bug**: el stream funciona igual y
 el SDK lo avisa por `adBlockerDetected`. Lo que sí es un bug es que el telón se quede
 puesto — para eso está el cierre a los 45 s.
 
-⚠️ **Y el pre-roll va UNA vez por sesión**, no en cada play. Si suena en el segundo
+**Y el pre-roll va UNA vez por sesión**, no en cada play. Si suena en el segundo
 play, se rompió `yaSonoElAnuncio`.

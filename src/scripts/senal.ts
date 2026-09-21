@@ -1,7 +1,7 @@
 /**
  * La parrilla avanza SOLA.
  *
- * 🔴 Por qué existe: la parrilla se calcula en el SERVIDOR y ahí se congela. Una
+ * Por qué existe: la parrilla se calcula en el SERVIDOR y ahí se congela. Una
  * pestaña abierta media hora seguía marcando al aire un programa que ya terminó,
  * o sea que lo que existe justamente para afirmar que Beat está en vivo era la
  * parte más muerta de la página.
@@ -10,17 +10,17 @@
  * basta con volver a compararlos contra el reloj. Cero peticiones, cero coste por
  * oyente.
  *
- * ⚠️ Nació para el panel «HOY EN LA SEÑAL» del Inicio, que se retiró el
+ * Nació para el panel «HOY EN LA SEÑAL» del Inicio, que se retiró el
  * 2026-09-09 («en el home nada», Carlos). Hoy sirve a DOS páginas: en `/en-vivo`,
  * el hero de «AL AIRE AHORA» —de donde cuelga que el punto de tally se apague al
  * terminar el bloque— y las filas de «LO QUE SIGUE HOY»; en `/programacion`, las
  * celdas de la rejilla semanal, con su propio punto de tally desde el 2026-09-09.
  *
- * ⚠️ Y sirve a CUALQUIER `[data-bloque]`, no a una pantalla concreta: por eso el
+ * Y sirve a CUALQUIER `[data-bloque]`, no a una pantalla concreta: por eso el
  * selector es de atributo y no de clase. Si no hay ninguno en la página, se apaga
  * el temporizador solo.
  *
- * 🔴 El reloj y la comparación NO se calculan aquí: se importan de
+ * El reloj y la comparación NO se calculan aquí: se importan de
  * `src/lib/parrilla.ts`, que es el mismo módulo que usa el SERVIDOR para pintar.
  * Tenía su propia copia de las dos funciones y era la trampa de §11 de
  * `movimiento.md` esperando su turno — dos copias de la misma regla, y el día que
@@ -53,7 +53,7 @@ function repasar(): void {
     if (!Number.isFinite(desde) || !Number.isFinite(hasta)) continue;
 
     /*
-      ⚠️ Una celda de la rejilla semanal declara SU día (`data-dia`), y solo puede
+      Una celda de la rejilla semanal declara SU día (`data-dia`), y solo puede
       estar al aire si hoy es ese día. Sin esta comprobación, el bloque de las
       21:00 del martes se marcaría al aire también el sábado a las 21:00 —siete
       celdas encendidas a la vez, una por columna—. El hero y las filas de «LO QUE
@@ -65,7 +65,7 @@ function repasar(): void {
     fila.classList.toggle('es-aire', alAire);
 
     /*
-      🔴 `[data-estado]` es el CONTRATO de este archivo: el elemento cuyo TEXTO se
+      `[data-estado]` es el CONTRATO de este archivo: el elemento cuyo TEXTO se
       reescribe con el estado del bloque. Quien meta ese atributo dentro de un
       `[data-bloque]` para otra cosa va a perder su contenido — le pasó al botón
       de «Escuchar en vivo» del hero, que quedó diciendo «AL AIRE · 58 MIN». Si

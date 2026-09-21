@@ -7,13 +7,13 @@
  * Lo que se toma de ahí es el COMPORTAMIENTO; el demo es jQuery y una barra
  * lateral de portafolio, así que nada de su marcado sirve.
  *
- * 🔴 Va DEBAJO del chrome en z, no encima, y es deliberado: la barra del player
+ * Va DEBAJO del chrome en z, no encima, y es deliberado: la barra del player
  * sigue visible y usable con el menú abierto. Este sitio afirma ser una radio en
  * vivo (§4.1 del mapa de sitio) — que abrir el menú te quite los controles de lo
  * que estás escuchando contradice esa afirmación. De paso, la hamburguesa
  * convertida en X queda siempre a la vista para cerrarlo.
  *
- * ⚠️ Se pinta POR PÁGINA y NO dentro del bloque persistente, al revés que la
+ * Se pinta POR PÁGINA y NO dentro del bloque persistente, al revés que la
  * cabecera. Así una navegación lo cierra sola: pulsar un enlace del menú tiene que
  * dejarte en la página nueva sin el menú encima, y con un nodo persistido habría
  * que acordarse de cerrarlo a mano. El estado vive en este elemento; el script solo
@@ -33,23 +33,23 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     movimiento.md §3 aplicada a la navegación.
   */}
   {/*
-    ⚠️ `tabindex="-1"` para que `menu.ts` pueda darle el foco al abrir. No entra en
+    `tabindex="-1"` para que `menu.ts` pueda darle el foco al abrir. No entra en
     el orden de tabulación —el -1 lo impide—, solo se puede enfocar por script.
   */}
   <nav class="menu-caja" aria-label="Menú principal" tabindex="-1">
     {/*
-      🔴 Programación va en la MISMA lista y con la misma pinta que las cinco
+      Programación va en la MISMA lista y con la misma pinta que las cinco
       (decisión de Carlos, 2026-09-03). Estaba abajo en voz baja porque en el pie
       es una utilidad de consulta, no una sección editorial — pero en el menú esa
       distinción no le sirve a nadie: quien lo abre está eligiendo a dónde ir, y
       una fila más chica solo le pide que averigüe por qué.
 
-      ⚠️ `data-escribir` va en `.menu-texto` y NO en el `<a>`. `partir()` se niega
+      `data-escribir` va en `.menu-texto` y NO en el `<a>`. `partir()` se niega
       a actuar sobre un elemento con hijos, así que el efecto tiene que caer sobre
       un nodo de texto plano — y por eso el rótulo conserva su propio `span`
       aunque ya no lo acompañe nada.
 
-      ⚠️ Los números `01`–`06` se retiraron (Carlos, 2026-09-03). Ordenaban una
+      Los números `01`–`06` se retiraron (Carlos, 2026-09-03). Ordenaban una
       lista que ya venía ordenada, y dejaban el borde izquierdo dentado porque
       cada línea se centra por su cuenta.
     */}
@@ -73,7 +73,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
 
 <style>
   /*
-    🔴 Justo por DEBAJO del chrome. No hay token para «debajo de la cabecera», así
+    Justo por DEBAJO del chrome. No hay token para «debajo de la cabecera», así
     que se calcula desde el suyo en vez de escribir un 199 suelto que nadie
     entendería dentro de seis meses.
   */
@@ -89,7 +89,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     /*
       Cerrado: invisible, intocable y fuera del árbol de accesibilidad.
 
-      ⚠️ `visibility` además de `opacity`. Con solo opacidad, el overlay seguiría
+      `visibility` además de `opacity`. Con solo opacidad, el overlay seguiría
       capturando los clics de toda la página. Y su transición va con RETARDO al
       cerrar —espera a que los ítems terminen de salir— y sin retardo al abrir.
       Es el truco del demo y es lo que evita que el menú desaparezca de golpe
@@ -99,7 +99,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     opacity: 0;
 
     /*
-      🔴 Se abre como un CÍRCULO que crece DESDE LA PROPIA HAMBURGUESA hasta
+      Se abre como un CÍRCULO que crece DESDE LA PROPIA HAMBURGUESA hasta
       llenar la pantalla, y se cierra volviendo a ella.
 
       Aparecer sin más se leía como un corte de plano: el menú estaba y de pronto
@@ -136,7 +136,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     text-align: center;
   }
   /*
-    ⚠️ Sin anillo, y aquí sí es correcto quitarlo: este `<nav>` no es un control, es
+    Sin anillo, y aquí sí es correcto quitarlo: este `<nav>` no es un control, es
     solo el destino del foco al abrir el menú. Su anillo no diría nada útil —no hay
     nada que activar en él— y encima competiría con la entrada que sí está marcada
     como sección en curso. Los enlaces de dentro conservan el suyo intacto.
@@ -173,7 +173,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
   }
 
   /*
-    🔴 En reposo va en `--text-body`, no en `--text-muted`, y NO es preferencia
+    En reposo va en `--text-body`, no en `--text-muted`, y NO es preferencia
     estética: es lo que hace legal el descifrado.
 
     Las letras sin resolver se pintan al 40% de opacidad. Medido sobre el fondo
@@ -182,7 +182,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
     gris de antes, el efecto habría dejado el menú ilegible durante un segundo
     entero, justo cuando el lector está eligiendo a dónde ir.
 
-    ⚠️ El guarda de `partir()` comprueba el TAMAÑO, no el color, así que esto no
+    El guarda de `partir()` comprueba el TAMAÑO, no el color, así que esto no
     lo habría detenido nadie. Queda escrito aquí porque el día que alguien quiera
     apagar más estos enlaces, este es el suelo.
   */
@@ -228,7 +228,7 @@ const activo = (href: string) => ruta === href || ruta.startsWith(`${href}/`);
   }
 
   /*
-    🔴 Menos movimiento: se apaga, no se acelera. Un overlay que se abre de golpe
+    Menos movimiento: se apaga, no se acelera. Un overlay que se abre de golpe
     es correcto; lo que la preferencia quita es el desplazamiento y el escalonado,
     no el menú. movimiento.md §5.
   */

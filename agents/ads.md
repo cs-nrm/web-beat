@@ -5,7 +5,7 @@
 Todo el inventario publicitario del sitio: los huecos, sus medidas, quién los
 llena, y el punto donde se enchufa una red nueva.
 
-🔴 **Este documento se reescribió por completo el 2026-09-08.** El anterior
+**Este documento se reescribió por completo el 2026-09-08.** El anterior
 describía la arquitectura del v1 —`BillBoard.astro`, `LeaderBoard.astro`,
 `LeaderBoard2.astro`, `SuperLeader.astro`, `BoxBanner.astro`, `DoubleBox.astro`,
 `Modal.astro`, `SliderBuenfin.astro`, `BaseHead.astro`— y **nueve de esos diez
@@ -41,16 +41,16 @@ Salen del lienzo v13/v14, no del sitio actual. Viven en `MEDIDAS`, en
 | `leaderboard` | 728 × 90 | 320 × 50 |
 | `box` | 300 × 250 | 300 × 250 |
 
-🔴 **El corte es 900px en los dos lados** —el `md` del design system y el
+**El corte es 900px en los dos lados** —el `md` del design system y el
 `sizeMapping` de GPT—. Si el CSS cortara en 900 y el mapping en 768, habría un
 tramo en el que el marco es de escritorio y el creativo que sirve GAM es de móvil.
 
-⚠️ **Dos de esas medidas no existen en Ad Manager**: 1280×350 y 390×110 son
+**Dos de esas medidas no existen en Ad Manager**: 1280×350 y 390×110 son
 nuevas. Un slot cuya medida no está dada de alta **nunca se llena**, y desde el
 sitio se ve igual que un hueco sin demanda. Antes de dar por bueno un hueco vacío,
 confirmar la medida en GAM.
 
-🔴 **El leaderboard móvil pasó de 320×100 a 320×50 el 2026-09-09, y la historia es
+**El leaderboard móvil pasó de 320×100 a 320×50 el 2026-09-09, y la historia es
 la lección.** El código pedía 320×100 —una medida que NO está en el ad unit—, así
 que GAM no tenía nada de ese tamaño y sirvió el **728×90 de escritorio** en un
 hueco de 320: el creativo se salía de lado y se pintaba encima del Fenómeno en un
@@ -66,20 +66,20 @@ iPhone. Tres cosas fallaron a la vez y conviene reconocer cada una:
    página. Eso ya está arreglado (`encajar()` en `anuncios.ts`), pero era el
    parachoques, no la causa.
 
-🔴 **La portada es un formato de la casa y va A TODO LO ANCHO** (Carlos,
+**La portada es un formato de la casa y va A TODO LO ANCHO** (Carlos,
 2026-09-09). No es una medida fija: es **una proporción**, 1600/450 = 3.556, y la
 banda la aplica con `aspect-ratio`. Las dos «medidas» que había —1280×350 y
 390×110— eran esa misma proporción escrita dos veces, y a 390 de ancho la
 proporción da 110 exacto. Las derivadas que genera el CMS ya la siguen
 (`…-1280x360.webp`).
 
-⚠️ **Consecuencia para programático:** un creativo de GAM es de tamaño fijo, así
+**Consecuencia para programático:** un creativo de GAM es de tamaño fijo, así
 que nunca llenará el ancho —en 1920 se queda en 1280 centrado—. A todo lo ancho
 solo llega por dos caminos: la **venta directa** del CMS (que es por donde funciona
 hoy, con imágenes de 1600×450) o pedir `'fluid'` a GPT, que exige un creativo
 fluido dado de alta en el ad unit. Lo segundo está sin hacer.
 
-⚠️ **El lienzo dice 970×250 para la portada** y nadie ha resuelto esa diferencia.
+**El lienzo dice 970×250 para la portada** y nadie ha resuelto esa diferencia.
 970×250 es el «billboard» estándar de IAB; la proporción de la casa (3.556) no lo
 es, así que su demanda programática es prácticamente nula. Decisión de Carlos.
 
@@ -89,19 +89,19 @@ Lo que el equipo comercial llama **«el modal»**: el overlay a pantalla complet
 tapa el Inicio al entrar. Vive en `src/components/Takeover.astro` y **no se pinta
 con `Anuncio.astro`**.
 
-🔴 **Es un `tipo` más de la colección `publicidad`, no una colección aparte**
+**Es un `tipo` más de la colección `publicidad`, no una colección aparte**
 (decisión de Carlos en el CMS, 2026-09-11). Tiene anunciante, vigencia, contadores y
 `estado` igual que los otros dos; lo único que lo distingue es dónde lo pinta el
-sitio. ⚠️ En Enfoque SÍ es una colección propia (`takeovers`), porque allá nació de
+sitio. En Enfoque SÍ es una colección propia (`takeovers`), porque allá nació de
 mudar al CMS un `Modal.astro` que se prendía y apagaba comentando HTML: **no se
 traduce campo por campo entre los dos repos**.
 
-🔴 **`fuente` decide todo, y `admanager` es el caso NORMAL** («casi siempre son
+**`fuente` decide todo, y `admanager` es el caso NORMAL** («casi siempre son
 provenientes de Ad Manager», Carlos). Ahí el CMS no guarda pieza ni enlace: el slot
 está fijo en el sitio, el creativo lo pone Google y la campaña del CMS es solo la
 VIGENCIA y el permiso — «durante estos días pídele el modal a GAM».
 
-🔴 **Se decide por `fuente`, jamás por «si viene imagen, píntala».** Una campaña que
+**Se decide por `fuente`, jamás por «si viene imagen, píntala».** Una campaña que
 empezó con creatividad propia y se pasó a Ad Manager **conserva** su `imagen` y su
 `enlace` viejos en la base —el CMS no los limpia a propósito, para no borrarle a
 nadie lo que ya eligió— y la API los devuelve. Son basura inerte. `obtenerTakeover()`
@@ -116,7 +116,7 @@ los anula en la capa de datos para que la plantilla no pueda equivocarse.
 | `frecuencia` | `sesion` (`sessionStorage`) o `siempre`. **No hay «por día»** |
 | `orden` | Con varios vigentes gana el más bajo. Nunca se apilan dos modales |
 
-⚠️ **No existen y no hay que esperarlos**: rutas donde aparece, retardo antes de
+**No existen y no hay que esperarlos**: rutas donde aparece, retardo antes de
 abrir, si se puede cerrar, y a los cuántos segundos. Nada de eso está en el CMS —el
 markup, la cruz y el timing son del front—. Si hiciera falta, se pide y se agrega.
 
@@ -125,20 +125,20 @@ markup, la cruz y el timing son del front—. Si hiciera falta, se pide y se agr
 `600×800` y `320×480`, heredadas del `ad-slot14` del sitio viejo. El lienzo no dice
 nada de este formato.
 
-🔴 **Es el único formato cuyo `sizeMapping` mira el ALTO del viewport**, y la razón
+**Es el único formato cuyo `sizeMapping` mira el ALTO del viewport**, y la razón
 está medida (Enfoque, 2026-09-08): un 600×800 en una laptop de 720px de alto **no
 cabe**, y el lector tendría que hacer scroll dentro del overlay para ver el final del
 anuncio. Se pide la pieza grande solo con ≥768 de ancho **y** ≥860 de alto.
 
-⚠️ Ese par (768 × 860) está escrito DOS veces —en el `mapping` y en el
+Ese par (768 × 860) está escrito DOS veces —en el `mapping` y en el
 `@media (min-height:)` que reserva `.tk-slot`— y tienen que coincidir. Comprobado en
 el build servido el 2026-09-13: a 1280×900 el hueco mide 600×800; a 1024×700 y a
 375×812, 320×480.
 
-⚠️ **`/…/Beat/Takeover` no existe todavía en GAM.** Pedir una ruta que no existe no
+**`/…/Beat/Takeover` no existe todavía en GAM.** Pedir una ruta que no existe no
 falla —GAM la atiende contra el padre y el modal se llena igual—, lo que se pierde es
 poder medir este formato por separado. El día que ad ops cree el bloque empieza a
-reportarse solo, sin desplegar. 🔴 Y si alguien va a ponerle una protección para
+reportarse solo, sin desplegar. Y si alguien va a ponerle una protección para
 bloquearle la programática, **el bloque hijo tiene que existir primero**: aplicada
 sobre el padre, apaga la programática de TODO el sitio.
 
@@ -147,36 +147,36 @@ sobre el padre, apaga la programática de TODO el sitio.
 Casi todas vienen medidas de la primera campaña de Enfoque (`leap auto`, 8-9 sep) o
 del build servido de Beat el 13-sep.
 
-1. 🔴 **Si ya se vio en esta sesión, el nodo se va del DOM en un script EN LÍNEA**,
+1. **Si ya se vio en esta sesión, el nodo se va del DOM en un script EN LÍNEA**,
    antes de que `anuncios.ts` descubra el slot. Pedirle el anuncio a Google y decidir
    después le factura al anunciante un modal que nadie vio.
-2. 🔴 **La llave de sesión lleva `id:updatedAt`.** Con una llave fija por campaña,
+2. **La llave de sesión lleva `id:updatedAt`.** Con una llave fija por campaña,
    corregir la pieza no se la vuelve a mostrar a quien ya la vio; con una llave fija
    a secas, la campaña siguiente nace YA VISTA para quien tenga la pestaña abierta —
    y eso no truena, simplemente no se muestra.
-3. 🔴 **Se marca al MOSTRAR, no al cerrar.** Al cerrar, un recargar a media pantalla
+3. **Se marca al MOSTRAR, no al cerrar.** Al cerrar, un recargar a media pantalla
    lo vuelve a abrir. Y un takeover que nunca se vio no debe gastar la sesión.
-4. 🔴 **Con Ad Manager el overlay espera INVISIBLE** (`opacity: 0`, con el hueco
+4. **Con Ad Manager el overlay espera INVISIBLE** (`opacity: 0`, con el hueco
    midiendo de verdad) y se revela solo cuando llega creativo. Enfoque lo revelaba de
    inmediato y el lector veía una caja vacía ~1.5 s en cada visita: GAM contesta
    entre **1700 y 2659 ms** con red de cable.
-5. 🔴 **El plazo de respaldo son 10 s, no 3.** Existe por el bloqueador de anuncios
+5. **El plazo de respaldo son 10 s, no 3.** Existe por el bloqueador de anuncios
    —con `gpt.js` bloqueado el evento no llega nunca—, y con 3 s se cierra en firme
    una impresión que venía en camino por 3G. Esperar no cuesta nada: no se ve nada.
-6. 🔴 **Sin animación de entrada.** Con `animation: … both` el fotograma inicial
+6. **Sin animación de entrada.** Con `animation: … both` el fotograma inicial
    (`opacity: 0`) se aplica antes de arrancar, y en una pestaña que el navegador no
    está pintando Chrome la deja pausada ahí: capa montada, scroll bloqueado y nada
    visible. La regla es «si está montada, se ve», que es una invariante comprobable
    con `getComputedStyle` — y en este repo eso importa el doble.
-7. 🔴 **La impresión de `propia` se cuenta al MOSTRAR, por `sendBeacon` al proxy**, y
+7. **La impresión de `propia` se cuenta al MOSTRAR, por `sendBeacon` al proxy**, y
    no en el render como la portada. El modal sale una vez por sesión: contar renders
    multiplicaría por cinco lo que se le factura a quien abre el Inicio cinco veces.
    Con `admanager` no se cuenta — ese número lo lleva Google.
-8. ⚠️ **El intro y el takeover coinciden** en la primera visita de una sesión: los
+8. **El intro y el takeover coinciden** en la primera visita de una sesión: los
    dos tapan la pantalla, los dos salen una vez y los dos viven en el Inicio. Van EN
    FILA (el takeover espera a que `data-intro` se limpie, con red de 4 s). Con Ad
    Manager casi nunca cuesta tiempo: los ~2 s de GAM transcurren bajo el intro.
-9. ⚠️ **El plazo en pantalla cuenta desde que SE VE**, no desde que se monta, y se
+9. **El plazo en pantalla cuenta desde que SE VE**, no desde que se monta, y se
    decide una sola vez. Enfoque sondeaba `video.paused` cada segundo y se le cerraba
    el overlay cuando el lector pausaba el spot, o a mitad en una pestaña de fondo.
 
@@ -196,12 +196,12 @@ del build servido de Beat el 13-sep.
 #### Cómo se prueba
 
 `?takeover=imagen|video|admanager` sobre el **build servido** (entrada
-`web-beat-build`), que es donde la cascada dice la verdad. 🔴 Apagado en el host
+`web-beat-build`), que es donde la cascada dice la verdad. Apagado en el host
 canónico: un takeover que cualquiera invoca por la URL es un modal a pantalla
 completa servido desde nuestro dominio, y con Ad Manager una impresión facturada que
 nadie pidió.
 
-⚠️ La puerta de «GAM sí trajo creativo» no se puede disparar sola mientras no haya
+La puerta de «GAM sí trajo creativo» no se puede disparar sola mientras no haya
 campaña: se reinserta el nodo que emite el servidor, se dispara `astro:page-load` y
 se emite a mano un `beat:anuncio-render` con `vacio: false`.
 
@@ -214,13 +214,13 @@ Las dos mitades hacen falta, por razones distintas:
 - **Desaparece** si no hay nada que poner. Una banda de 350px encabezando el Inicio
   sin anuncio dentro no es un marco, es un agujero en lo primero que ve el lector.
 
-🔴 Y lo cierra por DOS caminos: cuando GAM contesta «sin relleno», **y** cuando pasa
+Y lo cierra por DOS caminos: cuando GAM contesta «sin relleno», **y** cuando pasa
 el plazo sin que conteste (`PLAZO_VACIO`, 3.5s). El segundo no es un detalle: un
 bloqueador de anuncios o un `gpt.js` que no bajó son el modo de falla más común, y
 sin ese camino la banda se queda abierta para siempre — el patrón de «estado muerto
 sin salida» que movimiento.md §3 prohíbe.
 
-### 🔴 La regla de GPT que no se negocia
+### La regla de GPT que no se negocia
 
 **`destroySlots()` y TODO lo que dependa de `googletag` va DENTRO de
 `googletag.cmd.push()`. Nunca fuera.**
@@ -234,17 +234,17 @@ tiene ese método: **TypeError, y la inicialización entera se cancela**. Se ve 
 Está implementada y documentada en `src/scripts/anuncios.ts`; se anota aquí porque
 es la lección que sobrevive a cualquier reescritura del motor.
 
-⚠️ Y la segunda: **View Transitions hace un swap completo del DOM.** Los `div` de
+Y la segunda: **View Transitions hace un swap completo del DOM.** Los `div` de
 los slots anteriores desaparecen y GPT se queda con referencias a nodos huérfanos,
 así que en cada navegación hay que destruir y volver a definir. `anuncios.ts` lo
 hace registrando el oyente UNA vez; si se registrara por navegación, la enésima
 ejecutaría la inicialización n veces.
 
-⚠️ Tercera, de las que cuestan una tarde: `sizeMapping().addSize()` necesita **dos**
+Tercera, de las que cuestan una tarde: `sizeMapping().addSize()` necesita **dos**
 argumentos —viewport y tamaños—. `addSize([970, 250])` a secas compila y no mapea
 nada.
 
-🔴 **Y la cuarta, encontrada el 2026-09-13 midiendo el takeover: el oyente de
+**Y la cuarta, encontrada el 2026-09-13 midiendo el takeover: el oyente de
 `slotRenderEnded` se registra UNA vez por contexto de JavaScript, no por vista.**
 `addEventListener` de GPT **acumula**, y una navegación de Astro no recarga el
 contexto: registrándolo dentro de la inicialización, la enésima navegación tenía n
@@ -263,21 +263,21 @@ conjunto de la primera.
 
 ## Dónde va cada hueco, y por qué
 
-🔴 **La colocación NO se improvisa: sale del artboard `publicidad` del lienzo**
+**La colocación NO se improvisa: sale del artboard `publicidad` del lienzo**
 (`design/Nuevo sitio de beat full/Sitio Beat 2026 publicidad.dc.html`). Su dirección
 **5a «Mosaico»** es la que este sitio implementó, y dice literalmente:
 
 > «La portada de 970 × 250 abre sobre el header, **el leaderboard separa el mosaico
 > del marquee** y **el box vive como riel junto al archivo**.»
 
-⚠️ El lienzo describe SOLO el Inicio. Para cualquier otra página, la colocación es
+El lienzo describe SOLO el Inicio. Para cualquier otra página, la colocación es
 una decisión de Carlos, no una traducción del diseño: no la inventes.
 
 ### Las colocaciones de box, aprobadas el 2026-09-08
 
 Están DECIDIDAS, con su razón. No se re-proponen ni se mueven sin Carlos:
 
-⚠️ Eran ocho. La de `/programacion` se retiró el 2026-09-09 al partirse la página
+Eran ocho. La de `/programacion` se retiró el 2026-09-09 al partirse la página
 en dos y queda tachada en la tabla, no borrada: fue una colocación aprobada y su
 vuelta necesita una decisión, no un `git revert`.
 
@@ -286,13 +286,13 @@ vuelta necesita una decisión, no un `git revert`.
 | `/fenomeno-residente` | Tercera columna, bajo la playlist | El riel ya existe y terminaba en aire |
 | `/bonus-beat` | Tras la última edición, antes de «EDICIONES ANTERIORES» | El corte natural de la página |
 | `/bonus-beat/*` | Riel a la derecha de las canciones | Igual que la nota: columna de lectura + riel |
-| ~~`/programacion`~~ | ~~Tras «AL AIRE AHORA», antes de la parrilla~~ | 🔴 **RETIRADA el 2026-09-09** — ver abajo |
+| ~~`/programacion`~~ | ~~Tras «AL AIRE AHORA», antes de la parrilla~~ | **RETIRADA el 2026-09-09** — ver abajo |
 | `/programas/*` | Riel junto a los datos del programa | Ahí ya había una columna estrecha |
 | `/eventos` | Intercalado cada 6 eventos | Lista larga sin corte; el intercalado es lo que rinde |
 | `/eventos/*` | Riel bajo «CUÁNDO / DÓNDE» | La columna de datos ya estaba, y le sobraba un hueco |
 | `/especiales/*` | Columna de la playlist del tema | Misma estructura que `/fenomeno-residente` |
 
-🔴 Dos de ellas viven en un COMPONENTE y no en la página, porque la columna es
+Dos de ellas viven en un COMPONENTE y no en la página, porque la columna es
 del componente: `Fenomeno.astro` (las dos del tema) y `Agenda.astro` (el
 intercalado). En los dos casos el NOMBRE del hueco lo pasa la página por una prop
 —`anuncio`— y no se deduce del contexto: el nombre es la llave con la que GAM
@@ -301,40 +301,40 @@ que usa los mismos componentes, no hereda ningún box.
 
 ### Estado al 2026-09-08
 
-✅ = declarado y se pinta con los datos de hoy. ⚠️ = declarado, y hoy no se pinta
+✅ = declarado y se pinta con los datos de hoy. = declarado, y hoy no se pinta
 porque le falta el CONTENIDO del que cuelga (no porque el hueco esté mal).
 
 | Superficie | portada | leaderboard | box |
 |---|---|---|---|
-| Inicio | ✅ `inicio-portada` | ✅ `inicio-leader` | ⚠️ `inicio-box` |
+| Inicio | ✅ `inicio-portada` | ✅ `inicio-leader` | `inicio-box` |
 | `/scanner`, `/editorial`, `/etiqueta/*` (`IndiceScanner`) | — | ✅ `scanner-leader` | ✅ `scanner-box` |
 | `/noticias/*` | — | — | ✅ `nota-box` |
 | `/fenomeno-residente` | — | ✅ `fenomeno-leader` | ✅ `fenomeno-box` |
-| `/bonus-beat` | — | ✅ `lista-leader` | ⚠️ `lista-box` |
+| `/bonus-beat` | — | ✅ `lista-leader` | `lista-box` |
 | `/bonus-beat/*` | — | ✅ `edicion-leader` | ✅ `edicion-box` |
-| `/programacion` | — | ✅ `programacion-leader` | 🔴 retirado (ver abajo) |
-| `/programas/*` | — | ✅ `programa-leader` | ⚠️ `programa-box` |
-| `/eventos` | — | ✅ `agenda-leader` | ⚠️ `agenda-box` (+ `-2`, `-3`…) |
+| `/programacion` | — | ✅ `programacion-leader` | retirado (ver abajo) |
+| `/programas/*` | — | ✅ `programa-leader` | `programa-box` |
+| `/eventos` | — | ✅ `agenda-leader` | `agenda-box` (+ `-2`, `-3`…) |
 | `/eventos/*` | — | ✅ `evento-leader` | ✅ `evento-box` |
 | `/especiales/*` | — | ✅ `especial-leader` | ✅ `especial-box` |
 | `/en-vivo`, `/alexa`, legales | — | ✗ | ✗ |
 
-⚠️ El **takeover** no entra en esta tabla porque no es una superficie más: es un
+El **takeover** no entra en esta tabla porque no es una superficie más: es un
 overlay, solo vive en el Inicio y su columna sería una sola celda. Su estado al
 2026-09-13 es «declarado y sin campaña que lo dispare» — el CMS todavía no tiene
 ninguno capturado, así que en el sitio no se ve nada. Ver la sección del takeover
 más arriba.
 
-🔴 **`/en-vivo` no lleva box, y es una decisión tomada** (Carlos, 2026-09-08): es
+**`/en-vivo` no lleva box, y es una decisión tomada** (Carlos, 2026-09-08): es
 la página a la que alguien va a ESCUCHAR, y un anuncio al lado de la señal hace
 que un sitio de radio se sienta barato. No se propone otra vez.
 
-#### Los ⚠️, y de qué contenido cuelga cada uno
+#### Los , y de qué contenido cuelga cada uno
 
 Ninguno es un hueco roto: esperan un dato del CMS. Comprobados uno por uno
 forzando datos en la capa `src/lib/cms/*` (ver «Cómo se verifica»).
 
-⚠️ Eran cuatro hasta el 2026-09-09; `programacion-box` ya no es uno de ellos
+Eran cuatro hasta el 2026-09-09; `programacion-box` ya no es uno de ellos
 porque dejó de existir, no porque se haya llenado.
 
 - **`inicio-box`** — vive en `ArchivoTemas.astro`, donde el lienzo lo pone («de
@@ -345,7 +345,7 @@ porque dejó de existir, no porque se haya llenado.
   ANTERIORES», así que cuelga de que HAYA ediciones anteriores. `bonus-beat` tiene
   una sola capturada. Sin esa condición, el box quedaría a 40px del leaderboard
   del pie: una página que termina en dos anuncios seguidos.
-- **`programacion-box`** — 🔴 **RETIRADO el 2026-09-09, y hace falta una decisión
+- **`programacion-box`** — **RETIRADO el 2026-09-09, y hace falta una decisión
   de Carlos para que vuelva.**
 
   Iba tras «AL AIRE AHORA» y colgaba de que hubiera algo al aire. Ese día
@@ -365,7 +365,7 @@ porque dejó de existir, no porque se haya llenado.
 - **`agenda-box`** — se intercala cada SEIS eventos de la lista y nunca de cola
   (ver abajo). Hoy hay un evento capturado, o sea cero filas.
 
-⚠️ **`programa-box` está en `/programas/*`, que no se puede probar con datos**:
+**`programa-box` está en `/programas/*`, que no se puede probar con datos**:
 `programas` tiene cero documentos y la ruta responde 404 para cualquier slug.
 Comprobado con un programa fabricado en `obtenerPrograma`.
 
@@ -379,11 +379,11 @@ contenido» (Carlos)— y de paso que caiga junto al leaderboard del pie.
 Medido: 6 eventos → ningún box; 7 (6 filas) → ninguno; 8 → uno; 13 → uno; 14 →
 dos; 40 (el tope de `obtenerAgenda`) → seis.
 
-⚠️ Los ids se NUMERAN (`agenda-box`, `agenda-box-2`, …) porque en una agenda larga
+Los ids se NUMERAN (`agenda-box`, `agenda-box-2`, …) porque en una agenda larga
 hay más de uno y **dos huecos con el mismo id hacen que GPT pinte solo el
 primero**. En el reporte de GAM eso además dice qué posición de la lista rinde.
 
-#### ⚠️ El riel en móvil queda encima del leaderboard
+#### El riel en móvil queda encima del leaderboard
 
 Por debajo de 900px todas las páginas de detalle colapsan a una columna, y el box
 del riel cae al final del contenido: a **32px** del leaderboard que esas páginas ya
@@ -399,7 +399,7 @@ nada: el marco se cierra solo. Se nota el día que los dos se llenen a la vez.
 
 ## Agregar una red nueva (ShowHeroes y las que vengan)
 
-🔴 **Casi siempre NO se toca el código.** La regla de este proyecto es que Ad
+**Casi siempre NO se toca el código.** La regla de este proyecto es que Ad
 Manager es la ÚNICA fuente de anuncios programáticos: una red nueva entra como
 demanda DENTRO de GAM, no como un script propio en el sitio. Si una red se puede
 servir por GAM, el trabajo es de AdOps en el panel y aquí no hay nada que hacer.
@@ -416,7 +416,7 @@ ese caso:
 
 ### ShowHeroes: pendiente, y lo que de verdad pide
 
-🔴 **Esto SIGUE en pie** (Carlos, 2026-09-08): el documento que lo describía se
+**Esto SIGUE en pie** (Carlos, 2026-09-08): el documento que lo describía se
 borró por equivocado, no por cancelado. Lo que el proyecto quiere es un **video
 flotante en los interiores de contenido**, servido por ShowHeroes **a través de Ad
 Manager** — no con un script de la red.
@@ -433,12 +433,12 @@ Lo que hace falta cuando se retome, ya traducido a v2:
 4. Nada de `src/js/ads.js` ni de scripts inline: el motor lo descubre por los
    `data-*` del componente.
 
-⚠️ **`public/ads.txt` todavía declara `viralize.com, 7587, DIRECT`** (línea 283).
+**`public/ads.txt` todavía declara `viralize.com, 7587, DIRECT`** (línea 283).
 Viralize era la red ANTERIOR de este mismo hueco y su script ya no está en el
 sitio, así que ese seller autoriza a alguien que ya no vende. Es una decisión de
 AdOps, no de código: no se toca sin confirmarlo, pero hay que confirmarlo.
 
-### ⚠️ Y por qué el documento que había estaba MAL
+### Y por qué el documento que había estaba MAL
 
 `showheroes-videonota.md` es del v1 y seguirlo hoy rompe cosas:
 
@@ -446,7 +446,7 @@ AdOps, no de código: no se toca sin confirmarlo, pero hay que confirmarlo.
   parte de v2** (comprobado). El motor es `src/scripts/anuncios.ts`.
 - Manda editar `src/pages/[seccion]/[slug].astro`, ruta que **no existe**: la nota
   vive en `/noticias/[slug]`.
-- 🔴 Y el `defineSlot` que propone apunta a **`/23349147378/StereoCien`** — la
+- Y el `defineSlot` que propone apunta a **`/23349147378/StereoCien`** — la
   unidad de OTRA estación. Copiado tal cual, el sitio de Beat pediría inventario de
   Stereo Cien.
 
@@ -454,7 +454,7 @@ El formato que pedía —400×311— es uno de los tres del v1 que hoy no se usa
 ShowHeroes vuelve a la mesa, se agrega como formato nuevo por el camino de arriba,
 con el ad unit de Beat (`PUBLIC_GAM_AD_UNIT=Beat`) y confirmando la medida en GAM.
 
-⚠️ `dynamicAds.md` es de la misma época y describe los 13 slots del v1. Sirve como
+`dynamicAds.md` es de la misma época y describe los 13 slots del v1. Sirve como
 historia, no como referencia.
 
 ---
@@ -462,7 +462,7 @@ historia, no como referencia.
 ## Lo que este agente NO hace
 
 - **La política de caché** y el `<head>` como maquetado — son de `agents/frontend.md`.
-- **La medición** (GTM, GA4, comScore) — es de `agents/analytics.md`. ⚠️ Se cruzan
+- **La medición** (GTM, GA4, comScore) — es de `agents/analytics.md`. Se cruzan
   en una cosa: `PUBLICIDAD_TOKEN` vacío en preproducción evita sumar impresiones y
   clics a campañas facturables, y los ids de analítica van vacíos por lo mismo. Ver
   `docs/despliegue-v2.md`.
@@ -486,27 +486,27 @@ curl -s https://v2.beatdigital.mx/ | grep -o 'class="anuncio es-[a-z]*'
 curl -s https://v2.beatdigital.mx/ | grep -o 'data-vacio'
 ```
 
-🔴 Y hay un tercer caso que el `curl` NO distingue: un hueco que **no se pinta
-porque le falta el contenido del que cuelga** (los cuatro ⚠️ de la tabla). Ahí no
+Y hay un tercer caso que el `curl` NO distingue: un hueco que **no se pinta
+porque le falta el contenido del que cuelga** (los cuatro de la tabla). Ahí no
 sirve mirar la ruta: hay que FORZAR los datos. El camino es meter un retorno
 temporal al principio de la función de `src/lib/cms/*` que alimenta la página
 —`obtenerAgenda`, `obtenerListas`, `obtenerParrillaDeHoy`, `obtenerPrograma`—,
 levantar `astro dev`, comprobar por `curl`, y revertir con `git checkout --`. Así
 se comprobaron las cuatro y la matriz del intercalado de `/eventos`.
 
-⚠️ Y en el navegador el marco vacío **desaparece a los 3.5s** (`PLAZO_VACIO`), y
+Y en el navegador el marco vacío **desaparece a los 3.5s** (`PLAZO_VACIO`), y
 además GPT le pone `display:none` al div del slot, así que una captura tardía no
 enseña nada. Para medir el marco reservado —que es el peor caso del maquetado— hay
 que quitarle el `data-vacio` al `.anuncio` **y** el `display` en línea al
 `.anuncio-hueco`.
 
-⚠️ Al forzar la parrilla salió a la luz un desborde que **no es de publicidad**:
+Al forzar la parrilla salió a la luz un desborde que **no es de publicidad**:
 `.pr-horario` lleva `white-space: nowrap`, y un programa de lunes a domingo
 —«LUN · MAR · MIÉ · JUE · VIE · SÁB · DOM 00:00–23:59»— saca la página 120px a lo
 ancho a 390px. Es de `/programacion`, no del hueco; queda anotado aquí porque se
 descubrió aquí.
 
-⚠️ En preproducción `PUBLICIDAD_TOKEN` va VACÍO a propósito: con token, cada visita
+En preproducción `PUBLICIDAD_TOKEN` va VACÍO a propósito: con token, cada visita
 de revisión sumaría impresiones y clics a campañas que se le facturan a un
 anunciante real. Comprobado que un barrido que clicó un banner en v2 no generó
 ningún conteo. **No lo pongas para «probar que funciona».**

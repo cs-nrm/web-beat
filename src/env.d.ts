@@ -2,7 +2,7 @@
 /// <reference types="astro/client" />
 
 /**
- * 🔴 La regla de oro de este repo, y la fuente de un bug de producción ya pagado
+ * La regla de oro de este repo, y la fuente de un bug de producción ya pagado
  * en `web-enfoque` (ver `src/lib/env.ts`):
  *
  *   · `PUBLIC_*`  → se INCRUSTAN al compilar. Van como `--build-arg` del
@@ -18,19 +18,19 @@
  */
 interface ImportMetaEnv {
   // ---------- Build (llegan al navegador) ----------
-  /** URL pública del sitio, sin barra final. 🔴 Decide la indexación. */
+  /** URL pública del sitio, sin barra final. Decide la indexación. */
   readonly PUBLIC_SITE_URL: string;
   /** Origen PÚBLICO del CMS: la media que carga el navegador. */
   readonly PUBLIC_CMS_URL?: string;
   /**
-   * Google Ad Manager. 🔴 Nunca hardcodear el ad unit: lo consumen
+   * Google Ad Manager. Nunca hardcodear el ad unit: lo consumen
    * `src/scripts/anuncios.ts` (los slots de GPT) y `src/scripts/player.ts` (el
    * VAST del pre-roll), y `scripts/guardas.mjs` lo verifica en CI.
    */
   readonly PUBLIC_GAM_NETWORK_ID?: string;
   readonly PUBLIC_GAM_AD_UNIT?: string;
   /**
-   * ⚠️ Esta NO carga GA4. GA4 entra POR GTM —nunca por las dos vías, que duplican
+   * Esta NO carga GA4. GA4 entra POR GTM —nunca por las dos vías, que duplican
    * las páginas vistas—, así que el front no baja `gtag/js` en ningún caso. Lo
    * único que la lee es el `trackingId` del SDK de Triton (`src/scripts/player.ts`).
    */

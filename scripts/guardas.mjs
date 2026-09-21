@@ -4,7 +4,7 @@
  *
  * Cada una existe por un error que ya costó algo en esta casa, no por prolijidad.
  *
- * 🔴 Regla de esta herramienta: **cero falsos positivos**. Una guarda que grita
+ * Regla de esta herramienta: **cero falsos positivos**. Una guarda que grita
  * por cosas correctas se desactiva a la semana, y entonces no protege de nada —
  * peor que no tenerla. Por eso los patrones son estrechos y hay una salida
  * explícita (`guarda-ok:`) que OBLIGA a escribir la razón en la misma línea.
@@ -44,7 +44,7 @@ for (const archivo of fuentes) {
     const ubic = `${archivo}:${i + 1}`;
 
     /*
-     * 🔴 El ad unit de GAM, escrito en el código.
+     * El ad unit de GAM, escrito en el código.
      * En los repos hermanos está por copy-paste (`/<network>/StereoCien`), y
      * servir impresiones de una estación a la cuenta de otra es un bug de DINERO
      * que nadie ve hasta la facturación. Va siempre por env.

@@ -2,7 +2,7 @@
 /**
  * Cómo escuchar Beat 100.9 en Alexa.
  *
- * 🔴 Existe porque el pie la enlazaba y no existía. `APPS` tenía «Alexa» en `null`
+ * Existe porque el pie la enlazaba y no existía. `APPS` tenía «Alexa» en `null`
  * —pintada apagada— con una nota que decía que la página del v1 no se había
  * portado. Portada (Carlos, 2026-09-07), y con eso el pie se queda sin un solo
  * enlace apagado.
@@ -10,7 +10,7 @@
  * Los tres pasos son los del sitio actual (`beatdigital.mx/alexa/`). (El v1 repetía
  * el paso 2 dos veces por un error de su plantilla; aquí van los tres que son.)
  *
- * 🔴 Las capturas 2 y 3 son LOCALES desde el 2026-09-10, y es un cambio de criterio
+ * Las capturas 2 y 3 son LOCALES desde el 2026-09-10, y es un cambio de criterio
  * a propósito: las del bucket enseñan el logo VIEJO —el redondo dorado de «Beat
  * Digital»— en la ficha de la skill. No están desactualizadas por descuido, están
  * congeladas: el archivo del bucket es de julio de 2024 y responde siempre el mismo
@@ -18,11 +18,11 @@
  * nueva y se copian a `public/`, que es el único sitio donde este repo puede
  * cambiarlas.
  *
- * ⚠️ El paso 1 SE QUEDA en el bucket, y no es incoherencia: es el menú de la app de
+ * El paso 1 SE QUEDA en el bucket, y no es incoherencia: es el menú de la app de
  * Alexa, no sale ningún logo y sigue siendo exacta. Copiarla solo por uniformidad
  * añadiría 220 KB al repo para clonar una imagen que no tiene nada que arreglar.
  *
- * ⚠️ Lo que se pierde con las locales es lo que decía la nota anterior: ya NO se
+ * Lo que se pierde con las locales es lo que decía la nota anterior: ya NO se
  * actualizan solas cuando el corporativo toque el bucket. Si la app de Alexa cambia
  * de aspecto, estas dos hay que volver a capturarlas a mano.
  */
@@ -33,7 +33,7 @@ import PaginaTexto from '@/components/PaginaTexto.astro';
 const IMG = 'https://storage.googleapis.com/nrm-web/nrm/images/';
 
 /*
-  ⚠️ Cada captura trae SU medida, y no es un detalle: las tres declaraban 640×945
+  Cada captura trae SU medida, y no es un detalle: las tres declaraban 640×945
   —la del paso 1— y las otras dos no son ni de ese tamaño ni de esa forma (una es
   apaisada). El navegador reserva el hueco con lo que se le declara, así que dos de
   los tres pasos apartaban una caja vertical para meter luego una imagen ancha y
@@ -66,7 +66,7 @@ const PASOS = [
 ---
 
 {/*
-  ⚠️ El título decía «Beat 100.9 en Alexa — Beat 100.9»: la marca dos veces en una
+  El título decía «Beat 100.9 en Alexa — Beat 100.9»: la marca dos veces en una
   línea que Google recorta a unos 60 caracteres. El patrón de la casa es
   `<lo específico> — Beat 100.9`, y lo específico de esta página es Alexa.
 */}

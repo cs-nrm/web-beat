@@ -143,7 +143,7 @@
         e.clientY,
       );
       guardar(f);
-      console.warn('%c⚠ botón muerto', 'color:#ff6e93;font-weight:bold', f.motivo, f);
+      console.warn('%cbotón muerto', 'color:#ff6e93;font-weight:bold', f.motivo, f);
     }
   };
 

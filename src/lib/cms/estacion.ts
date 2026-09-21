@@ -43,23 +43,23 @@ export interface Estacion {
 /**
  * ¿Hay campaña de preroll?
  *
- * 🔴 Por qué existe el interruptor (Carlos, 2026-09-10): hay campaña cada dos o
+ * Por qué existe el interruptor (Carlos, 2026-09-10): hay campaña cada dos o
  * tres meses y dura de 15 a 30 días, así que el ad unit está VACÍO unos tres
  * cuartos del año. Medido ese día contra el ad unit que sale del entorno, GAM
  * devuelve un VAST vacío —`<VAST version="3.0"/>`, 156 bytes—. Apagado, el player
  * no pide ese anuncio y abre el aire antes.
  *
- * 🔴 Y sobre todo quita de raíz un cuelgue que ya costó: `playAd()` puede no emitir
+ * Y sobre todo quita de raíz un cuelgue que ya costó: `playAd()` puede no emitir
  * NINGÚN evento, y eso eran 20 s de «Conectando…» y un error en el primer play de
  * la sesión, en un iPhone con buena wifi. `player.ts` lo tiene acotado a 6 s con su
  * propio tope; con el interruptor apagado son cero, porque ni se pide.
  *
- * ⚠️ El fallo de un booleano va del lado caro, y hay que saberlo: olvidado APAGADO
+ * El fallo de un booleano va del lado caro, y hay que saberlo: olvidado APAGADO
  * con campaña vendida, se dejan de servir impresiones y nadie se entera. Se eligió
  * igual, a sabiendas, porque lo prende y lo apaga Carlos y no quiere capturar
  * fechas — antes esto fue un rango `inicio`/`fin` y se descartó por eso.
  *
- * ⚠️ Lo que NO ahorra, aunque lo parecía: la descarga del IMA de Google (499,908 B
+ * Lo que NO ahorra, aunque lo parecía: la descarga del IMA de Google (499,908 B
  * sin comprimir). Se probó construir el SDK sin el plugin `vastAd` y `ima3.js` se
  * baja igual — lo arrastra el módulo MediaPlayer, no el plugin. Queda anotado en
  * `player.ts`, donde se intentó.
@@ -109,12 +109,12 @@ export function obtenerEstacion(): Promise<Estacion> {
 /**
  * Redes sociales de la estación, ya filtradas y con su etiqueta.
  *
- * 🔴 El CMS manda, y `REDES_RESPALDO` solo tapa el hueco RED POR RED: hoy los
+ * El CMS manda, y `REDES_RESPALDO` solo tapa el hueco RED POR RED: hoy los
  * cinco campos de `estaciones` están en `null` y el pie pintaba «Próximamente»
  * donde va la única forma de seguir a la estación. Con el `??`, capturar Facebook
  * en el admin lo hace ganar de inmediato sin tocar las otras cuatro.
  *
- * ⚠️ Se sigue filtrando por verdad: una entrada sin URL en ninguno de los dos
+ * Se sigue filtrando por verdad: una entrada sin URL en ninguno de los dos
  * lados no se pinta. Un enlace vacío es peor que una red de menos.
  */
 export async function redesEstacion(): Promise<Array<{ red: string; url: string }>> {

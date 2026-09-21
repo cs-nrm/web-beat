@@ -7,7 +7,7 @@
  * alto de la columna. En móvil (14a) se convierte en portada a lo ancho + rejilla de 2, que es
  * lo que ya hace `TarjetaNota`.
  *
- * 🔴 Igual que en Scanner: el `gap: 2px` con el fondo en `--border-hairline` es la
+ * Igual que en Scanner: el `gap: 2px` con el fondo en `--border-hairline` es la
  * línea que separa las piezas, así que cada pieza necesita fondo OPACO propio.
  */
 import TarjetaNota from '@/components/TarjetaNota.astro';
@@ -71,7 +71,7 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
   .mosaico {
     display: grid;
     /*
-      🔴 PROPORCIONALES, no una lateral fija con el centro elástico.
+      PROPORCIONALES, no una lateral fija con el centro elástico.
 
       El lienzo dibuja 300 / 676 / 300 a 1280, o sea 1 : 2.25 : 1. Con la lateral
       fija en 300px, todo el ancho extra se lo comía el centro: medido a 1920, la
@@ -89,7 +89,7 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
     padding: 2px 0;
   }
   /*
-    🔴 TODO lo de la columna lateral vive dentro de `min-width: 900px`, y no fuera
+    TODO lo de la columna lateral vive dentro de `min-width: 900px`, y no fuera
     con un `@media` que lo deshaga después.
 
     Estaba al revés y costó una tarde: estas reglas llevan dos clases, así que le
@@ -104,7 +104,7 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
       display: flex;
       flex-direction: column;
       /*
-        🔴 Fondo OSCURO, y la línea como borde explícito.
+        Fondo OSCURO, y la línea como borde explícito.
 
         Antes esta columna usaba el truco de `gap` + fondo `--border-hairline`. El
         truco funciona cuando el gris solo asoma en 2px, pero una columna de
@@ -160,7 +160,7 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
       lados. Ese peso ahora lo da el ANCHO de la columna, que no cambió: la portada
       sigue siendo la pieza grande, pero deja de recortar la foto por los costados.
 
-      ⚠️ Esta foto MANDA sobre el alto de la fila entera: las columnas laterales se
+      Esta foto MANDA sobre el alto de la fila entera: las columnas laterales se
       estiran a la más alta y sus tarjetas absorben la diferencia (`flex: 1` sobre
       `.tarjeta-foto`, más abajo). Al pasar de 3:2 a 16:9 la columna del centro
       baja, así que las fotos laterales bajan con ella. Medido en el build servido a
@@ -247,7 +247,7 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
       background: none;
     }
     /*
-      🔴 La PORTADA va primero (Carlos, 2026-09-08). En el DOM va en medio —lado,
+      La PORTADA va primero (Carlos, 2026-09-08). En el DOM va en medio —lado,
       centro, lado— porque en escritorio esas son tres columnas y el orden es el de
       izquierda a derecha. En una sola columna ese mismo orden dejaba la nota
       principal SANDWICHADA entre dos pares de tarjetas secundarias, así que la
@@ -258,11 +258,11 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
       —«portada a lo ancho + rejilla de 2»—: el código se había separado de su
       propio diseño y nadie lo notó porque en escritorio se ve bien.
 
-      ⚠️ Se hace con `order` y NO reordenando el marcado: en escritorio el orden
+      Se hace con `order` y NO reordenando el marcado: en escritorio el orden
       del DOM ES el orden visual, y moverlo allí para arreglar el móvil rompería la
       composición de tres columnas. `order` solo actúa dentro de esta media query.
 
-      ⚠️ Y el orden del DOM es también el del TABULADOR, que no sigue a `order`.
+      Y el orden del DOM es también el del TABULADOR, que no sigue a `order`.
       Aquí no molesta: las cinco son enlaces a notas de la misma sección y ninguna
       es un control, así que recorrerlas en un orden y verlas en otro no deja a
       nadie perdido. Si algún día entra un control en el mosaico, esto se revisa.
@@ -294,7 +294,7 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
       max-width: none;
     }
 /*
-      🔴 UNA columna, no dos (Carlos, 2026-09-08). Las laterales pasan a FILAS
+      UNA columna, no dos (Carlos, 2026-09-08). Las laterales pasan a FILAS
       —miniatura y titular al lado— y una fila ocupa el ancho entero: partirlas en
       dos columnas de 187px dejaría una miniatura de 108 con 65px para el titular.
 
@@ -302,7 +302,7 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
       móvil: contra la portada, dos tarjetas del mismo tipo a 4.18× de superficie
       se leen como la misma pieza inflada, y el arreglo es cambiar el tipo.
 
-      ⚠️ Se va también el truco del `gap` con fondo gris: con filas apiladas la
+      Se va también el truco del `gap` con fondo gris: con filas apiladas la
       línea la pone cada fila (su `box-shadow` inferior), porque las laterales son
       DOS contenedores y una línea de `gap` no cruzaría de uno al otro.
     */
@@ -312,7 +312,7 @@ const alt = portada?.imagen && typeof portada.imagen === 'object' ? (portada.ima
       padding: 0;
       gap: 0;
     }
-    /* ⚠️ Nada que deshacer aquí: lo de la columna lateral está acotado a
+    /* Nada que deshacer aquí: lo de la columna lateral está acotado a
        `min-width: 900px` a propósito. Ver el comentario de arriba. */
   }
 </style>

@@ -28,7 +28,7 @@ interface Props {
    * Inicio son cuatro eventos y su publicidad la manda el lienzo; en el bloque «LO
    * QUE SIGUE» del detalle son tres, y ahí el hueco ya está en la ficha.
    *
-   * ⚠️ Es una BASE y no el id final: en una agenda larga se intercala más de uno y
+   * Es una BASE y no el id final: en una agenda larga se intercala más de uno y
    * dos huecos con el mismo id hacen que GPT pinte solo el primero. Los siguientes
    * se numeran (`agenda-box`, `agenda-box-2`, …), así que en el reporte de GAM se
    * puede ver qué posición de la lista rinde.
@@ -45,13 +45,13 @@ const [proximo, ...siguientes] = eventos;
 /**
  * Cada cuántas filas se intercala un box.
  *
- * 🔴 Seis, y con lista POR DEBAJO. Las dos mitades importan: cada seis para que
+ * Seis, y con lista POR DEBAJO. Las dos mitades importan: cada seis para que
  * sea una pausa en una lista larga y no un anuncio por evento, y con algo debajo
  * para que nunca sea la cola. Un box después de las dos últimas filas de una
  * agenda corta se lee como el final de la página, y encima quedaría a un paso del
  * leaderboard del pie: más anuncio que contenido (Carlos, 2026-09-08).
  *
- * ⚠️ Con los datos de hoy —un evento capturado, o sea CERO filas— esto no pinta
+ * Con los datos de hoy —un evento capturado, o sea CERO filas— esto no pinta
  * nada. Es lo esperado y no un hueco que no se llena.
  */
 const CADA = 6;
@@ -75,7 +75,7 @@ function partes(iso: string | null | undefined) {
 const ETIQUETA_ACCION: Record<string, string> = { rsvp: 'RSVP', boletos: 'BOLETOS' };
 
 /*
-  🔴 El TIPO de evento no se pinta en ninguna parte (Carlos, 2026-09-08): «eso de
+  El TIPO de evento no se pinta en ninguna parte (Carlos, 2026-09-08): «eso de
   propio suena raro/feo, quitémosle eso».
 
   Y tenía razón de fondo, no solo de gusto: `propio | cobertura | festival` describe
@@ -85,14 +85,14 @@ const ETIQUETA_ACCION: Record<string, string> = { rsvp: 'RSVP', boletos: 'BOLETO
   CMS, donde sirve para que la redacción organice su trabajo; lo que se retira es
   enseñarla en pantalla.
 
-  ⚠️ De paso se cierra un bug: el detalle rotulaba «QUÉ ES · PROPIOS», en PLURAL
+  De paso se cierra un bug: el detalle rotulaba «QUÉ ES · PROPIOS», en PLURAL
   para un solo evento, porque reusaba la etiqueta del filtro.
 */
 
 const p = partes(proximo?.inicio);
 const fotoProximo = urlMedia(proximo?.portada, 'large');
 /*
-  🔴 `donde()` y no `[lugar, ciudad].join(' · ')`: los dos campos llegan con el
+  `donde()` y no `[lugar, ciudad].join(' · ')`: los dos campos llegan con el
   mismo texto más veces de las que parece —«Aniversario Beat» traía «Próximamente»
   en ambos— y así el pie del destacado decía `PRÓXIMAMENTE · PRÓXIMAMENTE`
   (Carlos, 2026-09-09). El porqué completo, en `lib/evento.ts`.
@@ -104,7 +104,7 @@ const lugarProximo = proximo ? donde(proximo) : '';
   proximo && (
     <section class:list={['ag', `es-${contexto}`]}>
       {/*
-        ⚠️ Aquí había una tira de píldoras `TODOS · PROPIOS · COBERTURAS ·
+        Aquí había una tira de píldoras `TODOS · PROPIOS · COBERTURAS ·
         FESTIVALES`, igualita a la de las secciones. Se cambió por el remate de
         siempre (decisión de Carlos, 2026-09-01): dos tiras de píldoras idénticas
         en la misma página, una para navegar el sitio y otra para filtrar una
@@ -247,7 +247,7 @@ const lugarProximo = proximo ? donde(proximo) : '';
     margin-top: 0;
   }
   /*
-    🔴 CUADRADO. Los eventos de la Agenda no traen una foto de cobertura: traen un
+    CUADRADO. Los eventos de la Agenda no traen una foto de cobertura: traen un
     BANNER diseñado, y viene cuadrado (Carlos, 2026-09-03).
   */
   .ag-foto {
@@ -258,7 +258,7 @@ const lugarProximo = proximo ? donde(proximo) : '';
     overflow: hidden;
   }
   /*
-    🔴 `contain`, no `cover`, y por la misma razón que la creatividad de un
+    `contain`, no `cover`, y por la misma razón que la creatividad de un
     anuncio: un banner es arte con texto dentro, y recortarlo se come justo el
     nombre del evento o la fecha. Si el archivo llega cuadrado —que es lo
     acordado— las dos se comportan igual; la diferencia solo aparece el día que

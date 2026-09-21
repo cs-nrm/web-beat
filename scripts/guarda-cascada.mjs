@@ -2,13 +2,13 @@
 /**
  * Guarda de cascada: dos reglas peleando por la misma propiedad.
  *
- * 🔴 Existe por un fallo concreto. Un bloque de micro-interacciones aplicaba
+ * Existe por un fallo concreto. Un bloque de micro-interacciones aplicaba
  * `transform: scale(1.045)` a la foto de la tarjeta; meses después se le añadió un
  * hover que también escribía `transform`. Misma capa, misma especificidad: el
  * empate lo resolvía el ORDEN EN EL ARCHIVO, o sea por accidente. Movería el bloque
  * quien lo moviera, el hover cambiaba sin que nadie tocara el hover.
  *
- * 🔴 Y por eso lee el CSS CONSTRUIDO y no el fuente: el conflicto no existe en
+ * Y por eso lee el CSS CONSTRUIDO y no el fuente: el conflicto no existe en
  * ningún archivo por separado, solo en la cascada ensamblada. Una guarda sobre las
  * fuentes no lo habría visto nunca.
  *
@@ -51,7 +51,7 @@ function recortarKeyframes(css) {
 /**
  * Parte una lista de selectores por sus comas de PRIMER NIVEL.
  *
- * 🔴 Comparar el texto completo del selector no sirve, y esta guarda no cazó nada
+ * Comparar el texto completo del selector no sirve, y esta guarda no cazó nada
  * hasta descubrirlo: en la práctica casi todos los conflictos son entre una regla
  * de selector AGRUPADO y otra de selector suelto. `.a, .b, .c { transform }` y
  * `.a { transform }` pelean por `.a`, pero como cadenas no se parecen en nada.
@@ -95,7 +95,7 @@ for (const hoja of hojas) {
   css = css.replace(/@media[^{]*prefers-reduced-motion[^{]*\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}/g, '');
 
   /*
-   * 🔴 Y se recortan los `@keyframes`, que es lo primero que hizo saltar esta
+   * Y se recortan los `@keyframes`, que es lo primero que hizo saltar esta
    * guarda en falso. Sus pasos se llaman `0%`, `50%`, `to`… en TODOS los bloques,
    * así que dos animaciones sin ninguna relación parecían la misma regla escrita
    * dos veces. Escribir `transform` en el 0% de dos animaciones distintas no es un
@@ -104,7 +104,7 @@ for (const hoja of hojas) {
   css = recortarKeyframes(css);
 
   /*
-   * 🔴 Se recorre con PILA DE CONTEXTO, no con una expresión regular sobre todo el
+   * Se recorre con PILA DE CONTEXTO, no con una expresión regular sobre todo el
    * archivo. La primera versión daba falso positivo con `.pila-carta`: escribe
    * `transform` en la regla base y otra vez en su ajuste de móvil. Eso es CSS
    * responsivo normal —cada media query manda en su ancho— y no un empate resuelto

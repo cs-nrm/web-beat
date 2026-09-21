@@ -1,14 +1,14 @@
 /**
  * Publicidad VENDIDA — la colección `publicidad` del CMS.
  *
- * 🔴 NO es lo mismo que `src/scripts/anuncios.ts`, y la diferencia es de negocio:
+ * NO es lo mismo que `src/scripts/anuncios.ts`, y la diferencia es de negocio:
  * ahí vive el inventario PROGRAMÁTICO (Google Ad Manager, que rellena solo y
  * factura Google), y aquí la venta DIRECTA que el equipo comercial coloca a mano,
  * con su anunciante, su vigencia y su enlace. Cuando las dos cosas compiten por el
  * mismo hueco gana la directa: está vendida y tiene fecha de entrega (ver
  * `Anuncio.astro`).
  *
- * 🔴 EL CMS NO DICE DÓNDE VA (decisión de Carlos, documentada en
+ * EL CMS NO DICE DÓNDE VA (decisión de Carlos, documentada en
  * `cms-estaciones/src/collections/Publicidad.ts`): dice QUÉ es —`portada` o
  * `nativo`— y cada sitio lo coloca. En Beat, `portada` es la franja de arriba del
  * Inicio, encima del player y del menú.
@@ -34,12 +34,12 @@ export type TipoBanner = 'portada' | 'nativo' | 'takeover';
 /**
  * De dónde sale la PIEZA de un takeover, y es el campo que decide todo lo demás.
  *
- * 🔴 `admanager` es el caso NORMAL (Carlos, 2026-09-11: «casi siempre son
+ * `admanager` es el caso NORMAL (Carlos, 2026-09-11: «casi siempre son
  * provenientes de Ad Manager»), y ahí el CMS no guarda imagen ni enlace: el slot
  * está fijo en el sitio y el creativo lo pone Google. Lo único que dice la campaña
  * es durante qué días pedirlo. Es `estaciones.preroll` con vigencia.
  *
- * 🔴 Se decide por ESTE campo, nunca por «si viene imagen, píntala». Una campaña
+ * Se decide por ESTE campo, nunca por «si viene imagen, píntala». Una campaña
  * que empezó con creatividad propia y se pasó a Ad Manager CONSERVA su `imagen` y
  * su `enlace` viejos en la base —el CMS no los limpia a propósito, para no borrarle
  * a nadie lo que ya había elegido— y la API los devuelve igual. Son basura inerte.
@@ -49,7 +49,7 @@ export type FuenteTakeover = 'propia' | 'admanager';
 /**
  * Cada cuándo se le muestra el takeover al mismo lector. No hay «por día».
  *
- * 🔴 `sesion` es `sessionStorage`, que muere al cerrar la pestaña: quien vuelve
+ * `sesion` es `sessionStorage`, que muere al cerrar la pestaña: quien vuelve
  * mañana lo ve otra vez, y eso es lo que se vendió. Con `localStorage` o una cookie
  * larga sería «una vez y nunca más», que es otro producto y que nadie puede
  * resetear cuando entre la campaña siguiente. El contrato lo escribe el CMS para
@@ -68,7 +68,7 @@ export interface Banner {
   /**
    * A qué estación pertenece. Llega como id con `depth: 0`.
    *
-   * 🔴 Hace falta declararlo aunque las consultas por lista ya filtren por
+   * Hace falta declararlo aunque las consultas por lista ya filtren por
    * estación en el transporte: el proxy del CLIC lee por id, y el id es único en
    * todo el CMS, que sirve a cuatro marcas. Sin comprobarlo, el dominio de Beat
    * redirigiría el banner de otra estación y le sumaría el clic a su campaña.
@@ -86,7 +86,7 @@ export interface Banner {
   /** Solo en `takeover` con creatividad propia. Un mp4 subido a Media. */
   video?: DocMedia | number | null;
   /**
-   * 🔴 Puede venir VACÍO, y solo en el takeover de Ad Manager. En los otros tres
+   * Puede venir VACÍO, y solo en el takeover de Ad Manager. En los otros tres
    * casos el CMS lo sigue exigiendo al guardar, así que la guarda de abajo no se
    * cumple nunca en la práctica — pero el tipo tiene que admitirlo o el día que
    * llegue un `null` el sitio revienta donde no debe.
@@ -105,7 +105,7 @@ export interface Banner {
  * Un banner que YA pasó por `enlaceSeguro`, así que su enlace se puede poner en un
  * `href` sin volver a mirarlo.
  *
- * 🔴 Existe desde que `enlace` dejó de ser obligatorio en el CMS (2026-09-11, por el
+ * Existe desde que `enlace` dejó de ser obligatorio en el CMS (2026-09-11, por el
  * takeover de Ad Manager, que no lleva ninguno). Sin este tipo, `Banner.enlace` es
  * `string | null` en todas partes y el compilador deja de distinguir lo que ya se
  * validó de lo que no — que es justo la distinción que impide meter un `null` en un
@@ -114,7 +114,7 @@ export interface Banner {
 export type BannerConEnlace = Banner & { enlace: string };
 
 /**
- * 🔴 Solo `http(s)` o una ruta del propio sitio.
+ * Solo `http(s)` o una ruta del propio sitio.
  *
  * `enlace` es texto libre que escribe quien captura la campaña, y va directo a un
  * `href`. Un `javascript:` ahí se ejecuta en la página: no es un ataque de fuera,
@@ -132,7 +132,7 @@ function enlaceSeguro(enlace: string | null | undefined): string | null {
 /**
  * Instante actual, redondeado al MINUTO, para el filtro de vigencia.
  *
- * ⚠️ No es un detalle: la clave de caché del cliente del CMS es la URL completa.
+ * No es un detalle: la clave de caché del cliente del CMS es la URL completa.
  * Con un `Date.now()` exacto cada visita generaría una clave distinta —caché
  * inservible justo en el pico, y la tabla creciendo hasta que la poda la corte— y
  * eso es la regla de oro del cliente: nada que varíe por petición en el `where`.
@@ -149,7 +149,7 @@ function ahoraAlMinuto(): string {
 /**
  * TODAS las campañas vigentes de un tipo, en el orden en que deben rotar.
  *
- * 🔴 Devuelve una LISTA y no un documento, y ese es el cambio que pidió Carlos
+ * Devuelve una LISTA y no un documento, y ese es el cambio que pidió Carlos
  * (2026-09-01): «pueden haber activas más de una a la vez». Antes esto pedía
  * `limit: 1` y la segunda campaña vendida simplemente no salía —sin error, sin
  * aviso, y sin que nadie lo notara hasta el reporte de fin de mes—. Comercial
@@ -171,7 +171,7 @@ function ahoraAlMinuto(): string {
  * filas con NULL, de ahí el `or` con `exists: false` — el mismo tropiezo que ya
  * está documentado en `noticias.ts`.
  *
- * ⚠️ Tope de 6. No es una restricción de producto: es que una franja que rota
+ * Tope de 6. No es una restricción de producto: es que una franja que rota
  * entre más de seis creativos no la ve completa nadie, y sin tope una captura
  * equivocada podría traerse la colección entera al HTML de la portada.
  *
@@ -181,7 +181,7 @@ function ahoraAlMinuto(): string {
  */
 export async function obtenerBanners(
   /*
-    🔴 NO acepta `takeover`, y el tipo lo impide a propósito. Un takeover de Ad
+    NO acepta `takeover`, y el tipo lo impide a propósito. Un takeover de Ad
     Manager no lleva enlace, así que el descarte de abajo —«sin enlace no es la
     campaña que se vendió»— lo tiraría entero y en silencio: el modal no saldría
     nunca y desde el sitio se vería igual que «no hay campaña». Su consulta es
@@ -225,7 +225,7 @@ export async function obtenerBanners(
 /**
  * Lo que el sitio necesita de un TAKEOVER, ya resuelto.
  *
- * 🔴 Se devuelve normalizado y no el documento crudo por una sola razón, que es la
+ * Se devuelve normalizado y no el documento crudo por una sola razón, que es la
  * trampa de este formato: con `fuente: 'admanager'` la API PUEDE traer una `imagen`
  * y un `enlace` viejos —de cuando la campaña tenía creatividad propia— y el CMS no
  * los limpia a propósito. Resolverlo aquí, una vez, es lo que impide que la
@@ -237,7 +237,7 @@ export interface Takeover {
   /**
    * La llave de `sessionStorage`, y lleva la fecha de edición A PROPÓSITO.
    *
-   * 🔴 Con una llave fija por campaña, corregir la pieza no se la vuelve a mostrar
+   * Con una llave fija por campaña, corregir la pieza no se la vuelve a mostrar
    * a quien ya la vio; y con una llave fija a secas (`takeover-visto`) es peor: la
    * campaña que entra la semana siguiente nace YA VISTA para quien tenga la pestaña
    * abierta. Eso no truena, simplemente no se muestra, y nadie se entera hasta que
@@ -256,12 +256,12 @@ export interface Takeover {
 /**
  * El takeover vigente de esta estación, o `null`.
  *
- * 🔴 Devuelve UNO y no una lista, al revés que `obtenerBanners`. Dos banners de
+ * Devuelve UNO y no una lista, al revés que `obtenerBanners`. Dos banners de
  * portada conviviendo rotan en el mismo hueco; dos takeovers serían dos modales
  * encima del lector, uno tapando al otro. Gana el `orden` más bajo, que es lo que
  * promete el CMS, y desempata el que empezó después.
  *
- * ⚠️ Se piden 3 y no 1. El `read` del CMS ya esconde lo pausado y lo vencido, así
+ * Se piden 3 y no 1. El `read` del CMS ya esconde lo pausado y lo vencido, así
  * que el primero SIEMPRE es válido — pero eso es una promesa de la otra punta, y el
  * día que alguien afloje ese control de acceso un `limit: 1` nos dejaría sin
  * segundo candidato y con el modal apagado sin saber por qué.
@@ -316,7 +316,7 @@ function normalizarTakeover(doc: Banner): Takeover | null {
   const clave = `${doc.id}:${doc.updatedAt ?? ''}`;
 
   /*
-    🔴 Ad Manager: la campaña es SOLO la vigencia y el permiso. Ni imagen ni enlace,
+    Ad Manager: la campaña es SOLO la vigencia y el permiso. Ni imagen ni enlace,
     aunque la API los traiga — ver el comentario de `FuenteTakeover`.
   */
   if (fuente === 'admanager') {
@@ -372,13 +372,13 @@ function normalizarTakeover(doc: Banner): Takeover | null {
 /**
  * Un banner por id, sin filtro de vigencia.
  *
- * 🔴 Sin filtrar por vigencia A PROPÓSITO, y es la diferencia con `obtenerBanners`.
+ * Sin filtrar por vigencia A PROPÓSITO, y es la diferencia con `obtenerBanners`.
  * Esto lo usa el proxy del clic, y quien pulsa puede estar mirando una página
  * servida de caché con una campaña que venció hace un minuto. Ese clic **tiene que
  * llegar a su destino**: el lector no tiene la culpa de nuestro TTL. Lo que no
  * ocurre es que se cuente — de eso se encarga el CMS respondiendo 409.
  *
- * ⚠️ Va por `cmsFetch` y no por `cmsFetchEstacion` porque es una lectura por id, y
+ * Va por `cmsFetch` y no por `cmsFetchEstacion` porque es una lectura por id, y
  * el id ya es único. Aun así se comprueba la estación al usarlo (ver el proxy): un
  * id de otra estación no debe redirigir desde este dominio.
  */
@@ -397,15 +397,15 @@ export type EventoPublicidad = 'impresion' | 'clic';
 /**
  * Suma una impresión o un clic en el CMS.
  *
- * 🔴 **Nunca lanza.** Un contador roto no puede tumbar una página ni impedir que
+ * **Nunca lanza.** Un contador roto no puede tumbar una página ni impedir que
  * un clic llegue a su destino: lo que se pierde es un número, y lo que se perdería
  * si lanzara es la visita. Por eso devuelve un booleano y se traga todo.
  *
- * ⚠️ **El `409` no es un error y no se reintenta.** Significa que el banner está
+ * **El `409` no es un error y no se reintenta.** Significa que el banner está
  * pausado o fuera de vigencia. Reintentarlo acumularía números sobre una campaña
  * que ya no corre, y eso se le factura a alguien.
  *
- * ⚠️ Un `503` significa que a la VM del CMS le falta `PUBLICIDAD_TOKEN`. Es una
+ * Un `503` significa que a la VM del CMS le falta `PUBLICIDAD_TOKEN`. Es una
  * pendiente de infraestructura conocida, así que se avisa UNA vez por proceso y no
  * en cada render: un log por impresión llenaría el disco antes que la bandeja.
  */
@@ -431,7 +431,7 @@ export async function registrarEvento(id: number, evento: EventoPublicidad): Pro
     if (r.status === 503 && !avisadoSinToken) {
       avisadoSinToken = true;
       console.error(
-        '\n🔴 El CMS no puede contar publicidad: le falta PUBLICIDAD_TOKEN en su VM.\n' +
+        '\nEl CMS no puede contar publicidad: le falta PUBLICIDAD_TOKEN en su VM.\n' +
           '   Las campañas vendidas van a quedarse en cero impresiones y cero clics,\n' +
           '   así que no se le van a poder reportar al anunciante.\n',
       );
@@ -447,7 +447,7 @@ export async function registrarEvento(id: number, evento: EventoPublicidad): Pro
 /**
  * Cuenta una impresión sin hacer esperar al render.
  *
- * 🔴 No se espera a propósito: el contador va detrás del contenido, no delante. Y
+ * No se espera a propósito: el contador va detrás del contenido, no delante. Y
  * el `.catch` no es decorativo — una promesa rechazada sin capturar es un
  * `unhandledRejection`, y en Node eso puede tumbar el proceso entero. Sería el
  * colmo: el sitio caído por contar un anuncio.

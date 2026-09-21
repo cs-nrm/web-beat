@@ -2,17 +2,17 @@
 /**
  * Microambiente — las notas que traen audio.
  *
- * 🔴 Es la tercera sección editorial y nace el 2026-09-15 (Carlos). A diferencia de
+ * Es la tercera sección editorial y nace el 2026-09-15 (Carlos). A diferencia de
  * sus dos hermanas NO usa `IndiceScanner`: aquí no hay destacada ni rejilla, hay
  * una LISTA, y es la misma de `Microambiente.astro` que se pinta en el Inicio. Ese
  * es todo el motivo de que esta página tenga consulta propia y `/editorial` sean
  * cinco líneas.
  *
- * ⚠️ `microambiente` está en `SEGMENTOS_RESERVADOS` (`config/site.ts`). Sin eso, la
+ * `microambiente` está en `SEGMENTOS_RESERVADOS` (`config/site.ts`). Sin eso, la
  * ruta la resolvería `[tipoLista]` buscando un tipo de lista con ese slug, y cada
  * visita dispararía una consulta al CMS para acabar en un 404.
  *
- * ⚠️ Sin publicidad, y es una omisión consciente, no un olvido: los huecos de este
+ * Sin publicidad, y es una omisión consciente, no un olvido: los huecos de este
  * sitio se declaran uno a uno con su nombre (`agents/ads.md`) y no se inventa
  * inventario al abrir una sección. El día que se quiera vender aquí, es una franja
  * como la de `/beat-scanner`.
@@ -36,7 +36,7 @@ const seccion = SECCIONES_EDITORIALES.microambiente;
 const pagina = leerPagina(Astro.url);
 
 /*
-  🔴 `filtroDeCategoria` devuelve `null` cuando la categoría no existe en el CMS, y
+  `filtroDeCategoria` devuelve `null` cuando la categoría no existe en el CMS, y
   ese `null` NO se le puede pasar a `obtenerScanner`: allí significa «sin filtro» y
   traería TODAS las notas del sitio. Una sección que de pronto se ve llena de notas
   ajenas no la reporta nadie; una vacía con un aviso se arregla el mismo día.
@@ -49,7 +49,7 @@ const categoriaPerdida = !filtro;
   se pide de una vez y se reparte en memoria, para que dos zonas de la misma página
   no tengan dos relojes de caché y puedan quedar desfasadas.
 
-  🔴 Pagina desde el 2026-09-17, con las demás vistas. Aquí todavía no hacía falta
+  Pagina desde el 2026-09-17, con las demás vistas. Aquí todavía no hacía falta
   —una sola nota capturada— y se pone igual: el día que la sección crezca, el
   archivo ya es alcanzable sin que nadie se acuerde de volver. Lo que lo motivó
   fue Beat Scanner, que tenía 53 notas y 11 alcanzables.
@@ -63,7 +63,7 @@ const { destacada, rejilla, paginas } = filtro
   portada que se pinte aparte —la lista es toda la pantalla—, así que apartarla
   dejaría la nota más reciente fuera de su propia sección.
 
-  ⚠️ De la página 2 en adelante `destacada` llega `null` a propósito (ver
+  De la página 2 en adelante `destacada` llega `null` a propósito (ver
   `obtenerScanner`), y este aplanado ya lo absorbía: el `filter` lo descarta y las
   veintiuna de la tanda quedan en la lista. No hace falta nada más aquí.
 */
@@ -71,12 +71,12 @@ const notas = [destacada, ...rejilla].filter((n): n is NonNullable<typeof n> => 
 ---
 
 {/*
-  🔴 Su propia tarjeta de compartir, como las otras cinco secciones: la genera
+  Su propia tarjeta de compartir, como las otras cinco secciones: la genera
   `pnpm favicon` con el nombre de la sección encima (`scripts/favicon.mjs`). Sin
   ella caería en el respaldo de marca y compartir esta sección se vería igual que
   compartir la parrilla.
 
-  ⚠️ El `alt` describe lo que la imagen DICE, y ese texto está horneado en el PNG
+  El `alt` describe lo que la imagen DICE, y ese texto está horneado en el PNG
   por el script. Si allí se renombra la sección, este `alt` se cambia con él.
 */}
 <Base

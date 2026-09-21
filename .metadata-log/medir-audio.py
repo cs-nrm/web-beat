@@ -50,7 +50,7 @@ while time.time() < fin:
                     break
                 hueco = ahora - ultimo
                 if hueco >= UMBRAL:
-                    # 🔴 Esto es un CORTE: los bytes dejaron de llegar.
+                    # Esto es un CORTE: los bytes dejaron de llegar.
                     anotar({'ev': 'HUECO', 'segundos': round(hueco, 2),
                             'total_bytes': total})
                 ultimo = ahora

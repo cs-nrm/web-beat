@@ -1,7 +1,7 @@
 /**
  * El sitio reacciona al puntero.
  *
- * 🔴 Por qué hacía falta: no había NADA. Cero `pointermove` en todo `src/` — el
+ * Por qué hacía falta: no había NADA. Cero `pointermove` en todo `src/` — el
  * único que existía se quedó en el `player.js` de la versión vieja, sin portar. Un
  * sitio que no acusa recibo de dónde está tu cursor se siente inerte por mucho que
  * las cosas se animen al entrar.
@@ -22,7 +22,7 @@ let vy = 0;
 /**
  * La capa del halo.
  *
- * 🔴 Se busca perezosamente y se vuelve a buscar si el nodo se desconectó. Lleva
+ * Se busca perezosamente y se vuelve a buscar si el nodo se desconectó. Lleva
  * `transition:persist`, así que sobrevive a la navegación — pero guardar la
  * referencia y no comprobarla nunca es cómo se acaba moviendo un nodo huérfano:
  * el efecto muere en silencio y desde el código se ve correcto. Ya pasó con el
@@ -38,7 +38,7 @@ function capaHalo(): HTMLElement | null {
 /**
  * El fotograma pedido y todavía sin pintar, o `0` si no hay ninguno.
  *
- * 🔴 Es un IDENTIFICADOR, no un booleano, y la diferencia es la vida del efecto.
+ * Es un IDENTIFICADOR, no un booleano, y la diferencia es la vida del efecto.
  *
  * Antes había un candado: «si ya hay uno pedido, no pidas otro», y solo se soltaba
  * DENTRO del callback. O sea que si un fotograma se pedía y nunca llegaba, el
@@ -56,7 +56,7 @@ function pintar(): void {
   solicitud = 0;
 
   /*
-   * 🔴 El halo se MUEVE, no se vuelve a dibujar — y esta es la corrección que
+   * El halo se MUEVE, no se vuelve a dibujar — y esta es la corrección que
    * arregla los botones que «se sentían deshabilitados».
    *
    * Antes esto escribía `--cursor-x` / `--cursor-y` en `<html>` y el degradado de
@@ -86,7 +86,7 @@ function pintar(): void {
   if (!el) return;
 
   /*
-   * 🔴 La CAJA de la tarjeta se mide AQUÍ, dentro del fotograma, y no en el
+   * La CAJA de la tarjeta se mide AQUÍ, dentro del fotograma, y no en el
    * manejador del puntero.
    *
    * `getBoundingClientRect()` obliga al navegador a resolver la maquetación en el
@@ -109,7 +109,7 @@ function pintar(): void {
   el.style.setProperty('--my', `${y}%`);
 
   /*
-   * 🔴 Los mismos datos, CENTRADOS y sin unidad: -1 en un borde, 0 en el centro,
+   * Los mismos datos, CENTRADOS y sin unidad: -1 en un borde, 0 en el centro,
    * 1 en el otro.
    *
    * `--mx`/`--my` van en porcentaje porque es lo que quiere un `radial-gradient`.
@@ -124,7 +124,7 @@ function pintar(): void {
 
 function alMover(e: PointerEvent): void {
   /*
-   * 🔴 Solo puntero FINO. En una pantalla táctil un `pointermove` llega con el
+   * Solo puntero FINO. En una pantalla táctil un `pointermove` llega con el
    * dedo ya encima, así que la luz aparecería de golpe bajo el pulgar, tapando lo
    * que se intenta leer y sin que nadie la haya buscado. El efecto es de ratón.
    */
@@ -138,7 +138,7 @@ function alMover(e: PointerEvent): void {
    * visible, se pintaría en la esquina superior izquierda hasta que alguien moviera
    * el ratón — una mancha de luz en un rincón, sin explicación.
    *
-   * ⚠️ Y se escribe UNA vez, no en cada movimiento. Chrome descarta el atributo
+   * Y se escribe UNA vez, no en cada movimiento. Chrome descarta el atributo
    * que no cambia y ahí no costaba nada (medido: 0.001 ms), pero eso es una
    * optimización de un motor, no una garantía: la guarda hace que el precio sea
    * cero en todos.

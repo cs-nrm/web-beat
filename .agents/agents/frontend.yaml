@@ -4,7 +4,7 @@ interface:
   default_prompt: |
     Trabaja como el agente de frontend de este proyecto Beat 100.9.
 
-    🔴 El acta vieja de este agente describía el sitio v1 y casi ningún archivo que
+    El acta vieja de este agente describía el sitio v1 y casi ningún archivo que
     reclamaba existe: de sus 17 componentes, CERO; de sus 28 layouts (los
     `CardsHome*`, los `Slider*`, `Layout.astro`, `BlogPost.astro`), CERO. Tampoco
     `public/fonts/`. Y el stack es otro: **Tailwind 4** por el plugin de Vite (no
@@ -17,14 +17,14 @@ interface:
       slot `sobre-cabecera`, la barra de progreso y el cableado de `src/scripts/`
     - `src/components/Cabecera.astro`, `MenuLleno.astro`, `Pie.astro`,
       `NavSecciones.astro`, `Paginador.astro`, `Intro.astro` — el cromo.
-      ⚠️ `Paginador.astro` reusa la pastilla de `NavSecciones.astro` a propósito:
+      `Paginador.astro` reusa la pastilla de `NavSecciones.astro` a propósito:
       el sitio tiene UNA forma de pastilla de navegación y esa medida cambia en
       los dos a la vez. Es SERVIDOR, no JavaScript
     - `src/components/inicio/` y el resto de `src/components/` — los bloques.
-      ⚠️ En `AudioNota.astro` el marcado y el CSS son tuyos y el COMPORTAMIENTO es
+      En `AudioNota.astro` el marcado y el CSS son tuyos y el COMPORTAMIENTO es
       de streaming (`src/scripts/audio-nota.ts`); los `data-audio-*` son el
       contrato entre los dos y no se renombran sin avisar
-    - `src/styles/` — 🔴 `base.css` es el archivo más importante de este agente
+    - `src/styles/` — `base.css` es el archivo más importante de este agente
     - `tailwind.config.js`, `scripts/fuentes.mjs`, `scripts/guarda-cascada.mjs`
     - `src/scripts/cabecera.ts`, `menu.ts`, `revelar.ts`, `escribir.ts`,
       `cursor.ts`, `rejilla.ts`, `intro.ts`, `progreso.ts` — el movimiento
@@ -58,17 +58,17 @@ interface:
       desconfiar de los demás
 
     Trabaja asumiendo que:
-    - ⚠️ Astro NO admite comentarios de llaves dentro de la lista de atributos: los
+    - Astro NO admite comentarios de llaves dentro de la lista de atributos: los
       parsea como atributos sueltos y rompe el build con errores que no lo
       mencionan. Van CINCO tropiezos iguales en este repo, y dos quedaron
       commiteados. El comentario va antes de la etiqueta
-    - ⚠️ `astro check` no basta como puerta: uno de esos casos daba 0 errores y solo
+    - `astro check` no basta como puerta: uno de esos casos daba 0 errores y solo
       tronó el compilador del build. La puerta es `pnpm build`
-    - ⚠️ un atributo booleano se pasa como booleano (`inert={compacta}`): con
+    - un atributo booleano se pasa como booleano (`inert={compacta}`): con
       `''` no se emite nunca, y la barra plegada seguía siendo navegable con el
       tabulador
-    - ⚠️ Tailwind 4 quitó `cursor: pointer` de su preflight; hay que ponerlo a mano
-    - ⚠️ `transition:persist` necesita NOMBRE explícito: sin él Astro genera uno por
+    - Tailwind 4 quitó `cursor: pointer` de su preflight; hay que ponerlo a mano
+    - `transition:persist` necesita NOMBRE explícito: sin él Astro genera uno por
       POSICIÓN y no coincide entre páginas, así que el nodo se reemplaza en silencio
     - `scripts/favicon.mjs`, los `og-*.png` y todo el `<head>` de etiquetas son de
       `agents/metadata.md`; `Anuncio.astro` es de `agents/ads.md`; el
@@ -80,7 +80,7 @@ interface:
 
     Verifica con Inicio → nota → atrás, siempre: con View Transitions el `body` se
     reemplaza y solo sobrevive lo que lleva `transition:persist`, así que un
-    componente perfecto al recargar puede estar muerto al navegar. ⚠️ Y el panel del
+    componente perfecto al recargar puede estar muerto al navegar. Y el panel del
     navegador MIENTE sobre las animaciones — una que ya terminó se ve igual que una
     que nunca arrancó; deja un testigo en `dataset`. Cierra con `pnpm check` y
     `pnpm build`, y comprueba móvil a 375px de verdad, no encogiendo la ventana.

@@ -2,17 +2,17 @@
 /**
  * Beat Scanner — el día a día.
  *
- * 🔴 Desde el 2026-09-07 esta sección trae SOLO su categoría, no todas las notas
+ * Desde el 2026-09-07 esta sección trae SOLO su categoría, no todas las notas
  * del sitio (decisión editorial de Carlos): Beat Scanner es la nota del día a día y
  * `Editorial` —su hermana en `/editorial`— son las piezas más elaboradas. Antes las
  * dos caían en la misma rejilla y ninguna de las dos significaba nada.
  *
- * 🔴 La ruta es `/beat-scanner`, y vino de `/scanner` el mismo día (Carlos:
+ * La ruta es `/beat-scanner`, y vino de `/scanner` el mismo día (Carlos:
  * «deben ser /beat-scanner y /editorial»). Las dos secciones hermanas quedan con la
  * URL diciendo su nombre, que es lo que un lector puede leer, teclear y reconocer
  * en un enlace compartido.
  *
- * ⚠️ `/scanner` y `/scanner/<categoria>` NO se borran: responden **301** hacia acá
+ * `/scanner` y `/scanner/<categoria>` NO se borran: responden **301** hacia acá
  * desde `astro.config.mjs`. Es la ruta que llevan el sitemap del CMS, la migaja de
  * las notas ya publicadas y lo que la estación haya compartido; dejarla en 404
  * habría tirado a la basura lo que esas URLs tuvieran acumulado.
@@ -37,7 +37,7 @@ const pagina = leerPagina(Astro.url);
   se cambia con él. El por qué completo está en `scripts/favicon.mjs` y en
   `src/pages/editorial.astro`, su hermana.
 
-  ⚠️ Esta es la única de las seis donde el wordmark y el nombre de la sección
+  Esta es la única de las seis donde el wordmark y el nombre de la sección
   repiten la palabra «BEAT». Se queda: es lo que la propia cabecera de la página
   hace, y sin el wordmark la tarjeta no diría de quién es.
 */}

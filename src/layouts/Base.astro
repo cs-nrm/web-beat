@@ -8,19 +8,19 @@
  */
 import '@/styles/base.css';
 /*
-  🔴 La piel de Plyr, GLOBAL y desde aquí.
+  La piel de Plyr, GLOBAL y desde aquí.
 
   Vivía en el `<style>` de `Fenomeno.astro`, y ahí Astro la escopaba con el
   `data-astro-cid` de ese componente: solo vestía al visor del Fenómeno. El visor
   flotante de las canciones vive en este layout, y le llegaba Plyr sin hoja — los
   controles a 1049px de alto y el iframe a 640 de ancho dentro de un marco de 360.
 
-  ⚠️ Importado en el frontmatter y NO con un `import()` dinámico desde el script:
+  Importado en el frontmatter y NO con un `import()` dinámico desde el script:
   eso hace que Vite re-optimice dependencias y el navegador se quede con una URL
   vieja —`504 Outdated Optimize Dep`—, que en pantalla es un visor que no arranca.
   Está documentado en `video.ts` y ya costó una vez.
 
-  ⚠️ Y sí, son ~10 KB en todas las páginas y no solo en las que tienen visor. Es el
+  Y sí, son ~10 KB en todas las páginas y no solo en las que tienen visor. Es el
   precio de que el reproductor viva en el cromo: tiene que seguir sonando al
   navegar, así que no hay página en la que no pueda hacer falta.
 */
@@ -57,14 +57,14 @@ interface Props {
    * Qué se ve en esa imagen, para quien no la ve. En una nota es el `alt` de su
    * foto, tal como lo capturó la redacción.
    *
-   * ⚠️ Si no viene, la etiqueta NO se emite. Un `alt` inventado desde el layout
+   * Si no viene, la etiqueta NO se emite. Un `alt` inventado desde el layout
    * describiría una foto que este archivo no ha visto.
    */
   imagenAlt?: string | null;
   /**
    * Las medidas REALES de esa imagen, cuando se conocen.
    *
-   * 🔴 Solo se pasan si el dato existe: las trae el documento de media del CMS
+   * Solo se pasan si el dato existe: las trae el documento de media del CMS
    * (`sizes.<variante>.width/height`, ver `medidaMedia`). Las plataformas reservan
    * el hueco de la tarjeta con estos números antes de bajar el archivo, así que
    * unas medidas falsas se ven como un recorte raro en la publicación — y desde el
@@ -85,7 +85,7 @@ interface Props {
    */
   modificado?: string | null;
   /**
-   * 🔴 Este DOCUMENTO no se indexa, lo diga el host lo que diga.
+   * Este DOCUMENTO no se indexa, lo diga el host lo que diga.
    *
    * Es la cuarta entrada a la política de indexación y la única que depende del
    * contenido: `noticias.meta.noIndex` en el CMS, que la redacción marca en una
@@ -93,12 +93,12 @@ interface Props {
    * `<meta>` de aquí abajo— hablan del DESPLIEGUE entero y no pueden saber esto:
    * cuando se evalúan, nadie ha decidido todavía qué documento se va a servir.
    *
-   * ⚠️ Solo SUMA restricción, nunca la quita: se combina con un `||`, así que un
+   * Solo SUMA restricción, nunca la quita: se combina con un `||`, así que un
    * `false` del CMS no puede abrir a Google la preproducción. Es la misma regla
    * que gobierna las otras tres —basta con que una cierre— y es la que hace que
    * equivocarse aquí no tenga consecuencias.
    *
-   * ⚠️ La otra mitad la pone la PÁGINA, con la cabecera `X-Robots-Tag` en su
+   * La otra mitad la pone la PÁGINA, con la cabecera `X-Robots-Tag` en su
    * propia respuesta. Aquí no se puede: ver `src/pages/noticias/[slug].astro`.
    */
   noIndex?: boolean;
@@ -108,7 +108,7 @@ interface Props {
    */
   vista?: 'inicio' | 'interior';
   /**
-   * 🔴 La página de un índice paginado (`?pagina=2`). Solo la pasan las vistas que
+   * La página de un índice paginado (`?pagina=2`). Solo la pasan las vistas que
    * paginan, y por eso NO se lee aquí de `Astro.url`.
    *
    * La diferencia importa: si este layout leyera el parámetro por su cuenta,
@@ -145,7 +145,7 @@ const {
 const esInicio = Astro.url.pathname === '/';
 
 /**
- * 🔴 En los INTERIORES la barra oscura de navegación no se muestra: la página
+ * En los INTERIORES la barra oscura de navegación no se muestra: la página
  * arranca como si ya se hubiera hecho scroll, con la barra clara del player, su
  * wordmark y su hamburguesa. Decisión de Carlos (2026-09-01).
  *
@@ -165,17 +165,17 @@ const vista = Astro.props.vista ?? (esInicio ? 'inicio' : 'interior');
  * componente pida lo suyo. Las dos van en paralelo, y las dos consultas están
  * memorizadas o cacheadas en el cliente del CMS, así que no cuestan por página.
  *
- * 🔴 Aquí había una TERCERA consulta —`queSuena()`, la bitácora— y se retiró
+ * Aquí había una TERCERA consulta —`queSuena()`, la bitácora— y se retiró
  * (decisión de Carlos, 2026-09-03): **lo que suena lo dice el SDK de Triton, no
  * el CMS**. Los cue points vienen DENTRO del stream, así que llegan alineados con
  * lo que el oyente está escuchando; la bitácora es la hora del playout y va
  * desfasada (medido: 5 s). Y esta consulta corría en CADA página del sitio.
  *
- * ⚠️ El efecto visible: hasta que alguien pulsa play, la barra dice el nombre de
+ * El efecto visible: hasta que alguien pulsa play, la barra dice el nombre de
  * la estación en vez de una canción. Eso es MÁS honesto, no menos: antes
  * afirmaba saber qué sonaba para un oyente que no estaba oyendo nada.
  *
- * ⚠️ Lo que NO se puede mover al SDK es el HISTORIAL —«LO QUE SONÓ», que desde el
+ * Lo que NO se puede mover al SDK es el HISTORIAL —«LO QUE SONÓ», que desde el
  * 2026-09-09 vive solo en `/en-vivo`—: los cue points solo cuentan el presente, y
  * solo mientras haya una conexión abierta. Eso sigue saliendo de `bitacora`.
  *
@@ -204,19 +204,19 @@ const marca = estacion ?? {
   `Host` de esta petición— y las pone también el middleware por cabecera, que
   protege TODA respuesta; este `<meta>` es su segunda capa.
 
-  🔴 La tercera es `noIndex`, y es de otra naturaleza: la trae el documento del
+  La tercera es `noIndex`, y es de otra naturaleza: la trae el documento del
   CMS y la pasa la página. El middleware NO puede evaluarla —cuando corre, todavía
   no se sabe qué documento se va a servir—, así que la nota se encarga de su propia
   cabecera. Ver la prop `noIndex` arriba.
 
-  ⚠️ Se combinan con `||` a propósito: cada una solo puede CERRAR. Ninguna abre lo
+  Se combinan con `||` a propósito: cada una solo puede CERRAR. Ninguna abre lo
   que otra cerró.
 */
 const noIndexar = NOINDEX_SITIO || noIndexarHost(Astro.url.hostname) || noIndex;
 /*
   La canónica se apunta a SÍ MISMA, con la página cuando la hay.
 
-  ⚠️ Es el ÚNICO parámetro que entra: todo lo demás del query se descarta, como
+  Es el ÚNICO parámetro que entra: todo lo demás del query se descarta, como
   siempre. Un `?utm_source=…` o un `?fbclid=…` no hacen otra página, y dejarlos
   entrar convertiría cada enlace compartido en una URL canónica distinta.
 */
@@ -236,13 +236,13 @@ const canonical = new URL(
 const tituloPagina = paginaCanonica ? `${titulo} — Página ${paginaCanonica}` : titulo;
 
 /**
- * 🔴 La imagen de compartir, SIEMPRE absoluta y siempre presente.
+ * La imagen de compartir, SIEMPRE absoluta y siempre presente.
  *
  * Facebook y X descartan una `og:image` relativa sin decir nada: la publicación
  * sale sin imagen y desde el sitio no se nota. Por eso se resuelve aquí una sola
  * vez y no en cada página.
  *
- * ⚠️ Se resuelve contra `SITE_URL` —el dominio CANÓNICO— y no contra el host que
+ * Se resuelve contra `SITE_URL` —el dominio CANÓNICO— y no contra el host que
  * sirve. Es deliberado y es lo mismo que ya hacen `canonical` y los enlaces de
  * compartir de la nota: lo que se publica tiene que apuntar al sitio real, no a la
  * preproducción. Efecto secundario conocido: compartir desde v2 enseña la ficha del
@@ -258,12 +258,12 @@ const imagenCompartir = imagen
 /**
  * Lo que se sabe de esa imagen: qué se ve en ella y cuánto mide.
  *
- * 🔴 Los tres datos se eligen JUNTOS y del mismo lado. Si la página trae foto
+ * Los tres datos se eligen JUNTOS y del mismo lado. Si la página trae foto
  * propia, las medidas son las suyas o no hay medidas; jamás las de la tarjeta de
  * marca. Mezclarlos —la foto de una nota con el 1200×630 del respaldo— es
  * exactamente el fallo silencioso que las etiquetas de medida vienen a evitar.
  *
- * ⚠️ El `alt` del respaldo describe lo que `pnpm favicon` genera: el wordmark
+ * El `alt` del respaldo describe lo que `pnpm favicon` genera: el wordmark
  * blanco centrado sobre el negro del sitio. Si algún día la tarjeta se dibuja de
  * otra forma, este texto se cambia con ella (`scripts/favicon.mjs`).
  */
@@ -278,13 +278,13 @@ const tarjeta = imagen
 /**
  * La descripción de respaldo: una página sin bajada no debe compartirse muda.
  *
- * 🔴 Tiene que decir LO MISMO que la `descripcion` del Inicio
+ * Tiene que decir LO MISMO que la `descripcion` del Inicio
  * (`src/pages/index.astro`). Son dos textos que se desincronizan solos —ya pasó:
  * este hablaba de «Beat Scanner, Editorial y la agenda» mientras el Inicio decía
  * «Beat Editorial», un nombre de sección que ya no existe— y el efecto es que la
  * misma casa se presenta de dos maneras según por dónde entres.
  *
- * ⚠️ Y dice qué ES la estación antes que qué tiene. La versión anterior enumeraba
+ * Y dice qué ES la estación antes que qué tiene. La versión anterior enumeraba
  * secciones, que no le sirve ni a quien no ha entrado nunca —no sabe qué es el
  * Fenómeno Residente— ni a quien ya conoce el sitio, que no lee la descripción.
  * Desde que hay Open Graph esta frase es además lo que se lee en WhatsApp.
@@ -293,7 +293,7 @@ const RESUMEN_CASA =
   'La estación de música electrónica de la Ciudad de México. Escucha el 100.9 FM en vivo y sigue lo que suena, se lanza y se mueve en la pista.';
 
 /**
- * 🔴 La descripción se recorta a 160 caracteres, y el recorte vive AQUÍ.
+ * La descripción se recorta a 160 caracteres, y el recorte vive AQUÍ.
  *
  * Google corta ahí, así que el tope no es una preferencia de estilo. Lo que no se
  * puede es confiar en que el texto llegue ya corto: la mitad de las rutas pasan un
@@ -302,7 +302,7 @@ const RESUMEN_CASA =
  * notas, medido contra `admin.nrm.com.mx`), o sea que el problema no ha llegado
  * pero no hay nada que lo detenga.
  *
- * ⚠️ Se corta en el ESPACIO anterior y se cierra con «…», no a mitad de palabra.
+ * Se corta en el ESPACIO anterior y se cierra con «…», no a mitad de palabra.
  * El corte de Google es tipográfico y el lector no lo ve venir; este es un corte
  * declarado, y en una tarjeta de WhatsApp —donde esta frase también se lee— es la
  * diferencia entre una frase que termina y una que se traga la última sílaba.
@@ -324,7 +324,7 @@ function recortar(texto: string): string {
 const resumen = recortar(descripcion ?? RESUMEN_CASA);
 
 /**
- * 🔴 La ficha de la ESTACIÓN en JSON-LD, y va solo en el Inicio.
+ * La ficha de la ESTACIÓN en JSON-LD, y va solo en el Inicio.
  *
  * Vive en el layout y no en `src/pages/index.astro` por una razón concreta: los
  * dos datos que la sostienen —el nombre público de la estación y sus redes— ya
@@ -333,7 +333,7 @@ const resumen = recortar(descripcion ?? RESUMEN_CASA);
  * una cuenta distinta de la que el lector ve en el pie, que es la clase de
  * discrepancia que Google lee como marcado engañoso.
  *
- * ⚠️ Solo en el Inicio: es la ficha de la casa, no de cada página. Repetirla en
+ * Solo en el Inicio: es la ficha de la casa, no de cada página. Repetirla en
  * el resto de las rutas no le dice nada nuevo a nadie.
  */
 const fichaEstacion = esInicio
@@ -346,7 +346,7 @@ const fichaEstacion = esInicio
   : null;
 
 /**
- * 🔴 LOS CUATRO CONTENEDORES DE MEDICIÓN, y la regla que los gobierna: **sin
+ * LOS CUATRO CONTENEDORES DE MEDICIÓN, y la regla que los gobierna: **sin
  * valor en el env, el snippet NO se emite.**
  *
  * No es prolijidad. Preproducción y producción son la MISMA imagen de Docker
@@ -356,7 +356,7 @@ const fichaEstacion = esInicio
  * dato feo — infla una cifra de audiencia CERTIFICADA con tráfico que no es
  * audiencia.
  *
- * ⚠️ Son `PUBLIC_*`, y Vite las hornea AL COMPILAR: llenar el `.env` no enciende
+ * Son `PUBLIC_*`, y Vite las hornea AL COMPILAR: llenar el `.env` no enciende
  * nada hasta que se RECONSTRUYE. Reiniciar el servicio no sirve de nada. Es el
  * paso 2 del día del corte, y hasta hoy no tenía qué encender — el port del v1 se
  * trajo el emisor (`src/scripts/analitica.ts`) y dejó los receptores en el
@@ -364,7 +364,7 @@ const fichaEstacion = esInicio
  * `window.gtag` y `window.dataLayer`, no encontraba ninguno, y su `try/catch` se
  * comía en silencio cada evento del player, de los anuncios y de las pistas.
  *
- * ⚠️ `PUBLIC_GA_ID` no está en esta lista a propósito: **GA4 entra por GTM y
+ * `PUBLIC_GA_ID` no está en esta lista a propósito: **GA4 entra por GTM y
  * nunca directo.** Con las dos vías las páginas vistas salen al DOBLE, y el
  * síntoma se parece tanto a un buen mes que puede tardar semanas en levantar
  * sospechas. Esa variable la lee únicamente el SDK de Triton (`player.ts`).
@@ -397,7 +397,7 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
     <link rel="canonical" href={canonical} />
 
     {/*
-      🔴 Open Graph y Twitter Card. Faltaban ENTERAS (agregadas el 2026-09-07).
+      Open Graph y Twitter Card. Faltaban ENTERAS (agregadas el 2026-09-07).
 
       Los tres botones de compartir de la nota funcionaban —Carlos dudaba de ellos y
       no era eso—, pero lo que llegaba a Facebook o a X era un enlace pelado: sin
@@ -405,19 +405,19 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
       trabajado y una foto de portada no sirven de nada si lo que se publica es una
       línea de texto gris.
 
-      ⚠️ `og:image` va ABSOLUTA o no cuenta, y el fallo es silencioso. Ver
+      `og:image` va ABSOLUTA o no cuenta, y el fallo es silencioso. Ver
       `imagenCompartir`.
 
-      ⚠️ `og:type` es `article` solo en una nota. No es cosmético: con `article`,
+      `og:type` es `article` solo en una nota. No es cosmético: con `article`,
       las plataformas esperan `article:published_time` y presentan la ficha como
       pieza fechada.
 
-      ⚠️ `twitter:card` es lo único que X necesita de su propio espacio de nombres —
+      `twitter:card` es lo único que X necesita de su propio espacio de nombres —
       el resto lo lee de Open Graph—. Duplicar `twitter:title` y compañía sería
       mantener dos veces lo mismo para que digan lo mismo. Por eso tampoco hay
       `twitter:image:alt`: X lee el `og:image:alt` de abajo.
 
-      🔴 Las tres etiquetas de la IMAGEN se completaron el 2026-09-07 y no son
+      Las tres etiquetas de la IMAGEN se completaron el 2026-09-07 y no son
       adorno:
         · `og:image:alt` es lo que se lee en lugar de la foto — en el lector de
           pantalla de Facebook y en la vista previa que no acaba de cargar.
@@ -425,7 +425,7 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
           bajar el archivo. Sin ellas, la primera vez que se comparte un enlace la
           tarjeta se pinta encogida o recortada, y solo se acomoda cuando el
           rastreador vuelve.
-      ⚠️ Las tres son condicionales a propósito: se emiten si el dato existe. Ver
+      Las tres son condicionales a propósito: se emiten si el dato existe. Ver
       `tarjeta`.
     */}
     <meta property="og:site_name" content="Beat 100.9" />
@@ -453,7 +453,7 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@BEATOFICIAL" />
     {/*
-      🔴 El juego entero, no solo el `.ico`. Lo genera `pnpm favicon` desde
+      El juego entero, no solo el `.ico`. Lo genera `pnpm favicon` desde
       `public/img/beat-blanco.svg`, que es el MISMO archivo del que sale el logo
       de la cabecera: así el icono no puede quedarse en una marca anterior sin
       que nadie lo note. Es lo que había pasado — la pestaña seguía enseñando la
@@ -487,13 +487,13 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
       —el vector real aquí es un `</script>` dentro de un titular, no una etiqueta
       suelta—. Ver `src/lib/jsonld.ts`.
 
-      ⚠️ `is:inline` es obligatorio: sin él Astro trata el bloque como un script
+      `is:inline` es obligatorio: sin él Astro trata el bloque como un script
       del sitio y se lo lleva al bundle, donde ningún rastreador lo va a leer.
     */}
     {fichaEstacion && <script type="application/ld+json" is:inline set:html={fichaEstacion} />}
 
     {/*
-      🔴 SIN ESTO el `transition:persist` de la cabecera NO HACE NADA.
+      SIN ESTO el `transition:persist` de la cabecera NO HACE NADA.
       Cada navegación sería una carga completa del documento y el radio se cortaría
       al cambiar de página — que es justo lo contrario del §4.1 del mapa de sitio:
       "el reproductor en vivo es persistente… es la afirmación de que Beat sigue
@@ -514,7 +514,7 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
       con red lenta `googletag` es solo el stub y el TypeError cancela la
       inicialización entera.
 
-      🔴 El ad unit NO está aquí ni en ningún archivo: sale de
+      El ad unit NO está aquí ni en ningún archivo: sale de
       `PUBLIC_GAM_NETWORK_ID` y `PUBLIC_GAM_AD_UNIT`. Ver `src/scripts/anuncios.ts`.
     */}
     <script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js" is:inline></script>
@@ -526,19 +526,19 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
       LA MEDICIÓN. Los cuatro contenedores, cada uno tras su propia guarda; la
       regla y el por qué están arriba, con las constantes.
 
-      🔴 Ninguno bloquea el render, con el mismo criterio que `gpt.js`: lo que
+      Ninguno bloquea el render, con el mismo criterio que `gpt.js`: lo que
       pesa —la librería de cada contenedor— se inyecta con `async`. Lo que corre
       en línea es solo la cola y la etiqueta que la va a buscar.
 
-      ⚠️ Y ninguno se vuelve a ejecutar al navegar, sin que haga falta guarda
+      Y ninguno se vuelve a ejecutar al navegar, sin que haga falta guarda
       nuestra: el `ClientRouter` recuerda cada script en línea que ya corrió —por
       su TEXTO— y lo marca `data-astro-exec` antes de reinsertarlo en el `head`
       nuevo (`astro/dist/transitions/swap-functions.js`). Comprobado yendo del
       Inicio a una nota y volviendo: un solo `gtm.start` en la cola y una sola
-      copia de cada snippet. 🔴 Por eso mismo, aquí NUNCA va `data-astro-rerun`:
+      copia de cada snippet. Por eso mismo, aquí NUNCA va `data-astro-rerun`:
       bajaría un contenedor nuevo por navegación y contaría todo dos veces.
 
-      ⚠️ Lo que el `ClientRouter` sí hace es BORRAR del `head` los scripts que
+      Lo que el `ClientRouter` sí hace es BORRAR del `head` los scripts que
       estos contenedores inyectaron (`gtm.js`, `beacon.js`, el de Hotjar) al
       reemplazarlo. No importa: el código ya se ejecutó y vive en memoria, y el
       nodo `<script>` no es el que mide. Es la misma situación en la que ya está
@@ -554,7 +554,7 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
             bajar. Sin la cola creada, el primer `play` —que es el que interesa—
             se pierde en el `try/catch` del emisor.
 
-            🔴 Va DENTRO de la guarda de GTM y no fuera. Crear `dataLayer` sin
+            Va DENTRO de la guarda de GTM y no fuera. Crear `dataLayer` sin
             contenedor que la vacíe dejaría los eventos apilándose en un array que
             nadie lee, y encima rompería el único diagnóstico que hay:
             `Array.isArray(window.dataLayer)` es lo que dice si hay receptor (ver
@@ -593,7 +593,7 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
       `c1: '2'` es la constante de comScore para «página web», no un dato nuestro;
       lo único de la cuenta es `c2`.
 
-      ⚠️ Las dos `options` vienen tal cual del v1, que es como adops lo tiene
+      Las dos `options` vienen tal cual del v1, que es como adops lo tiene
       configurado hoy: cookie de primera parte y sin esperar consentimiento. En el
       sitio no hay CMP (México, LFPDPPP) — si algún día entra uno, el
       `bypassUserConsentRequirement…` es la primera línea que hay que revisar,
@@ -653,7 +653,7 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
       )
     }
     {/*
-      🔴 Metricool queda CABLEADO Y APAGADO: `PUBLIC_METRICOOL_HASH` va vacía
+      Metricool queda CABLEADO Y APAGADO: `PUBLIC_METRICOOL_HASH` va vacía
       porque el hash no lo tenemos, así que hoy este bloque no se emite nunca. Se
       escribe igual para que encenderlo sea llenar una variable y reconstruir, que
       es lo que el resto de este archivo promete.
@@ -686,7 +686,7 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
       salen de nuestro propio dominio, así que no hace falta `preconnect` a
       terceros ni se le manda a Google la IP del lector en cada visita.
 
-      🔴 Son SUSTITUTOS, no las tipografías de marca — el DS lo dice: "no licensed
+      Son SUSTITUTOS, no las tipografías de marca — el DS lo dice: "no licensed
       brand fonts were provided". Al llegar las licenciadas se reemplazan los
       archivos y las familias de `ds/tokens/typography.css`.
     */}
@@ -715,7 +715,7 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
       pegado al navegar a una nota sería un error de facturación, no de maquetado.
     */}
     {/*
-      🔴 La barra de progreso de navegación. Va PRIMERO en el `body` y con
+      La barra de progreso de navegación. Va PRIMERO en el `body` y con
       `transition:persist`.
 
       Lo primero, porque es `position: fixed` en la coronilla de la pantalla y
@@ -727,7 +727,7 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
       de la animación, y la barra desaparecería justo cuando el lector la está
       mirando. Es lo mismo que hace la cabecera con el player.
 
-      🔴 Y el nombre va EXPLÍCITO —`="progreso"`—, como el `="cabecera"` de la
+      Y el nombre va EXPLÍCITO —`="progreso"`—, como el `="cabecera"` de la
       cabecera. Sin nombre, Astro genera uno por POSICIÓN y no coincide entre
       páginas: medido, el Inicio emitía `astro-gyrtbwwo-3` y una nota
       `astro-gyrtbwwo-5`, porque la nota tiene más elementos con directiva de
@@ -735,7 +735,7 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
       se reemplaza en silencio — la barra se moría a mitad de la navegación y desde
       el código se veía correcta.
 
-      ⚠️ `aria-hidden`: el `ClientRouter` ya anuncia el cambio de ruta por su
+      `aria-hidden`: el `ClientRouter` ya anuncia el cambio de ruta por su
       cuenta. Ver `src/scripts/progreso.ts`.
     */}
     <div class="progreso" data-progreso aria-hidden="true" transition:persist="progreso">
@@ -743,7 +743,7 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
     </div>
 
     {/*
-      🔴 LA CAPA DEL HALO DEL CURSOR, y va en el marcado a propósito.
+      LA CAPA DEL HALO DEL CURSOR, y va en el marcado a propósito.
 
       Antes no existía: el halo era el `::after` del `<body>` y su centro salía de
       una variable que `cursor.ts` escribía en `<html>` en cada movimiento del
@@ -756,17 +756,17 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
       Como elemento propio, la posición va en un `transform` sobre una capa
       promovida y moverla no cuesta ni estilo ni pintado.
 
-      🔴 `transition:persist` por lo mismo que la barra de progreso: sin él, cada
+      `transition:persist` por lo mismo que la barra de progreso: sin él, cada
       navegación trae un nodo nuevo y la referencia que guarda `cursor.ts` se queda
       apuntando a uno huérfano. El script comprueba `isConnected` de todos modos,
       pero la red y el cinturón cuestan lo mismo aquí.
 
-      ⚠️ Vacío y `aria-hidden`: es luz, no contenido.
+      Vacío y `aria-hidden`: es luz, no contenido.
     */}
     <div class="cursor-halo" data-halo aria-hidden="true" transition:persist="halo"></div>
 
     {/*
-      🔴 EL VISOR FLOTANTE DE LAS CANCIONES.
+      EL VISOR FLOTANTE DE LAS CANCIONES.
 
       Va en el marcado y no lo construye `pista.ts`, por lo mismo que la barra: con
       `transition:persist` sobrevive a la navegación y la canción sigue sonando al
@@ -774,16 +774,16 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
       nuevo y el iframe anterior quedaría sonando dentro de un nodo huérfano, sin
       nadie que lo pueda parar.
 
-      🔴 Y va VISIBLE, con su X. Las políticas del reproductor incrustado de
+      Y va VISIBLE, con su X. Las políticas del reproductor incrustado de
       YouTube piden un reproductor visible, de al menos 200×200 y sin obstruir, y
       prohíben separar el audio del video. `min-height: 202px` en el CSS no es un
       número de gusto: es esa regla.
 
-      ⚠️ Nace con `hidden` y lo quita el script al primer play. Y `hidden` en vez de
+      Nace con `hidden` y lo quita el script al primer play. Y `hidden` en vez de
       una clase para que haya UNA sola verdad sobre si se ve — el atributo lo
       respetan igual el CSS, el lector de pantalla y el tabulador.
 
-      ⚠️ El `<video>` de montaje es lo que Plyr toma para construirse; al asignarle
+      El `<video>` de montaje es lo que Plyr toma para construirse; al asignarle
       una fuente de YouTube lo REEMPLAZA por su iframe, así que su atributo
       desaparece del DOM. Está medido y no importa: la instancia se crea una vez y
       se guarda en `window`.
@@ -800,25 +800,25 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
       Cada uno tras la misma guarda que su script, o sea que sin variable tampoco
       salen.
 
-      🔴 Van en el `<body>` y NO junto a sus scripts en el `<head>`, aunque el v1
+      Van en el `<body>` y NO junto a sus scripts en el `<head>`, aunque el v1
       los tuviera arriba. El `<head>` solo admite metadatos: un `<img>` o un
       `<iframe>` ahí le dice al parser que el head terminó, y con el JavaScript
       apagado —que es justo el caso que estas dos etiquetas atienden— lo que
       quedaba del head se acaba pintando dentro del body.
 
-      ⚠️ No son la primerísima línea del `body` porque ese sitio es de la barra de
+      No son la primerísima línea del `body` porque ese sitio es de la barra de
       progreso, y por una razón de pintado (ver arriba). Da igual: con JS un
       `<noscript>` no existe, y sin JS estas dos etiquetas van ocultas y no ocupan
       lugar, así que no hay nada que se les ponga delante.
 
-      ⚠️ Y solo viven en la carga INICIAL del documento: el `ClientRouter` borra
+      Y solo viven en la carga INICIAL del documento: el `ClientRouter` borra
       todos los `<noscript>` del documento que trae al navegar
       (`astro/dist/transitions/router.js`, justo después del `parseFromString`).
       Comprobado, y no es un problema: sin JavaScript no hay navegación de router
       —cada clic es un documento completo, que llega con las dos etiquetas—, y con
       JavaScript estas dos no tienen nada que hacer.
 
-      ⚠️ El pixel del v1 va ROTO y el error no se hereda: lleva `cv=cv=4.4.0` y un
+      El pixel del v1 va ROTO y el error no se hereda: lleva `cv=cv=4.4.0` y un
       salto de línea que parte `cj=1` a mitad de la URL.
     */}
     {

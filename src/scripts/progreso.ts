@@ -1,7 +1,7 @@
 /**
  * La barra de progreso de navegación.
  *
- * 🔴 Existe porque hay una espera CIEGA y está medida: entre el clic y el momento
+ * Existe porque hay una espera CIEGA y está medida: entre el clic y el momento
  * en que Astro tiene la página nueva pasaron **414ms en localhost** contra un
  * build, y en un teléfono sobre red móvil son fácil 800–1200. En todo ese tiempo
  * la pantalla no cambia ni un píxel, así que el lector no sabe si su toque
@@ -12,19 +12,19 @@
  * ahí el `ClientRouter` está pidiendo el documento por la red. Después de eso el
  * intercambio es inmediato.
  *
- * 🔴 REGLA DE ORO, la misma que `revelar.ts`: el contenido no depende de esto.
+ * REGLA DE ORO, la misma que `revelar.ts`: el contenido no depende de esto.
  * Es solo respuesta al toque — si este script no corre, la navegación funciona
  * igual y lo único que se pierde es el aviso. Y sin JavaScript no hay
  * `ClientRouter`, así que la navegación es una carga completa y el indicador lo
  * pone el propio navegador.
  *
- * ⚠️ NO se anuncia a lectores de pantalla y va `aria-hidden`. El `ClientRouter` de
+ * NO se anuncia a lectores de pantalla y va `aria-hidden`. El `ClientRouter` de
  * Astro ya trae su propio anunciador de cambio de ruta; añadir un `role="progressbar"`
  * aquí haría que una sola navegación se anunciara dos veces.
  */
 
 /**
- * 🔴 Lo que la barra espera antes de asomar.
+ * Lo que la barra espera antes de asomar.
  *
  * Una navegación que resuelve en 120ms con una barra encima se ve como un
  * parpadeo, y un parpadeo es peor que nada: llama la atención y no informa. Con
@@ -46,14 +46,14 @@ let salida: number | null = null;
 /**
  * El enlace que se acaba de pulsar, marcado para que se vea que registró.
  *
- * 🔴 Esto es la mitad que faltaba, y es la que el lector pide de verdad. La barra
+ * Esto es la mitad que faltaba, y es la que el lector pide de verdad. La barra
  * de arriba dice «está pasando algo»; esto dice «pasó por LO QUE TOCASTE». Son
  * 2px en la coronilla de la pantalla contra una tarjeta a media página: en
  * escritorio, a 1440px de ancho, el aviso de arriba queda fuera de donde el ojo
  * está mirando. Carlos lo pidió dos veces —«para que el usuario sepa que ya le
  * picó a algo… también en desk»— y la primera vez respondí solo con la barra.
  *
- * ⚠️ Y va SIN retardo, al contrario que la barra: el acuse de un toque tiene que
+ * Y va SIN retardo, al contrario que la barra: el acuse de un toque tiene que
  * ser inmediato o no es un acuse. Los 140ms de la barra existen para que una
  * navegación instantánea no parpadee; aquí un parpadeo es justamente la
  * confirmación.
@@ -68,7 +68,7 @@ const soltar = (): void => {
 /**
  * Solo los temporizadores de la BARRA.
  *
- * 🔴 No suelta la marca del enlace pulsado, y es la corrección de un error que
+ * No suelta la marca del enlace pulsado, y es la corrección de un error que
  * costó encontrar: la soltaba, y como `arrancar()` empieza llamando aquí, el acuse
  * se borraba **en el instante en que arranca la navegación** — o sea justo cuando
  * tiene que estar puesto. La marca dura desde el clic hasta que la página nueva
@@ -84,12 +84,12 @@ const cancelar = (): void => {
 /**
  * Empieza a esperar. Si la navegación resuelve antes del retardo, no se pinta nada.
  *
- * 🔴 Este script NO anima: solo pone y quita dos atributos. El reptado es una
+ * Este script NO anima: solo pone y quita dos atributos. El reptado es una
  * animación de CSS colgada de `[data-activa]`, y es la regla de la casa —la misma
  * que documenta `revelar.ts`—: lo resuelve el compositor, no compite con el hilo
  * principal, y el efecto queda donde se puede leer y ajustar.
  *
- * ⚠️ La primera versión de esto usaba un `setInterval` de 90ms para mover la barra
+ * La primera versión de esto usaba un `setInterval` de 90ms para mover la barra
  * a mano. Además de ir contra esa regla, se estrangula solo: en un documento
  * oculto el navegador baja los temporizadores a uno por segundo, así que la barra
  * se quedaba clavada en cero. En CSS eso no puede pasar.
@@ -98,7 +98,7 @@ function arrancar(): void {
   if (!barra) return;
   cancelar();
   /*
-    ⚠️ Se limpia el estado ANTES del retardo, no dentro. Si una segunda navegación
+    Se limpia el estado ANTES del retardo, no dentro. Si una segunda navegación
     empieza mientras la primera se está desvaneciendo, sin esto la barra nueva
     heredaría la opacidad de salida de la vieja y no se vería.
 
@@ -134,7 +134,7 @@ function terminar(): void {
 
 export function prepararProgreso(): void {
   /*
-    🔴 Se busca el elemento en cada evento y no una sola vez al arrancar: lleva
+    Se busca el elemento en cada evento y no una sola vez al arrancar: lleva
     `transition:persist`, así que sobrevive al intercambio — pero si algún día
     deja de llevarlo, guardar la referencia aquí dejaría el script apuntando a un
     nodo que ya no está en el documento, sin error y sin barra.
@@ -145,19 +145,19 @@ export function prepararProgreso(): void {
   localizar();
 
   /*
-    ⚠️ Los tres oyentes van en `document` y este módulo se importa UNA vez desde el
+    Los tres oyentes van en `document` y este módulo se importa UNA vez desde el
     layout, así que no se acumulan por navegación. Es la misma razón por la que el
     «copiar enlace» de la nota usa delegación.
   */
   /*
-    🔴 El acuse se marca en el CLIC, no en `before-preparation`.
+    El acuse se marca en el CLIC, no en `before-preparation`.
 
     Tiene que ser así por dos razones. La primera es de tiempo: el clic es el
     instante en que el lector espera respuesta, y `before-preparation` llega
     después. La segunda es que ese evento **no sabe qué se pulsó** — cubre también
     el botón de atrás del navegador, donde no hay nada que marcar.
 
-    ⚠️ Se descarta lo que no va a navegar por aquí: enlaces externos, los que abren
+    Se descarta lo que no va a navegar por aquí: enlaces externos, los que abren
     en otra pestaña, descargas, anclas de la misma página, y el clic con
     modificador o con el botón de en medio —que abre en pestaña nueva y dejaría la
     tarjeta marcada en una página en la que el lector se queda—.
@@ -165,7 +165,7 @@ export function prepararProgreso(): void {
   document.addEventListener('click', (ev) => {
     const e = ev as MouseEvent;
     /*
-      🔴 NO se comprueba `defaultPrevented`, y es contraintuitivo: parecía la
+      NO se comprueba `defaultPrevented`, y es contraintuitivo: parecía la
       guarda obvia para «ya lo atendió alguien».
 
       Es justo al revés. El `ClientRouter` de Astro intercepta el clic y llama
@@ -202,7 +202,7 @@ export function prepararProgreso(): void {
     localizar();
     terminar();
     /*
-      ⚠️ Y se suelta la marca. El intercambio reemplaza el `body`, así que el nodo
+      Y se suelta la marca. El intercambio reemplaza el `body`, así que el nodo
       marcado se va con él — pero la referencia se queda apuntando a un nodo
       huérfano, y sin esto la siguiente navegación intentaría desmarcar ese en vez
       del nuevo.
@@ -210,7 +210,7 @@ export function prepararProgreso(): void {
     soltar();
   });
   /*
-    ⚠️ Y un cierre de seguridad: si la petición falla o el lector cancela, no llega
+    Y un cierre de seguridad: si la petición falla o el lector cancela, no llega
     ningún `after-swap` y la barra se quedaría reptando para siempre.
   */
   window.addEventListener('pagehide', () => {

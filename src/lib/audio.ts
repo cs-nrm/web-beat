@@ -5,17 +5,17 @@
  * ajenas se hace en el SERVIDOR, para que el navegador reciba una fuente ya
  * comprobada en vez de una cadena que tiene que interpretar.
  *
- * ⚠️ Comparte nombre con `src/scripts/audio.ts`, que es el ÁRBITRO de audio (quién
+ * Comparte nombre con `src/scripts/audio.ts`, que es el ÁRBITRO de audio (quién
  * suena y quién se calla). Son dos cosas distintas y el par `lib/` + `scripts/` ya
  * existe igual para el video. Se importan por alias —`@/lib/audio` y
  * `@/scripts/audio`—, así que no hay ambigüedad en ningún archivo.
  *
- * 🔴 Nace el 2026-09-15 con **Microambiente**, la sección de notas que traen audio.
+ * Nace el 2026-09-15 con **Microambiente**, la sección de notas que traen audio.
  * El campo existía en el CMS desde la reestructura y el front no lo leía: medido
  * contra `admin.nrm.com.mx`, las 43 notas capturadas traen `audio.fuente: "embed"`
  * —el valor por omisión del admin— y **ninguna** trae `embedUrl` ni `archivo`.
  *
- * ⚠️ Por eso `fuente` NO decide nada aquí: es un desplegable con valor por defecto,
+ * Por eso `fuente` NO decide nada aquí: es un desplegable con valor por defecto,
  * así que «embed» significa «nadie tocó este campo» en 43 de 43 casos. Lo que
  * decide es qué hay CAPTURADO, y se mira en ese orden.
  */
@@ -43,7 +43,7 @@ interface CampoAudio {
 }
 
 /**
- * 🔴 Los hosts que se pueden meter en un `<iframe>`, y NADA más.
+ * Los hosts que se pueden meter en un `<iframe>`, y NADA más.
  *
  * Es la misma doctrina de `Embed.astro`: el CMS guarda una URL, no HTML del
  * editor, y el front decide qué hacer con ella. La diferencia es que allí la URL
@@ -53,16 +53,16 @@ interface CampoAudio {
  * plataformas de podcasting en el front serían diecisiete formas de equivocarse
  * con un dato que llega ya bueno.
  *
- * 🔴 Lo que NO se deja pasar es el HOST. Esa es la parte que protege: sin esta
+ * Lo que NO se deja pasar es el HOST. Esa es la parte que protege: sin esta
  * lista, un campo de texto del admin sería un `src` de iframe hacia cualquier
  * sitio, servido desde nuestro dominio.
  *
- * ⚠️ La lista sale de la ayuda del propio campo en el CMS, que enumera las
+ * La lista sale de la ayuda del propio campo en el CMS, que enumera las
  * plataformas aceptadas. Si la redacción usa una que no está, el front NO se queda
  * mudo: degrada a un enlace que sí funciona (ver `fuenteDeAudio`), y entonces se
  * agrega aquí.
  *
- * ⚠️ El ALTO es lo único que aquí va a ojo, y por eso casi todos comparten el de
+ * El ALTO es lo único que aquí va a ojo, y por eso casi todos comparten el de
  * `ALTO_POR_OMISION`. Los cuatro que llevan número propio son los que publican su
  * medida; el resto se MIDE en cuanto haya una nota capturada de esa plataforma —
  * hoy no hay ninguna, de ninguna.
@@ -101,7 +101,7 @@ const PLATAFORMAS: Record<string, { nombre: string; alto?: number }> = {
 /**
  * La URL de inserción, o `null` si no se reconoce el host.
  *
- * ⚠️ El único retoque de ruta es el de Spotify, y está medido contra su
+ * El único retoque de ruta es el de Spotify, y está medido contra su
  * documentación, no supuesto: lo que se comparte desde la app es
  * `open.spotify.com/episode/<id>`, y esa URL en un iframe responde con
  * `X-Frame-Options` y se ve un marco en blanco. El reproductor vive en
@@ -136,12 +136,12 @@ function insercion(crudo: string): FuenteAudio | null {
 /**
  * El audio de una nota, o `null` cuando no hay ninguno utilizable.
  *
- * 🔴 El ARCHIVO gana al embed cuando están los dos. Es el mismo criterio que la
+ * El ARCHIVO gana al embed cuando están los dos. Es el mismo criterio que la
  * barra de Bonus Beat: un mp3 nuestro suena sin iframe, sin script de terceros y
  * sin la política de nadie, y además es el único de los dos que el árbitro de
  * audio puede pausar cuando arranca la radio.
  *
- * ⚠️ Un `embedUrl` que no se reconoce devuelve `null` y quien llama pinta un
+ * Un `embedUrl` que no se reconoce devuelve `null` y quien llama pinta un
  * enlace. Nunca un iframe a una URL que no supimos leer — es justo el agujero que
  * el CMS cerró guardando la URL en vez del HTML.
  */
@@ -152,7 +152,7 @@ export function fuenteDeAudio(audio: CampoAudio | null | undefined): FuenteAudio
   if (archivo) return { tipo: 'archivo', src: archivo, plataforma: null, alto: null };
 
   /*
-    ⚠️ `.trim() ||` y nunca `??`: un campo del admin que se abrió y se dejó en
+    `.trim() ||` y nunca `??`: un campo del admin que se abrió y se dejó en
     blanco llega como cadena vacía, no como `null`. Es la trampa de Payload que ya
     mordió en el grupo `meta` de la nota.
   */
@@ -163,7 +163,7 @@ export function fuenteDeAudio(audio: CampoAudio | null | undefined): FuenteAudio
 /**
  * La URL cruda del embed, para el enlace de respaldo.
  *
- * 🔴 Existe para que una plataforma que no esté en la lista NO deje la nota muda:
+ * Existe para que una plataforma que no esté en la lista NO deje la nota muda:
  * `fuenteDeAudio` devuelve `null` y esto devuelve la URL, así que el componente
  * puede ofrecer «escúchalo en el sitio original» en vez de nada. Una nota de
  * Microambiente sin su audio es una nota sin lo único que la hace de Microambiente.

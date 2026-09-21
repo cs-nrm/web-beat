@@ -43,7 +43,7 @@ const otras = await obtenerListas(tipoSlug, 7);
 ---
 
 {/*
-  ⚠️ El respaldo decía «<título>: <tipo> de Beat 100.9», y con los datos reales eso
+  El respaldo decía «<título>: <tipo> de Beat 100.9», y con los datos reales eso
   salía como «Temas de la semana: Bonus Beat de Beat 100.9.» — dos «de» seguidos y
   el nombre del tipo pareciendo un apellido. Es el texto que se lee HOY: ninguna
   edición capturada trae `descripcion`. La palabra «edición» es la que faltaba: dice
@@ -113,7 +113,7 @@ const otras = await obtenerListas(tipoSlug, 7);
   }
   .ed-canciones {
     display: grid;
-    /* 🔴 `minmax(0, 1fr)` y no `1fr`: las filas de canciones llevan títulos largos
+    /* `minmax(0, 1fr)` y no `1fr`: las filas de canciones llevan títulos largos
        con `nowrap` en la duración, y con `1fr` —que es `minmax(auto, 1fr)`— la fila
        más ancha manda y el riel se estrecha por debajo de sus 300px. */
     grid-template-columns: minmax(0, 1fr) 300px;
@@ -158,7 +158,7 @@ const otras = await obtenerListas(tipoSlug, 7);
       font: var(--type-body);
       padding: 0 16px;
     }
-    /* 🔴 Aquí el riel deja de ser riel: una columna, y el box cae DESPUÉS de la
+    /* Aquí el riel deja de ser riel: una columna, y el box cae DESPUÉS de la
        última canción, que es donde la lista termina de verdad. Y `static`, porque
        un `sticky` en una sola columna se pega al viewport en medio del scroll. */
     .ed-canciones {

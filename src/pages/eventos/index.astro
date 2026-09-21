@@ -14,7 +14,7 @@ import { obtenerAgenda } from '@/lib/cms/eventos';
 import { MEDIDA_TARJETA } from '@/config/site';
 
 /*
-  🔴 Aquí vivía el filtro por TIPO —`?tipo=propio|cobertura|festival`— y se retiró
+  Aquí vivía el filtro por TIPO —`?tipo=propio|cobertura|festival`— y se retiró
   entero (Carlos, 2026-09-08): «eso de propio suena raro/feo».
 
   El motivo va más allá de la palabra: esa taxonomía describe el evento **desde el
@@ -23,11 +23,11 @@ import { MEDIDA_TARJETA } from '@/config/site';
   el lector no entiende no es navegación, es ruido. La agenda queda como lo que es:
   una lista cronológica de lo que viene.
 
-  ⚠️ La taxonomía SIGUE en el CMS, donde sirve para que la redacción organice su
+  La taxonomía SIGUE en el CMS, donde sirve para que la redacción organice su
   trabajo, y `obtenerAgenda` sigue aceptando un tipo. Lo que se retiró es la
   interfaz, no el dato.
 
-  ⚠️ Con el filtro se va también la validación del parámetro contra la lista
+  Con el filtro se va también la validación del parámetro contra la lista
   cerrada, y conviene saber POR QUÉ existía: la clave de caché del cliente del CMS
   es la URL de la consulta, así que un `?tipo=<lo que sea>` sin validar generaba una
   entrada de caché por visita — el bug que en `web-enfoque` produjo 836 de los
@@ -45,11 +45,11 @@ const titulo = 'AGENDA';
   sección encima. El `alt` describe el texto que el script horneó en el PNG, así que
   se cambia con él. El por qué completo, en `scripts/favicon.mjs`.
 
-  ⚠️ El archivo se llama por la RUTA (`og-eventos`) y la imagen dice «AGENDA», que
+  El archivo se llama por la RUTA (`og-eventos`) y la imagen dice «AGENDA», que
   es lo que dice el titular de esta página. No es un descuido: la ruta es `/eventos`
   y el rótulo es Agenda desde siempre.
 
-  ⚠️ Una sola tarjeta y un solo título: al retirarse el filtro por tipo, esta
+  Una sola tarjeta y un solo título: al retirarse el filtro por tipo, esta
   sección dejó de tener vistas con enlace propio.
 */}
 <Base
@@ -73,7 +73,7 @@ const titulo = 'AGENDA';
         */
         eventos.length > 0 && (
           /*
-            🔴 El box va INTERCALADO en la lista, cada seis eventos, y no en una
+            El box va INTERCALADO en la lista, cada seis eventos, y no en una
             franja al final: esta página es una lista larga sin un solo corte
             —hasta 40 eventos, uno tras otro— y el hueco que rinde ahí es el que
             aparece mientras se recorre, no el que espera al pie. Aprobado por

@@ -1,7 +1,7 @@
 /**
  * Cliente de `cms-estaciones` (Payload) — SOLO server-side.
  *
- * 🔴 Línea roja de la casa: el navegador NUNCA habla directo con el CMS. Este
+ * Línea roja de la casa: el navegador NUNCA habla directo con el CMS. Este
  * módulo se importa únicamente en frontmatter de `.astro` (SSR) o en
  * `src/pages/api/*` (proxies). El guard de abajo revienta si alguien lo arrastra
  * al cliente. La única excepción es la MEDIA, que el navegador sí carga directo
@@ -81,7 +81,7 @@ export interface RespuestaLista<T> {
 export type ParamsCms = Record<string, string | number | boolean | undefined>;
 
 /**
- * 🔴 Apaga el `COUNT` de Payload. Se agrega a TODA consulta que no pinte un
+ * Apaga el `COUNT` de Payload. Se agrega a TODA consulta que no pinte un
  * paginador.
  *
  * Payload devuelve `totalDocs`/`totalPages` en cada listado, y para eso corre un
@@ -113,7 +113,7 @@ export class ErrorCms extends Error {
 /**
  * GET contra `${CMS_URL}/api/<ruta>`, con caché, dedup y `stale-if-error`.
  *
- * ⚠️ **NO filtra por estación.** Úsalo solo para `estaciones` (que no tiene campo
+ * **NO filtra por estación.** Úsalo solo para `estaciones` (que no tiene campo
  * `estacion`) y para colecciones sin inquilino (`media`, `redirects`, `forms`).
  * Para TODO lo demás, usa `cmsFetchEstacion` — en `cms-estaciones` el `read` está
  * **abierto entre estaciones a propósito** (para poder republicar), así que una
@@ -190,7 +190,7 @@ async function pedirAlCms<T>(url: URL, ruta: string, timeoutMs: number): Promise
 // ============================================================
 // Multi-estación
 // ------------------------------------------------------------
-// 🔴 La diferencia más importante respecto a `web-enfoque`, que se copió casi
+// La diferencia más importante respecto a `web-enfoque`, que se copió casi
 // literal en todo lo demás: Enfoque tiene una instancia DEDICADA de Payload y por
 // eso **no filtra por `estacion` en absoluto**. Copiar ese patrón tal cual aquí
 // mezclaría las 4 marcas de NRM en la misma página.
@@ -203,7 +203,7 @@ async function pedirAlCms<T>(url: URL, ruta: string, timeoutMs: number): Promise
 /**
  * Colecciones de `cms-estaciones` que llevan el campo `estacion`.
  *
- * 🔴 Esta lista NO es documentación: `cmsFetchEstacion` la comprueba antes de
+ * Esta lista NO es documentación: `cmsFetchEstacion` la comprueba antes de
  * inyectar el filtro. Sin la comprobación, pedir una colección que no lleva el
  * campo devuelve un **400 de Payload** —`The following path cannot be queried:
  * estacion`— que se ve igual que "el CMS está mal" y no dice qué hiciste mal.
@@ -263,7 +263,7 @@ interface EstacionMinima {
 /**
  * Id numérico de la estación, resuelto por `codigo` y memorizado para el proceso.
  *
- * 🔴 Nunca se hardcodea el id. En una BD sembrada en orden Beat sería `1`, pero
+ * Nunca se hardcodea el id. En una BD sembrada en orden Beat sería `1`, pero
  * eso es un `serial` de Postgres: depende del orden de siembra y no es portable
  * entre entornos. `estaciones.read` es **público a propósito** justo para que cada
  * front pueda resolver esto sin sesión, en su primer request.
@@ -335,7 +335,7 @@ export async function cmsFetchEstacion<T>(
  * Cuántos documentos hay, para pintar un paginador. Devuelve `null` si no se pudo
  * contar.
  *
- * 🔴 Es la «consulta APARTE» que anuncia `SIN_PAGINACION` unas líneas arriba, y
+ * Es la «consulta APARTE» que anuncia `SIN_PAGINACION` unas líneas arriba, y
  * existe para poder tener números de página SIN pagar el `COUNT` en cada consulta
  * de contenido. Comprobado contra el CMS el 2026-09-17: con `pagination=false`
  * Payload **sí respeta `page`** —devuelve la tanda correcta— y lo único que pierde
@@ -355,7 +355,7 @@ export async function cmsFetchEstacion<T>(
  *     una vista con menos navegación; un `throw` sería una sección caída entera.
  *     Quien llama decide, y lo que se pierde es la tira, no las notas.
  *
- * ⚠️ `/api/<coleccion>/count` es un endpoint de Payload, no un listado: responde
+ * `/api/<coleccion>/count` es un endpoint de Payload, no un listado: responde
  * `{ totalDocs }` y nada más. Comprobado contra el CMS el 2026-09-17.
  */
 export async function cmsContarEstacion(
@@ -417,7 +417,7 @@ export interface DocMedia {
 /**
  * URL del archivo TAL CUAL, sin pasar por las variantes de imagen.
  *
- * 🔴 Para lo que no es una foto: el mp3 de una canción, un PDF. `Media` no
+ * Para lo que no es una foto: el mp3 de una canción, un PDF. `Media` no
  * restringe tipos y Sharp solo toca imágenes, así que un audio se guarda intacto
  * y **no tiene `sizes`**.
  *
@@ -435,7 +435,7 @@ export function urlArchivo(media: DocMedia | number | null | undefined): string 
 /**
  * El punto focal de la imagen como `object-position`, o `null` si está centrado.
  *
- * 🔴 Es lo que evita decapitar a alguien en un recorte apaisado, y hace falta
+ * Es lo que evita decapitar a alguien en un recorte apaisado, y hace falta
  * porque **el CMS no recorta**: `thumbnail` 400 / `card` 768 / `large` 1280 son
  * variantes de ANCHO y todas conservan la proporción del original. Ninguna es un
  * cuadrado ni un 16:9 — el recorte lo hace el front con `object-fit: cover`, y sin
@@ -445,11 +445,11 @@ export function urlArchivo(media: DocMedia | number | null | undefined): string 
  * `media` lleva `focalPoint: true` en el CMS, así que todo documento trae `focalX`
  * y `focalY` en porcentaje, con 50/50 por defecto.
  *
- * ⚠️ Devuelve `null` cuando el punto ya es el centro, para no ensuciar el marcado
+ * Devuelve `null` cuando el punto ya es el centro, para no ensuciar el marcado
  * con un `object-position: 50% 50%` que es justo lo que el CSS hace solo. Quien lo
  * use tiene que tratar el `null` como «no pongas nada», no como un error.
  *
- * ⚠️ Se acota a 0–100: son porcentajes capturados arrastrando en el admin, y un
+ * Se acota a 0–100: son porcentajes capturados arrastrando en el admin, y un
  * valor fuera de rango movería la foto fuera de su caja.
  */
 export function puntoFocal(media: DocMedia | number | null | undefined): string | null {
@@ -464,7 +464,7 @@ export function puntoFocal(media: DocMedia | number | null | undefined): string 
 /**
  * URL de la variante pedida, con degradación hacia abajo y hacia el original.
  *
- * ⚠️ Las tres variantes se generan con `withoutEnlargement: true`, así que un
+ * Las tres variantes se generan con `withoutEnlargement: true`, así que un
  * tamaño **puede no existir** si el original era más chico. Nunca asumir que
  * `sizes.large` está ahí.
  */
@@ -486,14 +486,14 @@ export function urlMedia(
  * Las medidas de la variante que se está sirviendo — para `og:image:width/height`
  * y para el `image` del JSON-LD.
  *
- * 🔴 Se busca POR URL, no repitiendo el orden de preferencia de `urlMedia`. Es la
+ * Se busca POR URL, no repitiendo el orden de preferencia de `urlMedia`. Es la
  * diferencia entre un dato y una suposición: `urlMedia` degrada hacia abajo
  * —`large` puede no existir, porque las variantes se generan con
  * `withoutEnlargement`— así que reproducir aquí su orden acabaría devolviendo las
  * medidas de `large` para una imagen que en realidad se sirvió en `card`. Partiendo
  * de la URL que ya devolvió, no hay dos criterios que se puedan desincronizar.
  *
- * ⚠️ Devuelve `null` si el CMS no trae las dos medidas. Es a propósito y quien la
+ * Devuelve `null` si el CMS no trae las dos medidas. Es a propósito y quien la
  * llama NO debe rellenarlas: las plataformas reservan el hueco de la tarjeta con
  * esos números antes de bajar la imagen, así que un valor inventado se ve como un
  * recorte en la publicación y desde el sitio no se nota.

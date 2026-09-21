@@ -4,7 +4,7 @@ interface:
   default_prompt: |
     Trabaja como el agente de streaming de este proyecto Beat 100.9.
 
-    🔴 El player NO es un componente flotante: vive en la CABECERA
+    El player NO es un componente flotante: vive en la CABECERA
     (`src/components/Cabecera.astro`) y es persistente, y eso es requisito de
     producto — el §4.1 del mapa de sitio dice que el reproductor en vivo «es la
     afirmación de que Beat sigue siendo una estación de radio en vivo».
@@ -15,8 +15,8 @@ interface:
     - `src/scripts/player.ts` — el núcleo: construir el SDK, la máquina de 6
       estados, los cue points, el pre-roll VAST, el modal del anuncio, el volumen
       y la marquesina
-    - `src/scripts/audio.ts` — 🔴 el ÁRBITRO: solo una fuente suena a la vez.
-      ⚠️ Un `<audio>` que sale del DOM SIGUE SONANDO: por eso `audio-nota.ts` se
+    - `src/scripts/audio.ts` — el ÁRBITRO: solo una fuente suena a la vez.
+      Un `<audio>` que sale del DOM SIGUE SONANDO: por eso `audio-nota.ts` se
       engancha a `astro:before-swap`. Y un EMBED de plataforma no se puede pausar
       desde fuera — con iframe pueden sonar la radio y el audio a la vez
     - `src/scripts/pista.ts` — las pistas de Bonus Beat, en la MISMA barra
@@ -67,19 +67,19 @@ interface:
 
     Trabaja asumiendo que:
     - `#td_container` y `#td-telon` van DENTRO del bloque con `transition:persist`.
-      ⚠️ Estuvieron fuera por un `</div>` mal puesto y no se notaba, porque la
+      Estuvieron fuera por un `</div>` mal puesto y no se notaba, porque la
       cabecera sí persistía: lo visible seguía ahí y solo se iba el audio
     - el `<ClientRouter />` de `Base.astro` es lo que hace que
       `transition:persist` sirva de algo. Estuvo faltando
     - la barra tiene DOS modos (`data-modo` = `directo` | `pista`) y comparten el
-      botón de play, así que cada módulo ignora los clics del otro. 🔴 El título de
+      botón de play, así que cada módulo ignora los clics del otro. El título de
       la pista va en SU PROPIO elemento: si escribiera en el del directo, el radio
       volvería del corte comercial anunciando la pista
     - hay guarda contra listeners DUPLICADOS: el botón vive en un bloque
       persistente, o sea que es el MISMO nodo, y sin la marca acumularía un
       listener por página visitada
     - el diagnóstico YA EXISTE: `?depurar=player` enseña cada estado y cada cue
-      point con el motivo de su descarte, y avisa a los 45 s si llegaron cero. ⚠️ No
+      point con el motivo de su descarte, y avisa a los 45 s si llegaron cero. No
       va detrás de `import.meta.env.DEV`: el sitio que se mira es el compilado, y
       un diagnóstico que solo funciona donde no está el problema no sirve
     - el ad unit del VAST sale del env y JAMÁS se hardcodea (hay grep en CI): en

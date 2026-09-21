@@ -1,5 +1,5 @@
 /*
- * 🔴 SEGUNDA intervención sobre la copia del DS, y es de PIPELINE, no de estilo.
+ * SEGUNDA intervención sobre la copia del DS, y es de PIPELINE, no de estilo.
  *
  * El lienzo escribe `@import url("tokens/…")`. Tailwind 4 procesa el CSS con
  * Lightning y esa forma la trata como importación EXTERNA: no la inlinea y la
@@ -10,7 +10,7 @@
  *
  * La forma con comillas (`@import "tokens/…"`) sí se resuelve e inlinea.
  *
- * ⚠️ Al re-sincronizar la copia desde `design/`, hay que volver a aplicar esto.
+ * Al re-sincronizar la copia desde `design/`, hay que volver a aplicar esto.
  * (La otra intervención es haber neutralizado el `@import` de Google Fonts: las
  * fuentes son auto-hospedadas.)
  */

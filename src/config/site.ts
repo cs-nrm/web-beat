@@ -1,7 +1,7 @@
 /**
  * Config del sitio — Beat 100.9.
  *
- * 🔴 El contrato de URLs vive aquí y está fijado en la decisión 10 del plan:
+ * El contrato de URLs vive aquí y está fijado en la decisión 10 del plan:
  * **una ruta por COLECCIÓN, no por sección**. Las notas van en `/noticias/<slug>`
  * y NO en `/<seccion>/<slug>`, por tres razones:
  *   1. `noticias.categorias` es `hasMany` y no hay categoría primaria en el CMS.
@@ -38,7 +38,7 @@ const forzadoNoIndex = (): boolean | null => {
 };
 
 /**
- * 🔴 ¿Este despliegue debe quedar FUERA de Google?
+ * ¿Este despliegue debe quedar FUERA de Google?
  *
  * Se decide solo, comparando el dominio servido contra el canónico: cualquier
  * despliegue que no sea `beatdigital.mx` (beta, staging, una IP) se marca
@@ -57,7 +57,7 @@ export const NOINDEX_SITIO = ((): boolean => {
 })();
 
 /**
- * 🔴 La misma pregunta, pero por PETICIÓN.
+ * La misma pregunta, pero por PETICIÓN.
  *
  * `NOINDEX_SITIO` mira el dominio con el que se COMPILÓ, y eso deja un hueco: el
  * staging y el sitio real son el mismo contenedor y la misma imagen, así que al
@@ -65,11 +65,11 @@ export const NOINDEX_SITIO = ((): boolean => {
  * el sitio como indexable — un duplicado exacto compitiéndole al real. El `Host`
  * de la petición sí distingue los dos.
  *
- * ⚠️ Depende de `security.allowedDomains` en `astro.config.mjs`: sin esa lista,
+ * Depende de `security.allowedDomains` en `astro.config.mjs`: sin esa lista,
  * `context.url.hostname` es SIEMPRE `localhost` en producción y esta función
  * marcaría el sitio real como despliegue de prueba.
  *
- * 🔴 Y depende de UNA SEGUNDA COSA que no vive en este repo: **`ProxyPreserveHost On`
+ * Y depende de UNA SEGUNDA COSA que no vive en este repo: **`ProxyPreserveHost On`
  * en el vhost de Apache**. Por omisión Apache reescribe el `Host` hacia el backend,
  * así que Node recibiría `Host: localhost:<puerto>` y esta función perdería la
  * única señal con la que trabaja.
@@ -86,7 +86,7 @@ export const NOINDEX_SITIO = ((): boolean => {
  * con `Host: beatdigital.mx` no puede llegar al proceso de preproducción — la
  * reclama el vhost del sitio vivo. Eso es lo que hace que la MISMA imagen sirva
  * v2 protegida y producción indexable sin reconstruir, y por eso el corte es
- * mover un puerto. ⚠️ Meter un proxy intermedio que reescriba el `Host` rompe las
+ * mover un puerto. Meter un proxy intermedio que reescriba el `Host` rompe las
  * dos mitades a la vez.
  * (Confirmado con la sesión que monta la preproducción, 2026-09-03.)
  */
@@ -101,7 +101,7 @@ export function noIndexarHost(hostname: string): boolean {
 export const CMS_URL = envServidor('CMS_URL').replace(/\/$/, '');
 
 /**
- * 🔴 Si falta, se grita. No es paranoia: es el fallo que ya costó un despliegue.
+ * Si falta, se grita. No es paranoia: es el fallo que ya costó un despliegue.
  *
  * `CMS_URL` va SIN prefijo `PUBLIC_`, así que se lee en ejecución y Vite no la
  * hornea en el bundle —solo inlinea las `PUBLIC_*`—. Cuando el proceso arranca sin
@@ -118,7 +118,7 @@ export const CMS_URL = envServidor('CMS_URL').replace(/\/$/, '');
  */
 if (!CMS_URL) {
   console.error(
-    '\n🔴 CMS_URL está vacía. El sitio va a responder 200 SIN CONTENIDO.\n' +
+    '\nCMS_URL está vacía. El sitio va a responder 200 SIN CONTENIDO.\n' +
       '   Es una variable de EJECUCIÓN (sin prefijo PUBLIC_), así que no basta con\n' +
       '   tenerla en `.env`: `astro preview` y el contenedor no lo cargan.\n' +
       '   · en local:  CMS_URL=https://admin.nrm.com.mx pnpm preview\n' +
@@ -136,7 +136,7 @@ export const CMS_URL_PUBLICA = (
 /**
  * `codigo` de la estación en la colección `estaciones` del CMS.
  *
- * 🔴 Es env var y no una constante a propósito: es lo único que hace que este
+ * Es env var y no una constante a propósito: es lo único que hace que este
  * repo sirva de modelo para `web-oye`, `web-sabrosita` y `web-stereocien`. El id
  * numérico NO se hardcodea nunca — se resuelve por este código (ver
  * `src/lib/cms/client.ts`).
@@ -149,7 +149,7 @@ export const ESTACION_CODIGO = envServidor('ESTACION_CODIGO', 'beat');
  * Son SLUGS y no ids, y van en el env con un valor por omisión: el id solo existe
  * en esta base de datos, y el slug es el mismo en local, staging y producción.
  *
- * ⚠️ Si el slug no coincide con nada, la sección degrada a vacío en vez de tronar
+ * Si el slug no coincide con nada, la sección degrada a vacío en vez de tronar
  * —y en el caso de la lista, el Inicio cae al primer tipo que exista— porque un
  * cambio de nombre en el CMS no debe apagar una sección del Inicio.
  */
@@ -163,18 +163,18 @@ export const LOCALE_OG = 'es_MX';
 /**
  * La medida de TODAS las tarjetas de compartir: la de respaldo y las de sección.
  *
- * 🔴 Las medidas van aquí y no escritas en el `<head>` porque las lee más de uno
+ * Las medidas van aquí y no escritas en el `<head>` porque las lee más de uno
  * —`og:image:width/height` y el `image` del JSON-LD del Inicio— y porque los
  * archivos los GENERA `scripts/favicon.mjs` a exactamente 1200×630 (1.91:1, la
  * medida que piden Facebook y X para la tarjeta grande). Son un dato del archivo,
  * no una preferencia: si un día se generan a otra medida, se cambia aquí y en el
  * script, y las etiquetas siguen diciendo la verdad.
  *
- * ⚠️ Unas medidas que no correspondan al archivo son peores que ninguna: las
+ * Unas medidas que no correspondan al archivo son peores que ninguna: las
  * plataformas reservan el hueco con ellas antes de bajar la imagen, así que el
  * error se ve como un recorte raro en la publicación, no como un fallo.
  *
- * ⚠️ Es una sola constante para toda la familia porque el script las genera con la
+ * Es una sola constante para toda la familia porque el script las genera con la
  * misma medida a propósito. Cada página de sección la pasa con SU tarjeta —ver
  * `src/pages/editorial.astro`—, y una medida por sección serían seis oportunidades
  * de que una se quede vieja.
@@ -185,7 +185,7 @@ export const MEDIDA_TARJETA = { ancho: 1200, alto: 630 } as const;
  * La tarjeta de RESPALDO: el Inicio, los legales y cualquier página que no traiga
  * la suya.
  *
- * ⚠️ Las secciones YA no caen aquí: cada una tiene la suya con su nombre encima
+ * Las secciones YA no caen aquí: cada una tiene la suya con su nombre encima
  * (`/img/og-<sección>.png`, también de `scripts/favicon.mjs`), y la pasa ella
  * misma. Esta se queda para lo que de verdad se comparte como «la casa».
  */
@@ -197,13 +197,13 @@ export const TARJETA_COMPARTIR = {
 /**
  * La tarjeta del INICIO, y es la única que NO sale del repo.
  *
- * 🔴 La pidió Carlos el 2026-09-09, con la URL en la mano: «para el share desde el
+ * La pidió Carlos el 2026-09-09, con la URL en la mano: «para el share desde el
  * home, si compartimos la página tal cual, esta imagen debería ir». Es el arte que
  * subió la estación —wordmark, la trama de la marca y «Aquí la música se elige»—,
  * ya recortado a 1200×630. La de respaldo que había es el wordmark pelón, correcto
  * pero sin nada del sitio.
  *
- * 🔴 Y va ABSOLUTA a `admin.nrm.com.mx` a propósito, que es lo que arregla el fallo
+ * Y va ABSOLUTA a `admin.nrm.com.mx` a propósito, que es lo que arregla el fallo
  * que lo destapó. `Base.astro` resuelve `og:image` contra `SITE_URL` —el dominio
  * CANÓNICO, `beatdigital.mx`— y HOY ese dominio todavía sirve el v1, donde
  * `/img/og-beat.png` no existe: medido, **404**. O sea que quien compartía el Inicio
@@ -215,14 +215,14 @@ export const TARJETA_COMPARTIR = {
  * funcionando después del corte. `new URL()` deja intacta una URL ya absoluta, por
  * lo que `Base.astro` no necesita saber nada de esto.
  *
- * ⚠️ **Es WebP, y no todos los previsualizadores lo bajan.** X lo documenta como
+ * **Es WebP, y no todos los previsualizadores lo bajan.** X lo documenta como
  * formato válido y Facebook lo acepta en la práctica; WhatsApp y LinkedIn son los
  * que fallan, y cuando fallan la publicación sale sin imagen. El CMS no tiene otra
  * variante —las tres medidas del documento 58 son WebP—, así que la salida, si
  * aparece el problema, es subir el MISMO arte en JPG y cambiar esta ruta. No se
  * arregla desde el front.
  *
- * ⚠️ Las medidas se comprobaron contra el archivo, no contra el nombre: 1200×630
+ * Las medidas se comprobaron contra el archivo, no contra el nombre: 1200×630
  * reales. Unas medidas que no correspondan son peores que ninguna — ver
  * `MEDIDA_TARJETA`.
  */
@@ -243,7 +243,7 @@ export const rutaEvento = (slug: string): string => `/eventos/${slug}`;
 /**
  * La ruta de una edición de lista.
  *
- * 🔴 Recibe el slug del TIPO, no lo asume. Antes esta función escribía
+ * Recibe el slug del TIPO, no lo asume. Antes esta función escribía
  * `/bonus-beat/<slug>` fijo, y eso dejó de ser correcto cuando `tipos-de-lista` se
  * volvió una colección: la estación crea el tipo y su slug ES la URL pública. Si se
  * hardcodea, el día que creen «Beat Ten» la ruta no existe y nadie se entera hasta
@@ -254,21 +254,21 @@ export const rutaPrograma = (slug: string): string => `/programas/${slug}`;
 export const rutaPagina = (slug: string): string => `/${slug}`;
 
 /**
- * 🔴 Conjunto CERRADO de primeros segmentos que son índices de sección o rutas de
+ * Conjunto CERRADO de primeros segmentos que son índices de sección o rutas de
  * la app, y por tanto nunca se resuelven como slug de contenido.
  *
  * Se comprueba ANTES que cualquier otra cosa en el resolvedor de rutas. La
  * lección está pagada en `web-enfoque`: a su lista equivalente le faltaba una
  * entrada y provocó `ERR_TOO_MANY_REDIRECTS` en una sección del menú.
  *
- * ⚠️ Mantener en sintonía con `src/pages/`. `tienda` está reservada aunque la
+ * Mantener en sintonía con `src/pages/`. `tienda` está reservada aunque la
  * Tienda sea de otra fase: así agregarla después no es un cambio estructural.
  */
 export const SEGMENTOS_RESERVADOS = [
   'en-vivo',
   'fenomeno-residente',
   /*
-    ⚠️ `bonus-beat` NO va en esta lista, y es el único caso así.
+    `bonus-beat` NO va en esta lista, y es el único caso así.
 
     Deja de ser una ruta escrita en `src/pages/` para ser un DATO: el primer
     segmento es el `slug` de un documento de `tipos-de-lista`, y lo resuelve
@@ -289,7 +289,7 @@ export const SEGMENTOS_RESERVADOS = [
   'editorial',
   'microambiente',
   /*
-    ⚠️ `scanner` se queda reservado aunque ya NO sea una sección: es la ruta vieja
+    `scanner` se queda reservado aunque ya NO sea una sección: es la ruta vieja
     de Beat Scanner y responde 301 hacia `/beat-scanner` (ver `redirects` en
     `astro.config.mjs`). Sacarla de aquí la dejaría a merced de `[tipoLista]`, y una
     URL que el sitemap del CMS y los enlaces compartidos todavía llevan acabaría
@@ -302,7 +302,7 @@ export const SEGMENTOS_RESERVADOS = [
     `src/pages/`, y van reservadas como el resto — si no, las resolvería
     `[tipoLista]` y cada visita dispararía una consulta al CMS.
 
-    ⚠️ El día que estos textos se muevan a la colección `paginas` del CMS (A1),
+    El día que estos textos se muevan a la colección `paginas` del CMS (A1),
     estos tres segmentos son los que hay que SACAR de aquí: pasarían a resolverse
     como slug de contenido, que es justo lo que esta lista bloquea.
   */

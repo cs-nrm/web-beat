@@ -1,7 +1,7 @@
 /**
  * Pistas a demanda en la BARRA PRINCIPAL — las canciones de Bonus Beat.
  *
- * 🔴 DOS motores detrás de la misma barra, y el segundo entró el 2026-09-09:
+ * DOS motores detrás de la misma barra, y el segundo entró el 2026-09-09:
  *
  *   · `nativo` — un `<audio>` para un mp3 nuestro. Es el bueno: sin iframe, sin
  *     terceros, sin la política de nadie, y `new Audio()` hace todo lo que hace
@@ -9,23 +9,23 @@
  *   · `youtube` — Plyr sobre un iframe de YouTube, en un visor FLOTANTE abajo a la
  *     derecha con su X para cerrarlo.
  *
- * 🔴 Por qué el segundo, si el primero es mejor: porque el primero no tiene nada
+ * Por qué el segundo, si el primero es mejor: porque el primero no tiene nada
  * que reproducir. Medido contra el CMS, ninguna de las 8 canciones capturadas trae
  * `audio` y las 8 traen su URL de YouTube. La barra existía, la cola existía, el
  * árbitro existía — y no sonaba nada porque faltaba el archivo.
  *
- * 🔴 Y por qué el visor VA VISIBLE, cuando lo cómodo sería esconderlo y dejar solo
+ * Y por qué el visor VA VISIBLE, cuando lo cómodo sería esconderlo y dejar solo
  * el audio: las políticas del reproductor incrustado de YouTube piden un
  * reproductor visible, de al menos 200×200 y sin obstruir, y prohíben separar el
  * audio del video. Ocultarlo es una línea de CSS y es justo la línea que no se
  * escribe. Decisión de Carlos con el riesgo sobre la mesa (2026-09-09).
  *
- * 🔴 El elemento vive en `window`, igual que el registro del árbitro y por lo
+ * El elemento vive en `window`, igual que el registro del árbitro y por lo
  * mismo: la barra sobrevive a la navegación (`transition:persist`) pero este
  * módulo puede volver a evaluarse, y un `<audio>` nuevo por página dejaría el
  * anterior sonando sin que nadie lo pueda parar.
  *
- * ⚠️ No se le pone `preload`: son tres mp3 en una página, y precargarlos baja
+ * No se le pone `preload`: son tres mp3 en una página, y precargarlos baja
  * megabytes que casi nadie va a escuchar. Se carga al pulsar.
  */
 import { registrarAudio, reclamarAudio, FUENTES } from './audio';
@@ -46,7 +46,7 @@ type Motor = 'nativo' | 'youtube';
 /**
  * Lo que la barra necesita saber de un motor, sea el que sea.
  *
- * 🔴 Es la pieza que evita duplicar la barra. Sin esto, pintar el progreso, mover
+ * Es la pieza que evita duplicar la barra. Sin esto, pintar el progreso, mover
  * el botón o encadenar la siguiente canción habría necesitado dos versiones de cada
  * función —una por motor— y la que se olvidara de actualizar sería el bug. Con esto
  * hay UNA barra que le pregunta al motor activo.
@@ -120,7 +120,7 @@ function audio(): HTMLAudioElement {
 /**
  * El marco del visor, que vive en el marcado y no se construye aquí.
  *
- * 🔴 Está en `Base.astro` con `transition:persist` por la misma razón que la barra:
+ * Está en `Base.astro` con `transition:persist` por la misma razón que la barra:
  * si lo creara este script, cada navegación traería un marco nuevo y el iframe
  * anterior se quedaría sonando dentro de un nodo huérfano. Persistido, el video
  * sigue sonando al cambiar de página — que es lo que hace la barra y lo que el
@@ -159,7 +159,7 @@ let motor: Motor = 'nativo';
 /**
  * La instancia de Plyr del visor, creada la primera vez que hace falta.
  *
- * ⚠️ Devuelve `null` si el marco no está en la página. No es un caso hipotético:
+ * Devuelve `null` si el marco no está en la página. No es un caso hipotético:
  * `Base.astro` lo pinta en todas, pero un fallo de marcado dejaría a este módulo
  * construyendo Plyr sobre nada, y un `throw` aquí se comería el clic entero.
  */
@@ -187,7 +187,7 @@ async function plyr(): Promise<PlyrPista | null> {
   });
 
   /*
-    🔴 Los escuchas se enlazan UNA vez, aquí, y no tras cada cambio de fuente.
+    Los escuchas se enlazan UNA vez, aquí, y no tras cada cambio de fuente.
 
     Es lo contrario de `video.ts`, y la diferencia es real: allí la fuente alterna
     entre mp4 y YouTube, y cambiar de proveedor hace que Plyr reconstruya el
@@ -208,7 +208,7 @@ async function plyr(): Promise<PlyrPista | null> {
 /**
  * El motor activo, hablado por una sola interfaz.
  *
- * ⚠️ El de YouTube puede no existir todavía —Plyr baja a demanda— y en ese hueco
+ * El de YouTube puede no existir todavía —Plyr baja a demanda— y en ese hueco
  * se devuelve un mando inerte en vez de `null`: así quien pinta la barra no tiene
  * que preguntar si hay motor antes de cada lectura, que es como se llega a un
  * `undefined` en un `toFixed`.
@@ -271,7 +271,7 @@ const INERTE: Mando = {
 /**
  * La clave con la que se reconoce una fila.
  *
- * 🔴 Una sola regla, usada por la cola Y por el marcado de las filas. Con dos
+ * Una sola regla, usada por la cola Y por el marcado de las filas. Con dos
  * fuentes posibles hacía falta una identidad común, y calcularla en dos sitios con
  * dos reglas parecidas es exactamente cómo se llega a que la fila que suena no se
  * marque.
@@ -300,7 +300,7 @@ function pintarBoton(sonando: boolean): void {
   icono('cargando', false);
 
   /*
-    🔴 Y la FILA al aire refleja lo mismo, que es lo que faltaba.
+    Y la FILA al aire refleja lo mismo, que es lo que faltaba.
 
     `data-sonando` solo se ponía al arrancar y se quitaba al terminar, así que una
     canción PAUSADA seguía mostrando el icono de pausa: el control decía «púlsame
@@ -315,7 +315,7 @@ function pintarBoton(sonando: boolean): void {
 /**
  * El botón en «cargando», con el mismo tercer icono que usa el directo.
  *
- * 🔴 Hacía falta al entrar YouTube y no antes: un mp3 arranca casi al instante,
+ * Hacía falta al entrar YouTube y no antes: un mp3 arranca casi al instante,
  * pero aquí hay 110 KB de Plyr y el montaje de un iframe por delante. Sin acuse de
  * recibo, el oyente vuelve a pulsar y se pelea con su propio clic.
  */
@@ -381,7 +381,7 @@ function sonar(i: number): void {
   indice = i;
 
   /*
-    🔴 El motor se elige por lo que TRAE la canción, con el mp3 por delante. Si
+    El motor se elige por lo que TRAE la canción, con el mp3 por delante. Si
     algún día se captura el archivo, esa canción pasa sola al camino nativo y deja
     de abrir el visor — sin tocar una línea de esto.
   */
@@ -399,7 +399,7 @@ function sonar(i: number): void {
     const a = audio();
     if (p.src && a.src !== p.src) a.src = p.src;
     /*
-      🔴 `play()` devuelve una promesa que RECHAZA si el navegador bloquea la
+      `play()` devuelve una promesa que RECHAZA si el navegador bloquea la
       reproducción, y un rechazo sin `catch` es un error no capturado en consola. Y
       más importante: si falla, la interfaz no puede quedarse diciendo que suena.
     */
@@ -430,7 +430,7 @@ function sonar(i: number): void {
 /**
  * Pone la canción en el visor flotante y la reproduce.
  *
- * ⚠️ `once('ready')` y no un `play()` inmediato, por la lección de `video.ts`:
+ * `once('ready')` y no un `play()` inmediato, por la lección de `video.ts`:
  * asignar `source` con proveedor de YouTube arranca una reconstrucción asíncrona
  * —hay que cargar la API de YouTube y montar el iframe— y un `play()` lanzado antes
  * de que termine se pierde en silencio, dejando el reproductor detenido con la
@@ -479,12 +479,12 @@ function alTerminar(): void {
 /**
  * Devuelve la barra al directo.
  *
- * 🔴 Existe porque sin ella nos llevamos al oyente FUERA de la señal sin puerta de
+ * Existe porque sin ella nos llevamos al oyente FUERA de la señal sin puerta de
  * vuelta, y la señal en vivo es lo que este sitio afirma ser (§4.1 del mapa de
  * sitio). Para el árbitro de audio del sitio esto es solo pausar; para el producto
  * es lo contrario de una trampa.
  *
- * 🔴 `arrancar` decide si además SUENA, y por defecto no.
+ * `arrancar` decide si además SUENA, y por defecto no.
  *
  * 📖 Hasta el 2026-09-09 nunca arrancaba, con este argumento: «pausar una pista y
  * que empiece a sonar otra cosa que nadie pidió es peor que el silencio». El
@@ -501,7 +501,7 @@ export function volverAlDirecto(arrancar = false): void {
     a.currentTime = 0;
   }
   /*
-    🔴 Y el visor de YouTube: se PAUSA y se esconde, pero no se destruye. Destruirlo
+    Y el visor de YouTube: se PAUSA y se esconde, pero no se destruye. Destruirlo
     obligaría a volver a bajar el iframe y a negociar con YouTube en la siguiente
     canción; escondido, el reproductor sigue ahí y la siguiente arranca en seco.
   */
@@ -527,7 +527,7 @@ export function volverAlDirecto(arrancar = false): void {
 /**
  * Pide el directo pulsando el botón de play, de verdad.
  *
- * 🔴 Un clic sintético y NO una función importada de `player.ts`, y la razón no es
+ * Un clic sintético y NO una función importada de `player.ts`, y la razón no es
  * pereza: «arrancar el directo» no es una función allí, son DOS manejadores sobre
  * el mismo botón —el del camino frío, que baja los 854 KB del SDK y guarda la
  * intención en `arranquePendiente`, y el del caliente, que alterna—. Cada uno vive
@@ -538,11 +538,11 @@ export function volverAlDirecto(arrancar = false): void {
  * Pulsando el botón se recorre el camino que ya funciona, entero: SDK a demanda,
  * intención pendiente, pre-roll VAST, estados de la barra y el árbitro.
  *
- * ⚠️ Los dos manejadores se protegen con `mandaLaPista()`, que lee `modo` del DOM.
+ * Los dos manejadores se protegen con `mandaLaPista()`, que lee `modo` del DOM.
  * Por eso esto va DESPUÉS de `modo('directo')`: al revés, los dos ignorarían el
  * clic por creer que es de la pista, y no pasaría nada.
  *
- * ⚠️ Y funciona porque estamos DENTRO del gesto del usuario —el clic en «En
+ * Y funciona porque estamos DENTRO del gesto del usuario —el clic en «En
  * vivo»—, así que la activación sigue vigente y el navegador no bloquea el audio.
  * Llamado desde un temporizador, esto se lo comería la política de autoplay.
  */
@@ -561,7 +561,7 @@ function alternar(): void {
     m.pausar();
   }
   /*
-    ⚠️ El botón lo pintan los EVENTOS del motor (`play` / `pause`), no esta
+    El botón lo pintan los EVENTOS del motor (`play` / `pause`), no esta
     función. Pintarlo aquí sería adivinar: el arranque puede ser rechazado por el
     navegador y la barra se quedaría diciendo que suena algo detenido.
   */
@@ -593,12 +593,12 @@ function desdeFila(boton: HTMLElement): void {
   const i = posicion < 0 ? 0 : posicion;
 
   /*
-    🔴 Pulsar la que YA está sonando es un INTERRUPTOR, no un reinicio — y se
+    Pulsar la que YA está sonando es un INTERRUPTOR, no un reinicio — y se
     resuelve con `alternar`, que también sabe retomar. Antes solo pausaba: al volver
     a pulsar caía en `sonar()`, que reasigna la fuente y devuelve la canción al
     segundo 0. Es el mismo fallo que tenían las cápsulas del Fenómeno.
 
-    🔴 Y la comparación es por PISTA, no por posición (`i === indice`), que es lo
+    Y la comparación es por PISTA, no por posición (`i === indice`), que es lo
     que decía antes. En el Inicio hay DOS listas —Bonus Beat y la playlist del
     Fenómeno— y la primera fila de las dos es la posición 0: pulsar la primera de
     una después de la primera de la otra se leía como volver a pulsar la misma
@@ -649,7 +649,7 @@ export function prepararPista(): void {
   a.addEventListener('ended', alTerminar);
 
   /*
-    🔴 Un error de red deja la barra diciendo que suena algo que no suena. Se
+    Un error de red deja la barra diciendo que suena algo que no suena. Se
     avisa en el campo de la pista, que es donde el oyente está mirando.
   */
   a.addEventListener('error', () => {
@@ -668,7 +668,7 @@ export function prepararPista(): void {
     if (!(t instanceof Element)) return;
 
     /*
-      🔴 La X del visor va ANTES que la fila, y el orden importa: el visor flota
+      La X del visor va ANTES que la fila, y el orden importa: el visor flota
       encima de la página y podría quedar sobre una fila de Bonus Beat. Si la fila
       se atendiera primero, cerrar el visor arrancaría la canción de debajo.
     */

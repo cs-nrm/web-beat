@@ -3,17 +3,17 @@
  * El cascarón de una página de TEXTO: legales, instrucciones, cualquier cosa que
  * sea un documento y no una sección editorial.
  *
- * 🔴 Existe por la misma razón que `CabezaSeccion`: para que no vuelva a haber una
+ * Existe por la misma razón que `CabezaSeccion`: para que no vuelva a haber una
  * maqueta por página. Las tres que lo usan —aviso de privacidad, términos y
  * Alexa— son documentos con la misma forma: un titular, una columna de lectura y
  * nada más. Sin esto, la tercera se habría escrito a ojo y con otra medida.
  *
- * ⚠️ Reusa `CabezaSeccion` con `activa={null}`: no encienden ninguna pastilla
+ * Reusa `CabezaSeccion` con `activa={null}`: no encienden ninguna pastilla
  * —no son secciones— pero SÍ llevan la tira. Es la única navegación visible de un
  * interior, y una página legal es justamente donde un lector entra por un enlace
  * suelto y necesita una salida hacia el sitio.
  *
- * ⚠️ La medida del cuerpo es la MISMA que la de una nota: `min(100%, 680px)` y
+ * La medida del cuerpo es la MISMA que la de una nota: `min(100%, 680px)` y
  * 17/1.72. Un aviso de privacidad no es más fácil de leer que un reportaje.
  */
 import CabezaSeccion from '@/components/CabezaSeccion.astro';

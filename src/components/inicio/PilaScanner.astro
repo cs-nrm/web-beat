@@ -2,13 +2,13 @@
 /**
  * La PILA del Inicio — hoy, «EDITORIAL».
  *
- * 🔴 Desde el 2026-09-07 este bloque es de **Editorial**, no de Beat Scanner
+ * Desde el 2026-09-07 este bloque es de **Editorial**, no de Beat Scanner
  * (decisión editorial de Carlos): arriba el día a día en el mosaico, aquí abajo las
  * piezas elaboradas. Y no lo decide este archivo: recibe la `seccion` y sus notas,
  * así que la pila es un COMPORTAMIENTO —cartas que se apilan al hacer scroll— y no
  * una sección concreta. El día que quieran apilar otra cosa, se le pasa otra.
  *
- * ⚠️ El archivo y las clases siguen llamándose «scanner» y «pila-*». Renombrarlos
+ * El archivo y las clases siguen llamándose «scanner» y «pila-*». Renombrarlos
  * no cambiaría un píxel y volvería ilegible el `git log` de la pila, que es donde
  * está explicado por qué el apilado se hace con `sticky` y por qué hace falta el
  * espaciador del final.
@@ -17,12 +17,12 @@
  * solo su franja de título, la siguiente se desliza encima, y las de atrás se
  * encogen para dar profundidad. La última queda arriba, completa.
  *
- * 🔴 Antes esto era un dibujo, no un comportamiento: dos tarjetas «asomadas» de
+ * Antes esto era un dibujo, no un comportamiento: dos tarjetas «asomadas» de
  * 88px y dos abiertas, todas quietas. Se veía como la referencia solo si nadie
  * hacía scroll. Ahora todas las tarjetas son iguales y el apilado lo produce el
  * scroll (referencia que mandó Carlos, 2026-08-24).
  *
- * 🔴 Y se hace con `position: sticky`, sin JavaScript. El apilado funciona en
+ * Y se hace con `position: sticky`, sin JavaScript. El apilado funciona en
  * cualquier navegador; el encogido de las de atrás va como MEJORA sobre animación
  * ligada al scroll, que Chrome y Edge ya tienen y Safari y Firefox todavía no. Sin
  * soporte, las tarjetas se apilan igual — solo no encogen.
@@ -74,7 +74,7 @@ const enLaPila = notas.slice(0, 4).map((n) => ({
           delante. Van como variables de CSS para no escribir una regla por cada
           posición de la pila.
 
-          ⚠️ El comentario va AQUÍ y no entre los atributos: Astro no admite
+          El comentario va AQUÍ y no entre los atributos: Astro no admite
           comentarios dentro de la lista de atributos de una etiqueta, y los parsea
           como atributos sueltos. Es el tercer tropiezo igual en este repo.
         */}
@@ -106,7 +106,7 @@ const enLaPila = notas.slice(0, 4).map((n) => ({
         ))}
 
         {/*
-          🔴 Un espaciador REAL, no `padding` ni `margin`.
+          Un espaciador REAL, no `padding` ni `margin`.
 
           El rango en que una tarjeta `sticky` se queda fija termina donde termina
           la última caja del contenedor. Medido: ni el `padding-bottom` del mazo ni
@@ -119,7 +119,7 @@ const enLaPila = notas.slice(0, 4).map((n) => ({
       </div>
 
       {/*
-        🔴 Aquí estaba un segundo enlace a la sección —«VER EDITORIAL»— y se retira
+        Aquí estaba un segundo enlace a la sección —«VER EDITORIAL»— y se retira
         (Carlos, 2026-09-07). Arriba, junto al titular, ya está el remate «TODAS LAS
         NOTAS» apuntando al mismo sitio; dos salidas idénticas en un bloque de
         cuatro tarjetas no dan más opciones, solo hacen dudar de si llevan a lo
@@ -159,7 +159,7 @@ const enLaPila = notas.slice(0, 4).map((n) => ({
 
   .pila-mazo {
     /*
-      🔴 Sin `overflow` aquí. Un `overflow: hidden` o `auto` en un ancestro anula
+      Sin `overflow` aquí. Un `overflow: hidden` o `auto` en un ancestro anula
       el `position: sticky` de los hijos, y la pila se vuelve una lista normal sin
       que nada avise.
     */
@@ -184,7 +184,7 @@ const enLaPila = notas.slice(0, 4).map((n) => ({
       76px más abajo que la anterior, y ese escalón ES la franja que queda a la
       vista cuando la tapan.
 
-      🔴 94px no es un número redondo, es la medida del titular acotado a DOS
+      94px no es un número redondo, es la medida del titular acotado a DOS
       líneas: 24px de padding superior + 62px de dos líneas a 25px/1.24 + aire.
 
       Con los 22px que tenía se veía una rendija de color y nada más. Y 76px
@@ -199,13 +199,13 @@ const enLaPila = notas.slice(0, 4).map((n) => ({
     grid-template-columns: 400px minmax(0, 1fr);
     gap: 36px;
     /*
-      🔴 `start`, no `center`. Con el contenido centrado verticalmente el titular
+      `start`, no `center`. Con el contenido centrado verticalmente el titular
       queda a media altura de la tarjeta, o sea FUERA de la franja que se ve cuando
       la tapan: se apilaban cuatro franjas de color sin una palabra.
     */
     align-items: start;
     /*
-      🔴 Este margen ES el recorrido de scroll entre una carta y la siguiente, no
+      Este margen ES el recorrido de scroll entre una carta y la siguiente, no
       un respiro visual: mientras se recorre, la carta de abajo va subiendo a tapar
       a la de arriba.
 
@@ -337,7 +337,7 @@ const enLaPila = notas.slice(0, 4).map((n) => ({
       font-size: 20px;
     }
     /*
-      🔴 En móvil la pila NO se apila.
+      En móvil la pila NO se apila.
       Con el chrome ocupando 104px y una tarjeta que necesita foto + texto, el
       escalonado dejaría cada carta con menos de media pantalla útil. Vuelven a ser
       tarjetas apiladas normales, que es lo que 14a dibuja.

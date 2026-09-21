@@ -4,7 +4,7 @@
  * Lo que pidió Carlos: que la trama deje de estar quieta, «pero no tan repetitivo
  * y no en todo, para que no se vea patrón».
  *
- * 🔴 Esas dos condiciones son el diseño entero, no un matiz:
+ * Esas dos condiciones son el diseño entero, no un matiz:
  *
  * · NO SE VE PATRÓN porque nada se repite. Cada pasada elige de nuevo su línea, su
  *   eje, su sentido, su velocidad y cuánto espera antes de volver. Una animación
@@ -28,7 +28,7 @@ const CUANTAS = 9;
 const PASO = 48;
 
 /**
- * Velocidad, en píxeles por segundo. 🔴 Velocidad, no duración — y la diferencia
+ * Velocidad, en píxeles por segundo. Velocidad, no duración — y la diferencia
  * importa.
  *
  * Antes se sorteaba una DURACIÓN igual para los dos ejes, pero los dos ejes no
@@ -52,7 +52,7 @@ const entre = (a: number, b: number): number => a + Math.random() * (b - a);
 /**
  * Una línea de la cuadrícula elegida al azar, o `null` si no hay dónde elegir.
  *
- * 🔴 Se descartan los bordes: las dos primeras líneas y la última. Una luz pegada
+ * Se descartan los bordes: las dos primeras líneas y la última. Una luz pegada
  * al borde no se lee como algo que cruza el fondo, se lee como un artefacto del
  * marco — y arriba, además, queda tapada por la cabecera, así que la pasada se
  * gastaría sin que nadie la viera.
@@ -110,7 +110,7 @@ function programar(luz: HTMLElement): void {
 /**
  * Las estelas de marca se encienden de vez en cuando.
  *
- * 🔴 Por qué hacía falta: son el motivo del design system sobre la foto de
+ * Por qué hacía falta: son el motivo del design system sobre la foto de
  * portada, y estaban clavadas. Se les había puesto una deriva de ±2.5% en 19
  * segundos, que sobre el papel es movimiento y en pantalla es nada — Carlos lo
  * notó enseguida.

@@ -79,7 +79,7 @@ sudo VHOST_NUEVO=020-beatdigital.conf CONFIRMAR=1 ./scripts/cambiar-dominio.sh
 
 → ~20 segundos. Tiene que terminar en:
 `✓ beatdigital.mx sirve el v2 y está indexable`
-→ 🔴 La línea que importa es `✓ INDEXABLE: <meta robots> dice index, follow`.
+→ La línea que importa es `✓ INDEXABLE: <meta robots> dice index, follow`.
 
 **7 · Comprobar a mano**
 
@@ -201,7 +201,7 @@ Respalda los vhosts, habilita el nuevo, recarga Apache y comprueba solo:
 ✓ sitemap con N URLs
 ```
 
-🔴 **`INDEXABLE` es el objetivo del corte.** Todo lo demás es fontanería. Si sale
+**`INDEXABLE` es el objetivo del corte.** Todo lo demás es fontanería. Si sale
 en rojo, casi siempre es `ProxyPreserveHost`: Node está recibiendo
 `Host: localhost` y no reconoce el dominio canónico.
 
@@ -256,14 +256,14 @@ Los números medidos van marcados; el resto son estimaciones honestas.
 | espera del script | 3 s |
 | las seis comprobaciones | ~10-15 s |
 
-🔴 **Sin caída.** `reload` es un *graceful* de Apache: las conexiones en curso
+**Sin caída.** `reload` es un *graceful* de Apache: las conexiones en curso
 terminan con la configuración vieja y las nuevas entran con la nueva. Nadie ve un
 error, ni siquiera un parpadeo.
 
-🔴 **Sin propagación.** v1 y v2 están en la misma máquina y el DNS no se toca, así
+**Sin propagación.** v1 y v2 están en la misma máquina y el DNS no se toca, así
 que no hay TTL que esperar. La petición siguiente al `reload` ya recibe el v2.
 
-🔴 **Sin CDN que purgar.** `beatdigital.mx` resuelve directo al origen —sin
+**Sin CDN que purgar.** `beatdigital.mx` resuelve directo al origen —sin
 cabeceras `Age`, `Via` ni `cf-*`—, así que no hay caché intermedia guardando el v1.
 
 ### Lo que sí tarda, y no depende de nosotros
@@ -296,7 +296,7 @@ mismo día.
 | Comprobación a mano + teléfono | ~10 min |
 | Expand de `www` | ~1 min |
 
-⚠️ El `build` de 5.5 s es en un portátil. En la VM cuenta con más, y sobre todo con
+El `build` de 5.5 s es en un portátil. En la VM cuenta con más, y sobre todo con
 la **descarga de paquetes**: este despliegue trae dependencias nuevas porque cambió
 el lockfile con la subida de Astro. Es el único paso de mañana con red de por
 medio, y por eso va HOY y no mañana.

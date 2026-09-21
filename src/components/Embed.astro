@@ -2,13 +2,13 @@
 /**
  * El bloque `embed` del contenido Lexical.
  *
- * 🔴 El CMS guarda **solo la URL**, nunca HTML crudo del editor — es una decisión
+ * El CMS guarda **solo la URL**, nunca HTML crudo del editor — es una decisión
  * de seguridad explícita de `src/blocks/Embed.ts`: *"el frontend arma el
  * <iframe>/embed real a partir de la URL, en vez de insertar HTML que venga del
  * editor"*. Este componente es esa mitad del contrato, así que la URL se **valida
  * y se reconstruye**; nunca se interpola tal cual en un atributo.
  *
- * 🔴 Y todos van por `<iframe>`, sin el script de la plataforma. Instagram,
+ * Y todos van por `<iframe>`, sin el script de la plataforma. Instagram,
  * Facebook y X ofrecen un `embed.js` que es lo que casi todo el mundo pega, y cada
  * uno pesa entre 100 y 300 KB, corre en el documento principal y rastrea al lector
  * en toda la página. Sus rutas `/embed` hacen lo mismo dentro de un iframe aislado

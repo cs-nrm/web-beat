@@ -11,7 +11,7 @@ const BAJAR = 96;
 /**
  * Y no se despliega hasta volver por debajo de esto.
  *
- * 🔴 Los dos umbrales son distintos A PROPÓSITO. Con uno solo, quedarse justo en el
+ * Los dos umbrales son distintos A PROPÓSITO. Con uno solo, quedarse justo en el
  * límite —o el rebote elástico de un móvil— hace que la barra se abra y se cierre
  * varias veces por segundo. Con 96 para bajar y 48 para subir hay 48px de zona
  * muerta, que es más que cualquier temblor.
@@ -22,7 +22,7 @@ let solicitud = 0;
 let compacta = false;
 
 /**
- * 🔴 En un interior la barra oscura NO se despliega nunca, ni volviendo arriba del
+ * En un interior la barra oscura NO se despliega nunca, ni volviendo arriba del
  * todo: la página vive como si ya se hubiera hecho scroll (decisión de Carlos,
  * 2026-09-01). El dato lo pone `Base.astro` en el `body`, y se lee en cada pasada
  * en vez de guardarse: el `body` cambia con cada navegación y una copia en una
@@ -33,7 +33,7 @@ function esInterior(): boolean {
 }
 
 /**
- * 🔴 En MÓVIL la barra oscura no se despliega nunca, ni en la portada: el sitio
+ * En MÓVIL la barra oscura no se despliega nunca, ni en la portada: el sitio
  * enseña una sola barra ahí (decisión de Carlos, 2026-09-03).
  *
  * El CSS ya la esconde —y tiene que hacerlo, porque el servidor no sabe el ancho
@@ -112,7 +112,7 @@ function alDesplazar(): void {
 /**
  * Marca en la nav la sección en la que estamos.
  *
- * 🔴 Esto lo pinta el SERVIDOR en la primera carga, y en una navegación del lado
+ * Esto lo pinta el SERVIDOR en la primera carga, y en una navegación del lado
  * del cliente esa marca se queda CONGELADA: la cabecera lleva `transition:persist`,
  * así que el nodo que sobrevive es el de la página anterior, con su `es-activo`
  * intacto y con el `aria-current` que ya no corresponde.
@@ -122,7 +122,7 @@ function alDesplazar(): void {
  * este— y además le mentía a un lector de pantalla, que oía «página actual» de una
  * sección en la que no estaba.
  *
- * ⚠️ La regla tiene que ser LA MISMA que la del servidor
+ * La regla tiene que ser LA MISMA que la del servidor
  * (`Cabecera.astro`: `ruta === href || ruta.startsWith(href + '/')`). Si las dos
  * divergen, la marca cambia al navegar y nadie sabe cuál de las dos manda.
  */
@@ -146,14 +146,14 @@ function marcarSeccion(): void {
 /**
  * Reconcilia tras una navegación.
  *
- * 🔴 La cabecera lleva `transition:persist`: el nodo sobrevive intacto y con él el
+ * La cabecera lleva `transition:persist`: el nodo sobrevive intacto y con él el
  * estado de la página ANTERIOR. Sin esto, ir del Inicio sin scroll a un interior
  * dejaría la barra oscura puesta, y volver de un interior al Inicio la dejaría
  * recogida para siempre.
  */
 function reconciliar(): void {
   /*
-    🔴 `hasAttribute` y NO `!!dataset.compacta`.
+    `hasAttribute` y NO `!!dataset.compacta`.
 
     El atributo se escribe como `data-compacta` a secas, así que su valor es la
     CADENA VACÍA — y `!!''` es `false`. O sea que la lectura decía siempre «no
@@ -185,7 +185,7 @@ export function prepararCabecera(): void {
    * ancla, o vuelve a una página con el scroll restaurado, la cabecera tiene que
    * nacer en el estado que le toca y no desplegada sobre contenido a media altura.
    *
-   * ⚠️ Va en `astro:after-swap` y NO en `astro:page-load`. El intercambio ya
+   * Va en `astro:after-swap` y NO en `astro:page-load`. El intercambio ya
    * ocurrió pero el navegador todavía no ha pintado, así que el ajuste entra en el
    * mismo fotograma. Con `page-load` se alcanzaba a ver un parpadeo de la barra
    * oscura al entrar a un interior — el error dura un fotograma, que es

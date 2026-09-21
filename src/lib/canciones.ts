@@ -1,13 +1,13 @@
 /**
  * Lo reproducible de una canción.
  *
- * 🔴 Existe porque el campo que de verdad tiene contenido no es el que el código
+ * Existe porque el campo que de verdad tiene contenido no es el que el código
  * miraba. Medido contra el CMS el 2026-09-08: de las 8 canciones capturadas, las 8
  * traen `embedUrl` —una URL de YouTube—, 3 traen además `youtube` con el mismo
  * valor byte a byte, y **ninguna** trae `audio`. O sea que el reproductor de pistas
  * de la barra, que espera un mp3, no podía sonar nunca.
  *
- * ⚠️ Esto resuelve el id en el SERVIDOR y no en el navegador. El cliente recibe 11
+ * Esto resuelve el id en el SERVIDOR y no en el navegador. El cliente recibe 11
  * caracteres ya validados, no una URL que tenga que interpretar: un `embedUrl` mal
  * pegado se queda en `null` aquí y la fila se pinta sin botón, en vez de llegar al
  * navegador y convertirse en el `src` de un iframe hacia donde sea.
@@ -31,12 +31,12 @@ function texto(doc: Record<string, unknown>, campo: string): string | null {
 /**
  * Resuelve las dos fuentes posibles de una canción.
  *
- * 🔴 El orden es `audio` primero y YouTube después, y no es indiferente: un mp3
+ * El orden es `audio` primero y YouTube después, y no es indiferente: un mp3
  * servido por nosotros suena en la barra con `new Audio()`, sin iframe, sin
  * terceros y sin política de nadie. YouTube es el respaldo que hace que hoy suene
  * algo, no el destino.
  *
- * ⚠️ Recibe `unknown` porque a la profundidad con la que llegan las listas, un
+ * Recibe `unknown` porque a la profundidad con la que llegan las listas, un
  * `canciones[].cancion` puede ser un número en vez del documento. Devolver las dos
  * fuentes en `null` es la respuesta honesta a eso.
  */

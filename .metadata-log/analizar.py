@@ -53,7 +53,7 @@ for ruta in archivos:
     print(f"type:   {tipos}")
     print(f"name:   {nombres}")
     if malos:
-        print(f"⚠️  {len(malos)} bloques sin parsear: {malos[:2]}")
+        print(f" {len(malos)} bloques sin parsear: {malos[:2]}")
 
     print(f"\n{'+ms':>8}  {'name':<6} {'dur':>6}  título — artista")
     for f in filas:
@@ -74,14 +74,14 @@ for ruta in archivos:
         print("    →", [f['titulo'] for f in sinArtista][:5])
 
     ids = [f['cue_id'] for f in filas if f['cue_id']]
-    print(f"  cue_id únicos: {len(set(ids))}/{len(ids)}" + ("  ⚠️ hay repetidos" if len(set(ids)) != len(ids) else "  ✅"))
+    print(f"  cue_id únicos: {len(set(ids))}/{len(ids)}" + ("  hay repetidos" if len(set(ids)) != len(ids) else "  ✅"))
 
     # ¿Los timestamps avanzan? ¿Hay huecos largos sin nada?
     ts = [f['ts'] for f in filas if isinstance(f['ts'], int)]
     if len(ts) > 1:
         desordenado = any(b < a for a, b in zip(ts, ts[1:]))
         huecos = [b - a for a, b in zip(ts, ts[1:])]
-        print(f"  orden temporal: {'⚠️ desordenado' if desordenado else '✅ monótono'}")
+        print(f"  orden temporal: {'desordenado' if desordenado else '✅ monótono'}")
         print(f"  hueco entre eventos: min {min(huecos)/1000:.1f}s · mediana {sorted(huecos)[len(huecos)//2]/1000:.1f}s · MÁX {max(huecos)/1000:.1f}s")
         print(f"  ventana cubierta: {(ts[-1]-ts[0])/1000/60:.1f} min")
 

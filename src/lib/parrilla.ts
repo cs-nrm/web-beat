@@ -1,7 +1,7 @@
 /**
  * La parrilla, en aritmética pura. Sin CMS, sin DOM.
  *
- * 🔴 Por qué este archivo existe SEPARADO de `lib/cms/programacion.ts`: la regla
+ * Por qué este archivo existe SEPARADO de `lib/cms/programacion.ts`: la regla
  * de «qué está al aire» la necesitan las DOS orillas. El servidor la usa para
  * pintar la página; el navegador para que una pestaña abierta media hora no siga
  * marcando al aire un programa que ya terminó. Y `lib/cms/*` es server-only por
@@ -13,7 +13,7 @@
  * copias de la regla, el día que divergen no se sabe cuál manda. Aquí hay UNA
  * copia y las dos la importan.
  *
- * ⚠️ Este módulo no importa nada que no sean tipos. Si algún día necesita algo
+ * Este módulo no importa nada que no sean tipos. Si algún día necesita algo
  * de `lib/cms/`, es señal de que lo que se está escribiendo no va aquí.
  */
 import type { Programa } from '@/types/payload';
@@ -43,7 +43,7 @@ export const MINUTOS_DIA = 24 * 60;
 /**
  * `HH:MM` a minutos desde medianoche.
  *
- * ⚠️ Las horas son TEXTO en el CMS, no un tipo hora. Un `"9:5"` o un `"24:00"`
+ * Las horas son TEXTO en el CMS, no un tipo hora. Un `"9:5"` o un `"24:00"`
  * capturado a mano no debe tumbar la página, así que lo que no parsea devuelve
  * `null` y su bloque se descarta.
  */
@@ -66,12 +66,12 @@ export function comoHora(min: number): string {
  * El día y el minuto actuales EN HORA DE MÉXICO, no en la del servidor ni en la
  * del visitante.
  *
- * 🔴 La parrilla está en hora de la estación. Un oyente en Madrid o en Los
+ * La parrilla está en hora de la estación. Un oyente en Madrid o en Los
  * Ángeles vería el programa equivocado marcado al aire si esto usara su reloj
  * local — y es exactamente el tipo de error que nadie reporta, porque quien lo
  * sufre no sabe cuál era el programa correcto.
  *
- * ⚠️ Se pide `weekday` en `en-US` a propósito: son las claves de tres letras
+ * Se pide `weekday` en `en-US` a propósito: son las claves de tres letras
  * (`Mon`, `Tue`…) que el mapa de abajo traduce. En `es-MX` llegarían acentuadas y
  * localizadas, que es un dato para pintar, no para comparar.
  */
@@ -138,7 +138,7 @@ export function parrillaDelDia(
       if (desde === null || hastaCrudo === null) continue;
 
       /*
-        ⚠️ El bloque que cruza medianoche. Si `horaFin <= horaInicio` el bloque
+        El bloque que cruza medianoche. Si `horaFin <= horaInicio` el bloque
         termina al día siguiente: «23:00 → 01:00». Sin esto, la comparación
         `minuto >= desde && minuto < hasta` es FALSA siempre para esos bloques, y
         el programa de la madrugada nunca aparecería al aire. Está anotado igual en
@@ -168,7 +168,7 @@ export function parrillaDelDia(
 /**
  * Un trozo de parrilla que cabe DENTRO de un día. La pieza de la rejilla semanal.
  *
- * 🔴 La diferencia con `Bloque` no es cosmética: un `Bloque` puede terminar al día
+ * La diferencia con `Bloque` no es cosmética: un `Bloque` puede terminar al día
  * siguiente (`hasta` > 1440), y una celda de la rejilla no puede — la columna del
  * sábado se acaba a medianoche. Así que un bloque que cruza produce DOS segmentos,
  * uno al fondo de su día y otro arriba del siguiente, que es lo que se ve en una
@@ -187,7 +187,7 @@ export interface Segmento {
   /**
    * Carril dentro de su racimo de solapes, y cuántos carriles tiene el racimo.
    *
-   * 🔴 Existe para que un solape no ESCONDA un programa. En la rejilla cada
+   * Existe para que un solape no ESCONDA un programa. En la rejilla cada
    * segmento va posicionado en absoluto y a todo el ancho de su columna; dos
    * bloques capturados a la misma hora del mismo día se taparían por completo y
    * el de abajo desaparecería de la página — contenido inalcanzable, que es la
@@ -214,7 +214,7 @@ function diaSiguiente(dia: Dia): Dia {
  * Lo que hace de verdad: aplanar `programas[].horarios[].dias[]` —tres niveles de
  * anidamiento— a una lista plana de celdas colocables, y cortar en medianoche.
  *
- * ⚠️ Los SOLAPES no se resuelven, se muestran. Dos programas capturados a la misma
+ * Los SOLAPES no se resuelven, se muestran. Dos programas capturados a la misma
  * hora del mismo día salen los dos, repartidos a lo ancho de la columna por
  * `repartirCarriles`. Elegir uno en silencio esconde un error de captura que la
  * estación tiene que poder VER para corregirlo — y esconderlo sería, además,
@@ -287,11 +287,11 @@ export function parrillaSemanal(
  * empiece antes de que acabe el más largo de los anteriores, sigue en el racimo.
  * Dentro de él, cada segmento toma el primer carril que ya esté libre a su hora.
  *
- * ⚠️ Por RACIMO y no por día: si el único solape del sábado está a las 3 de la
+ * Por RACIMO y no por día: si el único solape del sábado está a las 3 de la
  * mañana, no hay razón para partir en dos las 24 horas de esa columna. Cada tramo
  * paga solo su propio desorden.
  *
- * ⚠️ Recibe la lista YA ORDENADA por hora de inicio y la modifica en el sitio.
+ * Recibe la lista YA ORDENADA por hora de inicio y la modifica en el sitio.
  * Con el orden roto el algoritmo no falla: reparte mal, en silencio.
  */
 function repartirCarriles(segmentos: Segmento[]): void {
@@ -327,14 +327,14 @@ function repartirCarriles(segmentos: Segmento[]): void {
 /**
  * Los días de un bloque, en texto y ya plegados por tramos corridos.
  *
- * 🔴 Un tramo de tres días o más se pliega a rango: los siete se leen «LUN A DOM»
+ * Un tramo de tres días o más se pliega a rango: los siete se leen «LUN A DOM»
  * y no «LUN · MAR · MIÉ · JUE · VIE · SÁB · DOM». Esa cadena sacaba la lista de
  * programas a 510px de ancho en un viewport de 390 —scroll horizontal en toda la
  * ruta, medido el 2026-09-08— y «lunes a domingo» es el bloque más común de una
  * parrilla. Dos días o menos se listan: «LUN A MAR» no se lee mejor que
  * «LUN · MAR».
  *
- * ⚠️ Se ordena ANTES de plegar. `dias` es un select múltiple del CMS, así que baja
+ * Se ordena ANTES de plegar. `dias` es un select múltiple del CMS, así que baja
  * en el orden en que la estación marcó las casillas, no en el de la semana: sin
  * ordenar, un bloque marcado «domingo, lunes» pintaba «DOM · LUN» y ningún tramo
  * se reconocería.
@@ -343,7 +343,7 @@ function repartirCarriles(segmentos: Segmento[]): void {
  * tramos, no uno. Plegar el sábado-domingo-lunes a «SÁB A LUN» pediría leerlo al
  * revés, y la parrilla se lee de lunes a domingo.
  *
- * ⚠️ Vive AQUÍ y no en `lib/cms/programacion.ts`, donde se escribió: este archivo
+ * Vive AQUÍ y no en `lib/cms/programacion.ts`, donde se escribió: este archivo
  * ya tenía `DIAS_SEMANA` y `ROTULO_DIA`, y allá la función traía su propia copia
  * de las dos —el orden de lectura y el mapa de rótulos, otra vez—. Cuando se
  * escribió, este módulo no existía.

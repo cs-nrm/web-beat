@@ -19,7 +19,7 @@ const DEST = 'public/fuentes';
 const SUBSETS = new Set(['latin', 'latin-ext']);
 
 /**
- * 🔴 Estas NO son las tipografías de marca de Beat: son sustitutos. El propio DS
+ * Estas NO son las tipografías de marca de Beat: son sustitutos. El propio DS
  * lo dice ("no licensed brand fonts were provided"). Cuando lleguen las
  * licenciadas, se cambian los `.woff2` de `public/fuentes/` y las familias de
  * `ds/tokens/typography.css`; el resto del sitio no se toca.
@@ -112,7 +112,7 @@ const cabecera = `/* ===========================================================
    Las tres familias son VARIABLES: un archivo por subset cubre todo el rango de
    pesos pedido. Schibsted Grotesk lleva además su cara itálica real.
 
-   🔴 Y son SUSTITUTOS, no las tipografías de marca de Beat ("no licensed brand
+   Y son SUSTITUTOS, no las tipografías de marca de Beat ("no licensed brand
    fonts were provided", dice el DS). Al llegar las licenciadas se reemplazan estos
    archivos y las familias de \`ds/tokens/typography.css\`; nada más cambia.
 

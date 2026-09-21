@@ -4,18 +4,18 @@
  * Cada letra arranca siendo otra —un carácter al azar que va cambiando— y se
  * revela la real, de izquierda a derecha, en cuanto el bloque entra en pantalla.
  *
- * 🔴 La animación va por TIEMPO, no atada al scroll. Hubo una versión atada al
+ * La animación va por TIEMPO, no atada al scroll. Hubo una versión atada al
  * scroll y el defecto salta a la vista: si el lector no baja lo suficiente, el
  * titular se queda a medio descifrar y ahí se queda. Un titular a medias no es un
  * efecto, es un texto roto. Disparando al entrar en pantalla, la animación siempre
  * termina — se baje como se baje.
  *
- * 🔴 El texto real NUNCA depende de esto para existir. Va completo en el HTML del
+ * El texto real NUNCA depende de esto para existir. Va completo en el HTML del
  * servidor; el revoltijo lo monta el navegador encima. Si el JS falla, si el
  * navegador no lo soporta o si alguien pidió menos movimiento, se lee el titular
  * de siempre.
  *
- * 🔴 Y el original queda en `aria-label` con las letras en `aria-hidden`, así que
+ * Y el original queda en `aria-label` con las letras en `aria-hidden`, así que
  * un lector de pantalla anuncia el titular de verdad y no el revoltijo — que sería
  * el destrozo silencioso clásico de estos efectos.
  */
@@ -66,7 +66,7 @@ const textos: Texto[] = [];
 /**
  * El fotograma pedido y todavía sin pintar, o `0` si no hay ninguno.
  *
- * 🔴 Un ID, no un booleano — y por la misma razón que en `cursor.ts`, donde este
+ * Un ID, no un booleano — y por la misma razón que en `cursor.ts`, donde este
  * mismo patrón mató el efecto. Con un candado del tipo «si ya hay uno pedido, no
  * pidas otro», soltado solo DENTRO del callback, basta con que un fotograma no
  * llegue para que no se vuelva a pedir ninguno nunca más.
@@ -83,7 +83,7 @@ let vigia: IntersectionObserver | null = null;
 /**
  * El oyente de scroll de la repesca actual.
  *
- * 🔴 Hay que guardarlo para poder RETIRARLO. Se crea dentro de `iniciar()`, así que
+ * Hay que guardarlo para poder RETIRARLO. Se crea dentro de `iniciar()`, así que
  * es un cierre distinto en cada navegación y `removeEventListener` con una función
  * nueva no quita la vieja. Sin esto, cada visita dejaba otro oyente de scroll
  * recorriendo una lista de elementos que ya no están en la página: no se ve, no da
@@ -102,7 +102,7 @@ const alAzar = (fuente: string): string => fuente[Math.floor(Math.random() * fue
  */
 function partir(el: HTMLElement): Letra[] {
   /*
-   * 🔴 Solo texto plano. Partir en letras implica vaciar el elemento y
+   * Solo texto plano. Partir en letras implica vaciar el elemento y
    * reconstruirlo, así que sobre un párrafo con marcado —un enlace, una negrita,
    * un `code`— el efecto se llevaría por delante el enlace entero. Es un destrozo
    * silencioso: compila, se ve bien y la nota pierde sus ligas. En vez de intentar
@@ -111,7 +111,7 @@ function partir(el: HTMLElement): Letra[] {
   if (el.children.length) return [];
 
   /*
-   * 🔴 Solo texto GRANDE, y esto es una garantía de contraste, no una preferencia
+   * Solo texto GRANDE, y esto es una garantía de contraste, no una preferencia
    * estética. Las letras sin resolver van al 40% de opacidad; WCAG 1.4.3 pide
    * 4.5:1 para texto normal y 3:1 para texto grande (≥24px, o ≥18.66px en
    * negrita). Medido sobre nuestro fondo, a 0.4 el blanco de display da 3.37:1
@@ -174,7 +174,7 @@ function partir(el: HTMLElement): Letra[] {
 /**
  * Congela el ancho de cada letra al de su carácter REAL.
  *
- * 🔴 Sin esto el efecto sacude la página. Una `W` y una `i` no miden lo mismo, así
+ * Sin esto el efecto sacude la página. Una `W` y una `i` no miden lo mismo, así
  * que al ir cambiando de carácter la palabra cambia de ancho, y en un titular de
  * 52px eso reacomoda los saltos de línea en cada fotograma.
  *
@@ -213,7 +213,7 @@ function rematar(t: Texto): void {
 /**
  * Arranca el descifrado de un bloque.
  *
- * 🔴 El temporizador de rescate no es paranoia. La animación va por
+ * El temporizador de rescate no es paranoia. La animación va por
  * `requestAnimationFrame`, que el navegador DETIENE en una pestaña oculta. Si
  * alguien abre el sitio en segundo plano, el bloque se queda revuelto; y si por lo
  * que sea los fotogramas nunca llegan, se queda revuelto para siempre — o sea, un
@@ -292,7 +292,7 @@ function iniciar(): void {
   /*
    * En una pestaña OCULTA no se hace nada y se reintenta al mirarla.
    *
-   * ⚠️ Esto ya NO es la defensa contra dejar el texto revuelto —de eso se encarga
+   * Esto ya NO es la defensa contra dejar el texto revuelto —de eso se encarga
    * el orden del observador, más abajo—. Se queda por dos razones propias: evita
    * partir el texto en cientos de `span` para nadie, y mantiene el buscador del
    * navegador funcionando sobre el titular real mientras la pestaña esté al fondo.
@@ -318,7 +318,7 @@ function iniciar(): void {
 
   document.querySelectorAll<HTMLElement>('[data-escribir]').forEach((el) => {
     /*
-     * 🔴 Si ya estaba partido, se RE-REGISTRA en vez de volver a partir.
+     * Si ya estaba partido, se RE-REGISTRA en vez de volver a partir.
      *
      * Pasa de verdad: al volver con el botón de atrás el navegador puede restaurar
      * el DOM ya procesado y Astro dispara `astro:page-load` otra vez. Sin esto, la
@@ -333,7 +333,7 @@ function iniciar(): void {
       letras = cajas.map((caja, i) => {
         const real = reales[i] ?? caja.textContent ?? '';
         /*
-         * 🔴 Se DEVUELVE la letra real antes de nada. Por lo mismo que en
+         * Se DEVUELVE la letra real antes de nada. Por lo mismo que en
          * `revelar.ts`: el revoltijo vive en el DOM y el DOM sobrevive a la
          * navegación, así que un titular podía volver revuelto de una visita
          * anterior. Se parte del texto legible; si el observador entrega, lo
@@ -383,7 +383,7 @@ function iniciar(): void {
    * se volviera a revolver al subir y bajar sería un truco, no un efecto.
    */
   /*
-   * 🔴 EL ORDEN IMPORTA: no se revuelve NADA hasta que el observador entrega su
+   * EL ORDEN IMPORTA: no se revuelve NADA hasta que el observador entrega su
    * primera tanda, que es la prueba de que funciona.
    *
    * Al revés —revolver al arrancar y esperar que el observador lo deshaga— basta
@@ -396,7 +396,7 @@ function iniciar(): void {
   let primeraTanda = true;
 
   /*
-   * 🔴 En la primera tanda no se cree lo que dice el observador sobre qué está en
+   * En la primera tanda no se cree lo que dice el observador sobre qué está en
    * pantalla: se mide. Es la misma lección que en `revelar.ts` — al volver de una
    * nota, el observador entrega mientras la transición de vista aún no ha pintado
    * los elementos, así que los reporta fuera de pantalla aunque se estén viendo. El
@@ -409,7 +409,7 @@ function iniciar(): void {
   };
 
   /*
-   * 🔴 La misma red que en `revelar.ts`, y aquí importa todavía más: un titular
+   * La misma red que en `revelar.ts`, y aquí importa todavía más: un titular
    * revuelto no es un adorno incompleto, es texto que no se puede leer. Mira la
    * geometría de lo que sigue pendiente y lo resuelve si está a la vista, sin
    * depender de que el observador avise. Se desengancha sola al terminar.
@@ -509,7 +509,7 @@ export function prepararEscritura(): void {
 /**
  * Descifra un bloque AHORA, sin esperar al observador.
  *
- * 🔴 Existe para el menú a pantalla completa, y el observador no le sirve: sus
+ * Existe para el menú a pantalla completa, y el observador no le sirve: sus
  * enlaces están en el DOM desde el principio con geometría normal —el overlay se
  * oculta con `visibility`, que no cambia la caja— así que el observador los da por
  * vistos en la primera tanda y los resuelve antes de que nadie abra el menú. Para
@@ -536,7 +536,7 @@ export function descifrarAhora(el: HTMLElement): void {
   }
 
   /**
-   * 🔴 Se DESHACE el reparto anterior antes de volver a partir, y sin esto la
+   * Se DESHACE el reparto anterior antes de volver a partir, y sin esto la
    * función no hacía absolutamente nada.
    *
    * `partir()` se niega a actuar sobre un elemento con hijos —es su guarda contra
@@ -559,7 +559,7 @@ export function descifrarAhora(el: HTMLElement): void {
   if (!letras.length) return;
 
   /*
-    🔴 `partir()` NO pone esta marca: la pone quien la usa. Y de ella cuelga TODO
+    `partir()` NO pone esta marca: la pone quien la usa. Y de ella cuelga TODO
     el CSS del efecto —`[data-escribiendo] .escribir-letra { opacity: .4 }`— así
     que sin esta línea el texto se parte, se revuelve y se resuelve sin que se vea
     nada: las letras cambian a opacidad 1 y el ojo solo percibe un parpadeo.

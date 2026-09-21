@@ -2,13 +2,13 @@
 /**
  * «MICROAMBIENTE» — las notas que traen audio.
  *
- * 🔴 Nace el 2026-09-15 (Carlos). Son notas como las de Beat Scanner o Editorial
+ * Nace el 2026-09-15 (Carlos). Son notas como las de Beat Scanner o Editorial
  * —misma colección, misma URL, mismo detalle— y lo que las separa es que lo que las
  * justifica es un AUDIO. Por eso la sección sale de una categoría del CMS y no de
  * una colección nueva: el CMS ya tiene el campo y ya tiene la categoría
  * (`microambiente`, creada el 2026-09-14).
  *
- * 🔴 La maqueta sale de Bonus Beat y se aparta en tres cosas, las tres pedidas:
+ * La maqueta sale de Bonus Beat y se aparta en tres cosas, las tres pedidas:
  *
  *   · **La foto es más grande** — 180px contra los 92 de una canción. Ahí la
  *     portada es un disco; aquí es la foto editorial de la nota.
@@ -20,7 +20,7 @@
  *     otras dos. Es lo que más lo distingue de Bonus Beat, que lleva su rótulo
  *     encima y a todo lo ancho.
  *
- * ⚠️ La foto va en 16:9 —`--proporcion-foto`— y no es una elección de esta pieza:
+ * La foto va en 16:9 —`--proporcion-foto`— y no es una elección de esta pieza:
  * comparte `transition:name` con el hero de la nota, así que dos cajas de distinta
  * proporción se verían cambiar de encuadre durante la transición. Es lo mismo que
  * está anotado en `TarjetaNota.astro` y en la nota.
@@ -101,7 +101,7 @@ const filas = notas.map((n) => ({
 
 <style>
   /*
-    🔴 El relleno de ABAJO es igual que el de arriba, y no es simetría decorativa:
+    El relleno de ABAJO es igual que el de arriba, y no es simetría decorativa:
     el bloque acababa pegado a la sección siguiente —medido el 2026-09-15 en el
     Inicio: `hueco: 0`— y todo el aire lo ponía el vecino. Un bloque que depende del
     relleno de quien venga detrás cambia de forma según a quién le toque ir después.
@@ -123,7 +123,7 @@ const filas = notas.map((n) => ({
   }
 
   /*
-    🔴 Una columna para el rótulo y DOS para las notas — que es el reparto que pidió
+    Una columna para el rótulo y DOS para las notas — que es el reparto que pidió
     Carlos, y es lo que distingue este bloque de Bonus Beat.
 
     La rejilla solo existe en el Inicio: en la sección no hay columna izquierda, así
@@ -150,7 +150,7 @@ const filas = notas.map((n) => ({
     📖 Aquí había un `border-bottom`, copiado de `.bb-cabeza`, y se retiró el
     2026-09-15 (Carlos: «como que se pierde un poco»).
 
-    🔴 En Bonus Beat ese filete funciona porque su cabecera va ENCIMA del bloque y
+    En Bonus Beat ese filete funciona porque su cabecera va ENCIMA del bloque y
     lo cruza entero. Aquí el rótulo es una columna de un tercio, así que el filete
     terminaba en x 519 mientras el de la fila empezaba en x 563 y 50px más abajo:
     dos trozos que no se encuentran, y el ojo los lee como un filete mal dibujado,
@@ -193,7 +193,7 @@ const filas = notas.map((n) => ({
     padding-top: 0;
   }
   /*
-    🔴 La última no cierra con filete. Separa filas, y después de la última no hay
+    La última no cierra con filete. Separa filas, y después de la última no hay
     ninguna que separar: lo único que quedaba debajo era el filete de la cabecera de
     la sección siguiente, a 78px, y dos reglas horizontales casi paralelas con un
     titular en medio se leen como un error de maqueta.

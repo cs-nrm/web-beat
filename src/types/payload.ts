@@ -1,4 +1,4 @@
-/* ⚠️ GENERADO — NO EDITAR A MANO.
+/* GENERADO — NO EDITAR A MANO.
  * Vendorizado desde cms-estaciones:src/payload-types.ts en el ref 0190393.
  * Regenerar con: pnpm sync:types  (el pin vive en payload-types.lock.json).
  * Nota: se quita la augmentation `declare module 'payload'` del upstream

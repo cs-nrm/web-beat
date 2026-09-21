@@ -5,7 +5,7 @@
  * Se resuelve por SLUG, nunca por id: el sitio viejo tiene IDs de categoría
  * hardcodeados en 55 URLs porque su WordPress no exponía el slug.
  *
- * ⚠️ Vivía en `/scanner/<categoria>` y se mudó con su sección. La ruta vieja
+ * Vivía en `/scanner/<categoria>` y se mudó con su sección. La ruta vieja
  * responde 301 hacia esta desde `astro.config.mjs`.
  */
 import Base from '@/layouts/Base.astro';
@@ -17,7 +17,7 @@ import { leerPagina } from '@/lib/paginacion';
 const { categoria: slug } = Astro.params;
 
 /*
-  🔴 Las categorías que YA SON una sección se redirigen a su sección, con 301.
+  Las categorías que YA SON una sección se redirigen a su sección, con 301.
 
   Al separar Beat Scanner y Editorial (2026-09-07), sus categorías pasaron a tener
   DOS URLs con el mismo contenido: `/editorial` y `/beat-scanner/editorial` sirven
@@ -47,7 +47,7 @@ const pagina = leerPagina(Astro.url);
 ---
 
 {/*
-  🔴 El título lleva «Beat Scanner» en medio, como el resto de los interiores
+  El título lleva «Beat Scanner» en medio, como el resto de los interiores
   anidados —`— Programación —`, `— Agenda —`, `— El Fenómeno Residente —`—, y no
   es cosmético: sin ese segmento, `/beat-scanner/bonus-beat` y `/bonus-beat` se
   llamaban IGUAL, «Bonus Beat — Beat 100.9». Dos URLs con el mismo título es lo que

@@ -1,20 +1,20 @@
 /**
  * Datos estructurados — JSON-LD.
  *
- * 🔴 La regla que gobierna este archivo: **el JSON-LD no puede afirmar nada que la
+ * La regla que gobierna este archivo: **el JSON-LD no puede afirmar nada que la
  * página no pinte.** Un `datePublished` que no sea la fecha visible, o un `author`
  * distinto de la firma, no es un dato de más: Google lo trata como marcado
  * engañoso y con eso se pierde la ficha entera, no solo la propiedad. Por eso todo
  * lo que se emite sale del MISMO valor que ya usa el marcado —`firma()`,
  * `fechaIso()`, `seccionDeNota()`— y nunca de una segunda fuente.
  *
- * 🔴 Y la segunda: **un dato que no existe se OMITE.** Hoy `noticias.autores` está
+ * Y la segunda: **un dato que no existe se OMITE.** Hoy `noticias.autores` está
  * vacío y la firma viene del campo de texto libre, así que no hay página de autor
  * que enlazar: un `author.url` de relleno sería una URL que responde 404. De eso
  * se encarga `serializar` por todos —cualquier propiedad en `null` desaparece del
  * JSON—, así que un builder puede escribir `?? null` sin condicionales.
  *
- * ⚠️ Toda URL va ABSOLUTA y contra `SITE_URL`, nunca contra el host que sirve. Es
+ * Toda URL va ABSOLUTA y contra `SITE_URL`, nunca contra el host que sirve. Es
  * lo mismo que ya hacen la canónica y `og:image`, y por la misma razón: lo que se
  * publica apunta al sitio real, no a la preproducción.
  */
@@ -24,7 +24,7 @@ import { IDIOMA_REGION, SITE_URL, TARJETA_COMPARTIR, urlAbsoluta } from '@/confi
 export type Nodo = Record<string, unknown>;
 
 /**
- * 🔴 `@id` estable de la estación, y por eso lleva `SITE_URL` y no una cadena
+ * `@id` estable de la estación, y por eso lleva `SITE_URL` y no una cadena
  * suelta: es la MISMA entidad cuando el Inicio la describe entera y cuando una
  * nota la nombra como su `publisher`. Sin un id compartido, Google ve dos
  * organizaciones que se llaman igual.
@@ -48,7 +48,7 @@ const NOMBRE = 'Beat 100.9';
  *
  * 1. **Poda los huecos.** Una propiedad en `null` se cae del documento en vez de
  *    salir vacía. Es la regla de arriba, aplicada en un solo sitio.
- * 2. 🔴 **Escapa `<` como `\u003c`.** El contenido viene del CMS, y basta un
+ * 2. **Escapa `<` como `\u003c`.** El contenido viene del CMS, y basta un
  *    `</script>` dentro de un titular para que el navegador cierre el bloque ahí
  *    mismo: el JSON-LD se rompe y el resto del titular se pinta como HTML. Con el
  *    escape, el analizador de JSON lo devuelve como texto y el de HTML nunca ve
@@ -72,7 +72,7 @@ export function serializar(nodos: Nodo[]): string {
  * de `Organization`, así que sigue siendo válida donde schema.org pide una
  * organización, como el `publisher` de un `NewsArticle`—.
  *
- * ⚠️ El `logo` sí puede ser SVG; la prohibición de SVG es de `og:image`, que la
+ * El `logo` sí puede ser SVG; la prohibición de SVG es de `og:image`, que la
  * leen Facebook y X. Google Imágenes acepta SVG, y así el logo del JSON-LD sale
  * del mismo archivo que el de la cabecera y no puede quedarse en una marca
  * anterior.
@@ -90,20 +90,20 @@ export function nodoPublicador(): Nodo {
 /**
  * La estación descrita ENTERA. Va solo en el Inicio.
  *
- * ⚠️ Solo ahí, y es deliberado: la ficha de la estación es la de una página —la
+ * Solo ahí, y es deliberado: la ficha de la estación es la de una página —la
  * portada— y repetirla en cada ruta no añade nada que Google no vaya a leer una
  * vez. Las demás páginas nombran la misma entidad por su `@id` cuando la necesitan
  * (ver `nodoPublicador`).
  *
- * 🔴 Todo lo que afirma está verificado: la razón social y el domicilio salen del
+ * Todo lo que afirma está verificado: la razón social y el domicilio salen del
  * aviso de privacidad de este mismo sitio. No se agrega `broadcastFrequency` —que
  * sería el dato más obvio de una estación— porque en schema.org es propiedad de
  * `BroadcastService`, no de `RadioStation`; los 100.9 ya viajan en el `name`.
  *
- * ⚠️ Este nodo es de BEAT: razón social, domicilio e indicativo son suyos. El día
+ * Este nodo es de BEAT: razón social, domicilio e indicativo son suyos. El día
  * que este repo sirva de modelo para otra estación, es lo primero que se cambia.
  *
- * ⚠️ `sameAs` recibe las redes YA RESUELTAS por `redesEstacion()`, las mismas que
+ * `sameAs` recibe las redes YA RESUELTAS por `redesEstacion()`, las mismas que
  * pinta el pie. No se leen de `REDES_RESPALDO`: si mañana el CMS trae otra cuenta
  * de Facebook, el pie y el JSON-LD tienen que seguir enlazando a la misma.
  */
@@ -116,7 +116,7 @@ export function nodoEstacion(datos: {
     alternateName: datos.nombrePublico ?? null,
     legalName: 'TELEVIDEO, S.A. DE C.V.',
     /*
-      ⚠️ El indicativo se escribe aquí y NO se lee de `estaciones.tritonMount`,
+      El indicativo se escribe aquí y NO se lee de `estaciones.tritonMount`,
       aunque hoy los dos digan `XHSONFM`. No son el mismo dato: un mount es el
       nombre de un flujo en Triton y puede cambiar sin que la concesión cambie.
       Leerlo de ahí funcionaría por casualidad hasta el día que dejara de hacerlo.
@@ -135,7 +135,7 @@ export function nodoEstacion(datos: {
       `addressLocality` lleva la alcaldía: es el nivel que sigue al C.P. en una
       dirección mexicana.
 
-      ⚠️ El aviso de privacidad dice «México Distrito Federal» porque es texto
+      El aviso de privacidad dice «México Distrito Federal» porque es texto
       legal de 2015 y no es nuestro para reescribirlo. Aquí va el nombre vigente:
       esto no es el aviso, es un dato que se le da a un buscador.
     */
@@ -159,13 +159,13 @@ export function nodoEstacion(datos: {
 /**
  * La nota como `NewsArticle`.
  *
- * 🔴 Cada propiedad viene del valor que la página YA pinta:
+ * Cada propiedad viene del valor que la página YA pinta:
  *   · `headline` y `description` → el `h1` y la bajada
  *   · `datePublished` → el mismo ISO del `<time datetime>` visible
  *   · `author` → `firma(nota)`, la de la ficha del pie
  *   · `image` → la misma variante que carga el `<img>` del hero
  *
- * 🔴 Y por eso `headline` NO recibe `meta.title` del CMS, ni `image` la
+ * Y por eso `headline` NO recibe `meta.title` del CMS, ni `image` la
  * `meta.image`, aunque el `<title>` y la `og:image` de la misma nota sí los usen
  * (decisión de Carlos, 2026-09-07 — ver `src/pages/noticias/[slug].astro`). No es
  * una inconsistencia, es la línea entre dos cosas distintas: el `<title>` y la
@@ -175,11 +175,11 @@ export function nodoEstacion(datos: {
  * exactamente el marcado que Google lee como engañoso, y ahí no se pierde la
  * propiedad: se pierde la ficha entera.
  *
- * ⚠️ `dateModified` es la única que no está en pantalla, y sale de `updatedAt` del
+ * `dateModified` es la única que no está en pantalla, y sale de `updatedAt` del
  * CMS. Es un dato verdadero y Google lo usa para saber si vale la pena volver;
  * omitirlo haría que una nota corregida siguiera pareciendo la de ayer.
  *
- * ⚠️ Las medidas de la imagen se pasan SOLO si el CMS las trae para la variante
+ * Las medidas de la imagen se pasan SOLO si el CMS las trae para la variante
  * que se está sirviendo (ver `medidaMedia`). Unas medidas inventadas son peores
  * que ninguna: Google recorta la tarjeta con ellas.
  */
@@ -219,14 +219,14 @@ export function nodoNota(datos: {
 /**
  * La migaja, con los mismos eslabones que la de pantalla.
  *
- * 🔴 Los `nombre` van en la forma NORMAL del nombre —«Editorial», «Beat
+ * Los `nombre` van en la forma NORMAL del nombre —«Editorial», «Beat
  * Scanner»—, no en mayúsculas (Carlos, 2026-09-07). Antes esta migaja copiaba el
  * `rotulo` de la sección y salía «EDITORIAL», que es lo que Google enseña
  * literalmente al lector encima del resultado. Es la misma palabra: la mayúscula
  * es el `text-transform: uppercase` de la pastilla, una decisión de CSS, y no
  * tenía por qué acabar dentro de un resultado de búsqueda.
  *
- * ⚠️ Y no es una «versión arreglada» de lo que dice el DOM: el marcado visible
+ * Y no es una «versión arreglada» de lo que dice el DOM: el marcado visible
  * también escribe el nombre en su forma normal y deja el aspecto al CSS, así que
  * los dos siguen diciendo lo mismo. Eso es lo que importa — una migaja que no
  * coincida con la visible es justo el marcado que Google penaliza. Ver

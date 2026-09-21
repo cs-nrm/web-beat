@@ -3,7 +3,7 @@
    Schibsted Grotesk is the neutral text face. Martian Mono carries technical metadata.
    Replace with the real foundry files when available: drop .woff2 into assets/fonts/ and
    swap these @import lines for local @font-face rules. */
-/* 🔴 @import NEUTRALIZADO. El original cargaba Archivo + Schibsted Grotesk +
+/* @import NEUTRALIZADO. El original cargaba Archivo + Schibsted Grotesk +
    Martian Mono desde fonts.googleapis.com con un @import DENTRO del CSS
    bundleado: eso es una cascada render-blocking (el navegador tiene que bajar
    y parsear este archivo antes de saber que necesita las fuentes).

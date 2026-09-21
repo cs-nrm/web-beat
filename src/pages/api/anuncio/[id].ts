@@ -1,12 +1,12 @@
 /**
  * El clic de un banner vendido: se cuenta aquí y se redirige al anunciante.
  *
- * 🔴 Existe porque el conteo es de SERVIDOR a servidor. `PUBLICIDAD_TOKEN` no
+ * Existe porque el conteo es de SERVIDOR a servidor. `PUBLICIDAD_TOKEN` no
  * puede salir de este proceso, así que el navegador no puede avisar al CMS por su
  * cuenta — y es la línea roja de la casa: el navegador nunca habla con el CMS.
  * Por eso el `href` del banner apunta aquí y no al anunciante.
  *
- * 🔴 **El destino se resuelve leyendo el documento del CMS, JAMÁS de un parámetro
+ * **El destino se resuelve leyendo el documento del CMS, JAMÁS de un parámetro
  * de la petición.** Un `?destino=` reenviado a ciegas convierte esta ruta en un
  * redirector abierto con `beatdigital.mx` de fachada: cualquiera podría mandar
  * correos con enlaces a nuestro dominio que acaban en su página de phishing. Es de
@@ -38,7 +38,7 @@ export const GET: APIRoute = async ({ params }) => {
   }
 
   /*
-    🔴 Que el banner sea DE ESTA ESTACIÓN. El id es único en todo el CMS, que sirve
+    Que el banner sea DE ESTA ESTACIÓN. El id es único en todo el CMS, que sirve
     a cuatro marcas: sin esta comprobación, `/api/anuncio/<id de Oye>` redirigiría
     desde el dominio de Beat, y el clic se le sumaría a una campaña de otra
     estación. Es el mismo cuidado que el filtro por estación del transporte, que
@@ -81,7 +81,7 @@ export const GET: APIRoute = async ({ params }) => {
 /**
  * La IMPRESIÓN de un takeover, que es la única que no se puede contar en el render.
  *
- * 🔴 Por qué existe, y por qué solo para el takeover. Un banner de portada se cuenta
+ * Por qué existe, y por qué solo para el takeover. Un banner de portada se cuenta
  * en el render del servidor (`Anuncio.astro`) porque render y vista son casi lo
  * mismo: si la página se pintó, la franja estaba ahí. El takeover NO: sale una vez
  * por sesión, así que un lector que abre el Inicio cinco veces genera cinco renders
@@ -89,11 +89,11 @@ export const GET: APIRoute = async ({ params }) => {
  * factura a un anunciante, y la regla de la casa es que el error caiga siempre del
  * lado de no cobrarle de más a nadie (ver `Anuncio.astro`).
  *
- * 🔴 La línea roja se respeta: el navegador avisa a NUESTRO servidor, y es este
+ * La línea roja se respeta: el navegador avisa a NUESTRO servidor, y es este
  * proceso el que habla con el CMS con `PUBLICIDAD_TOKEN`. El token no sale de aquí.
  * Lo mismo que hace el GET de arriba para el clic.
  *
- * ⚠️ Es un aviso `sendBeacon`, así que llega sin cuerpo y sin cabeceras propias: lo
+ * Es un aviso `sendBeacon`, así que llega sin cuerpo y sin cabeceras propias: lo
  * único que viaja es el id en la ruta. Por eso la respuesta es 204 siempre que la
  * petición esté bien formada — al navegador no le sirve saber más, y describirle al
  * de fuera qué campañas existen sería regalar un mapa.
@@ -118,7 +118,7 @@ export const POST: APIRoute = async ({ params, request, url }) => {
   }
 
   /*
-    🔴 En una beta NO se cuenta, igual que en el render de `Anuncio.astro`: las
+    En una beta NO se cuenta, igual que en el render de `Anuncio.astro`: las
     impresiones de un despliegue de prueba se le facturarían a un anunciante real.
   */
   if (NOINDEX_SITIO || noIndexarHost(url.hostname)) {
@@ -128,11 +128,11 @@ export const POST: APIRoute = async ({ params, request, url }) => {
   const banner = await obtenerBannerPorId(id);
 
   /*
-    🔴 SOLO takeover, y la comprobación no es una formalidad: sin ella, un POST a un
+    SOLO takeover, y la comprobación no es una formalidad: sin ella, un POST a un
     banner de portada le sumaría una impresión que su propio render YA contó. El
     contador quedaría al doble y nadie lo notaría hasta el reporte de fin de mes.
 
-    🔴 Y solo con creatividad PROPIA. En un takeover de Ad Manager el conteo que se
+    Y solo con creatividad PROPIA. En un takeover de Ad Manager el conteo que se
     le factura al anunciante lo lleva Google; llamar al CMS ahí solo mete ruido en un
     número que a propósito se queda en cero.
   */

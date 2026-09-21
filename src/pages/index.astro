@@ -10,11 +10,11 @@
  *   2. qué se cuenta → el mosaico de portada, el Fenómeno, la pila de Editorial
  *   3. qué viene  → Bonus Beat y la Agenda
  *
- * ⚠️ Y desde el 2026-09-15, **Microambiente abre el 2 de forma PROVISIONAL**: se
+ * Y desde el 2026-09-15, **Microambiente abre el 2 de forma PROVISIONAL**: se
  * subió ahí mientras la portada tiene huecos, y su sitio es entre la pila y Bonus
  * Beat. El porqué completo está donde se pinta, no aquí.
  *
- * ⚠️ El «qué suena» lo contesta SOLO el player, y es decisión de Carlos
+ * El «qué suena» lo contesta SOLO el player, y es decisión de Carlos
  * (2026-09-09): «en el home nada». Debajo del player había un panel claro con
  * «HOY EN LA SEÑAL» —cuatro bloques de la parrilla de hoy— y «LO QUE SONÓ». Se
  * retiró entero, y con él dos consultas al CMS por visita.
@@ -23,13 +23,13 @@
  * en `/programacion` y el historial en `/en-vivo`. El player, que es como escucha
  * de verdad la gente, no se toca.
  *
- * 🔴 Y desde el 2026-09-07 el «qué se cuenta» se reparte en DOS, por decisión
+ * Y desde el 2026-09-07 el «qué se cuenta» se reparte en DOS, por decisión
  * editorial de Carlos: **arriba el día a día, abajo lo elaborado.** El mosaico de
  * portada se llena de `Beat Scanner` —la nota del día— y la pila de `Editorial`,
  * las piezas largas. Antes las dos salían de la misma consulta sin filtrar, así que
  * una pieza de fondo podía caer en la portada y una nota de agenda en la pila.
  *
- * 🔴 UNA sección = UN componente, y cada uno DEGRADA SOLO: si su colección está
+ * UNA sección = UN componente, y cada uno DEGRADA SOLO: si su colección está
  * vacía no se pinta, y el Inicio se acorta en vez de mostrar un encabezado con nada
  * debajo. Es lo que permite lanzar con contenido parcial y que la página se vaya
  * llenando sola conforme la redacción captura, sin un deploy por sección.
@@ -80,16 +80,16 @@ import { SECCIONES_EDITORIALES } from '@/config/navegacion';
   concurrencia real contra el CMS es una consulta por TTL, no una por visita.
 */
 /*
-  🔴 Los filtros de las TRES secciones editoriales se resuelven ANTES, porque las
+  Los filtros de las TRES secciones editoriales se resuelven ANTES, porque las
   consultas de notas los necesitan. Son tres consultas por slug ya cacheadas, y van
   en paralelo entre ellas.
 
-  ⚠️ `filtroDeCategoria` devuelve `null` si la categoría no existe en el CMS, y ese
+  `filtroDeCategoria` devuelve `null` si la categoría no existe en el CMS, y ese
   `null` NO se puede pasar a `obtenerScanner`: ahí significa «sin filtro» y traería
   todas las notas del sitio. Por eso abajo se comprueba antes de consultar, y el
   bloque degrada a vacío —que en el Inicio significa que la sección no se pinta—.
 
-  🔴 `filtroMicroambiente` hace DOS trabajos, y conviene no perder ninguno de vista.
+  `filtroMicroambiente` hace DOS trabajos, y conviene no perder ninguno de vista.
 
   Uno es EXCLUIR: «Microambiente» es una categoría nueva del CMS y sus notas también
   llevan `beat-scanner`, así que sin esto se cuelan en el hero del Inicio. Solo se
@@ -99,7 +99,7 @@ import { SECCIONES_EDITORIALES } from '@/config/navegacion';
   El otro es LLENAR su propio bloque, más abajo. Es la misma consulta por slug —ya
   cacheada— sirviendo a los dos, y por eso se resuelve una sola vez aquí arriba.
 
-  ⚠️ Y el slug NO se escribe a mano: sale de `SECCIONES_EDITORIALES`, como los otros
+  Y el slug NO se escribe a mano: sale de `SECCIONES_EDITORIALES`, como los otros
   dos. Es la regla de `config/navegacion.ts` y existe para que renombrar la sección
   se haga en un sitio; con el literal suelto, el día que cambie queda una consulta
   apuntando a una categoría que ya no existe y el bloque se pinta vacío sin decir por
@@ -150,19 +150,19 @@ const [
 /**
  * Vista previa del takeover: `?takeover=imagen|video|admanager`.
  *
- * 🔴 Existe porque el formato NO SE PUEDE VER de otra forma. Es el único hueco del
+ * Existe porque el formato NO SE PUEDE VER de otra forma. Es el único hueco del
  * sitio que no se puede probar con lo que hay capturado: en el CMS no hay ninguna
  * campaña de este tipo todavía, y las tres variantes se comportan distinto —la de Ad
  * Manager ni siquiera se abre hasta que Google contesta—. Sin esto, la única manera
  * de comprobar un cambio sería pedirle a alguien que dé de alta una campaña real.
  *
- * 🔴 **Apagada en el sitio real**, y con la misma guarda que usa el contador de
+ * **Apagada en el sitio real**, y con la misma guarda que usa el contador de
  * impresiones: fuera del host canónico. En `beatdigital.mx` este parámetro no hace
  * nada. No es un detalle de higiene — un takeover que cualquiera puede invocar por
  * la URL es un modal a pantalla completa servido desde nuestro dominio, y con la
  * variante de Ad Manager sería además una impresión facturada que nadie pidió.
  *
- * ⚠️ La pieza de `imagen` y `video` es un placeholder del propio sitio: la campaña
+ * La pieza de `imagen` y `video` es un placeholder del propio sitio: la campaña
  * de verdad trae su creatividad del CMS. Lo que esta previa reproduce fielmente es
  * el COMPORTAMIENTO —la llave de sesión, el plazo, la fila detrás del intro, el
  * bloqueo del scroll—, que es lo que se rompe.
@@ -185,7 +185,7 @@ function vistaPreviaTakeover(url: URL): DatosTakeover | null {
     return { ...base, fuente: 'admanager', imagen: null, imagenMovil: null, video: null, enlace: null };
   }
   /*
-    ⚠️ ABSOLUTA y contra el origen de ESTA petición. Una ruta relativa aquí no vale:
+    ABSOLUTA y contra el origen de ESTA petición. Una ruta relativa aquí no vale:
     `urlMedia()` absolutiza contra `CMS_URL_PUBLICA` —que es lo correcto para una
     media de verdad— así que `/img/og-beat.png` acabaría pidiéndose al CMS, donde no
     existe, y la previa se vería con la imagen rota. Medido, no supuesto.
@@ -212,7 +212,7 @@ const listaDestacada = tipoDestacado?.slug ? await obtenerListaReciente(tipoDest
     lados    → 2 + 2 en las columnas laterales
   Los `slice` no fallan con menos notas: devuelven lo que haya.
 
-  🔴 La PILA ya no sale de aquí: es de `Editorial` y tiene su propia consulta. Antes
+  La PILA ya no sale de aquí: es de `Editorial` y tiene su propia consulta. Antes
   eran `rejilla.slice(4, 8)` —las sobras del mosaico— y por eso el bloque de abajo
   no podía significar nada distinto del de arriba: era la misma lista, más abajo.
 */
@@ -233,25 +233,25 @@ const paraLaPila = [editorial.destacada, ...editorial.rejilla]
   portada» que se pinte aparte, así que apartar la destacada dejaría la nota más
   reciente fuera del Inicio.
 
-  🔴 Pero antes se DESCUENTA lo que ya pinta otro bloque, y no es higiene: una nota
+  Pero antes se DESCUENTA lo que ya pinta otro bloque, y no es higiene: una nota
   que salga dos veces en el Inicio emite dos veces el mismo `transition:name`
   —`foto-nota-<id>`, que es cómo la foto viaja a la nota— y el navegador ABORTA LA
   TRANSICIÓN ENTERA. No se rompe esa tarjeta: se rompe el efecto de todas.
 
-  ⚠️ Medido, no supuesto: el 2026-09-15, con este bloque apuntando a la categoría
+  Medido, no supuesto: el 2026-09-15, con este bloque apuntando a la categoría
   `editorial` durante una prueba, la consola soltó «Unexpected duplicate
   view-transition-name: foto-nota-66» y un `InvalidStateError` en cada navegación.
   Con las categorías de verdad no se repite ninguna —comprobado: 9 nombres, 0
   duplicados—, así que esto es la red para el día que la redacción marque una nota
   con dos categorías.
 
-  🔴 Y ese día ya llegó: la primera nota de Microambiente lleva TAMBIÉN
+  Y ese día ya llegó: la primera nota de Microambiente lleva TAMBIÉN
   `beat-scanner`, que es lo que obligó a excluirla del mosaico ahí arriba. O sea que
   la doble categoría no es un supuesto: es cómo se está capturando. Lo que queda
   cubierto aquí es el otro cruce —la pila de Editorial—, que no tiene exclusión
   propia porque nunca se ha dado.
 
-  ⚠️ Se descuenta AQUÍ y no en el CMS: `where[categorias][not_in]` metería en la
+  Se descuenta AQUÍ y no en el CMS: `where[categorias][not_in]` metería en la
   clave de caché algo que cambia con el contenido. Y cede ESTE bloque —el más nuevo
   de los tres, no el de más abajo— porque es el único que puede perder una fila sin
   que el mosaico o la pila cambien de forma. Vale igual ahora que se pinta arriba:
@@ -270,12 +270,12 @@ const paraMicroambiente = [microambiente.destacada, ...microambiente.rejilla]
   .slice(0, 3);
 
 /*
-  🔴 UN solo lugar para el lema: el cintillo y el `<title>` leen esta constante.
+  UN solo lugar para el lema: el cintillo y el `<title>` leen esta constante.
 
   Vuelve a ser texto y no el wordmark (Carlos, 2026-09-08); lo que se retiró el
   2026-09-07 era «TOTAL MUSIC», la marca vieja del v1, no la idea de un lema.
 
-  ⚠️ Y va junto porque tenerlo en dos sitios es como se llega a que la pestaña diga
+  Y va junto porque tenerlo en dos sitios es como se llega a que la pestaña diga
   una cosa y la franja otra. El cintillo lo pinta en `beat-display`, que fuerza
   mayúsculas — el `<title>` conserva esta caja, que es la que Carlos escribió.
 */
@@ -283,19 +283,19 @@ const LEMA = 'Beat 100.9 — Aquí la música se elige';
 ---
 
 {/*
-  🔴 La descripción del Inicio y `RESUMEN_CASA` en `Base.astro` son EL MISMO texto,
+  La descripción del Inicio y `RESUMEN_CASA` en `Base.astro` son EL MISMO texto,
   y tienen que seguir siéndolo: `RESUMEN_CASA` es el respaldo de cualquier página
   sin bajada propia, así que si se desincronizan, la casa se presenta de dos
   maneras según por dónde entre el lector. Ya había pasado: aquí se leía «Beat
   Editorial» —un nombre intermedio que ya no existe; hoy las secciones son «Beat
   Scanner» y «Editorial»— y allá una enumeración distinta.
 
-  ⚠️ Y dice qué ES la estación, no qué secciones tiene. Enumerarlas no le sirve a
+  Y dice qué ES la estación, no qué secciones tiene. Enumerarlas no le sirve a
   quien nunca ha entrado (no sabe qué es el Fenómeno Residente) ni a quien ya
   conoce el sitio (no lee la descripción). Desde que hay Open Graph esta frase es
   además lo que se lee al compartir la portada en WhatsApp.
 
-  ⚠️ Y el título: «Be» es decisión de Carlos (2026-09-07) y va TAL CUAL. Se le
+  Y el título: «Be» es decisión de Carlos (2026-09-07) y va TAL CUAL. Se le
   preguntó expresamente pensando que la respuesta se había cortado, y lo confirmó;
   él mismo lo dio por provisional. No se completa ni se interpreta.
 
@@ -303,14 +303,14 @@ const LEMA = 'Beat 100.9 — Aquí la música se elige';
   100.9»). Carlos lo escribió corto: se normaliza la puntuación, no el texto.
 */}
 {/*
-  🔴 El Inicio pasa SU tarjeta y ya no cae al respaldo (Carlos, 2026-09-09): «para
+  El Inicio pasa SU tarjeta y ya no cae al respaldo (Carlos, 2026-09-09): «para
   el share desde el home, si compartimos la página tal cual, esta imagen debería
   ir». Es el arte de la estación —wordmark, trama y la frase—, servido desde el
   CMS, y esa segunda mitad no es un detalle: el respaldo del repo se declara contra
   `beatdigital.mx`, que hoy todavía sirve el v1 y devuelve 404 ahí. Por eso al
   compartir salía el logo viejo. El porqué completo, en `TARJETA_INICIO`.
 
-  ⚠️ Los cuatro datos van JUNTOS —ruta, alt y las dos medidas— porque `Base.astro`
+  Los cuatro datos van JUNTOS —ruta, alt y las dos medidas— porque `Base.astro`
   los elige del mismo lado: pasar la imagen sin las medidas deja la publicación
   reservando el hueco a ojo.
 */}
@@ -353,7 +353,7 @@ const LEMA = 'Beat 100.9 — Aquí la música se elige';
     `position: fixed`, pero desde el `<slot />` de contenido ningún overlay puede
     tapar la cabecera.
 
-    🔴 Solo aquí. El CMS dice que es «el modal que tapa la portada al entrar», y un
+    Solo aquí. El CMS dice que es «el modal que tapa la portada al entrar», y un
     modal encima de una nota que alguien vino a leer es otra conversación. Si no hay
     campaña vigente el componente no emite NADA — ni overlay, ni slot de GAM.
   */}
@@ -365,7 +365,7 @@ const LEMA = 'Beat 100.9 — Aquí la música se elige';
   {/*
     2 y 3 van dentro del contenedor con TOPE de ancho.
 
-    🔴 Sin tope, estas secciones crecían sin límite mientras Scanner y la nota sí
+    Sin tope, estas secciones crecían sin límite mientras Scanner y la nota sí
     estaban capados a `--grid-max`: una lista de cápsulas o una pila de notas a
     1900px de ancho no se lee.
 
@@ -386,7 +386,7 @@ const LEMA = 'Beat 100.9 — Aquí la música se elige';
   <Marquee texto={LEMA} />
 
   {/*
-    🔴 El LEADERBOARD va DEBAJO del cintillo, y eso se aparta del lienzo a
+    El LEADERBOARD va DEBAJO del cintillo, y eso se aparta del lienzo a
     propósito (Carlos, 2026-09-08).
 
     La dirección 5a del artboard `publicidad` lo pone «separando el mosaico del
@@ -396,13 +396,13 @@ const LEMA = 'Beat 100.9 — Aquí la música se elige';
     cintillo hace de cierre del bloque editorial y el anuncio empieza algo nuevo.
     Donde el lienzo y la pantalla no coinciden, gana la pantalla.
 
-    ⚠️ Y va ENVUELTO en su franja, que es la otra mitad del arreglo: sin envoltura
+    Y va ENVUELTO en su franja, que es la otra mitad del arreglo: sin envoltura
     el hueco heredaba el borde de sus vecinos y se veía pegado —lo reportó Carlos
     con esas palabras—. El relleno es SIMÉTRICO, como `.sc-franja-anuncio` en la
     sección: un anuncio con más aire de un lado que del otro se lee como si se
     hubiera colado en el bloque de al lado.
 
-    ⚠️ La franja va FUERA del contenedor con tope de ancho, igual que el mosaico y
+    La franja va FUERA del contenedor con tope de ancho, igual que el mosaico y
     el cintillo: el hueco se centra solo. Y si no hay campaña vendida ni Ad Manager
     tiene qué servir, el componente cierra la franja entera y no queda ni el aire.
   */}
@@ -412,7 +412,7 @@ const LEMA = 'Beat 100.9 — Aquí la música se elige';
 
   <div class="inicio-contenido">
     {/*
-      ⚠️ **Microambiente va ARRIBA A PROPÓSITO Y ES PROVISIONAL** (Carlos,
+      **Microambiente va ARRIBA A PROPÓSITO Y ES PROVISIONAL** (Carlos,
       2026-09-15): «solo en el home, ahorita que tenemos un poco vacío, pongámoslo
       entre el marquee y Fenómeno; ya después lo movemos más abajo».
 
@@ -424,13 +424,13 @@ const LEMA = 'Beat 100.9 — Aquí la música se elige';
       justifica es su audio, así que abre la parte de abajo en vez de cerrar la de
       arriba, con Bonus Beat detrás, que ya es música sin texto.
 
-      🔴 Va DESPUÉS del leaderboard y no entre el cintillo y él, aunque el encargo
+      Va DESPUÉS del leaderboard y no entre el cintillo y él, aunque el encargo
       diga «entre el marquee y Fenómeno». El hueco está donde está por una decisión
       medida del 2026-09-08 —el cintillo cierra el bloque editorial y el anuncio
       empieza algo nuevo—, y colarse en medio la deshace: dejaría el anuncio flotando
       entre dos bloques de contenido, que es justo de donde se le movió.
 
-      ⚠️ Sin notas no se pinta NADA, ni el rótulo de la izquierda. Es la regla de la
+      Sin notas no se pinta NADA, ni el rótulo de la izquierda. Es la regla de la
       casa y aquí no es teórica: el 2026-09-15 la categoría existía en el CMS con
       cero notas, así que el estado por omisión de este bloque es no existir — y
       entonces la portada se lee exactamente como antes de que existiera.
@@ -446,11 +446,11 @@ const LEMA = 'Beat 100.9 — Aquí la música se elige';
 
     {/* 3. qué viene */}
     {/*
-      ⚠️ El nombre del hueco lo pasa esta página, no el componente: `BonusBeat` lo
+      El nombre del hueco lo pasa esta página, no el componente: `BonusBeat` lo
       usa también la sección `/bonus-beat`, y un hueco declarado dentro le
       aparecería a las dos. Ver la prop `anuncio` en ese archivo.
 
-      ⚠️ Y OJO con el inventario del Inicio: `ArchivoTemas.astro` ya declara
+      Y OJO con el inventario del Inicio: `ArchivoTemas.astro` ya declara
       `inicio-box`, que hoy no se pinta porque el archivo de temas está vacío. El
       día que capturen un segundo tema del Fenómeno, esta página va a tener DOS
       box. Si eso es demasiado para una sola página, el que sobra es una decisión

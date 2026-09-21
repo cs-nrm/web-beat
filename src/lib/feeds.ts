@@ -1,12 +1,12 @@
 /**
  * Proxy de los feeds que GENERA el CMS y SIRVE este dominio.
  *
- * 🔴 El reparto no es arbitrario y conviene entenderlo antes de tocarlo: el CMS
+ * El reparto no es arbitrario y conviene entenderlo antes de tocarlo: el CMS
  * los **genera** (sabe qué está publicado y cuándo cambió) y el front los **sirve
  * bajo su propio dominio**. No contradice la decisión de «los sitemaps los sirve
  * el CMS» ni reabre `@astrojs/sitemap`: aquí no se genera nada, se reenvía.
  *
- * ⚠️ Y no es una preferencia estética. El índice del CMS lista hijos con el
+ * Y no es una preferencia estética. El índice del CMS lista hijos con el
  * dominio de la estación (`https://beatdigital.mx/sitemap.xml?...`), porque un
  * `<sitemapindex>` cuyos hijos viven en OTRO host **Google lo descarta**, salvo
  * cross-submission verificada. O sea que los hijos tienen que responder aquí. Sin
@@ -25,7 +25,7 @@ import {
 } from '@/config/site';
 
 /**
- * 🔴 Conjunto CERRADO. Dos razones, y la segunda pesa más:
+ * Conjunto CERRADO. Dos razones, y la segunda pesa más:
  *
  *   1. Un `seccion` arbitrario se reenviaría al CMS tal cual.
  *   2. La clave de caché del borde es la URL completa, así que
@@ -41,16 +41,16 @@ const PAGINA_MAX = 10_000;
 /**
  * Reenvía un feed del CMS conservando los parámetros.
  *
- * 🔴 Los parámetros se reenvían SIEMPRE que sean válidos. Si se pierden, el CMS
+ * Los parámetros se reenvían SIEMPRE que sean válidos. Si se pierden, el CMS
  * responde el ÍNDICE en vez del hijo, y como el índice apunta aquí, se hace un
- * bucle: índice → hijo → índice. Es el fallo que el contrato marca en rojo.
+ * bucle: índice → hijo → índice. Es el fallo que el contrato señala como bloqueante.
  */
 export async function proxyFeed(
   nombre: 'sitemap.xml' | 'news-sitemap.xml',
   url: URL,
 ): Promise<Response> {
   /*
-    🔴 En un despliegue que no es el dominio canónico, esto NO existe.
+    En un despliegue que no es el dominio canónico, esto NO existe.
 
     El `X-Robots-Tag: noindex` del middleware ya cubre la indexación, pero un
     sitemap es una INVITACIÓN activa a rastrear: la beta estaría publicando un
@@ -58,7 +58,7 @@ export async function proxyFeed(
     en este host no hay sitemap. Falla del lado seguro, como el resto de la
     política de indexación.
 
-    🔴 Se comprueban LAS DOS reglas, igual que el middleware y el `<meta robots>`,
+    Se comprueban LAS DOS reglas, igual que el middleware y el `<meta robots>`,
     y basta con que una cierre. Al principio esto solo miraba el host, y lo cazó
     una prueba: con `Host: beatdigital.mx` el sitemap se servía **mientras el
     middleware ponía `X-Robots-Tag: noindex` en esa misma respuesta**, porque
@@ -93,7 +93,7 @@ export async function proxyFeed(
     destino.searchParams.set('seccion', seccion);
 
     /*
-      🔴 Una `pagina` presente pero inválida es un 404, NO se ignora.
+      Una `pagina` presente pero inválida es un 404, NO se ignora.
 
       Ignorarla era el primer intento y estaba mal: el CMS, sin `pagina`, sirve la
       primera. O sea que `?pagina=999999999` respondía 200 con el contenido de la
@@ -127,7 +127,7 @@ export async function proxyFeed(
     const xml = await r.text();
 
     /*
-      🔴 503, nunca un sitemap vacío.
+      503, nunca un sitemap vacío.
 
       Un `<urlset>` sin URLs es una afirmación —«este sitio no tiene nada»— y
       además CACHEABLE. Google lo tomaría por bueno y podría desindexar. Un 503 le

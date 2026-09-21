@@ -2,14 +2,14 @@
 /**
  * El índice de un tipo de lista — hoy, `/bonus-beat`.
  *
- * 🔴 La ruta es DINÁMICA y no `src/pages/bonus-beat/`. El primer segmento es el
+ * La ruta es DINÁMICA y no `src/pages/bonus-beat/`. El primer segmento es el
  * `slug` de un documento de `tipos-de-lista`, que es dato editorial: la estación
  * crea «Bonus Beat» hoy y «Beat Ten» mañana, y las dos secciones tienen que
  * existir sin que nadie despliegue. Escribir la carpeta a mano habría dejado la
  * segunda en 404 el día que la crearan, y nadie se entera hasta que un lector lo
  * reporta.
  *
- * ⚠️ Por eso `bonus-beat` NO está en `SEGMENTOS_RESERVADOS` — está explicado
+ * Por eso `bonus-beat` NO está en `SEGMENTOS_RESERVADOS` — está explicado
  * allí. Las rutas estáticas del sitio ganan igual a esta por especificidad, así
  * que lo único que hay que descartar aquí son los segmentos reservados que
  * todavía no tienen página.
@@ -38,7 +38,7 @@ const tipo = await obtenerTipoDeLista(slug);
 if (!tipo) return Astro.rewrite('/404');
 
 /*
-  🔴 DOS consultas, y no `ediciones[0]`, por una razón medida: las portadas de las
+  DOS consultas, y no `ediciones[0]`, por una razón medida: las portadas de las
   canciones no salían en esta página.
 
   `obtenerListas` pide `depth: 1` —lo correcto para 24 ediciones—, y a esa
@@ -48,7 +48,7 @@ if (!tipo) return Astro.rewrite('/404');
   o sea que el botón de reproducir tampoco podía aparecer. Comprobado contra el CMS:
   a `depth: 1` esas portadas llegan como `20`, `19`, `17`.
 
-  ⚠️ La solución NO es subir `obtenerListas` a `depth: 2`: eso arrastraría el
+  La solución NO es subir `obtenerListas` a `depth: 2`: eso arrastraría el
   documento de media de cada canción de las 24 ediciones para pintar una retícula
   que solo necesita la portada de la edición —y esa sí llega con `depth: 1`—.
 
@@ -63,7 +63,7 @@ const [ediciones, reciente] = await Promise.all([
 ]);
 
 /**
- * 🔴 La tarjeta de compartir de esta sección, por SLUG.
+ * La tarjeta de compartir de esta sección, por SLUG.
  *
  * Es la única de las seis que no puede escribir su imagen en el `<Base>`: la ruta
  * es dinámica, así que el archivo depende de qué tipo de lista se esté sirviendo.
@@ -72,7 +72,7 @@ const [ediciones, reciente] = await Promise.all([
  * en el CMS no rompe nada; solo comparte sin su nombre hasta que alguien le genere
  * la tarjeta (`scripts/favicon.mjs`) y la agregue aquí.
  *
- * 🔴 El `alt` viaja EN la lista y no se arma con `tipo.nombre`. Parece lo mismo y
+ * El `alt` viaja EN la lista y no se arma con `tipo.nombre`. Parece lo mismo y
  * no lo es: el texto está horneado en el PNG el día que se generó, así que si la
  * estación renombra el tipo en el admin, `tipo.nombre` cambiaría y la imagen no —y
  * el `alt` acabaría describiendo unas letras que no están en la foto. Un `alt` que
@@ -90,13 +90,13 @@ const tarjeta = TARJETAS_POR_TIPO[slug] ?? null;
 ---
 
 {/*
-  ⚠️ El respaldo de la descripción decía «Bonus Beat en Beat 100.9.» — el nombre de
+  El respaldo de la descripción decía «Bonus Beat en Beat 100.9.» — el nombre de
   la sección seguido del de la casa, que no dice qué es la página. Y es el texto que
   se ve HOY: `tipos-de-lista.descripcion` está vacía en el CMS, así que nunca cae la
   de la redacción. Lo que se describe ahora es lo que la página hace: el índice de
   ediciones, con la más reciente pintada entera.
 
-  ⚠️ Las tres etiquetas de la imagen van JUNTAS o no van: sin tarjeta propia se
+  Las tres etiquetas de la imagen van JUNTAS o no van: sin tarjeta propia se
   pasa `null` en las tres y el layout pone el respaldo con SUS medidas y su `alt`.
   Mezclarlas —la imagen de marca con el `alt` de una sección— es el fallo que estas
   etiquetas vienen a evitar. Ver `tarjeta` en el frontmatter.
@@ -147,7 +147,7 @@ const tarjeta = TARJETAS_POR_TIPO[slug] ?? null;
                 que es el único que tiene la página (aprobado por Carlos el
                 2026-09-08).
 
-                🔴 Y va DENTRO de esta condición justamente porque es un corte: si
+                Y va DENTRO de esta condición justamente porque es un corte: si
                 no hay ediciones anteriores no hay nada que cortar, y el box
                 acabaría pegado al leaderboard del pie con solo aire entre los dos
                 —una página que termina en dos anuncios seguidos—. Hoy es el caso

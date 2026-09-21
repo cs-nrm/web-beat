@@ -1,22 +1,22 @@
 # La puerta: lo mismo que corre el despliegue, pero antes de que llegue a la VM.
 #
-# 🔴 Por qué existe. El despliegue de la VM corre `pnpm build` completo, y una
+# Por qué existe. El despliegue de la VM corre `pnpm build` completo, y una
 # puerta que falla aborta el despliegue A MEDIAS: el `git pull` ya se hizo, el
 # `install` ya cambió `node_modules`, y el servicio sigue con el artefacto viejo
 # mientras el repo dice otra cosa. Descubrirlo aquí cuesta dos minutos; descubrirlo
 # en la VM cuesta un despliegue torcido, y ya pasó tres veces en una tarde.
 #
-# ⚠️ `pnpm check` NO sería puerta suficiente: el compilador del build rechaza cosas
+# `pnpm check` NO sería puerta suficiente: el compilador del build rechaza cosas
 # que `astro check` acepta —un comentario mal cerrado dio 0 errores en `check` y
 # reventó el build—. Por eso aquí corre `build`, que encadena check + guardas +
 # build + guarda-cascada.
 #
-# ⚠️ Esta puerta NO despliega y no necesita un solo secreto, así que es segura de
+# Esta puerta NO despliega y no necesita un solo secreto, así que es segura de
 # correr en un pull request de quien sea. El despliegue vive en `deploy.yml`, con
 # sus secretos y su palanca.
 name: CI
 
-# ⚠️ SOLO pull requests. Los pushes a `beat` los cubre `deploy.yml`, que corre la
+# SOLO pull requests. Los pushes a `beat` los cubre `deploy.yml`, que corre la
 # misma puerta y además despliega; tenerlos en los dos sitios haría el mismo build
 # dos veces por push y dejaría dos checks verdes diciendo lo mismo.
 on:
@@ -48,7 +48,7 @@ jobs:
         with:
           node-version-file: .nvmrc
 
-      # 🔴 pnpm entra por corepack leyendo `packageManager` de package.json
+      # pnpm entra por corepack leyendo `packageManager` de package.json
       # (pnpm@9.0.0), igual que en la VM. Ninguna acción de terceros: en un repo
       # público, cada acción externa es código ajeno con acceso al workflow.
       - name: Habilitar corepack
@@ -69,7 +69,7 @@ jobs:
       - name: Dependencias
         run: pnpm install --frozen-lockfile
 
-      # ⚠️ SIN `.env`, y es deliberado: comprobado que el build pasa limpio sin él.
+      # SIN `.env`, y es deliberado: comprobado que el build pasa limpio sin él.
       # Así esta puerta no necesita un solo secreto, que es lo que la hace segura
       # de correr en un repo público y en pull requests de cualquiera.
       #

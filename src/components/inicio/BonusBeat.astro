@@ -7,7 +7,7 @@
  * sitio pedía («por qué está aquí, qué contar de ella»). Los enlaces a plataformas
  * salen gratis del catálogo de `canciones`.
  *
- * 🔴 La ruta se construye desde el SLUG del tipo, que es dato editorial. Este
+ * La ruta se construye desde el SLUG del tipo, que es dato editorial. Este
  * componente no sabe que se llama «Bonus Beat»: recibe el tipo y lo usa.
  */
 import Icono from '@/components/Icono.astro';
@@ -22,7 +22,7 @@ interface Props {
   /**
    * El nombre del hueco de publicidad que va al lado de las canciones, si lo hay.
    *
-   * 🔴 Lo pasa la PÁGINA y no se declara aquí, por lo mismo que en `Fenomeno.astro`
+   * Lo pasa la PÁGINA y no se declara aquí, por lo mismo que en `Fenomeno.astro`
    * y `Agenda.astro`: este componente lo usan el Inicio y la sección, y un hueco
    * escrito dentro le aparecería a las dos. Sin prop no se pinta nada.
    */
@@ -77,7 +77,7 @@ function plataformasDe(c: unknown): Array<[string, string]> {
     `fuenteDeCancion()`, que lee esos dos mismos campos, así que el chip no daba
     una forma más de escuchar — daba una forma de IRSE a escucharlo a otro sitio.
 
-    ⚠️ Y era el único que llegaba a pintarse. Medido contra el CMS el mismo día:
+    Y era el único que llegaba a pintarse. Medido contra el CMS el mismo día:
     de las 3 canciones de la lista publicada, las 3 traen `embedUrl` y NINGUNA
     trae `spotify`, `appleMusic` ni `deezer`; las 3 filas traen su botón. O sea
     que a partir de ahora `plataformas` sale vacío y la fila de chips no se pinta.
@@ -86,7 +86,7 @@ function plataformasDe(c: unknown): Array<[string, string]> {
     que tiene la sección y vuelven solos en cuanto la redacción los capture. Por
     eso tampoco se toca `.bb-plataforma` en la hoja de estilos.
 
-    ⚠️ Lo que sí sigue vivo es el detalle de los valores de YouTube: llevan
+    Lo que sí sigue vivo es el detalle de los valores de YouTube: llevan
     `&list=RD…&start_radio=1`, o sea la RADIO de la pista y no la pista sola. Hoy
     eso le importa al reproductor, no a este enlace — ver `fuenteDeCancion()` en
     `src/lib/canciones.ts`; si estorba se corrige en el CMS, no aquí.
@@ -106,19 +106,19 @@ function plataformasDe(c: unknown): Array<[string, string]> {
       {/*
         Solo el rótulo de la sección.
 
-        ⚠️ Aquí hubo dos cosas más, y las dos se retiraron por decisión de Carlos.
+        Aquí hubo dos cosas más, y las dos se retiraron por decisión de Carlos.
         Primero «TRES TRACKS CADA VIERNES», que salía del lienzo (2026-09-01):
         nadie ha comprometido esa periodicidad, y un rótulo fijo que promete un día
         de la semana se convierte en un desmentido el primer viernes que no haya
         edición. Después la FECHA de la edición (2026-09-08): «quita la fecha de
         ahí, para que no se vea raro».
 
-        🔴 Y tenía razón con el bloque partido en dos columnas: la fecha iba
+        Y tenía razón con el bloque partido en dos columnas: la fecha iba
         alineada al extremo derecho de la cabeza, que ahora es el borde de la
         columna del ANUNCIO. Quedaba un dato editorial rotulando un hueco de
         publicidad.
 
-        ⚠️ La fecha no se pierde: sigue en cada edición dentro de la sección
+        La fecha no se pierde: sigue en cada edición dentro de la sección
         —`/bonus-beat`, donde el encabezado la lleva— y en la retícula de
         ediciones anteriores. Lo que se retira es repetirla en el Inicio.
       */}
@@ -129,7 +129,7 @@ function plataformasDe(c: unknown): Array<[string, string]> {
       )}
 
       {/*
-        🔴 Las canciones y el anuncio COMPARTEN fila (Carlos, 2026-09-08):
+        Las canciones y el anuncio COMPARTEN fila (Carlos, 2026-09-08):
         «dividamos Bonus Beat y al lado».
 
         Antes el bloque era una sola columna a todo lo ancho, y las tres filas de
@@ -137,7 +137,7 @@ function plataformasDe(c: unknown): Array<[string, string]> {
         lado, ese aire pasa a ser inventario y las canciones quedan a una medida de
         lectura en vez de estirarse a 1280px.
 
-        ⚠️ En móvil la rejilla colapsa y el box baja al final, DESPUÉS del remate de
+        En móvil la rejilla colapsa y el box baja al final, DESPUÉS del remate de
         «ver todas las ediciones»: metido entre las canciones cortaría la lista en
         dos, y una lista de tres tracks partida por un anuncio no se lee como una
         lista.
@@ -163,17 +163,17 @@ function plataformasDe(c: unknown): Array<[string, string]> {
                 en cualquier sitio donde haya una portada, así que no hace falta
                 enseñar un control aparte.
 
-                🔴 Y se pinta con mp3 **o** con YouTube. Antes solo con mp3, y como
+                Y se pinta con mp3 **o** con YouTube. Antes solo con mp3, y como
                 ninguna de las 8 canciones del CMS trae `audio`, el botón no se
                 pintaba NUNCA: la carátula quedaba como un `<div>` inerte —arte que
                 parece pulsable y no lo es, sin cursor de mano y sin play—. Cero
                 `bb-portada-btn` en el HTML servido, comprobado con curl. Es justo lo
                 que Carlos reportó el 2026-09-09.
 
-                ⚠️ Sigue degradando: una canción sin ninguna de las dos fuentes se
+                Sigue degradando: una canción sin ninguna de las dos fuentes se
                 queda como imagen, en vez de un botón que no reproduce nada.
 
-                🔴 `data-pista-*` es todo lo que `pista.ts` necesita: no hay una
+                `data-pista-*` es todo lo que `pista.ts` necesita: no hay una
                 lista de canciones duplicada en el JavaScript, la página la declara.
                 `data-pista-yt` lleva el id de 11 caracteres YA validado en el
                 servidor — nunca la URL cruda.

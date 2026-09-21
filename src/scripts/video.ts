@@ -5,12 +5,12 @@
  * de cápsulas al centro; al elegir una, se carga y suena AHÍ, sin salir de la
  * página.
  *
- * 🔴 Plyr son 110 KB y se cargan **solo cuando alguien va a ver un video**. Es la
+ * Plyr son 110 KB y se cargan **solo cuando alguien va a ver un video**. Es la
  * misma regla que con el SDK de Triton (854 KB): quien entra a leer no paga el peso
  * de lo que no usa. El sitio v1 cargaba Plyr desde el CDN de NRM en TODAS las
  * páginas, y encima `new Plyr(...)` corría sin guarda.
  *
- * 🔴 Y por qué Plyr y no `<video>`: las cápsulas pueden ser mp4 O YouTube, y un
+ * Y por qué Plyr y no `<video>`: las cápsulas pueden ser mp4 O YouTube, y un
  * `<video>` nativo no reproduce YouTube. Plyr da las dos con la misma API y la
  * misma piel, que es justo lo que este panel necesita.
  */
@@ -26,7 +26,7 @@ interface PlyrFuente {
 interface PlyrInstancia {
   source: PlyrFuente;
   /*
-    🔴 Se le pregunta A PLYR si está sonando, en vez de fiarse del atributo que
+    Se le pregunta A PLYR si está sonando, en vez de fiarse del atributo que
     este módulo pinta en el panel. El atributo es un ESPEJO —lo escriben los
     eventos— y un espejo puede quedarse atrás: medido, entre el clic y el evento
     `playing` hay una ventana de buffering de varios segundos en la que el panel
@@ -86,7 +86,7 @@ interface Visor {
   /**
    * El botón de la cápsula que está CARGADA en el visor.
    *
-   * 🔴 Sin esto no se podía distinguir «pulsó la que ya está puesta» de «pulsó
+   * Sin esto no se podía distinguir «pulsó la que ya está puesta» de «pulsó
    * otra», y las dos hacían lo mismo: recargar la fuente. Medido en el navegador,
    * volver a pulsar la cápsula en curso la devolvía de 23.8s a 0 — o sea que el
    * gesto natural para retomar después de que el directo robara el canal te
@@ -139,7 +139,7 @@ function vigilarViewport(visor: Visor): void {
  * hacer lo mismo en el sitio. Reconstruir SVG en cada cambio de estado sería la
  * otra, y es peor.
  *
- * ⚠️ `aria-pressed` acompaña al icono. Un botón que cambia de función según el
+ * `aria-pressed` acompaña al icono. Un botón que cambia de función según el
  * estado tiene que decirlo, o para quien navega con lector de pantalla sigue
  * siendo «reproducir» cuando ya reproduce.
  */
@@ -167,7 +167,7 @@ function enlazarEventos(visor: Visor): void {
   };
 
   /*
-    🔴 Los escuchas se guardan en una LISTA y no en un campo por evento.
+    Los escuchas se guardan en una LISTA y no en un campo por evento.
 
     Antes eran dos campos (`alSonar`, `alPausar`) y añadir el tercero —`ended`—
     habría sido un tercer campo y una tercera pareja de `off`/`on` a mano. Con la
@@ -175,7 +175,7 @@ function enlazarEventos(visor: Visor): void {
     sin el `off`, `on()` ACUMULA, y tras once cápsulas habría once manejadores del
     mismo evento.
 
-    ⚠️ `ended` es nuevo y tapaba un hueco real: al terminar el vídeo, Plyr no emite
+    `ended` es nuevo y tapaba un hueco real: al terminar el vídeo, Plyr no emite
     `pause`, así que el panel se quedaba en `sonando` y —ahora que el botón tiene
     dos caras— la cápsula habría quedado con el icono de pausa sobre algo que ya
     no suena.
@@ -201,13 +201,13 @@ function enlazarEventos(visor: Visor): void {
  * El interruptor de la cápsula que YA está cargada: pausa o retoma, sin tocar la
  * fuente.
  *
- * 🔴 Esto es lo que arregla el gesto que no funcionaba. El camino de antes trataba
+ * Esto es lo que arregla el gesto que no funcionaba. El camino de antes trataba
  * cualquier clic como «carga esta cápsula», así que pulsar la que ya estaba puesta
  * le reasignaba la misma fuente: Plyr reconstruye el elemento de medios, y el vídeo
  * volvía al segundo 0. Y como el icono no cambiaba nunca, desde fuera se leía como
  * que el botón no respondía.
  *
- * ⚠️ Retomar RECLAMA el canal, igual que un arranque: si el directo está sonando
+ * Retomar RECLAMA el canal, igual que un arranque: si el directo está sonando
  * —el caso normal, porque es justo lo que acaba de pausar este vídeo— hay que
  * callarlo, o se oirían los dos.
  */
@@ -230,7 +230,7 @@ function alternar(visor: Visor): void {
 /**
  * Pone una cápsula en el visor y la reproduce.
  *
- * 🔴 El canal de audio se reclama ANTES de que Plyr empiece, no en el evento
+ * El canal de audio se reclama ANTES de que Plyr empiece, no en el evento
  * `play`. Entre el clic y el primer fotograma hay una descarga de 110 KB más la
  * conexión con YouTube; si el radio siguiera sonando en esa ventana, se oirían los
  * dos a la vez — que es exactamente lo que el árbitro existe para evitar.
@@ -240,7 +240,7 @@ async function reproducirEn(visor: Visor, boton: HTMLElement): Promise<void> {
   if (!proveedor || !fuente) return;
 
   /*
-    🔴 Se reclama con `visor.id`, NO con `FUENTES.video`.
+    Se reclama con `visor.id`, NO con `FUENTES.video`.
 
     El visor se registra en el árbitro como `video-nota:<panel>` para poder tener
     más de uno por página. Reclamar con `FUENTES.video` a secas usaba una clave
@@ -251,7 +251,7 @@ async function reproducirEn(visor: Visor, boton: HTMLElement): Promise<void> {
   visor.panel.dataset.estado = 'cargando';
 
   /*
-    🔴 La cápsula se marca ANTES de bajar Plyr, no al final.
+    La cápsula se marca ANTES de bajar Plyr, no al final.
 
     Son 110 KB en el camino frío: hasta que llegaran, la lista no señalaba nada y
     el clic no tenía acuse de recibo. Y hace falta además para el interruptor —el
@@ -273,7 +273,7 @@ async function reproducirEn(visor: Visor, boton: HTMLElement): Promise<void> {
   } catch {
     visor.panel.dataset.estado = 'error';
     /*
-      ⚠️ Se suelta la marca de activo. Si se quedara puesta sin reproductor
+      Se suelta la marca de activo. Si se quedara puesta sin reproductor
       detrás, el clic siguiente en esa misma cápsula se leería como «la que ya
       está cargada», iría al interruptor, encontraría `reproductor` en null y no
       haría NADA: un fallo de red dejaría la cápsula muerta para siempre.
@@ -285,7 +285,7 @@ async function reproducirEn(visor: Visor, boton: HTMLElement): Promise<void> {
 
   if (!visor.reproductor) {
     /*
-      ⚠️ Se vuelve a buscar el elemento de montaje en vez de usar el de la
+      Se vuelve a buscar el elemento de montaje en vez de usar el de la
       construcción. Medido: al cambiar de fuente, Plyr REEMPLAZA el `<video>` por
       uno nuevo —`data-visor-montaje` desaparece del DOM mientras el reproductor
       vive—, así que la referencia guardada puede apuntar a un nodo desprendido.
@@ -312,7 +312,7 @@ async function reproducirEn(visor: Visor, boton: HTMLElement): Promise<void> {
       : { type: 'video', title: titulo, sources: [{ src: fuente, provider: proveedor as 'youtube' }] };
 
   /*
-    🔴 Los escuchas se enlazan DESPUÉS de cada cambio de fuente, no una vez al
+    Los escuchas se enlazan DESPUÉS de cada cambio de fuente, no una vez al
     construir.
 
     Asignar `source` hace que Plyr **reconstruya** el reproductor —con proveedor de
@@ -337,7 +337,7 @@ async function reproducirEn(visor: Visor, boton: HTMLElement): Promise<void> {
   visor.panel.dataset.estado = 'listo';
 
   /*
-    🔴 `play()` va DESPUÉS del evento `ready`, no inmediatamente.
+    `play()` va DESPUÉS del evento `ready`, no inmediatamente.
 
     Asignar `source` con proveedor de YouTube arranca una reconstrucción asíncrona
     —Plyr tiene que cargar la API de YouTube y montar el iframe—, y un `play()`
@@ -402,7 +402,7 @@ export function iniciarVisores(): void {
       reproductor: null,
       id,
       /*
-        🔴 Arranca en `null` y NO en la cápsula que el marcado trae con
+        Arranca en `null` y NO en la cápsula que el marcado trae con
         `data-activa`.
 
         Ese atributo lo pinta el servidor sobre la cápsula DESTACADA del especial:
@@ -436,12 +436,12 @@ export function iniciarVisores(): void {
       ev.preventDefault();
 
       /*
-        🔴 Dos gestos distintos con el mismo botón, y la diferencia es si esa
+        Dos gestos distintos con el mismo botón, y la diferencia es si esa
         cápsula ya está en el visor.
 
         La misma → interruptor: pausa o retoma donde iba. Otra → se carga y suena.
 
-        ⚠️ El `if` de dentro es la guarda del camino frío: mientras Plyr baja,
+        El `if` de dentro es la guarda del camino frío: mientras Plyr baja,
         `activo` ya apunta a la cápsula pulsada pero todavía no hay reproductor.
         Un segundo clic ahí NO debe reentrar en la carga —dispararía una segunda
         reconstrucción sobre la primera a medio hacer, que es como se llega a un

@@ -6,7 +6,7 @@
  * nunca comerciales: el endpoint de ingesta filtra con la lista blanca
  * `estaciones.categoriasMusicales`, que **falla cerrado**.
  *
- * 🔴 Hoy ninguna estación tiene esa lista cargada, así que la bitácora está vacía
+ * Hoy ninguna estación tiene esa lista cargada, así que la bitácora está vacía
  * y estas funciones devuelven `null`/`[]`. No es un bug de este código: es A6 del
  * plan. Por eso todo aquí degrada en silencio en vez de tirar la página.
  *

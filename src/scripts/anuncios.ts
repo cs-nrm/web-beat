@@ -9,7 +9,7 @@
  * Aquí el marcado DECLARA sus huecos con `data-*` y el script los descubre. Un
  * `<Anuncio />` nuevo en cualquier página entra solo.
  *
- * 🔴 EL AD UNIT SALE DEL ENV, JAMÁS DEL CÓDIGO. Es línea roja de la casa por una
+ * EL AD UNIT SALE DEL ENV, JAMÁS DEL CÓDIGO. Es línea roja de la casa por una
  * razón de dinero: en los repos hermanos está pegado por copy-paste
  * (`/<network>/StereoCien`), y servir impresiones de una estación a la cuenta de
  * otra factura mal. Hay una guarda de grep en CI.
@@ -63,7 +63,7 @@ let definidos: Slot[] = [];
 /**
  * El plazo tras el cual un hueco del que no se sabe nada se da por vacío.
  *
- * 🔴 Existe porque el fallo más común de la publicidad no es «GAM dice que no
+ * Existe porque el fallo más común de la publicidad no es «GAM dice que no
  * tiene»: es que GAM **no contesta nunca** —un bloqueador, una red que corta
  * `securepubads`, un `gpt.js` que no bajó—. En ese caso `slotRenderEnded` no
  * llega, y sin este plazo la banda de portada se queda abierta y negra para
@@ -80,18 +80,18 @@ let temporizador: ReturnType<typeof setTimeout> | undefined;
 /**
  * Los huecos de los que GPT ya contestó algo en ESTA vista.
  *
- * 🔴 Es lo que distingue «GAM dijo que no tiene» de «GAM no contestó», que es de lo
+ * Es lo que distingue «GAM dijo que no tiene» de «GAM no contestó», que es de lo
  * que depende `PLAZO_VACIO`: sin la distinción, el plazo escondería también los
  * huecos que sí se llenaron pero tardaron más que él.
  *
- * ⚠️ Vive en el módulo y no dentro de la función porque el oyente de GPT se registra
+ * Vive en el módulo y no dentro de la función porque el oyente de GPT se registra
  * UNA sola vez (ver `oyenteRegistrado`) y tiene que leer el conjunto de la vista en
  * curso, no el de la primera. Se vacía al empezar cada vista.
  */
 const atendidos = new Set<string>();
 
 /**
- * 🔴 El oyente de `slotRenderEnded` se registra UNA vez por contexto de JavaScript,
+ * El oyente de `slotRenderEnded` se registra UNA vez por contexto de JavaScript,
  * no por vista.
  *
  * `addEventListener` de GPT ACUMULA, y una navegación de Astro no recarga el
@@ -105,7 +105,7 @@ const atendidos = new Set<string>();
  * deja de serlo cuando alguien cuelgue de este evento algo que NO sea idempotente.
  * El takeover ya cuelga de él.
  *
- * ⚠️ Y se registra igual ANTES de `enableServices()`: la primera vista, que es la que
+ * Y se registra igual ANTES de `enableServices()`: la primera vista, que es la que
  * importa, lo hace en el mismo orden de siempre.
  */
 let oyenteRegistrado = false;
@@ -133,21 +133,21 @@ function marcar(id: string, vacio: boolean): void {
 /**
  * Reemite el render de un hueco como evento del DOM.
  *
- * 🔴 Existe para el TAKEOVER (`src/components/Takeover.astro`), que necesita saber
+ * Existe para el TAKEOVER (`src/components/Takeover.astro`), que necesita saber
  * si su slot se llenó para decidir si abre el overlay, y NO puede enterarse por su
  * cuenta: el oyente de GPT tiene que quedar registrado antes de `enableServices()`,
  * y cualquier módulo de una página se evalúa después del `cmd.push` de este archivo.
  * Un segundo `addEventListener` allá llegaría tarde justo al primer render, que es
  * el que importa. Aquí ya estamos dentro del único oyente que sí llega a tiempo.
  *
- * 🔴 Se avisa SOLO desde el evento de GPT, nunca desde `PLAZO_VACIO`. Los tres
+ * Se avisa SOLO desde el evento de GPT, nunca desde `PLAZO_VACIO`. Los tres
  * segundos y medio de este archivo son para un hueco que está a la vista y no se
  * puede quedar abierto; el takeover espera INVISIBLE, así que le sobra paciencia y
  * tiene su propio plazo más largo. Cerrarlo a los 3.5 s tiraría una impresión
  * pagada que venía en camino — GAM contesta entre 1700 y 2659 ms con red de cable,
  * medido en producción, y un teléfono en 3G se pasa de aquí sin despeinarse.
  *
- * ⚠️ Es un `CustomEvent` en `document` y no una función importada a propósito: este
+ * Es un `CustomEvent` en `document` y no una función importada a propósito: este
  * módulo no debe saber que el takeover existe. Cualquier otro hueco que algún día
  * necesite reaccionar a su propio render escucha lo mismo y no hay que tocar esto.
  */
@@ -158,22 +158,22 @@ function avisar(id: string, vacio: boolean): void {
 /**
  * Encaja un creativo que llegó más grande que el hueco.
  *
- * 🔴 Existe por un fallo visto en el v2 desplegado (Carlos, 2026-09-09, iPhone):
+ * Existe por un fallo visto en el v2 desplegado (Carlos, 2026-09-09, iPhone):
  * el hueco del leaderboard reservaba sus **320×100** de móvil y GAM metió dentro
  * un **728×90**, la medida de escritorio. Con `overflow: visible` el iframe se
  * salía de lado y se pintaba ENCIMA del Fenómeno. Medido en v2: hueco 320×100,
  * iframe 728×90, overflow visible en el hueco y en el marco.
  *
- * 🔴 Se ESCALA en vez de recortar, y esa es la decisión. `overflow: hidden` a secas
+ * Se ESCALA en vez de recortar, y esa es la decisión. `overflow: hidden` a secas
  * protegería la maquetación —que es lo urgente— pero entregaría al anunciante un
  * creativo cortado por la mitad, servido y facturado. Escalado se ve entero, cabe,
  * y la página no se rompe.
  *
- * ⚠️ Solo se escala hacia ABAJO. Un creativo más pequeño que su hueco se deja como
+ * Solo se escala hacia ABAJO. Un creativo más pequeño que su hueco se deja como
  * está: ampliarlo lo pixelaría, y además puede ser correcto —un 300×250 dentro de
  * un hueco de 300×250 con aire—.
  *
- * ⚠️ Esto es un PARACHOQUES, no la solución. Que GAM sirva una medida que el slot
+ * Esto es un PARACHOQUES, no la solución. Que GAM sirva una medida que el slot
  * no pidió se arregla en Ad Manager, restringiendo el ad unit a las medidas dadas
  * de alta. Mientras eso no pase, esto evita que la portada se rompa.
  */
@@ -241,7 +241,7 @@ type Regla = [Medida, Medida[]];
 /**
  * Define y muestra los huecos de la página.
  *
- * 🔴 TODO va dentro de `googletag.cmd.push`. Fuera, en móvil o con red lenta,
+ * TODO va dentro de `googletag.cmd.push`. Fuera, en móvil o con red lenta,
  * `googletag` es solo el stub que puso el snippet y `destroySlots` no existe
  * todavía: el TypeError cancela la inicialización entera y la página se queda sin
  * un solo anuncio. Está documentado así en `dynamicAds.md`.
@@ -287,7 +287,7 @@ export function iniciarAnuncios(): void {
       if (!slot) continue;
 
       /*
-        🔴 UN slot por formato, con `sizeMapping`. Nunca un slot de escritorio y
+        UN slot por formato, con `sizeMapping`. Nunca un slot de escritorio y
         otro de móvil apuntando al mismo hueco: en el v1 eso causó DOBLE
         IMPRESIÓN, porque los dos se contaban aunque solo uno se viera.
       */
@@ -317,7 +317,7 @@ export function iniciarAnuncios(): void {
       Cierra el hueco cuando GAM no tiene qué servir. El v1 no lo hacía y dejaba
       marcos vacíos en la página.
 
-      ⚠️ Va por `setConfig({ collapseDiv })` y no por `pubads().collapseEmptyDivs()`:
+      Va por `setConfig({ collapseDiv })` y no por `pubads().collapseEmptyDivs()`:
       GPT avisa en consola que ese método está **deprecado**. Lo cazamos en la
       consola del navegador el mismo día que se escribió, así que no llegó a
       producción — pero es el tipo de aviso que se ignora hasta que un día el
@@ -330,11 +330,11 @@ export function iniciarAnuncios(): void {
       rótulo «PUBLICIDAD» y el alto reservado son nuestros, no de GPT. Esto es lo
       que se lleva el marco entero.
 
-      ⚠️ Se registra ANTES de `enableServices()`. Después, el primer render puede
+      Se registra ANTES de `enableServices()`. Después, el primer render puede
       haber ocurrido ya y el evento se pierde — con la banda quedándose abierta
       justo en la carga inicial, que es la que importa.
 
-      🔴 `atendidos` es lo que distingue «GAM dijo que no tiene» de «GAM no
+      `atendidos` es lo que distingue «GAM dijo que no tiene» de «GAM no
       contestó». Sin esa distinción el plazo de abajo escondería también los huecos
       que sí se llenaron, si el creativo tardó más que el plazo.
     */
@@ -349,7 +349,7 @@ export function iniciarAnuncios(): void {
     }
 
     /*
-      ⚠️ `setConfig({ singleRequest })` y NO `pubads().enableSingleRequest()`.
+      `setConfig({ singleRequest })` y NO `pubads().enableSingleRequest()`.
 
       GPT avisa en consola que ese método está **deprecado**, con el mismo tono con
       el que avisó de `collapseEmptyDivs` — que ya migramos por eso mismo, dos
@@ -376,7 +376,7 @@ export function iniciarAnuncios(): void {
 /**
  * Cablea la inicialización a Astro.
  *
- * 🔴 El listener se registra UNA sola vez. `astro:page-load` dispara en la carga
+ * El listener se registra UNA sola vez. `astro:page-load` dispara en la carga
  * inicial **y** en cada navegación; si el módulo lo registrara de nuevo en cada
  * una, la enésima navegación ejecutaría `iniciarAnuncios` n veces y cada pasada
  * destruiría los slots que acababa de crear la anterior.

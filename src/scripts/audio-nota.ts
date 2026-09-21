@@ -1,19 +1,19 @@
 /**
  * El audio principal de una nota — la barra de Microambiente.
  *
- * 🔴 Suena en la PÁGINA y no en la barra del player, y es la diferencia con
+ * Suena en la PÁGINA y no en la barra del player, y es la diferencia con
  * `pista.ts`. Una canción de Bonus Beat es una pista suelta en una lista de tres:
  * su sitio es la barra, que sobrevive a la navegación. El audio de una nota de
  * Microambiente **es la nota** —va arriba, pegado a la foto, y se escucha mientras
  * se lee lo que tiene debajo—. Mandarlo a la barra lo habría convertido en otra
  * cosa: algo que sigue sonando cuando ya no estás en la nota que lo explica.
  *
- * 🔴 Solo atiende al mp3. El otro camino del CMS es un `embedUrl` de plataforma
+ * Solo atiende al mp3. El otro camino del CMS es un `embedUrl` de plataforma
  * (Omny, Spotify, SoundCloud…), y ese reproductor viene dentro de un iframe de otro
  * dominio: no hay nada que cablear desde aquí, ni forma de pausarlo.
  * `AudioNota.astro` pinta uno u otro y este módulo solo ve el primero.
  *
- * ⚠️ Y esa es una limitación REAL del árbitro, no un descuido: un embed que empieza
+ * Y esa es una limitación REAL del árbitro, no un descuido: un embed que empieza
  * a sonar no se puede callar desde fuera, así que con un iframe pueden acabar
  * sonando la radio y el audio a la vez. Es exactamente lo que el árbitro existe
  * para impedir, y es el motivo de que `fuenteDeAudio()` prefiera el archivo cuando
@@ -41,7 +41,7 @@ function reloj(segundos: number): string {
 /**
  * Desmonta el audio de la página anterior.
  *
- * 🔴 PAUSA además de olvidar. Con el `ClientRouter` de Astro el `<body>` se
+ * PAUSA además de olvidar. Con el `ClientRouter` de Astro el `<body>` se
  * reemplaza pero un `HTMLAudioElement` que ya está reproduciendo **sigue sonando
  * aunque su nodo salga del DOM**: quedaría una voz sin página y sin botón con el
  * que pararla. Es el mismo motivo por el que `video.ts` destruye sus visores.
@@ -69,7 +69,7 @@ function iniciar(): void {
   if (!boton || !avance) return;
 
   /*
-    ⚠️ `metadata` y no `none`, al revés que en `pista.ts`. Allí son tres mp3 en una
+    `metadata` y no `none`, al revés que en `pista.ts`. Allí son tres mp3 en una
     página y precargarlos baja megabytes que casi nadie va a escuchar; aquí es UNO,
     y su duración es un dato que se consulta ANTES de pulsar play — cuánto dura es
     la mitad de la decisión de escucharlo. `metadata` baja unos kilobytes de
@@ -86,7 +86,7 @@ function iniciar(): void {
 
   const pintarBoton = (): void => {
     /*
-      ⚠️ Con VALOR y no a secas. Un `data-sonando` vacío existe en el DOM pero vale
+      Con VALOR y no a secas. Un `data-sonando` vacío existe en el DOM pero vale
       la cadena vacía, y `!!''` es `false`: así se quedó plegado el menú al volver
       al Inicio. El CSS mira `[data-sonando]`, que sí acierta, pero el atributo
       también lo puede leer un script.
@@ -128,12 +128,12 @@ function iniciar(): void {
   });
 
   /*
-    🔴 El fallo de carga se DICE. Un mp3 que el CMS no sirve —borrado, renombrado,
+    El fallo de carga se DICE. Un mp3 que el CMS no sirve —borrado, renombrado,
     una media a la que le falta el archivo— deja una barra que se pulsa y no hace
     nada, y eso es justo lo que este sitio no admite: un control inerte le enseña al
     lector a desconfiar de los demás.
 
-    ⚠️ Y es la excepción de la regla de los avisos: una zona vacía se deja vacía y
+    Y es la excepción de la regla de los avisos: una zona vacía se deja vacía y
     sin rótulo, pero una AVERÍA se delata, porque sin el texto se ve igual que un
     audio que nadie ha pulsado todavía.
   */
@@ -149,7 +149,7 @@ function iniciar(): void {
       return;
     }
     /*
-      ⚠️ La promesa de `play()` se ATRAPA. Rechaza en dos casos reales —el navegador
+      La promesa de `play()` se ATRAPA. Rechaza en dos casos reales —el navegador
       niega la reproducción, o la fuente no se puede decodificar— y sin `catch` eso
       sale por consola como un rechazo no gestionado y la barra se queda en «play»
       sin explicar nada. El `error` de arriba cubre lo segundo; esto evita el ruido
@@ -178,7 +178,7 @@ export function prepararAudioNota(): void {
   w.__beatAudioNotaListo = true;
   document.addEventListener('astro:page-load', iniciar);
   /*
-    🔴 Y ANTES del cambio de página, no solo después. `astro:page-load` corre
+    Y ANTES del cambio de página, no solo después. `astro:page-load` corre
     cuando el DOM nuevo ya está puesto, así que el audio de la nota anterior seguiría
     sonando durante todo el intercambio; con `before-swap` se calla en el instante en
     que la nota que lo contenía deja de existir.

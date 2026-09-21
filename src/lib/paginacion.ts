@@ -1,20 +1,20 @@
 /**
  * El contrato de paginación de las vistas de índice.
  *
- * 🔴 Nace el 2026-09-17 porque Beat Scanner tenía **53 notas publicadas y solo 11
+ * Nace el 2026-09-17 porque Beat Scanner tenía **53 notas publicadas y solo 11
  * alcanzables**: la sección pedía una tanda y se acababa ahí. Las 42 restantes
  * seguían existiendo —su URL respondía, y estaban en el sitemap del CMS— pero
  * desde el sitio no había forma de llegar a ellas. Medido contra el CMS ese día:
  * Beat Scanner 53, Editorial 5, Microambiente 1.
  *
- * 🔴 La página va en el QUERY (`?pagina=2`) y no en la ruta (`/pagina/2`), y no es
+ * La página va en el QUERY (`?pagina=2`) y no en la ruta (`/pagina/2`), y no es
  * pereza: las cuatro vistas que paginan son `/beat-scanner`, `/editorial`,
  * `/beat-scanner/<categoria>` y `/etiqueta/<slug>`, y las dos últimas ya son rutas
  * dinámicas. Con segmento habría que crear cuatro archivos de ruta más, y el
  * `/pagina/` de primer nivel chocaría con `[tipoLista]`, que reclama cualquier
  * primer segmento que no esté reservado.
  *
- * ⚠️ Y por eso mismo `rutaPagina` NO conserva otros parámetros: hoy ninguna de las
+ * Y por eso mismo `rutaPagina` NO conserva otros parámetros: hoy ninguna de las
  * cuatro rutas lee nada más de la URL —el `?tipo` de la Agenda se retiró el
  * 2026-09-08—, y arrastrar el query entero sería justo lo que la regla de abajo
  * prohíbe. El día que una vista tenga dos parámetros, se combinan aquí y se
@@ -22,7 +22,7 @@
  */
 
 /**
- * 🔴 Tope de página. Es la regla de oro del cliente del CMS aplicada a la URL:
+ * Tope de página. Es la regla de oro del cliente del CMS aplicada a la URL:
  * la clave de caché es la consulta entera, así que `?pagina=999999999` es una
  * entrada de caché regalada, y hay tantas como números quiera teclear alguien.
  *
@@ -43,7 +43,7 @@ export const PARAM_PAGINA = 'pagina';
  * La página pedida, ya validada. Cualquier cosa que no sea un entero dentro del
  * rango cae a 1.
  *
- * ⚠️ `Number('')` es `0` y `Number(' 2 ')` es `2`: por eso se comprueba con
+ * `Number('')` es `0` y `Number(' 2 ')` es `2`: por eso se comprueba con
  * `Number.isInteger` sobre el valor convertido y no con un `parseInt`, que se
  * traga `2abc` y devolvería 2. Un valor raro no es un error del lector: es la
  * primera página.
@@ -68,7 +68,7 @@ export function totalPaginas(total: number, porPagina: number): number {
 /**
  * El `href` de una página.
  *
- * ⚠️ La página 1 va SIN parámetro. Es lo que evita que `/beat-scanner` y
+ * La página 1 va SIN parámetro. Es lo que evita que `/beat-scanner` y
  * `/beat-scanner?pagina=1` sean dos URLs con el mismo contenido — el mismo
  * problema que el 301 de `/beat-scanner/editorial` resolvió el 2026-09-07.
  */

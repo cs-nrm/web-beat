@@ -2,7 +2,7 @@
 /**
  * La tira de secciones de los interiores.
  *
- * 🔴 NO es un filtro, y la distinción importa. Antes esto eran las CATEGORÍAS de
+ * NO es un filtro, y la distinción importa. Antes esto eran las CATEGORÍAS de
  * `noticias` con un «TODO» delante, y en la práctica se leía como el menú del
  * sitio porque las categorías que la redacción creó se llaman igual que las
  * secciones —`Agenda`, `Beat Scanner`, `Bonus Beat`, `Fenómeno Residente`—.
@@ -12,12 +12,12 @@
  * Ahora es lo que parecía ser: la navegación entre las cinco secciones. Sin
  * «TODO», porque no hay nada que reiniciar — una sección no es un estado de filtro.
  *
- * 🔴 Y es la ÚNICA navegación visible de un interior: ahí la barra oscura va
+ * Y es la ÚNICA navegación visible de un interior: ahí la barra oscura va
  * recogida a propósito (`Base.astro`), así que esta tira carga con el trabajo que
  * hacía el menú. Por eso se envuelve, en vez de irse a un carrusel horizontal:
  * una sección que hay que descubrir arrastrando es una sección que no existe.
  *
- * 🔴 El AIRE Y EL FILETE de abajo viven aquí, y no en quien la usa. Es la
+ * El AIRE Y EL FILETE de abajo viven aquí, y no en quien la usa. Es la
  * corrección de un fallo que llevaba puesto en las ocho secciones (2026-09-07,
  * lo reportó Carlos como «abajo del en vivo hay un texto encimado»).
  *
@@ -34,7 +34,7 @@
  * recién puesta en la nota, ahí la migaja arrancaba exactamente donde terminaba la
  * tira.
  *
- * ⚠️ Puesto aquí, la medida vive en UN sitio y no puede volver a perderse por el
+ * Puesto aquí, la medida vive en UN sitio y no puede volver a perderse por el
  * camino. Si algún día una tira necesita ir sin filete, es una prop de este
  * archivo — no una regla en el `<style>` de quien la llama, que es lo que ya
  * falló.
@@ -93,7 +93,7 @@ const { activa = null, class: clase } = Astro.props;
   /*
     La activa se INVIERTE, no se aclara.
 
-    🔴 Nunca por opacidad sobre las inactivas: en este repo ya pasó que los
+    Nunca por opacidad sobre las inactivas: en este repo ya pasó que los
     enlaces «pendientes» acabaran más brillantes que el activo, por aplicar un
     modificador de opacidad encima de un `var()`.
   */

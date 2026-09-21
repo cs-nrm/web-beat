@@ -1,7 +1,7 @@
 /**
  * Control del intro: una vez por sesión, y con salida.
  *
- * 🔴 Lo que este script NO hace: quitar el overlay. Eso lo hace el CSS, que termina
+ * Lo que este script NO hace: quitar el overlay. Eso lo hace el CSS, que termina
  * su animación en `opacity: 0` + `visibility: hidden` + `pointer-events: none`. Si
  * este archivo no llega a ejecutarse, el intro se va igual y el sitio queda usable.
  * El handoff lo resolvía al revés —`intro.remove()` desde JS— y eso deja el sitio
@@ -36,7 +36,7 @@ function apuntarQueSeVio(): void {
 
 export function prepararIntro(): void {
   /*
-   * 🔴 Quien decide si el intro corre es el script EN LÍNEA de `Intro.astro`, que
+   * Quien decide si el intro corre es el script EN LÍNEA de `Intro.astro`, que
    * se ejecuta de forma síncrona antes de pintar. Aquí solo se atiende el caso en
    * que ya decidió que sí.
    *
@@ -68,7 +68,7 @@ export function prepararIntro(): void {
   /*
    * Se puede saltar, y solo a propósito.
    *
-   * 🔴 El clic va en un BOTÓN, no en todo el overlay. Con la superficie entera
+   * El clic va en un BOTÓN, no en todo el overlay. Con la superficie entera
    * escuchando, cualquier clic suelto mientras carga la página se llevaba el intro
    * sin que nadie lo pidiera — al probarlo desaparecía al instante. Un botón hay
    * que pulsarlo, sale en el orden de tabulación y dice lo que hace.
@@ -83,7 +83,7 @@ export function prepararIntro(): void {
   document.addEventListener('keydown', alTeclado);
 
   /*
-   * 🔴 El cierre se ata al `animationend` del overlay Y a un temporizador de
+   * El cierre se ata al `animationend` del overlay Y a un temporizador de
    * respaldo. Solo con el evento, una pestaña que estuviera en segundo plano
    * durante la animación podría no entregarlo nunca y el nodo se quedaría ahí —
    * invisible y sin capturar clics gracias al CSS, pero presente. `setTimeout`
@@ -91,7 +91,7 @@ export function prepararIntro(): void {
    */
   intro.addEventListener('animationend', (e) => {
     /*
-     * 🔴 Se comprueban las DOS cosas: que sea la animación de salida y que venga
+     * Se comprueban las DOS cosas: que sea la animación de salida y que venga
      * del overlay mismo. `animationend` burbujea, y dentro hay cuatro animaciones
      * más —el logo, el rastro y las dos estelas—; sin el filtro por nombre,
      * cualquiera de ellas cerraría el intro a los dos segundos. Y sin el filtro por

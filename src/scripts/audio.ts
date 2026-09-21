@@ -11,7 +11,7 @@
  * dos sentidos —radio→video y video→radio—, que es donde estaba el bug del sitio
  * viejo: ahí el player paraba el radio al abrir un video, pero no al revés.
  *
- * 🔴 El registro vive en `window` a propósito. El player del radio y el media de
+ * El registro vive en `window` a propósito. El player del radio y el media de
  * una nota se cargan en módulos distintos, y el bundler puede separarlos en
  * chunks: sin un punto común compartirían la interfaz pero no la instancia, y
  * cada uno tendría su propio registro vacío.
@@ -67,14 +67,14 @@ export function reclamarAudio(id: string): void {
 /**
  * Quién tiene el canal ahora mismo.
  *
- * 🔴 Hasta hoy `reclamarAudio` era una difusión de pausas SIN dueño: se podía
+ * Hasta hoy `reclamarAudio` era una difusión de pausas SIN dueño: se podía
  * decir «ahora sueno yo», pero no había a quién preguntarle «¿sigue siendo mío?».
  * El player del radio necesita esa pregunta antes de cada intento de reconexión:
  * si mientras estaba caído el oyente puso un video o una pista, reconectar le
  * robaría el canal a algo que él acaba de elegir, y volveríamos a tener dos
  * audios a la vez — el bug que este archivo existe para impedir.
  *
- * ⚠️ Se compara siempre contra `FUENTES.radio` y nunca al revés: `FUENTES.video`
+ * Se compara siempre contra `FUENTES.radio` y nunca al revés: `FUENTES.video`
  * NO es una clave real del registro, porque el visor se registra como
  * `video-nota:<id>` (ver `video.ts`).
  */

@@ -69,18 +69,18 @@ sabe qué documento se sirve.
 | `src/pages/noticias/[slug].astro` | la cabecera `X-Robots-Tag` de SU propia respuesta |
 | `src/layouts/Base.astro` (prop `noIndex`) | el `<meta robots>` del documento |
 
-- 🔴 **NO puede vivir en el middleware**, que es donde está el resto de la política:
+- **NO puede vivir en el middleware**, que es donde está el resto de la política:
   cuando el middleware corre no sabe qué documento se va a servir, ni si existe. Por
   eso la nota pone su propia cabecera, y por eso `Astro.response.headers` se escribe
   en el frontmatter de la PÁGINA — desde el layout ya es tarde, la respuesta va en
   camino.
-- ⚠️ **Se combina con `||`, igual que las otras**: solo puede CERRAR. Un `false` del
+- **Se combina con `||`, igual que las otras**: solo puede CERRAR. Un `false` del
   CMS no abre la preproducción, así que equivocarse en el admin no tiene
   consecuencias.
-- ⚠️ La cabecera es de esa respuesta y no se contagia: el resto del sitio sigue
+- La cabecera es de esa respuesta y no se contagia: el resto del sitio sigue
   indexable (comprobado, ver «Cómo se verifica»).
 
-### 🔴 De qué depende, fuera de este repo
+### De qué depende, fuera de este repo
 
 1. **`security.allowedDomains` en `astro.config.mjs`.** Sin esa lista,
    `context.url.hostname` es SIEMPRE `localhost` en producción, y las tres capas
@@ -91,7 +91,7 @@ sabe qué documento se sirve.
    `checkOrigin` **responde 403 a todo POST**. Falla silenciosa por un lado y
    ruidosa por el otro, que es la peor combinación para diagnosticarla.
 
-⚠️ **Corolario:** meter delante un proxy que reescriba el `Host` abre las tres capas
+**Corolario:** meter delante un proxy que reescriba el `Host` abre las tres capas
 a la vez. Ver `docs/despliegue-v2.md`.
 
 ---
@@ -114,11 +114,11 @@ Base.astro
 
 Reglas que hay que respetar:
 
-- 🔴 **`og:image` va ABSOLUTA o no cuenta.** Facebook y X descartan una ruta relativa
+- **`og:image` va ABSOLUTA o no cuenta.** Facebook y X descartan una ruta relativa
   **sin decir nada**: la publicación sale sin imagen y desde el sitio no se nota. Se
   resuelve una sola vez en el layout, contra `SITE_URL`.
-- 🔴 **Nunca SVG en `og:image`.** Ninguna de las dos plataformas lo acepta.
-- 🔴 **Las tres etiquetas de la imagen se eligen JUNTAS y del mismo lado.** Si la
+- **Nunca SVG en `og:image`.** Ninguna de las dos plataformas lo acepta.
+- **Las tres etiquetas de la imagen se eligen JUNTAS y del mismo lado.** Si la
   página trae imagen propia, el `alt` y las medidas son los de ESA imagen o no van;
   jamás los del respaldo. Y unas medidas que no correspondan al archivo son peores
   que ninguna: las plataformas reservan el hueco con ellas antes de bajar la imagen,
@@ -149,32 +149,32 @@ nombre de la sección sobre el negro de la marca.
   a 300.
 - **Se generan al COMPILAR**, en `scripts/favicon.mjs`, y el PNG se commitea.
   `sharp` es `devDependency`: nada de esto existe en producción, donde solo hay
-  archivos estáticos en `public/img/`. ⚠️ Compilar el sitio **no** las regenera — si
+  archivos estáticos en `public/img/`. Compilar el sitio **no** las regenera — si
   cambia el logo o el nombre de una sección, hay que correr `pnpm favicon`.
-- 🔴 **Cada página pasa su `imagen` escrita a mano** (`imagen="/img/og-editorial.png"`
+- **Cada página pasa su `imagen` escrita a mano** (`imagen="/img/og-editorial.png"`
   + su `alt` + `MEDIDA_TARJETA`). No hay detección de archivos en ejecución: la
   página declara con qué se comparte, se ve con un `grep`, y una sección sin tarjeta
   cae al respaldo en vez de pedir un archivo que no existe. La única excepción es
   `/bonus-beat`, cuya ruta es dinámica (`[tipoLista]`): ahí la tarjeta se busca por
   slug en un mapa del propio archivo.
-- ⚠️ **La lista de secciones está escrita DOS veces** y hay que mantenerla en
+- **La lista de secciones está escrita DOS veces** y hay que mantenerla en
   sintonía: en `scripts/favicon.mjs` (que es `.mjs` y no puede importar el `.ts` de
   `config/navegacion.ts`) y en el `imagen=` de cada página. Olvidarse es inofensivo
   —se comparte con la tarjeta de marca— y es lo que había antes.
-- ⚠️ **El texto de la tarjeta es el del `h1`** de esa sección, no el del `<title>`:
+- **El texto de la tarjeta es el del `h1`** de esa sección, no el del `<title>`:
   la tarjeta es la puerta de la página y tiene que decir lo que la página dice al
   abrirla. De ahí «AGENDA» en un archivo que se llama `og-eventos.png` (el archivo
   se nombra por la RUTA) y «EL FENÓMENO RESIDENTE» con su artículo.
-- ⚠️ **El `alt` describe el texto HORNEADO en el PNG**, no una variable. En
+- **El `alt` describe el texto HORNEADO en el PNG**, no una variable. En
   `/bonus-beat` es explícito: armarlo con `tipo.nombre` haría que un renombre en el
   CMS dejara el `alt` describiendo unas letras que no están en la imagen.
-- ⚠️ **El cuerpo y el reparto en líneas se MIDEN, no se escriben**: el script compone
+- **El cuerpo y el reparto en líneas se MIDEN, no se escriben**: el script compone
   el texto, `trim()` le da la caja real y de ahí sale el cuerpo que cabe. Si en una
   línea la letra queda chica se prueban los cortes por palabra y gana el que la deja
   más grande — «EL FENÓMENO RESIDENTE» pasa de 79px a dos líneas de 138. Hay guardas
   que truenan si algo no cabe: una tarjeta con el nombre cortado se ve perfecta desde
   el sitio y solo se nota ya publicada.
-- ⚠️ **El nombre NO va en Archivo**, la tipografía de display del sitio: librsvg
+- **El nombre NO va en Archivo**, la tipografía de display del sitio: librsvg
   compone con las tipografías del SISTEMA y las del front son `.woff2`, que
   fontconfig no indexa. Se pide una pila grotesca (Helvetica Neue / Helvetica /
   Arial). Consecuencia asumida: regenerar en otra máquina puede dar otra letra. Se
@@ -198,34 +198,34 @@ nombre de la sección sobre el negro de la marca.
 - Una sección que se muda **deja 301 detrás**, no un 404. Ver los `redirects` de
   `astro.config.mjs` para `/scanner` → `/beat-scanner`: de esos 301 dependen la
   migaja de cada nota ya publicada y lo que la estación haya compartido.
-- ⚠️ Si un cambio deja dos URLs sirviendo lo mismo, se colapsa una en la otra con
+- Si un cambio deja dos URLs sirviendo lo mismo, se colapsa una en la otra con
   301 en **un solo salto**. Ya pasó con `/scanner/editorial`, que daba dos.
 
 ### Los índices paginados (2026-09-17)
 
-🔴 **La página 2 de una sección se canoniza a SÍ MISMA, con su `?pagina=2`.** Es la
+**La página 2 de una sección se canoniza a SÍ MISMA, con su `?pagina=2`.** Es la
 única vez que un parámetro entra en la canónica, y sin ella el sitio le estaría
 diciendo a Google que la 2 es un duplicado de la 1 — con lo que las **42 notas de
 Beat Scanner que solo viven de la página 2 en adelante** se quedarían sin indexar.
 Lo pone `Base.astro` con la prop `pagina`.
 
-🔴 **Y el `<title>` lleva su número**, al final: `Beat Scanner — Beat 100.9 —
+**Y el `<title>` lleva su número**, al final: `Beat Scanner — Beat 100.9 —
 Página 3`. Cinco páginas con el mismo título es exactamente lo que el 301 de
 `/beat-scanner/editorial` vino a arreglar el 2026-09-07. Va al final y no
 incrustado en medio porque los títulos son cadenas escritas a mano en cada página,
 y partirlas aquí por guiones sería adivinar la forma de un texto de otro archivo.
 
-⚠️ **`Base.astro` NO lee `?pagina` de la URL: la prop la pasa la PÁGINA.** Si lo
+**`Base.astro` NO lee `?pagina` de la URL: la prop la pasa la PÁGINA.** Si lo
 leyera solo, `/alexa?pagina=7` —o lo que invente un rastreador— saldría con canónica
 propia y con «Página 7» en el título, o sea que el sitio declararía indexables
 infinitas URLs de páginas que no paginan. Comprobado el 2026-09-17: `/alexa?pagina=7`
 canoniza a `/alexa`.
 
-⚠️ **Todo lo demás del query se sigue descartando.** Un `?utm_source=` o un
+**Todo lo demás del query se sigue descartando.** Un `?utm_source=` o un
 `?fbclid=` no hacen otra página; dejarlos entrar convertiría cada enlace compartido
 en una canónica distinta.
 
-⚠️ `rel="prev"` / `rel="next"` van en los enlaces del paginador porque cuestan cero,
+`rel="prev"` / `rel="next"` van en los enlaces del paginador porque cuestan cero,
 pero **Google dejó de usarlos en 2019**: lo que hace el trabajo son los enlaces
 `<a href>` de verdad, que es la razón de que la tira sea servidor y no JavaScript.
 
@@ -233,16 +233,16 @@ pero **Google dejó de usarlos en 2019**: lo que hace el trabajo son los enlaces
 
 ## Sitemaps
 
-🔴 **Los genera el CMS. Estas rutas solo los sirven bajo nuestro dominio.**
+**Los genera el CMS. Estas rutas solo los sirven bajo nuestro dominio.**
 
 `/sitemap.xml` y `/news-sitemap.xml` son proxies (`src/lib/feeds.ts`). El path que el
 CMS emite (`getNewsURL` en `cms-estaciones/src/seo/site.ts`) ya coincide con el
 nuestro, así que **al corte solo cambia el host, no el path**.
 
-⚠️ Consecuencia práctica: **las rutas de sección del front NO están en el sitemap.**
+Consecuencia práctica: **las rutas de sección del front NO están en el sitemap.**
 Si hace falta declararlas, es una decisión nueva — no un arreglo.
 
-⚠️ Los dos sitemaps son **bloqueantes del corte de dominio**, no de la
+Los dos sitemaps son **bloqueantes del corte de dominio**, no de la
 preproducción. Ver la lista de `docs/despliegue-v2.md`.
 
 ---
@@ -259,7 +259,7 @@ preproducción. Ver la lista de `docs/despliegue-v2.md`.
   quien ya conoce el sitio no lee la descripción.
 - **Nada de «Total Music».** Era el lema del v1 y se retiró del sitio el 2026-09-07.
 - `RESUMEN_CASA` (en `Base.astro`) es el respaldo de cualquier página sin descripción
-  propia. ⚠️ Tiene que decir lo mismo que la descripción del Inicio; son dos textos
+  propia. Tiene que decir lo mismo que la descripción del Inicio; son dos textos
   que se desincronizan solos.
 
 ---
@@ -272,7 +272,7 @@ poblado y el front lo ignoraba entero hasta el 2026-09-07 — medido contra
 `admin.nrm.com.mx`, había un titular de 94 caracteres acortado a mano a 82 que nadie
 usaba. Lo lee `src/pages/noticias/[slug].astro`.
 
-⚠️ **Cada campo se toma solo si trae algo** (`?.trim() ||`, nunca `??`): un campo del
+**Cada campo se toma solo si trae algo** (`?.trim() ||`, nunca `??`): un campo del
 admin que se abrió y se dejó en blanco llega como cadena vacía, y con `??` eso
 ganaría y la nota se compartiría sin titular.
 
@@ -292,16 +292,16 @@ Las cinco decisiones (Carlos, 2026-09-07):
 - **`image` se comparte, el hero se ve.** Son dos trabajos distintos y la redacción
   los captura por separado: en la nota de Amelie Lens el hero es un 3:2 recortado
   para la página y `meta.image` es la foto de prensa, que es la que funciona dentro
-  de una tarjeta de Facebook. ⚠️ El `alt` y las medidas viajan CON la foto elegida,
+  de una tarjeta de Facebook. El `alt` y las medidas viajan CON la foto elegida,
   nunca mezclados: son documentos de media distintos con su propio `alt`.
 - **`noIndex` se honra en dos capas** — la cabecera la pone la página, el `<meta>` el
   layout. Ver «La cuarta entrada» más arriba.
-- 🔴 **`canonicalUrl` se IGNORA, y no es un olvido.** Sirve para contenido SINDICADO
+- **`canonicalUrl` se IGNORA, y no es un olvido.** Sirve para contenido SINDICADO
   —una nota publicada primero en otro sitio, cuya autoridad le pertenece a ese otro—
   y choca de frente con la doctrina de rutas de este repo: toda URL se arma contra
   `SITE_URL` y nunca contra otra cosa. Honrarlo sería darle a un campo de texto del
   admin la capacidad de sacar una nota del índice de este dominio sin que se note en
-  ninguna pantalla. ⚠️ Hoy está vacío en las 11 notas, así que no se está perdiendo
+  ninguna pantalla. Hoy está vacío en las 11 notas, así que no se está perdiendo
   nada; el día que la estación republique contenido de terceros es una decisión que
   se toma de nuevo, no un pendiente que se arregla.
 
@@ -310,7 +310,7 @@ Las cinco decisiones (Carlos, 2026-09-07):
 ## Datos estructurados (JSON-LD)
 
 Se agregaron el 2026-09-07 y viven en `src/lib/jsonld.ts`. Se emiten con
-`set:html` + `is:inline` — ⚠️ sin `is:inline` Astro se lleva el bloque al bundle,
+`set:html` + `is:inline` — sin `is:inline` Astro se lleva el bloque al bundle,
 donde ningún rastreador lo va a leer.
 
 ```
@@ -318,7 +318,7 @@ Inicio  → nodoEstacion (RadioStation + sameAs de las redes)   ← en Base.astr
 Nota    → nodoNota (NewsArticle) + nodoMigaja (BreadcrumbList) ← en [slug].astro
 ```
 
-- 🔴 **El JSON-LD es una AFIRMACIÓN sobre lo que hay en la página, no promoción.**
+- **El JSON-LD es una AFIRMACIÓN sobre lo que hay en la página, no promoción.**
   De ahí la regla que decide todos los casos: **el `headline` nunca sigue a
   `meta.title`** —lleva el `h1` visible— y el `image` lleva el hero, aunque el
   `<title>` y la `og:image` de la misma nota sí usen el grupo `meta`. Un `<title>`
@@ -371,11 +371,11 @@ for u in / /editorial /beat-scanner /eventos /fenomeno-residente /bonus-beat \
 done
 ```
 
-⚠️ Una `og:image` relativa **pasa toda validación local** y falla solo en la
+Una `og:image` relativa **pasa toda validación local** y falla solo en la
 plataforma. Si se cambia algo del bloque de compartir, se comprueba que la URL salga
 con `https://` y host.
 
-🔴 **`meta.noIndex` no se puede comprobar en local a secas**: en `localhost` las dos
+**`meta.noIndex` no se puede comprobar en local a secas**: en `localhost` las dos
 reglas del despliegue ya cierran, así que la respuesta sale `noindex` de todas formas
 y la prueba no demuestra nada. Hay que abrir el despliegue y forzar el campo:
 
@@ -396,7 +396,7 @@ curl -s  http://localhost:4323/noticias/<slug> | grep 'name="robots"'   # noinde
 curl -sI http://localhost:4323/ | grep -i x-robots-tag                  # ausente: no se contagia
 ```
 
-⚠️ Las 11 notas del CMS tienen `noIndex` en `false`, así que este campo **solo se
+Las 11 notas del CMS tienen `noIndex` en `false`, así que este campo **solo se
 puede probar forzándolo**. Comprobado así el 2026-09-08.
 
 Contexto operativo del despliegue y del corte: `docs/despliegue-v2.md`.

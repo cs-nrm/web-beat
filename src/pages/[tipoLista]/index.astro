@@ -20,7 +20,6 @@ import BonusBeat from '@/components/inicio/BonusBeat.astro';
 import RejillaEdiciones from '@/components/RejillaEdiciones.astro';
 import Anuncio from '@/components/Anuncio.astro';
 import { obtenerTipoDeLista, obtenerListas, obtenerListaReciente } from '@/lib/cms/listas';
-import { fechaCorta } from '@/lib/nota';
 import { MEDIDA_TARJETA, SEGMENTOS_RESERVADOS } from '@/config/site';
 
 const { tipoLista: slug } = Astro.params;
@@ -130,13 +129,21 @@ const tarjeta = TARJETAS_POR_TIPO[slug] ?? null;
             Es lo que alguien viene a ver: quien entra a Bonus Beat quiere las
             canciones de esta semana, no un índice desde el que dar otro clic.
           */}
+          {/*
+            Aquí iba el nombre de la edición con su fecha al otro extremo —«Top Ten
+            22 de sept» y «22 SEP 2026»—, y se fue el 2026-09-22 (Carlos). Repetía
+            debajo del titular lo que el titular ya dice, y la fecha de la edición
+            vigente no es un dato que nadie venga a buscar: quien entra quiere las
+            canciones. Sigue estando donde sí informa, en cada pieza de la retícula
+            de ediciones anteriores.
+
+            Con él se va su hueco de 32px, y eso ALINEA esta página con el resto:
+            medido en el build servido, `/beat-scanner`, `/editorial`,
+            `/microambiente` y `/eventos` pegan su primer bloque a la cabecera de
+            sección sin separación ninguna. Estas dos páginas de lista eran las
+            únicas que metían aire ahí, y lo metían por este bloque.
+          */}
           <div class="tl-ultima">
-            <div class="tl-corte">
-              <span class="beat-display tl-corte-titulo">{reciente.titulo}</span>
-              {fechaCorta(reciente.fecha) && (
-                <span class="beat-label tl-corte-fecha">{fechaCorta(reciente.fecha)}</span>
-              )}
-            </div>
             <BonusBeat lista={reciente} tipo={tipo} contexto="edicion" />
           </div>
 
@@ -185,12 +192,15 @@ const tarjeta = TARJETAS_POR_TIPO[slug] ?? null;
   .tl-ultima {
     padding: 0 24px;
   }
+  /*
+    Solo la usa ya el rótulo de «EDICIONES ANTERIORES», que trae su propio margen
+    en `.tl-corte-archivo`. Por eso aquí no queda ninguno: el que había servía al
+    bloque del título de la edición, que se retiró.
+  */
   .tl-corte {
     display: flex;
     align-items: baseline;
-    justify-content: space-between;
     gap: 14px;
-    margin-top: 32px;
     padding-bottom: 14px;
     border-bottom: 1px solid var(--border-quiet);
   }
@@ -202,10 +212,6 @@ const tarjeta = TARJETAS_POR_TIPO[slug] ?? null;
     font-weight: 800;
     letter-spacing: -0.01em;
     color: var(--mist-2);
-  }
-  .tl-corte-fecha {
-    color: var(--text-muted);
-    white-space: nowrap;
   }
   .tl-franja-anuncio {
     padding: 44px 24px;
@@ -219,9 +225,6 @@ const tarjeta = TARJETAS_POR_TIPO[slug] ?? null;
   @media (max-width: 899px) {
     .tl-ultima {
       padding: 0 16px;
-    }
-    .tl-corte {
-      margin-top: 24px;
     }
     .tl-corte-archivo {
       margin: 32px 16px 0;

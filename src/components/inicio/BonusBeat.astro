@@ -200,6 +200,34 @@ function plataformasDe(c: unknown): Array<[string, string]> {
       {enInicio && (
       <div class="bb-cabeza">
         <h2 class="beat-display bb-seccion">{(tipo?.nombre ?? lista.titulo).toUpperCase()}</h2>
+        {/*
+          El paginador del carrusel, por TRAMOS y no con puntos.
+
+          «Que el paginador sea intuitivo para ver las demás» (Carlos, 2026-09-23).
+          Cinco puntos no dicen qué hay detrás de cada uno; «05-08» sí, y en una
+          lista numerada del 01 al 20 es exactamente el dato que el lector ya está
+          usando para orientarse. Es la misma idea que gobierna los rótulos de este
+          sitio: se pinta el dato, no un adorno.
+
+          Son BOTONES y no enlaces: no llevan a otra página, mueven esta. Y la tira
+          se desliza igual con el dedo o con el trackpad, así que sin JavaScript el
+          bloque sigue siendo recorrible — el paginador es un atajo, no la única
+          puerta.
+        */}
+        {columnas === 4 && paginas.length > 1 && (
+          <div class="bb-paginas" data-carrusel-paginas role="group" aria-label="Tramos de la lista">
+            {paginas.map((t, i) => (
+              <button
+                type="button"
+                class="beat-label bb-pagina"
+                data-carrusel-ir={String(i)}
+                aria-current={i === 0 ? 'true' : 'false'}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
       )}
 
@@ -431,34 +459,6 @@ function plataformasDe(c: unknown): Array<[string, string]> {
         dentro de la expresión de un `&&`, porque ahí solo cabe un elemento. Va
         antes de la llave que abre.
       */}
-      {/*
-        El paginador del carrusel, por TRAMOS y no con puntos.
-
-        «Que el paginador sea intuitivo para ver las demás» (Carlos, 2026-09-23).
-        Cinco puntos no dicen qué hay detrás de cada uno; «05-08» sí, y en una
-        lista numerada del 01 al 20 es exactamente el dato que el lector ya está
-        usando para orientarse. Es la misma idea que gobierna los rótulos de este
-        sitio: se pinta el dato, no un adorno.
-
-        Son BOTONES y no enlaces: no llevan a otra página, mueven esta. Y la tira
-        se desliza igual con el dedo o con el trackpad, así que sin JavaScript el
-        bloque sigue siendo recorrible — el paginador es un atajo, no la única
-        puerta.
-      */}
-      {columnas === 4 && paginas.length > 1 && (
-        <div class="bb-paginas" data-carrusel-paginas role="group" aria-label="Tramos de la lista">
-          {paginas.map((t, i) => (
-            <button
-              type="button"
-              class="beat-label bb-pagina"
-              data-carrusel-ir={String(i)}
-              aria-current={i === 0 ? 'true' : 'false'}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
-      )}
 
       {enInicio && rutaTipo && columnas === 1 && (
         <div class="bb-pie">
@@ -594,6 +594,14 @@ function plataformasDe(c: unknown): Array<[string, string]> {
   .bb-tira.es-col-4 > * {
     scroll-snap-align: start;
   }
+  /*
+    Todas las tarjetas al alto de la más alta. Sin esto, la de título largo es más
+    alta que sus vecinas y con fondo eso se ve como un escalón — que es justo lo
+    que el fondo venía a arreglar.
+  */
+  .bb-tira.es-col-4 {
+    align-items: stretch;
+  }
   @media (prefers-reduced-motion: no-preference) {
     .bb-tira.es-col-4 {
       scroll-behavior: smooth;
@@ -601,12 +609,21 @@ function plataformasDe(c: unknown): Array<[string, string]> {
   }
 
   /* El paginador por tramos. */
+  /*
+    El paginador vive en la CABECERA, al lado del rótulo (Carlos, 2026-09-23).
+    Abajo quedaba después de cinco filas de tarjetas, o sea que para saber que
+    había más había que llegar hasta el final — y el problema era justo que no se
+    notaba que hubiera más. Arriba se ve antes que la lista.
+
+    `.bb-cabeza` ya reparte con `justify-content: space-between`, así que el
+    rótulo se queda a la izquierda y los tramos al otro extremo, que es el mismo
+    gesto que tenía esa barra cuando llevaba la fecha.
+  */
   .bb-paginas {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
-    padding: 22px 0 0;
+    gap: 6px;
+    justify-content: flex-end;
   }
   .bb-pagina {
     padding: 9px 13px;
@@ -653,26 +670,39 @@ function plataformasDe(c: unknown): Array<[string, string]> {
     holgada, que es la misma que se lee en la sección.
   */
   /*
-    El reparto de la celda, versión del 2026-09-23 (Carlos): «al lado de la imagen
-    poner el título y artista, y abajo el botón de votar».
+    El reparto de la celda. Volvió al de antes el 2026-09-23 (Carlos) tras probar
+    el otro: número y carátula arriba con el voto al otro extremo, y el texto
+    entero debajo.
 
-    Antes el texto iba debajo de todo y el voto compartía renglón con la carátula.
-    Se cambia porque lo que identifica la canción —el título— tiene que ir pegado a
-    su carátula, y el voto es la acción, que va al final. Con el bloque a todo lo
-    ancho la celda creció y el título ya cabe al lado.
+    Con el título al lado de la carátula, uno de dos líneas empujaba su botón de
+    votar más abajo que el de sus vecinas y las cuatro tarjetas acababan
+    desalineadas — se ve en la captura que lo tumbó. Con el texto debajo, la
+    primera línea de las cuatro queda a la misma altura pase lo que pase.
+
+    El número va más grande que en la fila ancha y no más pequeño: en una tarjeta
+    suelta es lo único que dice en qué puesto va, y compite con una carátula.
+
+    La TARJETA es la unidad, así que tiene fondo y aire propios: «cada elemento
+    como que se pierde, no se sabe cuál es de cuál». La línea de abajo que separa
+    las filas en la lista larga aquí sobra — el fondo ya dice dónde acaba una.
   */
   .bb-tira.es-col-4 .bb-fila {
-    grid-template-columns: 28px 52px minmax(0, 1fr);
+    grid-template-columns: 34px 52px minmax(0, 1fr);
     grid-template-areas:
-      'num portada texto'
-      'voto voto voto';
-    gap: 10px 12px;
+      'num portada voto'
+      'texto texto texto';
+    gap: 12px;
     align-items: center;
-    padding: 16px 0;
+    padding: 16px;
+    background: var(--surface-card);
+    box-shadow: inset 0 0 0 1px var(--border-hairline);
+    border-bottom: 0;
+    /* Todas al alto de la más alta: con fondo, una corta deja un escalón. */
+    align-content: start;
   }
   .bb-tira.es-col-4 .bb-n {
     grid-area: num;
-    font-size: 17px;
+    font-size: 26px;
   }
   .bb-tira.es-col-4 .bb-portada {
     grid-area: portada;
@@ -712,9 +742,20 @@ function plataformasDe(c: unknown): Array<[string, string]> {
     —incluidas sus medidas—, así que aquí se deshace también el reparto de arriba.
   */
   @media (max-width: 899px) {
-    .bb-tira.es-col-2,
-    .bb-tira.es-col-4 {
+    .bb-tira.es-col-2 {
       display: block;
+    }
+    /*
+      En móvil la de cuatro se apila, pero SIGUE siendo de tarjetas: el fondo es
+      lo que dice dónde acaba una y empieza otra, y eso hace la misma falta en una
+      columna que en cuatro. Lo que cambia es que necesitan hueco entre ellas —
+      apiladas sin separación, con su borde de un píxel, se leían como un solo
+      bloque con rayas.
+    */
+    .bb-tira.es-col-4 {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
       overflow-x: visible;
     }
     /*
@@ -729,7 +770,7 @@ function plataformasDe(c: unknown): Array<[string, string]> {
       grid-template-columns: 30px 64px minmax(0, 1fr);
       grid-template-areas: none;
       gap: 12px;
-      padding: 14px 0;
+      padding: 14px;
     }
     .bb-tira.es-col-4 .bb-n,
     .bb-tira.es-col-4 .bb-portada,

@@ -17,10 +17,43 @@ import { urlArchivo } from './cms/client';
 
 /** Lo que se puede reproducir de una canción, ya resuelto. */
 export interface FuenteCancion {
-  /** El mp3 propio, si algún día se captura. Manda sobre YouTube. */
+  /** El mp3 propio, si algún día se captura. Manda sobre los otros dos. */
   audio: string | null;
   /** El id de 11 caracteres del video de YouTube. */
   youtube: string | null;
+  /** La URL de la canción en SoundCloud, con el host ya comprobado. */
+  soundcloud: string | null;
+}
+
+/**
+ * Los hosts de SoundCloud que se aceptan.
+ *
+ * `on.soundcloud.com` es el enlace CORTO, y es el caso normal y no la excepción:
+ * medido contra el CMS el 2026-09-23, de las 20 canciones del Top Ten diecinueve
+ * llegaron con un corto —los comparten desde la app, y se les ve el
+ * `utm_source=whatsapp`— y una con la URL larga.
+ *
+ * El corto NO sirve para reproducir: redirige con un 302 al canónico, y el
+ * reproductor de SoundCloud le contesta 404. Quien lo resuelve es
+ * `src/pages/api/soundcloud.ts`, ya en el servidor. Aquí solo se comprueba que el
+ * host sea suyo, que es lo que decide si la fila lleva botón.
+ */
+const HOSTS_SOUNDCLOUD = new Set([
+  'soundcloud.com',
+  'www.soundcloud.com',
+  'm.soundcloud.com',
+  'on.soundcloud.com',
+]);
+
+function urlSoundcloud(crudo: string | null): string | null {
+  if (!crudo) return null;
+  try {
+    const u = new URL(crudo);
+    if (u.protocol !== 'https:') return null;
+    return HOSTS_SOUNDCLOUD.has(u.hostname) ? u.href : null;
+  } catch {
+    return null;
+  }
 }
 
 function texto(doc: Record<string, unknown>, campo: string): string | null {
@@ -41,16 +74,30 @@ function texto(doc: Record<string, unknown>, campo: string): string | null {
  * fuentes en `null` es la respuesta honesta a eso.
  */
 export function fuenteDeCancion(c: unknown): FuenteCancion {
-  if (!c || typeof c !== 'object') return { audio: null, youtube: null };
+  if (!c || typeof c !== 'object') return { audio: null, youtube: null, soundcloud: null };
   const doc = c as Record<string, unknown>;
   const audio = urlArchivo(doc.audio as Parameters<typeof urlArchivo>[0]);
+
+  /*
+    `embedUrl` es un campo de texto libre y en él cabe cualquiera de las
+    plataformas que el CMS acepta, así que se prueba con las dos que sabemos
+    reproducir en vez de suponer cuál es. Hoy conviven de verdad: la lista vieja
+    trae YouTube en ese campo y la nueva trae SoundCloud.
+
+    El campo `youtube` dedicado sigue teniendo preferencia sobre `embedUrl` para
+    YouTube, que es como estaba.
+  */
   const crudo = texto(doc, 'youtube') ?? texto(doc, 'embedUrl');
-  return { audio, youtube: crudo ? idYoutube(crudo) : null };
+  return {
+    audio,
+    youtube: crudo ? idYoutube(crudo) : null,
+    soundcloud: urlSoundcloud(texto(doc, 'embedUrl')),
+  };
 }
 
 /** Si hay algo que reproducir. Lo usan las plantillas para decidir botón o no. */
 export function suena(f: FuenteCancion): boolean {
-  return Boolean(f.audio || f.youtube);
+  return Boolean(f.audio || f.youtube || f.soundcloud);
 }
 
 /**

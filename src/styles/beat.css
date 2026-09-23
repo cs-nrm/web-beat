@@ -2222,6 +2222,32 @@ html[data-cursor] .cursor-halo {
   width: 100%;
 }
 /*
+  Los DOS reproductores conviven dentro del visor y se alterna cuál se ve, igual
+  que los dos iconos del botón de play: reconstruirlos en cada canción obligaría a
+  volver a bajar el iframe y a negociar con el tercero.
+
+  El de SoundCloud mide 166px, que es el alto de su widget compacto. El visor
+  conserva su `min-height: 202px` por la política de YouTube, así que en modo
+  SoundCloud sobra aire: se centra en vez de quedar pegado arriba.
+*/
+.pista-visor-sc {
+  display: none;
+}
+.pista-visor-sc iframe {
+  display: block;
+  width: 100%;
+  border: 0;
+}
+.pista-visor[data-motor='soundcloud'] video,
+.pista-visor[data-motor='soundcloud'] .plyr {
+  display: none;
+}
+.pista-visor[data-motor='soundcloud'] .pista-visor-sc {
+  display: flex;
+  align-items: center;
+  min-height: 202px;
+}
+/*
   La X, encima del reproductor.
 
   Por encima de los controles de Plyr en `z-index` y con su propio fondo: sobre

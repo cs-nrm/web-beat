@@ -793,6 +793,13 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
         <Icono nombre="x" tamano={16} />
       </button>
       <video data-pista-montaje playsinline></video>
+      {/*
+        El hueco del widget de SoundCloud. Nace vacío: el iframe lo monta
+        `pista.ts` la primera vez que alguien pide una canción de ahí, igual que
+        Plyr monta el suyo. Cuál de los dos se ve lo decide el atributo
+        `data-motor` del visor.
+      */}
+      <div class="pista-visor-sc" data-pista-sc></div>
     </div>
 
     {/*

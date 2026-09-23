@@ -32,16 +32,48 @@ import { registrarAudio, reclamarAudio, FUENTES } from './audio';
 import { ga4 } from './analitica';
 
 export interface Pista {
-  /** El mp3 propio, o `null` si esta canción solo tiene YouTube. */
+  /** El mp3 propio, o `null` si esta canción no lo tiene. */
   src: string | null;
   /** El id de 11 caracteres del video, ya validado en el servidor. */
   yt: string | null;
+  /** La URL de SoundCloud, con el host ya comprobado en el servidor. */
+  sc: string | null;
   titulo: string;
   artista: string;
 }
 
-/** Cuál de los dos motores atiende a la pista en curso. */
-type Motor = 'nativo' | 'youtube';
+/** Cuál de los TRES motores atiende a la pista en curso. */
+type Motor = 'nativo' | 'youtube' | 'soundcloud';
+
+/** Lo que este módulo usa del widget de SoundCloud. */
+interface WidgetSC {
+  play(): void;
+  pause(): void;
+  seekTo(ms: number): void;
+  load(url: string, opciones: Record<string, unknown>): void;
+  getDuration(cb: (ms: number) => void): void;
+  bind(evento: string, cb: (datos?: { currentPosition?: number }) => void): void;
+}
+
+/**
+ * El estado del widget de SoundCloud, cacheado.
+ *
+ * Existe porque su API contesta por CALLBACK —`getPosition(cb)`,
+ * `getDuration(cb)`, `isPaused(cb)`— y el `Mando` de esta barra lee de forma
+ * SÍNCRONA: `get tiempo()`, `get duracion()`, `get pausado()`. No se pueden
+ * conciliar preguntando, así que se apunta lo último que dijo el widget en sus
+ * eventos y la barra lee de aquí.
+ *
+ * Es la única diferencia real con los otros dos motores. Plyr y `<audio>` exponen
+ * sus propiedades directamente; SoundCloud, no.
+ */
+interface EstadoSc {
+  widget: WidgetSC;
+  marco: HTMLIFrameElement;
+  pausado: boolean;
+  tiempo: number;
+  duracion: number;
+}
 
 /**
  * Lo que la barra necesita saber de un motor, sea el que sea.
@@ -66,6 +98,10 @@ interface VentanaConPista {
   __beatPistaLista?: boolean;
   /** La instancia de Plyr del visor flotante, una por sesión. */
   __beatPistaYt?: PlyrPista | null;
+  /** El widget de SoundCloud del visor, uno por sesión. Mismo motivo que Plyr. */
+  __beatPistaSc?: EstadoSc | null;
+  /** La API de SoundCloud, una vez cargada. */
+  SC?: { Widget: ((el: HTMLIFrameElement) => WidgetSC) & { Events: Record<string, string> } };
 }
 
 /** Lo que este módulo usa de Plyr. Mismo recorte que en `video.ts`. */
@@ -148,9 +184,20 @@ function cargarPlyr(): Promise<void> {
 }
 
 /** Muestra u oculta el marco. `hidden` y no `display`, para que sea una sola verdad. */
+/**
+ * Enseña o esconde el visor flotante, y dice CUÁL de los dos reproductores toca.
+ *
+ * Los dos marcos —el de Plyr y el de SoundCloud— viven a la vez dentro del visor
+ * y no se destruyen nunca, para no volver a negociar con el tercero en la
+ * siguiente canción. Así que hay que decidir cuál se ve, y eso lo lleva
+ * `data-motor` en el visor, que es el mismo patrón de atributo que usa el resto
+ * del sitio para el estado.
+ */
 function mostrarVisor(si: boolean): void {
   const v = visor();
-  if (v) v.hidden = !si;
+  if (!v) return;
+  v.hidden = !si;
+  if (si) v.dataset.motor = motor;
 }
 
 /** Cuál de los dos motores atiende a la pista en curso. */
@@ -206,6 +253,157 @@ async function plyr(): Promise<PlyrPista | null> {
 }
 
 /**
+ * Baja la API del widget de SoundCloud, una sola vez.
+ *
+ * Mismo criterio que Plyr: no se baja hasta que alguien pide una canción de
+ * SoundCloud. Quien solo escucha la radio no paga este script.
+ */
+let cargandoSc: Promise<void> | null = null;
+
+function cargarApiSc(): Promise<void> {
+  if (w().SC) return Promise.resolve();
+  if (cargandoSc) return cargandoSc;
+  cargandoSc = new Promise((listo, falla) => {
+    const e = document.createElement('script');
+    e.src = 'https://w.soundcloud.com/player/api.js';
+    e.async = true;
+    e.onload = () => listo();
+    e.onerror = () => {
+      // Se olvida el intento: si vuelve la red, el siguiente clic reintenta.
+      cargandoSc = null;
+      falla(new Error('no se pudo cargar la API de SoundCloud'));
+    };
+    document.head.appendChild(e);
+  });
+  return cargandoSc;
+}
+
+/** El marco del widget, creado la primera vez que hace falta. */
+function marcoSc(src: string): HTMLIFrameElement | null {
+  const montaje = visor()?.querySelector<HTMLElement>('[data-pista-sc]');
+  if (!montaje) return null;
+
+  const existente = montaje.querySelector('iframe');
+  if (existente) return existente;
+
+  const marco = document.createElement('iframe');
+  marco.src = src;
+  marco.title = 'Reproductor de SoundCloud';
+  marco.allow = 'autoplay';
+  marco.width = '100%';
+  marco.height = '166';
+  marco.frameBorder = 'no';
+  montaje.appendChild(marco);
+  return marco;
+}
+
+/**
+ * Deja el widget listo y sonando.
+ *
+ * La primera canción monta el iframe; las siguientes usan `load()`, que cambia de
+ * pista sin recrear nada — igual que el visor de YouTube, que se esconde pero no
+ * se destruye.
+ */
+async function arrancarSoundcloud(p: Pista): Promise<void> {
+  if (!p.sc) return;
+
+  let datos: { src?: string; pista?: string };
+  try {
+    const r = await fetch(`/api/soundcloud?url=${encodeURIComponent(p.sc)}`);
+    if (!r.ok) throw new Error(String(r.status));
+    datos = (await r.json()) as { src?: string; pista?: string };
+  } catch {
+    // Sin resolución no hay nada que sonar; la barra no se queda «cargando».
+    pintarBoton(false);
+    marcarFila(null);
+    pintarPista(null);
+    modo('directo');
+    mostrarVisor(false);
+    return;
+  }
+  if (!datos.src || !datos.pista) return;
+
+  try {
+    await cargarApiSc();
+  } catch {
+    pintarBoton(false);
+    marcarFila(null);
+    modo('directo');
+    mostrarVisor(false);
+    return;
+  }
+
+  const SC = w().SC;
+  if (!SC) return;
+
+  mostrarVisor(true);
+
+  const guardado = w().__beatPistaSc;
+  if (guardado) {
+    guardado.tiempo = 0;
+    guardado.duracion = NaN;
+    guardado.widget.load(datos.pista, {
+      auto_play: true,
+      visual: false,
+      hide_related: true,
+      show_comments: false,
+      callback: () => {
+        guardado.widget.getDuration((ms) => {
+          guardado.duracion = ms / 1000;
+          pintarProgreso();
+        });
+        ga4('pista_play', { titulo: p.titulo, artista: p.artista, motor: 'soundcloud' });
+      },
+    });
+    return;
+  }
+
+  const marco = marcoSc(`${datos.src}&auto_play=true`);
+  if (!marco) {
+    pintarBoton(false);
+    marcarFila(null);
+    modo('directo');
+    mostrarVisor(false);
+    return;
+  }
+
+  const widget = SC.Widget(marco);
+  const estado: EstadoSc = { widget, marco, pausado: true, tiempo: 0, duracion: NaN };
+  w().__beatPistaSc = estado;
+
+  const E = SC.Widget.Events;
+  /*
+    Estos escuchas se enlazan UNA vez, con el widget, y no en cada canción: el
+    iframe sobrevive a los `load()`, igual que la instancia de Plyr sobrevive a los
+    cambios de `source`. Y son los que mantienen el estado que la barra lee, porque
+    a este widget no se le puede preguntar de forma síncrona.
+  */
+  widget.bind(E.READY, () => {
+    widget.getDuration((ms) => {
+      estado.duracion = ms / 1000;
+      pintarProgreso();
+    });
+    ga4('pista_play', { titulo: p.titulo, artista: p.artista, motor: 'soundcloud' });
+  });
+  widget.bind(E.PLAY, () => {
+    estado.pausado = false;
+    pintarBoton(true);
+  });
+  widget.bind(E.PAUSE, () => {
+    estado.pausado = true;
+    pintarBoton(false);
+  });
+  widget.bind(E.PLAY_PROGRESS, (d) => {
+    estado.tiempo = (d?.currentPosition ?? 0) / 1000;
+    pintarProgreso();
+  });
+  widget.bind(E.FINISH, () => {
+    estado.pausado = true;
+    alTerminar();
+  });
+}
+
+/**
  * El motor activo, hablado por una sola interfaz.
  *
  * El de YouTube puede no existir todavía —Plyr baja a demanda— y en ese hueco
@@ -214,6 +412,25 @@ async function plyr(): Promise<PlyrPista | null> {
  * `undefined` en un `toFixed`.
  */
 function mando(): Mando {
+  if (motor === 'soundcloud') {
+    const e = w().__beatPistaSc;
+    if (!e) return INERTE;
+    return {
+      reproducir: () => e.widget.play(),
+      pausar: () => e.widget.pause(),
+      get pausado() {
+        return e.pausado;
+      },
+      get tiempo() {
+        return e.tiempo;
+      },
+      get duracion() {
+        return e.duracion;
+      },
+      // El widget cuenta en MILISEGUNDOS y la barra en segundos.
+      buscar: (sg) => e.widget.seekTo(sg * 1000),
+    };
+  }
   if (motor === 'youtube') {
     const p = w().__beatPistaYt;
     if (!p) return INERTE;
@@ -276,8 +493,8 @@ const INERTE: Mando = {
  * dos reglas parecidas es exactamente cómo se llega a que la fila que suena no se
  * marque.
  */
-function clave(p: { src?: string | null; yt?: string | null }): string {
-  return p.src || (p.yt ? `yt:${p.yt}` : '');
+function clave(p: { src?: string | null; yt?: string | null; sc?: string | null }): string {
+  return p.src || (p.yt ? `yt:${p.yt}` : p.sc ? `sc:${p.sc}` : '');
 }
 
 function modo(valor: Modo): void {
@@ -343,8 +560,12 @@ function pintarPista(p: Pista | null): void {
  * una marca huérfana es peor que ninguna.
  */
 function marcarFila(cl: string | null): void {
-  for (const b of document.querySelectorAll<HTMLElement>('[data-pista-src], [data-pista-yt]')) {
-    const suya = Boolean(cl) && clave({ src: b.dataset.pistaSrc, yt: b.dataset.pistaYt }) === cl;
+  for (const b of document.querySelectorAll<HTMLElement>(
+    '[data-pista-src], [data-pista-yt], [data-pista-sc]',
+  )) {
+    const suya =
+      Boolean(cl) &&
+      clave({ src: b.dataset.pistaSrc, yt: b.dataset.pistaYt, sc: b.dataset.pistaSc }) === cl;
     b.toggleAttribute('data-sonando', suya);
     b.setAttribute('aria-pressed', String(suya));
   }
@@ -385,7 +606,7 @@ function sonar(i: number): void {
     algún día se captura el archivo, esa canción pasa sola al camino nativo y deja
     de abrir el visor — sin tocar una línea de esto.
   */
-  motor = p.src ? 'nativo' : 'youtube';
+  motor = p.src ? 'nativo' : p.yt ? 'youtube' : 'soundcloud';
 
   reclamarAudio(FUENTES.pista);
   modo('pista');
@@ -416,7 +637,7 @@ function sonar(i: number): void {
     return;
   }
 
-  // ── camino de YouTube ──
+  // ── caminos de iframe: YouTube y SoundCloud ──
   audio().pause();
   /*
     El botón dice «cargando» desde YA. Entre el clic y el primer fotograma hay 110
@@ -424,6 +645,13 @@ function sonar(i: number): void {
     visible durante un segundo largo.
   */
   pintarCargando();
+  if (motor === 'soundcloud') {
+    // El otro motor de iframe se calla: son tres y solo uno manda.
+    w().__beatPistaYt?.pause();
+    void arrancarSoundcloud(p);
+    return;
+  }
+  w().__beatPistaSc?.widget.pause();
   void arrancarYoutube(p);
 }
 
@@ -510,6 +738,16 @@ export function volverAlDirecto(arrancar = false): void {
     yt.pause();
     yt.currentTime = 0;
   }
+  /*
+    Y el de SoundCloud, por lo mismo: se pausa y se rebobina, pero el iframe se
+    queda. Volver a montarlo obligaría a resolver la URL y a bajar su API otra vez.
+  */
+  const sc = w().__beatPistaSc;
+  if (sc) {
+    sc.widget.pause();
+    sc.widget.seekTo(0);
+    sc.tiempo = 0;
+  }
   mostrarVisor(false);
   motor = 'nativo';
   cola = [];
@@ -576,7 +814,11 @@ function alternar(): void {
 function desdeFila(boton: HTMLElement): void {
   const lista = boton.closest<HTMLElement>('[data-pistas]');
   const filas = lista
-    ? Array.from(lista.querySelectorAll<HTMLElement>('[data-pista-src], [data-pista-yt]'))
+    ? Array.from(
+        lista.querySelectorAll<HTMLElement>(
+          '[data-pista-src], [data-pista-yt], [data-pista-sc]',
+        ),
+      )
     : [boton];
 
   /* Qué sonaba ANTES de cambiar la cola: después de reasignarla ya no se sabe. */
@@ -585,6 +827,7 @@ function desdeFila(boton: HTMLElement): void {
   cola = filas.map((f) => ({
     src: f.dataset.pistaSrc ?? null,
     yt: f.dataset.pistaYt ?? null,
+    sc: f.dataset.pistaSc ?? null,
     titulo: f.dataset.pistaTitulo ?? '',
     artista: f.dataset.pistaArtista ?? '',
   }));
@@ -629,12 +872,14 @@ export function prepararPista(): void {
   */
   registrarAudio(FUENTES.pista, () => {
     /*
-      Calla LOS DOS motores. Registrar solo el nativo dejaba a YouTube sonando
+      Calla LOS TRES motores. Registrar solo el nativo dejaba a YouTube sonando
       cuando el directo reclamaba el canal — o sea el bug que el árbitro existe
-      para no tener: dos cosas sonando a la vez.
+      para no tener: dos cosas sonando a la vez. Con SoundCloud pasaría igual, y
+      además ahí el oyente no tendría ni cómo pararlo: el widget vive en un iframe.
     */
     if (!a.paused) a.pause();
     w().__beatPistaYt?.pause();
+    w().__beatPistaSc?.widget.pause();
   });
 
   a.addEventListener('timeupdate', pintarProgreso);
@@ -678,7 +923,9 @@ export function prepararPista(): void {
       return;
     }
 
-    const fila = t.closest<HTMLElement>('[data-pista-src], [data-pista-yt]');
+    const fila = t.closest<HTMLElement>(
+      '[data-pista-src], [data-pista-yt], [data-pista-sc]',
+    );
     if (fila) {
       e.preventDefault();
       desdeFila(fila);

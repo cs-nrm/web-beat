@@ -885,6 +885,7 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
       import { prepararMenu } from '@/scripts/menu';
       import { prepararProgreso } from '@/scripts/progreso';
       import { prepararVoto } from '@/scripts/voto';
+      import { prepararCarrusel } from '@/scripts/carrusel';
       prepararAnuncios();
       prepararEscritura();
       prepararRevelado();
@@ -901,6 +902,7 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
       prepararMenu();
       prepararProgreso();
       prepararVoto();
+      prepararCarrusel();
       // Solo CABLEA los visores; Plyr (110 KB) no se baja hasta que alguien
       // pide un video.
       prepararVideo();

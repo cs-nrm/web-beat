@@ -81,6 +81,24 @@ const rutaTipo = tipo?.slug ? `/${tipo.slug}` : null;
  * vacías.
  */
 const canciones = lista?.canciones?.length ? ordenarPorVotos(lista.canciones) : [];
+
+/**
+ * Los tramos del carrusel: «01-04», «05-08»…
+ *
+ * De cuatro en cuatro porque son cuatro las que caben a la vez. El último puede
+ * quedar corto —con 18 canciones sería «17-18»— y se escribe tal cual: redondear
+ * a «17-20» prometería dos que no están.
+ */
+const POR_VISTA = 4;
+const paginas =
+  columnas === 4
+    ? Array.from({ length: Math.ceil(canciones.length / POR_VISTA) }, (_, i) => {
+        const desde = i * POR_VISTA + 1;
+        const hasta = Math.min((i + 1) * POR_VISTA, canciones.length);
+        const dos = (n: number) => String(n).padStart(2, '0');
+        return desde === hasta ? dos(desde) : `${dos(desde)}-${dos(hasta)}`;
+      })
+    : [];
 const votacionAbierta = Boolean(lista?.votacionAbierta);
 
 /*
@@ -200,9 +218,20 @@ function plataformasDe(c: unknown): Array<[string, string]> {
         lista.
       */}
       <div class:list={['bb-reparto', { 'con-anuncio': enInicio && anuncio }]}>
+      {/*
+        `bb-canciones` agrupa la lista con lo que la acompaña —el paginador, el
+        modal del voto, el remate— y `bb-tira` es SOLO las tarjetas.
+
+        Están separados porque la tira es la que se reparte en columnas y la que
+        se desliza, y meter ahí dentro el paginador lo convertía en una columna
+        más: salía flotando a la derecha del carrusel, fuera de la vista, y el
+        modal con él. Con 20 canciones la tira tenía 22 hijos.
+      */}
+      <div class="bb-canciones">
       <div
-        class:list={['bb-canciones', `es-col-${columnas}`]}
-        style={columnas > 1 ? `--filas:${Math.ceil(canciones.length / columnas)}` : undefined}
+        class:list={['bb-tira', `es-col-${columnas}`]}
+        style={columnas === 2 ? `--filas:${Math.ceil(canciones.length / 2)}` : undefined}
+        data-carrusel={columnas === 4 ? 'sí' : undefined}
       >
       {/*
         Sin canciones no se pinta nada — decisión del 2026-09-09. Aquí caía
@@ -341,6 +370,7 @@ function plataformasDe(c: unknown): Array<[string, string]> {
           );
         })
       )}
+      </div>
 
       {/*
         La respuesta al voto, en un MODAL.
@@ -401,6 +431,35 @@ function plataformasDe(c: unknown): Array<[string, string]> {
         dentro de la expresión de un `&&`, porque ahí solo cabe un elemento. Va
         antes de la llave que abre.
       */}
+      {/*
+        El paginador del carrusel, por TRAMOS y no con puntos.
+
+        «Que el paginador sea intuitivo para ver las demás» (Carlos, 2026-09-23).
+        Cinco puntos no dicen qué hay detrás de cada uno; «05-08» sí, y en una
+        lista numerada del 01 al 20 es exactamente el dato que el lector ya está
+        usando para orientarse. Es la misma idea que gobierna los rótulos de este
+        sitio: se pinta el dato, no un adorno.
+
+        Son BOTONES y no enlaces: no llevan a otra página, mueven esta. Y la tira
+        se desliza igual con el dedo o con el trackpad, así que sin JavaScript el
+        bloque sigue siendo recorrible — el paginador es un atajo, no la única
+        puerta.
+      */}
+      {columnas === 4 && paginas.length > 1 && (
+        <div class="bb-paginas" data-carrusel-paginas role="group" aria-label="Tramos de la lista">
+          {paginas.map((t, i) => (
+            <button
+              type="button"
+              class="beat-label bb-pagina"
+              data-carrusel-ir={String(i)}
+              aria-current={i === 0 ? 'true' : 'false'}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+      )}
+
       {enInicio && rutaTipo && columnas === 1 && (
         <div class="bb-pie">
           <a href={rutaTipo} class="beat-label bb-mas">
@@ -494,18 +553,92 @@ function plataformasDe(c: unknown): Array<[string, string]> {
     Trampa: el número de filas lo pone la plantilla en `--filas`, porque CSS no sabe
     cuántos hijos hay. Sin eso, `grid-auto-flow: column` mete todo en UNA fila.
   */
-  .bb-canciones.es-col-2,
-  .bb-canciones.es-col-4 {
+  .bb-tira.es-col-2 {
     display: grid;
     grid-auto-flow: column;
     grid-template-rows: repeat(var(--filas, 1), auto);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     column-gap: 36px;
   }
-  .bb-canciones.es-col-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  /*
+    La de cuatro es un CARRUSEL, no una rejilla (Carlos, 2026-09-23): veinte
+    canciones apiladas en cinco filas «se ven raro» en una portada, así que se
+    enseñan cuatro y las demás se piden.
+
+    Va con scroll nativo y `scroll-snap`, no con una librería ni con transformadas:
+    así funciona con el dedo, con el trackpad, con las flechas del teclado y con
+    el tabulador, y sin JavaScript sigue siendo recorrible. El paginador solo
+    empuja el scroll.
+
+    El ancho de cada tarjeta se calcula para que entren CUATRO justas descontando
+    sus tres huecos.
+
+    No se mueve solo. Un carrusel que avanza sin que nadie lo pida es de las cosas
+    que `movimiento.md` prohíbe: los mandos contestan, no se animan por su cuenta.
+  */
+  .bb-tira.es-col-4 {
+    --hueco: 28px;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - 3 * var(--hueco)) / 4);
+    column-gap: var(--hueco);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    /* La barra de scroll estorba a la lectura; el paginador y el gesto la sustituyen. */
+    scrollbar-width: none;
   }
-  .bb-canciones.es-col-4 {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+  .bb-tira.es-col-4::-webkit-scrollbar {
+    display: none;
+  }
+  .bb-tira.es-col-4 > * {
+    scroll-snap-align: start;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .bb-tira.es-col-4 {
+      scroll-behavior: smooth;
+    }
+  }
+
+  /* El paginador por tramos. */
+  .bb-paginas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    padding: 22px 0 0;
+  }
+  .bb-pagina {
+    padding: 9px 13px;
+    border: 0;
+    background: var(--surface-card);
+    box-shadow: inset 0 0 0 1px var(--border-hairline);
+    color: var(--text-muted);
+    font-size: 9px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background var(--dur-2) var(--ease-out),
+      color var(--dur-2) var(--ease-out);
+  }
+  .bb-pagina:hover,
+  .bb-pagina:focus-visible {
+    color: var(--mist-0);
+  }
+  .bb-pagina:focus-visible {
+    outline: 2px solid var(--mist-0);
+    outline-offset: 2px;
+  }
+  /*
+    El tramo en pantalla va INVERTIDO, que es como este sitio marca lo activo: la
+    pastilla de la nav, la celda al aire de la parrilla, el texto seleccionado.
+    Y se marca con `aria-current`, no con una clase: el estado es el mismo dato
+    para el CSS y para un lector de pantalla.
+  */
+  .bb-pagina[aria-current='true'] {
+    background: var(--mist-0);
+    color: var(--noche-0);
   }
 
   /*
@@ -528,7 +661,7 @@ function plataformasDe(c: unknown): Array<[string, string]> {
     su carátula, y el voto es la acción, que va al final. Con el bloque a todo lo
     ancho la celda creció y el título ya cabe al lado.
   */
-  .bb-canciones.es-col-4 .bb-fila {
+  .bb-tira.es-col-4 .bb-fila {
     grid-template-columns: 28px 52px minmax(0, 1fr);
     grid-template-areas:
       'num portada texto'
@@ -537,38 +670,38 @@ function plataformasDe(c: unknown): Array<[string, string]> {
     align-items: center;
     padding: 16px 0;
   }
-  .bb-canciones.es-col-4 .bb-n {
+  .bb-tira.es-col-4 .bb-n {
     grid-area: num;
     font-size: 17px;
   }
-  .bb-canciones.es-col-4 .bb-portada {
+  .bb-tira.es-col-4 .bb-portada {
     grid-area: portada;
   }
-  .bb-canciones.es-col-4 .bb-voto {
+  .bb-tira.es-col-4 .bb-voto {
     grid-area: voto;
     justify-content: flex-end;
   }
-  .bb-canciones.es-col-4 .bb-texto {
+  .bb-tira.es-col-4 .bb-texto {
     grid-area: texto;
   }
   /* Los chips de plataforma no caben y hoy no se pintan nunca: ver `plataformasDe`. */
-  .bb-canciones.es-col-4 .bb-plataformas {
+  .bb-tira.es-col-4 .bb-plataformas {
     display: none;
   }
   /* «Textos un poco más pequeños» (Carlos): la celda es la mitad de ancha que en
      la sección, así que el cuerpo baja con ella. */
-  .bb-canciones.es-col-4 .bb-titulo {
+  .bb-tira.es-col-4 .bb-titulo {
     font-size: 14px;
     line-height: 1.3;
   }
-  .bb-canciones.es-col-4 .bb-linea {
+  .bb-tira.es-col-4 .bb-linea {
     font-size: 11.5px;
     margin-top: 4px;
   }
-  .bb-canciones.es-col-4 .bb-voto-conteo {
+  .bb-tira.es-col-4 .bb-voto-conteo {
     font-size: 10px;
   }
-  .bb-canciones.es-col-4 .bb-voto-btn {
+  .bb-tira.es-col-4 .bb-voto-btn {
     padding: 7px 10px;
     font-size: 8.5px;
   }
@@ -579,29 +712,38 @@ function plataformasDe(c: unknown): Array<[string, string]> {
     —incluidas sus medidas—, así que aquí se deshace también el reparto de arriba.
   */
   @media (max-width: 899px) {
-    .bb-canciones.es-col-2,
-    .bb-canciones.es-col-4 {
+    .bb-tira.es-col-2,
+    .bb-tira.es-col-4 {
       display: block;
+      overflow-x: visible;
     }
-    .bb-canciones.es-col-4 .bb-fila {
+    /*
+      En móvil no hay carrusel: la tarjeta ocuparía la pantalla entera y serían
+      veinte gestos para ver la lista, que es peor que desplazarse. La lista se
+      apila y el paginador sobra.
+    */
+    .bb-paginas {
+      display: none;
+    }
+    .bb-tira.es-col-4 .bb-fila {
       grid-template-columns: 30px 64px minmax(0, 1fr);
       grid-template-areas: none;
       gap: 12px;
       padding: 14px 0;
     }
-    .bb-canciones.es-col-4 .bb-n,
-    .bb-canciones.es-col-4 .bb-portada,
-    .bb-canciones.es-col-4 .bb-voto,
-    .bb-canciones.es-col-4 .bb-texto {
+    .bb-tira.es-col-4 .bb-n,
+    .bb-tira.es-col-4 .bb-portada,
+    .bb-tira.es-col-4 .bb-voto,
+    .bb-tira.es-col-4 .bb-texto {
       grid-area: auto;
     }
-    .bb-canciones.es-col-4 .bb-voto {
+    .bb-tira.es-col-4 .bb-voto {
       grid-column: 2 / -1;
     }
-    .bb-canciones.es-col-4 .bb-titulo {
+    .bb-tira.es-col-4 .bb-titulo {
       font-size: 15px;
     }
-    .bb-canciones.es-col-4 .bb-linea {
+    .bb-tira.es-col-4 .bb-linea {
       font-size: 13px;
     }
   }

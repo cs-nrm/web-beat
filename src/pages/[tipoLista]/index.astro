@@ -17,9 +17,8 @@
 import Base from '@/layouts/Base.astro';
 import CabezaSeccion from '@/components/CabezaSeccion.astro';
 import BonusBeat from '@/components/inicio/BonusBeat.astro';
-import RejillaEdiciones from '@/components/RejillaEdiciones.astro';
 import Anuncio from '@/components/Anuncio.astro';
-import { obtenerTipoDeLista, obtenerListas, obtenerListaReciente } from '@/lib/cms/listas';
+import { obtenerTipoDeLista, obtenerListaReciente } from '@/lib/cms/listas';
 import { MEDIDA_TARJETA, SEGMENTOS_RESERVADOS } from '@/config/site';
 
 const { tipoLista: slug } = Astro.params;
@@ -37,29 +36,25 @@ const tipo = await obtenerTipoDeLista(slug);
 if (!tipo) return Astro.rewrite('/404');
 
 /*
-  DOS consultas, y no `ediciones[0]`, por una razón medida: las portadas de las
-  canciones no salían en esta página.
+  UNA consulta, y con `depth: 2`.
 
-  `obtenerListas` pide `depth: 1` —lo correcto para 24 ediciones—, y a esa
-  profundidad `canciones[].cancion` llega poblada pero su `portada` sigue siendo un
-  id. `urlMedia` devuelve `null` con un id, así que la última edición se pintaba con
-  los tres huecos en degradado y sin una sola imagen. Lo mismo le pasaba al `audio`,
-  o sea que el botón de reproducir tampoco podía aparecer. Comprobado contra el CMS:
-  a `depth: 1` esas portadas llegan como `20`, `19`, `17`.
+  Aquí había dos —`obtenerListas(slug, 24)` para la retícula del archivo y
+  `obtenerListaReciente` para la edición vigente— y la primera se fue con el
+  archivo el 2026-09-23.
 
-  La solución NO es subir `obtenerListas` a `depth: 2`: eso arrastraría el
-  documento de media de cada canción de las 24 ediciones para pintar una retícula
-  que solo necesita la portada de la edición —y esa sí llega con `depth: 1`—.
+  Conviene no perder el porqué de que fueran dos, por si el archivo vuelve:
+  `obtenerListas` pide `depth: 1`, que es lo correcto para 24 ediciones, y a esa
+  profundidad `canciones[].cancion` llega poblada pero su `portada` sigue siendo
+  un id. `urlMedia` devuelve `null` con un id, así que la edición vigente se
+  pintaba sin una sola imagen. La solución no era subir esa consulta a `depth: 2`
+  —arrastraría el documento de media de cada canción de las 24 ediciones para
+  pintar una retícula que solo necesita la portada de la lista—, sino pedir la
+  vigente aparte, que es lo que se quedó.
 
-  `obtenerListaReciente` ya existe, ya pide `depth: 2` y trae exactamente el mismo
-  documento: mismos `where`, mismo `sort: -fecha`, `limit: 1`. Y es la MISMA
-  consulta que ya hace el Inicio para este tipo, así que acierta su entrada de caché
-  y en la práctica no cuesta una consulta más.
+  Y es la MISMA consulta que ya hace el Inicio para este tipo, así que acierta su
+  entrada de caché y en la práctica no cuesta nada.
 */
-const [ediciones, reciente] = await Promise.all([
-  obtenerListas(slug, 24),
-  obtenerListaReciente(slug),
-]);
+const reciente = await obtenerListaReciente(slug);
 
 /**
  * La tarjeta de compartir de esta sección, por SLUG.
@@ -143,37 +138,43 @@ const tarjeta = TARJETAS_POR_TIPO[slug] ?? null;
             sección sin separación ninguna. Estas dos páginas de lista eran las
             únicas que metían aire ahí, y lo metían por este bloque.
           */}
+          {/*
+            DOS columnas a partir de diez canciones, y el umbral es por LONGITUD y
+            no por tipo de lista: Bonus Beat trae tres y en dos columnas quedarían
+            dos arriba y una suelta debajo, mientras que el Top Ten trae veinte y en
+            una sola columna es una página que solo se recorre con el dedo. La
+            regla mira el dato, así que el día que la estación cree otro tipo de
+            lista se reparte sola.
+          */}
           <div class="tl-ultima">
-            <BonusBeat lista={reciente} tipo={tipo} contexto="edicion" />
+            <BonusBeat
+              lista={reciente}
+              tipo={tipo}
+              contexto="edicion"
+              columnas={(reciente.canciones?.length ?? 0) >= 10 ? 2 : 1}
+            />
           </div>
 
-          {ediciones.length > 1 && (
-            <>
-              {/*
-                El box marca el CORTE entre la edición de esta semana y el archivo,
-                que es el único que tiene la página (aprobado por Carlos el
-                2026-09-08).
+          {/*
+            Aquí iba el archivo —«EDICIONES ANTERIORES» con su retícula— y se
+            retira el 2026-09-23 (Carlos): «quitamos ediciones anteriores, no
+            tendremos histórico».
 
-                Y va DENTRO de esta condición justamente porque es un corte: si
-                no hay ediciones anteriores no hay nada que cortar, y el box
-                acabaría pegado al leaderboard del pie con solo aire entre los dos
-                —una página que termina en dos anuncios seguidos—. Hoy es el caso
-                real: `bonus-beat` tiene una sola edición capturada.
-              */}
-              <div class="tl-franja-box">
-                <Anuncio formato="box" nombre="lista-box" unidad="Box" />
-              </div>
+            Se lleva con él el hueco de publicidad «box», y no es un descuido: ese
+            box existía para marcar el CORTE entre la edición vigente y el archivo,
+            y así estaba escrito aquí mismo. Sin archivo no hay corte, y dejarlo
+            pondría el box pegado al leaderboard del pie con solo aire entre los
+            dos — una página que termina en dos anuncios seguidos, que es justo lo
+            que ese comentario decía evitar. Si se quiere recuperar el inventario,
+            es una decisión de `agents/ads.md` y hay que buscarle un sitio que no
+            sea ese.
 
-              <div class="tl-corte tl-corte-archivo" data-barrido>
-                <span class="beat-display tl-corte-titulo">EDICIONES ANTERIORES</span>
-              </div>
-              <RejillaEdiciones
-                tipoSlug={slug}
-                ediciones={ediciones}
-                excluir={reciente.id}
-              />
-            </>
-          )}
+            Con el archivo desaparece también la única forma de LLEGAR a
+            `/top-ten/<edición>` desde el sitio. Las ediciones viejas siguen
+            respondiendo 200 por su URL y siguen siendo indexables; si eso no se
+            quiere, es otro encargo — una redirección o un noindex, no este
+            borrado.
+          */}
         </>
       )
     }
@@ -192,51 +193,16 @@ const tarjeta = TARJETAS_POR_TIPO[slug] ?? null;
   .tl-ultima {
     padding: 0 24px;
   }
-  /*
-    Solo la usa ya el rótulo de «EDICIONES ANTERIORES», que trae su propio margen
-    en `.tl-corte-archivo`. Por eso aquí no queda ninguno: el que había servía al
-    bloque del título de la edición, que se retiró.
-  */
-  .tl-corte {
-    display: flex;
-    align-items: baseline;
-    gap: 14px;
-    padding-bottom: 14px;
-    border-bottom: 1px solid var(--border-quiet);
-  }
-  .tl-corte-archivo {
-    margin: 44px 24px 0;
-  }
-  .tl-corte-titulo {
-    font-size: 22px;
-    font-weight: 800;
-    letter-spacing: -0.01em;
-    color: var(--mist-2);
-  }
   .tl-franja-anuncio {
     padding: 44px 24px;
-  }
-  /* Menos aire por abajo que por arriba: el rótulo «EDICIONES ANTERIORES» trae su
-     propio margen de 44px, y sumar los dos abría un vacío del alto del box. */
-  .tl-franja-box {
-    padding: 40px 24px 0;
   }
 
   @media (max-width: 899px) {
     .tl-ultima {
       padding: 0 16px;
     }
-    .tl-corte-archivo {
-      margin: 32px 16px 0;
-    }
-    .tl-corte-titulo {
-      font-size: 19px;
-    }
     .tl-franja-anuncio {
       padding: 32px 16px;
-    }
-    .tl-franja-box {
-      padding: 30px 16px 0;
     }
   }
 </style>

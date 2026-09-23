@@ -61,6 +61,7 @@ import {
 import {
   SERIE_FENOMENO,
   TIPO_LISTA_DESTACADA,
+  TIPO_LISTA_VOTACION,
   TARJETA_INICIO,
   NOINDEX_SITIO,
   noIndexarHost,
@@ -204,6 +205,23 @@ const takeoverVisible = vistaPreviaTakeover(Astro.url) ?? takeover;
 
 const tipoDestacado = tipos.find((t) => t.slug === TIPO_LISTA_DESTACADA) ?? tipos[0] ?? null;
 const listaDestacada = tipoDestacado?.slug ? await obtenerListaReciente(tipoDestacado.slug) : null;
+
+/*
+  La lista que se vota, que en el Inicio es un bloque aparte del destacado.
+
+  A diferencia del destacado NO cae a `tipos[0]` si el slug no existe: el
+  destacado es un hueco de portada que siempre quiere algo dentro, y este es una
+  votación concreta. Sacar a votar «la primera lista que haya» porque alguien
+  renombró un tipo sería peor que no pintar nada.
+
+  La consulta es la misma que ya hace `/top-ten`, así que comparte su entrada de
+  caché y no cuesta un viaje más.
+*/
+const tipoVotacion = tipos.find((t) => t.slug === TIPO_LISTA_VOTACION) ?? null;
+const listaVotacion =
+  tipoVotacion?.slug && tipoVotacion.slug !== tipoDestacado?.slug
+    ? await obtenerListaReciente(tipoVotacion.slug)
+    : null;
 
 /*
   El reparto del mosaico. `obtenerScanner` devuelve la destacada y el resto en una
@@ -435,6 +453,28 @@ const LEMA = 'Beat 100.9 — Aquí la música se elige';
       cero notas, así que el estado por omisión de este bloque es no existir — y
       entonces la portada se lee exactamente como antes de que existiera.
     */}
+    {/*
+      La lista a votación, ENCIMA de Microambiente (Carlos, 2026-09-23).
+
+      Va en cuatro columnas y no en la fila ancha de Bonus Beat porque son VEINTE
+      canciones: en una columna serían veinte filas en mitad de la portada, y el
+      Inicio dejaría de ser una portada. Cuatro columnas por cinco filas es el
+      reparto que cabe sin empujar todo lo de abajo fuera de alcance.
+
+      Se pueden votar las veinte desde aquí: el botón y el porcentaje son los
+      mismos que en la sección, con el mismo proxy detrás. La idea de la estación
+      es que de esas veinte salgan las diez más votadas.
+
+      Sin lista publicada no se pinta nada, ni el rótulo. Misma regla que
+      Microambiente, aquí debajo.
+    */}
+    <BonusBeat
+      lista={listaVotacion}
+      tipo={tipoVotacion}
+      contexto="inicio"
+      columnas={4}
+    />
+
     <Microambiente
       notas={paraMicroambiente}
       seccion={SECCIONES_EDITORIALES.microambiente}

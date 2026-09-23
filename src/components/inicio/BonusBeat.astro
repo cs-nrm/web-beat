@@ -44,9 +44,21 @@ interface Props {
    *               mismo rótulo dos veces con dos tipografías distintas.
    */
   contexto?: 'inicio' | 'edicion';
+  /**
+   * En cuántas columnas se reparten las canciones.
+   *
+   * `1` es la fila ancha de siempre y es lo que usa Bonus Beat, con tres
+   * canciones. El Top Ten trae VEINTE, y en una sola columna eso es una página de
+   * scroll infinito: de ahí `2` en la sección (diez y diez) y `4` en el Inicio,
+   * donde el bloque comparte pantalla con todo lo demás.
+   *
+   * Lo decide la PÁGINA y no este componente, por lo mismo que `anuncio`: el
+   * mismo bloque lo pintan el Inicio y la sección, y cada uno tiene su sitio.
+   */
+  columnas?: 1 | 2 | 4;
 }
 
-const { lista, tipo, contexto = 'inicio', anuncio = null } = Astro.props;
+const { lista, tipo, contexto = 'inicio', anuncio = null, columnas = 1 } = Astro.props;
 
 const enInicio = contexto === 'inicio';
 const rutaTipo = tipo?.slug ? `/${tipo.slug}` : null;
@@ -188,7 +200,10 @@ function plataformasDe(c: unknown): Array<[string, string]> {
         lista.
       */}
       <div class:list={['bb-reparto', { 'con-anuncio': enInicio && anuncio }]}>
-      <div class="bb-canciones">
+      <div
+        class:list={['bb-canciones', `es-col-${columnas}`]}
+        style={columnas > 1 ? `--filas:${Math.ceil(canciones.length / columnas)}` : undefined}
+      >
       {/*
         Sin canciones no se pinta nada — decisión del 2026-09-09. Aquí caía
         «Esta edición todavía no tiene canciones cargadas», que en el Inicio dejaba
@@ -371,10 +386,20 @@ function plataformasDe(c: unknown): Array<[string, string]> {
         </dialog>
       )}
 
+      {/*
+        El rótulo decía «VER TODAS LAS EDICIONES» y dejó de ser verdad el
+        2026-09-23, cuando se retiró el archivo: la sección ya no tiene ediciones
+        que ver, tiene una. Ahora nombra el tipo, que es lo que hay al otro lado y
+        sirve para cualquiera que la estación cree.
+
+        Trampa de Astro, la sexta en este repo: un comentario de llaves NO puede ir
+        dentro de la expresión de un `&&`, porque ahí solo cabe un elemento. Va
+        antes de la llave que abre.
+      */}
       {enInicio && rutaTipo && (
         <div class="bb-pie">
           <a href={rutaTipo} class="beat-label bb-mas">
-            VER TODAS LAS EDICIONES
+            VER {(tipo?.nombre ?? lista.titulo).toUpperCase()}
           </a>
         </div>
       )}
@@ -427,6 +452,128 @@ function plataformasDe(c: unknown): Array<[string, string]> {
   }
   .bb-canciones {
     min-width: 0;
+  }
+
+  /*
+    Las rejillas de lista larga.
+
+    Una lista de veinte canciones en una sola columna es una página que solo se
+    recorre con el dedo: por eso la sección va a DOS columnas —diez y diez— y el
+    Inicio a CUATRO, donde el bloque convive con todo lo demás.
+
+    `column-gap` con separación vertical propia y no `gap` a secas: las filas ya
+    traen su línea de abajo (`border-bottom` en `.bb-fila`), y un hueco vertical
+    encima de esa línea la despega del contenido que separa.
+
+    Reparte por COLUMNAS y no en zigzag: con `grid-auto-flow: column` y las filas
+    contadas, la primera columna lleva del 01 al 10 y la segunda del 11 al 20, que
+    es como se lee un top. Con el flujo normal de rejilla saldría 01-02 en la
+    primera fila, 03-04 en la segunda, y el orden se perdería.
+
+    Trampa: el número de filas lo pone la plantilla en `--filas`, porque CSS no sabe
+    cuántos hijos hay. Sin eso, `grid-auto-flow: column` mete todo en UNA fila.
+  */
+  .bb-canciones.es-col-2,
+  .bb-canciones.es-col-4 {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(var(--filas, 1), auto);
+    column-gap: 36px;
+  }
+  .bb-canciones.es-col-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .bb-canciones.es-col-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  /*
+    La celda de CUATRO columnas no puede llevar la fila ancha.
+
+    Medido a 1280: la celda sale a 209px, y la fila de siempre reserva 44 para el
+    número y 92 para la carátula — quedan 53 para el título y el botón de votar,
+    que es no caber. Así que en esta variante la fila se dobla: arriba el número,
+    la carátula y el voto; el texto entero debajo, a lo ancho de la celda.
+
+    A dos columnas NO hace falta: ahí la celda mide 578 y la fila ancha entra
+    holgada, que es la misma que se lee en la sección.
+  */
+  .bb-canciones.es-col-4 .bb-fila {
+    grid-template-columns: 28px 52px minmax(0, 1fr);
+    grid-template-areas:
+      'num portada voto'
+      'texto texto texto';
+    gap: 10px 12px;
+    align-items: center;
+    padding: 16px 0;
+  }
+  .bb-canciones.es-col-4 .bb-n {
+    grid-area: num;
+    font-size: 17px;
+  }
+  .bb-canciones.es-col-4 .bb-portada {
+    grid-area: portada;
+  }
+  .bb-canciones.es-col-4 .bb-voto {
+    grid-area: voto;
+    justify-content: flex-end;
+  }
+  .bb-canciones.es-col-4 .bb-texto {
+    grid-area: texto;
+  }
+  /* Los chips de plataforma no caben y hoy no se pintan nunca: ver `plataformasDe`. */
+  .bb-canciones.es-col-4 .bb-plataformas {
+    display: none;
+  }
+  /* «Textos un poco más pequeños» (Carlos): la celda es la mitad de ancha que en
+     la sección, así que el cuerpo baja con ella. */
+  .bb-canciones.es-col-4 .bb-titulo {
+    font-size: 14px;
+    line-height: 1.3;
+  }
+  .bb-canciones.es-col-4 .bb-linea {
+    font-size: 11.5px;
+    margin-top: 4px;
+  }
+  .bb-canciones.es-col-4 .bb-voto-conteo {
+    font-size: 10px;
+  }
+  .bb-canciones.es-col-4 .bb-voto-btn {
+    padding: 7px 10px;
+    font-size: 8.5px;
+  }
+
+  /*
+    En móvil no hay rejilla que valga: cuatro columnas a 375px dan 80px por celda.
+    Las dos variantes caen a una sola columna y la fila vuelve a ser la de siempre
+    —incluidas sus medidas—, así que aquí se deshace también el reparto de arriba.
+  */
+  @media (max-width: 899px) {
+    .bb-canciones.es-col-2,
+    .bb-canciones.es-col-4 {
+      display: block;
+    }
+    .bb-canciones.es-col-4 .bb-fila {
+      grid-template-columns: 30px 64px minmax(0, 1fr);
+      grid-template-areas: none;
+      gap: 12px;
+      padding: 14px 0;
+    }
+    .bb-canciones.es-col-4 .bb-n,
+    .bb-canciones.es-col-4 .bb-portada,
+    .bb-canciones.es-col-4 .bb-voto,
+    .bb-canciones.es-col-4 .bb-texto {
+      grid-area: auto;
+    }
+    .bb-canciones.es-col-4 .bb-voto {
+      grid-column: 2 / -1;
+    }
+    .bb-canciones.es-col-4 .bb-titulo {
+      font-size: 15px;
+    }
+    .bb-canciones.es-col-4 .bb-linea {
+      font-size: 13px;
+    }
   }
   .bb-riel {
     /* Pegajoso bajo el chrome, como el riel de la nota. Con tres canciones no

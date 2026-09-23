@@ -156,6 +156,21 @@ export const ESTACION_CODIGO = envServidor('ESTACION_CODIGO', 'beat');
 export const SERIE_FENOMENO = envServidor('SERIE_FENOMENO', 'fenomeno-residente');
 export const TIPO_LISTA_DESTACADA = envServidor('TIPO_LISTA_DESTACADA', 'bonus-beat');
 
+/**
+ * El tipo de lista que el Inicio saca A VOTACIÓN, en rejilla y encima de
+ * Microambiente.
+ *
+ * Es OTRO hueco que `TIPO_LISTA_DESTACADA`, no el mismo con otro valor: el
+ * destacado es el bloque de tres canciones con viñeta editorial —Bonus Beat— y
+ * este es la lista larga que el público vota. Conviven en la misma portada, y el
+ * día que la estación quiera votar otra cosa se cambia aquí sin tocar código.
+ *
+ * Si el slug no existe, el bloque no se pinta. Sin aviso y sin rótulo: es la regla
+ * de la casa, y aquí además es el estado normal de cualquier estación hermana que
+ * todavía no tenga su lista de votación.
+ */
+export const TIPO_LISTA_VOTACION = envServidor('TIPO_LISTA_VOTACION', 'top-ten');
+
 export const IDIOMA = 'es';
 export const IDIOMA_REGION = 'es-MX';
 export const LOCALE_OG = 'es_MX';

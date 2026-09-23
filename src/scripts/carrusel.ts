@@ -226,6 +226,68 @@ function montar(tira: HTMLElement): void {
   tira.addEventListener('pointerup', soltar);
   tira.addEventListener('pointercancel', soltar);
 
+  // ── el recorte de móvil ──
+  /*
+    En móvil no hay carrusel —la tira se apila— y veinte tarjetas seguidas son
+    mucha portada. Se enseñan cuatro y las demás se piden de cuatro en cuatro
+    (Carlos, 2026-09-23).
+
+    Lo recorta el SCRIPT y no el CSS, y esa es la parte importante: es la regla de
+    `movimiento.md` de que ningún efecto puede dejar el contenido inalcanzable. Con
+    el recorte en la hoja de estilos, un navegador sin JavaScript se quedaría con
+    dieciséis canciones que no existen y sin nada que las traiga. Sin script se ven
+    las veinte y el botón no aparece.
+
+    Suma en vez de reemplazar: lo visto se queda visto. Con cuatro a la vez y un
+    salto que las cambia, quien compara dos canciones pierde la primera al buscar
+    la segunda.
+  */
+  const boton = bloque.querySelector<HTMLElement>('[data-carrusel-mas]');
+  const rotulo = boton?.querySelector<HTMLElement>('[data-carrusel-mas-texto]');
+  const tarjetas = [...tira.children] as HTMLElement[];
+  const enMovil = window.matchMedia('(max-width: 899px)');
+  let tope = POR_VISTA;
+
+  const pintarRecorte = (): void => {
+    if (!boton) return;
+    if (!enMovil.matches) {
+      // En escritorio manda el carrusel: nada escondido y sin botón.
+      tarjetas.forEach((t) => (t.hidden = false));
+      boton.hidden = true;
+      return;
+    }
+    tarjetas.forEach((t, i) => (t.hidden = i >= tope));
+    const quedan = tarjetas.length - tope;
+    boton.hidden = quedan <= 0;
+    if (rotulo) rotulo.textContent = `VER ${Math.min(POR_VISTA, quedan)} MÁS`;
+  };
+
+  boton?.addEventListener('click', () => {
+    tope = Math.min(tarjetas.length, tope + POR_VISTA);
+    pintarRecorte();
+    /*
+      El foco se queda en el botón mientras quede algo que descubrir, que es lo
+      que permite ir pulsando sin volver a buscarlo. Cuando desaparece, se lleva a
+      la primera tarjeta recién sacada: dejarlo en un botón que ya no está manda el
+      foco al principio del documento y pierde a quien navega con el teclado.
+    */
+    if (boton.hidden) tarjetas[tope - POR_VISTA]?.querySelector('button')?.focus();
+  });
+
+  /*
+    Al cruzar el corte se recalcula. Sin esto, girar el teléfono o agrandar la
+    ventana deja escondidas dieciséis tarjetas en un escritorio que ya tiene
+    carrusel, o las veinte sueltas en un móvil sin botón.
+  */
+  const alCambiarAncho = (): void => {
+    tope = POR_VISTA;
+    pintarRecorte();
+    if (enMovil.matches) parar();
+    else arrancar();
+  };
+  enMovil.addEventListener('change', alCambiarAncho);
+  pintarRecorte();
+
   actualizar();
   arrancar();
 
@@ -233,6 +295,7 @@ function montar(tira: HTMLElement): void {
     parar();
     vigia?.disconnect();
     document.removeEventListener('visibilitychange', alCambiarVisibilidad);
+    enMovil.removeEventListener('change', alCambiarAncho);
   });
 }
 

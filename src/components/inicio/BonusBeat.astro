@@ -401,6 +401,28 @@ function plataformasDe(c: unknown): Array<[string, string]> {
       </div>
 
       {/*
+        El botón que descubre las siguientes cuatro, en móvil (Carlos, 2026-09-23):
+        «que muestre hacia abajo 4 y una flechita para los siguientes 4, y así».
+
+        Nace ESCONDIDO y lo saca el script, que es lo mismo que hace con el recorte
+        de la lista. Es la regla de `movimiento.md`: ningún efecto puede dejar el
+        contenido inalcanzable. Sin JavaScript no hay recorte —se ven las veinte— y
+        entonces tampoco hay botón que lo deshaga; un botón ahí sería un control
+        muerto, que es lo que la casa no admite.
+
+        Suma en vez de reemplazar. Con cuatro visibles y un salto que cambia las
+        cuatro, quien compara dos canciones pierde la primera al buscar la segunda;
+        creciendo hacia abajo, lo visto se queda visto. Y es lo que dice el
+        encargo: «hacia abajo».
+      */}
+      {columnas === 4 && (
+        <button type="button" class="beat-label bb-mas-movil" data-carrusel-mas hidden>
+          <span data-carrusel-mas-texto>VER 4 MÁS</span>
+          <Icono nombre="chevron-down" tamano={14} />
+        </button>
+      )}
+
+      {/*
         La respuesta al voto, en un MODAL.
 
         Aquí hubo una línea de texto debajo de la lista con `aria-live`, y se
@@ -624,6 +646,25 @@ function plataformasDe(c: unknown): Array<[string, string]> {
     }
   }
 
+  /*
+    El botón de «ver 4 más», solo en móvil. En escritorio manda el carrusel y el
+    script no lo saca nunca; aquí se apaga también por CSS, que es el cinturón que
+    no depende de que el script corra.
+  */
+  .bb-mas-movil {
+    display: none;
+  }
+  /*
+    Una tarjeta escondida necesita su propia regla: `.bb-fila` declara
+    `display: grid`, y eso le gana al `display: none` que el navegador le pone a
+    `[hidden]` — la clase tiene más especificidad que el atributo. Es el mismo
+    tropiezo de siempre con `hidden`, y aquí dejaría las veinte a la vista con el
+    botón puesto.
+  */
+  .bb-fila[hidden] {
+    display: none;
+  }
+
   /* El paginador por tramos. */
   /*
     El paginador vive en la CABECERA, al lado del rótulo (Carlos, 2026-09-23).
@@ -781,6 +822,36 @@ function plataformasDe(c: unknown): Array<[string, string]> {
     */
     .bb-paginas {
       display: none;
+    }
+    .bb-mas-movil {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      margin-top: 12px;
+      padding: 14px;
+      border: 0;
+      background: var(--surface-card);
+      box-shadow: inset 0 0 0 1px var(--border-hairline);
+      color: var(--text-body);
+      font-size: 9px;
+      cursor: pointer;
+      transition:
+        background var(--dur-2) var(--ease-out),
+        color var(--dur-2) var(--ease-out);
+    }
+    .bb-mas-movil[hidden] {
+      display: none;
+    }
+    .bb-mas-movil:hover,
+    .bb-mas-movil:focus-visible {
+      background: var(--mist-0);
+      color: var(--noche-0);
+    }
+    .bb-mas-movil:focus-visible {
+      outline: 2px solid var(--mist-0);
+      outline-offset: 2px;
     }
     .bb-tira.es-col-4 .bb-fila {
       grid-template-columns: 30px 64px minmax(0, 1fr);

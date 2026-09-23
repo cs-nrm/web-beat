@@ -156,7 +156,7 @@ function plataformasDe(c: unknown): Array<[string, string]> {
 {
   lista && (
     <section
-      class:list={['bb', `es-${contexto}`]}
+      class:list={['bb', `es-${contexto}`, `es-rejilla-${columnas}`]}
       data-pistas
       data-voto-lista={conVoto ? String(lista.id) : undefined}
     >
@@ -388,16 +388,20 @@ function plataformasDe(c: unknown): Array<[string, string]> {
       )}
 
       {/*
-        El rótulo decía «VER TODAS LAS EDICIONES» y dejó de ser verdad el
-        2026-09-23, cuando se retiró el archivo: la sección ya no tiene ediciones
-        que ver, tiene una. Ahora nombra el tipo, que es lo que hay al otro lado y
-        sirve para cualquiera que la estación cree.
+        El remate solo sale en la fila ancha, o sea en Bonus Beat. En la rejilla no
+        (Carlos, 2026-09-23: «hay un botón que dice ver top ten, quitémoslo»), y el
+        motivo es que ahí sobra: el bloque ya enseña las veinte canciones y se puede
+        votar en ellas, así que el enlace lleva a una página con lo mismo.
+
+        Su rótulo decía «VER TODAS LAS EDICIONES» y dejó de ser verdad el mismo día,
+        cuando se retiró el archivo. Ahora nombra el tipo, que es lo que hay al otro
+        lado y sirve para cualquiera que la estación cree.
 
         Trampa de Astro, la sexta en este repo: un comentario de llaves NO puede ir
         dentro de la expresión de un `&&`, porque ahí solo cabe un elemento. Va
         antes de la llave que abre.
       */}
-      {enInicio && rutaTipo && (
+      {enInicio && rutaTipo && columnas === 1 && (
         <div class="bb-pie">
           <a href={rutaTipo} class="beat-label bb-mas">
             VER {(tipo?.nombre ?? lista.titulo).toUpperCase()}
@@ -419,6 +423,22 @@ function plataformasDe(c: unknown): Array<[string, string]> {
 <style>
   .bb {
     padding: 44px 24px 0;
+  }
+  /*
+    En la rejilla de cuatro el bloque vive FUERA del contenedor con tope de ancho
+    del Inicio, para que las veinte celdas tengan sitio. El rótulo no: se limita
+    aquí, solo, para seguir alineado con el resto de la portada. Es lo mismo que
+    hace `.inicio-contenido`, aplicado a una sola pieza.
+
+    La clase la pone la SECCIÓN y no se deduce con `:has()` del contenedor de
+    dentro. Con `:has()` funcionaría igual en todo navegador reciente, pero donde
+    no exista el rótulo se iría a lo ancho sin que nadie se entere — y un fallo
+    silencioso de maquetación es el que nadie reporta. El dato ya lo tiene el
+    componente; no hay que adivinarlo desde el CSS.
+  */
+  .bb.es-rejilla-4 .bb-cabeza {
+    max-width: var(--grid-max);
+    margin-inline: auto;
   }
   /*
     En la sección propia el bloque no pone NADA de margen: ni arriba (el
@@ -499,11 +519,20 @@ function plataformasDe(c: unknown): Array<[string, string]> {
     A dos columnas NO hace falta: ahí la celda mide 578 y la fila ancha entra
     holgada, que es la misma que se lee en la sección.
   */
+  /*
+    El reparto de la celda, versión del 2026-09-23 (Carlos): «al lado de la imagen
+    poner el título y artista, y abajo el botón de votar».
+
+    Antes el texto iba debajo de todo y el voto compartía renglón con la carátula.
+    Se cambia porque lo que identifica la canción —el título— tiene que ir pegado a
+    su carátula, y el voto es la acción, que va al final. Con el bloque a todo lo
+    ancho la celda creció y el título ya cabe al lado.
+  */
   .bb-canciones.es-col-4 .bb-fila {
     grid-template-columns: 28px 52px minmax(0, 1fr);
     grid-template-areas:
-      'num portada voto'
-      'texto texto texto';
+      'num portada texto'
+      'voto voto voto';
     gap: 10px 12px;
     align-items: center;
     padding: 16px 0;

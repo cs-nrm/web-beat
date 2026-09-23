@@ -428,6 +428,33 @@ const LEMA = 'Beat 100.9 — Aquí la música se elige';
     <Anuncio formato="leaderboard" nombre="inicio-leader" />
   </div>
 
+  {/*
+    La lista a votación, ENCIMA de Microambiente (Carlos, 2026-09-23).
+
+    Va en cuatro columnas y no en la fila ancha de Bonus Beat porque son VEINTE
+    canciones: en una columna serían veinte filas en mitad de la portada, y el
+    Inicio dejaría de ser una portada.
+
+    Y va FUERA de `.inicio-contenido`, o sea a todo lo ancho, por lo mismo que el
+    mosaico, el cintillo y la franja del leaderboard: «como son muchas se ve raro»
+    (Carlos). Con los 1240px del contenedor, veinte celdas quedan estrechas y el
+    bloque se lee apretado en medio de una página que tiene aire de sobra. El
+    RÓTULO sí se queda dentro: se limita solo, dentro del componente, para seguir
+    alineado con todo lo demás de la portada.
+
+    Se pueden votar las veinte desde aquí: el botón y el porcentaje son los mismos
+    que en la sección, con el mismo proxy detrás. La idea de la estación es que de
+    esas veinte salgan las diez más votadas.
+
+    Sin lista publicada no se pinta nada, ni el rótulo.
+  */}
+  <BonusBeat
+    lista={listaVotacion}
+    tipo={tipoVotacion}
+    contexto="inicio"
+    columnas={4}
+  />
+
   <div class="inicio-contenido">
     {/*
       **Microambiente va ARRIBA A PROPÓSITO Y ES PROVISIONAL** (Carlos,
@@ -453,28 +480,6 @@ const LEMA = 'Beat 100.9 — Aquí la música se elige';
       cero notas, así que el estado por omisión de este bloque es no existir — y
       entonces la portada se lee exactamente como antes de que existiera.
     */}
-    {/*
-      La lista a votación, ENCIMA de Microambiente (Carlos, 2026-09-23).
-
-      Va en cuatro columnas y no en la fila ancha de Bonus Beat porque son VEINTE
-      canciones: en una columna serían veinte filas en mitad de la portada, y el
-      Inicio dejaría de ser una portada. Cuatro columnas por cinco filas es el
-      reparto que cabe sin empujar todo lo de abajo fuera de alcance.
-
-      Se pueden votar las veinte desde aquí: el botón y el porcentaje son los
-      mismos que en la sección, con el mismo proxy detrás. La idea de la estación
-      es que de esas veinte salgan las diez más votadas.
-
-      Sin lista publicada no se pinta nada, ni el rótulo. Misma regla que
-      Microambiente, aquí debajo.
-    */}
-    <BonusBeat
-      lista={listaVotacion}
-      tipo={tipoVotacion}
-      contexto="inicio"
-      columnas={4}
-    />
-
     <Microambiente
       notas={paraMicroambiente}
       seccion={SECCIONES_EDITORIALES.microambiente}

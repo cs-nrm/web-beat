@@ -495,6 +495,22 @@ function plataformasDe(c: unknown): Array<[string, string]> {
     silencioso de maquetación es el que nadie reporta. El dato ya lo tiene el
     componente; no hay que adivinarlo desde el CSS.
   */
+  /*
+    Aire por debajo, que el bloque no tenía: `.bb` solo trae padding arriba.
+
+    Los 64px no son a ojo, son los que igualan los dos huecos (Carlos: «la
+    distancia del ticker a la de top ten está bien, pero de esa a microambientes
+    es muy corta, la dejamos igual»). Medido a 1440: del cintillo al rótulo TOP
+    TEN hay 108px —64 de la franja del anuncio más los 44 de `.bb`—, y de las
+    tarjetas al rótulo MICROAMBIENTE había 44, que son los suyos. Con estos 64 los
+    dos lados quedan en 108.
+
+    Solo en la rejilla: es la única que vive fuera del contenedor y pegada a la
+    sección siguiente. Bonus Beat va dentro y no tiene ese problema.
+  */
+  .bb.es-rejilla-4 {
+    padding-bottom: 64px;
+  }
   .bb.es-rejilla-4 .bb-cabeza {
     max-width: var(--grid-max);
     margin-inline: auto;

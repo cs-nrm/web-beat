@@ -349,6 +349,24 @@ if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
       lo que sobra no rompa la página.
     */
     overflow: hidden;
+    /*
+      Centra el creativo cuando llega MÁS CHICO que el hueco. GPT mete un solo
+      `div` contenedor con ancho y alto fijos en línea, y como bloque se pegaba
+      arriba a la izquierda: visto en el sitio el 2026-10-01, un 1280×360 en la
+      banda de portada de 1441×405, con 161px de banda vacía a la derecha y 45 abajo.
+    */
+    display: flex;
+  }
+  /*
+    `margin: auto` y no `justify-content: center`, y la diferencia es la que
+    importa. Con el creativo MÁS GRANDE que el hueco —el caso de `encajar()`, una
+    portada de 1280 entre 900 y 1280 de ancho— `center` lo desborda por los DOS
+    lados, y el escalado con origen arriba a la izquierda lo deja corrido y
+    recortado. Un margen automático se queda en 0 cuando no hay sitio, así que ese
+    caso queda alineado al inicio, que es lo que `encajar()` supone.
+  */
+  .anuncio-hueco > :global(*) {
+    margin: auto;
   }
   /*
     Con el creativo escalado, la altura la fija el script en píxeles: la proporción

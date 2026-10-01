@@ -59,6 +59,7 @@ const conTitular = contexto !== 'tema';
 
 const capsulas = capsulasDe(especial);
 const playlist = listaDe(especial);
+const canciones = playlist?.canciones ?? [];
 
 /**
  * La cápsula que encabeza: la marcada como destacada si la hay, y si no la última
@@ -301,8 +302,16 @@ const tiendas = (
           <div class="fr-playlist" data-pistas>
             <div class="fr-playlist-cabeza">
               <span class="beat-label fr-playlist-titulo">PLAYLIST ASOCIADO</span>
-              {playlist?.canciones && (
-                <span class="beat-label fr-playlist-nota">{playlist.canciones.length} TRACKS</span>
+              {/*
+                Cuenta las mismas filas que se pintan abajo, y por eso el listado
+                no lleva tope. Hasta el 2026-10-01 pintaba `slice(0, 6)` y aquí
+                contaba el total: «Las Máquinas Kraftwerk» decía 10 TRACKS con seis
+                filas, y las otras cuatro no salían en ninguna parte del sitio.
+              */}
+              {canciones.length > 0 && (
+                <span class="beat-label fr-playlist-nota">
+                  {canciones.length} {canciones.length === 1 ? 'TRACK' : 'TRACKS'}
+                </span>
               )}
             </div>
             {/*
@@ -310,9 +319,9 @@ const tiendas = (
               caía «Sin playlist todavía. Se agrega al especial en “Lista de
               canciones”», que nombraba un campo del CMS delante del lector.
             */}
-            {playlist?.canciones && playlist.canciones.length > 0 && (
+            {canciones.length > 0 && (
               <>
-                {playlist.canciones.slice(0, 6).map((c, i) => {
+                {canciones.map((c, i) => {
                   const cancion = typeof c.cancion === 'object' ? c.cancion : null;
                   const fuente = fuenteDeCancion(cancion);
                   /*

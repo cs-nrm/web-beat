@@ -69,8 +69,9 @@ import {
 import { SECCIONES_EDITORIALES } from '@/config/navegacion';
 
 /*
-  Todo en PARALELO. Son ocho consultas y ninguna depende de otra salvo la lista
-  destacada, que necesita saber qué tipos existen. Eran nueve, bajaron a siete
+  Todo en PARALELO. Son ocho consultas y ninguna depende de otra salvo las dos
+  listas, que necesitan saber qué tipos existen y van encadenadas aparte —ver
+  `listasDelInicio`—, pero dentro del mismo `Promise.all`. Eran nueve, bajaron a siete
   —la parrilla de hoy y la bitácora se fueron con el panel de la señal— y vuelven a
   ocho con Microambiente. Secuenciales sumarían sus latencias; en paralelo el Inicio
   cuesta lo que la más lenta.
@@ -106,6 +107,48 @@ import { SECCIONES_EDITORIALES } from '@/config/navegacion';
   apuntando a una categoría que ya no existe y el bloque se pinta vacío sin decir por
   qué.
 */
+/*
+  Las dos listas del Inicio —la destacada y la que se vota— salen de `tipos`, así
+  que no se pueden pedir hasta saber qué tipos hay. Eso no las obliga a esperar al
+  resto: se encadenan a `obtenerTiposDeLista` y la cadena entera corre en paralelo
+  con todo lo demás. Se arranca AQUÍ, antes del primer `await` de la página, y se
+  recoge en el `Promise.all` de abajo.
+
+  Antes se pedían DESPUÉS de ese `Promise.all` y una detrás de otra, así que su
+  tiempo se SUMABA al de la consulta más lenta en vez de solaparse con ella. Medido
+  el 2026-10-02 contra el CMS de producción: el Top Ten tardaba 5–10 s y el
+  especial del Fenómeno 8–12 s, y la primera carga del Inicio llegaba a 16 s.
+
+  El tipo DESTACADO se resuelve por slug contra lo que la estación tenga creado, y
+  si ese slug no existe se toma el primero que haya. Así el bloque no desaparece
+  porque alguien renombró «Bonus Beat», ni hay que desplegar cuando inventen otro
+  tipo.
+
+  El de VOTACIÓN, en cambio, NO cae a `tipos[0]` si el slug no existe: el
+  destacado es un hueco de portada que siempre quiere algo dentro, y este es una
+  votación concreta. Sacar a votar «la primera lista que haya» porque alguien
+  renombró un tipo sería peor que no pintar nada.
+
+  La consulta del de votación es la misma que ya hace `/top-ten`, así que comparte
+  su entrada de caché y no cuesta un viaje más.
+
+  No necesita `catch`: `obtenerTiposDeLista` y `obtenerListaReciente` ya degradan
+  a vacío, así que esta promesa no rechaza aunque se arranque antes de esperarla.
+*/
+async function listasDelInicio() {
+  const tipos = await obtenerTiposDeLista();
+  const tipoDestacado = tipos.find((t) => t.slug === TIPO_LISTA_DESTACADA) ?? tipos[0] ?? null;
+  const tipoVotacion = tipos.find((t) => t.slug === TIPO_LISTA_VOTACION) ?? null;
+  const [listaDestacada, listaVotacion] = await Promise.all([
+    tipoDestacado?.slug ? obtenerListaReciente(tipoDestacado.slug) : null,
+    tipoVotacion?.slug && tipoVotacion.slug !== tipoDestacado?.slug
+      ? obtenerListaReciente(tipoVotacion.slug)
+      : null,
+  ]);
+  return { tipoDestacado, tipoVotacion, listaDestacada, listaVotacion };
+}
+const pidiendoListas = listasDelInicio();
+
 const [filtroScanner, filtroEditorial, filtroMicroambiente] = await Promise.all([
   filtroDeCategoria(SECCIONES_EDITORIALES.scanner.categoria),
   filtroDeCategoria(SECCIONES_EDITORIALES.editorial.categoria),
@@ -120,7 +163,7 @@ const [
   microambiente,
   especial,
   especiales,
-  tipos,
+  { tipoDestacado, tipoVotacion, listaDestacada, listaVotacion },
   agenda,
   banners,
   takeover,
@@ -136,18 +179,12 @@ const [
     filtroMicroambiente ? obtenerScanner(3, filtroMicroambiente) : Promise.resolve(VACIO),
     obtenerEspecialVigente(SERIE_FENOMENO),
     obtenerEspeciales(SERIE_FENOMENO, 8),
-    obtenerTiposDeLista(),
+    pidiendoListas,
     obtenerAgenda(4),
     obtenerBanners('portada'),
     obtenerTakeover(),
   ]);
 
-/*
-  El tipo de lista que va al Inicio se resuelve por SLUG contra lo que la estación
-  tenga creado, y si ese slug no existe se toma el primero que haya. Así el bloque
-  no desaparece porque alguien renombró «Bonus Beat», ni hay que desplegar cuando
-  inventen otro tipo.
-*/
 /**
  * Vista previa del takeover: `?takeover=imagen|video|admanager`.
  *
@@ -202,26 +239,6 @@ function vistaPreviaTakeover(url: URL): DatosTakeover | null {
 }
 
 const takeoverVisible = vistaPreviaTakeover(Astro.url) ?? takeover;
-
-const tipoDestacado = tipos.find((t) => t.slug === TIPO_LISTA_DESTACADA) ?? tipos[0] ?? null;
-const listaDestacada = tipoDestacado?.slug ? await obtenerListaReciente(tipoDestacado.slug) : null;
-
-/*
-  La lista que se vota, que en el Inicio es un bloque aparte del destacado.
-
-  A diferencia del destacado NO cae a `tipos[0]` si el slug no existe: el
-  destacado es un hueco de portada que siempre quiere algo dentro, y este es una
-  votación concreta. Sacar a votar «la primera lista que haya» porque alguien
-  renombró un tipo sería peor que no pintar nada.
-
-  La consulta es la misma que ya hace `/top-ten`, así que comparte su entrada de
-  caché y no cuesta un viaje más.
-*/
-const tipoVotacion = tipos.find((t) => t.slug === TIPO_LISTA_VOTACION) ?? null;
-const listaVotacion =
-  tipoVotacion?.slug && tipoVotacion.slug !== tipoDestacado?.slug
-    ? await obtenerListaReciente(tipoVotacion.slug)
-    : null;
 
 /*
   El reparto del mosaico. `obtenerScanner` devuelve la destacada y el resto en una

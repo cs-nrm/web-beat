@@ -99,6 +99,24 @@ export type ParamsCms = Record<string, string | number | boolean | undefined>;
  */
 export const SIN_PAGINACION = { pagination: false } as const;
 
+/**
+ * Acota qué campos devuelve el CMS: `soloCampos('select', ['titulo'])` da
+ * `{ 'select[titulo]': true }`.
+ *
+ * Con `select` se acota el documento pedido; con `populate[<colección>]`, los
+ * documentos de esa colección que llegan POBLADOS dentro de él, a cualquier
+ * profundidad. Hace falta porque en `cms-estaciones` el coste de una consulta lo
+ * marca cuántos documentos relacionados se pueblan, no cuántas filas se piden —
+ * medido el 2026-10-02, ver `CAMPOS_MEDIA`—.
+ *
+ * El precio es el mismo en todos los usos: el tipo de TypeScript no se entera y
+ * un campo que no se pidió llega `undefined` sin ningún error. Por eso cada lista
+ * de campos vive junto al código que los lee.
+ */
+export function soloCampos(clave: string, campos: readonly string[]): ParamsCms {
+  return Object.fromEntries(campos.map((campo) => [`${clave}[${campo}]`, true]));
+}
+
 export class ErrorCms extends Error {
   constructor(
     message: string,
@@ -413,6 +431,38 @@ export interface DocMedia {
   focalY?: number | null;
   sizes?: Partial<Record<TamanoMedia, VarianteMedia>> | null;
 }
+
+/**
+ * Lo que leen de un documento de media las cuatro funciones de abajo: los campos
+ * de `DocMedia`, más DOS que no salen en él y sin los que nada funciona.
+ *
+ * **`filename` y `prefix` no se pintan, y se piden igual.** El CMS calcula `url`
+ * a partir de `filename` al leer, así que pedir `url` sin él la devuelve `null`; y
+ * sin `prefix` las URLs de `sizes` pierden su `?prefix=media`. Medido contra el
+ * CMS el 2026-10-02: el vídeo de una cápsula (media 245, un `.mov` sin variantes)
+ * se quedaba sin URL, o sea un Fenómeno sin vídeo y sin ningún error. `mimeType`
+ * va por si un reproductor lo necesita para elegir fuente.
+ *
+ * Por qué acotar la media: cada documento de `media` poblado le cuesta al CMS
+ * ~200 ms, y el Top Ten trae veinte portadas. Pedirlas aparte no lo arregla
+ * (20 portadas en una sola consulta: 3–6 s); lo que sí lo baja es pedir menos de
+ * cada una.
+ */
+export const CAMPOS_MEDIA = [
+  'alt',
+  'url',
+  'filename',
+  'prefix',
+  'mimeType',
+  'sizes',
+  'focalX',
+  'focalY',
+  'width',
+  'height',
+] as const;
+
+/** `CAMPOS_MEDIA` para toda la media que llegue poblada en una consulta. */
+export const POBLAR_MEDIA = soloCampos('populate[media]', CAMPOS_MEDIA);
 
 /**
  * URL del archivo TAL CUAL, sin pasar por las variantes de imagen.

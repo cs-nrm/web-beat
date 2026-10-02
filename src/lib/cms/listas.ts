@@ -12,8 +12,55 @@
  * —«la viñeta que acompaña a la canción»—, que es exactamente lo que pedía el mapa
  * de sitio.)
  */
-import { cmsFetchEstacion, SIN_PAGINACION, type RespuestaLista } from './client';
+import {
+  cmsFetchEstacion,
+  POBLAR_MEDIA,
+  SIN_PAGINACION,
+  soloCampos,
+  type ParamsCms,
+  type RespuestaLista,
+} from './client';
 import type { Lista, TiposDeLista } from '@/types/payload';
+
+/**
+ * Lo que se pinta de cada CANCIÓN de una lista: la fila de `BonusBeat` (título,
+ * artista, portada, las fuentes que lee `fuenteDeCancion()` y las tres tiendas de
+ * `plataformasDe()`) y la del Fenómeno, que además enseña la `duracion`.
+ *
+ * Lo que se queda fuera es sobre todo la `estacion` de cada canción: a `depth: 2`
+ * llegaba poblada en las veinte, el mismo documento veinte veces, que el front ya
+ * conoce. `comentario` y `votos` no van aquí: son de la FILA de la lista, no de la
+ * canción, y esos no se acotan.
+ *
+ * Lo usa también `especiales.ts`, para las canciones de la lista del Fenómeno.
+ */
+export const CAMPOS_CANCION = [
+  'titulo',
+  'artista',
+  'duracion',
+  'portada',
+  'audio',
+  'youtube',
+  'embedUrl',
+  'spotify',
+  'appleMusic',
+  'deezer',
+] as const;
+
+/**
+ * Lo que se puebla dentro de una edición: sus canciones y la media (las portadas),
+ * acotadas a lo que se pinta. La lista en sí NO se acota con `select`: se probó y
+ * no movía el tiempo, y sus campos los leen tres vistas distintas.
+ *
+ * Medido contra el CMS el 2026-10-02, con el Top Ten de veinte canciones y cinco
+ * rondas alternadas: **9.9 s → 6.5 s** de mediana. Casi todo lo que queda son las
+ * veinte portadas (con `depth: 1`, sin ellas, son 2.6 s) y eso ya es coste del CMS
+ * por documento de media, no algo que se arregle pidiendo menos.
+ */
+const POBLAR_EDICION: ParamsCms = {
+  ...soloCampos('populate[canciones]', CAMPOS_CANCION),
+  ...POBLAR_MEDIA,
+};
 
 /** Los tipos que la estación tiene creados. De aquí salen las rutas. */
 export async function obtenerTiposDeLista(): Promise<TiposDeLista[]> {
@@ -46,6 +93,7 @@ export async function obtenerListaReciente(tipoSlug: string): Promise<Lista | nu
       'where[tipo.slug][equals]': tipoSlug,
       'where[estado][equals]': 'publicada',
       depth: 2,
+      ...POBLAR_EDICION,
       sort: '-fecha',
       limit: 1,
     });
@@ -111,6 +159,7 @@ export async function obtenerLista(tipoSlug: string, slug: string): Promise<List
     'where[tipo.slug][equals]': tipoSlug,
     'where[estado][equals]': 'publicada',
     depth: 2,
+    ...POBLAR_EDICION,
     limit: 1,
   });
   return r.docs[0] ?? null;

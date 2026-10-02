@@ -9,6 +9,7 @@ import {
   cmsContarEstacion,
   cmsFetchEstacion,
   SIN_PAGINACION,
+  soloCampos,
   type ParamsCms,
   type RespuestaLista,
 } from './client';
@@ -45,7 +46,7 @@ const CAMPOS_TARJETA = ['titulo', 'slug', 'resumen', 'fecha', 'createdAt', 'imag
 const BASE_INDICE: ParamsCms = {
   depth: 1,
   ...SIN_PAGINACION,
-  ...Object.fromEntries(CAMPOS_TARJETA.map((campo) => [`select[${campo}]`, true])),
+  ...soloCampos('select', CAMPOS_TARJETA),
 };
 
 /**

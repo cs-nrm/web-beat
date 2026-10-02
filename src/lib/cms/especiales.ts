@@ -10,8 +10,45 @@
  * El ORDEN del array es el dato, no un accidente: es lo que numera las cápsulas
  * («CÁPSULA 05 · HOY» en 13a). Nunca se reordena en el front.
  */
-import { cmsFetchEstacion, SIN_PAGINACION, type RespuestaLista } from './client';
+import {
+  cmsFetchEstacion,
+  POBLAR_MEDIA,
+  SIN_PAGINACION,
+  soloCampos,
+  type ParamsCms,
+  type RespuestaLista,
+} from './client';
+import { CAMPOS_CANCION } from './listas';
 import type { Especiale, Lista, Noticia, Podcast, Transmisione } from '@/types/payload';
+
+/**
+ * Lo que se puebla dentro de un especial con `depth: 2`, acotado a lo que pinta
+ * `Fenomeno.astro`, que es el único que lo lee —en el Inicio, en
+ * `/fenomeno-residente` y en la página de cada tema—:
+ *
+ *   · de cada CÁPSULA (`noticias`): título, slug, vídeo e imagen. Sin esto cada
+ *     una traía también sus categorías y su estación pobladas, y el join
+ *     `colecciones` —los especiales que la contienen—, que es una subconsulta más
+ *     por cápsula. La destacada (`piezaDestacada`) también es una noticia y se
+ *     acota igual; de ella solo se lee el `id`.
+ *   · de la LISTA asociada: sus canciones y los dos enlaces de playlist.
+ *   · de cada CANCIÓN y de la MEDIA: lo mismo que en `listas.ts` y `client.ts`.
+ *
+ * El especial en sí NO se acota: sus campos los leen tres páginas.
+ *
+ * Medido contra el CMS el 2026-10-02 con el especial vigente (ocho cápsulas),
+ * cinco rondas alternadas: **12.1 s → 4.8 s** de mediana. Con 12 s la consulta
+ * pasaba el corte de 8 s de `pedirAlCms` y el Fenómeno desaparecía del Inicio.
+ *
+ * Si `Fenomeno.astro` empieza a leer otro campo de una cápsula o de la lista,
+ * va aquí también: si no, llega `undefined` sin ningún error.
+ */
+const POBLAR_ESPECIAL: ParamsCms = {
+  ...soloCampos('populate[noticias]', ['titulo', 'slug', 'video', 'imagen']),
+  ...soloCampos('populate[listas]', ['canciones', 'playlistSpotify', 'playlistAppleMusic']),
+  ...soloCampos('populate[canciones]', CAMPOS_CANCION),
+  ...POBLAR_MEDIA,
+};
 
 /**
  * Una pieza ya resuelta, con su número de orden dentro del especial.
@@ -50,6 +87,7 @@ export async function obtenerEspecialVigente(serieSlug?: string): Promise<Especi
       'where[estado][equals]': 'activo',
       ...(serieSlug ? { 'where[serie.slug][equals]': serieSlug } : {}),
       depth: 2,
+      ...POBLAR_ESPECIAL,
       sort: '-inicio',
       limit: 1,
     });
@@ -149,6 +187,7 @@ export async function obtenerEspecial(slug: string): Promise<Especiale | null> {
   const r = await cmsFetchEstacion<RespuestaLista<Especiale>>('especiales', {
     'where[slug][equals]': slug,
     depth: 2,
+    ...POBLAR_ESPECIAL,
     limit: 1,
   });
   return r.docs[0] ?? null;

@@ -17,11 +17,36 @@ import { obtenerCategoria } from './categorias';
 import type { Noticia } from '@/types/payload';
 
 /**
- * Campos que el índice necesita, y solo esos. `depth: 1` puebla `imagen`,
- * `categorias` y `autores`; con `depth: 0` vendrían como ids y habría que pedirlos
- * aparte.
+ * Los campos que pinta una TARJETA, y solo esos: lo que leen `TarjetaNota`, el
+ * mosaico, la pila, Microambiente y la destacada de `IndiceScanner`. El `id` lo
+ * devuelve Payload siempre.
+ *
+ * Sin `select` cada nota del índice traía también su `contenido` —el árbol Lexical
+ * entero, ~10 KB por nota— que ningún índice pinta, y es justo lo que el CMS tarda
+ * en servir. Medido contra producción el 2026-10-02 con la consulta del mosaico (7
+ * notas): **25 s con el cuerpo, 2.6 s sin él**, y 93 KB → 2.4 KB. Como `pedirAlCms`
+ * corta a los 8 s, la consulta entera se perdía: el mosaico de Beat Scanner salía
+ * VACÍO y, como un fallo no se cachea, cada visita volvía a esperar los 8 s.
+ *
+ * Se lista lo que entra y no lo que sale (`select[contenido]=false`) porque
+ * excluir solo el cuerpo dejaba la misma consulta en 4–6 s: hay más campos caros
+ * que tampoco se pintan.
+ *
+ * El precio: el tipo sigue diciendo `Noticia` y estos documentos llegan SIN el
+ * resto de campos. Si una tarjeta empieza a leer uno nuevo, va aquí también — si
+ * no, llega `undefined` sin ningún error.
  */
-const BASE_INDICE: ParamsCms = { depth: 1, ...SIN_PAGINACION };
+const CAMPOS_TARJETA = ['titulo', 'slug', 'resumen', 'fecha', 'createdAt', 'imagen', 'categorias'] as const;
+
+/**
+ * `depth: 1` puebla `imagen` y `categorias`; con `depth: 0` vendrían como ids y
+ * habría que pedirlos aparte.
+ */
+const BASE_INDICE: ParamsCms = {
+  depth: 1,
+  ...SIN_PAGINACION,
+  ...Object.fromEntries(CAMPOS_TARJETA.map((campo) => [`select[${campo}]`, true])),
+};
 
 /**
  * Una `pieza` no se distribuye como noticia.

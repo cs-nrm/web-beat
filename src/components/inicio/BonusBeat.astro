@@ -56,9 +56,21 @@ interface Props {
    * mismo bloque lo pintan el Inicio y la sección, y cada uno tiene su sitio.
    */
   columnas?: 1 | 2 | 4;
+  /**
+   * La línea bajo el rótulo. Solo la pasa el Inicio, y solo para el Top Ten —
+   * ver `BAJADAS` en `src/pages/index.astro`—. Sin ella el rótulo va solo.
+   */
+  bajada?: string | null;
 }
 
-const { lista, tipo, contexto = 'inicio', anuncio = null, columnas = 1 } = Astro.props;
+const {
+  lista,
+  tipo,
+  contexto = 'inicio',
+  anuncio = null,
+  columnas = 1,
+  bajada = null,
+} = Astro.props;
 
 const enInicio = contexto === 'inicio';
 const rutaTipo = tipo?.slug ? `/${tipo.slug}` : null;
@@ -199,7 +211,15 @@ function plataformasDe(c: unknown): Array<[string, string]> {
       */}
       {enInicio && (
       <div class="bb-cabeza">
-        <h2 class="beat-display bb-seccion">{(tipo?.nombre ?? lista.titulo).toUpperCase()}</h2>
+        {/*
+          El rótulo y su bajada van en UNA caja. La cabeza alinea por la línea
+          base, que de una caja es la de su primera línea: así el paginador se
+          queda a la altura del rótulo y la bajada cuelga debajo sin moverlo.
+        */}
+        <div>
+          <h2 class="beat-display bb-seccion">{(tipo?.nombre ?? lista.titulo).toUpperCase()}</h2>
+          {bajada && <p class="beat-bajada">{bajada}</p>}
+        </div>
         {/*
           El paginador del carrusel, por TRAMOS y no con puntos.
 

@@ -1865,6 +1865,33 @@ html[data-cursor] .cursor-halo {
 }
 
 /* ============================================================
+   Bajada de bloque — la línea bajo el rótulo, solo en el Inicio
+   ------------------------------------------------------------
+   Le dice a quien llega a la portada qué es cada bloque (encargo del
+   2026-10-06). Va en el Inicio y en ningún otro sitio: el texto lo pasa la PÁGINA
+   y los interiores no lo pasan, porque su cabecera no lleva bajada por decisión
+   —ver `CabezaSeccion.astro`—. Dentro de la sección ya sabes dónde entraste.
+
+   Global y no en cada componente por lo mismo que `.beat-remate`: son cinco
+   bloques, y cinco copias son cómo se llega a cinco tamaños de bajada.
+
+   Mismo trato que `.sc-lead-bajada` en la sección: cuerpo de texto y
+   `--text-muted`, a opacidad plena. Por eso NO lleva `data-escribir`: el
+   encendido arranca en 0.4, y a ese valor un gris de 16px no llega a 4.5:1 —
+   está medido en «El texto se enciende al leerlo», más arriba.
+
+   Se probó más marcada —blanco, 18px y peso medio— el mismo 2026-10-06, y se
+   volvió a esta: gustó más el gris.
+   ============================================================ */
+.beat-bajada {
+  font: var(--type-body);
+  color: var(--text-muted);
+  margin: 6px 0 0;
+  max-width: 52ch;
+  text-wrap: pretty;
+}
+
+/* ============================================================
    Cabecera compacta: la barra oscura se recoge al bajar
    ------------------------------------------------------------
    Al hacer scroll, la barra de navegación se pliega y el wordmark aparece en la

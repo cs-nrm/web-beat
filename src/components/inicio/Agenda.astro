@@ -34,9 +34,14 @@ interface Props {
    * puede ver qué posición de la lista rinde.
    */
   anuncio?: string | null;
+  /**
+   * La línea bajo el rótulo. Solo la pasa el Inicio —ver `BAJADAS` en
+   * `src/pages/index.astro`— y solo se ve con la barra «AGENDA».
+   */
+  bajada?: string | null;
 }
 
-const { eventos, contexto = 'inicio', anuncio = null } = Astro.props;
+const { eventos, contexto = 'inicio', anuncio = null, bajada = null } = Astro.props;
 
 const enInicio = contexto === 'inicio';
 
@@ -113,7 +118,11 @@ const lugarProximo = proximo ? donde(proximo) : '';
       */}
       {enInicio && (
         <div class="ag-cabeza" data-barrido>
-          <h2 class="beat-display ag-seccion">AGENDA</h2>
+          {/* En una caja, para que el remate siga alineado con el rótulo: ver `BonusBeat.astro`. */}
+          <div>
+            <h2 class="beat-display ag-seccion">AGENDA</h2>
+            {bajada && <p class="beat-bajada">{bajada}</p>}
+          </div>
           <Remate href="/eventos" texto="VER LA AGENDA" clase="ag-todo" />
         </div>
       )}
@@ -208,6 +217,8 @@ const lugarProximo = proximo ? donde(proximo) : '';
   }
   .ag-cabeza {
     display: flex;
+    /* Se parte cuando la bajada no cabe junto al remate: ver `.fr-cabeza`. */
+    flex-wrap: wrap;
     align-items: baseline;
     justify-content: space-between;
     gap: 14px;

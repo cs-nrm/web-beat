@@ -50,9 +50,14 @@ interface Props {
    * la portada serían dos peticiones a GAM compitiendo por la misma pantalla.
    */
   anuncio?: string | null;
+  /**
+   * La línea bajo el rótulo. Solo la pasa el Inicio —ver `BAJADAS` en
+   * `src/pages/index.astro`— y solo se ve con la barra de sección.
+   */
+  bajada?: string | null;
 }
 
-const { especial, contexto = 'inicio', anuncio = null } = Astro.props;
+const { especial, contexto = 'inicio', anuncio = null, bajada = null } = Astro.props;
 
 const conCabeza = contexto === 'inicio';
 const conTitular = contexto !== 'tema';
@@ -110,7 +115,11 @@ const tiendas = (
     <section class="fr" data-fenomeno>
       {conCabeza && (
         <div class="fr-cabeza" data-barrido>
-          <h2 class="beat-display fr-seccion" data-escribir>EL FENÓMENO RESIDENTE</h2>
+          {/* En una caja, para que el remate siga alineado con el rótulo: ver `BonusBeat.astro`. */}
+          <div>
+            <h2 class="beat-display fr-seccion" data-escribir>EL FENÓMENO RESIDENTE</h2>
+            {bajada && <p class="beat-bajada">{bajada}</p>}
+          </div>
           <Remate href="/fenomeno-residente" texto="VER EL ARCHIVO" clase="fr-todo" />
         </div>
       )}
@@ -450,6 +459,16 @@ const tiendas = (
     gap: 14px;
     padding-bottom: 14px;
     border-bottom: 1px solid var(--border-quiet);
+  }
+  /*
+    Con la bajada, la cabeza se PARTE cuando no cabe: el remate baja a su línea
+    y el rótulo y la bajada se quedan con todo el ancho. Sin esto, a 375px la
+    bajada se apretaba en 177px junto al remate —tres líneas con media pantalla
+    vacía a la derecha—, medido el 2026-10-06. Solo la cabeza de la sección: las
+    otras dos no llevan bajada y ahí se encogen como siempre.
+  */
+  .fr-cabeza {
+    flex-wrap: wrap;
   }
   .fr-seccion {
     font-size: 26px;

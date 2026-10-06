@@ -315,6 +315,26 @@ const paraMicroambiente = [microambiente.destacada, ...microambiente.rejilla]
   mayúsculas — el `<title>` conserva esta caja, que es la que Carlos escribió.
 */
 const LEMA = 'Beat 100.9 — Aquí la música se elige';
+
+/*
+  La bajada de cada bloque, la línea bajo su rótulo (encargo del 2026-10-06).
+
+  Viven AQUÍ y no en los componentes por lo mismo que `anuncio` y `columnas`:
+  esos bloques los pintan también sus secciones, y allí no van —ver
+  `.beat-bajada` en `beat.css`—. Juntas, además, se leen como lo que son: cómo se
+  presenta la casa en la portada.
+
+  Bonus Beat NO lleva, y no es olvido: el encargo trajo texto para cinco bloques y
+  ese no estaba. Una bajada inventada es el relleno que `CabezaSeccion` retiró.
+*/
+const BAJADAS = {
+  topTen: 'Lo mejor de Beat. Tú escoges quién avanza.',
+  microambiente:
+    'Experiencia inmersiva, experimenta cómo suena la música electrónica en los diferentes lugares del mundo.',
+  fenomeno: 'Conoce la historia y cultura de la música electrónica.',
+  editorial: 'Las plumas de nuestro staff se encuentran aquí.',
+  agenda: 'Los eventos que importan los encuentras en nuestra agenda.',
+};
 ---
 
 {/*
@@ -470,6 +490,7 @@ const LEMA = 'Beat 100.9 — Aquí la música se elige';
     tipo={tipoVotacion}
     contexto="inicio"
     columnas={4}
+    bajada={BAJADAS.topTen}
   />
 
   <div class="inicio-contenido">
@@ -500,11 +521,16 @@ const LEMA = 'Beat 100.9 — Aquí la música se elige';
     <Microambiente
       notas={paraMicroambiente}
       seccion={SECCIONES_EDITORIALES.microambiente}
+      bajada={BAJADAS.microambiente}
     />
 
-    <Fenomeno especial={especial} />
+    <Fenomeno especial={especial} bajada={BAJADAS.fenomeno} />
     <ArchivoTemas temas={especiales} excluir={especial?.id ?? null} />
-    <PilaScanner notas={paraLaPila} seccion={SECCIONES_EDITORIALES.editorial} />
+    <PilaScanner
+      notas={paraLaPila}
+      seccion={SECCIONES_EDITORIALES.editorial}
+      bajada={BAJADAS.editorial}
+    />
 
     {/* 3. qué viene */}
     {/*
@@ -523,7 +549,7 @@ const LEMA = 'Beat 100.9 — Aquí la música se elige';
       tipo={tipoDestacado}
       anuncio="inicio-bonus-box"
     />
-    <Agenda eventos={agenda} />
+    <Agenda eventos={agenda} bajada={BAJADAS.agenda} />
   </div>
 </Base>
 

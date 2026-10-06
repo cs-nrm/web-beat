@@ -46,9 +46,15 @@ interface Props {
    *               decisión que `es-edicion` en `BonusBeat.astro`.
    */
   contexto?: 'inicio' | 'seccion';
+  /**
+   * La línea bajo el rótulo, en la columna de la izquierda. Solo la pasa el
+   * Inicio —ver `BAJADAS` en `src/pages/index.astro`—, que es el único que pinta
+   * esa columna.
+   */
+  bajada?: string | null;
 }
 
-const { notas, seccion, contexto = 'inicio' } = Astro.props;
+const { notas, seccion, contexto = 'inicio', bajada = null } = Astro.props;
 
 const enInicio = contexto === 'inicio';
 
@@ -75,6 +81,7 @@ const filas = notas.map((n) => ({
             <h2 class="beat-display ma-seccion" data-escribir>
               {seccion.rotulo}
             </h2>
+            {bajada && <p class="beat-bajada">{bajada}</p>}
             <Remate href={seccion.href} texto="VER TODAS" clase="ma-todo" />
           </div>
         )}

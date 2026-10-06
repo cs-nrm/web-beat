@@ -94,19 +94,23 @@ const otros = vecinos.filter((t) => t.id !== especial.id);
       <Anuncio formato="leaderboard" nombre="especial-leader" />
     </div>
 
-    {
-      otros.length > 0 && (
-        <>
-          <div class="es-corte" data-barrido>
-            <span class="beat-display es-corte-titulo">OTROS TEMAS</span>
-            <a href="/fenomeno-residente" class="beat-label es-corte-todo">
-              VER EL ARCHIVO
-            </a>
-          </div>
-          <ArchivoTemas temas={otros} limite={6} riel={false} />
-        </>
-      )
-    }
+    {/*
+      La misma rejilla que `/fenomeno-residente`, con el mismo rótulo pequeño
+      «OTROS TEMAS» en vez del corte grande que iba aquí (titular de 22px con
+      filete). El «VER EL ARCHIVO» del corte se queda, en la línea del rótulo: es
+      el único camino de esta página al archivo. Pedido el 2026-10-06.
+
+      Cuatro temas y no seis: a cuatro columnas, seis dejaban la segunda fila con
+      dos huecos grises. Una fila llena, y el resto está a un clic.
+    */}
+    <ArchivoTemas
+      temas={otros}
+      limite={4}
+      riel={false}
+      titulo="OTROS TEMAS"
+      columnas={4}
+      enlace={{ href: '/fenomeno-residente', texto: 'VER EL ARCHIVO' }}
+    />
   </div>
 </Base>
 
@@ -115,39 +119,11 @@ const otros = vecinos.filter((t) => t.id !== especial.id);
     max-width: var(--grid-max);
     margin: 0 auto;
   }
-  .es-corte {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 14px;
-    margin: 12px 24px 0;
-    padding-bottom: 14px;
-    border-bottom: 1px solid var(--border-quiet);
-  }
-  .es-corte-titulo {
-    font-size: 22px;
-    font-weight: 800;
-    letter-spacing: -0.01em;
-    color: var(--mist-2);
-  }
-  .es-corte-todo {
-    color: var(--text-muted);
-    white-space: nowrap;
-  }
-  .es-corte-todo:hover {
-    color: var(--mist-0);
-  }
   .es-franja-anuncio {
     padding: 44px 24px 32px;
   }
 
   @media (max-width: 899px) {
-    .es-corte {
-      margin: 8px 16px 0;
-    }
-    .es-corte-titulo {
-      font-size: 19px;
-    }
     .es-franja-anuncio {
       padding: 32px 16px 24px;
     }

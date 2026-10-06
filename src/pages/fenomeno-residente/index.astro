@@ -82,16 +82,22 @@ const anteriores = vigente ? todos.filter((t) => t.id !== vigente.id) : todos;
     */}
     <Fenomeno especial={vigente} contexto="seccion" anuncio="fenomeno-box" />
 
-    {
-      anteriores.length > 0 && (
-        <>
-          <div class="fr-corte" data-barrido>
-            <span class="beat-display fr-corte-titulo">EL ARCHIVO</span>
-          </div>
-          <ArchivoTemas temas={anteriores} limite={null} riel={false} />
-        </>
-      )
-    }
+    {/*
+      El mismo subtítulo que en el Inicio, «OTROS TEMAS», y no el corte grande
+      «EL ARCHIVO» que iba aquí (titular de 22px con filete debajo): la rejilla es
+      ya la misma tarjeta en las dos páginas —cartel entero con el título encima—,
+      y el rótulo la acompaña. Pedido el 2026-10-06.
+
+      Sin temas anteriores no se pinta nada, ni el rótulo: lo resuelve el
+      componente, que es donde vive ahora.
+    */}
+    <ArchivoTemas
+      temas={anteriores}
+      limite={null}
+      riel={false}
+      titulo="OTROS TEMAS"
+      columnas={4}
+    />
 
     {/*
       📖 Sin ningún tema la página se queda en su rótulo y el leaderboard —decisión
@@ -115,31 +121,11 @@ const anteriores = vigente ? todos.filter((t) => t.id !== vigente.id) : todos;
     max-width: var(--grid-max);
     margin: 0 auto;
   }
-  .fr-corte {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    margin: 44px 24px 0;
-    padding-bottom: 14px;
-    border-bottom: 1px solid var(--border-quiet);
-  }
-  .fr-corte-titulo {
-    font-size: 22px;
-    font-weight: 800;
-    letter-spacing: -0.01em;
-    color: var(--mist-2);
-  }
   .fr-franja-anuncio {
     padding: 44px 24px;
   }
 
   @media (max-width: 899px) {
-    .fr-corte {
-      margin: 32px 16px 0;
-    }
-    .fr-corte-titulo {
-      font-size: 19px;
-    }
     .fr-franja-anuncio {
       padding: 32px 16px;
     }

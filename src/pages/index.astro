@@ -525,7 +525,11 @@ const BAJADAS = {
     />
 
     <Fenomeno especial={especial} bajada={BAJADAS.fenomeno} />
-    <ArchivoTemas temas={especiales} excluir={especial?.id ?? null} />
+    <ArchivoTemas
+      temas={especiales}
+      excluir={especial?.id ?? null}
+      titulo="OTROS TEMAS"
+    />
     <PilaScanner
       notas={paraLaPila}
       seccion={SECCIONES_EDITORIALES.editorial}

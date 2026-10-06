@@ -30,9 +30,49 @@ interface Props {
    * ya tiene su hueco más abajo.
    */
   riel?: boolean;
+  /**
+   * El rótulo sobre la rejilla. `null` = sin rótulo.
+   *
+   * Las dos páginas pasan «OTROS TEMAS»: sin él, la rejilla se lee como
+   * continuación del bloque del tema vigente que tiene justo encima.
+   * `/fenomeno-residente` llevaba antes su propio corte «EL ARCHIVO», más
+   * grande; desde el 2026-10-06 usa este mismo rótulo.
+   *
+   * Vive DENTRO del componente y no en la página para que se vaya con la
+   * rejilla: sin temas anteriores no se pinta nada, ni el rótulo.
+   */
+  titulo?: string | null;
+  /**
+   * Columnas de la rejilla en escritorio. En el móvil son dos siempre.
+   *
+   * Cuatro en `/fenomeno-residente` y en `/especiales/[slug]`: sin el box al
+   * costado la rejilla tiene todo el ancho, y a tres columnas cada cartel salía de
+   * 395×493 contra 287×358 en el Inicio. A cuatro queda en ~295×369, la misma
+   * tarjeta en las tres páginas. Es una prop y no algo colgado de `sin-riel`
+   * porque es una decisión de cada página: el Inicio se quedó en tres.
+   */
+  columnas?: 3 | 4;
+  /**
+   * Un enlace discreto a la derecha del rótulo, en su misma línea. Solo se pinta
+   * si hay `titulo`.
+   *
+   * Lo usa `/especiales/[slug]` para «VER EL ARCHIVO»: ahí el bloque del
+   * Fenómeno va sin su cabecera (`contexto="tema"`), así que este enlace es el
+   * único camino de la página al archivo completo, y no podía irse con el corte
+   * grande que lo llevaba antes.
+   */
+  enlace?: { href: string; texto: string } | null;
 }
 
-const { temas, excluir = null, limite = 3, riel = true } = Astro.props;
+const {
+  temas,
+  excluir = null,
+  limite = 3,
+  riel = true,
+  titulo = null,
+  columnas = 3,
+  enlace = null,
+} = Astro.props;
 
 const filtrados = temas.filter((t) => t.id !== excluir);
 const anteriores = limite == null ? filtrados : filtrados.slice(0, limite);
@@ -40,24 +80,58 @@ const anteriores = limite == null ? filtrados : filtrados.slice(0, limite);
 
 {
   anteriores.length > 0 && (
-    <section class:list={['at', { 'sin-riel': !riel }]}>
-      <div class="at-rejilla">
-        {anteriores.map((t) => {
-          const portada = urlMedia(t.portada, 'card');
-          return (
-            <a href={`/especiales/${t.slug}`} class="at-tema" data-luz>
-              <div class="at-caja">
-                {portada && <img src={portada} alt="" loading="lazy" decoding="async" />}
-                <div class="beat-grid at-trama" />
-                {t.estado === 'archivado' && (
-                  <span class="beat-label at-estado">CERRADO</span>
-                )}
-              </div>
-              <div class="at-titulo">{t.titulo}</div>
-              {t.etiquetaPublica && <span class="beat-label at-nota">{t.etiquetaPublica}</span>}
-            </a>
-          );
-        })}
+    <section class:list={['at', { 'sin-riel': !riel, 'a-cuatro': columnas === 4 }]}>
+      <div class="at-principal">
+        {titulo && (
+          <div class="at-cabeza">
+            <h3 class="beat-label at-rotulo">{titulo}</h3>
+            {enlace && (
+              <a href={enlace.href} class="beat-label at-enlace">
+                {enlace.texto}
+              </a>
+            )}
+          </div>
+        )}
+        <div class="at-rejilla">
+          {anteriores.map((t) => {
+            const portada = urlMedia(t.portada, 'card');
+            return (
+              <a href={`/especiales/${t.slug}`} class="at-tema" data-luz>
+                <div class="at-caja">
+                  {portada && (
+                    <>
+                      <img
+                        src={portada}
+                        alt=""
+                        aria-hidden="true"
+                        class="at-fondo"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                      <img
+                        src={portada}
+                        alt=""
+                        class="at-cartel"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </>
+                  )}
+                  <div class="beat-grid at-trama" />
+                  {t.estado === 'archivado' && (
+                    <span class="beat-label at-estado">CERRADO</span>
+                  )}
+                  <div class="at-pie">
+                    <div class="at-titulo">{t.titulo}</div>
+                    {t.etiquetaPublica && (
+                      <span class="beat-label at-nota">{t.etiquetaPublica}</span>
+                    )}
+                  </div>
+                </div>
+              </a>
+            );
+          })}
+        </div>
       </div>
 
       {riel && (
@@ -78,6 +152,31 @@ const anteriores = limite == null ? filtrados : filtrados.slice(0, limite);
     margin-top: 38px;
     padding: 0 24px;
   }
+  /*
+    Subtítulo, no título de sección: la misma etiqueta mono en versalitas que
+    «LAS CÁPSULAS» dentro del bloque del Fenómeno, y un tono por debajo de ella
+    (`--mist-2`, no `--mist-0`) para que no compita con «EL FENÓMENO RESIDENTE».
+  */
+  .at-cabeza {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+  .at-rotulo {
+    margin: 0;
+    color: var(--mist-2);
+  }
+  /* Los colores del «VER EL ARCHIVO» que vivía en el corte de
+     `/especiales/[slug]` (`.es-corte-todo`), que se fue con él. */
+  .at-enlace {
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .at-enlace:hover {
+    color: var(--mist-0);
+  }
   .at-rejilla {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -88,20 +187,22 @@ const anteriores = limite == null ? filtrados : filtrados.slice(0, limite);
   .at-tema {
     display: block;
     background: var(--noche-1);
-    padding-bottom: 16px;
     color: inherit;
     text-decoration: none;
-    transition: background var(--dur-2) var(--ease-out);
-  }
-  .at-tema:hover {
-    background: var(--noche-2);
-  }
-  .at-tema:hover .at-titulo {
-    color: var(--mist-0);
   }
   .at-caja {
     position: relative;
-    aspect-ratio: 1 / 1;
+    /* 📖 Las portadas de los temas son carteles verticales 9:16 (medido en el CMS
+       el 2026-10-06: 1080×1920 y 941×1672), y el encargo es que se vean ENTERAS
+       sin que la tarjeta se alargue.
+       · `1 / 1` con `cover` se comía el 44% del cartel: el «RESIDENTE» del
+         encabezado salía cortado.
+       · `9 / 16` lo mostraba entero, pero a 287×510 en escritorio: una tira que
+         bajaba el doble que el box de al lado. Descartado el mismo día.
+       Queda `4 / 5` (287×359): el cartel cabe completo por altura, centrado, y los
+       lados los llena `.at-fondo`. Más cuadrado que esto, el cartel se encoge
+       hasta que su propio texto deja de leerse. */
+    aspect-ratio: 4 / 5;
     background: var(--grad-noche);
     overflow: hidden;
     display: grid;
@@ -112,12 +213,26 @@ const anteriores = limite == null ? filtrados : filtrados.slice(0, limite);
     inset: 0;
     width: 100%;
     height: 100%;
+  }
+  /* El cartel, entero: `contain` y no `cover`, que en una caja 4:5 volvería a
+     recortarlo arriba y abajo.
+     📖 Aquí la foto iba a `opacity: .42`, atenuada porque el protagonista era el
+     NÚMERO del tema sobrepuesto —«el tema 07»— y la imagen solo lo ambientaba.
+     El CMS quitó `especiales.numero` el 2026-08-21 (el número vive en el título
+     y el orden lo dan `inicio` y el sort), así que sin nada encima una foto al
+     42% era una caja oscura sin motivo. Va entera: ahora ella es el tema. */
+  .at-cartel {
+    object-fit: contain;
+  }
+  /* Las bandas que deja el cartel a los lados, rellenas con él mismo, desenfocado
+     y apagado: así la tarjeta se lee como una sola imagen y no como un cartel
+     flotando en una caja. Es la misma URL que `.at-cartel`, así que el navegador
+     la descarga una vez. El `scale` saca de la caja el borde del desenfoque, que
+     si no se ve como un marco claro. */
+  .at-fondo {
     object-fit: cover;
-    /* 📖 Aquí la foto iba a `opacity: .42`, atenuada porque el protagonista era el
-       NÚMERO del tema sobrepuesto —«el tema 07»— y la imagen solo lo ambientaba.
-       El CMS quitó `especiales.numero` el 2026-08-21 (el número vive en el título
-       y el orden lo dan `inicio` y el sort), así que sin nada encima una foto al
-       42% era una caja oscura sin motivo. Va entera: ahora ella es el tema. */
+    filter: blur(18px) brightness(0.42) saturate(1.15);
+    transform: scale(1.2);
   }
   .at-trama {
     position: absolute;
@@ -130,15 +245,45 @@ const anteriores = limite == null ? filtrados : filtrados.slice(0, limite);
     font-size: 9px;
     color: var(--text-faint);
   }
+  /*
+    El título va DENTRO de la imagen, al pie, y no debajo: así la tarjeta mide lo
+    que mide la caja (287×358 en escritorio) en vez de sumarle ~70px de texto.
+
+    El velo es el oscuro de la casa —`rgba(5, 7, 6, …)` con desenfoque, el mismo
+    del botón de cerrar del visor en `Fenomeno.astro`— y no un degradado: sobre un
+    cartel con letras propias, un degradado deja el título montado encima de ellas
+    en la parte de arriba de la franja.
+  */
+  .at-pie {
+    position: absolute;
+    inset: auto 0 0;
+    padding: 12px 14px 14px;
+    background: rgba(5, 7, 6, 0.62);
+    backdrop-filter: blur(10px);
+    transition: background var(--dur-2) var(--ease-out);
+  }
+  .at-tema:hover .at-pie {
+    background: rgba(5, 7, 6, 0.78);
+  }
+  .at-tema:hover .at-titulo {
+    color: var(--mist-0);
+  }
   .at-titulo {
     font: 600 15px / 1.25 var(--font-text);
-    color: var(--mist-2);
-    padding: 14px 16px 0;
+    color: var(--mist-1);
     text-wrap: pretty;
+    /* Tope de tres líneas: en las tarjetas angostas del móvil un título largo
+       subía el velo hasta tapar medio cartel. El recorte es solo visual; el
+       nombre accesible del enlace lleva el título entero. */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
   }
   .at-nota {
     display: block;
-    padding: 8px 16px 0;
+    padding-top: 6px;
     font-size: 9px;
     color: var(--text-faint);
   }
@@ -149,6 +294,9 @@ const anteriores = limite == null ? filtrados : filtrados.slice(0, limite);
   /* Sin box al lado, la rejilla ocupa el ancho entero. */
   .at.sin-riel {
     grid-template-columns: minmax(0, 1fr);
+  }
+  .at.a-cuatro .at-rejilla {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   @media (max-width: 1199px) {
@@ -166,12 +314,17 @@ const anteriores = limite == null ? filtrados : filtrados.slice(0, limite);
       padding: 0 16px;
       gap: 20px;
     }
-    .at-rejilla {
+    /* El `.a-cuatro` va aquí también: tiene más especificidad que `.at-rejilla`
+       sola, y sin repetirlo el móvil se quedaba a cuatro columnas de ~80px. */
+    .at-rejilla,
+    .at.a-cuatro .at-rejilla {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
+    .at-pie {
+      padding: 10px 12px 12px;
+    }
     .at-titulo {
-      font-size: 14px;
-      padding: 12px 14px 0;
+      font-size: 13px;
     }
   }
 </style>

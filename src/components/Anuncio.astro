@@ -477,9 +477,9 @@ if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
 
     Se abre SIEMPRE, traiga lo que traiga el creativo, y es decisión tomada
     (2026-10-15): todo llega por GAM y no hay manera de saber desde el sitio, ni de
-    simular en local, si una pieza es expandible. El precio, medido: con el 728×90
-    plano que GAM sirve hoy, bajo el cursor quedan 310 px de iframe vacío debajo de
-    la imagen.
+    simular en local, si una pieza es expandible. Lo que eso cuesta con un 728×90
+    que no se abre son 310 px de iframe vacío bajo la imagen, y por eso el estado
+    abierto es TRANSPARENTE (ver más abajo): no se ve, solo tapa.
 
     El hueco y el iframe pasan a 400, y el `margin-bottom` negativo devuelve los
     310 que ganan: para el flujo el hueco sigue midiendo 90, así que nada de abajo
@@ -499,6 +499,15 @@ if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
     155 px más abajo y se cortaba por el pie. Arriba, el iframe de 400 desborda
     su contenedor de 90 hacia abajo y llena el hueco desde el top 0.
 
+    Transparente, en dos capas. El hueco pierde su fondo y su filete. Y el iframe
+    lleva `color-scheme: light`: el documento del creativo no declara ninguno
+    —claro por defecto— y el nuestro es oscuro, y con esa diferencia Chrome pinta
+    el lienzo del iframe OPACO y blanco aunque el creativo sea transparente. Es el
+    bloque blanco que se veía bajo la banda (medido en el sitio el 2026-10-15, con
+    el expandible de GWD plegado dentro del iframe de 400). Igualando el esquema, el
+    lienzo queda transparente. Solo abierto: en reposo el creativo se pinta como
+    siempre.
+
     Solo con cursor y desde 900px: bajo ese corte el formato es 320×50, y en
     táctil un `:hover` pegado tras un toque dejaría 400 px tapando la página.
 
@@ -511,12 +520,15 @@ if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
       height: 400px;
       aspect-ratio: auto;
       margin-bottom: -310px;
+      background: none;
+      box-shadow: none;
     }
     .es-leaderboard .anuncio-hueco:not([data-encajado]):hover > :global(*) {
       margin-top: 0;
     }
     .es-leaderboard .anuncio-hueco:not([data-encajado]):hover :global(iframe) {
       height: 400px;
+      color-scheme: light;
     }
   }
   .es-box .anuncio-hueco {

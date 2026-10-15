@@ -216,8 +216,12 @@ puede caer en cualquiera. Vive entero en el CSS de `src/components/Anuncio.astro
 primera versión (`df85c94`) solo abría los creativos que traían más de 90 px de
 alto, midiendo el iframe; se retiró el mismo día porque todo llega por GAM y en
 local GAM no rellena el hueco: no había manera de ver ni de simular el efecto.
-El precio, medido en el sitio: lo que GAM sirve hoy es una imagen plana de 728×90,
-y bajo el cursor quedan 310 px de iframe vacío debajo de ella.
+Lo que cuesta con un creativo que no se abre son 310 px de iframe vacío bajo la
+imagen, y por eso el estado abierto es **transparente**: el hueco pierde su fondo
+y el iframe lleva `color-scheme: light`. Sin eso Chrome pinta el lienzo del iframe
+OPACO y blanco —el documento del creativo es claro por defecto y el nuestro es
+oscuro—, que es el bloque blanco que se vio el 2026-10-15 bajo un expandible de
+Google Web Designer que se quedó plegado.
 
 **El mecanismo:** el hueco Y el iframe pasan a 400 px, y un `margin-bottom:
 -310px` devuelve lo que ganan, así que para el flujo el hueco sigue midiendo 90 y

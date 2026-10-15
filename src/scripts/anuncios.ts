@@ -211,6 +211,60 @@ function encajar(id: string): void {
 }
 
 /**
+ * Decide si el leaderboard que tiene el cursor encima es EXPANDIBLE: 728×90 en
+ * reposo, 728×400 bajo el cursor. La apertura la hace el CSS de `Anuncio.astro`;
+ * esto solo pone o quita `data-expandible`.
+ *
+ * Es expandible el creativo que TRAE más alto que la banda, y hay dos maneras de
+ * traerlo:
+ *
+ *   · GAM lo sirve más alto de lo pedido (un 728×400 con la medida forzada en el
+ *     line item): el `height` del iframe ya lo dice, y el hueco lo recorta a 90.
+ *   · Un creativo HTML de 728×90 cuyo contenido mide 400, con los 90 de arriba
+ *     como la vista plegada. Ahí el iframe dice 90 y hay que leer su documento.
+ *
+ * Lo segundo solo se puede leer en un iframe AMIGABLE —el que GPT usa hoy, medido
+ * en el sitio el 2026-10-15—. En un SafeFrame el documento es de otro origen y
+ * solo cuenta lo primero.
+ *
+ * El umbral es el DOBLE de la banda y no «cualquier pixel de más»: un `<img>` en
+ * línea puede dejar unos px de línea base por debajo, y un 728×90 normal tomado
+ * por expandible abriría 310 px vacíos encima del contenido. Uno expandible trae
+ * 400, más de cuatro veces la banda.
+ *
+ * Se mide al pasar el cursor y no al pintar: `slotRenderEnded` llega ANTES de que
+ * el creativo cargue sus imágenes, y en ese momento su documento todavía mide 90.
+ * Y como el hueco no cambia de alto al abrirse —crece el iframe, no él— medir
+ * otra vez con el anuncio abierto da el mismo resultado.
+ *
+ * Un creativo que hubo que encoger (`encajar()`) no se abre: no cabe ni plegado.
+ */
+function evaluarExpandible(hueco: HTMLElement): void {
+  const iframe = hueco.querySelector<HTMLIFrameElement>('iframe');
+  let alto = 0;
+  if (iframe && !('encajado' in hueco.dataset)) {
+    alto = Number(iframe.getAttribute('height')) || 0;
+    try {
+      alto = Math.max(alto, iframe.contentDocument?.documentElement.scrollHeight ?? 0);
+    } catch {
+      // SafeFrame: otro origen. Vale lo que diga el `height` del iframe.
+    }
+  }
+  hueco.toggleAttribute('data-expandible', alto > hueco.clientHeight * 2);
+}
+
+/**
+ * Delegado en `document`, así que sobrevive a las navegaciones de Astro sin
+ * volver a registrarse. Al entrar el cursor en el iframe, el documento de la
+ * página recibe el `pointerover` con el iframe como destino.
+ */
+function alPasarEncima(e: PointerEvent): void {
+  const destino = e.target instanceof Element ? e.target : null;
+  const hueco = destino?.closest<HTMLElement>('.es-leaderboard .anuncio-hueco');
+  if (hueco) evaluarExpandible(hueco);
+}
+
+/**
  * La ruta del ad unit.
  *
  * `sub` es la sub-unidad opcional (`Box`, `Box2`…), que en el v1 servía para que
@@ -385,6 +439,7 @@ export function prepararAnuncios(): void {
   if (window.__beatAnunciosListo) return;
   window.__beatAnunciosListo = true;
 
+  document.addEventListener('pointerover', alPasarEncima);
   document.addEventListener('astro:page-load', () => {
     iniciarAnuncios();
     ga4('anuncios_init', { ruta: location.pathname });

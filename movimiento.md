@@ -175,7 +175,7 @@ página**.
 | Tarjeta que es un enlace | luz + inclinación + la foto se desplaza |
 | Tarjeta que ya usa su `transform` (la pila) | luz + la foto se desplaza, **sin** inclinación |
 | Media que NO es un enlace — hero de nota, visor | nada: no lleva a ningún sitio, así que no debe insinuar que sí |
-| Publicidad | nada |
+| Publicidad | nada. El leaderboard expandible no es una excepción: abrirse a 728×400 es el formato, no un efecto nuestro, y va sin transición. Ver `agents/ads.md` |
 
 ---
 

@@ -471,6 +471,40 @@ if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
     max-width: 728px;
     aspect-ratio: 728 / 90;
   }
+  /*
+    El leaderboard EXPANDIBLE: 728×90 en reposo y 728×400 bajo el cursor, ENCIMA
+    de lo que sigue y sin moverlo ni un pixel.
+
+    Solo con `[data-expandible]`, que pone `anuncios.ts` cuando el creativo TRAE
+    más alto que la banda. Un 728×90 normal —el que sirve GAM hoy, una imagen de
+    90 px— abierto a 400 enseñaría 310 px vacíos tapando el contenido, y en Chrome
+    ni siquiera transparentes: el documento del iframe no declara `color-scheme` y
+    el nuestro es oscuro, así que su lienzo se pinta opaco y blanco.
+
+    No se toca el alto del hueco: crece el IFRAME y el hueco lo deja asomar.
+    Así el flujo no cambia y no hace falta un margen negativo que tenga que saber
+    cuánto mide la banda en reposo.
+
+    `min-height: 0` no es decorativo. Sin `overflow: hidden` el hueco deja de ser
+    contenedor de desplazamiento, y entonces el mínimo automático de una caja con
+    `aspect-ratio` —y el de un elemento flex— pasa a ser su contenido: los 400 px
+    del iframe. El hueco crecería y empujaría todo lo de abajo, que es justo lo
+    que no se pidió.
+
+    Sin transición, a propósito (movimiento.md §2): la publicidad no lleva
+    movimiento nuestro. Si el creativo quiere animar su apertura, lo hace él dentro
+    de sus 400 px.
+  */
+  @media (min-width: 900px) and (hover: hover) {
+    .es-leaderboard .anuncio-hueco[data-expandible]:hover {
+      z-index: var(--z-raised);
+      overflow: visible;
+      min-height: 0;
+    }
+    .es-leaderboard .anuncio-hueco[data-expandible]:hover :global(iframe) {
+      height: 400px;
+    }
+  }
   .es-box .anuncio-hueco {
     width: 300px;
     height: 250px;

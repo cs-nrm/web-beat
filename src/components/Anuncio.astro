@@ -492,6 +492,13 @@ if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
     el `:not([data-encajado])`. Y `:has(iframe)` para que un hueco que todavía
     espera a GAM no se abra como una caja vacía de 400 px.
 
+    El contenedor que mete GPT va ARRIBA (`margin-top: 0`), no centrado. Cuando
+    sirve en SafeFrame le pone al contenedor un alto EN LÍNEA de 90 px que no se
+    puede pisar sin `!important`, y el `margin: auto` de `.anuncio-hueco > *` lo
+    centraba en los 400: medido en el sitio el 2026-10-15, el iframe arrancaba
+    155 px más abajo y se cortaba por el pie. Arriba, el iframe de 400 desborda
+    su contenedor de 90 hacia abajo y llena el hueco desde el top 0.
+
     Solo con cursor y desde 900px: bajo ese corte el formato es 320×50, y en
     táctil un `:hover` pegado tras un toque dejaría 400 px tapando la página.
 
@@ -504,6 +511,9 @@ if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
       height: 400px;
       aspect-ratio: auto;
       margin-bottom: -310px;
+    }
+    .es-leaderboard .anuncio-hueco:not([data-encajado]):hover > :global(*) {
+      margin-top: 0;
     }
     .es-leaderboard .anuncio-hueco:not([data-encajado]):hover :global(iframe) {
       height: 400px;

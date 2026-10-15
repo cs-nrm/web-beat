@@ -327,9 +327,9 @@ const etiquetas = (nota.etiquetas ?? []).filter(
       </div>
 
       {/*
-        Leaderboard arriba del titular. Si el creativo es expandible, bajo el
-        cursor se abre a 728×400 ENCIMA del titular sin moverlo: eso lo hace
-        `Anuncio.astro` para todos los leaderboards, no esta página.
+        Leaderboard arriba del titular. Bajo el cursor se abre a 728×400 ENCIMA
+        del titular sin moverlo: eso lo hace `Anuncio.astro` para todos los
+        leaderboards, no esta página.
       */}
       <div class="nt-leader-franja">
         <Anuncio formato="leaderboard" nombre="nota-leader" />
@@ -580,8 +580,8 @@ const etiquetas = (nota.etiquetas ?? []).filter(
   /*
     Aquí vivía el leader expandible de la nota: el HUECO crecía a 400 px con
     un `margin-bottom` negativo. Se fue al componente el 2026-10-15, para todos los
-    leaderboards, y cambió de mecanismo: crecer el hueco no agrandaba el iframe de
-    GAM, así que el creativo seguía en 90 px y lo que se abría eran 310 px vacíos.
+    leaderboards, y ahora crece también el IFRAME: sin él, el creativo de GAM
+    seguía midiendo 90 px dentro de una caja de 400.
     Ver `.es-leaderboard` en `Anuncio.astro`.
   */
   .nt-leader-franja {

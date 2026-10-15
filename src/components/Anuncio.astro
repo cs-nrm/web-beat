@@ -475,33 +475,37 @@ if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
     El leaderboard EXPANDIBLE: 728×90 en reposo y 728×400 bajo el cursor, ENCIMA
     de lo que sigue y sin moverlo ni un pixel.
 
-    Solo con `[data-expandible]`, que pone `anuncios.ts` cuando el creativo TRAE
-    más alto que la banda. Un 728×90 normal —el que sirve GAM hoy, una imagen de
-    90 px— abierto a 400 enseñaría 310 px vacíos tapando el contenido, y en Chrome
-    ni siquiera transparentes: el documento del iframe no declara `color-scheme` y
-    el nuestro es oscuro, así que su lienzo se pinta opaco y blanco.
+    Se abre SIEMPRE, traiga lo que traiga el creativo, y es decisión tomada
+    (2026-10-15): todo llega por GAM y no hay manera de saber desde el sitio, ni de
+    simular en local, si una pieza es expandible. El precio, medido: con el 728×90
+    plano que GAM sirve hoy, bajo el cursor quedan 310 px de iframe vacío debajo de
+    la imagen.
 
-    No se toca el alto del hueco: crece el IFRAME y el hueco lo deja asomar.
-    Así el flujo no cambia y no hace falta un margen negativo que tenga que saber
-    cuánto mide la banda en reposo.
+    El hueco y el iframe pasan a 400, y el `margin-bottom` negativo devuelve los
+    310 que ganan: para el flujo el hueco sigue midiendo 90, así que nada de abajo
+    se mueve, y lo que crece se pinta encima por el `z-index` (el hueco ya es
+    `position: relative`). El iframe tiene que crecer con él: si solo creciera el
+    hueco, el documento del creativo seguiría midiendo 90 y no se abriría nada.
 
-    `min-height: 0` no es decorativo. Sin `overflow: hidden` el hueco deja de ser
-    contenedor de desplazamiento, y entonces el mínimo automático de una caja con
-    `aspect-ratio` —y el de un elemento flex— pasa a ser su contenido: los 400 px
-    del iframe. El hueco crecería y empujaría todo lo de abajo, que es justo lo
-    que no se pidió.
+    Ese 310 = 400 − 90 solo vale con el hueco a 728×90, que es como queda en
+    escritorio salvo que `encajar()` haya tenido que encoger el creativo: por eso
+    el `:not([data-encajado])`. Y `:has(iframe)` para que un hueco que todavía
+    espera a GAM no se abra como una caja vacía de 400 px.
+
+    Solo con cursor y desde 900px: bajo ese corte el formato es 320×50, y en
+    táctil un `:hover` pegado tras un toque dejaría 400 px tapando la página.
 
     Sin transición, a propósito (movimiento.md §2): la publicidad no lleva
-    movimiento nuestro. Si el creativo quiere animar su apertura, lo hace él dentro
-    de sus 400 px.
+    movimiento nuestro. Si el creativo quiere animar su apertura, lo hace él.
   */
   @media (min-width: 900px) and (hover: hover) {
-    .es-leaderboard .anuncio-hueco[data-expandible]:hover {
+    .es-leaderboard .anuncio-hueco:not([data-encajado]):has(iframe):hover {
       z-index: var(--z-raised);
-      overflow: visible;
-      min-height: 0;
+      height: 400px;
+      aspect-ratio: auto;
+      margin-bottom: -310px;
     }
-    .es-leaderboard .anuncio-hueco[data-expandible]:hover :global(iframe) {
+    .es-leaderboard .anuncio-hueco:not([data-encajado]):hover :global(iframe) {
       height: 400px;
     }
   }

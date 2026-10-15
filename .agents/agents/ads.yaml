@@ -58,11 +58,11 @@ interface:
       «PUBLICIDAD · 600×800». Su slot sí entra en el motor de `anuncios.ts` por
       `data-anuncio`, pero sin envoltorio `.anuncio`
     - el takeover solo vive en el Inicio, y solo hay UNO por página
-    - el leaderboard se abre de 728×90 a 728×400 bajo el cursor, encima del
-      contenido, SOLO si el creativo trae ese alto (`data-expandible`, que pone
-      `anuncios.ts`). Crece el iframe, no el hueco; sin transición, y nunca en
-      táctil ni bajo 900px. Abrir un 728×90 normal enseñaría 310 px vacíos —en
-      Chrome, blancos— tapando la página
+    - todo leaderboard se abre de 728×90 a 728×400 bajo el cursor, encima del
+      contenido y sin moverlo, traiga lo que traiga el creativo (decisión tomada:
+      todo llega por GAM y no se puede saber ni simular si una pieza es
+      expandible). Crecen el hueco y el iframe, y un margen negativo devuelve los
+      310 px; sin transición, y nunca en táctil ni bajo 900px
 
     Verifica con `curl` sobre el HTML servido, no mirando la página: un hueco que no
     se llena y un hueco que no existe se ven idénticos. El takeover, además, con

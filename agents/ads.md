@@ -207,49 +207,34 @@ se emite a mano un `beat:anuncio-render` con `vacio: false`.
 
 ### El leaderboard EXPANDIBLE (2026-10-15)
 
-En escritorio (≥900px y con cursor), un leaderboard cuyo creativo es expandible
-se abre de **728×90 a 728×400 bajo el cursor, ENCIMA de lo que sigue y sin
-moverlo**. Vale para todos los leaderboards, no por página: todos comparten el ad
-unit `Beat`, así que un creativo expandible puede caer en cualquiera, y uno que no
-se abriera enseñaría para siempre solo su franja de arriba.
+En escritorio (≥900px y con cursor), **todo leaderboard se abre de 728×90 a
+728×400 bajo el cursor, ENCIMA de lo que sigue y sin moverlo**. Vale para todos,
+no por página: todos comparten el ad unit `Beat`, así que un creativo expandible
+puede caer en cualquiera. Vive entero en el CSS de `src/components/Anuncio.astro`.
 
-| Archivo | Qué le toca |
-|---|---|
-| `src/scripts/anuncios.ts` | `evaluarExpandible()`: al pasar el cursor, pone o quita `data-expandible` en el hueco |
-| `src/components/Anuncio.astro` | El CSS: con `[data-expandible]:hover`, el IFRAME crece a 400 y el hueco lo deja asomar |
+**Se abre SIEMPRE, traiga lo que traiga el creativo**, y es decisión tomada. La
+primera versión (`df85c94`) solo abría los creativos que traían más de 90 px de
+alto, midiendo el iframe; se retiró el mismo día porque todo llega por GAM y en
+local GAM no rellena el hueco: no había manera de ver ni de simular el efecto.
+El precio, medido en el sitio: lo que GAM sirve hoy es una imagen plana de 728×90,
+y bajo el cursor quedan 310 px de iframe vacío debajo de ella.
 
-**Solo se abre si el creativo TRAE el alto.** Lo que GAM sirve hoy es una imagen
-plana de 728×90 (medido en el sitio el 2026-10-15) y abrirla enseñaría 310 px
-vacíos tapando el contenido — y en Chrome ni siquiera transparentes: el documento
-del iframe no declara `color-scheme`, el nuestro es oscuro, y su lienzo se pinta
-blanco. Cuenta como expandible lo que mide más del DOBLE de la banda, por dos
-caminos:
-
-1. **GAM lo sirve más alto de lo pedido** (un 728×400 con la medida forzada en el
-   line item): el `height` del iframe ya lo dice. El hueco lo recorta a 90 en
-   reposo.
-2. **Un creativo HTML de 728×90 cuyo contenido mide 400**, con los 90 de arriba
-   como la vista plegada. Solo se puede medir en un iframe AMIGABLE, que es el que
-   usa GPT hoy; en un **SafeFrame** el documento es de otro origen y únicamente
-   vale el camino 1. Un creativo que se reacomoda al alto de su marco —que en 90
-   mide 90— tampoco se detecta.
+**El mecanismo:** el hueco Y el iframe pasan a 400 px, y un `margin-bottom:
+-310px` devuelve lo que ganan, así que para el flujo el hueco sigue midiendo 90 y
+nada de abajo se mueve; lo que crece se pinta encima por `z-index`. Las dos
+mitades hacen falta: la versión que vivía solo en la nota agrandaba el hueco y no
+el iframe, y el creativo se quedaba en 90.
 
 **Lo que no hace, a propósito:**
 
-- **No agranda el hueco.** Crece el iframe y el hueco pasa a `overflow: visible`;
-  el flujo no cambia. Así no hace falta un margen negativo que sepa cuánto mide la
-  banda. La versión anterior, que vivía solo en la nota, agrandaba el hueco: el
-  iframe se quedaba en 90 y lo que se abría eran 310 px vacíos.
+- **No se abre si `encajar()` encogió el creativo** (`:not([data-encajado])`):
+  el 310 = 400 − 90 solo vale con el hueco a 728×90.
+- **No se abre un hueco que todavía espera a GAM** (`:has(iframe)`): sería una
+  caja vacía de 400 px.
 - **No lleva transición.** La publicidad no lleva movimiento nuestro
   (movimiento.md §2); si el creativo quiere animar su apertura, lo hace él.
 - **No se abre en táctil ni bajo 900px.** Allá el formato es 320×50 y un `:hover`
   pegado tras un toque dejaría 400 px tapando la página.
-- **No se abre un creativo que hubo que encoger** (`encajar()`): no cabe ni plegado.
-
-Y una trampa de CSS que lo sostiene: el `min-height: 0` de la regla abierta. Sin
-`overflow: hidden` el hueco deja de ser contenedor de desplazamiento, y el mínimo
-automático de una caja con `aspect-ratio` pasa a ser su contenido —los 400 del
-iframe—: crecería y empujaría todo.
 
 ### El marco se reserva y luego desaparece
 

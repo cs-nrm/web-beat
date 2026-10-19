@@ -141,6 +141,19 @@ No existe ningún `afterChange` que avise al front. Mientras no exista, el front
 de TTL corto y **no se puede encender Cache Everything** en el CDN. No bloquea el
 desarrollo, sí el rendimiento en producción.
 
+### A8 — `alto` en el bloque `embed` (para «Otro (iframe genérico)»)
+Desde el 19 oct 2026 el front pinta «otro» como `<iframe>` con `sandbox`, a
+cualquier URL https (antes lo degradaba a un enlace). Una página arbitraria no
+tiene proporción conocida, así que va a **alto fijo: 720px** si el CMS no dice
+otra cosa, y lo que sobre se desplaza dentro del marco. El registro de Xibalba
+mide 2372px: ningún valor por defecto le sirve a todo.
+
+Lo que pide el front: un campo `alto` de tipo `number` en `src/blocks/Embed.ts`,
+opcional, en px, visible solo cuando `plataforma` es `otro`
+(`admin.condition`). El front ya lo lee de `fields.alto` y acepta de 200 a 3000;
+fuera de ese rango usa 720. Al ser un bloque dentro del richText, vive en el JSON
+de `contenido`: no pide migración.
+
 ### ℹ️ CORS: Beat NO lo necesita
 El commit de `listas` pide agregar los 4 dominios a `CORS_ORIGINS` "para que los
 sitios puedan llamar al endpoint de votos desde el navegador". **Para Beat no hace

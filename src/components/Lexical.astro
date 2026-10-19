@@ -202,9 +202,14 @@ function trozos(hijos: Nodo[] = []): { texto: string; href: string | null }[] {
       }
 
       case 'block': {
-        const f = (n.fields ?? {}) as { blockType?: string; plataforma?: string; url?: string };
+        const f = (n.fields ?? {}) as {
+          blockType?: string;
+          plataforma?: string;
+          url?: string;
+          alto?: number;
+        };
         if (f.blockType !== 'embed') return null;
-        return <Embed plataforma={f.plataforma as never} url={f.url} />;
+        return <Embed plataforma={f.plataforma as never} url={f.url} alto={f.alto} />;
       }
 
       case 'horizontalrule':

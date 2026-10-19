@@ -1,0 +1,184 @@
+---
+/**
+ * El bloque `galeria` del contenido Lexical.
+ *
+ * En el CMS es `src/blocks/Galeria.ts`: un arreglo `imagenes` de filas
+ * `{ imagen: upload a media, pie?: texto }`, en el orden que la redacción
+ * arrastró. Hasta el 19 oct 2026 `Lexical.astro` lo descartaba sin aviso, igual
+ * que `formulario`; ninguna de las últimas 300 notas lo usaba todavía.
+ *
+ * Es una TIRA con `scroll-snap`, una foto por vista. Deslizar con el dedo o el
+ * trackpad, las flechas del teclado con el foco en la tira y el tabulador los
+ * hace el navegador: sin JavaScript la galería se recorre igual. Los botones de
+ * anterior y siguiente son un atajo para el ratón, y nacen `hidden` hasta que
+ * `galeria.ts` los cablea — un botón que no hace nada se retira, no se deja
+ * inerte (ver agents/frontend.md).
+ *
+ * Sin avance automático: es el cuerpo de una nota, no un escaparate, y una foto
+ * que se va sola mientras alguien lee su pie es justo lo que no se quiere.
+ */
+import Icono from './Icono.astro';
+import { medidaMedia, urlMedia, type DocMedia } from '@/lib/cms/client';
+
+interface Props {
+  imagenes: unknown;
+}
+
+const { imagenes } = Astro.props;
+
+interface Fila {
+  imagen?: unknown;
+  pie?: string | null;
+}
+
+/*
+  Solo las fotos que llegaron POBLADAS y con URL. Una fila cuya `imagen` vino
+  como id —`depth` corto— no se puede pintar, y se descarta en vez de dejar un
+  hueco con su pie: es la regla de `depth` de agents/content.md.
+
+  `pie` con `?.trim() ||` y nunca con `??`: un campo vacío del admin llega como
+  cadena vacía y con `??` ganaría.
+*/
+const fotos = (Array.isArray(imagenes) ? (imagenes as Fila[]) : []).flatMap((fila) => {
+  const media =
+    typeof fila?.imagen === 'object' && fila.imagen !== null ? (fila.imagen as DocMedia) : null;
+  const src = urlMedia(media, 'large');
+  if (!media || !src) return [];
+  return [
+    {
+      src,
+      medida: medidaMedia(media, src),
+      alt: media.alt?.trim() || '',
+      pie: fila.pie?.trim() || '',
+    },
+  ];
+});
+
+const total = fotos.length;
+---
+
+{
+  total === 1 ? (
+    <figure class="gl-sola">
+      <img
+        src={fotos[0].src}
+        alt={fotos[0].alt}
+        width={fotos[0].medida?.ancho}
+        height={fotos[0].medida?.alto}
+        loading="lazy"
+        decoding="async"
+      />
+      {fotos[0].pie && <figcaption class="beat-label">{fotos[0].pie}</figcaption>}
+    </figure>
+  ) : total > 1 ? (
+    <section class="gl" aria-roledescription="carrusel" aria-label={`Galería de ${total} fotos`} data-galeria>
+      {/*
+        `tabindex` para que la tira tome el foco y las flechas del teclado la
+        recorran: sin él, quien navega con teclado solo vería la primera foto.
+      */}
+      <div class="gl-tira" tabindex="0" data-galeria-tira>
+        {fotos.map((f, i) => (
+          <figure class="gl-foto" aria-label={`${i + 1} de ${total}`}>
+            <div class="gl-marco">
+              <img
+                src={f.src}
+                alt={f.alt}
+                width={f.medida?.ancho}
+                height={f.medida?.alto}
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <figcaption class="beat-label">
+              <span class="gl-cuenta">
+                {i + 1} / {total}
+              </span>
+              {f.pie && <span>{f.pie}</span>}
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+      <div class="gl-controles" data-galeria-controles hidden>
+        <button type="button" class="beat-iconbtn is-sm" data-galeria-paso="-1" aria-label="Foto anterior">
+          <Icono nombre="chevron-left" />
+        </button>
+        <button type="button" class="beat-iconbtn is-sm" data-galeria-paso="1" aria-label="Foto siguiente">
+          <Icono nombre="chevron-right" />
+        </button>
+      </div>
+    </section>
+  ) : null
+}
+
+<style>
+  .gl-sola,
+  .gl {
+    margin: 32px 0 0;
+  }
+  .gl-sola img {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: var(--grad-noche);
+  }
+  .gl-sola figcaption,
+  .gl-foto figcaption {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    font-size: 8.5px;
+    color: var(--text-faint);
+  }
+
+  .gl-tira {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    /* Que el gesto horizontal no arrastre la página entera hacia atrás en
+       Safari y en Chrome con trackpad. */
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+  .gl-tira:focus-visible {
+    outline: none;
+    box-shadow: var(--ring-focus);
+  }
+  .gl-foto {
+    flex: 0 0 100%;
+    margin: 0;
+    scroll-snap-align: start;
+  }
+  /*
+    Alto PAREJO para toda la tira, y la foto entera dentro (`contain`, no
+    `cover`): las fotos de prensa vienen en todas las proporciones, y una tira que
+    cambia de alto en cada paso empuja el texto de abajo a cada clic. Recortar
+    no es opción porque el CMS no da punto focal por fila, solo por media.
+  */
+  .gl-marco {
+    aspect-ratio: 3 / 2;
+    background: var(--grad-noche);
+  }
+  .gl-marco img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .gl-cuenta {
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .gl-controles {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  /* Trampa: un `display` de autor le gana al `[hidden]` del navegador, así que
+     sin esta regla los botones saldrían visibles y muertos antes del script. */
+  .gl-controles[hidden] {
+    display: none;
+  }
+</style>

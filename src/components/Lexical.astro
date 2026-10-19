@@ -7,7 +7,8 @@
  * `unknown`), así que los tipos no dicen qué nodos existen. Inspeccionados el
  * 2026-08-21: `paragraph`, `heading`, `text`, `link`, `upload`, `block:embed`.
  * Los de lista y cita se cubren porque el editor los ofrece aunque todavía no se
- * hayan usado.
+ * hayan usado, y por lo mismo `block:galeria` y `block:formulario` (19 oct 2026):
+ * el editor del CMS los ofrece y antes de esa fecha se descartaban sin aviso.
  *
  * Nada de `set:html` con contenido del CMS. El texto sale como texto y el
  * formato como etiquetas, así que un `<script>` escrito en el editor se ve como
@@ -15,6 +16,8 @@
  * grep en CI; aquí el problema no existe.
  */
 import Embed from './Embed.astro';
+import Formulario from './Formulario.astro';
+import Galeria from './Galeria.astro';
 import { urlMedia, type DocMedia } from '@/lib/cms/client';
 
 interface Props {
@@ -108,7 +111,7 @@ function trozos(hijos: Nodo[] = []): { texto: string; href: string | null }[] {
 ---
 
 {
-  visibles.map((n) => {
+  visibles.map((n, i) => {
     switch (n.type) {
       case 'heading': {
         /*
@@ -207,7 +210,11 @@ function trozos(hijos: Nodo[] = []): { texto: string; href: string | null }[] {
           plataforma?: string;
           url?: string;
           alto?: number;
+          imagenes?: unknown;
+          formulario?: unknown;
         };
+        if (f.blockType === 'galeria') return <Galeria imagenes={f.imagenes} />;
+        if (f.blockType === 'formulario') return <Formulario formulario={f.formulario} clave={i} />;
         if (f.blockType !== 'embed') return null;
         return <Embed plataforma={f.plataforma as never} url={f.url} alto={f.alto} />;
       }

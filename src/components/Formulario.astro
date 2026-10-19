@@ -1,0 +1,306 @@
+---
+/**
+ * El bloque `formulario` del contenido Lexical.
+ *
+ * En el CMS es `src/blocks/Formulario.ts`: una relación a `forms`, la colección
+ * del form-builder de Payload. La redacción elige un formulario ya creado (los
+ * crea un admin) y lo coloca donde quiera dentro del cuerpo. Hasta el 19 oct
+ * 2026 `Lexical.astro` lo descartaba sin aviso.
+ *
+ * El envío va por `/api/formulario`, nunca directo al CMS: es la regla 1 de
+ * agents/content.md, y en producción el CMS ni siquiera es alcanzable desde el
+ * navegador.
+ *
+ * Funciona SIN JavaScript: es un `<form method="post">` de verdad. El endpoint
+ * contesta con un 303 de vuelta a la nota y un ancla, y el `:target` del CSS
+ * enseña las gracias o el error. Con JavaScript, `formulario.ts` lo manda por
+ * `fetch` y no recarga la página. `data-astro-reload` saca el formulario del
+ * `ClientRouter`, que si no lo interceptaría como una navegación.
+ */
+import { cmsFetch } from '@/lib/cms/client';
+import { camposConValor, parrafos, rotulo } from '@/lib/formulario';
+import type { Form } from '@/types/payload';
+
+interface Props {
+  formulario: unknown;
+  /** Distingue dos formularios en la misma nota: los `id` no se pueden repetir. */
+  clave: number;
+}
+
+const { formulario, clave } = Astro.props;
+
+/*
+  La relación puede llegar poblada o como id, según el `depth` con que se pidió
+  la nota. Si llega como id se pide aparte: `forms` no tiene estación, así que va
+  por `cmsFetch` y no por `cmsFetchEstacion` (ver la cabecera de `cmsFetch`).
+  Si el formulario ya no existe, el bloque no se pinta: regla 3, todo degrada.
+*/
+let form: Form | null =
+  typeof formulario === 'object' && formulario !== null ? (formulario as Form) : null;
+if (!form && typeof formulario === 'number') {
+  try {
+    form = await cmsFetch<Form>(`forms/${formulario}`, { depth: 0 });
+  } catch {
+    form = null;
+  }
+}
+
+const campos = form ? (form.fields ?? []) : [];
+const conValor = form ? camposConValor(form) : [];
+const ancla = `fm-${form?.id ?? 0}-${clave}`;
+const gracias = form ? parrafos(form.confirmationMessage) : [];
+
+/** El `width` del admin es un porcentaje. Fuera de rango, `null`: la fila entera. */
+const parcial = (w: number | null | undefined) =>
+  typeof w === 'number' && w > 0 && w < 100 ? `--fm-ancho:${w}%` : undefined;
+---
+
+{
+  form && conValor.length > 0 && (
+    <div class="fm-caja" data-formulario-caja>
+      {/*
+        Las dos respuestas sin JavaScript van ANTES del formulario para que el
+        `:target ~ .fm` pueda esconderlo. Con JavaScript las enseña el
+        `data-estado` de la caja.
+      */}
+      <div id={`${ancla}-enviado`} class="fm-respuesta fm-gracias" tabindex="-1" data-formulario-gracias>
+        {gracias.length ? gracias.map((p) => <p>{p}</p>) : <p>Gracias. Recibimos tus datos.</p>}
+      </div>
+      <div id={`${ancla}-error`} class="fm-respuesta fm-fallo">
+        <p>No se pudo enviar. Revisa los campos e inténtalo otra vez.</p>
+      </div>
+
+      <form
+        id={ancla}
+        class="fm"
+        method="post"
+        action="/api/formulario"
+        data-formulario
+        data-astro-reload
+      >
+        <input type="hidden" name="_formulario" value={form.id} />
+        <input type="hidden" name="_volver" value={Astro.url.pathname} />
+        <input type="hidden" name="_ancla" value={ancla} />
+        {/*
+          Trampa para bots: un campo que una persona no ve ni alcanza con el
+          tabulador. Si llega lleno, el endpoint contesta que todo salió bien y
+          no reenvía nada.
+        */}
+        <div class="fm-trampa" aria-hidden="true">
+          <label>
+            No llenes este campo
+            <input type="text" name="_sitio" tabindex="-1" autocomplete="off" />
+          </label>
+        </div>
+
+        {campos.map((c) => {
+          if (c.blockType === 'message') {
+            const textos = parrafos(c.message);
+            return textos.length ? (
+              <div class="fm-mensaje">
+                {textos.map((p) => (
+                  <p>{p}</p>
+                ))}
+              </div>
+            ) : null;
+          }
+          if (!('name' in c) || !c.name) return null;
+          const id = `${ancla}-${c.name}`;
+          const requerido = Boolean(c.required);
+
+          if (c.blockType === 'checkbox') {
+            return (
+              <label class:list={['fm-check', { 'es-parcial': parcial(c.width) }]} style={parcial(c.width)}>
+                <input type="checkbox" name={c.name} value="true" required={requerido} checked={Boolean(c.defaultValue)} />
+                <span>
+                  {rotulo(c)}
+                  {requerido && <span class="fm-req" aria-hidden="true"> *</span>}
+                </span>
+              </label>
+            );
+          }
+
+          return (
+            <div
+              class:list={['beat-field', 'fm-campo', { 'es-parcial': parcial(c.width) }]}
+              style={parcial(c.width)}
+            >
+              <label class="beat-field__label" for={id}>
+                {rotulo(c)}
+                {requerido && <span class="fm-req" aria-hidden="true"> *</span>}
+              </label>
+              {c.blockType === 'textarea' ? (
+                <textarea
+                  id={id}
+                  name={c.name}
+                  class="beat-input"
+                  rows="5"
+                  maxlength="5000"
+                  required={requerido}
+                  set:text={c.defaultValue ?? ''}
+                />
+              ) : c.blockType === 'select' ? (
+                <select id={id} name={c.name} class="beat-select" required={requerido}>
+                  {/* Sin valor por defecto, la primera opción es «elige»: si no, el
+                      select llegaría contestado sin que nadie lo tocara. */}
+                  {!c.defaultValue && (
+                    <option value="" disabled selected>
+                      {c.placeholder?.trim() || 'Elige una opción'}
+                    </option>
+                  )}
+                  {(c.options ?? []).map((o) => (
+                    <option value={o.value} selected={o.value === c.defaultValue}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  id={id}
+                  name={c.name}
+                  class="beat-input"
+                  type={c.blockType === 'email' ? 'email' : c.blockType === 'number' ? 'number' : 'text'}
+                  inputmode={c.blockType === 'number' ? 'decimal' : undefined}
+                  autocomplete={
+                    c.blockType === 'email'
+                      ? 'email'
+                      : c.blockType === 'country'
+                        ? 'country-name'
+                        : c.blockType === 'state'
+                          ? 'address-level1'
+                          : undefined
+                  }
+                  maxlength="500"
+                  required={requerido}
+                  value={'defaultValue' in c && c.defaultValue != null ? String(c.defaultValue) : undefined}
+                />
+              )}
+            </div>
+          );
+        })}
+
+        <p class="fm-aviso" role="status" data-formulario-aviso hidden />
+        <div class="fm-pie">
+          <button type="submit" class="beat-btn">
+            {form.submitButtonLabel?.trim() || 'Enviar'}
+          </button>
+        </div>
+      </form>
+    </div>
+  )
+}
+
+<style>
+  .fm-caja {
+    margin: 32px 0 0;
+    padding: 24px;
+    background: var(--surface-card);
+    box-shadow: inset 0 0 0 1px var(--border-hairline);
+  }
+  .fm {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px 16px;
+  }
+  .fm-campo,
+  .fm-check {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+  /*
+    El `width` del admin, descontando el hueco entre columnas, y con `grow` para
+    que el renglón se llene. Sin el `grow`, tres campos al 33% más sus dos huecos
+    suman más de 100% y el tercero se va al renglón de abajo.
+  */
+  .es-parcial {
+    flex-basis: calc(var(--fm-ancho) - 16px);
+  }
+  .fm-mensaje,
+  .fm-aviso,
+  .fm-pie {
+    flex: 0 0 100%;
+  }
+  .fm-mensaje p,
+  .fm-respuesta p {
+    margin: 0;
+    font: 400 16px / 1.6 var(--font-text);
+    color: var(--text-body);
+  }
+  .fm-mensaje p + p,
+  .fm-respuesta p + p {
+    margin-top: 10px;
+  }
+  .fm-req {
+    color: var(--text-primary);
+  }
+  .fm-check {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    font: var(--type-body-sm);
+    color: var(--text-body);
+    cursor: pointer;
+  }
+  .fm-check input {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin: 2px 0 0;
+    accent-color: var(--surface-accent);
+  }
+  .beat-input[rows] {
+    resize: vertical;
+    min-height: 120px;
+  }
+  .fm-aviso {
+    margin: 0;
+    font: var(--type-body-sm);
+    color: var(--state-danger);
+  }
+  .fm-aviso[hidden] {
+    display: none;
+  }
+  .fm-trampa {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  /*
+    Las respuestas. Sin JavaScript manda el `:target` (el endpoint vuelve con el
+    ancla); con JavaScript, el `data-estado` de la caja. Las gracias ESCONDEN el
+    formulario —ya se envió—; el error lo deja a la vista para corregir.
+  */
+  .fm-respuesta {
+    display: none;
+  }
+  .fm-respuesta:focus {
+    outline: none;
+  }
+  .fm-gracias:target,
+  .fm-fallo:target,
+  [data-estado='enviado'] > .fm-gracias {
+    display: block;
+  }
+  .fm-fallo:target {
+    margin-bottom: 18px;
+  }
+  .fm-fallo p {
+    color: var(--state-danger);
+  }
+  .fm-gracias:target ~ .fm,
+  [data-estado='enviado'] > .fm {
+    display: none;
+  }
+
+  @media (max-width: 899px) {
+    .fm-caja {
+      padding: 18px;
+    }
+    .es-parcial {
+      flex-basis: 100%;
+    }
+  }
+</style>

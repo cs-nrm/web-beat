@@ -27,6 +27,8 @@ interface Props {
     | 'search'
     | 'x'
     | 'chevron-down'
+    | 'chevron-left'
+    | 'chevron-right'
     | 'arrow-up-right'
     | 'link'
     | 'facebook'
@@ -48,6 +50,9 @@ const TRAZOS: Record<Props['nombre'], string> = {
      este comentario. Vuelve el 2026-09-23 con un usuario de verdad: el botón que
      descubre las siguientes cuatro canciones del Top Ten en móvil. */
   'chevron-down': '<path d="m6 9 6 6 6-6"/>',
+  // Anterior y siguiente de la galería del cuerpo de la nota (`Galeria.astro`).
+  'chevron-left': '<path d="m15 18-6-6 6-6"/>',
+  'chevron-right': '<path d="m9 18 6-6-6-6"/>',
   menu: '<path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/>',
   search: '<path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/>',
   x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',

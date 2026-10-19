@@ -303,10 +303,15 @@ pintar una cápsula que no se puede enlazar.
 - **La publicidad**, programática y vendida — es de `agents/ads.md`, incluido
   `src/lib/cms/publicidad.ts`.
 - **Escribir al CMS.** El front es cliente de **solo lectura**, y las excepciones
-  son TRES, todas por proxy de servidor porque el navegador nunca habla con el CMS:
+  son CUATRO, todas por proxy de servidor porque el navegador nunca habla con el CMS:
   el conteo de publicidad (de `agents/ads.md`), **el voto del público**
-  (`src/pages/api/votar.ts`, desde el 2026-09-21) y las escrituras de oyente
-  (Comunidad, que no existe todavía).
+  (`src/pages/api/votar.ts`, desde el 2026-09-21), **las respuestas a los
+  formularios del cuerpo de la nota** (`src/pages/api/formulario.ts`, desde el
+  2026-10-19) y las escrituras de oyente (Comunidad, que no existe todavía).
+
+  El de formularios valida contra la definición del formulario que pide al CMS,
+  porque el form-builder de Payload guarda lo que le llegue sin compararlo con
+  sus campos: solo pasan los campos declarados, con su tipo y su obligatoriedad.
 
   El voto faltaba de esta lista hasta el 2026-09-21, y este documento y
   `docs/lo-que-el-front-necesita-del-cms.md` llevaban semanas contradiciéndose:

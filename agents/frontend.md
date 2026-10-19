@@ -60,6 +60,8 @@ perder una tarde y luego hace dudar del resto de la documentación.
 | `src/components/TarjetaNota.astro` | La tarjeta de nota, en todos sus contextos |
 | `src/components/Lexical.astro` | El cuerpo de la nota, desde el Lexical del CMS |
 | `src/components/Embed.astro` | Los bloques incrustados del cuerpo. «Otro» va como iframe con `sandbox` a cualquier https (2026-10-19) |
+| `src/components/Galeria.astro` | El bloque `galeria` del cuerpo: tira con `scroll-snap` que se recorre sin JavaScript; los botones los cablea `src/scripts/galeria.ts` |
+| `src/components/Formulario.astro` | El bloque `formulario` del cuerpo: un `<form>` que funciona sin JavaScript (303 y `:target`); `src/scripts/formulario.ts` lo manda por `fetch` |
 | `src/components/AudioNota.astro` | El audio principal de una nota, pegado bajo la foto. El COMPORTAMIENTO es de `agents/streaming.md` |
 | `src/components/Paginador.astro` | La tira de páginas de los índices. Es SERVIDOR, no JavaScript, y con una sola página no pinta nada |
 | `src/components/CabezaSeccion.astro`, `Remate.astro`, `RejillaEdiciones.astro`, `PaginaTexto.astro`, `Icono.astro` | Las piezas compartidas |

@@ -886,6 +886,8 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
       import { prepararProgreso } from '@/scripts/progreso';
       import { prepararVoto } from '@/scripts/voto';
       import { prepararCarrusel } from '@/scripts/carrusel';
+      import { prepararGaleria } from '@/scripts/galeria';
+      import { prepararFormulario } from '@/scripts/formulario';
       prepararAnuncios();
       prepararEscritura();
       prepararRevelado();
@@ -903,6 +905,10 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
       prepararProgreso();
       prepararVoto();
       prepararCarrusel();
+      // Los dos bloques del cuerpo de la nota. Solo cablean: sin galería ni
+      // formulario en la página no hacen nada.
+      prepararGaleria();
+      prepararFormulario();
       // Solo CABLEA los visores; Plyr (110 KB) no se baja hasta que alguien
       // pide un video.
       prepararVideo();

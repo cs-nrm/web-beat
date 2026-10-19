@@ -85,10 +85,15 @@ interface:
     - el tamaño de página es CONSTANTE entre páginas: el desplazamiento es
       `(page - 1) * limit`, así que un `limit` distinto en la 2 se salta una nota
       por salto. La destacada sale de la tanda y solo existe en la página 1
-    - el front es cliente de SOLO LECTURA, con TRES excepciones y todas por
+    - el front es cliente de SOLO LECTURA, con CUATRO excepciones y todas por
       proxy de servidor: el conteo de publicidad (de ads), el VOTO del público
-      (`src/pages/api/votar.ts`, 2026-09-21) y las escrituras de oyente
-      (Comunidad, que aún no existe). El navegador nunca habla con el CMS
+      (`src/pages/api/votar.ts`, 2026-09-21), las respuestas a los FORMULARIOS
+      del cuerpo de la nota (`src/pages/api/formulario.ts`, 2026-10-19) y las
+      escrituras de oyente (Comunidad, que aún no existe). El navegador nunca
+      habla con el CMS
+    - el proxy de formularios valida contra la definición del formulario que
+      pide al CMS: el form-builder guarda lo que le llegue, así que solo pasan
+      los campos declarados, con su tipo y su obligatoriedad
     - el proxy del voto NO comprueba que la lista sea de esta estación, a
       propósito: eso pediría un `where[id][equals]` variable por petición, que es
       justo lo que esta acta prohíbe. Quien valida es el CMS

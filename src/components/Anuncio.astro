@@ -86,23 +86,23 @@ const { formato, nombre = formato, unidad, banners = [], class: clase } = Astro.
 const MEDIDAS = {
   portada: {
     /*
-      1280×**360**, no 350. La banda es una proporción (1600/450 = 3.556, ver el
-      CSS) y el CMS genera sus derivadas con ella —`…-1280x360.webp`, comprobado en
-      lo servido—. El 350 dejaba la medida pedida a GAM 10px por debajo de su propio
-      hueco: no rompe nada, pero era la tercera cifra distinta para el mismo formato.
+      **970×250** en escritorio desde el 2026-10-19: el «billboard» estándar de IAB,
+      el que nombra el lienzo, y la misma medida que la venta directa del CMS. El
+      hueco del CSS la reserva con `--portada-proporcion` y un tope de 970px: si
+      cambia aquí, cambia allá.
 
-      Y lo que estas dos medidas NO pueden dar es lo que se pidió. Un creativo de
-      GAM es de tamaño FIJO, así que en una pantalla de 1920 se queda en 1280
-      centrado, con la banda a sangre alrededor. Para programático a todo lo ancho
-      hace falta pedir `'fluid'` —que toma el ancho del contenedor— y eso exige que
-      AdOps dé de alta un creativo fluido. Está sin hacer y no lo añado a ciegas:
-      pedir `fluid` sin nada fluido en el ad unit solo añade una medida que nunca
-      se llena. La VENTA DIRECTA del CMS sí llena a todo lo ancho, y es por donde
-      este hueco está funcionando hoy.
+      **Un slot cuya medida no está dada de alta en el ad unit nunca se llena**, y
+      desde el sitio se ve igual que un hueco sin demanda: la banda se cierra sola.
+      Hasta este cambio se pedía 1280×360 y se estaba llenando al aire (un anuncio
+      de LEGO, visto en una captura el 2026-10-19). Si la portada deja de salir
+      tras desplegar, lo primero es confirmar 970×250 en Ad Manager.
+
+      📖 1280×360 era la proporción de la banda a todo lo ancho (1600/450). Antes
+      fue 1280×350, la tercera cifra para el mismo formato.
     */
-    tamanos: [[1280, 360], [390, 110]],
+    tamanos: [[970, 250], [390, 110]],
     mapping: [
-      [[900, 0], [[1280, 360]]],
+      [[900, 0], [[970, 250]]],
       [[0, 0], [[390, 110]]],
     ],
   },
@@ -360,7 +360,7 @@ if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
   /*
     `margin: auto` y no `justify-content: center`, y la diferencia es la que
     importa. Con el creativo MÁS GRANDE que el hueco —el caso de `encajar()`, una
-    portada de 1280 entre 900 y 1280 de ancho— `center` lo desborda por los DOS
+    portada de 970 entre 900 y 970 de ancho— `center` lo desborda por los DOS
     lados, y el escalado con origen arriba a la izquierda lo deja corrido y
     recortado. Un margen automático se queda en 0 cuando no hay sitio, así que ese
     caso queda alineado al inicio, que es lo que `encajar()` supone.
@@ -376,37 +376,44 @@ if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
     aspect-ratio: auto;
   }
 
-  /* El banner de portada va a sangre y con el rótulo ENCIMA, no arriba: es lo
-     primero de la página y una línea de texto suelta antes del banner se lee como
-     contenido del sitio. */
   /*
-    UNA proporción, no dos altos fijos (Carlos, 2026-09-09: «es un banner
-    inventado por nosotros, debería ir a full width»).
+    La banda va a todo lo ancho, pero su ALTO lo pone la pieza, más 30px de banda
+    arriba y abajo (2026-10-19). La proporción vive en la caja de la pieza —el
+    hueco de GAM o el enlace de la creatividad—, con tope de 970px, y la banda no
+    tiene alto propio: mide lo que mide lo de dentro más su `padding`.
 
-    Antes eran `height: 350px` en escritorio y `110px` en móvil, y esos números
-    venían de las dos medidas de `MEDIDAS.portada` —1280×350 y 390×110—. Al
-    medirlas se vio que **son la misma proporción**: 3.657 y 3.545, y las imágenes
-    que la redacción ya subió al CMS son de 1600×450, o sea 3.556. Con 1600/450 el
-    móvil sale EXACTO: 390 de ancho dan 110 de alto. El formato siempre fue una
-    banda a lo ancho y se había anotado como dos tamaños sueltos.
+    Las DOS fuentes son 970×250 en escritorio: la venta directa del CMS y lo que se
+    le pide a GAM en `MEDIDAS`. Por eso hay una sola proporción para las dos.
 
-    Con la proporción el banner llena de borde a borde en cualquier pantalla, sin
-    franjas negras a los lados y sin recortar nada.
+    El margen va en píxeles y no con un token porque se pidió así, 30px; el
+    escalón más cercano del sistema es `--s-9` (32px). Solo en escritorio: en móvil
+    la pieza llena el ancho y 60px de banda serían más de la mitad de lo que mide
+    el anuncio.
 
-    El coste, con su número: el alto crece con el ancho. A 1440 son 405px y a
-    1920 son **540px**, contra los 350 fijos de antes. Es lo que significa «a todo
-    lo ancho» sin recortar. Si algún día estorba, la salida es `max-height` en esta
-    misma regla —una línea— y el precio es que el creativo se recorta arriba y
-    abajo en pantallas anchas. No se pone hoy porque nadie lo ha pedido y recortar
-    un creativo vendido es peor que una banda alta.
+    El rótulo queda en ese margen, arriba a la izquierda y fuera de la pieza (de 12
+    a 26px, con la pieza empezando en 30). En móvil, sin margen, va ENCIMA de la
+    pieza y no arriba de la banda: una línea de texto suelta antes del banner se
+    leería como contenido del sitio.
+
+    📖 Hasta el 2026-10-19 la proporción (1600/450) iba en la BANDA, a todo lo
+    ancho (Carlos, 2026-09-09: «debería ir a full width»), y el alto crecía con la
+    pantalla: 405px a 1440 y 540 a 1920. Con la pieza topada en 970 eso era más de
+    130px de negro arriba y abajo a 1440, y cambiar solo el número no lo arreglaba:
+    con 970/250 a todo lo ancho, a 1920 la banda seguiría midiendo 495.
+
+    La reserva contra el CLS no se pierde, se muda: el `aspect-ratio` de la caja
+    de la pieza aparta su alto antes de que llegue la imagen o el creativo.
   */
   .es-portada {
     position: relative;
     display: block;
-    /* El único número del formato. Cambiarlo mueve el hueco y la reserva a la vez. */
-    --portada-proporcion: 1600 / 450;
+    /*
+      El único número del formato, y tiene que ser la medida de escritorio de
+      `MEDIDAS.portada`. Cambiarlo mueve el hueco y la reserva a la vez.
+    */
+    --portada-proporcion: 970 / 250;
     width: 100%;
-    aspect-ratio: var(--portada-proporcion);
+    padding-block: 30px;
     background: var(--noche-1);
     box-shadow: inset 0 -1px 0 var(--border-hairline);
   }
@@ -417,8 +424,14 @@ if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
     z-index: 1;
     pointer-events: none;
   }
+  /*
+    Entre 900 y 970 de ancho el hueco mide menos que el creativo, y `encajar()`
+    lo escala al ancho y fija el alto en línea, que pisa este `aspect-ratio`.
+  */
   .es-portada .anuncio-hueco {
-    height: 100%;
+    max-width: 970px;
+    margin: 0 auto;
+    aspect-ratio: var(--portada-proporcion);
     background: none;
     box-shadow: none;
     text-align: center;
@@ -428,34 +441,43 @@ if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
   }
 
   /*
-    La creatividad del CMS.
+    La creatividad del CMS: 970px como mucho y centrada en la banda, igual que un
+    creativo de GAM (2026-10-19).
 
-    📖 Iba en `object-fit: contain` —«un creativo vendido no se recorta ni se
-    estira»— y pasa a `cover` el 2026-09-09. El argumento de entonces era bueno pero
-    describía otra caja: con la banda a un alto FIJO, `contain` era lo único que
-    evitaba deformar un creativo de otra proporción, al precio de dejar franjas
-    negras a los lados.
+    El tope y la proporción van en el ENLACE: así el área que cuenta un clic es la
+    pieza, no la banda entera —un clic en el negro de al lado no es un clic al
+    anuncio, igual que no lo es junto a un iframe de GAM—.
 
-    Ahora la banda tiene la proporción DE LOS CREATIVOS (1600/450), así que para un
-    archivo bien medido `cover` y `contain` pintan exactamente igual: no hay nada
-    que recortar. La diferencia solo aparece con un creativo mal medido, y ahí
-    `cover` llena la banda —que es lo pedido— en vez de enseñar el fondo.
+    La imagen va con su alto PROPIO (`height: auto`): ni se recorta ni se deforma,
+    venga con la proporción que venga. Si es más alta que 970/250 —las de
+    1600×450 que ya hay en el CMS miden 970×273—, el enlace crece hasta
+    contenerla, porque una caja con `aspect-ratio` no baja de su contenido. Si es
+    más baja, queda centrada en el alto reservado.
 
-    Lo que esto sí exige: que el CMS pida los creativos a 1600×450. Un archivo
-    con otra proporción ahora se recorta en silencio en vez de avisar con franjas.
+    📖 Iba a `height: 100%` con `object-fit: cover`, porque la pieza llenaba la
+    banda y compartía su proporción. Con el tope ya no mide lo que la banda.
   */
   .anuncio-creatividad {
-    display: block;
-    height: 100%;
+    display: flex;
+    width: 100%;
+    max-width: 970px;
+    margin: 0 auto;
+    aspect-ratio: var(--portada-proporcion);
   }
-  .anuncio-creatividad picture,
+  .anuncio-creatividad picture {
+    display: block;
+    width: 100%;
+    margin: auto;
+  }
+  /*
+    El tope va también en la imagen, y no solo en el enlace: que la pieza no pase
+    de 970 no puede depender de que otra regla no le cambie la caja al `<a>`.
+  */
   .anuncio-creatividad img {
     display: block;
     width: 100%;
-    height: 100%;
-  }
-  .anuncio-creatividad img {
-    object-fit: cover;
+    max-width: 970px;
+    height: auto;
   }
   /* Con creativo debajo, el rótulo necesita su propio fondo: a 8px y en
      `--text-faint` se pierde sobre cualquier imagen clara. Y el color va fijo y no
@@ -542,10 +564,18 @@ if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
 
   @media (max-width: 899px) {
     /*
-      📖 Aquí había `height: 110px` para el móvil, y se fue: la proporción lo da
-      sola. A 390px de ancho, 1600/450 son 109.7px — el mismo número que estaba
-      escrito a mano. Un alto fijo menos que mantener sincronizado.
+      En móvil la proporción es la de la medida que se le pide a GAM ahí, 390×110,
+      y no 970/250: a 390 de ancho eso daría 100px y el hueco —que CONTIENE, con
+      `overflow: hidden`— le cortaría 10px al creativo. El lienzo no dice nada de
+      móvil. Una pieza de 970×250 sin versión móvil queda centrada con 5px de banda
+      arriba y abajo.
+
+      Y sin el margen de banda: la pieza llena el ancho, como antes.
     */
+    .es-portada {
+      --portada-proporcion: 390 / 110;
+      padding-block: 0;
+    }
     .es-portada .anuncio-rotulo {
       left: 12px;
       top: 8px;

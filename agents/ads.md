@@ -37,7 +37,7 @@ Salen del lienzo v13/v14, no del sitio actual. Viven en `MEDIDAS`, en
 
 | Formato | Escritorio (≥900px) | Móvil |
 |---|---|---|
-| `portada` | 1280 × 360 | 390 × 110 |
+| `portada` | 970 × 250 | 390 × 110 |
 | `leaderboard` | 728 × 90 | 320 × 50 |
 | `box` | 300 × 250 | 300 × 250 |
 
@@ -45,8 +45,9 @@ Salen del lienzo v13/v14, no del sitio actual. Viven en `MEDIDAS`, en
 `sizeMapping` de GPT—. Si el CSS cortara en 900 y el mapping en 768, habría un
 tramo en el que el marco es de escritorio y el creativo que sirve GAM es de móvil.
 
-**Dos de esas medidas no existen en Ad Manager**: 1280×350 y 390×110 son
-nuevas. Un slot cuya medida no está dada de alta **nunca se llena**, y desde el
+**Al lanzar, dos medidas de portada no existían en Ad Manager**: 1280×350 y
+390×110 (la de escritorio es 970×250 desde el 2026-10-19, ver abajo). Un slot
+cuya medida no está dada de alta **nunca se llena**, y desde el
 sitio se ve igual que un hueco sin demanda. Antes de dar por bueno un hueco vacío,
 confirmar la medida en GAM.
 
@@ -66,22 +67,40 @@ iPhone. Tres cosas fallaron a la vez y conviene reconocer cada una:
    página. Eso ya está arreglado (`encajar()` en `anuncios.ts`), pero era el
    parachoques, no la causa.
 
-**La portada es un formato de la casa y va A TODO LO ANCHO** (Carlos,
-2026-09-09). No es una medida fija: es **una proporción**, 1600/450 = 3.556, y la
-banda la aplica con `aspect-ratio`. Las dos «medidas» que había —1280×350 y
-390×110— eran esa misma proporción escrita dos veces, y a 390 de ancho la
-proporción da 110 exacto. Las derivadas que genera el CMS ya la siguen
-(`…-1280x360.webp`).
+**Desde el 2026-10-19 la portada es 970×250 en escritorio, para las dos fuentes.**
+La venta directa del CMS va a 970px como mucho, y a GAM se le pide **970×250**
+—el «billboard» estándar de IAB, el que nombra el lienzo— en vez de 1280×360. La
+banda negra sigue a todo lo ancho, pero no tiene alto propio: la proporción
+(`--portada-proporcion: 970 / 250`) vive en la caja de la pieza, con tope de 970px,
+y la banda mide lo que mide la pieza **más 30px arriba y abajo** (en móvil, sin
+margen).
 
-**Consecuencia para programático:** un creativo de GAM es de tamaño fijo, así
-que nunca llenará el ancho —en 1920 se queda en 1280 centrado—. A todo lo ancho
-solo llega por dos caminos: la **venta directa** del CMS (que es por donde funciona
-hoy, con imágenes de 1600×450) o pedir `'fluid'` a GPT, que exige un creativo
-fluido dado de alta en el ad unit. Lo segundo está sin hacer.
+⚠️ **Hasta este cambio GAM SÍ llenaba la portada con 1280×360** (un anuncio de
+LEGO, visto al aire el 2026-10-19). Si 970×250 no está dado de alta en el ad unit
+`Beat`, el hueco deja de llenarse y la banda se cierra sola: desde el sitio no hay
+diferencia con «hoy no hay demanda». Si la portada deja de salir tras desplegar, lo
+primero es confirmarlo en Ad Manager.
 
-**El lienzo dice 970×250 para la portada** y nadie ha resuelto esa diferencia.
-970×250 es el «billboard» estándar de IAB; la proporción de la casa (3.556) no lo
-es, así que su demanda programática es prácticamente nula. Decisión de Carlos.
+| Ancho | Pieza de 970×250 (o GAM) | Pieza de 1600×450 (las del CMS hoy) |
+|---|---|---|
+| 1641 | 1641 × 310 | 1641 × 333 |
+| 1440 | 1440 × 310 | 1440 × 333 |
+| 1000 | 1000 × 310 | 1000 × 333 |
+| 390 | 390 × 110 (pieza de 101, centrada) | 390 × 110 |
+
+La imagen del CMS va con su alto propio (`height: auto`): no se recorta ni se
+deforma. Una más alta que 970/250 estira su caja hasta contenerla; una más baja
+queda centrada.
+
+**En móvil la proporción es 390/110**, la de la medida que se le pide a GAM ahí: con
+970/250 el hueco saldría de 100px y, como CONTIENE con `overflow: hidden`, le
+cortaría 10px al creativo.
+
+📖 Del 2026-09-09 al 2026-10-19 la portada fue **A TODO LO ANCHO** (Carlos): la
+proporción 1600/450 iba en la banda y el alto crecía con la pantalla —405px a 1440,
+540 a 1920—. Con la pieza topada en 970 eso era más de 130px de negro arriba y
+abajo, y cambiar solo el número no lo arreglaba: 970/250 a todo lo ancho seguía
+dando 495px a 1920.
 
 ### El TAKEOVER, el cuarto formato (2026-09-13)
 

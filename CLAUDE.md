@@ -133,10 +133,12 @@ Ninguna es teórica: las ocho ya pasaron.
 ## Despliegue
 
 **Ya no hay preproducción.** `v2.beatdigital.mx` lo parecía, pero era el mismo
-proceso con otro nombre, y se apagó el 10 sep. Un push a `beat` con el deploy
-encendido va **directo al aire**, y cada despliegue reinicia el servicio: unos
-segundos de 502 para quien esté navegando. Un entorno de pruebas de verdad
-—proceso, puerto y build propios— está por hacer.
+proceso con otro nombre, y se apagó el 10 sep. **El deploy automático está
+encendido desde el 19 oct 2026**: un push a `beat` que toque código va **directo
+al aire** solo (la primera corrida tardó 76 s), y cada despliegue reinicia el
+servicio: unos segundos de 502 para quien esté navegando. Un push de solo `.md`
+no despliega. Un entorno de pruebas de verdad —proceso, puerto y build propios—
+está por hacer.
 
 | | |
 |---|---|
@@ -144,7 +146,7 @@ segundos de 502 para quien esté navegando. Un entorno de pruebas de verdad
 | Servicio | **systemd** `web-beat-v2`. No es pm2 |
 | Delante | Apache como proxy inverso, `020-beatdigital.conf` |
 | Despliegue | [scripts/desplegar-v2.sh](scripts/desplegar-v2.sh), se ejecuta EN la VM |
-| CI | [.github/workflows/ci.yml](.github/workflows/ci.yml) en PRs · [deploy.yml](.github/workflows/deploy.yml) en pushes a `beat`, **apagado** tras `DEPLOY_HABILITADO` |
+| CI | [.github/workflows/ci.yml](.github/workflows/ci.yml) en PRs · [deploy.yml](.github/workflows/deploy.yml) en pushes a `beat`, **encendido** (`DEPLOY_HABILITADO=true` desde el 19 oct 2026) |
 
 Lo demás —los tres fallos silenciosos, la vuelta atrás, por qué pnpm va fijado en
 corepack— está en [agents/deploy.md](agents/deploy.md). El registro del corte y lo

@@ -163,9 +163,31 @@ intacto es justo lo que hace que la vuelta atrás sea de dos comandos.
 `.github/workflows/deploy.yml` corre la misma puerta en cada push a `beat` y luego
 despliega por SSH llamando a `scripts/desplegar-v2.sh`.
 
-**El job de deploy NACE APAGADO**, detrás de la variable `DEPLOY_HABILITADO`.
-No es que falten secretos: encenderlo significa que cada push a `beat` reinicia el
-sitio en vivo. Esa es una decisión aparte de montar el pipeline.
+**El job de deploy nació apagado**, detrás de la variable `DEPLOY_HABILITADO`,
+porque encenderlo significa que cada push a `beat` reinicia el sitio en vivo: una
+decisión aparte de montar el pipeline. **Se encendió el 19 oct 2026.** Primera
+corrida por `workflow_dispatch`, en verde: puerta en CI, build en la VM, reinicio y
+las cuatro comprobaciones del script (portada 200, 12 notas, sin `noindex`), unos
+40 s de SSH en total. Para apagarlo de nuevo basta con quitar la variable o
+ponerla en otra cosa que `true`; no hay que tocar código.
+
+Lo que hizo falta, y dónde vive:
+
+- **En GitHub** (Settings → Secrets and variables → Actions): los secretos
+  `VPS_HOST`, `VPS_USER` y `VPS_SSH_KEY`, y la variable `DEPLOY_HABILITADO`.
+  Antes del 19 oct no existía ninguno de los cuatro.
+- **En la VM, y NO versionado en este repo** (lo puso Carlos el 19 oct; desde
+  aquí no se puede verificar): la llave pública de `~/.ssh/web-beat-deploy` en
+  el `authorized_keys` del usuario de despliegue, y
+  `/etc/sudoers.d/web-beat-deploy` con `NOPASSWD` para los tres comandos que el
+  script corre con `sudo` —`systemctl restart web-beat-v2`, `systemctl is-active
+  --quiet web-beat-v2` y `journalctl -u web-beat-v2 -n 25 --no-pager`—. Por SSH
+  desde CI no hay terminal donde teclear una contraseña, y sin esa regla el job se
+  queda colgado en el primer `sudo`.
+- La recomendación fue amarrar la llave con `command="cd /var/www/web-beat-v2 &&
+  ./scripts/desplegar-v2.sh"` en `authorized_keys`, para que una llave robada solo
+  pueda desplegar. Si está puesta, el `script:` del workflow se ignora y manda el
+  `command=` de la VM: cambiar el workflow no cambia lo que se corre.
 
 El paso de SSH **no hace `git pull`** antes del script, a diferencia de los
 repos hermanos: `desplegar-v2.sh` lo hace él mismo y guarda el commit de PARTIDA

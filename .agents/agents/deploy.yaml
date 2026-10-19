@@ -16,8 +16,11 @@ interface:
       cuatro cosas (traer, instalar, compilar, reiniciar) más las cuatro
       comprobaciones posteriores
     - `.github/workflows/` — la puerta (`ci.yml`, en PRs) y el despliegue por SSH
-      (`deploy.yml`, en pushes a `beat`), que NACE APAGADO tras la variable
-      `DEPLOY_HABILITADO`
+      (`deploy.yml`, en pushes a `beat`), que nació apagado tras la variable
+      `DEPLOY_HABILITADO` y está ENCENDIDO desde el 19 oct 2026: un push a
+      `beat` que toque código va al aire solo. Necesita los secretos
+      `VPS_HOST`, `VPS_USER` y `VPS_SSH_KEY`, y en la VM una regla de sudoers
+      sin contraseña para los tres `sudo` del script (no versionada aquí)
     - el diagnóstico de un despliegue que salió mal, a partir de lo que el usuario
       pegue del terminal
     - `.claude/launch.json` — la entrada `web-beat-build`, que levanta el build en

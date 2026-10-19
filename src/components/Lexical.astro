@@ -89,6 +89,22 @@ function hrefDe(n: Nodo): string | null {
 function esExterno(href: string): boolean {
   return /^https?:\/\//i.test(href);
 }
+
+/**
+ * Los hijos en línea de un encabezado, una cita o un elemento de lista, como
+ * trozos de texto con su enlace si lo traen.
+ *
+ * Trampa: un `link` NO tiene `text`; su texto vive en sus hijos. Leer solo
+ * `h.text` borra el enlace entero, texto incluido, y deja la etiqueta vacía. Así
+ * desapareció el «REGÍSTRATE AQUÍ» de la nota de Xibalba (19 oct 2026): la
+ * redacción lo escribió como `h2` con enlace y salía `<h3></h3>`.
+ */
+function trozos(hijos: Nodo[] = []): { texto: string; href: string | null }[] {
+  return hijos.map((h) => ({
+    texto: h.text ?? (h.children ?? []).map((x) => x.text ?? '').join(''),
+    href: h.type === 'link' ? hrefDe(h) : null,
+  }));
+}
 ---
 
 {
@@ -113,7 +129,18 @@ function esExterno(href: string): boolean {
         const Tag = `h${nivel}` as 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
         return (
           <Tag class:list={['lx-h', { 'es-menor': original >= 3 }]}>
-            <Fragment set:text={(n.children ?? []).map((h) => h.text ?? '').join('')} />
+            {trozos(n.children).map(({ texto, href }) =>
+              href ? (
+                <a
+                  href={href}
+                  target={esExterno(href) ? '_blank' : undefined}
+                  rel={esExterno(href) ? 'noopener noreferrer' : undefined}
+                  set:text={texto}
+                />
+              ) : (
+                <Fragment set:text={texto} />
+              ),
+            )}
           </Tag>
         );
       }
@@ -122,11 +149,18 @@ function esExterno(href: string): boolean {
         return (
           <blockquote class="lx-cita">
             <p class="beat-display">
-              <Fragment
-                set:text={(n.children ?? [])
-                  .flatMap((h) => [h.text ?? '', ...(h.children ?? []).map((x) => x.text ?? '')])
-                  .join('')}
-              />
+              {trozos(n.children).map(({ texto, href }) =>
+                href ? (
+                  <a
+                    href={href}
+                    target={esExterno(href) ? '_blank' : undefined}
+                    rel={esExterno(href) ? 'noopener noreferrer' : undefined}
+                    set:text={texto}
+                  />
+                ) : (
+                  <Fragment set:text={texto} />
+                ),
+              )}
             </p>
           </blockquote>
         );
@@ -137,10 +171,8 @@ function esExterno(href: string): boolean {
           <Tag class="lx-lista">
             {(n.children ?? []).map((li) => (
               <li>
-                {(li.children ?? []).map((t) => {
-                  const href = t.type === 'link' ? hrefDe(t) : null;
-                  const texto = t.text ?? (t.children ?? []).map((x) => x.text ?? '').join('');
-                  return href ? (
+                {trozos(li.children).map(({ texto, href }) =>
+                  href ? (
                     <a
                       href={href}
                       rel={esExterno(href) ? 'noopener noreferrer' : undefined}
@@ -148,8 +180,8 @@ function esExterno(href: string): boolean {
                     />
                   ) : (
                     <Fragment set:text={texto} />
-                  );
-                })}
+                  ),
+                )}
               </li>
             ))}
           </Tag>
@@ -258,6 +290,8 @@ function esExterno(href: string): boolean {
     margin-top: 30px;
   }
   .lx-p a,
+  .lx-h a,
+  .lx-cita a,
   .lx-lista a {
     color: var(--text-link);
     text-decoration: underline;
@@ -265,6 +299,8 @@ function esExterno(href: string): boolean {
     text-decoration-thickness: 1px;
   }
   .lx-p a:hover,
+  .lx-h a:hover,
+  .lx-cita a:hover,
   .lx-lista a:hover {
     color: var(--text-link-hover);
   }

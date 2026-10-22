@@ -42,6 +42,14 @@ corregirlo aquí antes de seguir.
 | URL | `https://beatdigital.mx` |
 | Puerto interno | `127.0.0.1:4322` |
 
+**Ese Node está por debajo del parche de seguridad.** El aviso de Node del 21 oct
+2026 fija el mínimo de la línea 22 en **22.23.4**, y es lo que piden `.nvmrc` y
+`engines`. La más seria de sus CVE (Brotli, CVE-2026-111497) la alcanza cualquier
+`fetch()` del servidor a un host externo, y aquí son todos: el CMS, los feeds,
+SoundCloud. El despliegue NO actualiza Node —eso es a mano, en la VM—, y tampoco
+lo exige: medido, `pnpm install --frozen-lockfile` con un Node por debajo de
+`engines` no aborta. Al subirlo, corregir la fila de arriba.
+
 **No es pm2.** Se dio `pm2 restart` por error y no existe en esta máquina.
 
 ## El despliegue

@@ -25,10 +25,10 @@
     },
     {
       "name": "web-beat-build",
-      "runtimeExecutable": "sh",
+      "runtimeExecutable": "bash",
       "runtimeArgs": [
         "-c",
-        "set -a; . ./.env; set +a; node ./dist/server/entry.mjs"
+        "[ -s \"$HOME/.nvm/nvm.sh\" ] && . \"$HOME/.nvm/nvm.sh\" && nvm use --silent; set -a; . ./.env; set +a; exec node ./dist/server/entry.mjs"
       ],
       "port": 4322,
       "autoPort": true

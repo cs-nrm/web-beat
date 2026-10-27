@@ -39,7 +39,7 @@ import { HOST_CANONICO, NOINDEX_SITIO, noIndexarHost } from '@/config/site';
 
 interface Props {
   /** Los formatos del lienzo. */
-  formato: 'portada' | 'leaderboard' | 'box' | 'halfpage';
+  formato: 'portada' | 'leaderboard' | 'superleader' | 'box' | 'halfpage';
   /**
    * Id del div, y por tanto la llave con la que GAM reporta este hueco. Tiene que
    * ser ÚNICO en la página: dos huecos con el mismo id hacen que GPT pinte solo
@@ -125,6 +125,29 @@ const MEDIDAS = {
     tamanos: [[728, 90], [320, 50]],
     mapping: [
       [[900, 0], [[728, 90]]],
+      [[0, 0], [[320, 50]]],
+    ],
+  },
+  /*
+    970×90, el «super leaderboard» de IAB (encargo del 2026-10-27: el Inicio,
+    entre el Top Ten y Microambiente). El lienzo no lo nombra, así que son medida
+    y colocación nuevas a la vez.
+
+    En móvil pide **320×50**, lo mismo que el leaderboard, y no una medida propia:
+    970 no cabe en 390, y la lección del 320×100 de arriba es no pedirle a GAM una
+    medida que no esté dada de alta. 320×50 sí lo está.
+
+    ⚠️ 970×90 NO está confirmado en el ad unit `Beat`. Si el hueco no sale nunca en
+    escritorio y sí en móvil, lo primero es darlo de alta en Ad Manager: desde el
+    sitio, una medida sin alta se ve igual que un día sin demanda.
+
+    Entre 900 y ~1018px de ancho el hueco mide menos de 970 —la franja le quita 24
+    por lado— y `encajar()` escala el creativo, como la portada entre 900 y 970.
+  */
+  superleader: {
+    tamanos: [[970, 90], [320, 50]],
+    mapping: [
+      [[900, 0], [[970, 90]]],
       [[0, 0], [[320, 50]]],
     ],
   },
@@ -493,6 +516,10 @@ if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
     max-width: 728px;
     aspect-ratio: 728 / 90;
   }
+  .es-superleader .anuncio-hueco {
+    max-width: 970px;
+    aspect-ratio: 970 / 90;
+  }
   /*
     El leaderboard EXPANDIBLE: 728×90 en reposo y 728×400 bajo el cursor, ENCIMA
     de lo que sigue y sin moverlo ni un pixel.
@@ -535,9 +562,15 @@ if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
 
     Sin transición, a propósito (movimiento.md §2): la publicidad no lleva
     movimiento nuestro. Si el creativo quiere animar su apertura, lo hace él.
+
+    El superleader de 970×90 se abre IGUAL, a 970×400 (2026-10-27): comparte el ad
+    unit, así que un expandible le puede caer igual, y mide los mismos 90 en
+    reposo, así que el 310 vale tal cual. Entre 900 y ~1018px el creativo llega
+    encajado y no se abre, por la misma regla de arriba.
   */
   @media (min-width: 900px) and (hover: hover) {
-    .es-leaderboard .anuncio-hueco:not([data-encajado]):has(iframe):hover {
+    .es-leaderboard .anuncio-hueco:not([data-encajado]):has(iframe):hover,
+    .es-superleader .anuncio-hueco:not([data-encajado]):has(iframe):hover {
       z-index: var(--z-raised);
       height: 400px;
       aspect-ratio: auto;
@@ -545,10 +578,12 @@ if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
       background: none;
       box-shadow: none;
     }
-    .es-leaderboard .anuncio-hueco:not([data-encajado]):hover > :global(*) {
+    .es-leaderboard .anuncio-hueco:not([data-encajado]):hover > :global(*),
+    .es-superleader .anuncio-hueco:not([data-encajado]):hover > :global(*) {
       margin-top: 0;
     }
-    .es-leaderboard .anuncio-hueco:not([data-encajado]):hover :global(iframe) {
+    .es-leaderboard .anuncio-hueco:not([data-encajado]):hover :global(iframe),
+    .es-superleader .anuncio-hueco:not([data-encajado]):hover :global(iframe) {
       height: 400px;
       color-scheme: light;
     }
@@ -582,8 +617,9 @@ if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
       font-size: 7px;
       letter-spacing: 0.2em;
     }
-    /* 320×50 en móvil: el 728×90 no cabe en 390px. Ver `MEDIDAS`. */
-    .es-leaderboard .anuncio-hueco {
+    /* 320×50 en móvil: ni el 728×90 ni el 970×90 caben en 390px. Ver `MEDIDAS`. */
+    .es-leaderboard .anuncio-hueco,
+    .es-superleader .anuncio-hueco {
       width: 320px;
       max-width: 100%;
       aspect-ratio: 320 / 50;

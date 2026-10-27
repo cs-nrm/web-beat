@@ -62,7 +62,12 @@ interface:
       contenido y sin moverlo, traiga lo que traiga el creativo (decisión tomada:
       todo llega por GAM y no se puede saber ni simular si una pieza es
       expandible). Crecen el hueco y el iframe, y un margen negativo devuelve los
-      310 px; sin transición, y nunca en táctil ni bajo 900px
+      310 px; sin transición, y nunca en táctil ni bajo 900px. El `superleader`
+      de 970×90 se abre igual, a 970×400
+    - el `superleader` (970×90, 320×50 en móvil) es del 2026-10-27 y tiene un solo
+      hueco, `inicio-superleader`, entre el Top Ten y Microambiente. Cuelga de que
+      haya Top Ten (si no, quedaría pegado a `inicio-leader`) y su franja se cierra
+      con él. 970×90 está SIN confirmar en el ad unit `Beat`
 
     Verifica con `curl` sobre el HTML servido, no mirando la página: un hueco que no
     se llena y un hueco que no existe se ven idénticos. El takeover, además, con

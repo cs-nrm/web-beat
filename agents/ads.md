@@ -39,7 +39,14 @@ Salen del lienzo v13/v14, no del sitio actual. Viven en `MEDIDAS`, en
 |---|---|---|
 | `portada` | 970 × 250 | 390 × 110 |
 | `leaderboard` | 728 × 90 | 320 × 50 |
+| `superleader` | 970 × 90 | 320 × 50 |
 | `box` | 300 × 250 | 300 × 250 |
+
+**El `superleader` (970×90) es del 2026-10-27** y tiene un solo hueco:
+`inicio-superleader`, en el Inicio entre el Top Ten y Microambiente (ver «Dónde va
+cada hueco»). El lienzo no lo nombra. En móvil pide el mismo 320×50 del
+leaderboard, que sí está dado de alta. ⚠️ **970×90 está sin confirmar en el ad
+unit `Beat`**: si el hueco sale en móvil y nunca en escritorio, es eso.
 
 **El corte es 900px en los dos lados** —el `md` del design system y el
 `sizeMapping` de GPT—. Si el CSS cortara en 900 y el mapping en 768, habría un
@@ -259,6 +266,11 @@ el iframe, y el creativo se quedaba en 90.
 - **No se abre en táctil ni bajo 900px.** Allá el formato es 320×50 y un `:hover`
   pegado tras un toque dejaría 400 px tapando la página.
 
+**El `superleader` de 970×90 se abre igual, a 970×400** (2026-10-27): comparte el
+ad unit y mide los mismos 90 en reposo, así que el 310 vale tal cual. Entre 900 y
+~1018px de ancho la franja le deja menos de 970, `encajar()` escala el creativo y
+por la primera regla de arriba no se abre.
+
 ### El marco se reserva y luego desaparece
 
 Las dos mitades hacen falta, por razones distintas:
@@ -326,6 +338,21 @@ conjunto de la primera.
 
 El lienzo describe SOLO el Inicio. Para cualquier otra página, la colocación es
 una decisión de Carlos, no una traducción del diseño: no la inventes.
+
+### El superleader del Inicio (2026-10-27)
+
+`inicio-superleader`, 970×90, va **entre el Top Ten y Microambiente**. Es encargo
+directo, no sale del lienzo. Usa la misma franja que `inicio-leader`
+(`.inicio-franja-anuncio`: 32px arriba y abajo, 24 en móvil) y va fuera del
+contenedor con tope, como él.
+
+- **Cuelga de que haya Top Ten** (`listaVotacion`). Sin la lista a votación caería
+  justo debajo de la franja del leaderboard: dos anuncios seguidos.
+- **La franja se cierra con el anuncio**: `.inicio-franja-anuncio` lleva
+  `display: none` cuando su `.anuncio` tiene `data-vacio`, para no dejar 64px de
+  aire entre dos bloques. Vale para las dos franjas del Inicio.
+- Microambiente está arriba **de forma provisional**. Cuando baje a su sitio hay
+  que decidir si este hueco lo sigue o se queda tras el Top Ten.
 
 ### Las colocaciones de box, aprobadas el 2026-09-08
 

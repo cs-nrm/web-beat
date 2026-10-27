@@ -493,6 +493,28 @@ const BAJADAS = {
     bajada={BAJADAS.topTen}
   />
 
+  {/*
+    El SUPERLEADER, 970×90, entre el Top Ten y Microambiente (encargo del
+    2026-10-27). Va en la misma franja que el leaderboard de arriba —mismo aire
+    simétrico, fuera del contenedor con tope— porque es el mismo gesto: un anuncio
+    a todo lo ancho que separa dos bloques.
+
+    Cuelga de que HAYA Top Ten, como `lista-box` cuelga de que haya ediciones
+    anteriores: sin la lista a votación, este hueco caería justo debajo de la
+    franja del leaderboard y la portada tendría dos anuncios seguidos. Si el que
+    falta es Microambiente, lo que sigue es el Fenómeno y el hueco sigue separando
+    contenido, así que no hace falta otra condición.
+
+    Microambiente está ahí de forma PROVISIONAL (ver abajo). El día que baje a su
+    sitio hay que decidir si este hueco lo sigue o se queda tras el Top Ten: se
+    pidió entre los dos.
+  */}
+  {listaVotacion && (
+    <div class="inicio-franja-anuncio">
+      <Anuncio formato="superleader" nombre="inicio-superleader" />
+    </div>
+  )}
+
   <div class="inicio-contenido">
     {/*
       **Microambiente va ARRIBA A PROPÓSITO Y ES PROVISIONAL** (Carlos,
@@ -565,6 +587,21 @@ const BAJADAS = {
   /* Mismo aire arriba que abajo. Ver el comentario del marcado. */
   .inicio-franja-anuncio {
     padding: 32px 24px;
+  }
+  /*
+    Y la franja se va CON el anuncio. `anuncios.ts` cierra el marco con
+    `data-vacio`, pero el relleno es de aquí: sin esto, un hueco sin relleno dejaba
+    64px de aire entre dos bloques (48 en móvil). Con el superleader pesa más,
+    porque mientras 970×90 no esté dado de alta en Ad Manager, vacío es su estado
+    normal.
+
+    Sin `:global` aunque `.anuncio` sea de otro componente: Astro no le pone
+    alcance a lo que va dentro de `:has()` (así compila también el `:has(iframe)`
+    de `Anuncio.astro`), y un `:global()` ahí dentro llega TAL CUAL al CSS, donde
+    no es un selector válido y la regla entera se descarta.
+  */
+  .inicio-franja-anuncio:has(> .anuncio[data-vacio]) {
+    display: none;
   }
   @media (max-width: 899px) {
     .inicio-franja-anuncio {

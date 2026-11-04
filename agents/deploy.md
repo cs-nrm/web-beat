@@ -36,19 +36,28 @@ corregirlo aquí antes de seguir.
 | Rama | `beat` (no `main`) |
 | Servicio | **systemd**, `web-beat-v2` |
 | Reinicio | `sudo systemctl restart web-beat-v2` |
-| Node | v22.23.2 |
+| Node | v22.23.4, paquete `nodejs` de apt (NodeSource) |
 | Gestor | corepack en `/usr/bin/corepack`, con **pnpm 9.0.0 fijado** |
 | Delante | Apache como proxy inverso |
 | URL | `https://beatdigital.mx` |
 | Puerto interno | `127.0.0.1:4322` |
+| Entrada | `ssh beat`, alias del `/etc/hosts` de la Mac. `beat-astro` es el nombre de la VM y **no resuelve** |
 
-**Ese Node está por debajo del parche de seguridad.** El aviso de Node del 21 oct
-2026 fija el mínimo de la línea 22 en **22.23.4**, y es lo que piden `.nvmrc` y
-`engines`. La más seria de sus CVE (Brotli, CVE-2026-111497) la alcanza cualquier
-`fetch()` del servidor a un host externo, y aquí son todos: el CMS, los feeds,
-SoundCloud. El despliegue NO actualiza Node —eso es a mano, en la VM—, y tampoco
-lo exige: medido, `pnpm install --frozen-lockfile` con un Node por debajo de
-`engines` no aborta. Al subirlo, corregir la fila de arriba.
+**Node lo instala apt, y el despliegue no lo toca.** Subirlo es a mano, en la VM:
+
+```bash
+sudo apt-get install -y --only-upgrade nodejs && sudo systemctl restart web-beat-v2
+```
+
+`--only-upgrade` toca solo ese paquete; con `-s` delante se simula primero. El
+reinicio no es opcional: hasta que se da, el servicio sigue corriendo el binario
+viejo que ya tenía cargado. Se hizo así el 4 nov 2026, de 22.23.2 a 22.23.4, por
+el aviso de seguridad de Node del 21 oct 2026, y 22.23.4 es el mínimo que piden
+`.nvmrc` y `engines`. Medido después: el proceso del servicio corre con
+`/usr/bin/node` v22.23.4, y el `/usr/bin/corepack` que trae el paquete (0.36.0)
+sigue resolviendo pnpm 9.0.0. Si algún día `engines` va por delante de la VM, el
+despliegue no aborta: `pnpm install --frozen-lockfile` avisa `Unsupported engine`
+y sigue. Por eso nadie se entera si no lo busca.
 
 **No es pm2.** Se dio `pm2 restart` por error y no existe en esta máquina.
 

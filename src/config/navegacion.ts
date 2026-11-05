@@ -358,11 +358,20 @@ export const APPS: Array<{ tienda: string; url: string | null }> = [
  * y del de los repos hermanos, y es el contacto comercial de NRM, no de la
  * estación. Es el enlace por el que entra el dinero, así que es el que menos
  * conviene perder en un relanzamiento.
+ *
+ * `Defensoría de las Audiencias` va AL FINAL, después de Ventas (2026-11-05), y
+ * es otra página de este sitio: el contacto de los defensores de la CIRT y el
+ * Código de Ética de TELEVIDEO. Ver `src/pages/defensoria-de-las-audiencias.astro`.
  */
 export const LEGALES: EntradaNav[] = [
   { corto: 'Aviso de privacidad', largo: 'Aviso de privacidad', href: '/avisodeprivacidad' },
   { corto: 'Términos y condiciones', largo: 'Términos y condiciones', href: '/terminosycondiciones' },
   { corto: 'Ventas', largo: 'Ventas', href: 'https://nrm.com.mx/contacto/' },
+  {
+    corto: 'Defensoría de las Audiencias',
+    largo: 'Defensoría de las Audiencias',
+    href: '/defensoria-de-las-audiencias',
+  },
 ];
 
 /**

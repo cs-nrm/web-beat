@@ -129,7 +129,7 @@ Es la decisión 10 del plan, y explica casi todo el mapa de URLs:
 | `/eventos` y `/eventos/<slug>` | `src/pages/eventos/index.astro`, `src/pages/eventos/[slug].astro` | `eventos` |
 | `/programacion` y `/programas/<slug>` | `src/pages/programacion/index.astro`, `src/pages/programas/[slug].astro` | `programas` |
 | `/en-vivo` | `src/pages/en-vivo/index.astro` | `programas` + `bitacora` |
-| `/alexa`, `/avisodeprivacidad`, `/terminosycondiciones` | páginas estáticas | texto escrito en el repo |
+| `/alexa`, `/avisodeprivacidad`, `/terminosycondiciones`, `/defensoria-de-las-audiencias` | páginas estáticas | texto escrito en el repo |
 
 **Una nota va en `/noticias/<slug>` y no en `/<seccion>/<slug>`** porque
 `noticias.categorias` es `hasMany` **sin categoría primaria**: derivar el path de
@@ -341,6 +341,7 @@ varias secciones.
 # Las rutas públicas, de un tirón: nada debe dar 500, y lo que no exista debe dar 404.
 for u in / /beat-scanner /editorial /eventos /fenomeno-residente /bonus-beat \
          /programacion /en-vivo /alexa /avisodeprivacidad /terminosycondiciones \
+         /defensoria-de-las-audiencias \
          /sitemap.xml /news-sitemap.xml /robots.txt; do
   printf '%-28s %s\n' "$u" "$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:4321$u")"
 done

@@ -318,11 +318,12 @@ export const SEGMENTOS_RESERVADOS = [
     `[tipoLista]` y cada visita dispararía una consulta al CMS.
 
     El día que estos textos se muevan a la colección `paginas` del CMS (A1),
-    estos tres segmentos son los que hay que SACAR de aquí: pasarían a resolverse
+    estos cuatro segmentos son los que hay que SACAR de aquí: pasarían a resolverse
     como slug de contenido, que es justo lo que esta lista bloquea.
   */
   'avisodeprivacidad',
   'terminosycondiciones',
+  'defensoria-de-las-audiencias',
   'alexa',
   'programacion',
   'comunidad',

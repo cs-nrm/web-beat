@@ -1,0 +1,213 @@
+---
+/**
+ * Defensoría de las Audiencias.
+ *
+ * El texto y los enlaces son los de Stereo Cien
+ * (stereociendigital.mx/defensoriadelasaudiencias/, leída el 2026-11-05), copiados
+ * sin reescribir. Los defensores los designa la CIRT para todas sus afiliadas, así
+ * que el contacto —nombres, correos, domicilio y teléfono— es el mismo en las
+ * cuatro estaciones, y los Lineamientos son un único documento para todas.
+ *
+ * Lo ÚNICO propio de Beat es el Código de Ética: cada concesión tiene el suyo. El
+ * de Stereo Cien es el de XHMM-FM (STC); este es el de TELEVIDEO (XHSON-FM), que es
+ * la persona moral de Beat. Copiar el enlace de la hermana sería publicar el código
+ * de otra concesión — el mismo error que tenía el pie cuando mandaba al aviso de
+ * privacidad del corporativo (ver `LEGALES` en `config/navegacion.ts`).
+ *
+ * La ruta va CON guiones —`/defensoria-de-las-audiencias`—, a diferencia de los
+ * otros legales y de la de las hermanas, y fue decisión (2026-11-05). No rompe
+ * nada: los legales van sin guiones para que sigan valiendo los enlaces del sitio
+ * viejo, y el sitio viejo nunca tuvo esta página, así que aquí no hay herencia
+ * que respetar ni redirección que hacer.
+ *
+ * Va en `SEGMENTOS_RESERVADOS` de `config/site.ts`: sin eso,
+ * `/defensoria-de-las-audiencias/<algo>` lo resolvería `[tipoLista]` consultando
+ * el CMS.
+ *
+ * Como el aviso y los términos, es una página estática y no un documento del
+ * CMS: para cambiar un defensor o un PDF hay que editar este archivo y desplegar.
+ */
+import Base from '@/layouts/Base.astro';
+import PaginaTexto from '@/components/PaginaTexto.astro';
+
+/*
+  El asunto con el que se abre el correo en Gmail y en Outlook. Es el mismo que
+  usan las hermanas, para que la Defensoría reciba lo mismo venga de donde venga.
+*/
+const ASUNTO = 'Contacto con la Defensoría de las Audiencias';
+
+const DEFENSORES = [
+  { nombre: 'Lic. Eli Manuel Ramírez Villaseñor', correo: 'defensor1@cirtcomunicacion.com' },
+  { nombre: 'Lic. Fabiana Estrada Tena', correo: 'defensor2@cirtcomunicacion.com' },
+].map((d) => {
+  const para = encodeURIComponent(d.correo);
+  const asunto = encodeURIComponent(ASUNTO);
+  return {
+    ...d,
+    gmail: `https://mail.google.com/mail/?view=cm&fs=1&to=${para}&su=${asunto}`,
+    outlook: `https://outlook.office.com/mail/deeplink/compose?to=${para}&subject=${asunto}`,
+  };
+});
+
+/*
+  Los dos documentos, en el bucket del corporativo. Comprobados con un HEAD el
+  2026-11-05: los dos responden 200 y `application/pdf`.
+
+  El nombre del Código lleva DOS espacios seguidos («AFILIADOS%20%20CIRT») y los
+  Lineamientos una «ó» descompuesta («Proteccio%CC%81n», o + acento combinante).
+  Las dos rarezas están así en el archivo: «corregirlas» da un 404.
+*/
+const CODIGO_DE_ETICA =
+  'https://storage.googleapis.com/nrm-web/nrm/CodigoEtica/CODIGO%20DE%20ETICA%202026%20AFILIADOS%20%20CIRT%20-%20TELEVIDEO%20(XHSON-FM)%20(BEAT).pdf';
+const LINEAMIENTOS =
+  'https://storage.googleapis.com/nrm-web/nrm/CodigoEtica/Lineamientos%20Generales%20para%20la%20Proteccio%CC%81n%20de%20los%20Derechos%20de%20las%20Audiencias.pdf';
+---
+
+<Base
+  titulo="Defensoría de las Audiencias — Beat 100.9"
+  descripcion="Contacto de los Defensores de las Audiencias designados por la CIRT, Código de Ética de Beat 100.9 y Lineamientos Generales para la Protección de los Derechos de las Audiencias."
+>
+  <PaginaTexto titulo="DEFENSORÍA DE LAS AUDIENCIAS">
+    {/*
+      Era la `entrada` de `PaginaTexto` y se perdía: 20px a peso 500 y el MISMO
+      color que el cuerpo, así que se leía como un párrafo más. Es el nombre del
+      documento —el titular de la página de Stereo Cien— y pidieron destacarlo
+      (2026-11-05). Va como `<h2>` propio en vez de tocar `.pt-entrada`, que
+      comparte Alexa.
+    */}
+    <header class="da-cabeza">
+      <h2 class="da-subtitulo">Código de Ética y Lineamientos Generales para la Protección de los Derechos de las Audiencias</h2>
+    </header>
+
+    <p>En cumplimiento de la legislación vigente, ponemos a disposición de nuestros radioescuchas los datos de contacto de los Defensores de las Audiencias designados por la Cámara Nacional de la Industria de Radio y Televisión (CIRT), quienes reciben y atienden quejas, observaciones y sugerencias relacionadas con nuestros contenidos y programación.</p>
+
+    <ul class="da-defensores">
+      {
+        DEFENSORES.map((d) => (
+          <li class="da-defensor">
+            <p class="da-nombre">{d.nombre}</p>
+            <div class="da-correo">
+              <a href={`mailto:${d.correo}`} class="da-direccion">{d.correo}</a>
+              <div class="da-acciones" role="group" aria-label={`Escribir a ${d.correo}`}>
+                <a class="beat-label da-accion" href={d.gmail} target="_blank" rel="noopener noreferrer">Gmail</a>
+                <a class="beat-label da-accion" href={d.outlook} target="_blank" rel="noopener noreferrer">Outlook</a>
+              </div>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+
+    <p>Domicilio: Av. Horacio 1013, Col. Polanco III Sección, Alcaldía Miguel Hidalgo, C.P. 11540, Ciudad de México.</p>
+    <p>Teléfono: 55 5726 9909</p>
+
+    <ul class="da-descargas">
+      <li><a href={CODIGO_DE_ETICA} target="_blank" rel="noopener noreferrer">Descarga Código de Ética.</a></li>
+      <li><a href={LINEAMIENTOS} target="_blank" rel="noopener noreferrer">Descarga Lineamientos Generales para la Protección de los Derechos de las Audiencias.</a></li>
+    </ul>
+  </PaginaTexto>
+</Base>
+
+<style>
+  /*
+    Especificidad, que aquí manda: `PaginaTexto` pinta su cuerpo con
+    `.pt-cuerpo :global(p)` y `:global(a)`, que salen a (0,2,1). Una clase sola de
+    esta página sale a (0,2,0) y PIERDE — el botón de Gmail se pintaría como un
+    enlace subrayado. Por eso cada regla de abajo va con dos clases (0,4,0), que
+    gana sin `!important` y sin depender del orden en que Astro junte las hojas.
+  */
+  /*
+    El nombre del documento, entre el titular y el cuerpo: más grande, más grueso
+    y en el blanco del titular, para que no se confunda con un párrafo. Sin
+    margen arriba: el `h2` de `PaginaTexto` trae 38px para separar apartados, y
+    este no separa nada, abre el documento.
+  */
+  .da-cabeza .da-subtitulo {
+    margin: 0;
+    font: 700 26px / 1.22 var(--font-text);
+    letter-spacing: -0.016em;
+    color: var(--text-primary);
+    text-wrap: balance;
+  }
+  .da-defensores {
+    list-style: none;
+    margin: 30px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 26px;
+  }
+  .da-defensores .da-defensor {
+    padding-top: 26px;
+    border-top: 1px solid var(--border-hairline);
+  }
+  .da-defensores .da-nombre {
+    margin: 0;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .da-defensores .da-correo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 18px;
+    margin-top: 10px;
+  }
+  /* Los correos no tienen dónde partirse: en un teléfono de 320px se salían. */
+  .da-defensores .da-direccion {
+    overflow-wrap: anywhere;
+  }
+  .da-defensores .da-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  /* La pastilla hueca de la casa, la misma de «VER BEAT SCANNER» en el 404. */
+  .da-acciones .da-accion {
+    padding: 13px 22px;
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px var(--border-strong);
+    color: var(--text-primary);
+    font-size: 9px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      transform var(--dur-2) var(--ease-out),
+      background-color var(--dur-2) var(--ease-out),
+      color var(--dur-2) var(--ease-out);
+  }
+  .da-acciones .da-accion:hover {
+    background: var(--surface-inverse);
+    color: var(--text-on-inverse);
+    transform: translateY(-2px);
+  }
+  .da-acciones .da-accion:focus-visible {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 2px;
+  }
+
+  /* Las descargas cierran el documento, separadas de los datos de contacto. */
+  .da-descargas {
+    list-style: none;
+    margin: 38px 0 0;
+    padding: 26px 0 0;
+    border-top: 1px solid var(--border-hairline);
+    display: grid;
+    gap: 14px;
+    font: 400 17px / 1.6 var(--font-text);
+  }
+
+  @media (max-width: 899px) {
+    .da-cabeza .da-subtitulo {
+      font-size: 21px;
+    }
+    .da-descargas {
+      font-size: 16px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .da-acciones .da-accion:hover {
+      transform: none;
+    }
+  }
+</style>

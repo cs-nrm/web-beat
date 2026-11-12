@@ -121,6 +121,9 @@ function marcoDe(id: string): HTMLElement | null {
  * Reabrir importa: al navegar, GPT redefine los slots sobre un DOM nuevo, pero si
  * un `data-vacio` sobreviviera el hueco quedaría escondido con un creativo dentro
  * — servido, facturado y sin que nadie lo vea.
+ *
+ * Y es lo ÚNICO que abre un marco con `naceCerrado` (la portada del Inicio), que
+ * llega del servidor ya con `data-vacio`. Ver la prop en `Anuncio.astro`.
  */
 function marcar(id: string, vacio: boolean): void {
   const marco = marcoDe(id);

@@ -286,6 +286,24 @@ bloqueador de anuncios o un `gpt.js` que no bajó son el modo de falla más com�
 sin ese camino la banda se queda abierta para siempre — el patrón de «estado muerto
 sin salida» que movimiento.md §3 prohíbe.
 
+#### La excepción: la portada del Inicio NACE CERRADA (2026-11-11)
+
+Encargo directo: **sin anuncio de Ad Manager, la sección no existe; con anuncio,
+sale entera.** La banda negra de 310px con «PUBLICIDAD» encabezaba el sitio hasta
+3.5 s y se cerraba sola cuando GAM contestaba vacío, que es lo normal sin demanda.
+
+- Es la prop `naceCerrado` de `Anuncio.astro`, y solo la lleva `inicio-portada`.
+  Los demás huecos siguen reservando.
+- El marco sale del SERVIDOR con `data-vacio`, la misma marca que pone el motor a
+  un hueco sin relleno: `anuncios.ts` no cambió. GPT pide y pinta el slot aunque
+  el marco esté en `display: none`, y `marcar()` lo abre al llegar
+  `slotRenderEnded` con creativo, también si llega después de `PLAZO_VACIO`.
+- Solo afecta al camino de GAM. Una campaña vendida del CMS se sabe en el
+  servidor y se pinta abierta como siempre.
+- **El precio es el CLS** que la regla de arriba evita: cuando el creativo llega
+  (~2 s), todo lo de abajo baja lo que mide la banda. Antes se pagaba igual pero
+  al cerrarse sin relleno; ahora solo cuando hay anuncio.
+
 ### La regla de GPT que no se negocia
 
 **`destroySlots()` y TODO lo que dependa de `googletag` va DENTRO de

@@ -25,6 +25,10 @@
  * falla más común deja la banda abierta para siempre, que es exactamente el
  * patrón de «estado muerto sin salida» de movimiento.md §3.
  *
+ * La EXCEPCIÓN es la portada del Inicio, que desde el 2026-11-11 NACE CERRADA
+ * (`naceCerrado`): no se reserva nada y solo se abre si GAM trae creativo. Ver la
+ * prop.
+ *
  * Los tamaños salen del LIENZO v13/v14, y NO coinciden con los del sitio
  * actual. Antes de lanzar, AdOps tiene que confirmar que estas medidas existen
  * en Ad Manager, o los slots nunca se van a llenar:
@@ -72,10 +76,41 @@ interface Props {
    * ejecución que habría que acordarse de escribir.
    */
   banners?: BannerConEnlace[];
+  /**
+   * El marco NACE CERRADO y solo se abre si Ad Manager trae creativo: sin anuncio
+   * de GAM, la sección no existe — ni banda, ni rótulo, ni alto reservado.
+   *
+   * Es lo contrario de la regla general de este componente («se reserva y luego
+   * desaparece»), y es encargo directo para la portada del Inicio (2026-11-11):
+   * la banda negra de 310px con «PUBLICIDAD» encabezaba el sitio hasta 3.5 s y se
+   * cerraba sola en cuanto GAM contestaba vacío, que es lo normal sin demanda.
+   *
+   * Se sirve con `data-vacio` desde el SERVIDOR, que es la misma marca que pone
+   * `anuncios.ts` a un hueco sin relleno, así que el motor no necesita saber nada
+   * nuevo: GPT pide y pinta el slot aunque el marco esté en `display: none`, y
+   * `marcar()` le quita la marca al llegar `slotRenderEnded` con creativo —también
+   * si llega después de `PLAZO_VACIO`—. `encajar()` mide DESPUÉS de abrirlo, así
+   * que el ancho que lee es el de verdad.
+   *
+   * El precio es el CLS que la regla general evita: cuando el creativo llega (GAM
+   * tarda ~2 s) todo lo de abajo baja lo que mide la banda. Antes se pagaba igual
+   * pero al revés, al CERRARSE sin relleno; ahora se paga solo cuando hay anuncio.
+   *
+   * Solo toca el camino de GAM. Una campaña vendida del CMS (`banners`) se sabe en
+   * el servidor, así que se pinta abierta como siempre.
+   */
+  naceCerrado?: boolean;
   class?: string;
 }
 
-const { formato, nombre = formato, unidad, banners = [], class: clase } = Astro.props;
+const {
+  formato,
+  nombre = formato,
+  unidad,
+  banners = [],
+  naceCerrado = false,
+  class: clase,
+} = Astro.props;
 
 /**
  * Medidas por formato: la lista completa que el slot puede servir, y el mapeo por
@@ -278,9 +313,15 @@ if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
   */
   contarImpresion(creatividad.id);
 }
+
+/** Ver la prop `naceCerrado`: con venta directa no aplica, el anuncio ya está. */
+const cerradoDeOrigen = naceCerrado && !creatividad;
 ---
 
-<div class:list={['anuncio', `es-${formato}`, creatividad && 'tiene-creatividad', clase]}>
+<div
+  class:list={['anuncio', `es-${formato}`, creatividad && 'tiene-creatividad', clase]}
+  data-vacio={cerradoDeOrigen ? '' : undefined}
+>
   <span class="beat-label anuncio-rotulo">PUBLICIDAD</span>
   {/*
     El `href` de la creatividad va a NUESTRO proxy, no al anunciante. Es lo que

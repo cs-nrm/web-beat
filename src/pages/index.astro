@@ -393,8 +393,11 @@ const BAJADAS = {
 
     `banners` son TODAS las campañas vendidas vigentes (colección `publicidad` del
     CMS, tipo «Portada»): pueden ser varias a la vez y el hueco rota entre ellas
-    por minuto. Si no hay ninguna llega vacío, el hueco se lo pide a Ad Manager, y
-    si Ad Manager tampoco tiene, la franja se cierra sola y no queda hueco.
+    por minuto. Si no hay ninguna llega vacío y el hueco se lo pide a Ad Manager.
+
+    `naceCerrado` (2026-11-11): con Ad Manager la franja NO se reserva. Llega
+    cerrada y solo se abre, entera, si GAM trae creativo; sin anuncio, la sección
+    no existe. Ver la prop en `Anuncio.astro`, que dice también lo que cuesta.
   */}
   {/*
     El intro va por el mismo slot que la portada, y por la misma razón: el `<slot />`
@@ -413,7 +416,13 @@ const BAJADAS = {
     campaña vigente el componente no emite NADA — ni overlay, ni slot de GAM.
   */}
   <Takeover takeover={takeoverVisible} slot="sobre-cabecera" />
-  <Anuncio formato="portada" nombre="inicio-portada" banners={banners} slot="sobre-cabecera" />
+  <Anuncio
+    formato="portada"
+    nombre="inicio-portada"
+    banners={banners}
+    naceCerrado
+    slot="sobre-cabecera"
+  />
 
   {/* 1. qué suena — la señal */}
 

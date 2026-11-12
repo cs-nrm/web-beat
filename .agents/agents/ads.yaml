@@ -28,7 +28,11 @@ interface:
       reintroduzcas salvo pedido explícito
     - que el marco se RESERVE y luego DESAPAREZCA si no hay relleno, por los DOS
       caminos: respuesta vacía de GAM y plazo agotado. Sin el segundo, un bloqueador
-      deja la banda abierta para siempre
+      deja la banda abierta para siempre. EXCEPCIÓN: la portada del Inicio
+      (`inicio-portada`) lleva `naceCerrado` desde el 2026-11-11: sale del
+      servidor con `data-vacio` y solo la abre `marcar()` si GAM trae creativo.
+      Sin anuncio de GAM la sección no existe; la venta directa del CMS se pinta
+      abierta como siempre
     - un solo corte de breakpoint, 900px, en el CSS y en el `sizeMapping` de GPT
     - confirmar que la medida existe en Ad Manager antes de dar por bueno un hueco
       vacío: un slot con medida no dada de alta nunca se llena y se ve igual que uno

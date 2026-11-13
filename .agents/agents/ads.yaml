@@ -37,7 +37,10 @@ interface:
       impresión que nadie ve y va contra las políticas de AdSense. Sin campaña de
       GAM la sección no existe; la venta directa del CMS se pinta abierta como
       siempre. Apagar el AdSense en origen es de Ad Manager y pide un bloque hijo
-      para la portada: sobre `Beat` lo apagaría en todo el sitio
+      para la portada: sobre `Beat` lo apagaría en todo el sitio. HOY ESTÁ
+      APAGADA (2026-11-13, a pedido): `PORTADA_ENCENDIDA = false` en
+      `src/pages/index.astro` no pinta el marco, no define el slot y no pide al CMS
+      las campañas «Portada». Se enciende poniéndola en `true`
     - un solo corte de breakpoint, 900px, en el CSS y en el `sizeMapping` de GPT
     - confirmar que la medida existe en Ad Manager antes de dar por bueno un hueco
       vacío: un slot con medida no dada de alta nunca se llena y se ve igual que uno

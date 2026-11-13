@@ -166,6 +166,23 @@ const [filtroScanner, filtroEditorial, filtroMicroambiente] = await Promise.all(
 
 const VACIO = { destacada: null, rejilla: [] as Awaited<ReturnType<typeof obtenerScanner>>['rejilla'] };
 
+/**
+ * Interruptor de la banda de publicidad de arriba del Inicio (`inicio-portada`).
+ *
+ * APAGADA desde el 2026-11-13, a pedido: ni con el `sinBackfill` del mismo día
+ * se comportó como se quería, y se decidió quitarla mientras se resuelve. Para
+ * VOLVER A ENCENDERLA basta con poner `true`: el marco, el `sinBackfill` y su
+ * documentación siguen en su sitio, sin tocar.
+ *
+ * Apagada no es «vacía»: no se pinta el marco, el slot no se define en GPT —no
+ * sale ninguna petición a Ad Manager para él— y ni siquiera se le piden al CMS
+ * las campañas vendidas de tipo «Portada». Eso último es a propósito y es el
+ * precio: una campaña de portada VENDIDA en el CMS tampoco sale mientras esto
+ * siga en `false`. Al apagarla no había ninguna vigente (medido en el HTML
+ * servido: el marco salía sin `tiene-creatividad`).
+ */
+const PORTADA_ENCENDIDA = false;
+
 const [
   { destacada, rejilla },
   editorial,
@@ -191,7 +208,8 @@ const [
     obtenerEspeciales(SERIE_FENOMENO, 8),
     pidiendoListas,
     obtenerAgenda(4),
-    obtenerBanners('portada'),
+    // Apagada, ni se consulta: ver `PORTADA_ENCENDIDA`.
+    PORTADA_ENCENDIDA ? obtenerBanners('portada') : Promise.resolve([]),
     obtenerTakeover(),
     // Ya degrada a `[]` sola: con el CMS caído, la portada sale sin la sección.
     obtenerTransmisiones(),
@@ -434,6 +452,8 @@ const BAJADAS = {
     el AdSense que GAM mete de relleno se descarta sin pintarse. Sin campaña, la
     sección no existe. Ver la prop en `Anuncio.astro`, que dice también lo que
     cuesta.
+
+    HOY ESTÁ APAGADA (2026-11-13): la gobierna `PORTADA_ENCENDIDA`, arriba.
   */}
   {/*
     El intro va por el mismo slot que la portada, y por la misma razón: el `<slot />`
@@ -452,13 +472,17 @@ const BAJADAS = {
     campaña vigente el componente no emite NADA — ni overlay, ni slot de GAM.
   */}
   <Takeover takeover={takeoverVisible} slot="sobre-cabecera" />
-  <Anuncio
-    formato="portada"
-    nombre="inicio-portada"
-    banners={banners}
-    sinBackfill
-    slot="sobre-cabecera"
-  />
+  {
+    PORTADA_ENCENDIDA && (
+      <Anuncio
+        formato="portada"
+        nombre="inicio-portada"
+        banners={banners}
+        sinBackfill
+        slot="sobre-cabecera"
+      />
+    )
+  }
 
   {/* 1. qué suena — la señal */}
 

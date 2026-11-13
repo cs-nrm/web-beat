@@ -300,8 +300,14 @@ tiempos, y el segundo corrige al primero:
    dinámica de GAM—, y el box del mismo Inicio un line item con su id. Para el
    sitio, los dos «venían de Ad Manager». **AdSense por GAM no cuenta como «de Ad
    Manager»: la regla es el line item.**
+3. **13 nov, mismo día** — «no me está funcionando como quisiera, ocúltala por
+   ahora». **La banda está APAGADA**: la gobierna `PORTADA_ENCENDIDA` en
+   `src/pages/index.astro`, hoy en `false`. Apagada no se pinta el marco, no se
+   define el slot en GPT y no se le piden al CMS las campañas de tipo «Portada»
+   —así que una VENDIDA tampoco sale—. Para encenderla se pone en `true`; todo lo
+   de abajo sigue en su sitio y vuelve a regir tal cual.
 
-Cómo está hecho:
+Cómo está hecho (y cómo vuelve a estar en cuanto se encienda):
 
 - Es la prop `sinBackfill` de `Anuncio.astro`, y solo la lleva `inicio-portada`.
   Los demás huecos siguen reservando y siguen aceptando AdSense.
@@ -427,7 +433,7 @@ porque le falta el CONTENIDO del que cuelga (no porque el hueco esté mal).
 
 | Superficie | portada | leaderboard | box |
 |---|---|---|---|
-| Inicio | ✅ `inicio-portada` | ✅ `inicio-leader` | `inicio-box` |
+| Inicio | APAGADO desde el 2026-11-13 (`PORTADA_ENCENDIDA`) `inicio-portada` | ✅ `inicio-leader` | `inicio-box` |
 | `/scanner`, `/editorial`, `/etiqueta/*` (`IndiceScanner`) | — | ✅ `scanner-leader` | ✅ `scanner-box` |
 | `/noticias/*` | — | ✅ `nota-leader` | ✅ `nota-box` |
 | `/fenomeno-residente` | — | ✅ `fenomeno-leader` | ✅ `fenomeno-box` |

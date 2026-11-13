@@ -1,0 +1,326 @@
+---
+/**
+ * La TRANSMISIÓN especial del Inicio: cabecera + reproductor, entre el menú y
+ * el mosaico de noticias (2026-11-13).
+ *
+ * Es solo para eventos especiales —el primero, «El Beat de Xibalba»—, así que su
+ * estado normal es NO EXISTIR. Sin transmisión vigente este componente no emite
+ * nada, ni un contenedor vacío, y la portada se lee exactamente como antes. Se
+ * prende sola cuando alguien captura una en el CMS; ningún despliegue de por medio.
+ *
+ * Qué transmisión, en qué fase y con qué reproductor lo decide
+ * `src/lib/transmision.ts`; aquí llega todo resuelto. Este archivo solo decide
+ * cómo se ve:
+ *
+ *   · **La cabecera ES el rótulo.** Va dentro del `h2` con el título como `alt`:
+ *     la de Xibalba lleva el nombre escrito, así que repetirlo en texto debajo lo
+ *     diría dos veces. Sin cabecera, el título se pinta como el de las demás
+ *     secciones de la portada.
+ *   · **El fondo es el `colorFondo` del CMS, a TODO el ancho de la pantalla**,
+ *     aunque el contenido siga dentro del tope de la portada: por eso la sección
+ *     pinta el color y `.tr-caja` lleva el tope. Sin color capturado no hay banda y
+ *     la sección se queda sobre el fondo del sitio, como antes. Va al 50% de
+ *     opacidad (`OPACIDAD_FONDO`), y el texto encima en claro u oscuro según el
+ *     contraste MEDIDO contra ese color ya mezclado (`fondoDe`).
+ *   · **El cuadro toma la proporción de lo que se pegó en el CMS** (`--tr-prop`):
+ *     16:9 si el código de inserción no dice otra cosa, y vertical si es vertical.
+ *   · **El rótulo de la fase lo cambia el navegador.** Llegan los dos —«EN VIVO» y
+ *     «PRÓXIMAMENTE»— y el CSS enseña el que diga `data-estado`. A la hora de
+ *     inicio `src/scripts/transmision.ts` lo pasa a `envivo`, y a la hora de fin
+ *     quita la sección: el HTML de la portada vive hasta un minuto en el borde y
+ *     una pestaña puede quedarse abierta horas.
+ */
+import type { TransmisionVisible } from '@/lib/transmision';
+import { cuandoSale } from '@/lib/transmision';
+
+interface Props {
+  transmision: TransmisionVisible | null;
+}
+
+const { transmision } = Astro.props;
+
+/**
+ * Lo que puede hacer un reproductor de «otra» plataforma —ni Vimeo ni YouTube—.
+ * Es el MISMO `sandbox` del bloque «Otro» de la nota (`Embed.astro`), por la
+ * misma decisión: cualquier https entra, y lo que lo contiene es esto. Sin
+ * `allow-top-navigation`: el marco no se puede llevar al lector de la portada.
+ */
+const SANDBOX_OTRO =
+  'allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation';
+
+/*
+  La trampa de `Embed.astro`: `allow-scripts` + `allow-same-origin` en un marco de
+  NUESTRO origen deja que la página se quite el sandbox. Un reproductor «otro» que
+  apunte al sitio mismo no se pinta, y con él la sección entera.
+*/
+const hostsPropios = new Set([Astro.url.host, Astro.site?.host].filter(Boolean));
+
+function enmarcaElSitio(x: TransmisionVisible): boolean {
+  if (x.reproductor.proveedor !== 'otro') return false;
+  try {
+    return hostsPropios.has(new URL(x.reproductor.src).host);
+  } catch {
+    return true;
+  }
+}
+
+const t = transmision && !enmarcaElSitio(transmision) ? transmision : null;
+
+const fecha = cuandoSale(t?.inicio);
+const prop = t ? Number(t.reproductor.proporcion.toFixed(4)) : 16 / 9;
+const idTitulo = t ? `transmision-${t.id}` : '';
+---
+
+{
+  t && (
+    <section
+      class="tr"
+      data-transmision
+      data-estado={t.fase}
+      data-inicio={t.inicio}
+      data-fin={t.fin}
+      data-tinta={t.fondo?.tinta}
+      style={t.fondo ? `--tr-fondo: ${t.fondo.css};` : undefined}
+      aria-labelledby={idTitulo}
+    >
+      <div class="tr-caja">
+        {t.cabecera ? (
+          <h2 id={idTitulo} class="tr-cabecera">
+            {/*
+              `eager` y `fetchpriority`: es lo primero bajo el menú, o sea el LCP de la
+              portada mientras haya transmisión. Las medidas van para que el hueco se
+              reserve antes de que llegue la imagen.
+            */}
+            <img
+              src={t.cabecera.src}
+              alt={t.titulo}
+              width={t.cabecera.ancho ?? undefined}
+              height={t.cabecera.alto ?? undefined}
+              loading="eager"
+              fetchpriority="high"
+              decoding="async"
+              style={`object-position: ${t.cabecera.focoX}% ${t.cabecera.focoY}%;`}
+            />
+          </h2>
+        ) : (
+          <h2 id={idTitulo} class="beat-display tr-titulo">
+            {t.titulo}
+          </h2>
+        )}
+
+        {/*
+          `undefined` y no `false`: en un `data-*` Astro pinta el booleano como texto,
+          y `data-vertical="false"` también casa con `[data-vertical]`.
+        */}
+        <div class="tr-marco" data-vertical={prop < 1 ? 'si' : undefined} style={`--tr-prop: ${prop};`}>
+          {/*
+            Sin `autoplay` en el `src`: el radio puede estar sonando y dos fuentes que
+            arrancan solas se pisan. El `allow` sí lo lleva, porque es lo que deja que
+            el play de DENTRO del reproductor funcione en Safari.
+          */}
+          {t.reproductor.proveedor === 'otro' ? (
+            <iframe
+              src={t.reproductor.src}
+              title={`Transmisión: ${t.titulo}`}
+              loading="eager"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+              allowfullscreen
+              sandbox={SANDBOX_OTRO}
+              data-transmision-marco
+            />
+          ) : (
+            <iframe
+              src={t.reproductor.src}
+              title={`Transmisión: ${t.titulo}`}
+              loading="eager"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allow="autoplay; fullscreen; picture-in-picture; encrypted-media; web-share"
+              allowfullscreen
+              data-transmision-marco
+            />
+          )}
+        </div>
+
+        <div class="tr-pie">
+          {/*
+            El punto rojo es el MISMO de la barra del player (`--rojo-aire`), y no
+            abre una segunda excepción al blanco y negro (`movimiento.md` §8): es la
+            misma luz de «al aire» diciendo lo mismo. Por eso solo va en EN VIVO; un
+            anuncio de algo que todavía no empieza no lleva luz de tally.
+          */}
+          <p class="beat-label tr-fase">
+            <span class="tr-si-envivo">
+              <span
+                class="tr-punto h-[7px] w-[7px] flex-none rounded-pill bg-[var(--rojo-aire)] motion-safe:animate-pulse"
+                aria-hidden="true"
+              />
+              En vivo
+            </span>
+            <span class="tr-si-proxima">
+              Próximamente
+              {fecha && t.inicio && (
+                <>
+                  <span aria-hidden="true">·</span>
+                  <time datetime={t.inicio}>{fecha}</time>
+                </>
+              )}
+            </span>
+          </p>
+          {t.descripcion && <p class="tr-bajada">{t.descripcion}</p>}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  /*
+    La SECCIÓN va a todo el ancho y es la que pinta el color de fondo del CMS; sin
+    color, `transparent` y se ve el fondo del sitio. El contenido va en `.tr-caja`,
+    con el mismo tope que el resto de la portada (`--grid-max`) y su relleno
+    lateral: la cabecera de Xibalba se subió a 1240px, que es justo ese tope.
+
+    Relleno SIMÉTRICO: con color, la banda se lee como un bloque cerrado, y una
+    banda con más aire de un lado parece cortada.
+  */
+  .tr {
+    background: var(--tr-fondo, transparent);
+  }
+  .tr-caja {
+    max-width: var(--grid-max);
+    margin-inline: auto;
+    padding: 32px 24px;
+  }
+
+  /*
+    La tinta sobre el color: la que dé más contraste, medida en el servidor
+    (`fondoDe` en `src/lib/transmision.ts`). TODO el texto va en ella, también lo
+    que sobre el fondo del sitio va en gris: un gris sobre un color vivo no llega
+    al 4.5:1, así que lo secundario se distingue por el PESO, no por el tono.
+  */
+  .tr[data-tinta='claro'] {
+    --tr-tinta: var(--mist-0);
+  }
+  .tr[data-tinta='oscuro'] {
+    --tr-tinta: var(--noche-0);
+  }
+  .tr[data-tinta] .tr-titulo,
+  .tr[data-tinta] .tr-fase,
+  .tr[data-tinta] .tr-si-envivo,
+  .tr[data-tinta] .tr-bajada {
+    color: var(--tr-tinta);
+  }
+  /*
+    El punto de «al aire» sigue ROJO —es la convención, no decoración—, pero sobre
+    un color elegido por el editor puede desaparecer: rojo sobre el rosa de Xibalba
+    al 50% (`#780C43`) da 2.2:1, por debajo del 3:1 de un indicador. Un filete de
+    la tinta alrededor lo separa de cualquier fondo sin cambiarle el color.
+  */
+  .tr[data-tinta] .tr-punto {
+    box-shadow: 0 0 0 1.5px var(--tr-tinta);
+  }
+
+  .tr-cabecera {
+    margin: 0 0 16px;
+  }
+  /*
+    A todo lo ancho y en su proporción. En pantallas angostas una tira de 1240×100
+    quedaría de 28px de alto —ilegible—, así que ahí NO se encoge más: se queda en
+    `min-height` y se RECORTA por los lados, conservando el punto focal que se marcó
+    en el CMS. Es lo que promete la ayuda del campo: «lo importante debe ir al
+    centro». Y un tope arriba, por si alguien sube una foto en vez de una tira.
+  */
+  .tr-cabecera img {
+    width: 100%;
+    height: auto;
+    min-height: 44px;
+    max-height: 360px;
+    object-fit: cover;
+  }
+
+  .tr-titulo {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--mist-1);
+    margin: 0 0 16px;
+    text-wrap: balance;
+  }
+
+  /*
+    El cuadro va al 100% del contenedor, del mismo ancho que la cabecera, para que
+    el bloque se lea parejo (Danira, 2026-11-13). Antes llevaba un tope de alto
+    —72% de la ventana— que en pantallas bajas lo dejaba más angosto que la
+    cabecera, y se veían dos anchos distintos uno encima del otro.
+
+    La proporción la manda `--tr-prop` (ancho/alto). La ÚNICA excepción es un
+    video VERTICAL: a 1192px de ancho mediría más de 2,000 de alto. Ese sí se acota
+    al 80% de la ventana y se centra; con un vertical, el ancho parejo ya no es
+    posible de todas formas.
+  */
+  .tr-marco {
+    position: relative;
+    width: 100%;
+    aspect-ratio: var(--tr-prop);
+    background: #000;
+  }
+  .tr-marco[data-vertical] {
+    max-width: calc(80svh * var(--tr-prop));
+    margin-inline: auto;
+  }
+  .tr-marco iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .tr-pie {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    gap: 6px 16px;
+    margin-top: 14px;
+    text-align: center;
+  }
+  .tr-fase {
+    margin: 0;
+    color: var(--text-body);
+  }
+  .tr-fase > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tr-si-envivo {
+    color: var(--mist-0);
+    font-weight: 700;
+  }
+  /* Los dos rótulos llegan en el HTML; se ve el de la fase. Ver el encabezado. */
+  .tr[data-estado='envivo'] .tr-si-proxima,
+  .tr[data-estado='proxima'] .tr-si-envivo {
+    display: none;
+  }
+  .tr-bajada {
+    font: var(--type-body);
+    color: var(--text-muted);
+    margin: 0;
+    max-width: 60ch;
+    text-wrap: pretty;
+  }
+
+  @media (max-width: 899px) {
+    .tr-caja {
+      padding: 24px 16px;
+    }
+    .tr-cabecera {
+      margin-bottom: 12px;
+    }
+    .tr-titulo {
+      font-size: 22px;
+    }
+  }
+</style>

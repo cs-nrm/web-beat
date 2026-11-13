@@ -21,6 +21,12 @@ interface:
       el sitio tiene UNA forma de pastilla de navegación y esa medida cambia en
       los dos a la vez. Es SERVIDOR, no JavaScript
     - `src/components/inicio/` y el resto de `src/components/` — los bloques.
+      `inicio/Transmision.astro` (2026-11-13) solo existe con un evento vigente;
+      su `colorFondo` pinta la banda a todo el ancho al 50% de opacidad, y el
+      texto va en la tinta (clara u oscura) de más contraste medido contra el
+      color ya mezclado;
+      el punto rojo de EN VIVO es el mismo `--rojo-aire` de la barra, no una
+      segunda excepción al blanco y negro.
       En `AudioNota.astro` el marcado y el CSS son tuyos y el COMPORTAMIENTO es
       de streaming (`src/scripts/audio-nota.ts`); los `data-audio-*` son el
       contrato entre los dos y no se renombran sin avisar

@@ -16,11 +16,21 @@
  */
 import { ga4 } from './analitica';
 
+/**
+ * De DÓNDE salió lo que GAM contestó, que es lo que separa una campaña cargada en
+ * Ad Manager del AdSense que GAM mete de relleno. Ver `esLineItem()`.
+ */
+interface OrigenAnuncio {
+  isBackfill?: boolean;
+  lineItemId: number | null;
+}
 interface Slot {
   getSlotElementId(): string;
+  /** `null` mientras no haya respuesta, o si vino vacía. */
+  getResponseInformation(): OrigenAnuncio | null;
 }
-/** Lo único que nos interesa de `slotRenderEnded`: quién y si vino vacío. */
-interface EventoRender {
+/** Lo que nos interesa de `slotRenderEnded`: quién, si vino vacío y de dónde. */
+interface EventoRender extends OrigenAnuncio {
   slot: Slot;
   isEmpty: boolean;
 }
@@ -28,6 +38,7 @@ interface PubAds {
   refresh(slots?: Slot[]): void;
   disableInitialLoad(): void;
   addEventListener(evento: 'slotRenderEnded', cb: (e: EventoRender) => void): void;
+  addEventListener(evento: 'slotResponseReceived', cb: (e: { slot: Slot }) => void): void;
 }
 interface SlotEnConstruccion extends Slot {
   defineSizeMapping(m: unknown): SlotEnConstruccion;
@@ -91,6 +102,30 @@ let temporizador: ReturnType<typeof setTimeout> | undefined;
 const atendidos = new Set<string>();
 
 /**
+ * Los huecos de ESTA vista que solo aceptan un line item de Ad Manager
+ * (`data-sin-backfill`, la prop `sinBackfill` de `Anuncio.astro`). Hoy, solo la
+ * portada del Inicio.
+ *
+ * Vive en el módulo por la misma razón que `atendidos`: lo leen los oyentes de
+ * GPT, que se registran una sola vez. Se rehace al empezar cada vista.
+ */
+const sinBackfill = new Set<string>();
+
+/**
+ * ¿Lo que contestó GAM es una campaña CARGADA en Ad Manager?
+ *
+ * El backfill —AdSense / Ad Exchange por la asignación dinámica— llega con
+ * `isBackfill: true` y sin `lineItemId`. Medido en el sitio el 2026-11-13: la
+ * portada del Inicio traía eso, y el box del mismo Inicio un line item con su id.
+ *
+ * Se piden las DOS señales y no una: si Google dejara de mandar `isBackfill` (es
+ * opcional en su tipo), el `lineItemId` nulo sigue dejando fuera el relleno.
+ */
+function esLineItem(origen: OrigenAnuncio | null): boolean {
+  return !!origen && !origen.isBackfill && origen.lineItemId != null;
+}
+
+/**
  * El oyente de `slotRenderEnded` se registra UNA vez por contexto de JavaScript,
  * no por vista.
  *
@@ -122,7 +157,7 @@ function marcoDe(id: string): HTMLElement | null {
  * un `data-vacio` sobreviviera el hueco quedaría escondido con un creativo dentro
  * — servido, facturado y sin que nadie lo vea.
  *
- * Y es lo ÚNICO que abre un marco con `naceCerrado` (la portada del Inicio), que
+ * Y es lo ÚNICO que abre un marco con `sinBackfill` (la portada del Inicio), que
  * llega del servidor ya con `data-vacio`. Ver la prop en `Anuncio.astro`.
  */
 function marcar(id: string, vacio: boolean): void {
@@ -274,9 +309,11 @@ export function iniciarAnuncios(): void {
     // (`ad-inicio-leader` está en cada visita al Inicio) y un id que quedara marcado
     // daría por atendido un hueco del que todavía no se sabe nada.
     atendidos.clear();
+    sinBackfill.clear();
 
     const huecos = Array.from(document.querySelectorAll<HTMLElement>('[data-anuncio]'));
     if (!huecos.length) return;
+    for (const hueco of huecos) if (hueco.hasAttribute('data-sin-backfill')) sinBackfill.add(hueco.id);
 
     for (const hueco of huecos) {
       const ruta = rutaUnidad(hueco.dataset.unidad);
@@ -346,8 +383,46 @@ export function iniciarAnuncios(): void {
       gt.pubads().addEventListener('slotRenderEnded', (e) => {
         const id = e.slot.getSlotElementId();
         atendidos.add(id);
-        marcar(id, e.isEmpty);
-        avisar(id, e.isEmpty);
+        /*
+          Un backfill en un hueco `sinBackfill` no debería llegar hasta aquí: lo
+          descarta el oyente de abajo antes de pintarse. Esto es el seguro por si
+          algún día GPT pinta aunque el slot se haya destruido — el marco no se
+          abre y el lector no ve el AdSense.
+        */
+        const vacio = e.isEmpty || (sinBackfill.has(id) && !esLineItem(e));
+        marcar(id, vacio);
+        avisar(id, vacio);
+      });
+
+      /*
+        El backfill de un hueco `sinBackfill` se descarta AQUÍ, al llegar la
+        respuesta y ANTES de pintarse: destruir el slot en este evento hace que GPT
+        no llegue a pintar el creativo. Medido en el build servido el 2026-11-13 con
+        la red de prueba de Google: el slot destruido aquí se quedó sin iframe, sin
+        `slotRenderEnded` y sin `slotOnload`; el de control, pedido en la misma
+        tanda, se pintó y llegó a `impressionViewable`.
+
+        Por qué no basta con dejar el marco cerrado: pintado dentro de un
+        `display: none`, el AdSense es una impresión que Google cuenta y que nadie
+        ve, y sus políticas prohíben los anuncios ocultos. Lo que se arriesga es la
+        cuenta del sitio, no un hueco.
+
+        Y se marca `atendidos` antes de cerrar: GAM ya contestó, y lo que contestó
+        no se va a pintar. El `avisar` es para que quien escuche los renders se
+        entere igual de que este hueco quedó vacío.
+
+        Una respuesta VACÍA también entra aquí —no trae `lineItemId`— y se destruye
+        igual. Da lo mismo: no había nada que pintar, y el motor no reusa slots
+        (en cada vista los destruye y los vuelve a definir).
+      */
+      gt.pubads().addEventListener('slotResponseReceived', (e) => {
+        const id = e.slot.getSlotElementId();
+        if (!sinBackfill.has(id) || esLineItem(e.slot.getResponseInformation())) return;
+        atendidos.add(id);
+        gt.destroySlots([e.slot]);
+        definidos = definidos.filter((s) => s !== e.slot);
+        marcar(id, true);
+        avisar(id, true);
       });
     }
 

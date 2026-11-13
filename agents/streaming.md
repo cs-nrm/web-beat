@@ -42,6 +42,7 @@ perder una tarde y luego hace dudar del resto de la documentación.
 | `src/scripts/pista.ts` | Las pistas a demanda de Bonus Beat, en la MISMA barra. Un `<audio>` nativo, no Plyr |
 | `src/scripts/senal.ts` | Que la parrilla de `/programacion` avance sola, sin pedirle nada al servidor |
 | `src/scripts/video.ts` | El visor de las cápsulas (Plyr a demanda). Entra aquí por el árbitro de audio |
+| `src/scripts/transmision.ts` | La transmisión especial del Inicio: su reloj (PRÓXIMAMENTE → EN VIVO → fuera) y su lugar en el árbitro |
 | `src/scripts/audio-nota.ts` | El audio principal de una nota —Microambiente—, en la PÁGINA y no en la barra. Un `<audio>` nativo |
 | `src/components/Cabecera.astro` | **Solo los `data-*` y `#td_container` / `#td-telon`.** El marcado y el CSS son de `agents/frontend.md` |
 | `src/lib/cms/estacion.ts` | De donde sale `tritonMount` |
@@ -282,6 +283,14 @@ player paraba el radio al abrir un video, **pero no al revés**.
   sonar. Con un embed pueden acabar sonando la radio y el audio a la vez, que es
   justo lo que este archivo existe para impedir. Por eso `fuenteDeAudio()` prefiere
   el ARCHIVO cuando están capturados los dos (`src/lib/audio.ts`).
+- **La transmisión del Inicio SÍ entra al árbitro, aunque sea un embed**
+  (2026-11-13, `src/scripts/transmision.ts`, id `transmision`). No se le pregunta
+  al iframe: al pulsar DENTRO de él la ventana pierde el foco y `activeElement` pasa
+  a ser el iframe, y ese gesto reclama el canal. Al revés, si luego suena el radio,
+  el iframe se RECARGA, que es la única forma de parar un reproductor ajeno — en un
+  directo no hay posición que perder. Probado: reclamar calla el radio, y la pausa
+  del árbitro dispara un `load` nuevo del iframe. El truco del foco serviría
+  también para los embeds de `noticias.audio`; ahí no se ha puesto.
 
 ### La barra tiene DOS modos, y no comparten estado
 
@@ -345,8 +354,9 @@ funciona donde no está el problema no sirve de nada.**
   historial.
 - **El `<head>`** — de `agents/metadata.md`.
 - **Diseñar `/en-vivo`.** Es mínima a propósito: su pantalla no está en el lienzo v14,
-  y `transmisiones` y `bitacora` están vacías en producción. Inventarle un diseño es
-  una decisión de Carlos, no una traducción.
+  y `bitacora` está vacía en producción. Inventarle un diseño es una decisión de
+  Carlos, no una traducción. Las `transmisiones` ya se pintan, pero en el INICIO
+  (ver `agents/content.md`), no aquí.
 - **Cambiar el mount o la configuración de la estación en Triton.** Eso vive en el
   panel de Triton y en el CMS, no aquí.
 

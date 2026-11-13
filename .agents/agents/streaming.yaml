@@ -18,7 +18,9 @@ interface:
     - `src/scripts/audio.ts` — el ÁRBITRO: solo una fuente suena a la vez.
       Un `<audio>` que sale del DOM SIGUE SONANDO: por eso `audio-nota.ts` se
       engancha a `astro:before-swap`. Y un EMBED de plataforma no se puede pausar
-      desde fuera — con iframe pueden sonar la radio y el audio a la vez
+      desde fuera — con iframe pueden sonar la radio y el audio a la vez. La
+      excepción es la transmisión del Inicio (`src/scripts/transmision.ts`):
+      reclama por el FOCO (pulsar dentro del iframe) y se para RECARGANDO el iframe
     - `src/scripts/pista.ts` — las pistas de Bonus Beat, en la MISMA barra
     - `src/scripts/senal.ts` — que «HOY EN LA SEÑAL» avance solo, sin pedir nada
     - `src/scripts/video.ts` — el visor de cápsulas (Plyr a demanda); entra por el

@@ -888,6 +888,7 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
       import { prepararCarrusel } from '@/scripts/carrusel';
       import { prepararGaleria } from '@/scripts/galeria';
       import { prepararFormulario } from '@/scripts/formulario';
+      import { prepararTransmision } from '@/scripts/transmision';
       prepararAnuncios();
       prepararEscritura();
       prepararRevelado();
@@ -909,6 +910,9 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
       // formulario en la página no hacen nada.
       prepararGaleria();
       prepararFormulario();
+      // La transmisión especial del Inicio: su reloj y su lugar en el árbitro de
+      // audio. Sin transmisión en la página no hace nada.
+      prepararTransmision();
       // Solo CABLEA los visores; Plyr (110 KB) no se baja hasta que alguien
       // pide un video.
       prepararVideo();

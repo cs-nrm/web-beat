@@ -89,4 +89,10 @@ export const FUENTES = {
   podcast: 'podcast',
   /** Una pista a demanda sonando en la barra: Bonus Beat y lo que venga después. */
   pista: 'pista',
+  /**
+   * El reproductor de la transmisión especial del Inicio. Es un iframe de otro
+   * dominio: se entera de que empezó por el FOCO y se para recargándolo — ver
+   * `transmision.ts`.
+   */
+  transmision: 'transmision',
 } as const;

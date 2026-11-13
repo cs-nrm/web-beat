@@ -48,6 +48,7 @@ perder una tarde y luego hace dudar del resto de la documentación.
 
 | Archivo | Qué le toca |
 |---|---|
+| `src/components/inicio/Transmision.astro` | La transmisión especial, entre el menú y el mosaico. Solo existe con un evento vigente: cabecera (dentro del `h2`, recortada por los lados en móvil) + reproductor al 100% del contenedor, del mismo ancho que la cabecera, en la proporción que traiga el código de inserción (solo un video vertical se acota al 80% del alto de la ventana). El `colorFondo` del CMS pinta la banda a TODO el ancho, al 50% de opacidad (el contenido sigue en `.tr-caja`, con tope), y el texto va en la tinta de más contraste contra el color ya mezclado |
 | `src/components/inicio/Mosaico.astro` | La portada de Beat Scanner |
 | `src/components/inicio/PilaScanner.astro` | La pila de Editorial |
 | `src/components/inicio/Fenomeno.astro` | El bloque del Fenómeno Residente, con su visor de cápsulas |

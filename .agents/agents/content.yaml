@@ -42,8 +42,16 @@ interface:
       rango CERRADO (`TOPE_PAGINA`), como el `PAGINA_MAX` de `feeds.ts`
     - que todo DEGRADE: `null` o `[]` en el catch, y el componente decide no
       pintarse. El Inicio se acorta; no enseña un encabezado con nada debajo. Hay
-      colecciones hoy VACÍAS en producción (`programas`, `bitacora`,
-      `transmisiones`, `paginas`), así que esos caminos son lo que se ve ahora
+      colecciones hoy VACÍAS en producción (`programas`, `bitacora`, `paginas`),
+      así que esos caminos son lo que se ve ahora
+    - `transmisiones` (sección de eventos del Inicio, 2026-11-13): la consulta
+      filtra solo `estado != fuera` y la hora se decide en memoria
+      (`src/lib/transmision.ts`). «En vivo ahora» = al aire ya; «Programar» =
+      PRÓXIMAMENTE hasta `fecha` y al aire SOLA a esa hora (al revés de lo que
+      dice la ayuda del CMS, copiada de Enfoque); `despublicarEn` es el fin, y sin
+      él NO hay tope de horas: la apaga la redacción. Sin reproductor no hay
+      sección. El tipo va a mano (`TransmisionCms`), más nuevo
+      que el lock
     - una ruta por COLECCIÓN, no por sección: la nota va en `/noticias/<slug>`
       porque `noticias.categorias` es `hasMany` sin categoría primaria, y derivar
       el path de `categorias[0]` haría que reordenar un array cambiara una URL

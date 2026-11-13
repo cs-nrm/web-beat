@@ -40,6 +40,7 @@ perder una tarde y luego hace dudar del resto de la documentación.
 | `src/lib/cms/listas.ts` | Bonus Beat y cualquier tipo de lista que la estación cree |
 | `src/lib/cms/especiales.ts` | El Fenómeno Residente: el especial vigente y sus piezas polimórficas |
 | `src/lib/cms/eventos.ts` | La Agenda, con su corte «desde hoy» redondeado al día |
+| `src/lib/cms/transmisiones.ts` | Las transmisiones que pueden estar al aire (`estado != fuera`). El reloj NO va en la consulta |
 | `src/lib/cms/programacion.ts` | La parrilla, resuelta contra el reloj **en el servidor** |
 | `src/lib/cms/aire.ts` | La bitácora del playout: «lo que sonó» |
 | `src/lib/cms/estacion.ts` | Los datos de marca, memorizados por proceso |
@@ -47,6 +48,7 @@ perder una tarde y luego hace dudar del resto de la documentación.
 | `src/lib/nota.ts` | Presentación derivada de una nota: firma, categoría, fecha, sección, enlaces de compartir |
 | `src/lib/video.ts` | `noticias.video` a algo que el reproductor entiende (id de YouTube ya validado) |
 | `src/lib/audio.ts` | `noticias.audio` a algo que se puede pintar: el mp3, o el iframe de una plataforma de la lista blanca |
+| `src/lib/transmision.ts` | Qué transmisión pinta el Inicio, en qué fase (contra el reloj) y con qué reproductor |
 | `src/types/payload.ts` | Los tipos generados del CMS. **No se editan a mano** |
 | `payload-types.lock.json` y `scripts/sync-payload-types.mjs` | El commit del CMS al que están fijados esos tipos, y cómo se re-sincronizan |
 | `src/config/site.ts` | El contrato de rutas: `rutaNota`, `rutaEspecial`, `rutaEvento`, `rutaLista`, `rutaPrograma`, y `SEGMENTOS_RESERVADOS` |
@@ -107,8 +109,9 @@ encabezado con nada debajo. `Base.astro` cae a un objeto de marca mínimo si
 
 Es la regla de la casa y viene de `web-enfoque`, que responde 200 con cero notas
 cuando su CMS no está. Hay colecciones **hoy vacías en producción** —`programas`,
-`bitacora`, `transmisiones`, `paginas`— así que estos caminos no son teóricos: son
-lo que se ve en pantalla ahora mismo.
+`bitacora`, `paginas`— así que estos caminos no son teóricos: son lo que se ve en
+pantalla ahora mismo. Y `transmisiones` está vacía casi siempre aunque tenga filas:
+solo cuenta mientras un evento está al aire (ver abajo).
 
 ---
 
@@ -160,6 +163,52 @@ que no haya CADENA de redirecciones. De esos 301 dependen la migaja de cada nota
 publicada, el sitemap que emite el CMS y lo que la estación haya compartido.
 
 ---
+
+## `transmisiones`: la sección de eventos especiales del Inicio (2026-11-13)
+
+Entre el menú y el mosaico, **solo cuando hay una transmisión vigente**; si no, no
+existe. La consulta (`src/lib/cms/transmisiones.ts`) filtra lo único CONSTANTE
+—`estado != fuera`— y la hora se decide en memoria (`src/lib/transmision.ts`), por la
+regla 2: un `where` con «ahora» estrenaría entrada de caché en cada visita.
+
+El radio «¿Cuándo sale al aire?» del CMS, como lo lee este sitio:
+
+| Estado | En el Inicio |
+|---|---|
+| En vivo ahora | Al aire YA, sin mirar `fecha` (es el interruptor del editor) |
+| Programar transmisión | Antes de `fecha`: «PRÓXIMAMENTE» y la hora. A la hora entra al aire SOLA |
+| Fuera de aire | No llega: la consulta la filtra |
+
+`despublicarEn` es el fin en los dos primeros, y se mira aquí aunque el barrido del
+CMS aún no la haya pasado a «Fuera de aire». **Sin fin capturado no hay tope**: la
+transmisión sigue en la portada hasta que la redacción la apague (decisión de
+Danira, 2026-11-13). Hubo un tope de 12 h para la programada y se quitó.
+
+**⚠️ El texto de ayuda del CMS dice lo contrario** —que una programada «no sale al
+aire hasta que alguien la ponga en vivo»—: viene copiado de Enfoque. Aquí sí sale
+sola, porque así se capturó el primer caso real («El Beat de Xibalba», con inicio y
+fin y nadie que la fuera a prender a mano).
+
+Y tres cosas que no se ven en el tipo:
+
+- **El tipo se declara a mano** (`TransmisionCms`): `estado`, `imagenCabecera` y
+  `despublicarEn` son más nuevos que el lock de los tipos. Como `Banner`.
+- **«URL del iframe» trae el CÓDIGO de inserción entero**, no una URL: Vimeo da un
+  `<div style="padding:56.25% …"><iframe src=…>`. Se saca el `src`, se
+  RECONSTRUYE (Vimeo evento/video, YouTube por `youtube-nocookie`; cualquier otro
+  https va con `sandbox`, como «Otro» en `Embed.astro`) y de ese mismo código se
+  lee la PROPORCIÓN del cuadro. «Número de evento» es el de un evento de Vimeo.
+- **Sin reproductor no hay sección**: una cabecera con «EN VIVO» y nada que ver es
+  un estado muerto en lo alto de la portada.
+- **`colorFondo` va a un `style`, así que se valida otra vez** aunque el CMS ya lo
+  normalice: solo `#RGB`/`#RRGGBB` (`fondoDe`), y al `style` llega armado con
+  números (`rgb(R G B / 0.5)`). Se pinta al **50% de opacidad por omisión**
+  (`OPACIDAD_FONDO`, Danira 2026-11-13), y la tinta del texto —clara u oscura— se
+  MIDE contra el color que se VE, ya mezclado con el lienzo: el `#EA1180` de
+  Xibalba pleno pedía texto oscuro, y al 50% (`#780C43`) el blanco da 10.9:1.
+
+Vista previa fuera del sitio real: `/?transmision=envivo` o `/?transmision=proxima`
+toma la última capturada, aunque ya haya terminado.
 
 ## `noticias.audio`: un campo que estaba y no se leía
 

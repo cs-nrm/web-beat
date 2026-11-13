@@ -286,23 +286,45 @@ bloqueador de anuncios o un `gpt.js` que no bajó son el modo de falla más com�
 sin ese camino la banda se queda abierta para siempre — el patrón de «estado muerto
 sin salida» que movimiento.md §3 prohíbe.
 
-#### La excepción: la portada del Inicio NACE CERRADA (2026-11-11)
+#### La excepción: la portada del Inicio, SOLO line items de GAM (2026-11-11/13)
 
-Encargo directo: **sin anuncio de Ad Manager, la sección no existe; con anuncio,
-sale entera.** La banda negra de 310px con «PUBLICIDAD» encabezaba el sitio hasta
-3.5 s y se cerraba sola cuando GAM contestaba vacío, que es lo normal sin demanda.
+Encargo directo: **en la portada no sale nada que no sea una campaña cargada en Ad
+Manager. Sin ella, la sección no existe; con ella, sale entera.** Llegó en dos
+tiempos, y el segundo corrige al primero:
 
-- Es la prop `naceCerrado` de `Anuncio.astro`, y solo la lleva `inicio-portada`.
-  Los demás huecos siguen reservando.
-- El marco sale del SERVIDOR con `data-vacio`, la misma marca que pone el motor a
-  un hueco sin relleno: `anuncios.ts` no cambió. GPT pide y pinta el slot aunque
-  el marco esté en `display: none`, y `marcar()` lo abre al llegar
-  `slotRenderEnded` con creativo, también si llega después de `PLAZO_VACIO`.
+1. **11 nov** — «si no viene de Ad Manager, que no exista». El marco pasó a nacer
+   cerrado y a abrirse con cualquier creativo que trajera GAM.
+2. **13 nov** — «sigue saliendo AdSense». Medido en el sitio con
+   `getResponseInformation()`: la portada traía `isBackfill: true`,
+   `lineItemId: null` y `creativeId: null` —AdSense entrando por la asignación
+   dinámica de GAM—, y el box del mismo Inicio un line item con su id. Para el
+   sitio, los dos «venían de Ad Manager». **AdSense por GAM no cuenta como «de Ad
+   Manager»: la regla es el line item.**
+
+Cómo está hecho:
+
+- Es la prop `sinBackfill` de `Anuncio.astro`, y solo la lleva `inicio-portada`.
+  Los demás huecos siguen reservando y siguen aceptando AdSense.
+- El marco sale del SERVIDOR con `data-vacio`, y el hueco con `data-sin-backfill`.
+  Solo `marcar()` lo abre, y solo con un line item (`esLineItem()` en
+  `anuncios.ts`: sin `isBackfill` **y** con `lineItemId`), también si llega
+  después de `PLAZO_VACIO`.
+- **El backfill se descarta ANTES de pintarse**: en `slotResponseReceived` se
+  destruye el slot y GPT ya no pinta el creativo. Medido en el build servido con
+  la red de prueba de Google (`/6355419/Travel/Europe`): el slot destruido ahí se
+  quedó sin iframe, sin `slotRenderEnded` y sin `slotOnload`; el de control se
+  pintó. **No basta con dejar el marco cerrado**: un AdSense pintado dentro de un
+  `display: none` es una impresión que Google cuenta y que nadie ve, y las
+  políticas de AdSense / Ad Exchange prohíben los anuncios ocultos.
+- **Lo que el código NO puede hacer es que GAM deje de elegir el AdSense.** El
+  pedido sigue saliendo y se queda sin impresión. Para apagarlo en origen hace
+  falta un bloque hijo para la portada (`unidad`) y quitarle el AdSense / Ad
+  Exchange en Ad Manager. **Sobre `Beat` apagaría el AdSense de todo el sitio.**
 - Solo afecta al camino de GAM. Una campaña vendida del CMS se sabe en el
   servidor y se pinta abierta como siempre.
 - **El precio es el CLS** que la regla de arriba evita: cuando el creativo llega
   (~2 s), todo lo de abajo baja lo que mide la banda. Antes se pagaba igual pero
-  al cerrarse sin relleno; ahora solo cuando hay anuncio.
+  al cerrarse sin relleno; ahora solo cuando hay campaña.
 
 ### La regla de GPT que no se negocia
 

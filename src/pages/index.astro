@@ -10,6 +10,11 @@
  *   2. qué se cuenta → el mosaico de portada, el Fenómeno, la pila de Editorial
  *   3. qué viene  → Bonus Beat y la Agenda
  *
+ * Y desde el 2026-11-13, **una transmisión especial abre la página** cuando la
+ * hay: entre el menú y el mosaico. No es un cuarto punto: es el «qué suena» de
+ * un día de evento, y por eso va antes que todo lo demás. Su estado normal es no
+ * existir (ver `Transmision.astro`).
+ *
  * Y desde el 2026-09-15, **Microambiente abre el 2 de forma PROVISIONAL**: se
  * subió ahí mientras la portada tiene huecos, y su sitio es entre la pila y Bonus
  * Beat. El porqué completo está donde se pinta, no aquí.
@@ -46,11 +51,14 @@ import PilaScanner from '@/components/inicio/PilaScanner.astro';
 import Microambiente from '@/components/inicio/Microambiente.astro';
 import BonusBeat from '@/components/inicio/BonusBeat.astro';
 import Agenda from '@/components/inicio/Agenda.astro';
+import Transmision from '@/components/inicio/Transmision.astro';
 
 import { obtenerScanner, filtroDeCategoria } from '@/lib/cms/noticias';
 import { obtenerEspecialVigente, obtenerEspeciales } from '@/lib/cms/especiales';
 import { obtenerTiposDeLista, obtenerListaReciente } from '@/lib/cms/listas';
 import { obtenerAgenda } from '@/lib/cms/eventos';
+import { obtenerTransmisiones } from '@/lib/cms/transmisiones';
+import { transmisionDelInicio, vistaPrevia, type FaseTransmision } from '@/lib/transmision';
 // El alias evita el choque con el COMPONENTE `Takeover` de arriba: el tipo y el
 // componente se llaman igual, y sin él TypeScript declara identificador duplicado.
 import {
@@ -73,7 +81,8 @@ import { SECCIONES_EDITORIALES } from '@/config/navegacion';
   listas, que necesitan saber qué tipos existen y van encadenadas aparte —ver
   `listasDelInicio`—, pero dentro del mismo `Promise.all`. Eran nueve, bajaron a siete
   —la parrilla de hoy y la bitácora se fueron con el panel de la señal— y vuelven a
-  ocho con Microambiente. Secuenciales sumarían sus latencias; en paralelo el Inicio
+  ocho con Microambiente. Luego entraron las dos de publicidad, y el 2026-11-13 las
+  transmisiones: diez. Secuenciales sumarían sus latencias; en paralelo el Inicio
   cuesta lo que la más lenta.
 
   Cada `obtener*` ya trae su propio `catch` que degrada a vacío, así que un
@@ -167,6 +176,7 @@ const [
   agenda,
   banners,
   takeover,
+  transmisiones,
 ] =
   await Promise.all([
     filtroScanner ? obtenerScanner(6, filtroScanner, filtroMicroambiente) : Promise.resolve(VACIO),
@@ -183,6 +193,8 @@ const [
     obtenerAgenda(4),
     obtenerBanners('portada'),
     obtenerTakeover(),
+    // Ya degrada a `[]` sola: con el CMS caído, la portada sale sin la sección.
+    obtenerTransmisiones(),
   ]);
 
 /**
@@ -239,6 +251,28 @@ function vistaPreviaTakeover(url: URL): DatosTakeover | null {
 }
 
 const takeoverVisible = vistaPreviaTakeover(Astro.url) ?? takeover;
+
+/**
+ * Vista previa de la transmisión: `?transmision=envivo|proxima`.
+ *
+ * Por lo mismo que la del takeover, y con la MISMA guarda —fuera del sitio real
+ * no hace nada—: la sección solo existe mientras hay un evento al aire, que es casi
+ * nunca, y sin esto no habría forma de revisar un cambio de maqueta entre evento y
+ * evento. Toma la última transmisión capturada (aunque ya esté «Fuera de aire»)
+ * con su cabecera y su reproductor reales, y la pone en la fase pedida. Ver
+ * `vistaPrevia` en `src/lib/transmision.ts`.
+ *
+ * Es la única consulta del Inicio que corre DESPUÉS del `Promise.all`, y solo con
+ * el parámetro puesto: una visita normal no la paga.
+ */
+async function vistaPreviaTransmision(url: URL) {
+  if (!NOINDEX_SITIO && !noIndexarHost(url.hostname)) return null;
+  const fase = url.searchParams.get('transmision');
+  if (fase !== 'envivo' && fase !== 'proxima') return null;
+  return vistaPrevia(await obtenerTransmisiones({ todas: true }), fase as FaseTransmision);
+}
+
+const transmision = (await vistaPreviaTransmision(Astro.url)) ?? transmisionDelInicio(transmisiones);
 
 /*
   El reparto del mosaico. `obtenerScanner` devuelve la destacada y el resto en una
@@ -395,9 +429,11 @@ const BAJADAS = {
     CMS, tipo «Portada»): pueden ser varias a la vez y el hueco rota entre ellas
     por minuto. Si no hay ninguna llega vacío y el hueco se lo pide a Ad Manager.
 
-    `naceCerrado` (2026-11-11): con Ad Manager la franja NO se reserva. Llega
-    cerrada y solo se abre, entera, si GAM trae creativo; sin anuncio, la sección
-    no existe. Ver la prop en `Anuncio.astro`, que dice también lo que cuesta.
+    `sinBackfill` (2026-11-11/13): con Ad Manager la franja NO se reserva. Llega
+    cerrada y solo se abre, entera, con una campaña cargada en GAM (un line item);
+    el AdSense que GAM mete de relleno se descarta sin pintarse. Sin campaña, la
+    sección no existe. Ver la prop en `Anuncio.astro`, que dice también lo que
+    cuesta.
   */}
   {/*
     El intro va por el mismo slot que la portada, y por la misma razón: el `<slot />`
@@ -420,7 +456,7 @@ const BAJADAS = {
     formato="portada"
     nombre="inicio-portada"
     banners={banners}
-    naceCerrado
+    sinBackfill
     slot="sobre-cabecera"
   />
 
@@ -445,6 +481,14 @@ const BAJADAS = {
     controla no es el ancho total sino la PROPORCIÓN de sus columnas, para que el
     centro no se coma la pantalla (ver `Mosaico.astro`).
   */}
+  {/*
+    La TRANSMISIÓN especial, entre el menú y las noticias (2026-11-13). Va FUERA
+    del mosaico y antes que él porque, el día que hay evento, es lo primero que la
+    estación quiere que se vea. Sin transmisión vigente no emite nada y la portada
+    empieza en el mosaico, como siempre.
+  */}
+  <Transmision transmision={transmision} />
+
   <Mosaico portada={destacada} izquierda={izquierda} derecha={derecha} />
 
   <Marquee texto={LEMA} />

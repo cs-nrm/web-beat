@@ -29,10 +29,15 @@ interface:
     - que el marco se RESERVE y luego DESAPAREZCA si no hay relleno, por los DOS
       caminos: respuesta vacía de GAM y plazo agotado. Sin el segundo, un bloqueador
       deja la banda abierta para siempre. EXCEPCIÓN: la portada del Inicio
-      (`inicio-portada`) lleva `naceCerrado` desde el 2026-11-11: sale del
-      servidor con `data-vacio` y solo la abre `marcar()` si GAM trae creativo.
-      Sin anuncio de GAM la sección no existe; la venta directa del CMS se pinta
-      abierta como siempre
+      (`inicio-portada`) lleva `sinBackfill` (2026-11-11/13): sale del servidor
+      con `data-vacio` y solo la abre `marcar()` con un LINE ITEM de Ad Manager.
+      El AdSense que GAM mete de relleno (`isBackfill: true`, `lineItemId: null`)
+      NO cuenta como «de Ad Manager»: se descarta en `slotResponseReceived`
+      destruyendo el slot, ANTES de pintarse — un anuncio pintado oculto es una
+      impresión que nadie ve y va contra las políticas de AdSense. Sin campaña de
+      GAM la sección no existe; la venta directa del CMS se pinta abierta como
+      siempre. Apagar el AdSense en origen es de Ad Manager y pide un bloque hijo
+      para la portada: sobre `Beat` lo apagaría en todo el sitio
     - un solo corte de breakpoint, 900px, en el CSS y en el `sizeMapping` de GPT
     - confirmar que la medida existe en Ad Manager antes de dar por bueno un hueco
       vacío: un slot con medida no dada de alta nunca se llena y se ve igual que uno

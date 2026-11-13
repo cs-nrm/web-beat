@@ -25,9 +25,9 @@
  * falla más común deja la banda abierta para siempre, que es exactamente el
  * patrón de «estado muerto sin salida» de movimiento.md §3.
  *
- * La EXCEPCIÓN es la portada del Inicio, que desde el 2026-11-11 NACE CERRADA
- * (`naceCerrado`): no se reserva nada y solo se abre si GAM trae creativo. Ver la
- * prop.
+ * La EXCEPCIÓN es la portada del Inicio (`sinBackfill`, 2026-11-11/13): NACE
+ * CERRADA, no reserva nada y solo se abre con un line item de Ad Manager; el
+ * AdSense que GAM mete de relleno se descarta sin pintarse. Ver la prop.
  *
  * Los tamaños salen del LIENZO v13/v14, y NO coinciden con los del sitio
  * actual. Antes de lanzar, AdOps tiene que confirmar que estas medidas existen
@@ -77,20 +77,36 @@ interface Props {
    */
   banners?: BannerConEnlace[];
   /**
-   * El marco NACE CERRADO y solo se abre si Ad Manager trae creativo: sin anuncio
-   * de GAM, la sección no existe — ni banda, ni rótulo, ni alto reservado.
+   * Solo se pinta un LINE ITEM cargado en Ad Manager: el backfill —AdSense / Ad
+   * Exchange, lo que GAM mete solo cuando ninguna campaña suya compite— se descarta
+   * sin pintarse. Y el marco NACE CERRADO: sin campaña de GAM, la sección no
+   * existe — ni banda, ni rótulo, ni alto reservado. Con campaña, sale entera.
    *
-   * Es lo contrario de la regla general de este componente («se reserva y luego
-   * desaparece»), y es encargo directo para la portada del Inicio (2026-11-11):
-   * la banda negra de 310px con «PUBLICIDAD» encabezaba el sitio hasta 3.5 s y se
-   * cerraba sola en cuanto GAM contestaba vacío, que es lo normal sin demanda.
+   * Es encargo directo para la portada del Inicio, y llegó en dos tiempos:
    *
-   * Se sirve con `data-vacio` desde el SERVIDOR, que es la misma marca que pone
-   * `anuncios.ts` a un hueco sin relleno, así que el motor no necesita saber nada
-   * nuevo: GPT pide y pinta el slot aunque el marco esté en `display: none`, y
-   * `marcar()` le quita la marca al llegar `slotRenderEnded` con creativo —también
-   * si llega después de `PLAZO_VACIO`—. `encajar()` mide DESPUÉS de abrirlo, así
-   * que el ancho que lee es el de verdad.
+   *   1. **2026-11-11**, «si no viene de Ad Manager, que no exista»: el marco pasó
+   *      a nacer cerrado y a abrirse con cualquier creativo de GAM.
+   *   2. **2026-11-13**, «sigue saliendo AdSense»: medido en el sitio, la portada
+   *      traía `isBackfill: true` y `lineItemId: null` —AdSense entrando por la
+   *      asignación dinámica de GAM—, mientras el box del mismo Inicio traía un
+   *      line item de verdad. Para el sitio los dos «venían de Ad Manager»; para
+   *      quien lo encargó, solo el segundo. La regla buena es la del line item.
+   *
+   * El backfill se descarta en `slotResponseReceived`, ANTES de pintarse,
+   * destruyendo el slot (ver `anuncios.ts`). No basta con dejar el marco cerrado:
+   * un AdSense pintado dentro de un `display: none` es una impresión que Google
+   * cuenta y nadie ve, y las políticas de AdSense / Ad Exchange prohíben los
+   * anuncios ocultos — se arriesga la cuenta, no solo un hueco.
+   *
+   * Lo que NO hace: impedir que GAM elija el backfill. Eso solo se apaga en Ad
+   * Manager, y el pedido sigue saliendo y quedando sin impresión. Si se quiere
+   * apagar allá, el hueco necesita su propio bloque hijo (`unidad`): aplicado sobre
+   * `Beat`, el cambio apaga el AdSense de TODO el sitio.
+   *
+   * El marco sale del SERVIDOR con `data-vacio`, la misma marca que pone el motor
+   * a un hueco sin relleno, y solo lo abre `marcar()` con un line item —también si
+   * llega después de `PLAZO_VACIO`—. `encajar()` mide DESPUÉS de abrirlo, así que
+   * el ancho que lee es el de verdad.
    *
    * El precio es el CLS que la regla general evita: cuando el creativo llega (GAM
    * tarda ~2 s) todo lo de abajo baja lo que mide la banda. Antes se pagaba igual
@@ -99,7 +115,7 @@ interface Props {
    * Solo toca el camino de GAM. Una campaña vendida del CMS (`banners`) se sabe en
    * el servidor, así que se pinta abierta como siempre.
    */
-  naceCerrado?: boolean;
+  sinBackfill?: boolean;
   class?: string;
 }
 
@@ -108,7 +124,7 @@ const {
   nombre = formato,
   unidad,
   banners = [],
-  naceCerrado = false,
+  sinBackfill = false,
   class: clase,
 } = Astro.props;
 
@@ -314,8 +330,8 @@ if (creatividad && !NOINDEX_SITIO && !noIndexarHost(Astro.url.hostname)) {
   contarImpresion(creatividad.id);
 }
 
-/** Ver la prop `naceCerrado`: con venta directa no aplica, el anuncio ya está. */
-const cerradoDeOrigen = naceCerrado && !creatividad;
+/** Ver la prop `sinBackfill`: con venta directa no aplica, el anuncio ya está. */
+const cerradoDeOrigen = sinBackfill && !creatividad;
 ---
 
 <div
@@ -367,6 +383,7 @@ const cerradoDeOrigen = naceCerrado && !creatividad;
         class="anuncio-hueco"
         data-anuncio={formato}
         data-unidad={unidad}
+        data-sin-backfill={sinBackfill ? '' : undefined}
         data-tamanos={JSON.stringify(medidas.tamanos)}
         data-mapping={JSON.stringify(medidas.mapping)}
       />

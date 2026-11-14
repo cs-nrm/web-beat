@@ -27,8 +27,10 @@ la documentación.
 | `src/lib/cms/publicidad.ts` | La venta DIRECTA: campañas de la colección `publicidad`, su vigencia y el conteo de impresiones |
 | `src/pages/api/anuncio/[id].ts` | El proxy. `GET` cuenta el clic y redirige; `POST` cuenta la impresión del takeover |
 | `src/layouts/Base.astro` | La carga de `gpt.js` y el stub de `window.googletag` |
+| `src/components/SmartInline.astro` | El video flotante de Medios Federales (Smart). La excepción a GAM, ver abajo |
+| `src/scripts/smart.ts` | Su maintag: baja los scripts de Smart, pide, pinta y cierra |
 | `public/ads.txt` | Los sellers autorizados |
-| `.env` | `PUBLIC_GAM_NETWORK_ID`, `PUBLIC_GAM_AD_UNIT`, `PUBLICIDAD_TOKEN` |
+| `.env` | `PUBLIC_GAM_NETWORK_ID`, `PUBLIC_GAM_AD_UNIT`, `PUBLICIDAD_TOKEN`, `SMART_SITE_ID`, `SMART_PAGE_ID` |
 
 ### Los formatos, y sus medidas
 
@@ -564,6 +566,48 @@ Lo que hace falta cuando se retome, ya traducido a v2:
 Viralize era la red ANTERIOR de este mismo hueco y su script ya no está en el
 sitio, así que ese seller autoriza a alguien que ya no vende. Es una decisión de
 AdOps, no de código: no se toca sin confirmarlo, pero hay que confirmarlo.
+
+### Medios Federales (Smart AdServer): la excepción, del 2026-11-14
+
+**La única publicidad del sitio que NO entra por Ad Manager.** Medios Federales
+vende con su propio adserver (Smart AdServer / Equativ, red 4308) y su propio
+wrapper de Prebid, así que su demanda no se puede traer a GAM: lo entregan como un
+«maintag» para pegar en la página. Es la misma integración que ya corre en Oye,
+Stereo Cien y Sabrosita.
+
+- **Formato 111268, «Inline»**: un video in-read que flota abajo a la IZQUIERDA del
+  Inicio (la derecha es de los visores del lector). Solo en el Inicio, como en los
+  hermanos. Contenedor en `SmartInline.astro`, lógica en `smart.ts`.
+- **Los ids van por env** (`SMART_SITE_ID=794553`, `SMART_PAGE_ID=2249308`), de
+  EJECUCIÓN y sin valor por omisión, por la misma razón que el ad unit: un siteId
+  copiado de otra estación le acredita a ella las impresiones. **Sin las dos
+  variables el formato no existe** —ni contenedor ni scripts— y desde el sitio eso
+  se ve igual que «hoy no hay video». En la VM van en `/var/www/web-beat-v2/.env`.
+- **Los scripts de Smart solo se bajan en el Inicio**, la primera vez que aparece
+  el contenedor. Entrar por una nota no baja nada de Smart (medido).
+- **El fragmento que mandan no sirve tal cual**, y los cuatro sitios lo han traído
+  con los mismos defectos: `tagId: "inline"` contra un div `Inline` (los ids
+  distinguen mayúsculas), la rama de escritorio sin el `sas.cmd.push(function () {`
+  de apertura (no compila y tumba el bloque entero), el `target` sin codificar y un
+  `let dominio` que truena al re-ejecutarse. El detalle está en la cabecera de
+  `smart.ts`.
+- **El recuadro no puede nacer en `display: none`**: la plantilla mide el ancho del
+  hueco al pintar. Nace transparente, sin rótulo ni X y con `pointer-events: none`,
+  y se enciende cuando el hueco mide más de 20px (`ResizeObserver`). Contar hijos
+  no sirve: Smart mete sus `<script>` y un contenedor de 1px aunque no traiga video.
+- **La X vacía el hueco**, que es lo que corta el video, y lo marca en
+  `sessionStorage`: en esa sesión ya no se pide.
+
+**Cómo se prueba**: en el build servido, `performance.getEntriesByType('resource')`
+tiene que enseñar un `adapi.smartadserver.com/h/nshow` con `siteid=794553`,
+`fmtid=111268` y `tag=inline` por cada llegada al Inicio, y ninguno en una nota.
+Comprobado el 2026-11-14 con el flujo Inicio → nota → atrás: uno, cero y uno, y
+`smart.js` bajado una sola vez. En local Smart no trae video, así que el recuadro
+se queda transparente; el encendido y la X se probaron forzando `data-con-anuncio`.
+
+`ads.txt` ya traía 19 de las 21 líneas de su lista; se agregaron
+`smartadserver.com, 4308` y `mediosfederales.com, 794553, DIRECT`. La de
+`adyoulike.com, b4bf4fdd…` ya estaba, con su id de certificación.
 
 ### Y por qué el documento que había estaba MAL
 

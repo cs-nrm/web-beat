@@ -43,6 +43,7 @@ import Base from '@/layouts/Base.astro';
 import Intro from '@/components/Intro.astro';
 import Anuncio from '@/components/Anuncio.astro';
 import Takeover from '@/components/Takeover.astro';
+import SmartInline from '@/components/SmartInline.astro';
 import Mosaico from '@/components/inicio/Mosaico.astro';
 import Marquee from '@/components/inicio/Marquee.astro';
 import Fenomeno from '@/components/inicio/Fenomeno.astro';
@@ -654,6 +655,12 @@ const BAJADAS = {
     />
     <Agenda eventos={agenda} bajada={BAJADAS.agenda} />
   </div>
+  {/*
+    El video flotante de Medios Federales (Smart). Es `position: fixed` y va
+    DEBAJO de la cabecera en `z-index`, así que el slot de contenido le basta.
+    Solo en el Inicio, como en Oye, Stereo Cien y Sabrosita.
+  */}
+  <SmartInline />
 </Base>
 
 <style>

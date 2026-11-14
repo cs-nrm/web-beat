@@ -55,6 +55,9 @@ interface ImportMetaEnv {
   readonly CACHE_CMS_MS?: string;
   /** Escape hatch de indexación: `1` fuerza noindex, `0` fuerza indexar. */
   readonly SITIO_NOINDEX?: string;
+  /** Sitio y página de la estación en Smart AdServer (Medios Federales). Sin las dos, no hay formato Inline. */
+  readonly SMART_SITE_ID?: string;
+  readonly SMART_PAGE_ID?: string;
 }
 
 interface ImportMeta {

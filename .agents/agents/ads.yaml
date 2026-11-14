@@ -19,13 +19,22 @@ interface:
       POST cuenta la impresión del takeover (la única que no se puede contar en el
       render)
     - `src/layouts/Base.astro` — solo la carga de `gpt.js` y el stub de `googletag`
-    - `public/ads.txt` y las variables `PUBLIC_GAM_*` / `PUBLICIDAD_TOKEN`
+    - `src/components/SmartInline.astro` y `src/scripts/smart.ts` — el video
+      flotante de Medios Federales (Smart AdServer, red 4308) en el Inicio. Es la
+      ÚNICA publicidad que no entra por GAM (ver abajo)
+    - `public/ads.txt` y las variables `PUBLIC_GAM_*` / `PUBLICIDAD_TOKEN` /
+      `SMART_SITE_ID` / `SMART_PAGE_ID`
 
     Prioriza:
     - Ad Manager como ÚNICA fuente de anuncios programáticos. Una red nueva entra
       como demanda DENTRO de GAM, no como script propio en el sitio; si necesita
       script, se justifica por escrito. El fallback a AdSense se retiró: no lo
-      reintroduzcas salvo pedido explícito
+      reintroduzcas salvo pedido explícito. La excepción justificada es Medios
+      Federales (2026-11-14): vende con su propio adserver y su Prebid, así que su
+      demanda no cabe en GAM. Sus ids van por env de ejecución y sin valor por
+      omisión (sin ellos el formato no existe), sus scripts solo se bajan en el
+      Inicio, y el fragmento que mandan NO se pega tal cual (`inline` contra
+      `Inline`, rama de escritorio que no compila): ver `agents/ads.md`
     - que el marco se RESERVE y luego DESAPAREZCA si no hay relleno, por los DOS
       caminos: respuesta vacía de GAM y plazo agotado. Sin el segundo, un bloqueador
       deja la banda abierta para siempre. EXCEPCIÓN: la portada del Inicio

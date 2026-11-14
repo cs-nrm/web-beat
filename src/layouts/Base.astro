@@ -889,7 +889,11 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
       import { prepararGaleria } from '@/scripts/galeria';
       import { prepararFormulario } from '@/scripts/formulario';
       import { prepararTransmision } from '@/scripts/transmision';
+      import { prepararSmart } from '@/scripts/smart';
       prepararAnuncios();
+      // Medios Federales (Smart). Sin su contenedor en la página no hace nada,
+      // ni baja sus scripts. Ver `smart.ts`.
+      prepararSmart();
       prepararEscritura();
       prepararRevelado();
       prepararSenal();

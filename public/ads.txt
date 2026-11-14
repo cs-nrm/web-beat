@@ -539,3 +539,9 @@ yieldlab.net, 6378054, RESELLER
 pubmatic.com, 158858, RESELLER, 5d62403b186f2ace
 themediagrid.com, 6283VY, RESELLER, 35d5010d7789b49d
 aps.amazon.com, 5223, DIRECT
+
+# Medios Federales (Smart AdServer / Equativ, red 4308): formato Inline del Inicio.
+# De su lista de 21 lineas (14 nov 2026) solo faltaban estas dos. La de adyoulike
+# b4bf4fdd... ya esta arriba, con su id de certificacion.
+smartadserver.com, 4308, RESELLER, 060d053dcf45cbf3
+mediosfederales.com, 794553, DIRECT

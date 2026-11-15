@@ -144,21 +144,6 @@ export const CMS_URL_PUBLICA = (
 export const ESTACION_CODIGO = envServidor('ESTACION_CODIGO', 'beat');
 
 /**
- * El sitio y la página de la estación en Smart AdServer (Medios Federales). Los
- * pinta `src/components/SmartInline.astro`; ver `agents/ads.md`.
- *
- * Por env y SIN valor por omisión, por la misma razón que el ad unit de GAM: este
- * repo es el modelo de los hermanos, y un `siteId` de Beat copiado tal cual le
- * acreditaría a Beat las impresiones de otra estación. Sin las dos variables el
- * formato no existe: ni contenedor ni scripts de Smart.
- *
- * Son de EJECUCIÓN (sin `PUBLIC_`): el servidor las escribe en el HTML como
- * `data-*`, así que cambiarlas pide reiniciar el servicio, no reconstruir.
- */
-export const SMART_SITE_ID = envServidor('SMART_SITE_ID');
-export const SMART_PAGE_ID = envServidor('SMART_PAGE_ID');
-
-/**
  * La serie del Fenómeno Residente, y el tipo de lista que va al Inicio.
  *
  * Son SLUGS y no ids, y van en el env con un valor por omisión: el id solo existe

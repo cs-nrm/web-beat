@@ -1,0 +1,83 @@
+<!-- START MAINTAG NOTAS -->
+<meta http-equiv="x-dns-prefetch-control" content="on">
+<link rel="dns-prefetch" href="//tagmanager.smartadserver.com">
+<link rel="preconnect" href="https://ced.sascdn.com" crossorigin>
+<link rel="preconnect" href="https://adapi.smartadserver.com" crossorigin>
+
+<script is:inline src="https://ced.sascdn.com/tag/4308/smart.js"></script>
+
+<script is:inline type="text/javascript">
+  var sas = sas || {};
+  sas.cmd = sas.cmd || [];
+
+  sas.cmd.push(() => {
+    sas.setup({
+      networkid: 4308,
+      domain: "https://adapi.smartadserver.com",
+      async: true,
+      renderMode: 2
+    });
+
+    sas.call("onecall", {
+      siteId: 794553,
+      pageId: 2249308,
+      formats: [
+        { id: 111268, tagId: "Inline" }
+      ],
+      schain: "1.0,1!mediosfederales.com,794553,1,beatdigital,beatdigital.mx"
+    });
+  });
+</script>
+<!-- END MAINTAG NOTAS -->
+
+<script is:inline type="text/javascript">
+  if (!window._sasListo) {
+    window._sasListo = true;
+    let sasPrimera = true;
+
+    const sasCerrado = () => {
+      try { return sessionStorage.getItem('sasInlineCerrado') === '1'; } catch (e) { return false; }
+    };
+
+    document.addEventListener('astro:page-load', () => {
+      const primera = sasPrimera;
+      sasPrimera = false;
+      const caja = document.getElementById('smart-inline');
+      const holder = document.getElementById('Inline');
+      if (!caja || !holder || sasCerrado()) return;
+
+      if (window._sasInlineObs) window._sasInlineObs.disconnect();
+      window._sasInlineObs = new ResizeObserver(() => {
+        caja.classList.toggle('con-anuncio', holder.offsetHeight > 20);
+      });
+      window._sasInlineObs.observe(holder);
+
+      sas.cmd.push(() => {
+        if (!primera) {
+          sas.call("onecall", {
+            siteId: 794553,
+            pageId: 2249308,
+            formats: [
+              { id: 111268, tagId: "Inline" }
+            ],
+            schain: "1.0,1!mediosfederales.com,794553,1,beatdigital,beatdigital.mx"
+          });
+        }
+        sas.render("Inline");
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target || !e.target.closest || !e.target.closest('#smart-inline-cerrar')) return;
+      const caja = document.getElementById('smart-inline');
+      const holder = document.getElementById('Inline');
+      if (window._sasInlineObs) window._sasInlineObs.disconnect();
+      if (caja) {
+        caja.classList.remove('con-anuncio');
+        caja.classList.add('cerrado');
+      }
+      if (holder) holder.innerHTML = '';
+      try { sessionStorage.setItem('sasInlineCerrado', '1'); } catch (err) {}
+    });
+  }
+</script>

@@ -26,11 +26,11 @@ la documentación.
 | `src/scripts/anuncios.ts` | El motor de GPT: descubre los slots por sus `data-*`, los define, los pinta y los cierra si vienen vacíos |
 | `src/lib/cms/publicidad.ts` | La venta DIRECTA: campañas de la colección `publicidad`, su vigencia y el conteo de impresiones |
 | `src/pages/api/anuncio/[id].ts` | El proxy. `GET` cuenta el clic y redirige; `POST` cuenta la impresión del takeover |
-| `src/layouts/Base.astro` | La carga de `gpt.js` y el stub de `window.googletag` |
-| `src/components/SmartInline.astro` | El video flotante de Medios Federales (Smart). La excepción a GAM, ver abajo |
-| `src/scripts/smart.ts` | Su maintag: baja los scripts de Smart, pide, pinta y cierra |
+| `src/layouts/Base.astro` | La carga de `gpt.js`, el stub de `window.googletag` y la inclusión del maintag de Smart en el `head` |
+| `src/components/head/SmartMediosFederales.astro` | El maintag de Medios Federales (Smart), tal cual, y el script que pinta, re-pide y cierra. La excepción a GAM, ver abajo |
+| `src/components/SmartInline.astro` | Su contenedor: el video flotante del Inicio |
 | `public/ads.txt` | Los sellers autorizados |
-| `.env` | `PUBLIC_GAM_NETWORK_ID`, `PUBLIC_GAM_AD_UNIT`, `PUBLICIDAD_TOKEN`, `SMART_SITE_ID`, `SMART_PAGE_ID` |
+| `.env` | `PUBLIC_GAM_NETWORK_ID`, `PUBLIC_GAM_AD_UNIT`, `PUBLICIDAD_TOKEN` |
 
 ### Los formatos, y sus medidas
 
@@ -572,45 +572,57 @@ AdOps, no de código: no se toca sin confirmarlo, pero hay que confirmarlo.
 **La única publicidad del sitio que NO entra por Ad Manager.** Medios Federales
 vende con su propio adserver (Smart AdServer / Equativ, red 4308), así que su
 demanda no se puede traer a GAM: lo entregan como un «maintag» para pegar en la
-página. Es la misma integración que ya corre en Oye, Stereo Cien y Sabrosita.
+página. Es la misma integración que corre en Oye, Stereo Cien y Sabrosita.
 
 - **Formato 111268, «Inline»**: un video in-read que flota abajo a la IZQUIERDA del
-  Inicio (la derecha es de los visores del lector). Solo en el Inicio, como en los
-  hermanos. Contenedor en `SmartInline.astro`, lógica en `smart.ts`.
-- **Los ids van por env** (`SMART_SITE_ID=794553`, `SMART_PAGE_ID=2249308`), de
-  EJECUCIÓN y sin valor por omisión, por la misma razón que el ad unit: un siteId
-  copiado de otra estación le acredita a ella las impresiones. **Sin las dos
-  variables el formato no existe** —ni contenedor ni scripts— y desde el sitio eso
-  se ve igual que «hoy no hay video». En la VM van en `/var/www/web-beat-v2/.env`.
-- **`smart.js` solo se baja en el Inicio**, la primera vez que aparece el
-  contenedor. Entrar por una nota no baja nada de Smart (medido). Desde la segunda
-  versión del fragmento (14 nov 2026) ya NO va `smart.prebid.js`.
-- **El `schain` lleva el dominio dos veces, y distinto**: el cuarto campo sin `.mx`
-  y el sexto completo, `…,794553,1,beatdigital,beatdigital.mx`. Así lo pide la
-  segunda versión del fragmento; en la primera iban los dos completos.
-- **El fragmento que mandan no sirve tal cual**, y los cuatro sitios lo han traído
-  con los mismos defectos: `tagId: "inline"` contra un div `Inline` (los ids
-  distinguen mayúsculas), la rama de escritorio con `sas.call()` fuera de
-  `sas.cmd.push()` (con `smart.js` en `async` truena; en la primera versión ni
-  compilaba), el `target` sin codificar y un `let dominio` que truena al
-  re-ejecutarse. El detalle está en la cabecera de `smart.ts`.
+  Inicio (la derecha es de los visores del lector). El contenedor, solo en el
+  Inicio, es `SmartInline.astro`.
+- **El maintag va TAL CUAL lo mandan** (su versión «optimizada», 14 nov 2026), en
+  `src/components/head/SmartMediosFederales.astro`, con los datos de Beat escritos
+  en él y **sin comentarios nuestros dentro**. Lo pidió Carlos: Beat queda igual
+  que Oye y se compara contra el fragmento a ojo. Los datos: `siteId: 794553`,
+  `pageId: 2249308`, formato `111268` con `tagId: "Inline"` y
+  `schain: "1.0,1!mediosfederales.com,794553,1,beatdigital,beatdigital.mx"`. El
+  número del `schain` ES el `siteId` (el fragmento de Oye traía otro y era un
+  error, confirmado por Carlos).
+- **Lo único que se le agregó**: `is:inline` en sus dos `<script>` (sin eso Astro
+  procesa el de `src` y `sas` deja de ser global) y, después del bloque, el script
+  de Oye con los datos de Beat. El fragmento ya no trae el `render` y usa
+  `renderMode: 2`, así que ese script, una vez por contexto, escucha
+  `astro:page-load` y, si hay `#Inline`, hace `sas.render("Inline")`. En la primera
+  carga no repite el `onecall` (ya lo hizo el bloque); en cada navegación
+  siguiente sí, con los mismos datos.
+- **Va en el `head` de TODAS las páginas, idéntico.** El `ClientRouter` reconoce
+  los scripts en línea por su texto y no los vuelve a correr al navegar. Si solo
+  estuviera en el Inicio, cada llegada desde una nota lo insertaría y el `onecall`
+  saldría dos veces.
+- **Consecuencias que se aceptaron con el fragmento**: `smart.js` va sin `async`,
+  así que bloquea el render de cada página mientras baja, y el `onecall` de la
+  carga inicial sale también en las notas, aunque ahí no haya hueco que pintar.
+  Ya no van `smart.prebid.js`, `mobileCheck` ni `target`.
 - **El recuadro no puede nacer en `display: none`**: la plantilla mide el ancho del
   hueco al pintar. Nace transparente, sin rótulo ni X y con `pointer-events: none`,
-  y se enciende cuando el hueco mide más de 20px (`ResizeObserver`). Contar hijos
-  no sirve: Smart mete sus `<script>` y un contenedor de 1px aunque no traiga video.
-- **La X vacía el hueco**, que es lo que corta el video, y lo marca en
-  `sessionStorage`: en esa sesión ya no se pide.
+  y se enciende con `.con-anuncio` cuando el hueco mide más de 20px
+  (`ResizeObserver`). Contar hijos no sirve: Smart mete sus `<script>` y un
+  contenedor de 1px aunque no traiga video.
+- **La X vacía el hueco**, que es lo que corta el video, pone `.cerrado` y guarda
+  `sasInlineCerrado` en `sessionStorage`: en esa sesión ya no se pinta.
+- **Los ids son contrato** entre el script y el contenedor: `smart-inline`,
+  `smart-inline-cerrar` e `Inline`, con esa mayúscula, la misma del `tagId`.
 
-**Cómo se prueba**: en el build servido, `performance.getEntriesByType('resource')`
-tiene que enseñar un `adapi.smartadserver.com/h/nshow` con `siteid=794553`,
-`fmtid=111268` y `tag=inline` por cada llegada al Inicio, y ninguno en una nota.
-Comprobado el 2026-11-14 con el flujo Inicio → nota → atrás: uno, cero y uno, y
-`smart.js` bajado una sola vez. El `schain` no sale en esa URL sino en el cuerpo
-del POST a `adapi.smartadserver.com/4308/call`; para leerlo hay que envolver
-`XMLHttpRequest.prototype.send` antes de navegar (comprobado con la segunda
-versión del fragmento: `…,794553,1,beatdigital,beatdigital.mx` y ningún
-`prebid` entre los recursos). En local Smart no trae video, así que el recuadro
-se queda transparente; el encendido y la X se probaron forzando `data-con-anuncio`.
+**Cómo se prueba**, en el build servido y con el flujo Inicio → nota → atrás:
+`performance.getEntriesByType('resource')` enseña un
+`adapi.smartadserver.com/h/nshow` con `siteid=794553`, `fmtid=111268` y
+`tag=Inline` por cada pedido, `smart.js` bajado una sola vez y ningún `prebid`.
+El `schain` no sale en esa URL sino en el cuerpo del POST a
+`adapi.smartadserver.com/4308/call`: para leerlo hay que envolver
+`XMLHttpRequest.prototype.send` antes de navegar. En local Smart no trae video,
+así que el recuadro se queda transparente; el encendido y la X se prueban
+poniéndole `.con-anuncio` a mano.
+
+Antes de esta versión hubo otra integración propia, con los ids por env y los
+scripts bajados solo en el Inicio (commits `e8c3334` y `72d570c`); se reemplazó
+por el maintag tal cual cuando Medios Federales mandó el optimizado.
 
 `ads.txt` ya traía 19 de las 21 líneas de su lista; se agregaron
 `smartadserver.com, 4308` y `mediosfederales.com, 794553, DIRECT`. La de

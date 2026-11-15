@@ -4,41 +4,25 @@
  * un video in-read que flota abajo a la IZQUIERDA del Inicio.
  *
  * Aquí solo va el contenedor. El pedido, el render, el mostrado y la X viven en
- * `src/scripts/smart.ts`, que corre en cada `astro:page-load` y solo hace algo
- * en las páginas que traen este nodo (hoy, el Inicio).
+ * `src/components/head/SmartMediosFederales.astro`, que está en el `head` de
+ * todas las páginas y solo pinta donde encuentra este nodo (hoy, el Inicio).
  *
- * Es la misma receta que ya corre en Oye, Stereo Cien y Sabrosita, adaptada a
- * Beat: los ids por env (ver `SMART_SITE_ID` en `src/config/site.ts`) y la capa
- * en la escala del design system.
- *
- * No romper: el id `inline` del hueco tiene que coincidir letra por letra con el
- * `tagId` del pedido y con `sas.render()`. El fragmento que manda Medios
- * Federales trae `tagId: "inline"` y el div como `Inline`, y los ids de HTML
- * distinguen mayúsculas: así no se pinta nunca.
+ * No romper: los ids. El script los busca por nombre, igual que en Oye:
+ * `smart-inline` (la caja), `smart-inline-cerrar` (la X) e `Inline` (el hueco).
+ * `Inline` va con mayúscula porque así es el `tagId` del fragmento y el
+ * `sas.render("Inline")`, y los ids de HTML distinguen mayúsculas: con una
+ * letra distinta no se pinta nunca.
  */
 import Icono from '@/components/Icono.astro';
-import { SMART_SITE_ID, SMART_PAGE_ID, HOST_CANONICO } from '@/config/site';
-
-const encendido = Boolean(SMART_SITE_ID && SMART_PAGE_ID);
 ---
 
-{
-  encendido && (
-    <div
-      class="smart-inline"
-      data-smart-inline
-      data-sitio={SMART_SITE_ID}
-      data-pagina={SMART_PAGE_ID}
-      data-dominio={HOST_CANONICO}
-    >
-      <button type="button" class="smart-inline-cerrar" data-smart-cerrar aria-label="Cerrar publicidad">
-        <Icono nombre="x" tamano={14} />
-      </button>
-      <span class="beat-label smart-inline-rotulo">PUBLICIDAD</span>
-      <div id="inline" class="smart-inline-hueco"></div>
-    </div>
-  )
-}
+<div id="smart-inline" class="smart-inline">
+  <button type="button" id="smart-inline-cerrar" class="smart-inline-cerrar" aria-label="Cerrar publicidad">
+    <Icono nombre="x" tamano={14} />
+  </button>
+  <span class="beat-label smart-inline-rotulo">PUBLICIDAD</span>
+  <div id="Inline" class="smart-inline-hueco"></div>
+</div>
 
 <style>
   /*
@@ -71,21 +55,24 @@ const encendido = Boolean(SMART_SITE_ID && SMART_PAGE_ID);
     anuncio, porque oculto el hueco mide 0 de ancho y la plantilla no arranca.
 
     Y no se decide contando hijos del hueco: Smart mete ahí sus `<script>` y un
-    contenedor de 1px aunque no haya video. Lo enciende `smart.ts` cuando el
-    hueco mide más de 20px de alto.
+    contenedor de 1px aunque no haya video. El script del `head` le pone
+    `.con-anuncio` cuando el hueco mide más de 20px de alto, y `.cerrado` con la X.
   */
   .smart-inline-rotulo,
   .smart-inline-cerrar {
     display: none;
   }
-  .smart-inline[data-con-anuncio] {
+  .smart-inline.cerrado {
+    display: none;
+  }
+  .smart-inline.con-anuncio {
     background: var(--noche-0);
     box-shadow:
       0 0 0 1px var(--border-hairline),
       0 18px 48px rgb(5 7 6 / 0.55);
     pointer-events: auto;
   }
-  .smart-inline[data-con-anuncio] .smart-inline-rotulo {
+  .smart-inline.con-anuncio .smart-inline-rotulo {
     display: block;
     margin-bottom: 6px;
     font-size: 8px;
@@ -93,7 +80,7 @@ const encendido = Boolean(SMART_SITE_ID && SMART_PAGE_ID);
     color: var(--text-faint);
   }
   /* La X, igual que la del visor de las canciones. */
-  .smart-inline[data-con-anuncio] .smart-inline-cerrar {
+  .smart-inline.con-anuncio .smart-inline-cerrar {
     position: absolute;
     top: -10px;
     right: -10px;

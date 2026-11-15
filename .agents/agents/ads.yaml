@@ -18,12 +18,13 @@ interface:
     - `src/pages/api/anuncio/[id].ts` — el proxy: GET cuenta el clic y redirige,
       POST cuenta la impresión del takeover (la única que no se puede contar en el
       render)
-    - `src/layouts/Base.astro` — solo la carga de `gpt.js` y el stub de `googletag`
-    - `src/components/SmartInline.astro` y `src/scripts/smart.ts` — el video
-      flotante de Medios Federales (Smart AdServer, red 4308) en el Inicio. Es la
-      ÚNICA publicidad que no entra por GAM (ver abajo)
-    - `public/ads.txt` y las variables `PUBLIC_GAM_*` / `PUBLICIDAD_TOKEN` /
-      `SMART_SITE_ID` / `SMART_PAGE_ID`
+    - `src/layouts/Base.astro` — solo la carga de `gpt.js`, el stub de `googletag`
+      y la inclusión de `SmartMediosFederales` en el `head`
+    - `src/components/head/SmartMediosFederales.astro` y
+      `src/components/SmartInline.astro` — el video flotante de Medios Federales
+      (Smart AdServer, red 4308) en el Inicio. Es la ÚNICA publicidad que no entra
+      por GAM (ver abajo)
+    - `public/ads.txt` y las variables `PUBLIC_GAM_*` / `PUBLICIDAD_TOKEN`
 
     Prioriza:
     - Ad Manager como ÚNICA fuente de anuncios programáticos. Una red nueva entra
@@ -31,12 +32,13 @@ interface:
       script, se justifica por escrito. El fallback a AdSense se retiró: no lo
       reintroduzcas salvo pedido explícito. La excepción justificada es Medios
       Federales (2026-11-14): vende con su propio adserver, así que su demanda no
-      cabe en GAM. Sus ids van por env de ejecución y sin valor por omisión (sin
-      ellos el formato no existe), `smart.js` solo se baja en el Inicio (sin
-      `smart.prebid.js`, que ya no va), el `schain` lleva `beatdigital` sin `.mx`
-      en el cuarto campo, y el fragmento que mandan NO se pega tal cual (`inline`
-      contra `Inline`, rama de escritorio con `sas.call()` fuera de la cola): ver
-      `agents/ads.md`
+      cabe en GAM. Su maintag va TAL CUAL lo mandan, con los datos de Beat
+      escritos en él y sin comentarios nuestros dentro, igual que en Oye: así lo
+      pidió Carlos. Lo único que se le agrega es `is:inline` y el script de
+      después (render, re-pedido en cada navegación, recuadro y X). Va en el
+      `head` de todas las páginas, idéntico: si solo estuviera en el Inicio, el
+      `ClientRouter` lo insertaría de nuevo en cada llegada y pediría dos veces.
+      Ver `agents/ads.md`
     - que el marco se RESERVE y luego DESAPAREZCA si no hay relleno, por los DOS
       caminos: respuesta vacía de GAM y plazo agotado. Sin el segundo, un bloqueador
       deja la banda abierta para siempre. EXCEPCIÓN: la portada del Inicio

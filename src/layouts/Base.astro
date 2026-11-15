@@ -36,6 +36,7 @@ import {
 import { rutaPagina } from '@/lib/paginacion';
 import { nodoEstacion, serializar } from '@/lib/jsonld';
 import { ClientRouter } from 'astro:transitions';
+import SmartMediosFederales from '@/components/head/SmartMediosFederales.astro';
 import Cabecera from '@/components/Cabecera.astro';
 import MenuLleno from '@/components/MenuLleno.astro';
 import Pie from '@/components/Pie.astro';
@@ -523,6 +524,26 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
     </script>
 
     {/*
+      Medios Federales (Smart AdServer, red 4308): la única publicidad que no
+      entra por GAM. Su maintag va TAL CUAL lo mandan, con los datos de Beat, y
+      sin comentarios nuestros dentro: así lo pidió Carlos el 14 nov 2026, para
+      que Beat y Oye queden iguales y se comparen contra el fragmento a ojo.
+
+      No romper:
+        · Va en TODAS las páginas y en el `head`, idéntico. El `ClientRouter`
+          reconoce los scripts en línea por su texto y no los vuelve a correr
+          (ver la medición de abajo). Si solo estuviera en el Inicio, cada
+          llegada desde una nota lo insertaría de nuevo y el `onecall` saldría
+          dos veces.
+        · `smart.js` va SIN `async`, como en el fragmento: bloquea el render de
+          cada página mientras baja. Es decisión de Medios Federales.
+        · El contenedor (`#Inline`, con mayúscula, igual que el `tagId`) está en
+          `src/components/SmartInline.astro`, solo en el Inicio.
+      El detalle, en `agents/ads.md`.
+    */}
+    <SmartMediosFederales />
+
+    {/*
       LA MEDICIÓN. Los cuatro contenedores, cada uno tras su propia guarda; la
       regla y el por qué están arriba, con las constantes.
 
@@ -889,11 +910,7 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
       import { prepararGaleria } from '@/scripts/galeria';
       import { prepararFormulario } from '@/scripts/formulario';
       import { prepararTransmision } from '@/scripts/transmision';
-      import { prepararSmart } from '@/scripts/smart';
       prepararAnuncios();
-      // Medios Federales (Smart). Sin su contenedor en la página no hace nada,
-      // ni baja sus scripts. Ver `smart.ts`.
-      prepararSmart();
       prepararEscritura();
       prepararRevelado();
       prepararSenal();

@@ -1,11 +1,12 @@
 ---
 /**
  * El formato «Inline» de Medios Federales (Smart AdServer / Equativ, red 4308):
- * un video in-read que flota abajo a la IZQUIERDA del Inicio.
+ * un video in-read que flota abajo a la IZQUIERDA del Inicio y de las notas.
  *
  * Aquí solo va el contenedor. El pedido, el render, el mostrado y la X viven en
  * `src/components/head/SmartMediosFederales.astro`, que está en el `head` de
- * todas las páginas y solo pinta donde encuentra este nodo (hoy, el Inicio).
+ * todas las páginas y solo pinta donde encuentra este nodo (hoy, el Inicio y
+ * `noticias/[slug]`).
  *
  * No romper: los ids. El script los busca por nombre, igual que en Oye:
  * `smart-inline` (la caja), `smart-inline-cerrar` (la X) e `Inline` (el hueco).

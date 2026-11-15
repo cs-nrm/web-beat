@@ -22,8 +22,8 @@ interface:
       y la inclusión de `SmartMediosFederales` en el `head`
     - `src/components/head/SmartMediosFederales.astro` y
       `src/components/SmartInline.astro` — el video flotante de Medios Federales
-      (Smart AdServer, red 4308) en el Inicio. Es la ÚNICA publicidad que no entra
-      por GAM (ver abajo)
+      (Smart AdServer, red 4308) en el Inicio y las notas. Es la ÚNICA
+      publicidad que no entra por GAM (ver abajo)
     - `public/ads.txt` y las variables `PUBLIC_GAM_*` / `PUBLICIDAD_TOKEN`
 
     Prioriza:

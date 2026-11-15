@@ -543,9 +543,16 @@ ese caso:
 3. Si la red exige su propio script, va en `Base.astro` junto al de GPT, y se
    documenta aquí por qué no pudo entrar por GAM.
 
-### ShowHeroes: pendiente, y lo que de verdad pide
+### ShowHeroes: en pausa, y lo que de verdad pide
 
-**Esto SIGUE en pie** (Carlos, 2026-09-08): el documento que lo describía se
+**En pausa desde el 2026-11-15.** Carlos pidió apagar ShowHeroes y Exte en los
+interiores de los cuatro sitios y poner ahí el video de Medios Federales (ver
+abajo). En Beat no había nada que apagar: ShowHeroes nunca se montó aquí (no
+existe el hueco `videonota`) y Exte no tiene script en el sitio; solo sus
+líneas de `ads.txt` (`#EXTE`, `showheroes.com`), que se quedan. Comprobado en
+el HTML en vivo de una nota: ni `videonota`, ni `showheroes`, ni `exte`.
+
+Lo de abajo sigue valiendo el día que se retome (Carlos, 2026-09-08): el documento que lo describía se
 borró por equivocado, no por cancelado. Lo que el proyecto quiere es un **video
 flotante en los interiores de contenido**, servido por ShowHeroes **a través de Ad
 Manager** — no con un script de la red.
@@ -574,9 +581,10 @@ vende con su propio adserver (Smart AdServer / Equativ, red 4308), así que su
 demanda no se puede traer a GAM: lo entregan como un «maintag» para pegar en la
 página. Es la misma integración que corre en Oye, Stereo Cien y Sabrosita.
 
-- **Formato 111268, «Inline»**: un video in-read que flota abajo a la IZQUIERDA del
-  Inicio (la derecha es de los visores del lector). El contenedor, solo en el
-  Inicio, es `SmartInline.astro`.
+- **Formato 111268, «Inline»**: un video in-read que flota abajo a la IZQUIERDA
+  (la derecha es de los visores del lector). El contenedor es
+  `SmartInline.astro`, en el Inicio y, desde el 2026-11-15, en las notas
+  (`noticias/[slug].astro`): el mismo recuadro, con su X.
 - **El maintag va TAL CUAL lo mandan** (su versión «optimizada», 14 nov 2026), en
   `src/components/head/SmartMediosFederales.astro`, con los datos de Beat escritos
   en él y **sin comentarios nuestros dentro**. Lo pidió Carlos: Beat queda igual
@@ -598,7 +606,8 @@ página. Es la misma integración que corre en Oye, Stereo Cien y Sabrosita.
   saldría dos veces.
 - **Consecuencias que se aceptaron con el fragmento**: `smart.js` va sin `async`,
   así que bloquea el render de cada página mientras baja, y el `onecall` de la
-  carga inicial sale también en las notas, aunque ahí no haya hueco que pintar.
+  carga inicial sale también en las páginas sin hueco (listados, programas,
+  eventos…), aunque ahí no haya nada que pintar.
   Ya no van `smart.prebid.js`, `mobileCheck` ni `target`.
 - **El recuadro no puede nacer en `display: none`**: la plantilla mide el ancho del
   hueco al pintar. Nace transparente, sin rótulo ni X y con `pointer-events: none`,
@@ -610,7 +619,9 @@ página. Es la misma integración que corre en Oye, Stereo Cien y Sabrosita.
 - **Los ids son contrato** entre el script y el contenedor: `smart-inline`,
   `smart-inline-cerrar` e `Inline`, con esa mayúscula, la misma del `tagId`.
 
-**Cómo se prueba**, en el build servido y con el flujo Inicio → nota → atrás:
+**Cómo se prueba**, en el build servido. Primera carga en una nota: un `onecall`
+(el del bloque) y un `render`. De nota a nota: un `onecall` y un `render` por
+llegada. Y el flujo Inicio → nota → atrás:
 `performance.getEntriesByType('resource')` enseña un
 `adapi.smartadserver.com/h/nshow` con `siteid=794553`, `fmtid=111268` y
 `tag=Inline` por cada pedido, `smart.js` bajado una sola vez y ningún `prebid`.

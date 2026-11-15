@@ -2,18 +2,27 @@
  * El formato «Inline» de Medios Federales — Smart AdServer / Equativ, red 4308.
  *
  * Es la ÚNICA publicidad del sitio que no entra por Ad Manager, y no por gusto:
- * Medios Federales vende su inventario con su propio adserver y su propio
- * wrapper de Prebid, así que su demanda no se puede traer a GAM. Lo entregan
- * como un «maintag» para pegar en la página; esto es ese maintag, reescrito.
- * El contenedor es `src/components/SmartInline.astro`.
+ * Medios Federales vende su inventario con su propio adserver, así que su
+ * demanda no se puede traer a GAM. Lo entregan como un «maintag» para pegar en
+ * la página; esto es ese maintag, reescrito. El contenedor es
+ * `src/components/SmartInline.astro`.
+ *
+ * Lo que pide la versión del fragmento del 14 nov 2026, la segunda (llegó por la
+ * sesión de Oye, que ya la aplicó):
+ *
+ *   · Ya NO va `smart.prebid.js` (`tagmanager.smartadserver.com/4308/790083`):
+ *     solo `smart.js`.
+ *   · El cuarto campo del `schain` va SIN `.mx`: `…,1,beatdigital,beatdigital.mx`.
  *
  * Lo que se le cambió al fragmento que mandan, y por qué (las mismas
  * correcciones que ya llevan Oye, Stereo Cien y Sabrosita):
  *
  *   · Su `tagId` es `inline` y su div `Inline`. Los ids distinguen mayúsculas:
  *     aquí es `inline` en los tres lugares.
- *   · Su rama de ESCRITORIO no compila: le falta el `sas.cmd.push(function () {`
- *     de apertura, y el error de sintaxis tumba el bloque entero, móvil incluido.
+ *   · Su rama de ESCRITORIO llama a `sas.call()` FUERA de `sas.cmd.push()`. Con
+ *     `smart.js` en `async` eso truena con «sas.call is not a function». En la
+ *     primera versión era peor: le faltaba la apertura del `push` y el error de
+ *     sintaxis tumbaba el bloque entero, móvil incluido.
  *   · Su `mobileCheck()` se fue: las dos ramas piden el mismo formato. Si Medios
  *     Federales separa formatos por dispositivo, ahí vuelve a hacer falta.
  *   · Su `target` iba sin codificar. Es `clave=valor;clave=valor`, y una URL con
@@ -23,10 +32,9 @@
  *
  * Y lo que es de Beat:
  *
- *   · Los dos scripts de Smart (`smart.js` y su Prebid) se bajan SOLO en las
- *     páginas que traen el contenedor, la primera vez que aparece uno. El
- *     fragmento los ponía en todas: quien entra a leer una nota no paga el peso de
- *     un formato que ahí no existe.
+ *   · `smart.js` se baja SOLO en las páginas que traen el contenedor, la primera
+ *     vez que aparece uno. El fragmento lo ponía en todas: quien entra a leer una
+ *     nota no paga el peso de un formato que ahí no existe.
  *   · `sas` se escribe en `window` a mano. Un `var sas` dentro de un módulo deja
  *     de ser global y `smart.js` nunca ve la cola `sas.cmd`: en los hermanos eso
  *     obligó a `is:inline`.
@@ -52,10 +60,7 @@ const RED = 4308;
 const FORMATO_INLINE = 111268;
 /** Tiene que coincidir con el `id` del hueco en `SmartInline.astro`. */
 const TAG_ID = 'inline';
-const LIBRERIAS = [
-  'https://ced.sascdn.com/tag/4308/smart.js',
-  'https://tagmanager.smartadserver.com/4308/790083/smart.prebid.js',
-];
+const LIBRERIA = 'https://ced.sascdn.com/tag/4308/smart.js';
 const LLAVE_CERRADO = 'beat:smart-inline-cerrado';
 /**
  * Por encima de esto, hay video. El in-read desplegado mide ~160px; sin anuncio,
@@ -73,8 +78,8 @@ function cola(): Array<() => void> {
   return window.sas.cmd;
 }
 
-/** Los scripts de Smart y su `setup`, UNA vez por contexto de JavaScript. */
-function cargarLibrerias(): void {
+/** `smart.js` y su `setup`, UNA vez por contexto de JavaScript. */
+function cargarLibreria(): void {
   if (window.__beatSmartLibrerias) return;
   window.__beatSmartLibrerias = true;
 
@@ -88,12 +93,10 @@ function cargarLibrerias(): void {
     });
   });
 
-  for (const src of LIBRERIAS) {
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = src;
-    document.head.appendChild(script);
-  }
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = LIBRERIA;
+  document.head.appendChild(script);
 }
 
 function yaCerrado(): boolean {
@@ -123,6 +126,10 @@ function pedir(): void {
   const pagina = Number(caja.dataset.pagina);
   const dominio = caja.dataset.dominio;
   if (!sitio || !pagina || !dominio) return;
+  // El cuarto campo del `schain` es el dominio SIN `.mx` (`beatdigital`), el
+  // sexto, completo. Así viene desde el fragmento del 14 nov 2026; antes los dos
+  // iban completos.
+  const nombre = dominio.split('.')[0];
 
   observador = new ResizeObserver(() => {
     if (hueco.offsetHeight > UMBRAL_ALTO) caja.dataset.conAnuncio = '';
@@ -130,7 +137,7 @@ function pedir(): void {
   });
   observador.observe(hueco);
 
-  cargarLibrerias();
+  cargarLibreria();
   cola().push(() => {
     // Mientras bajaba `smart.js` el lector pudo irse del Inicio, o irse y
     // volver: entonces este hueco ya no es el de la página y el pedido que vale
@@ -141,7 +148,7 @@ function pedir(): void {
       pageId: pagina,
       formats: [{ id: FORMATO_INLINE, tagId: TAG_ID }],
       target: 'dominio=' + encodeURIComponent(location.href),
-      schain: `1.0,1!mediosfederales.com,${sitio},1,${dominio},${dominio}`,
+      schain: `1.0,1!mediosfederales.com,${sitio},1,${nombre},${dominio}`,
     });
     window.sas?.render?.(TAG_ID);
   });

@@ -570,10 +570,9 @@ AdOps, no de código: no se toca sin confirmarlo, pero hay que confirmarlo.
 ### Medios Federales (Smart AdServer): la excepción, del 2026-11-14
 
 **La única publicidad del sitio que NO entra por Ad Manager.** Medios Federales
-vende con su propio adserver (Smart AdServer / Equativ, red 4308) y su propio
-wrapper de Prebid, así que su demanda no se puede traer a GAM: lo entregan como un
-«maintag» para pegar en la página. Es la misma integración que ya corre en Oye,
-Stereo Cien y Sabrosita.
+vende con su propio adserver (Smart AdServer / Equativ, red 4308), así que su
+demanda no se puede traer a GAM: lo entregan como un «maintag» para pegar en la
+página. Es la misma integración que ya corre en Oye, Stereo Cien y Sabrosita.
 
 - **Formato 111268, «Inline»**: un video in-read que flota abajo a la IZQUIERDA del
   Inicio (la derecha es de los visores del lector). Solo en el Inicio, como en los
@@ -583,14 +582,18 @@ Stereo Cien y Sabrosita.
   copiado de otra estación le acredita a ella las impresiones. **Sin las dos
   variables el formato no existe** —ni contenedor ni scripts— y desde el sitio eso
   se ve igual que «hoy no hay video». En la VM van en `/var/www/web-beat-v2/.env`.
-- **Los scripts de Smart solo se bajan en el Inicio**, la primera vez que aparece
-  el contenedor. Entrar por una nota no baja nada de Smart (medido).
+- **`smart.js` solo se baja en el Inicio**, la primera vez que aparece el
+  contenedor. Entrar por una nota no baja nada de Smart (medido). Desde la segunda
+  versión del fragmento (14 nov 2026) ya NO va `smart.prebid.js`.
+- **El `schain` lleva el dominio dos veces, y distinto**: el cuarto campo sin `.mx`
+  y el sexto completo, `…,794553,1,beatdigital,beatdigital.mx`. Así lo pide la
+  segunda versión del fragmento; en la primera iban los dos completos.
 - **El fragmento que mandan no sirve tal cual**, y los cuatro sitios lo han traído
   con los mismos defectos: `tagId: "inline"` contra un div `Inline` (los ids
-  distinguen mayúsculas), la rama de escritorio sin el `sas.cmd.push(function () {`
-  de apertura (no compila y tumba el bloque entero), el `target` sin codificar y un
-  `let dominio` que truena al re-ejecutarse. El detalle está en la cabecera de
-  `smart.ts`.
+  distinguen mayúsculas), la rama de escritorio con `sas.call()` fuera de
+  `sas.cmd.push()` (con `smart.js` en `async` truena; en la primera versión ni
+  compilaba), el `target` sin codificar y un `let dominio` que truena al
+  re-ejecutarse. El detalle está en la cabecera de `smart.ts`.
 - **El recuadro no puede nacer en `display: none`**: la plantilla mide el ancho del
   hueco al pintar. Nace transparente, sin rótulo ni X y con `pointer-events: none`,
   y se enciende cuando el hueco mide más de 20px (`ResizeObserver`). Contar hijos
@@ -602,7 +605,11 @@ Stereo Cien y Sabrosita.
 tiene que enseñar un `adapi.smartadserver.com/h/nshow` con `siteid=794553`,
 `fmtid=111268` y `tag=inline` por cada llegada al Inicio, y ninguno en una nota.
 Comprobado el 2026-11-14 con el flujo Inicio → nota → atrás: uno, cero y uno, y
-`smart.js` bajado una sola vez. En local Smart no trae video, así que el recuadro
+`smart.js` bajado una sola vez. El `schain` no sale en esa URL sino en el cuerpo
+del POST a `adapi.smartadserver.com/4308/call`; para leerlo hay que envolver
+`XMLHttpRequest.prototype.send` antes de navegar (comprobado con la segunda
+versión del fragmento: `…,794553,1,beatdigital,beatdigital.mx` y ningún
+`prebid` entre los recursos). En local Smart no trae video, así que el recuadro
 se queda transparente; el encendido y la X se probaron forzando `data-con-anuncio`.
 
 `ads.txt` ya traía 19 de las 21 líneas de su lista; se agregaron

@@ -525,16 +525,23 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
 
     {/*
       Medios Federales (Smart AdServer, red 4308): la única publicidad que no
-      entra por GAM. Su maintag va TAL CUAL lo mandan, con los datos de Beat, y
-      sin comentarios nuestros dentro: así lo pidió Carlos el 14 nov 2026, para
-      que Beat y Oye queden iguales y se comparen contra el fragmento a ojo.
+      entra por GAM. El archivo es IGUAL al de Oye salvo los datos de Beat, y
+      sin comentarios nuestros dentro: así lo pidió Carlos, para compararlos a
+      ojo. Desde el 16 nov 2026 ya no es el maintag tal cual: el `onecall` salió
+      del bloque de arriba y vive solo en el manejador de `astro:page-load`.
 
       No romper:
         · Va en TODAS las páginas y en el `head`, idéntico. El `ClientRouter`
           reconoce los scripts en línea por su texto y no los vuelve a correr
-          (ver la medición de abajo). Si solo estuviera en el Inicio, cada
-          llegada desde una nota lo insertaría de nuevo y el `onecall` saldría
-          dos veces.
+          (ver la medición de abajo), y `sas.setup` truena si se llama dos
+          veces por carga.
+        · El `onecall` sale SOLO si la página trae `#Inline` y el lector no
+          cerró el recuadro. Pedir sin pintar es ganar la puja y no entregar:
+          es lo que Medios Federales le reclamó a Carlos (entrega de KIA del
+          22-28% en su RTB Health).
+        · Después del `sas.render("Inline")` va `sas.render()` SIN argumentos.
+          Con `renderMode: 2` es lo único que suelta la cola: sin él la
+          petición sale al vencer `renderModeTimeout`, a los ~5 s.
         · `smart.js` va SIN `async`, como en el fragmento: bloquea el render de
           cada página mientras baja. Es decisión de Medios Federales.
         · El contenedor (`#Inline`, con mayúscula, igual que el `tagId`) está en

@@ -32,13 +32,14 @@ interface:
       script, se justifica por escrito. El fallback a AdSense se retiró: no lo
       reintroduzcas salvo pedido explícito. La excepción justificada es Medios
       Federales (2026-11-14): vende con su propio adserver, así que su demanda no
-      cabe en GAM. Su maintag va TAL CUAL lo mandan, con los datos de Beat
-      escritos en él y sin comentarios nuestros dentro, igual que en Oye: así lo
-      pidió Carlos. Lo único que se le agrega es `is:inline` y el script de
-      después (render, re-pedido en cada navegación, recuadro y X). Va en el
-      `head` de todas las páginas, idéntico: si solo estuviera en el Inicio, el
-      `ClientRouter` lo insertaría de nuevo en cada llegada y pediría dos veces.
-      Ver `agents/ads.md`
+      cabe en GAM. Su archivo es IGUAL al de Oye salvo los datos de Beat, y sin
+      comentarios nuestros dentro: así lo pidió Carlos. Va en el `head` de todas
+      las páginas, idéntico. Desde el 2026-11-16 (reclamo de MF por entrega
+      baja): en el `head` solo `smart.js` y `sas.setup` (una vez por carga, o
+      truena), y UN solo `onecall`, en `astro:page-load`, que sale solo si hay
+      `#Inline` y el recuadro no se cerró, seguido de `sas.render("Inline")` y
+      `sas.render()` sin argumentos (sin este, la petición espera 5 s). Ver
+      `agents/ads.md`
     - que el marco se RESERVE y luego DESAPAREZCA si no hay relleno, por los DOS
       caminos: respuesta vacía de GAM y plazo agotado. Sin el segundo, un bloqueador
       deja la banda abierta para siempre. EXCEPCIÓN: la portada del Inicio

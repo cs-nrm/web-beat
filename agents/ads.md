@@ -585,30 +585,39 @@ página. Es la misma integración que corre en Oye, Stereo Cien y Sabrosita.
   (la derecha es de los visores del lector). El contenedor es
   `SmartInline.astro`, en el Inicio y, desde el 2026-11-15, en las notas
   (`noticias/[slug].astro`): el mismo recuadro, con su X.
-- **El maintag va TAL CUAL lo mandan** (su versión «optimizada», 14 nov 2026), en
-  `src/components/head/SmartMediosFederales.astro`, con los datos de Beat escritos
-  en él y **sin comentarios nuestros dentro**. Lo pidió Carlos: Beat queda igual
-  que Oye y se compara contra el fragmento a ojo. Los datos: `siteId: 794553`,
+- **El archivo es IGUAL al de Oye**, salvo los datos de Beat:
+  `src/components/head/SmartMediosFederales.astro`, **sin comentarios nuestros
+  dentro**. Lo pidió Carlos para compararlos a ojo. Los datos: `siteId: 794553`,
   `pageId: 2249308`, formato `111268` con `tagId: "Inline"` y
   `schain: "1.0,1!mediosfederales.com,794553,1,beatdigital,beatdigital.mx"`. El
   número del `schain` ES el `siteId` (el fragmento de Oye traía otro y era un
   error, confirmado por Carlos).
-- **Lo único que se le agregó**: `is:inline` en sus dos `<script>` (sin eso Astro
-  procesa el de `src` y `sas` deja de ser global) y, después del bloque, el script
-  de Oye con los datos de Beat. El fragmento ya no trae el `render` y usa
-  `renderMode: 2`, así que ese script, una vez por contexto, escucha
-  `astro:page-load` y, si hay `#Inline`, hace `sas.render("Inline")`. En la primera
-  carga no repite el `onecall` (ya lo hizo el bloque); en cada navegación
-  siguiente sí, con los mismos datos.
+- **Ya no es el maintag tal cual (2026-11-16).** Medios Federales le reclamó a
+  Carlos que la integración estaba mal: en su RTB Health la entrega de KIA era del
+  22-28% (Equativ gana la puja y casi nunca llega a impresión). No había pedidos
+  dobles, pero sí tres fugas nuestras: el `onecall` del bloque salía en páginas
+  sin `#Inline` (puja ganada que nunca se pinta), salía aunque el lector hubiera
+  cerrado el recuadro, y salía a los ~5 s (abajo por qué), así que navegar antes
+  de eso juntaba dos. Hoy el archivo es un solo `<script is:inline>`:
+  - `smart.js` y `sas.setup` en el `head`. `sas.setup` va solo, dentro de la
+    guarda `window._sasListo`: Smart lo rechaza si se llama dos veces por carga
+    («sas.setup can only be called once»), y por eso el bloque no se puede
+    re-ejecutar en cada navegación.
+  - **Un solo `sas.call("onecall"`**, en el manejador de `astro:page-load`. Corre
+    solo si la página trae `#Inline` y no hay `sasInlineCerrado`, en la carga
+    directa y en cada navegación por igual.
+  - Lo siguen `sas.render("Inline")` y **`sas.render()` sin argumentos**. Con
+    `renderMode: 2`, Smart retiene el `onecall` hasta ese `render()` vacío o
+    hasta que vence `renderModeTimeout` (5000 ms por omisión): con solo
+    `render("Inline")` la petición salía a los ~5.4 s en los cuatro sitios.
 - **Va en el `head` de TODAS las páginas, idéntico.** El `ClientRouter` reconoce
-  los scripts en línea por su texto y no los vuelve a correr al navegar. Si solo
-  estuviera en el Inicio, cada llegada desde una nota lo insertaría y el `onecall`
-  saldría dos veces.
-- **Consecuencias que se aceptaron con el fragmento**: `smart.js` va sin `async`,
-  así que bloquea el render de cada página mientras baja, y el `onecall` de la
-  carga inicial sale también en las páginas sin hueco (listados, programas,
-  eventos…), aunque ahí no haya nada que pintar.
-  Ya no van `smart.prebid.js`, `mobileCheck` ni `target`.
+  los scripts en línea por su texto y no los vuelve a correr al navegar.
+- **Lo que se aceptó con el fragmento**: `smart.js` va sin `async`, así que
+  bloquea el render de cada página mientras baja. Ya no van `smart.prebid.js`,
+  `mobileCheck` ni `target`. `id5-api.js` lo inyecta el propio `smart.js`.
+- **Lo que NO es nuestro**: aun con el contenedor puesto y el render corriendo, el
+  `nshow` vuelve `noad` con la inserción de KIA 13456937. Eso lo tiene que ver
+  Medios Federales.
 - **El recuadro no puede nacer en `display: none`**: la plantilla mide el ancho del
   hueco al pintar. Nace transparente, sin rótulo ni X y con `pointer-events: none`,
   y se enciende con `.con-anuncio` cuando el hueco mide más de 20px
@@ -619,21 +628,31 @@ página. Es la misma integración que corre en Oye, Stereo Cien y Sabrosita.
 - **Los ids son contrato** entre el script y el contenedor: `smart-inline`,
   `smart-inline-cerrar` e `Inline`, con esa mayúscula, la misma del `tagId`.
 
-**Cómo se prueba**, en el build servido. Primera carga en una nota: un `onecall`
-(el del bloque) y un `render`. De nota a nota: un `onecall` y un `render` por
-llegada. Y el flujo Inicio → nota → atrás:
-`performance.getEntriesByType('resource')` enseña un
-`adapi.smartadserver.com/h/nshow` con `siteid=794553`, `fmtid=111268` y
-`tag=Inline` por cada pedido, `smart.js` bajado una sola vez y ningún `prebid`.
-El `schain` no sale en esa URL sino en el cuerpo del POST a
-`adapi.smartadserver.com/4308/call`: para leerlo hay que envolver
-`XMLHttpRequest.prototype.send` antes de navegar. En local Smart no trae video,
-así que el recuadro se queda transparente; el encendido y la X se prueban
-poniéndole `.con-anuncio` a mano.
+**Cómo se prueba**, en el build servido, contando las peticiones a
+`adapi.smartadserver.com/4308/call` en `performance.getEntriesByType('resource')`.
+Trampa: ese registro se llena a las 250 entradas y deja de anotar; súbelo con
+`performance.setResourceTimingBufferSize(20000)` o usa un `PerformanceObserver`.
+Medido el 2026-11-16, con la ventana en 1440×900 (el panel la deja en 0×0 y
+entonces el hueco mide 0):
+
+- `/especiales/<slug>`, sin `#Inline`, carga directa: **0** peticiones en 8 s.
+- Nota, carga directa: **1**, a los 0.51 s (`smart.js` terminó a los 0.44 s).
+- Inicio, carga directa: **1**, a los 0.84 s.
+- Nota a nota con el `ClientRouter`: **1** `onecall`, seguido de
+  `render("Inline")` y `render()`.
+- Con `sasInlineCerrado=1`, nota en carga directa: **0**.
+- `smart.js` bajado una sola vez, ningún `prebid`, y ningún «sas.setup can only be
+  called once» en consola.
+
+El `schain` no sale en la URL del `nshow` sino en el cuerpo del POST a
+`/4308/call`: para leerlo hay que envolver `XMLHttpRequest.prototype.send` antes
+de navegar. En local Smart no trae video, así que el recuadro se queda
+transparente; el encendido y la X se prueban poniéndole `.con-anuncio` a mano.
 
 Antes de esta versión hubo otra integración propia, con los ids por env y los
 scripts bajados solo en el Inicio (commits `e8c3334` y `72d570c`); se reemplazó
-por el maintag tal cual cuando Medios Federales mandó el optimizado.
+por el maintag tal cual cuando Medios Federales mandó el optimizado
+(`a586128`), y este por la versión de un solo `onecall` el 2026-11-16.
 
 `ads.txt` ya traía 19 de las 21 líneas de su lista; se agregaron
 `smartadserver.com, 4308` y `mediosfederales.com, 794553, DIRECT`. La de

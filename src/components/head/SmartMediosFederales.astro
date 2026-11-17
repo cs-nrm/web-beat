@@ -10,60 +10,47 @@
   var sas = sas || {};
   sas.cmd = sas.cmd || [];
 
-  sas.cmd.push(() => {
-    sas.setup({
-      networkid: 4308,
-      domain: "https://adapi.smartadserver.com",
-      async: true,
-      renderMode: 2
-    });
-
-    sas.call("onecall", {
-      siteId: 794553,
-      pageId: 2249308,
-      formats: [
-        { id: 111268, tagId: "Inline" }
-      ],
-      schain: "1.0,1!mediosfederales.com,794553,1,beatdigital,beatdigital.mx"
-    });
-  });
-</script>
-<!-- END MAINTAG NOTAS -->
-
-<script is:inline type="text/javascript">
   if (!window._sasListo) {
     window._sasListo = true;
-    let sasPrimera = true;
+
+    sas.cmd.push(() => {
+      sas.setup({
+        networkid: 4308,
+        domain: "https://adapi.smartadserver.com",
+        async: true,
+        renderMode: 2
+      });
+    });
 
     const sasCerrado = () => {
       try { return sessionStorage.getItem('sasInlineCerrado') === '1'; } catch (e) { return false; }
     };
 
     document.addEventListener('astro:page-load', () => {
-      const primera = sasPrimera;
-      sasPrimera = false;
+      if (window._sasInlineObs) {
+        window._sasInlineObs.disconnect();
+        window._sasInlineObs = null;
+      }
       const caja = document.getElementById('smart-inline');
       const holder = document.getElementById('Inline');
       if (!caja || !holder || sasCerrado()) return;
 
-      if (window._sasInlineObs) window._sasInlineObs.disconnect();
       window._sasInlineObs = new ResizeObserver(() => {
         caja.classList.toggle('con-anuncio', holder.offsetHeight > 20);
       });
       window._sasInlineObs.observe(holder);
 
       sas.cmd.push(() => {
-        if (!primera) {
-          sas.call("onecall", {
-            siteId: 794553,
-            pageId: 2249308,
-            formats: [
-              { id: 111268, tagId: "Inline" }
-            ],
-            schain: "1.0,1!mediosfederales.com,794553,1,beatdigital,beatdigital.mx"
-          });
-        }
+        sas.call("onecall", {
+          siteId: 794553,
+          pageId: 2249308,
+          formats: [
+            { id: 111268, tagId: "Inline" }
+          ],
+          schain: "1.0,1!mediosfederales.com,794553,1,beatdigital,beatdigital.mx"
+        });
         sas.render("Inline");
+        sas.render();
       });
     });
 
@@ -81,3 +68,4 @@
     });
   }
 </script>
+<!-- END MAINTAG NOTAS -->

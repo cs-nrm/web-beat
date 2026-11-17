@@ -603,9 +603,17 @@ página. Es la misma integración que corre en Oye, Stereo Cien y Sabrosita.
     guarda `window._sasListo`: Smart lo rechaza si se llama dos veces por carga
     («sas.setup can only be called once»), y por eso el bloque no se puede
     re-ejecutar en cada navegación.
-  - **Un solo `sas.call("onecall"`**, en el manejador de `astro:page-load`. Corre
-    solo si la página trae `#Inline` y no hay `sasInlineCerrado`, en la carga
-    directa y en cada navegación por igual.
+  - **Un solo `sas.call("onecall"`**, en la función `sasPedir`. Corre solo si la
+    página trae `#Inline` y no hay `sasInlineCerrado`, en la carga directa y en
+    cada navegación por igual.
+  - `sasPedir` se engancha a `DOMContentLoaded` (o corre de inmediato si el DOM
+    ya está) y a `astro:page-load`. **En la carga directa no basta
+    `astro:page-load`**: el `ClientRouter` lo dispara con el `load` de la
+    ventana, cuando ya bajaron todas las imágenes y píxeles; en una nota pesada
+    de Oye en vivo eso fue a los 9.87 s, contra 0.93 s de `DOMContentLoaded`
+    (2026-11-16, lo detectó Stereo Cien). Un `WeakSet` (`sasPedidos`) evita que
+    el `page-load` de esa misma carga pida otra vez el mismo `#Inline`, y sale
+    ANTES de tocar el `ResizeObserver`, que tiene que seguir vivo.
   - Lo siguen `sas.render("Inline")` y **`sas.render()` sin argumentos**. Con
     `renderMode: 2`, Smart retiene el `onecall` hasta ese `render()` vacío o
     hasta que vence `renderModeTimeout` (5000 ms por omisión): con solo
@@ -636,8 +644,12 @@ Medido el 2026-11-16, con la ventana en 1440×900 (el panel la deja en 0×0 y
 entonces el hueco mide 0):
 
 - `/especiales/<slug>`, sin `#Inline`, carga directa: **0** peticiones en 8 s.
-- Nota, carga directa: **1**, a los 0.51 s (`smart.js` terminó a los 0.44 s).
-- Inicio, carga directa: **1**, a los 0.84 s.
+- Nota, carga directa: **1**, a los 443 ms, con `DOMContentLoaded` a los 442 ms
+  y el `load` a los 466. En local la página es ligera y `load` llega casi junto
+  con `DOMContentLoaded`: la diferencia solo se ve en vivo.
+- Inicio, carga directa: **1**, a los 379 ms, igual que `DOMContentLoaded`.
+- Hueco forzado a 250 px después del `load`: se enciende `.con-anuncio` y se
+  apaga al encogerlo, sin petición nueva. El observador sobrevive al `page-load`.
 - Nota a nota con el `ClientRouter`: **1** `onecall`, seguido de
   `render("Inline")` y `render()`.
 - Con `sasInlineCerrado=1`, nota en carga directa: **0**.
@@ -652,7 +664,8 @@ transparente; el encendido y la X se prueban poniéndole `.con-anuncio` a mano.
 Antes de esta versión hubo otra integración propia, con los ids por env y los
 scripts bajados solo en el Inicio (commits `e8c3334` y `72d570c`); se reemplazó
 por el maintag tal cual cuando Medios Federales mandó el optimizado
-(`a586128`), y este por la versión de un solo `onecall` el 2026-11-16.
+(`a586128`), y este por la versión de un solo `onecall` el 2026-11-16
+(`408c485`), que esa misma noche pasó a pedir con `DOMContentLoaded`.
 
 `ads.txt` ya traía 19 de las 21 líneas de su lista; se agregaron
 `smartadserver.com, 4308` y `mediosfederales.com, 794553, DIRECT`. La de

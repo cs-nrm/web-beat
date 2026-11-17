@@ -528,7 +528,8 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
       entra por GAM. El archivo es IGUAL al de Oye salvo los datos de Beat, y
       sin comentarios nuestros dentro: así lo pidió Carlos, para compararlos a
       ojo. Desde el 16 nov 2026 ya no es el maintag tal cual: el `onecall` salió
-      del bloque de arriba y vive solo en el manejador de `astro:page-load`.
+      del bloque de arriba y vive en una sola función, `sasPedir`, que corre con
+      `DOMContentLoaded` en la carga directa y con `astro:page-load` al navegar.
 
       No romper:
         · Va en TODAS las páginas y en el `head`, idéntico. El `ClientRouter`
@@ -542,6 +543,12 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
         · Después del `sas.render("Inline")` va `sas.render()` SIN argumentos.
           Con `renderMode: 2` es lo único que suelta la cola: sin él la
           petición sale al vencer `renderModeTimeout`, a los ~5 s.
+        · En la carga directa no se espera a `astro:page-load`: el
+          `ClientRouter` lo dispara con el `load` de la ventana, o sea cuando
+          terminaron TODAS las imágenes y píxeles (en una nota pesada de Oye,
+          9.87 s contra 0.93 s de `DOMContentLoaded`). El `WeakSet` de
+          `sasPedidos` evita que el `page-load` de esa misma carga pida otra
+          vez el mismo `#Inline`.
         · `smart.js` va SIN `async`, como en el fragmento: bloquea el render de
           cada página mientras baja. Es decisión de Medios Federales.
         · El contenedor (`#Inline`, con mayúscula, igual que el `tagId`) está en

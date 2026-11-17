@@ -26,14 +26,18 @@
       try { return sessionStorage.getItem('sasInlineCerrado') === '1'; } catch (e) { return false; }
     };
 
-    document.addEventListener('astro:page-load', () => {
+    const sasPedidos = new WeakSet();
+
+    const sasPedir = () => {
+      const caja = document.getElementById('smart-inline');
+      const holder = document.getElementById('Inline');
+      if (holder && sasPedidos.has(holder)) return;
       if (window._sasInlineObs) {
         window._sasInlineObs.disconnect();
         window._sasInlineObs = null;
       }
-      const caja = document.getElementById('smart-inline');
-      const holder = document.getElementById('Inline');
       if (!caja || !holder || sasCerrado()) return;
+      sasPedidos.add(holder);
 
       window._sasInlineObs = new ResizeObserver(() => {
         caja.classList.toggle('con-anuncio', holder.offsetHeight > 20);
@@ -52,7 +56,14 @@
         sas.render("Inline");
         sas.render();
       });
-    });
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', sasPedir);
+    } else {
+      sasPedir();
+    }
+    document.addEventListener('astro:page-load', sasPedir);
 
     document.addEventListener('click', (e) => {
       if (!e.target || !e.target.closest || !e.target.closest('#smart-inline-cerrar')) return;

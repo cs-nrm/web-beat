@@ -36,10 +36,12 @@ interface:
       comentarios nuestros dentro: así lo pidió Carlos. Va en el `head` de todas
       las páginas, idéntico. Desde el 2026-11-16 (reclamo de MF por entrega
       baja): en el `head` solo `smart.js` y `sas.setup` (una vez por carga, o
-      truena), y UN solo `onecall`, en `astro:page-load`, que sale solo si hay
-      `#Inline` y el recuadro no se cerró, seguido de `sas.render("Inline")` y
-      `sas.render()` sin argumentos (sin este, la petición espera 5 s). Ver
-      `agents/ads.md`
+      truena), y UN solo `onecall`, en `sasPedir` (con `DOMContentLoaded` en la
+      carga directa, porque ahí `astro:page-load` espera al `load`, y con
+      `astro:page-load` al navegar; un `WeakSet` evita el doble), que sale solo
+      si hay `#Inline` y el recuadro no se cerró, seguido de
+      `sas.render("Inline")` y `sas.render()` sin argumentos (sin este, la
+      petición espera 5 s). Ver `agents/ads.md`
     - que el marco se RESERVE y luego DESAPAREZCA si no hay relleno, por los DOS
       caminos: respuesta vacía de GAM y plazo agotado. Sin el segundo, un bloqueador
       deja la banda abierta para siempre. EXCEPCIÓN: la portada del Inicio

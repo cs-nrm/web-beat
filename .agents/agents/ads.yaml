@@ -23,7 +23,9 @@ interface:
     - `src/components/head/SmartMediosFederales.astro` y
       `src/components/SmartInline.astro` — el video flotante de Medios Federales
       (Smart AdServer, red 4308) en el Inicio y las notas. Es la ÚNICA
-      publicidad que no entra por GAM (ver abajo)
+      publicidad que no entra por GAM (ver abajo). COMENTADO en todo el sitio
+      desde el 2026-11-19, con `{/* … */}` y sus imports con `//`; los dos
+      componentes se quedan para reusarlos
     - `public/ads.txt` y las variables `PUBLIC_GAM_*` / `PUBLICIDAD_TOKEN`
 
     Prioriza:
@@ -42,6 +44,9 @@ interface:
       si hay `#Inline` y el recuadro no se cerró, seguido de
       `sas.render("Inline")` y `sas.render()` sin argumentos (sin este, la
       petición espera 5 s). Ver `agents/ads.md`
+    - ShowHeroes y Exte (Sun Media): Carlos pidió regresarlos el 2026-11-19, pero
+      en el sitio nunca estuvieron (solo en el viejo, hasta la demolición
+      `071ffe0`). Montarlos de cero espera a que Carlos lo pida expresamente
     - que el marco se RESERVE y luego DESAPAREZCA si no hay relleno, por los DOS
       caminos: respuesta vacía de GAM y plazo agotado. Sin el segundo, un bloqueador
       deja la banda abierta para siempre. EXCEPCIÓN: la portada del Inicio

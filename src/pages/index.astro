@@ -43,7 +43,8 @@ import Base from '@/layouts/Base.astro';
 import Intro from '@/components/Intro.astro';
 import Anuncio from '@/components/Anuncio.astro';
 import Takeover from '@/components/Takeover.astro';
-import SmartInline from '@/components/SmartInline.astro';
+// Medios Federales, comentado desde el 19 nov 2026: ver `Base.astro`.
+// import SmartInline from '@/components/SmartInline.astro';
 import Mosaico from '@/components/inicio/Mosaico.astro';
 import Marquee from '@/components/inicio/Marquee.astro';
 import Fenomeno from '@/components/inicio/Fenomeno.astro';
@@ -661,7 +662,12 @@ const BAJADAS = {
     Va también en las notas (`noticias/[slug].astro`), como en Oye, Stereo Cien
     y Sabrosita.
   */}
-  <SmartInline />
+  {/*
+    COMENTADO desde el 19 nov 2026, igual que el maintag del `head`: el porqué
+    y cómo volver a encenderlo están en `Base.astro`.
+
+    <SmartInline />
+  */}
 </Base>
 
 <style>

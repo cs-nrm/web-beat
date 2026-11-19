@@ -543,14 +543,25 @@ ese caso:
 3. Si la red exige su propio script, va en `Base.astro` junto al de GPT, y se
    documenta aquí por qué no pudo entrar por GAM.
 
-### ShowHeroes: en pausa, y lo que de verdad pide
+### ShowHeroes y Exte: pendientes, y lo que de verdad piden
 
-**En pausa desde el 2026-11-15.** Carlos pidió apagar ShowHeroes y Exte en los
-interiores de los cuatro sitios y poner ahí el video de Medios Federales (ver
-abajo). En Beat no había nada que apagar: ShowHeroes nunca se montó aquí (no
-existe el hueco `videonota`) y Exte no tiene script en el sitio; solo sus
-líneas de `ads.txt` (`#EXTE`, `showheroes.com`), que se quedan. Comprobado en
-el HTML en vivo de una nota: ni `videonota`, ni `showheroes`, ni `exte`.
+**El 2026-11-19 Carlos pidió regresarlos** a los cuatro sitios («regresaremos
+EXTE y showheroes, a todos»), después de haberlos apagado el 15 nov para poner
+ahí a Medios Federales. **En Beat no hay qué regresar: en el sitio nunca
+estuvieron.** Vivieron solo en el sitio viejo, y se fueron con la demolición
+(`071ffe0`, 2026-08-19, antes del corte):
+
+- **ShowHeroes** (`c058ad8`, 2026-05-08): el hueco `ad-slot-videonota` de 400×311,
+  definido en `src/js/ads.js` y servido por GAM.
+- **Exte = Sun Media** (`0ef86b1`, 2026-04-27): un script propio,
+  `SunMediaBeat.js` (lo servía `storage.googleapis.com/nrm-web`), en los
+  interiores. Por eso en `ads.txt` el bloque `#EXTE` son líneas de `sunmedia.tv`
+  y `richaudience.com`.
+
+Regresarlos en Beat es montarlos desde cero, y eso espera a que Carlos lo pida
+expresamente. Sus líneas de `ads.txt` siguen ahí. Comprobado en el historial de
+`beat` (fuera del legado `src/js/`, nada de `videonota`, `showheroes` ni
+`sunmedia` después de la demolición) y en el HTML en vivo de una nota.
 
 Lo de abajo sigue valiendo el día que se retome (Carlos, 2026-09-08): el documento que lo describía se
 borró por equivocado, no por cancelado. Lo que el proyecto quiere es un **video
@@ -575,6 +586,14 @@ sitio, así que ese seller autoriza a alguien que ya no vende. Es una decisión 
 AdOps, no de código: no se toca sin confirmarlo, pero hay que confirmarlo.
 
 ### Medios Federales (Smart AdServer): la excepción, del 2026-11-14
+
+**COMENTADO en todo el sitio desde el 2026-11-19.** Carlos: «por ahora vamos a
+comentar medios federales, en lo que vemos donde lo pondremos», porque al
+regresar ShowHeroes y Exte iba a chocar. Están comentados, con `{/* … */}` para
+que no llegue nada al HTML, `<SmartMediosFederales />` en el `head` de
+`Base.astro` y los `<SmartInline />` del Inicio y de `noticias/[slug].astro`,
+con sus imports. Los dos componentes se quedan en el repo: se van a reusar. Lo
+de abajo describe cómo funciona cuando está encendido.
 
 **La única publicidad del sitio que NO entra por Ad Manager.** Medios Federales
 vende con su propio adserver (Smart AdServer / Equativ, red 4308), así que su

@@ -36,7 +36,8 @@ import {
 import { rutaPagina } from '@/lib/paginacion';
 import { nodoEstacion, serializar } from '@/lib/jsonld';
 import { ClientRouter } from 'astro:transitions';
-import SmartMediosFederales from '@/components/head/SmartMediosFederales.astro';
+// Medios Federales, comentado desde el 19 nov 2026: ver el `head`, abajo.
+// import SmartMediosFederales from '@/components/head/SmartMediosFederales.astro';
 import Cabecera from '@/components/Cabecera.astro';
 import MenuLleno from '@/components/MenuLleno.astro';
 import Pie from '@/components/Pie.astro';
@@ -555,7 +556,19 @@ const METRICOOL_HASH = contenedor(import.meta.env.PUBLIC_METRICOOL_HASH);
           `src/components/SmartInline.astro`, en el Inicio y en las notas.
       El detalle, en `agents/ads.md`.
     */}
-    <SmartMediosFederales />
+    {/*
+      COMENTADO desde el 19 nov 2026, en todo el sitio. Carlos: «regresaremos
+      EXTE y showheroes, a todos» y «por ahora vamos a comentar medios
+      federales, en lo que vemos donde lo pondremos». Va en un comentario de
+      llaves y no de HTML para que no llegue nada al HTML publicado: ni
+      `smart.js`, ni `sas.setup`, ni el pedido.
+
+      Para volver a encenderlo: esta línea y su import, y los `<SmartInline />`
+      del Inicio y de `noticias/[slug].astro` con los suyos. Los dos
+      componentes se quedan en el repo a propósito.
+
+      <SmartMediosFederales />
+    */}
 
     {/*
       LA MEDICIÓN. Los cuatro contenedores, cada uno tras su propia guarda; la

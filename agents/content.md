@@ -372,6 +372,16 @@ pintar una cápsula que no se puede enlazar.
   `where[id][equals]` que cambia en cada petición, o sea la regla 2 de este mismo
   documento. Quien valida es el CMS, que ya mira existencia, publicación, votación
   abierta y pertenencia de la canción.
+
+  Y otra que tardó dos meses en verse: **una escritura que el CMS frena por IP
+  tiene que llevarle la IP del oyente** en `x-forwarded-for`, con `ipDelOyente`
+  (`src/lib/ipOyente.ts`). Quien le habla al CMS es este servidor, así que sin ella
+  todos los oyentes comparten un solo tope: el del voto (30 por minuto) estuvo
+  compartido del 21 sep al 27 nov 2026, y un anuncio al aire bastaba para llenarlo.
+  Es el ÚLTIMO valor de la cabecera, el que agrega Apache, y nunca
+  `Astro.clientAddress`, que toma el primero: el que puede inventar el navegador.
+  Hoy solo el voto lo necesita. El conteo de publicidad va con token y sin freno
+  por IP a propósito, y el CMS no frena por IP las respuestas a formularios.
 - **Pedirle campos nuevos al CMS.** Eso se escribe en
   `docs/lo-que-el-front-necesita-del-cms.md`, que es el documento de traspaso, y su
   regla de oro aplica aquí: **el lienzo es un mockup de diseño, no una especificación

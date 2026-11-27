@@ -25,6 +25,7 @@
  */
 import type { APIRoute } from 'astro';
 import { CMS_URL } from '@/config/site';
+import { ipDelOyente } from '@/lib/ipOyente';
 
 export const prerender = false;
 
@@ -64,7 +65,9 @@ function marcasVigentes(crudo: string | undefined, ahora: number): number[] {
     .slice(-LIMITE);
 }
 
-export const POST: APIRoute = async ({ request, cookies }) => {
+export const POST: APIRoute = async (contexto) => {
+  const { request, cookies } = contexto;
+
   /*
     Tope de velocidad, no cerradura — el mismo de `api/anuncio/[id].ts`.
     `Sec-Fetch-Site` lo pone el NAVEGADOR y no se puede falsificar desde una página,
@@ -100,13 +103,27 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
   if (!CMS_URL) return responder(503, { error: 'No se pudo registrar el voto.' });
 
+  /*
+    La IP del oyente viaja al CMS porque su tope de 30 votos por minuto es POR IP.
+    Sin ella el CMS ve la de este servidor, y todos los oyentes de Beat comparten un
+    solo tope: un anuncio al aire basta para llenarlo. Ver `lib/ipOyente.ts`, y por
+    qué es el ÚLTIMO valor de `x-forwarded-for` y no `clientAddress`.
+
+    Va SOLA, no la cadena entera que llegó: el CMS se queda con el PRIMER valor, y
+    reenviar la cadena le pasaría justo el que puede inventar el navegador.
+  */
+  const ip = ipDelOyente(contexto);
+
   const control = new AbortController();
   const temporizador = setTimeout(() => control.abort(), 2500);
   let respuesta: Response;
   try {
     respuesta = await fetch(`${CMS_URL}/api/listas/${lista}/votar`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: {
+        'content-type': 'application/json',
+        ...(ip ? { 'x-forwarded-for': ip } : {}),
+      },
       body: JSON.stringify({ cancion }),
       signal: control.signal,
     });

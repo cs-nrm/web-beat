@@ -105,6 +105,11 @@ interface:
     - el proxy del voto NO comprueba que la lista sea de esta estación, a
       propósito: eso pediría un `where[id][equals]` variable por petición, que es
       justo lo que esta acta prohíbe. Quien valida es el CMS
+    - una escritura que el CMS frena por IP lleva la IP del oyente en
+      `x-forwarded-for` (`ipDelOyente`, `src/lib/ipOyente.ts`): el ÚLTIMO valor,
+      el que agrega Apache, nunca `clientAddress`, que toma el primero y lo puede
+      inventar el navegador. Sin ella todos los oyentes comparten un tope; al voto
+      le pasó del 21 sep al 27 nov 2026. Hoy solo el voto la necesita
 
     Verifica que la ruta responda Y degrade bien: barre las rutas con `curl`
     esperando 200/301/404 y nunca 500, comprueba que las URLs viejas redirijan en
